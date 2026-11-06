@@ -1,0 +1,52 @@
+{
+	"FileVersion": 3,
+	"EngineAssociation": "{DEC43C63-4155-0388-B4B3-6B830A2347BA}",
+	"Category": "",
+	"Description": "",
+	"Modules": [
+		{
+			"Name": "HordeOptLab",
+			"Type": "Runtime",
+			"LoadingPhase": "Default",
+			"AdditionalDependencies": [
+				"Engine"
+			]
+		}
+	],
+	"Plugins": [
+		{
+			"Name": "MassGameplay",
+			"Enabled": true
+		},
+		{
+			"Name": "MassAI",
+			"Enabled": true
+		},
+		{
+			"Name": "AnimationBudgetAllocator",
+			"Enabled": true
+		},
+		{
+			"Name": "SignificanceManager",
+			"Enabled": true
+		},
+		{
+			"Name": "AnimToTexture",
+			"Enabled": true
+		},
+		{
+			"Name": "ModelContextProtocol",
+			"Enabled": true,
+			"TargetAllowList": [
+				"Editor"
+			]
+		},
+		{
+			"Name": "AllToolsets",
+			"Enabled": true,
+			"TargetAllowList": [
+				"Editor"
+			]
+		}
+	]
+}
