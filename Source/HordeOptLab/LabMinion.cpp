@@ -1,0 +1,208 @@
+#include "LabMinion.h"
+#include "LabConfig.h"
+#include "LabCrowdSpawner.h"
+#include "Animation/AnimSequence.h"
+#include "Components/CapsuleComponent.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "Components/StaticMeshComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "SignificanceManager.h"
+#include "SkeletalMeshComponentBudgeted.h"
+
+ALabMinion::ALabMinion(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+{
+	PrimaryActorTick.bCanEverTick = true;
+	AutoPossessAI = EAutoPossessAI::Disabled;
+	AIControllerClass = nullptr;
+
+	// 개체끼리 막지 않는다. M0과 M1(a)는 회피 없이 비교한다(plan.md).
+	UCapsuleComponent* Capsule = GetCapsuleComponent();
+	Capsule->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
+
+	// Paragon 미니언 피직스 에셋의 바디가 PhysType_Simulated라 바디가 생기면 래그돌이 된다(engine-notes.md 9절).
+	// 메시 콜리전을 꺼서 피직스 바디를 만들지 않는다. 충돌은 캡슐이 맡는다.
+	USkeletalMeshComponent* SkelMesh = GetMesh();
+	SkelMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	SkelMesh->SetGenerateOverlapEvents(false);
+	SkelMesh->SetRelativeLocation(FVector(0.f, 0.f, -Capsule->GetUnscaledCapsuleHalfHeight()));
+	SkelMesh->SetRelativeRotation(FRotator(0.f, -90.f, 0.f));
+
+	UCharacterMovementComponent* Move = GetCharacterMovement();
+	Move->bRunPhysicsWithNoController = true;
+	Move->MaxWalkSpeed = FLabScenario::MoveSpeed;
+	Move->bOrientRotationToMovement = true;
+	bUseControllerRotationYaw = false;
+}
+
+void ALabMinion::InitMinion(ALabCrowdSpawner* InSpawner, const FLabMinionAssets& Assets, uint32 InSerial)
+{
+	Spawner = InSpawner;
+	AssetsRef = &Assets;
+	Serial = InSerial;
+	SetupVisual(Assets);
+	EnterState(ELabMinionState::Walk);
+}
+
+void ALabMinion::SetupVisual(const FLabMinionAssets& Assets)
+{
+	USkeletalMeshComponent* SkelMesh = GetMesh();
+	SkelMesh->SetSkeletalMesh(Assets.Mesh);
+	if (Assets.AnimClass)
+	{
+		SkelMesh->SetAnimationMode(EAnimationMode::AnimationBlueprint);
+		SkelMesh->SetAnimInstanceClass(Assets.AnimClass);
+	}
+	else
+	{
+		// AnimBP가 아직 없을 때의 임시 경로. 측정 전에 AnimBP로 바꾼다(STATUS.md).
+		bSingleNode = true;
+		SkelMesh->SetAnimationMode(EAnimationMode::AnimationSingleNode);
+	}
+	if (FLabConfig::Get().Variant == ELabVariant::Uro)
+	{
+		SkelMesh->bEnableUpdateRateOptimizations = true;
+	}
+}
+
+void ALabMinion::EnterState(ELabMinionState NewState)
+{
+	State = NewState;
+	UAnimSequence* Seq = nullptr;
+	switch (NewState)
+	{
+	case ELabMinionState::Walk: Seq = AssetsRef->Walk; StateTimeLeft = 0.f; break;
+	case ELabMinionState::Hit: Seq = AssetsRef->Hit; StateTimeLeft = Seq ? Seq->GetPlayLength() : 0.5f; break;
+	case ELabMinionState::Dead: Seq = AssetsRef->Death; StateTimeLeft = Seq ? Seq->GetPlayLength() : 1.f; break;
+	}
+	if (NewState != ELabMinionState::Walk)
+	{
+		GetCharacterMovement()->StopMovementImmediately();
+		GetCharacterMovement()->DisableMovement();
+	}
+
+	USkeletalMeshComponent* SkelMesh = GetMesh();
+	if (!SkelMesh->GetSkeletalMeshAsset())
+	{
+		return; // static 변형
+	}
+	if (bSingleNode)
+	{
+		SkelMesh->PlayAnimation(Seq, NewState == ELabMinionState::Walk);
+	}
+	else if (ULabMinionAnimInstance* Anim = Cast<ULabMinionAnimInstance>(SkelMesh->GetAnimInstance()))
+	{
+		Anim->State = NewState;
+	}
+}
+
+void ALabMinion::Kill()
+{
+	if (IsAlive())
+	{
+		EnterState(ELabMinionState::Dead);
+	}
+}
+
+void ALabMinion::Snipe()
+{
+	if (IsAlive())
+	{
+		EnterState(ELabMinionState::Hit);
+	}
+}
+
+void ALabMinion::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	if (State == ELabMinionState::Walk)
+	{
+		const FVector ToOrb = Spawner->GetOrbLocation() - GetActorLocation();
+		AddMovementInput(FVector(ToOrb.X, ToOrb.Y, 0.f).GetSafeNormal());
+		return;
+	}
+
+	StateTimeLeft -= DeltaSeconds;
+	if (StateTimeLeft > 0.f)
+	{
+		return;
+	}
+	if (State == ELabMinionState::Hit)
+	{
+		EnterState(ELabMinionState::Dead);
+	}
+	else
+	{
+		Spawner->OnMinionFinished(this);
+	}
+}
+
+// static 변형 ---------------------------------------------------------------
+
+ALabMinionStatic::ALabMinionStatic(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+{
+	StaticVisual = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticVisual"));
+	StaticVisual->SetupAttachment(GetMesh());
+	StaticVisual->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	StaticVisual->SetGenerateOverlapEvents(false);
+}
+
+void ALabMinionStatic::SetupVisual(const FLabMinionAssets& Assets)
+{
+	GetMesh()->SetSkeletalMesh(nullptr);
+	GetMesh()->SetComponentTickEnabled(false);
+	StaticVisual->SetStaticMesh(Assets.StaticMesh);
+}
+
+// budget 변형 ---------------------------------------------------------------
+
+namespace
+{
+	const FName LabMinionSignificanceTag(TEXT("LabMinion"));
+
+	/** 거리 단계(25/50/100/250m) → 1, 0.75, 0.5, 0.25, 그 밖 0. 값이 클수록 중요하다(engine-notes.md 3절). */
+	float LabTierSignificance(USignificanceManager::FManagedObjectInfo* Info, const FTransform& Viewpoint)
+	{
+		const AActor* Actor = CastChecked<AActor>(Info->GetObject());
+		const float Dist = FVector::Dist(Actor->GetActorLocation(), Viewpoint.GetLocation());
+		for (int32 i = 0; i < 4; ++i)
+		{
+			if (Dist <= FLabScenario::BudgetTiers[i])
+			{
+				return 1.f - 0.25f * i;
+			}
+		}
+		return 0.f;
+	}
+}
+
+ALabMinionBudget::ALabMinionBudget(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer.SetDefaultSubobjectClass<USkeletalMeshComponentBudgeted>(ACharacter::MeshComponentName))
+{
+}
+
+void ALabMinionBudget::BeginPlay()
+{
+	Super::BeginPlay();
+	if (USignificanceManager* Sig = USignificanceManager::Get(GetWorld()))
+	{
+		Sig->RegisterObject(this, LabMinionSignificanceTag, &LabTierSignificance,
+			USignificanceManager::EPostSignificanceType::Sequential,
+			[](USignificanceManager::FManagedObjectInfo* Info, float /*Old*/, float New, bool /*bFinal*/)
+			{
+				ACharacter* Character = CastChecked<ACharacter>(Info->GetObject());
+				CastChecked<USkeletalMeshComponentBudgeted>(Character->GetMesh())->SetComponentSignificance(New);
+			});
+	}
+}
+
+void ALabMinionBudget::EndPlay(const EEndPlayReason::Type Reason)
+{
+	if (USignificanceManager* Sig = USignificanceManager::Get(GetWorld()))
+	{
+		Sig->UnregisterObject(this);
+	}
+	Super::EndPlay(Reason);
+}
