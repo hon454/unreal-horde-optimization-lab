@@ -96,3 +96,14 @@
 | 피직스 바디 타입 | `PhysType_Default`는 컴포넌트를 따르고, `PhysType_Simulated`는 컴포넌트와 무관하게 시뮬레이션한다(Paragon 미니언이 배치 직후 늘어지는 원인) | `PhysicsCore/Public/BodySetupEnums.h:26-31` |
 | 바디 설정 접근 | `UPhysicsAsset::SkeletalBodySetups`는 `UPROPERTY(instanced)`뿐이라 Python `get_editor_property`로 읽을 수 없다. 바디 타입을 Python으로 바꾸지 못한다 | `Runtime/Engine/Classes/PhysicsEngine/PhysicsAsset.h:212-213` |
 | 런처 엔진의 Test 구성 | 설치형 엔진 빌드의 게임 구성 기본값은 `Shipping;Development;DebugGame`. 런처 5.8.4(`G:\Epic Games\UE_5.8`)에도 Test 라이브러리가 없어 Test 패키지를 만들 수 없다 | `Engine/Build/InstalledEngineBuild.xml:104`, 런처 설치본 `Engine/Intermediate/Build/Win64/x64/UnrealGame/` |
+
+## 10. 실행·도구에서 확인한 것(2026-11-06)
+
+| 항목 | 확인한 것 | 위치 |
+| --- | --- | --- |
+| Test 구성 로그 | Test에서는 `NO_LOGGING = !USE_LOGGING_IN_SHIPPING`이라 로그 파일이 생기지 않는다. 러너는 요약을 `Saved/Lab/<라벨>.summary.txt`와 CSV 메타데이터(`LabAlive`, `LabRespawns`, `LabOk`)로 남긴다 | `Core/Public/Misc/Build.h` `UE_BUILD_TEST` 블록 `NO_LOGGING` |
+| CSV 형식 | 첫 열 `EVENTS`. 캡처 중 새 스탯이 생기면 뒤 행일수록 열이 늘어나고, 끝의 헤더 행이 전체 열 목록이다. 메타데이터 행의 키는 소문자(`[labn],500`) | 실행 결과(시험 측정) |
+| CSV 파일 이름 | `FCsvProfiler::BeginCapture(-1, 폴더, 파일이름)`. 확장자는 압축 여부로 붙는다. `csvprofile STARTFILE=`로도 정할 수 있다 | `Core/Private/ProfilingDebugging/CsvProfiler.cpp` `HandleCSVProfileCommand`, `BeginCaptureInternal` |
+| 정적 메시 변환 | `UAnimToTextureBPLibrary::ConvertSkeletalMeshToStaticMesh`는 커맨드렛에서 `-nullrhi`면 실패하고 `-AllowCommandletRendering`이 필요하다. 패키지 이름은 점 없는 경로여야 한다(`CreatePackage`에서 `check`) | `AnimToTextureBPLibrary.cpp:775-813`, `MeshUtilities.cpp:680` |
+| Unreal MCP 툴셋 | 툴은 `list_toolsets`/`describe_toolset`/`call_tool` 셋으로 노출된다(`bEnableToolSearch` 기본 true). 블루프린트 그래프 DSL(`BlueprintTools.write_graph_dsl`)은 이벤트 그래프용이고 애님 그래프·스테이트 머신을 다루지 않는다. 애니메이션 툴셋은 Control Rig·Sequencer뿐이다 | 실행 중 `tools/call list_toolsets`, `get_graph_dsl_docs` |
+| BP_TeslaCoil 구성 | 루트 아래 `SM_TorchBase`(z360, roll 180, x4, `M_Target_Metal`), 구체(z400, 오버레이 `MI_Mesh_Overlay_TeslaCoil`), `NS_TeslaCoil`(`User.PositionTarget`), `NS_Boundary_Cylinder`(`User.Radius`/`Height`/`Color`). GAS 상태 효과를 참조한다 | AssetHost에서 BP 인스턴스 컴포넌트 조회, 에셋 문자열 |

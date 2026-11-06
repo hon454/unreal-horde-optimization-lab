@@ -31,7 +31,7 @@
   AssetHost/               런처 5.8 엔진의 빈 프로젝트. Fab "프로젝트에 추가" 대상. Content/ParagonMinions가 원본 팩(4.8GB)
 ```
 
-런처는 소스 빌드를 엔진으로 인식하지 못해 Fab 에셋을 소스 빌드 프로젝트에 직접 추가할 수 없다. 그래서 원본은 AssetHost에 받고, 쓰는 것만 `Scripts/migrate-minions.py`로 HordeOptLab에 옮긴다([commands.md](../Guides/commands.md) "에셋 마이그레이션"). MetaHuman Crowd Sample은 프로젝트가 아니라 콘텐츠 플러그인으로 받았다: 런처 엔진 `G:\Epic Games\UE_5.8\Engine\Plugins\Marketplace\MetaHumanCrowdSample_5.8\`(`MetaHumanCrowdContent.uplugin`). 엔진 플러그인 `MetaHumanCrowd`는 소스 빌드에도 있다(`Engine/Plugins/MetaHuman/MetaHumanCrowd/`).
+런처는 소스 빌드를 엔진으로 인식하지 못해 Fab 에셋을 소스 빌드 프로젝트에 직접 추가할 수 없다. 그래서 원본은 AssetHost에 받고, 쓰는 것만 `Scripts/migrate-assets.py`로 HordeOptLab에 옮긴다([commands.md](../Guides/commands.md) "에셋 마이그레이션"). MetaHuman Crowd Sample은 프로젝트가 아니라 콘텐츠 플러그인으로 받았다: 런처 엔진 `G:\Epic Games\UE_5.8\Engine\Plugins\Marketplace\MetaHumanCrowdSample_5.8\`(`MetaHumanCrowdContent.uplugin`). 엔진 플러그인 `MetaHumanCrowd`는 소스 빌드에도 있다(`Engine/Plugins/MetaHuman/MetaHumanCrowd/`).
 
 저장소 안이 아니라 형제 디렉터리에 두는 이유: 라이선스 자료가 커밋될 위험을 없애고, 수십 GB가 git 작업 트리 밖에 있어야 상태 확인이 느려지지 않는다. Claude Code는 `--add-dir ..\unreal-horde-references`로 읽는다.
 
