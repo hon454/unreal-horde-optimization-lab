@@ -47,3 +47,13 @@ STATUS.md "명령"에는 매번 쓰는 것만 둔다. 여기에는 스크립트 
 - 에디터 콘솔: `ModelContextProtocol.GenerateClientConfig ClaudeCode` → 프로젝트 루트에 `.mcp.json`(gitignore). `ModelContextProtocol.StartServer`로 시작.
 - 툴 호출은 게임 스레드에서 직렬. 겹쳐 부르지 않는다. 대량 변경 전후 저장. 새 `UFUNCTION`은 에디터 재시작.
 - Claude Code는 `claude --add-dir ..\unreal-horde-references`로 시작한다(`.claude/settings.json`의 `additionalDirectories`에도 있다).
+
+## 에셋 마이그레이션
+
+Fab 원본 팩은 `../unreal-horde-references/AssetHost/`(런처 5.8 엔진 프로젝트)에 받고, 쓰는 것만 `Scripts/migrate-minions.py`로 옮긴다. AssetHost를 연 엔진(런처 `G:\Epic Games\UE_5.8`)의 커맨드렛으로 돌린다. `LAB_MIGRATE_DRY=1`이면 의존성 목록과 크기만 출력한다.
+
+```bash
+LAB_MIGRATE_DRY=0 LAB_MIGRATE_DEST="G:/Epic Games/UE_5.8.4/Games/unreal-horde-optimization-lab/Content" "G:/Epic Games/UE_5.8/Engine/Binaries/Win64/UnrealEditor-Cmd.exe" "G:/Epic Games/UE_5.8.4/Games/unreal-horde-references/AssetHost/AssetHost.uproject" -run=pythonscript -script="G:/Epic Games/UE_5.8.4/Games/unreal-horde-optimization-lab/Scripts/migrate-minions.py" -unattended -nosplash -nullrhi -stdout
+```
+
+2026-11-06 실행: 51개 패키지, 원본 기준 282.7MB(옮긴 뒤 `Content/ParagonMinions/` 244MB). 소프트 참조로 Dusk 메시와 Super 텍스처 일부가 함께 온다.

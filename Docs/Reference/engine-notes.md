@@ -87,3 +87,12 @@
 | 툴셋 | `AllToolsets`가 21개 툴셋 플러그인을 묶는다(`AIModuleToolset`, `AnimationAssistantToolset`, `ConfigSettingsToolset`, `EditorToolset`, `NiagaraToolsets`, `PhysicsToolsets`, `StateTreeToolset`, …) | `Engine/Plugins/Experimental/Toolsets/AllToolsets/AllToolsets.uplugin` |
 | 콘솔 | `ModelContextProtocol.StartServer`, `StopServer`, `RefreshTools`, `GenerateClientConfig <ClaudeCode\|Cursor\|VSCode\|Gemini\|…>` → `.mcp.json` | `ModelContextProtocolEditor` 소스 |
 | Runtime 모듈 포함 | Runtime 타입 모듈이 있으므로 Test 패키지에 들어갈 수 있다. `.uproject`에서 `TargetAllowList: ["Editor"]`로 제한한다 | |
+
+## 9. 에셋과 피직스
+
+| 항목 | 확인한 것 | 위치 |
+| --- | --- | --- |
+| 에셋 마이그레이션 | `IAssetTools::MigratePackages(PackageNames, DestinationPath, FMigrationOptions)`가 `BlueprintCallable`이라 Python 커맨드렛에서 부를 수 있다. `FMigrationOptions::bPrompt`는 스크립트에서 항상 false, 충돌 시 기본 `Skip` | `Developer/AssetTools/Public/IAssetTools.h:241-266,633` |
+| 피직스 바디 타입 | `PhysType_Default`는 컴포넌트를 따르고, `PhysType_Simulated`는 컴포넌트와 무관하게 시뮬레이션한다(Paragon 미니언이 배치 직후 늘어지는 원인) | `PhysicsCore/Public/BodySetupEnums.h:26-31` |
+| 바디 설정 접근 | `UPhysicsAsset::SkeletalBodySetups`는 `UPROPERTY(instanced)`뿐이라 Python `get_editor_property`로 읽을 수 없다. 바디 타입을 Python으로 바꾸지 못한다 | `Runtime/Engine/Classes/PhysicsEngine/PhysicsAsset.h:212-213` |
+| 런처 엔진의 Test 구성 | 설치형 엔진 빌드의 게임 구성 기본값은 `Shipping;Development;DebugGame`. 런처 5.8.4(`G:\Epic Games\UE_5.8`)에도 Test 라이브러리가 없어 Test 패키지를 만들 수 없다 | `Engine/Build/InstalledEngineBuild.xml:104`, 런처 설치본 `Engine/Intermediate/Build/Win64/x64/UnrealGame/` |
