@@ -25,8 +25,8 @@ void ALabCrowdSpawner::LoadAssets()
 	Assets.Hit = LoadObject<UAnimSequence>(nullptr, *FString::Printf(TEXT("%s/Animations/Melee/HitReact_Front.HitReact_Front"), MinionRoot));
 	Assets.Death = LoadObject<UAnimSequence>(nullptr, *FString::Printf(TEXT("%s/Animations/Melee/Death_A.Death_A"), MinionRoot));
 	Assets.AnimClass = LoadClass<UAnimInstance>(nullptr, TEXT("/Game/Lab/Anim/ABP_LabMinion.ABP_LabMinion_C"), nullptr, LOAD_Quiet | LOAD_NoWarn);
-	// static 변형의 메시. 미니언 정적 메시 변환(M0 6번)이 끝나기 전에는 엔진 실린더로 대신한다.
-	Assets.StaticMesh = LoadObject<UStaticMesh>(nullptr, TEXT("/Game/Lab/Meshes/SM_LabMinion.SM_LabMinion"), nullptr, LOAD_Quiet | LOAD_NoWarn);
+	// static 변형의 메시. Scripts/make-static-minion.py가 만든다. 없으면 엔진 실린더로 대신한다.
+	Assets.StaticMesh = LoadObject<UStaticMesh>(nullptr, TEXT("/Game/Lab/Derived/SM_LabMinion.SM_LabMinion"), nullptr, LOAD_Quiet | LOAD_NoWarn);
 	if (!Assets.StaticMesh)
 	{
 		Assets.StaticMesh = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Cylinder.Cylinder"));

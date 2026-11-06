@@ -29,6 +29,9 @@ Content/NiagaraExamples/
 # VAT 베이크 산출물(재생성 가능, 수십 MB)
 Content/Lab/VAT/Baked/
 
+# Fab 에셋에서 만든 파생 에셋(Scripts/make-static-minion.py). 재배포 금지라 커밋하지 않는다.
+Content/Lab/Derived/
+
 # 저장소 밖에 두는 측정 산출물
 *.utrace
 *.csv.gz
