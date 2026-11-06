@@ -1,0 +1,43 @@
+{
+  "permissions": {
+    "defaultMode": "acceptEdits",
+    "additionalDirectories": ["../unreal-horde-references/"],
+    "allow": [
+      "Read",
+      "Bash(powershell -ExecutionPolicy Bypass -File Scripts/build.ps1:*)",
+      "Bash(powershell -ExecutionPolicy Bypass -File Scripts/package.ps1:*)",
+      "Bash(powershell -ExecutionPolicy Bypass -File Scripts/run-bench.ps1:*)",
+      "Bash(powershell -ExecutionPolicy Bypass -File Scripts/run-dev.ps1:*)",
+      "Bash(python Scripts/summarize.py:*)",
+      "Bash(python Scripts/plot.py:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git show:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git tag:*)",
+      "Bash(git checkout:*)",
+      "Bash(git restore:*)",
+      "Bash(git stash:*)",
+      "Bash(git lfs:*)",
+      "Bash(rg:*)",
+      "Bash(Get-Content:*)",
+      "Bash(Get-ChildItem:*)",
+      "Bash(Select-String:*)"
+    ],
+    "ask": [
+      "Bash(git push:*)",
+      "Bash(git reset:*)",
+      "Bash(git rebase:*)",
+      "Bash(powershell -ExecutionPolicy Bypass -File Scripts/capture-video.ps1:*)"
+    ],
+    "deny": [
+      "Bash(git push --force:*)",
+      "Bash(rm -rf:*)",
+      "Bash(Remove-Item -Recurse:*)",
+      "Read(./.mcp.json)",
+      "Read(../unreal-horde-references/**/*.uasset)"
+    ]
+  }
+}

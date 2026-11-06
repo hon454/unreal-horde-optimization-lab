@@ -1,0 +1,147 @@
+# 마일스톤 계획
+
+M0\~M5가 필수다. 마일스톤마다 바꾸는 최적화 변수는 하나고, 끝에 측정과 태그가 있다. 글은 완료 조건이 아니다([AGENTS.md](../AGENTS.md) "진행 방식"). 미룬 주제는 [backlog.md](backlog.md)에 있다. 측정 조건과 지표는 [measurement.md](Guides/measurement.md)를 따른다.
+
+## 공통 완료 조건
+
+1. Development 빌드와 작은 규모 실행이 성공한다.
+2. Test 패키지로 그 마일스톤의 측정 조건(N × 프리셋 × 3회)을 돌려 `Measurements/M<N>/summary.csv`, `runs.csv`, 대표 스크린샷(궤도 프리셋, N=5k)이 남는다.
+3. 이전 마일스톤의 앵커 조건과 비교한 한 줄을 STATUS.md에 적는다. 바뀐 변수가 하나임을 확인한다.
+4. `Docs/Worklog/M<N>.md`에 경위를 적고, `backlog.md` "글 대기열"에 글 항목을 더한다.
+5. 태그 `M<N>`.
+
+60fps 같은 성능 목표는 완료 조건이 아니라 "예상"이다. 하드웨어가 못 미쳐도 측정이 남으면 완료다.
+
+## M0. 기준선 — 액터 군중
+
+**목표:** 비교의 출발점. 측정 인프라를 만들고 동결한다.
+
+**만드는 것**
+- 엔진 프로젝트, 모듈, 플러그인, 스크립트(`build`, `run-dev`, `package`, `run-bench`, `summarize.py`, `plot.py`).
+- Paragon Minions 근접 미니언 한 종류. 피직스 에셋 수정.
+- 평지 맵, 오브, 스포너, 관전 카메라와 프리셋 3종, 벤치마크 러너. 오브와 저격 궤적은 구체와 디버그 라인이다.
+- 미니언 `ACharacter` 변형 셋. 변형은 실행 인자 `-LabVariant=`로 고른다.
+  - `full`: `ACharacter` + 스켈레탈 메시 + AnimBP(걷기·피격·죽기). 대표 기준선.
+  - `static`: 같은 `ACharacter`에 `UStaticMeshComponent`, 애니메이션 없음. M1의 "애니 없는 ISM"과 컨테이너(액터 vs Mass)만 다르다.
+  - `budget`: `full` + `USkeletalMeshComponentBudgeted` + Significance Manager 거리 단계(25/50/100/250m) + `a.Budget.BudgetMs 2`. 액터 위에 올릴 수 있는 최적화를 다 올린 상태. 변형 `uro`(URO만)도 인자로 둔다.
+- 오브: 소멸 반경 안의 개체는 체력 0. 주기마다 먼 개체 K개를 쏜다. 대상은 난수가 아니라 결정적 해시(스폰 일련번호 + 저격 틱)로 고른다. 피격은 피격 애니 뒤 즉사다.
+- 스포너: 시작 시 디스크 전체에 정상 상태 분포(반지름당 개체 수 일정, 밀도 ∝ 1/r)로 N개를 놓는다. 사망한 개체는 가장자리 링에서 다시 생성한다. 시드로 초기 위치와 재생성 순서를 재현한다.
+
+**고정하는 것(사용자 확정 뒤 measurement.md "확정값")**
+- 맵 반경 R, 이동 속도, 소멸 반경, 저격 간격과 K, 프리셋 좌표.
+- 거리 밴드 경계(초안 30 / 80 / 200m)와 `LODMaxCount`. 미니언 실제 크기와 프리셋으로 정한다. **M3이 아니라 여기서 동결한다.** 밴드가 바뀌면 M2의 ISM 개체 수가 달라져 비교가 끊긴다.
+- 프리셋의 역할: P1 궤도 = 혼합 대표(오브 중심 반경 60m, 높이 20m, 1 rpm. 한 바퀴가 측정 60초다), P2 탑뷰 = ISM 티어 대조군(높이는 모든 개체가 ISM 밴드에 들도록 정한다), P3 지상 = 액터 티어 집중(오브에서 25m, 눈높이).
+
+**실험 E0**
+- 변형 `full` / `static` / `budget` / `uro` × N {250, 500, 1k, 2k, 5k} × 프리셋 3. 어디서 16.7ms를 넘는가. `budget`과 `uro`는 "액터로 할 수 있는 것을 다 해도 어디서 멈추는가"의 답이고 M3의 대조군이다.
+- 예상: `full`은 1k\~2k에서 Game Thread가 16.7ms를 넘는다.
+
+**완료:** 공통 조건 + ADR-0002 "측정 인프라 동결" 승인 + README "결과 한눈에 보기" 초판 + 글 대기열에 `00-testbed`, `01-baseline`.
+
+## M1. Mass 코어 — 로직을 엔티티로
+
+**목표:** 같은 이동·피해·사망 로직을 Fragment와 Processor로. 표현은 애니 없는 ISM(`UMassMovableVisualizationTrait`, 밴드 없이 전부 Medium). **비교 상대는 M0 `static`이다.**
+
+**바꾸는 변수:** 컨테이너(액터 → Mass). 회피는 켜지 않는다(M0에도 없다).
+
+**만드는 것**
+- Fragment: `FLabTargetFragment`(목표 방향), `FLabHealthFragment`(float). 엔진 `FTransformFragment`, `FMassVelocityFragment`, `FMassMoveTargetFragment` 재사용. Tag: `FLabHitTag`, `FLabDeadTag`. Const Shared Fragment `FLabUnitTypeParams`(속도, 체력, 바운드 반경).
+- Processor: `ULabApproachProcessor`(MoveTarget을 오브로), 엔진 스티어링, `ULabOrbContactProcessor`, `ULabOrbSnipeProcessor`(피해 이벤트 엔티티 생성), `ULabDamageApplyProcessor`, `ULabDeathProcessor`(Dead 태그 → 지연 파괴 + 재생성). CDO 자동 등록 프로세서 끄기.
+- EntityConfig, Spawner 연결(M0 스포너가 액터 대신 엔티티를 만든다. 분포·시드 로직은 같다).
+
+**실험 E1**
+- (a) M0 `static` vs M1: 컨테이너 전환의 Game Thread 차이. 대표 비교.
+- (b) `mass.FullyParallel` 0 / 1.
+- (c) 회피(`MassAvoidance` Trait) 끔 / 켬. **이 뒤 M2\~M5는 회피 켬으로 고정한다.**
+- (d) 저격 피해 전달: 직접 호출 vs 피해 이벤트 엔티티(수명 1프레임). 비치명 피해(체력 차감만)로 초당 1k / 10k. 사망·재생성 비용과 섞지 않는다.
+- 부록(측정만, 글에는 한 줄): 프로세서 하나 vs 셋, 큰 프래그먼트 vs 작은 프래그먼트 셋.
+
+**측정 조건:** N {1k, 5k, 20k, 50k}. 예상: 50k가 로직만으로 16.7ms 안.
+
+## M2. Representation LOD — ISM + VAT
+
+**목표:** 먼 개체를 애니메이션이 있는 ISM으로. **비교 상대는 M1.**
+
+**바꾸는 변수:** 원거리 표현(정지 ISM → VAT ISM). 밴드는 M0 확정값이고 High = None(아직 액터 없음), Medium / Low = ISM, Off = 없음.
+
+**만드는 것**
+- AnimToTexture로 걷기·피격·죽기 베이크(Bone 모드 기본, Vertex는 메모리 비교용). VAT 머티리얼.
+- Representation 그룹에서 `UMassUpdateISMProcessor` 뒤에 도는 별도 프로세서가 `FMassInstancedStaticMeshInfo::AddBatchedCustomData`로 애니 인덱스·시작 시각을 쓴다(상속하지 않는다. engine-notes.md).
+- 저격으로 ISM 티어에서 피격·사망 애니가 재생되고 끝나면 인스턴스가 제거되는지 확인.
+
+**실험 E2**
+- (a) M1 vs M2: Render Thread, GPU, 드로우 콜. 대표 비교.
+- (b) Bone vs Vertex VAT 텍스처 메모리.
+- (c) Off 밴드 끔 / 켬(원거리 컬링의 몫 분리).
+- (d) 저격 빈도 초당 사망 0 / 1k에서 인스턴스 추가·제거 비용.
+
+**측정 조건:** N {1k, 5k, 20k, 50k}.
+
+## M3. 액터 하이드레이션 + 애니메이션 예산
+
+**목표:** 가까운 개체를 액터 + AnimBP로 바꾸고 그 티어의 비용을 제한한다. 프로젝트의 중심. **비교 상대는 M2.**
+
+**바꾸는 변수:** 근거리 표현(None → HighResActor). 예산 기법은 E3 안에서 계단으로 비교하고, **M3의 대표점은 (1) 하이드레이션만**이다.
+
+**만드는 것**
+- Representation High = HighResActor. `UMassActorSpawnerSubsystem` 풀, `UMassAgentComponent` + Mass→Actor Sync. 전환 시 VAT 재생 시각 ↔ AnimBP 시각 동기화.
+- 액터 메시를 `USkeletalMeshComponentBudgeted`로. 중요도는 `1 - LODSignificance / 3`으로 변환해 `SetComponentSignificance`에 넘긴다(Mass는 0이 High, Budget은 큰 값이 중요. engine-notes.md).
+- 풀에 돌아간 액터는 `IMassActorPoolableInterface`에서 중요도 0, 틱 끔. Mass 풀링은 액터를 숨기기만 한다(engine-notes.md).
+
+**실험 E3(계단, 조건 하나씩 더함)**
+1. 하이드레이션만. 전환 횟수/초, 전환 히치, 팝핑 유무(영상).
+2. + URO.
+3. URO 대신 Budget Allocator(`BudgetMs` 2). Significance 소스 (a) 거리 단계(M0 `budget`과 같음) vs (b) Mass `LODSignificance` 변환값.
+4. 풀 크기별 스폰 비용(부록).
+
+**측정 조건:** N {1k, 5k, 20k, 50k}. P3 지상 프리셋이 이 마일스톤의 주 관찰점이다.
+
+## M3b. 새 기준선 — 큰 개체 추가
+
+**목표:** 시즈 미니언 10%를 더해 "거리 외 중요도 기준"을 실험한다. 시나리오 변경이므로 **M0\~M3 태그를 모두 다시 잰다**(앵커 N {1k, 5k} × 프리셋 3 × 3회).
+
+**바꾸는 것:** 개체 종류 1 → 2(소형 90 / 대형 10). 행동은 같고 크기만 다르다. `FLabUnitTypeParams` 값이 달라 아키타입이 갈린다. VAT 텍스처, ISM 컴포넌트, 액터 풀이 종류별로 생긴다.
+
+**실험 E3b**
+- 재측정 표(1종 vs 2종, 마일스톤별).
+- E3(3)에 (c) 크기 보정 추가: 대형은 바운드 반경 비례로 중요도 가산. 예산이 모자랄 때 대형이 끝까지 매 프레임 갱신되는지.
+
+## M4. Simulation LOD
+
+**목표:** 로직도 거리별로 가볍게. **비교 상대는 M3b 대표점.**
+
+**바꾸는 변수:** `UMassSimulationLODTrait`의 `TickRates[High/Medium/Low/Off]`. `UMassMovingAvoidanceProcessor`는 High LOD만 처리하므로 먼 개체의 회피는 자동으로 꺼진다(engine-notes.md). 시나리오는 바꾸지 않는다(넉다운은 backlog).
+
+**실험 E4**
+- (a) 끔 / 켬의 Game Thread, 프로세서별 ms.
+- (b) 먼 개체 움직임의 끊김(영상, 틱 간격별).
+
+**선택 M4b. StateTree + Signal:** 접근 → 피격 → 사망 전이를 태그 상태(M1 방식) 대신 StateTree로. 피해 적용 프로세서가 Signal로 깨운다. (a) 저격 1회당 깨어나는 엔티티 수 (b) 태그 vs StateTree 비용. 글 하나 분량이면 하고, 아니면 backlog.
+
+**측정 조건:** N {1k, 5k, 20k, 50k}.
+
+## M5. ISKM
+
+**목표:** 원거리 표현을 ISKM + `AnimSequenceTransformProviderData`로 바꿔 VAT와 비교. **비교 상대는 M4.**
+
+**바꾸는 변수:** 원거리 표현(VAT ISM → ISKM).
+
+**만드는 것**
+- `FMassSkinnedMeshInstanceVisualizationMeshDesc`, `UMassConsumeInstancedSkinnedMeshAnimationProcessor` 경로. MetaHuman Crowd Sample 설정 참고(복사 금지).
+- **사망 시 엔티티를 파괴하지 않고 재활용한다**(링으로 옮겨 체력 복원). ISKM 트랙 풀 해제 경로가 동적 개체에서 막혀 있다(engine-notes.md). M1부터 재활용으로 짜면 여기서 바꿀 것이 없다.
+- ISKM ↔ 액터 전환 동기화.
+
+**실험 E5**
+- (a) VAT vs ISKM: GPU ms, 메모리, 드로우 콜, 전환 품질.
+- (b) 생성·소멸 10만 회 뒤 GPU 메모리(재활용으로 누수가 막혔는지).
+- 선택: N 100k.
+
+**완료:** 공통 조건. 이 뒤 전 태그를 한 날 연달아 재서 README "결과 한눈에 보기"를 확정한다.
+
+## 리스크
+
+- **ISKM(M5):** 5.8.4에서도 트랙 풀 누수가 남아 있다. 재활용으로 우회하고, 막히면 VAT 결과로 마무리하고 ISKM은 기록만 남긴다.
+- **Budget + 풀링(M3):** 숨긴 액터가 예산을 계속 쓴다. 풀 반환 시 중요도 0으로. 첫날 확인.
+- **Paragon Minions:** 스켈레톤이 종류별로 다르고 피직스 에셋 기본값으로 늘어진다. 안 되면 UE5 Manny + 리타겟 애니로 대체.
+- **Unreal MCP:** Experimental. 막히면 Python Editor Script, 그다음 사용자.
+- **범위 확장 유혹:** 새 아이디어는 backlog.md에만.
