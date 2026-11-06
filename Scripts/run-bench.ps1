@@ -28,13 +28,14 @@ $Failed = 0
 for ($i = 0; $i -le $Runs; $i++) {
     $Label = "$Base-r$i"
     if (Test-Path "$OutCsv\$Label.csv") { Write-Host "FAIL: $Label.csv already exists. Use -Tag."; exit 1 }
-    $GameArgs = @("-windowed", "-ResX=$ResX", "-ResY=$ResY", "-nosound", "-LOG=$Label.log",
+    $GameArgs = @("-windowed", "-ResX=$ResX", "-ResY=$ResY", "-nosound",
         "-LabBench", "-LabN=$N", "-LabPreset=$($Preset.Substring(1))", "-LabSeed=$Seed", "-LabVariant=$Variant", "-LabLabel=$Label")
     Write-Host "RUN $Label"
     $Proc = Start-Process -FilePath $Exe -ArgumentList $GameArgs -PassThru
     $Proc.WaitForExit()
-    $Log = "$ProjectDir\Packaged\Test\Windows\HordeOptLab\Saved\Logs\$Label.log"
-    if (Test-Path $Log) { Select-String -Path $Log -Pattern "lab_summary" | ForEach-Object { $_.Line } }
+    # Test 구성은 로그 파일을 남기지 않는다(engine-notes.md 6절 NO_LOGGING). 게임이 Saved/Lab/<라벨>.summary.txt에 요약을 쓴다.
+    $Summary = "$ProjectDir\Packaged\Test\Windows\HordeOptLab\Saved\Lab\$Label.summary.txt"
+    if (Test-Path $Summary) { Get-Content $Summary }
     if ($Proc.ExitCode -ne 0 -or -not (Test-Path "$PkgCsv\$Label.csv")) {
         Write-Host "FAIL: $Label exit=$($Proc.ExitCode) csv=$(Test-Path "$PkgCsv\$Label.csv")"
         $Failed++

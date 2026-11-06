@@ -7,6 +7,8 @@
 #include "Engine/World.h"
 #include "GameFramework/PlayerController.h"
 #include "HAL/IConsoleManager.h"
+#include "Misc/FileHelper.h"
+#include "Misc/Paths.h"
 #include "ProfilingDebugging/CsvProfiler.h"
 #include "SignificanceManager.h"
 
@@ -109,14 +111,21 @@ void ALabGameMode::TickBench()
 		++BenchFrames;
 		if (BenchPhaseTime >= FLabBench::MeasureSec)
 		{
-#if CSV_PROFILER
-			FCsvProfiler::Get()->EndCapture();
-#endif
 			const int32 Alive = Spawner->GetMinions().Num();
 			const bool bOk = Alive == Config.N && BenchFrames > 0;
-			UE_LOG(LogLab, Log, TEXT("lab_summary label=%s measure_sec=%.2f frames=%d avg_ms=%.3f n=%d respawns=%d ok=%d"),
+			const FString Summary = FString::Printf(TEXT("lab_summary label=%s measure_sec=%.2f frames=%d avg_ms=%.3f n=%d respawns=%d ok=%d"),
 				*Config.Label, BenchPhaseTime, BenchFrames, BenchPhaseTime * 1000.f / FMath::Max(BenchFrames, 1),
 				Alive, Spawner->GetRespawnCount() - RespawnsAtStart, bOk ? 1 : 0);
+#if CSV_PROFILER
+			CSV_METADATA(TEXT("LabAlive"), *FString::FromInt(Alive));
+			CSV_METADATA(TEXT("LabRespawns"), *FString::FromInt(Spawner->GetRespawnCount() - RespawnsAtStart));
+			CSV_METADATA(TEXT("LabOk"), bOk ? TEXT("1") : TEXT("0"));
+			FCsvProfiler::Get()->EndCapture();
+#endif
+			// Test 구성은 로그를 남기지 않는다(Build.h UE_BUILD_TEST 블록, NO_LOGGING = !USE_LOGGING_IN_SHIPPING).
+			// 요약은 파일로도 남겨 run-bench.ps1이 읽는다.
+			UE_LOG(LogLab, Log, TEXT("%s"), *Summary);
+			FFileHelper::SaveStringToFile(Summary, *(FPaths::ProjectSavedDir() / TEXT("Lab") / (Config.Label + TEXT(".summary.txt"))));
 			BenchExitCode = bOk ? 0 : 1;
 			BenchPhase = ELabBenchPhase::Flush;
 			BenchPhaseTime = 0.f;

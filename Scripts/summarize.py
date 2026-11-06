@@ -43,22 +43,28 @@ def percentile(values, q):
 
 
 def read_profile(path):
-    """헤더, 프레임 행, 메타데이터(마지막의 [키],값 쌍)를 돌려준다."""
+    """헤더, 프레임 행, 메타데이터를 돌려준다.
+
+    엔진 CSV는 첫 행이 헤더(첫 열 EVENTS), 이어 프레임 행, 끝에 헤더 반복과 [키],값 쌍의 메타데이터 행이 온다.
+    메타데이터 키는 소문자다(예: [labn],500).
+    """
     with open(path, newline="", encoding="utf-8-sig") as f:
         rows = list(csv.reader(f))
-    header = rows[0]
+    # 캡처 중에 새 스탯이 생기면 뒤쪽 행일수록 열이 늘어난다. 끝의 헤더([HasHeaderRowAtEnd])가 전체 열 목록이다.
+    header = [r for r in rows if r and r[0] == "EVENTS"][-1]
     data, meta = [], {}
-    for row in rows[1:]:
-        if row and row[0].startswith("["):
-            for i in range(0, len(row) - 1, 2):
-                meta[row[i].strip("[]")] = row[i + 1]
+    for row in rows:
+        if not row or row[0] == "EVENTS":
             continue
-        if len(row) == len(header):
-            try:
-                float(row[0])
-            except ValueError:
-                continue
-            data.append(row)
+        if row[0].startswith("["):
+            for i in range(0, len(row) - 1, 2):
+                meta[row[i].strip("[]").lower()] = row[i + 1]
+            continue
+        try:
+            float(row[1])
+        except (ValueError, IndexError):
+            continue
+        data.append(row + [""] * (len(header) - len(row)))
     return header, data, meta
 
 
@@ -86,7 +92,7 @@ def summarize_run(path, pc):
     p50 = percentile(frame, 0.5)
     row = {
         "label": label, "milestone": m["m"], "variant": m["variant"], "n": int(m["n"]),
-        "preset": m["preset"], "seed": meta.get("LabSeed", ""), "run": int(m["run"]), "pc": pc,
+        "preset": m["preset"], "seed": meta.get("labseed", ""), "run": int(m["run"]), "pc": pc,
         "frames": len(data),
         "game_p50_ms": percentile(column(header, data, COLS["game"]), 0.5),
         "game_p99_ms": percentile(column(header, data, COLS["game"]), 0.99),
