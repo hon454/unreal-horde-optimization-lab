@@ -7,7 +7,23 @@
 #include "Engine/World.h"
 #include "GameFramework/PlayerController.h"
 #include "HAL/IConsoleManager.h"
+#include "ProfilingDebugging/CsvProfiler.h"
 #include "SignificanceManager.h"
+
+namespace
+{
+	void LabSetCVar(const TCHAR* Name, const TCHAR* Value)
+	{
+		if (IConsoleVariable* Var = IConsoleManager::Get().FindConsoleVariable(Name))
+		{
+			Var->Set(Value, ECVF_SetByCode);
+		}
+		else
+		{
+			UE_LOG(LogLab, Warning, TEXT("lab_cvar_missing %s"), Name);
+		}
+	}
+}
 
 ALabGameMode::ALabGameMode()
 {
@@ -23,6 +39,10 @@ void ALabGameMode::StartPlay()
 	UE_LOG(LogLab, Log, TEXT("%s"), *Config.ToLogString());
 
 	ApplyVariantCVars();
+	if (Config.bBench)
+	{
+		ApplyBenchCVars();
+	}
 
 	UWorld* World = GetWorld();
 	Spawner = World->SpawnActor<ALabCrowdSpawner>();
@@ -45,8 +65,76 @@ void ALabGameMode::ApplyVariantCVars()
 		return;
 	}
 	// a.Budget.Enabled 기본값은 0이다(AnimationBudgetAllocatorCVars.cpp:7).
-	IConsoleManager::Get().FindConsoleVariable(TEXT("a.Budget.Enabled"))->Set(1, ECVF_SetByCode);
-	IConsoleManager::Get().FindConsoleVariable(TEXT("a.Budget.BudgetMs"))->Set(FLabScenario::BudgetMs, ECVF_SetByCode);
+	LabSetCVar(TEXT("a.Budget.Enabled"), TEXT("1"));
+	LabSetCVar(TEXT("a.Budget.BudgetMs"), *FString::SanitizeFloat(FLabScenario::BudgetMs));
+}
+
+void ALabGameMode::ApplyBenchCVars()
+{
+	// measurement.md "렌더 고정". 해상도와 창 모드는 run-bench.ps1이 -ResX/-ResY로 넘긴다. sg.*·Lumen/VSM/TSR 값은 M0 8번에서 확정해 여기에 더한다.
+	LabSetCVar(TEXT("r.VSync"), TEXT("0"));
+	LabSetCVar(TEXT("t.MaxFPS"), TEXT("0"));
+	LabSetCVar(TEXT("r.ScreenPercentage"), TEXT("100"));
+	LabSetCVar(TEXT("r.DynamicRes.OperationMode"), TEXT("0"));
+	LabSetCVar(TEXT("csv.CompressionMode"), TEXT("0")); // .csv로 쓴다(CsvProfiler.cpp:183-194)
+}
+
+void ALabGameMode::TickBench()
+{
+	const FLabConfig& Config = FLabConfig::Get();
+	BenchPhaseTime += GetWorld()->GetDeltaSeconds();
+
+	switch (BenchPhase)
+	{
+	case ELabBenchPhase::Warmup:
+		if (BenchPhaseTime >= FLabBench::WarmupSec)
+		{
+#if CSV_PROFILER
+			CSV_METADATA(TEXT("LabN"), *FString::FromInt(Config.N));
+			CSV_METADATA(TEXT("LabPreset"), *FString::Printf(TEXT("P%d"), Config.Preset));
+			CSV_METADATA(TEXT("LabSeed"), *FString::FromInt(Config.Seed));
+			CSV_METADATA(TEXT("LabVariant"), FLabConfig::VariantName(Config.Variant));
+			CSV_METADATA(TEXT("LabLabel"), *Config.Label);
+			FCsvProfiler::Get()->BeginCapture(-1, FString(), Config.Label);
+#endif
+			RespawnsAtStart = Spawner->GetRespawnCount();
+			BenchPhase = ELabBenchPhase::Measure;
+			BenchPhaseTime = 0.f;
+			BenchFrames = 0;
+			UE_LOG(LogLab, Log, TEXT("lab_measure_start n=%d"), Spawner->GetMinions().Num());
+		}
+		break;
+
+	case ELabBenchPhase::Measure:
+		++BenchFrames;
+		if (BenchPhaseTime >= FLabBench::MeasureSec)
+		{
+#if CSV_PROFILER
+			FCsvProfiler::Get()->EndCapture();
+#endif
+			const int32 Alive = Spawner->GetMinions().Num();
+			const bool bOk = Alive == Config.N && BenchFrames > 0;
+			UE_LOG(LogLab, Log, TEXT("lab_summary label=%s measure_sec=%.2f frames=%d avg_ms=%.3f n=%d respawns=%d ok=%d"),
+				*Config.Label, BenchPhaseTime, BenchFrames, BenchPhaseTime * 1000.f / FMath::Max(BenchFrames, 1),
+				Alive, Spawner->GetRespawnCount() - RespawnsAtStart, bOk ? 1 : 0);
+			BenchExitCode = bOk ? 0 : 1;
+			BenchPhase = ELabBenchPhase::Flush;
+			BenchPhaseTime = 0.f;
+		}
+		break;
+
+	case ELabBenchPhase::Flush:
+		// CSV는 별도 스레드가 쓴다. 파일이 닫힐 시간을 둔다.
+		if (BenchPhaseTime >= FLabBench::FlushSec)
+		{
+			BenchPhase = ELabBenchPhase::Done;
+			FPlatformMisc::RequestExitWithStatus(false, BenchExitCode, TEXT("LabBench"));
+		}
+		break;
+
+	default:
+		break;
+	}
 }
 
 void ALabGameMode::Tick(float DeltaSeconds)
@@ -62,6 +150,12 @@ void ALabGameMode::Tick(float DeltaSeconds)
 			const FTransform View = Camera->GetActorTransform();
 			Sig->Update(TArrayView<const FTransform>(&View, 1));
 		}
+	}
+
+	if (FLabConfig::Get().bBench)
+	{
+		TickBench();
+		return;
 	}
 
 	const float ShotAt = FLabConfig::Get().ShotAtSec;
