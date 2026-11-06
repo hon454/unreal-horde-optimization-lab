@@ -33,7 +33,7 @@ struct FLabScenario
 	static constexpr float OrbViewPitch = -12.f;     // P1 내려다보는 각
 	static constexpr float OrbViewPeriod = 60.f;     // P1 1rpm으로 제자리 회전, 측정 60초에 한 바퀴
 	static constexpr float TopDownHeight = 30000.f;  // P2 탑뷰. M0 8번에서 모든 개체가 원거리 밴드에 들도록 다시 정한다
-	static constexpr float GroundOffset = 300.f;     // P3 오브 옆 3m, +X 방향 고정
+	static constexpr float GroundOffset = 1200.f;    // P3 오브에서 12m(피해 범위 10m 바로 밖), +X 방향 고정
 	static constexpr float GroundEyeHeight = 170.f;  // P3 눈높이
 
 	// budget 변형의 Significance 거리 단계(25/50/100/250m). plan.md "M0"
@@ -51,7 +51,7 @@ struct FLabConfig
 	bool bBench = false;       // 벤치마크 러너(M0 7번)
 	FString Label;
 	float DurationSec = 0.f;   // 0보다 크면 그 시간 뒤 종료(개발용 -Small 실행)
-	float ShotAtSec = 0.f;     // 0보다 크면 그 시각에 스크린샷 한 장(Saved/Screenshots/)
+	float ShotAtSec = 0.f;     // 0보다 크면 그 시각에 QHD 스크린샷 한 장(Saved/Screenshots/)
 
 	static const FLabConfig& Get();
 	static const TCHAR* VariantName(ELabVariant V);

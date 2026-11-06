@@ -26,7 +26,7 @@ void ALabGameMode::StartPlay()
 
 	UWorld* World = GetWorld();
 	Spawner = World->SpawnActor<ALabCrowdSpawner>();
-	Orb = World->SpawnActor<ALabOrb>(FVector(0.f, 0.f, 200.f), FRotator::ZeroRotator);
+	Orb = World->SpawnActor<ALabOrb>(FVector::ZeroVector, FRotator::ZeroRotator);
 	Orb->SetSpawner(Spawner);
 	Spawner->SpawnInitial();
 
@@ -70,7 +70,7 @@ void ALabGameMode::Tick(float DeltaSeconds)
 		bShotTaken = true;
 		if (APlayerController* PC = GetWorld()->GetFirstPlayerController())
 		{
-			PC->ConsoleCommand(TEXT("HighResShot 1"));
+			PC->ConsoleCommand(TEXT("HighResShot 2560x1440")); // 스크린샷은 창 크기와 무관하게 QHD로 렌더한다
 		}
 	}
 

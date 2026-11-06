@@ -33,7 +33,7 @@ void ALabCameraRig::Apply()
 		SetActorLocationAndRotation(Target + FVector(0.f, 0.f, FLabScenario::TopDownHeight), FRotator(-90.f, 0.f, 0.f));
 		return;
 	case 3:
-		// 오브 지상: 오브 옆 눈높이에서 +X 방향 고정. 몰려오는 개체를 정면으로 보는, 근거리 액터 비중이 가장 큰 대조군.
+		// 오브 지상: 피해 범위 바로 밖 눈높이에서 +X 방향 고정. 몰려오는 개체를 정면으로 보는, 근거리 액터 비중이 가장 큰 대조군.
 		SetActorLocationAndRotation(Target + FVector(FLabScenario::GroundOffset, 0.f, FLabScenario::GroundEyeHeight), FRotator::ZeroRotator);
 		return;
 	default:

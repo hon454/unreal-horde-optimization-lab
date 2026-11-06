@@ -133,7 +133,7 @@ void ALabOrb::Snipe()
 		Pick.Value->Snipe();
 		++SnipeCount;
 #if ENABLE_DRAW_DEBUG
-		DrawDebugLine(GetWorld(), Center, Pick.Value->GetActorLocation(), FColor::Cyan, false, 0.2f, 0, 4.f);
+		DrawDebugLine(GetWorld(), Sphere->GetComponentLocation(), Pick.Value->GetActorLocation(), FColor::Cyan, false, 0.2f, 0, 4.f);
 #endif
 	}
 }

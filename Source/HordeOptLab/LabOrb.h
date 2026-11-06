@@ -14,7 +14,7 @@ class UStaticMeshComponent;
  * 저격 대상은 난수가 아니라 결정적 해시(스폰 일련번호 + 저격 틱)로 고른다. plan.md "M0".
  * 겉모습은 Niagara Examples Pack의 BP_TeslaCoil 구성(타워 메시, 구체, NS_TeslaCoil, NS_Boundary_Cylinder)을 같은 배치로 옮긴 것이다.
  * BP는 GAS 상태 효과를 끌고 와서 쓰지 않는다. 이펙트는 모든 실행에서 하나씩 상시로 돈다. 저격 표현은 디버그 라인이다(Test 패키지에서는 그려지지 않는다).
- * 액터 위치는 지면에서 OrbHeight 위다(BP의 루트 높이).
+ * 액터 위치는 지면(z=0)이다. 타워 메시(높이 90.5 x4 = 362cm)를 z360에서 뒤집어 두므로 바닥이 지면에 닿는다.
  */
 UCLASS()
 class ALabOrb : public AActor
