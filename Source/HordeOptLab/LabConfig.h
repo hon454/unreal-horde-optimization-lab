@@ -19,8 +19,9 @@ struct FLabScenario
 {
 	static constexpr float MapRadius = 25000.f;      // R 250m
 	static constexpr float RespawnRingWidth = 1000.f; // 재생성 링 [R-10m, R]
-	static constexpr float ZoneRadius = 1000.f;      // 오브 피해 범위 10m(보라색 원기둥). 안에 있으면 초당 ZoneDps 피해
-	static constexpr float ZoneDps = 200.f;          // 체력 100이면 0.5초에 사망
+	static constexpr float ZoneRadius = 600.f;       // 오브 피해 범위 6m(보라색 원기둥). 10m는 너무 컸다(2026-11-06 사용자 의견)
+	static constexpr float ZoneDpsEdge = 100.f;      // 범위 가장자리 초당 피해. 체력 100이면 1초
+	static constexpr float ZoneDpsCenter = 300.f;    // 중심 초당 피해. 안으로 갈수록 선형으로 세진다
 	static constexpr float MinionHealth = 100.f;
 	static constexpr float MoveSpeed = 300.f;        // 이동 속도 3m/s
 	static constexpr float SnipeInterval = 2.f;      // 저격 간격(0.5초 10발은 화면에서 너무 잦았다, 2026-11-06 사용자 확인)
@@ -32,9 +33,10 @@ struct FLabScenario
 	static constexpr float OrbViewHeight = 900.f;    // P1 높이 9m
 	static constexpr float OrbViewPitch = -12.f;     // P1 내려다보는 각
 	static constexpr float OrbViewPeriod = 60.f;     // P1 1rpm으로 제자리 회전, 측정 60초에 한 바퀴
-	static constexpr float TopDownHeight = 30000.f;  // P2 탑뷰. M0 8번에서 모든 개체가 원거리 밴드에 들도록 다시 정한다
-	static constexpr float GroundOffset = 1200.f;    // P3 오브에서 12m(피해 범위 10m 바로 밖), +X 방향 고정
-	static constexpr float GroundEyeHeight = 170.f;  // P3 눈높이
+	static constexpr float TopDownHeight = 10000.f;  // P2 탑뷰 100m. 가장 가까운 개체도 100m 떨어져 근거리 밴드(초안 30m)에 들지 않는다. 300m는 너무 멀었다(2026-11-06 사용자 의견)
+	static constexpr float GroundOffset = 800.f;     // P3 오브에서 8m(피해 범위 6m 바로 밖), +X 방향 고정
+	static constexpr float GroundEyeHeight = 500.f;  // P3 높이 5m(1.7m는 너무 낮았다, 2026-11-06 사용자 의견)
+	static constexpr float GroundPitch = -8.f;       // P3 내려다보는 각
 
 	// budget 변형의 Significance 거리 단계(25/50/100/250m). plan.md "M0"
 	static constexpr float BudgetTiers[4] = { 2500.f, 5000.f, 10000.f, 25000.f };

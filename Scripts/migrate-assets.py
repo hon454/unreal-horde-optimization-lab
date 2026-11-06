@@ -26,6 +26,7 @@ SETS = {
         "/Game/NiagaraExamples/FX_Misc/NS_Boundary_Cylinder",  # 피해 범위 표시(보라색 원기둥)
         "/Game/NiagaraExamples/Gallery/StaticMesh/SM_TorchBase",  # 타워 받침대
         "/Game/NiagaraExamples/Gallery/Materials/M_Target_Metal", # 타워·구체 머티리얼
+        "/Game/NiagaraExamples/Materials/MI_Mesh_Overlay_TeslaCoil", # 구체의 보라색 오버레이
     ],
 }
 SEEDS = SETS[os.environ.get("LAB_MIGRATE_SET", "minion")]

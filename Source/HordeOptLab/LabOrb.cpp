@@ -50,10 +50,17 @@ void ALabOrb::BeginPlay()
 	{
 		Sphere->SetMaterial(0, Metal);
 	}
+	// BP_TeslaCoil은 구체에 보라색 오버레이 머티리얼을 씌운다(BP 문자열의 OverlayMaterial, MI_Mesh_Overlay_TeslaCoil).
+	if (UMaterialInterface* Overlay = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/NiagaraExamples/Materials/MI_Mesh_Overlay_TeslaCoil.MI_Mesh_Overlay_TeslaCoil"), nullptr, LOAD_Quiet | LOAD_NoWarn))
+	{
+		Sphere->SetOverlayMaterial(Overlay);
+	}
 
 	if (UNiagaraSystem* Coil = LoadObject<UNiagaraSystem>(nullptr, TEXT("/Game/NiagaraExamples/FX_Ribbons/NS_TeslaCoil.NS_TeslaCoil"), nullptr, LOAD_Quiet | LOAD_NoWarn))
 	{
 		CoilFx->SetAsset(Coil);
+		// BP는 번개가 구체로 모이도록 User.PositionTarget에 구체 위치를 넘긴다(BP 문자열의 SetVariablePosition).
+		CoilFx->SetVariablePosition(TEXT("User.PositionTarget"), Sphere->GetComponentLocation());
 		CoilFx->Activate(true);
 	}
 	if (UNiagaraSystem* Zone = LoadObject<UNiagaraSystem>(nullptr, TEXT("/Game/NiagaraExamples/FX_Misc/NS_Boundary_Cylinder.NS_Boundary_Cylinder"), nullptr, LOAD_Quiet | LOAD_NoWarn))
@@ -76,13 +83,16 @@ void ALabOrb::Tick(float DeltaSeconds)
 	}
 
 	const FVector Center = GetActorLocation();
+	// 피해는 중심에 가까울수록 세다: 가장자리 ZoneDpsEdge → 중심 ZoneDpsCenter.
 	const float ZoneRadiusSq = FMath::Square(FLabScenario::ZoneRadius);
-	const float Damage = FLabScenario::ZoneDps * DeltaSeconds;
 	for (ALabMinion* Minion : Spawner->GetMinions())
 	{
-		if (Minion->IsAlive() && FVector::DistSquared2D(Minion->GetActorLocation(), Center) <= ZoneRadiusSq)
+		const float DistSq = FVector::DistSquared2D(Minion->GetActorLocation(), Center);
+		if (Minion->IsAlive() && DistSq <= ZoneRadiusSq)
 		{
-			if (Minion->ApplyDamage(Damage))
+			const float Closeness = 1.f - FMath::Sqrt(DistSq) / FLabScenario::ZoneRadius;
+			const float Dps = FMath::Lerp(FLabScenario::ZoneDpsEdge, FLabScenario::ZoneDpsCenter, Closeness);
+			if (Minion->ApplyDamage(Dps * DeltaSeconds))
 			{
 				++KillCount;
 			}
