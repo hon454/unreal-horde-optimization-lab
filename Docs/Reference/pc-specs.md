@@ -4,4 +4,4 @@ M0 첫날에 채운다. 바뀌면 날짜와 함께 행을 더한다. 모든 `run
 
 | 날짜 | CPU | GPU, 드라이버 | RAM | OS | 엔진 | 해상도·`sg.*` |
 | --- | --- | --- | --- | --- | --- | --- |
-| 2026-11- | | | | Windows 11 | 소스 빌드 `G:\Epic Games\UE_Source`, 태그 `5.8.x-release`(`Engine/Build/Build.version`에서 읽는다) | |
+| 2026-11- | | | | Windows 11 | 소스 빌드 `G:\Epic Games\UE_5.8.4`, 5.8.4(`Engine/Build/Build.version`, BranchName `UE5`, CompatibleChangelist 55116800) | |
