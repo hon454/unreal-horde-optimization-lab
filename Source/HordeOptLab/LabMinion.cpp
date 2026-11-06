@@ -40,6 +40,7 @@ void ALabMinion::InitMinion(ALabCrowdSpawner* InSpawner, const FLabMinionAssets&
 	Spawner = InSpawner;
 	AssetsRef = &Assets;
 	Serial = InSerial;
+	Health = FLabScenario::MinionHealth;
 	SetupVisual(Assets);
 	EnterState(ELabMinionState::Walk);
 }
@@ -96,12 +97,19 @@ void ALabMinion::EnterState(ELabMinionState NewState)
 	}
 }
 
-void ALabMinion::Kill()
+bool ALabMinion::ApplyDamage(float Amount)
 {
-	if (IsAlive())
+	if (!IsAlive())
 	{
-		EnterState(ELabMinionState::Dead);
+		return false;
 	}
+	Health -= Amount;
+	if (Health > 0.f)
+	{
+		return false;
+	}
+	EnterState(ELabMinionState::Dead);
+	return true;
 }
 
 void ALabMinion::Snipe()

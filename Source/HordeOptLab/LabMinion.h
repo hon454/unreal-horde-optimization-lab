@@ -35,8 +35,8 @@ public:
 
 	void InitMinion(ALabCrowdSpawner* InSpawner, const FLabMinionAssets& Assets, uint32 InSerial);
 
-	/** 오브 소멸 반경. 바로 죽는 애니. */
-	void Kill();
+	/** 오브 피해 범위. 체력이 0이 되면 죽는 애니. 죽었으면 true. */
+	bool ApplyDamage(float Amount);
 	/** 오브 저격. 피격 애니 뒤 죽는 애니. */
 	void Snipe();
 
@@ -55,6 +55,7 @@ protected:
 	const FLabMinionAssets* AssetsRef = nullptr;
 	uint32 Serial = 0;
 	ELabMinionState State = ELabMinionState::Walk;
+	float Health = 0.f;
 	float StateTimeLeft = 0.f;
 	bool bSingleNode = false;
 };

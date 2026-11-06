@@ -19,18 +19,21 @@ struct FLabScenario
 {
 	static constexpr float MapRadius = 25000.f;      // R 250m
 	static constexpr float RespawnRingWidth = 1000.f; // 재생성 링 [R-10m, R]
-	static constexpr float KillRadius = 300.f;       // 오브 소멸 반경 3m
+	static constexpr float ZoneRadius = 1000.f;      // 오브 피해 범위 10m(보라색 원기둥). 안에 있으면 초당 ZoneDps 피해
+	static constexpr float ZoneDps = 200.f;          // 체력 100이면 0.5초에 사망
+	static constexpr float MinionHealth = 100.f;
 	static constexpr float MoveSpeed = 300.f;        // 이동 속도 3m/s
 	static constexpr float SnipeInterval = 2.f;      // 저격 간격(0.5초 10발은 화면에서 너무 잦았다, 2026-11-06 사용자 확인)
 	static constexpr int32 SnipeCount = 5;           // 저격당 대상 수 K
 	static constexpr float SnipeMinDistance = 8000.f; // 저격 대상 최소 거리(초안 밴드 80m 밖)
 
-	// 카메라 프리셋. plan.md "프리셋의 역할"
-	static constexpr float OrbitRadius = 6000.f;     // P1 궤도 반경 60m
-	static constexpr float OrbitHeight = 2000.f;     // P1 높이 20m
-	static constexpr float OrbitPeriod = 60.f;       // P1 1rpm, 측정 60초에 한 바퀴
-	static constexpr float TopDownHeight = 30000.f;  // P2 탑뷰. M0 8번에서 모든 개체가 ISM 밴드에 들도록 다시 정한다
-	static constexpr float GroundDistance = 2500.f;  // P3 오브에서 25m
+	// 카메라 프리셋. 오브(중앙)에서 바깥을 본다. 근거리 액터부터 지평선 원거리까지 한 화면에 들어온다(2026-11-06 사용자 의견으로 궤도에서 변경).
+	static constexpr float OrbViewBack = 1500.f;     // P1 오브 뒤 15m. 오브가 화면 아래 가운데에 보이게 한다(2026-11-06 사용자 의견)
+	static constexpr float OrbViewHeight = 900.f;    // P1 높이 9m
+	static constexpr float OrbViewPitch = -12.f;     // P1 내려다보는 각
+	static constexpr float OrbViewPeriod = 60.f;     // P1 1rpm으로 제자리 회전, 측정 60초에 한 바퀴
+	static constexpr float TopDownHeight = 30000.f;  // P2 탑뷰. M0 8번에서 모든 개체가 원거리 밴드에 들도록 다시 정한다
+	static constexpr float GroundOffset = 300.f;     // P3 오브 옆 3m, +X 방향 고정
 	static constexpr float GroundEyeHeight = 170.f;  // P3 눈높이
 
 	// budget 변형의 Significance 거리 단계(25/50/100/250m). plan.md "M0"

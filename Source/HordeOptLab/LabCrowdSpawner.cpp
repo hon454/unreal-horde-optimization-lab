@@ -53,11 +53,11 @@ void ALabCrowdSpawner::SpawnInitial()
 	Stream.Initialize(Config.Seed);
 	OrbLocation = FVector::ZeroVector;
 
-	// 반지름을 [소멸 반경, R]에서 균등하게 뽑으면 반지름당 개체 수가 일정하다(밀도 ∝ 1/r).
+	// 반지름을 [피해 범위, R]에서 균등하게 뽑으면 반지름당 개체 수가 일정하다(밀도 ∝ 1/r).
 	Minions.Reserve(Config.N);
 	for (int32 i = 0; i < Config.N; ++i)
 	{
-		const float Radius = Stream.FRandRange(FLabScenario::KillRadius, FLabScenario::MapRadius);
+		const float Radius = Stream.FRandRange(FLabScenario::ZoneRadius, FLabScenario::MapRadius);
 		const float Angle = Stream.FRandRange(0.f, UE_TWO_PI);
 		SpawnAt(Radius, Angle);
 	}

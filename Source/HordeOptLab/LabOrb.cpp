@@ -2,19 +2,69 @@
 #include "LabConfig.h"
 #include "LabCrowdSpawner.h"
 #include "Components/StaticMeshComponent.h"
+#include "NiagaraComponent.h"
+#include "NiagaraSystem.h"
 #include "DrawDebugHelpers.h"
 #include "Engine/StaticMesh.h"
+#include "Materials/MaterialInterface.h"
 #include "UObject/ConstructorHelpers.h"
 
 ALabOrb::ALabOrb()
 {
 	PrimaryActorTick.bCanEverTick = true;
+	Root = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
+	RootComponent = Root;
+
+	// 상대 배치는 BP_TeslaCoil과 같다(SM_TorchBase z360 roll180 x4, Sphere z400, 시스템 둘은 루트).
+	Tower = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Tower"));
+	Tower->SetupAttachment(Root);
+	Tower->SetRelativeLocationAndRotation(FVector(0.f, 0.f, 360.f), FRotator(0.f, 0.f, 180.f));
+	Tower->SetRelativeScale3D(FVector(4.f));
+	Tower->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
 	Sphere = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Sphere"));
-	RootComponent = Sphere;
+	Sphere->SetupAttachment(Root);
+	Sphere->SetRelativeLocation(FVector(0.f, 0.f, 400.f));
 	Sphere->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> SphereMesh(TEXT("/Engine/BasicShapes/Sphere.Sphere"));
 	Sphere->SetStaticMesh(SphereMesh.Object);
-	Sphere->SetRelativeScale3D(FVector(2.f));
+
+	// 이펙트와 타워는 Niagara Examples Pack에서 옮긴 것(Scripts/migrate-assets.py "orbfx"). 없으면 구체만 남는다.
+	CoilFx = CreateDefaultSubobject<UNiagaraComponent>(TEXT("CoilFx"));
+	CoilFx->SetupAttachment(Root);
+	ZoneFx = CreateDefaultSubobject<UNiagaraComponent>(TEXT("ZoneFx"));
+	ZoneFx->SetupAttachment(Root);
+}
+
+void ALabOrb::BeginPlay()
+{
+	Super::BeginPlay();
+
+	UMaterialInterface* Metal = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/NiagaraExamples/Gallery/Materials/M_Target_Metal.M_Target_Metal"), nullptr, LOAD_Quiet | LOAD_NoWarn);
+	if (UStaticMesh* TowerMesh = LoadObject<UStaticMesh>(nullptr, TEXT("/Game/NiagaraExamples/Gallery/StaticMesh/SM_TorchBase.SM_TorchBase"), nullptr, LOAD_Quiet | LOAD_NoWarn))
+	{
+		Tower->SetStaticMesh(TowerMesh);
+		Tower->SetMaterial(0, Metal);
+	}
+	if (Metal)
+	{
+		Sphere->SetMaterial(0, Metal);
+	}
+
+	if (UNiagaraSystem* Coil = LoadObject<UNiagaraSystem>(nullptr, TEXT("/Game/NiagaraExamples/FX_Ribbons/NS_TeslaCoil.NS_TeslaCoil"), nullptr, LOAD_Quiet | LOAD_NoWarn))
+	{
+		CoilFx->SetAsset(Coil);
+		CoilFx->Activate(true);
+	}
+	if (UNiagaraSystem* Zone = LoadObject<UNiagaraSystem>(nullptr, TEXT("/Game/NiagaraExamples/FX_Misc/NS_Boundary_Cylinder.NS_Boundary_Cylinder"), nullptr, LOAD_Quiet | LOAD_NoWarn))
+	{
+		// User.Radius·User.Height·User.Color는 이 시스템의 사용자 파라미터다(에셋 문자열에서 확인).
+		ZoneFx->SetAsset(Zone);
+		ZoneFx->SetVariableFloat(TEXT("User.Radius"), FLabScenario::ZoneRadius);
+		ZoneFx->SetVariableFloat(TEXT("User.Height"), 400.f);
+		ZoneFx->SetVariableLinearColor(TEXT("User.Color"), FLinearColor(1.5f, 0.3f, 6.f)); // 보라. 기본값은 초록이다
+		ZoneFx->Activate(true);
+	}
 }
 
 void ALabOrb::Tick(float DeltaSeconds)
@@ -26,13 +76,16 @@ void ALabOrb::Tick(float DeltaSeconds)
 	}
 
 	const FVector Center = GetActorLocation();
-	const float KillRadiusSq = FMath::Square(FLabScenario::KillRadius);
+	const float ZoneRadiusSq = FMath::Square(FLabScenario::ZoneRadius);
+	const float Damage = FLabScenario::ZoneDps * DeltaSeconds;
 	for (ALabMinion* Minion : Spawner->GetMinions())
 	{
-		if (Minion->IsAlive() && FVector::DistSquared2D(Minion->GetActorLocation(), Center) <= KillRadiusSq)
+		if (Minion->IsAlive() && FVector::DistSquared2D(Minion->GetActorLocation(), Center) <= ZoneRadiusSq)
 		{
-			Minion->Kill();
-			++KillCount;
+			if (Minion->ApplyDamage(Damage))
+			{
+				++KillCount;
+			}
 		}
 	}
 

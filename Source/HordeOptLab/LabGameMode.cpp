@@ -31,7 +31,7 @@ void ALabGameMode::StartPlay()
 	Spawner->SpawnInitial();
 
 	Camera = World->SpawnActor<ALabCameraRig>();
-	Camera->SetPreset(Config.Preset, FVector(0.f, 0.f, 100.f));
+	Camera->SetPreset(Config.Preset, FVector::ZeroVector);
 	if (APlayerController* PC = World->GetFirstPlayerController())
 	{
 		PC->SetViewTarget(Camera);
