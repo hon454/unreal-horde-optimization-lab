@@ -24,7 +24,7 @@
 
 - [x] `-LabStage=M1`: 같은 스포너·오브에서 미니언을 Mass 엔티티로 만든다. EntityConfig는 실행 시 C++([ADR-0005](Decisions/0005-entity-config-in-code.md)). 프로세서 `ULabApproachProcessor`(엔진 조향 앞), `ULabOrbContactProcessor`, `ULabOrbSnipeProcessor`, `ULabMinionStateProcessor`(지연 파괴 + 재생성). 표현은 `UMassMovableVisualizationTrait`의 ISM 하나(모든 LOD), `Config/DefaultMass.ini`로 LOD·표현 프로세서를 켠다.
 - [x] 로직 일치: N=300 개발 실행 25초에서 처치·재생성·저격 수가 M0 static과 같다. 프레임이 100ms를 넘으면 엔진 이동이 시간을 0.1초로 잘라 느려진다([engine-notes.md](Reference/engine-notes.md) 11절).
-- [ ] 렌더 스레드 병목: Test 패키지 시험(N=2000, P1, `Saved/Profiling/CSV/trial/`, 비교 수치로 쓰지 않음)에서 Game 2.1ms(M0 static 24.5ms)인데 렌더 스레드 `EventWait/Visibility` p50 24ms, 프레임 p99 358ms다. ISM 인스턴스 추가·삭제(재생성)마다 표현이 다시 만들어지는지부터 본다.
+- [x] GPU 병목: 움직이는 ISM 2,000개가 Lumen 장면에 들어가 GPU 29ms였다. 모든 단계에서 미니언 표현을 Lumen 장면에서 빼고(`LabExcludeFromLumen`) Mass ISM 그림자를 켰다(2026-11-07 사용자 결정, measurement.md 확정값). 시험 수치는 engine-notes.md 11절. E0 재측정은 이 조건의 패키지(c9c0af6)로 한다.
 - [ ] `ULabDamageApplyProcessor`(피해 이벤트 엔티티)는 E1 (d)에서 더한다. 지금 저격은 직접 태그를 붙인다.
 - [ ] E1 측정 조건과 `run-e1.ps1`.
 
