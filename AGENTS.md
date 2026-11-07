@@ -57,7 +57,7 @@ Night of the Dead에서 측정 없이 액터로 했던 좀비 호드 최적화�
 
 ### 구현
 
-- **에디터 작업을 만들지 않는다. Unreal MCP는 예외 경로다.** 액터·프로세서·설정은 C++과 ini로 쓰고, 스포너·오브·카메라 프리셋은 실행 시 코드로 만든다. 에디터가 꼭 필요한 일(Fab 에셋 임포트 확인, 피직스 에셋 수정, AnimToTexture 베이크, EntityConfig 에셋)에만 Unreal MCP(`ModelContextProtocol` + `AllToolsets` 플러그인)를 쓴다. MCP 툴 호출은 게임 스레드에서 직렬이라 겹쳐 부르지 않고, 대량 변경 전후에 저장한다. 새 `UFUNCTION`은 에디터 재시작이 필요하다. MCP가 막히면 Python Editor Script로 우회하고, 그것도 막히면 사용자에게 에디터 작업을 요청한다. MCP 없이도 진행되는 설계를 우선한다.
+- **에디터 작업은 최대한 줄인다. 금지는 아니다.** 액터·프로세서·설정은 되도록 C++과 ini로 쓰고, 스포너·오브·카메라 프리셋·Mass EntityConfig는 실행 시 코드로 만든다([ADR-0005](Docs/Decisions/0005-entity-config-in-code.md)). 에셋이 더 맞는 일(Fab 에셋 임포트 확인, 피직스 에셋 수정, AnimToTexture 베이크, Niagara 시스템, 글에 보일 에셋 화면)은 에디터 작업을 만든다. 그때는 Unreal MCP(`ModelContextProtocol` + `AllToolsets` 플러그인)를 먼저 쓰고, 만든 순서를 `Scripts/`에 적어 다시 만들 수 있게 한다(예: `Scripts/create-bolt-fx.md`). MCP 툴 호출은 게임 스레드에서 직렬이라 겹쳐 부르지 않고, 대량 변경 전후에 저장한다. 새 `UFUNCTION`은 에디터 재시작이 필요하다. MCP가 막히면 Python Editor Script로 우회하고, 그것도 막히면 사용자에게 에디터 작업을 요청한다. 같은 결과라면 MCP 없이도 진행되는 설계를 고른다.
 - **엔진 소스를 추측하지 않는다.** 기본값, 매크로, 클래스 이름은 소스 빌드의 `Engine/Source`·`Engine/Plugins`에서 확인한 뒤 쓰고, 확인한 것은 engine-notes.md에 적는다. 이미 확인한 것이 engine-notes.md에 있다: Mass 코어 경로, `LODSignificance` 범위(0\~3), `mass.FullyParallel`, Test 구성 매크로, ISKM 트랙 풀 문제.
 - **소스 빌드 엔진만 쓴다.** `.uproject`의 `EngineAssociation`이 가리키는 소스 빌드로만 열고 빌드한다. 런처 설치본과 섞으면 같은 `Binaries/`에 번갈아 빌드하게 된다.
 - **군중 최적화와 무관한 기능을 만들지 않는다.** GAS, 무기·전투, 인벤토리, 메뉴 UI, 네트워크 복제, 세이브, 플레이어 이동, VFX·사운드 제작은 비목표다. 오브의 피해는 체력 프래그먼트 차감과 피격·사망 태그까지다. 오브와 저격 궤적은 구체 하나와 디버그 라인으로 그린다. 새 기능 아이디어는 backlog.md에만 적는다.

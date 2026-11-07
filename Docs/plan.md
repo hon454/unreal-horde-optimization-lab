@@ -48,7 +48,7 @@ M0\~M5가 필수다. 마일스톤마다 바꾸는 최적화 변수는 하나고,
 **만드는 것**
 - Fragment: `FLabTargetFragment`(목표 방향), `FLabHealthFragment`(float). 엔진 `FTransformFragment`, `FMassVelocityFragment`, `FMassMoveTargetFragment` 재사용. Tag: `FLabHitTag`, `FLabDeadTag`. Const Shared Fragment `FLabUnitTypeParams`(속도, 체력, 바운드 반경).
 - Processor: `ULabApproachProcessor`(MoveTarget을 오브로), 엔진 스티어링, `ULabOrbContactProcessor`, `ULabOrbSnipeProcessor`(피해 이벤트 엔티티 생성), `ULabDamageApplyProcessor`, `ULabDeathProcessor`(Dead 태그 → 지연 파괴 + 재생성). CDO 자동 등록 프로세서 끄기.
-- EntityConfig, Spawner 연결(M0 스포너가 액터 대신 엔티티를 만든다. 분포·시드 로직은 같다).
+- EntityConfig(실행 시 C++로 만든다, [ADR-0005](Decisions/0005-entity-config-in-code.md)), Spawner 연결(M0 스포너가 액터 대신 엔티티를 만든다. 분포·시드 로직은 같다).
 
 **실험 E1**
 - (a) M0 `static` vs M1: 컨테이너 전환의 Game Thread 차이. 대표 비교.
