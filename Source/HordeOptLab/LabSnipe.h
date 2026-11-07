@@ -48,11 +48,14 @@ struct FLabSnipeView
 
 struct FLabSnipeBands
 {
-	/** 오브 중심에서의 수평 거리 구간 경계(cm). 피해 범위 밖 8m부터 맵 끝까지. 거리 밴드 확정값(30/80/200m)과 같다. */
-	static constexpr float Edges[5] = { FLabScenario::ZoneRadius, 3000.f, 8000.f, 20000.f, FLabScenario::MapRadius + 1.f };
-	/** 구간마다 고르는 수. 합이 FLabScenario::SnipeCount(5)다. 원거리는 개체가 가장 많아 2발. */
-	static constexpr int32 Counts[4] = { 1, 1, 1, 2 };
-	static constexpr int32 Num = 4;
+	/**
+	 * 오브 중심에서의 수평 거리 구간 경계(cm). 거리 밴드 확정값(30/80/200m)과 같다. 30m 안은 쏘지 않는다: 몇 초 안에 피해 범위에 들어와
+	 * 거기서 죽기 때문이다(2026-11-07 사용자 의견). 근거리 밴드의 사망은 피해 범위가 만든다.
+	 */
+	static constexpr float Edges[4] = { 3000.f, 8000.f, 20000.f, FLabScenario::MapRadius + 1.f };
+	/** 구간마다 고르는 수(30\~80m, 80\~200m, 200m\~). 합이 FLabScenario::SnipeCount(5)다. */
+	static constexpr int32 Counts[3] = { 1, 2, 2 };
+	static constexpr int32 Num = 3;
 
 	/** 구간 번호. 범위 밖이면 INDEX_NONE. */
 	static int32 BandOf(float Distance2D)
