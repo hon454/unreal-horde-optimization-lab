@@ -16,7 +16,7 @@ if ($Small) { $N = 100; $Preset = "P1"; if ($Duration -le 0) { $Duration = 20 } 
 
 $LogName = "LabDev-$Variant-N$N-$Preset.log"
 $GameArgs = @(
-    "`"$Project`"", "-game", "-windowed", "-ResX=1280", "-ResY=720", "-log", "-LOG=$LogName", "-nosound",
+    "`"$Project`"", "-game", "-windowed", "-ResX=1280", "-ResY=720", "-log", "-LOG=$LogName", "-nosound", "-DisablePython",
     "-LabN=$N", "-LabPreset=$($Preset.Substring(1))", "-LabSeed=$Seed", "-LabVariant=$Variant"
 ) + $Extra
 if ($Duration -gt 0) { $GameArgs += "-LabDuration=$Duration" }

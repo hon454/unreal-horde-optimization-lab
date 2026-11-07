@@ -58,6 +58,7 @@ protected:
 	float Health = 0.f;
 	float StateTimeLeft = 0.f;
 	bool bSingleNode = false;
+	bool bManualMove = false; // pawn 변형: CharacterMovement 틱 없이 위치를 직접 옮긴다
 };
 
 /** static 변형: 스켈레탈 메시 대신 UStaticMeshComponent, 애니메이션 없음. */
@@ -72,9 +73,9 @@ protected:
 };
 
 /**
- * pawn 변형: CharacterMovement를 만들지 않고 위치를 직접 옮긴다. 캡슐·스켈레탈 메시·AnimBP는 full과 같다.
+ * pawn 변형: CharacterMovement의 틱을 끄고 위치를 직접 옮긴다(ACharacter는 이 컴포넌트를 필수로 만든다). 캡슐·스켈레탈 메시·AnimBP는 full과 같다.
  * "액터를 최대한 가볍게 만들어도 여기까지"를 보는 액터 쪽 천장이다(2026-11-07 사용자 결정, budget·uro와 같은 대조군).
- * APawn을 새로 만들지 않고 ACharacter에서 이동 컴포넌트만 빼서 스포너·오브 코드를 그대로 쓴다.
+ * APawn을 새로 만들지 않고 ACharacter에서 이동 틱만 꺼서 스포너·오브 코드를 그대로 쓴다.
  */
 UCLASS()
 class ALabMinionPawn : public ALabMinion

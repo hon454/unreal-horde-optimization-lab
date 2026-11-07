@@ -79,7 +79,7 @@ void ALabMinion::EnterState(ELabMinionState NewState)
 	case ELabMinionState::Hit: Seq = AssetsRef->Hit; StateTimeLeft = Seq ? Seq->GetPlayLength() : 0.5f; break;
 	case ELabMinionState::Dead: Seq = AssetsRef->Death; StateTimeLeft = Seq ? Seq->GetPlayLength() : 1.f; break;
 	}
-	if (NewState != ELabMinionState::Walk && GetCharacterMovement())
+	if (NewState != ELabMinionState::Walk && !bManualMove)
 	{
 		GetCharacterMovement()->StopMovementImmediately();
 		GetCharacterMovement()->DisableMovement();
@@ -131,7 +131,7 @@ void ALabMinion::Tick(float DeltaSeconds)
 	{
 		const FVector ToOrb = Spawner->GetOrbLocation() - GetActorLocation();
 		const FVector Dir = FVector(ToOrb.X, ToOrb.Y, 0.f).GetSafeNormal();
-		if (GetCharacterMovement())
+		if (!bManualMove)
 		{
 			AddMovementInput(Dir);
 		}
@@ -179,8 +179,13 @@ void ALabMinionStatic::SetupVisual(const FLabMinionAssets& Assets)
 // pawn 변형 ----------------------------------------------------------------
 
 ALabMinionPawn::ALabMinionPawn(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer.DoNotCreateDefaultSubobject(ACharacter::CharacterMovementComponentName))
+	: Super(ObjectInitializer)
 {
+	// ACharacter는 CharacterMovement를 필수 하위 오브젝트로 만들어 DoNotCreateDefaultSubobject가 무시된다
+	// ("Ignored DoNotCreateDefaultSubobject for CharMoveComp as it's marked as required", 2026-11-07 로그). 그래서 컴포넌트는 두고 틱을 끈다.
+	bManualMove = true;
+	GetCharacterMovement()->PrimaryComponentTick.bCanEverTick = false;
+	GetCharacterMovement()->PrimaryComponentTick.bStartWithTickEnabled = false;
 }
 
 // budget 변형 ---------------------------------------------------------------
