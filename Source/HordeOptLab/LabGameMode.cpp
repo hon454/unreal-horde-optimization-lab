@@ -4,6 +4,7 @@
 #include "LabConfig.h"
 #include "LabCrowdSpawner.h"
 #include "LabOrb.h"
+#include "Engine/Engine.h"
 #include "Engine/World.h"
 #include "GameFramework/PlayerController.h"
 #include "HAL/IConsoleManager.h"
@@ -73,12 +74,17 @@ void ALabGameMode::ApplyVariantCVars()
 
 void ALabGameMode::ApplyBenchCVars()
 {
-	// measurement.md "렌더 고정". 해상도와 창 모드는 run-bench.ps1이 -ResX/-ResY로 넘긴다. sg.*·Lumen/VSM/TSR 값은 M0 8번에서 확정해 여기에 더한다.
+	// measurement.md "렌더 고정". 해상도와 창 모드는 run-bench.ps1이 -ResX/-ResY로 넘긴다. 품질은 스케일러빌리티 Epic(3)으로 고정한다.
 	LabSetCVar(TEXT("r.VSync"), TEXT("0"));
 	LabSetCVar(TEXT("t.MaxFPS"), TEXT("0"));
 	LabSetCVar(TEXT("r.ScreenPercentage"), TEXT("100"));
 	LabSetCVar(TEXT("r.DynamicRes.OperationMode"), TEXT("0"));
 	LabSetCVar(TEXT("csv.CompressionMode"), TEXT("0")); // .csv로 쓴다(CsvProfiler.cpp:183-194)
+	// 스케일러빌리티 Epic(3). measurement.md "확정값".
+	if (GEngine)
+	{
+		GEngine->Exec(GetWorld(), TEXT("scalability 3"));
+	}
 }
 
 void ALabGameMode::TickBench()

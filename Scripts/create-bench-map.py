@@ -1,5 +1,5 @@
 # 벤치마크 맵 /Game/Lab/Maps/L_Bench를 엔진 Basic 템플릿(Template_Default: 평평한 바닥, 해, 하늘, 안개)으로 만든다.
-# 바닥은 맵 반경 R(250m, LabConfig.h FLabScenario::MapRadius)보다 20m 넓게 키운다. 오브·스포너·카메라는 ALabGameMode가 실행 시 만든다.
+# 바닥은 맵 반경 R(500m, LabConfig.h FLabScenario::MapRadius)보다 20m 넓게 키운다. 오브·스포너·카메라는 ALabGameMode가 실행 시 만든다.
 # Open World 템플릿(지형)은 쓰지 않는다. 경사가 개체마다 이동 거리와 CharacterMovement 비용을 바꿔 실행 간 수치가 흔들린다(plan.md "평지 맵").
 # VolumetricCloud는 지운다. 군중과 무관한 GPU 비용이다.
 # 조명은 템플릿 기본값(해 6 lux, 피치 -49.5, 스카이 1.0) 그대로 둔다. 해 질 녘 쪽으로 낮추는 안을 시험했다가 되돌렸다(2026-11-07 사용자 결정).
@@ -8,7 +8,7 @@ import unreal
 
 PATH = "/Game/Lab/Maps/L_Bench"
 TEMPLATE = "/Engine/Maps/Templates/Template_Default"
-MAP_RADIUS = 25000.0
+MAP_RADIUS = 50000.0
 MARGIN = 2000.0
 
 if unreal.EditorAssetLibrary.does_asset_exist(PATH):

@@ -3,7 +3,7 @@
 param(
     [int]$N = 500,
     [ValidateSet("P1", "P2")][string]$Preset = "P1",
-    [int]$Seed = 1,
+    [int]$Seed = 20261106,
     [ValidateSet("full", "static", "budget", "uro")][string]$Variant = "full",
     [double]$Duration = 0,
     [double]$ShotAt = 0,

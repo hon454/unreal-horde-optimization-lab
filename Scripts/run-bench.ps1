@@ -6,11 +6,11 @@ param(
     [Parameter(Mandatory)][int]$N,
     [ValidateSet("P1", "P2")][string]$Preset = "P1",
     [ValidateSet("full", "static", "budget", "uro")][string]$Variant = "full",
-    [int]$Seed = 1,
+    [int]$Seed = 20261106,
     [int]$Runs = 3,
     [string]$Tag = "",
-    [int]$ResX = 1920,
-    [int]$ResY = 1080
+    [int]$ResX = 2560,
+    [int]$ResY = 1440
 )
 . "$PSScriptRoot\common.ps1"
 

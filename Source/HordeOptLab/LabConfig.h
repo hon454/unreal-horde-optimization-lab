@@ -12,12 +12,12 @@ enum class ELabVariant : uint8
 };
 
 /**
- * 시나리오 고정값 초안. M0 8번에서 실측해 사용자 확정을 받은 뒤 measurement.md "확정값"에 적고 여기를 맞춘다.
+ * 시나리오 고정값. 2026-11-07 사용자 확정(measurement.md "확정값"). 바꾸면 모든 태그를 다시 잰다.
  * 단위는 cm, 초.
  */
 struct FLabScenario
 {
-	static constexpr float MapRadius = 25000.f;      // R 250m
+	static constexpr float MapRadius = 50000.f;      // R 500m
 	static constexpr float RespawnRingWidth = 1000.f; // 재생성 링 [R-10m, R]
 	static constexpr float ZoneRadius = 800.f;       // 오브 피해 범위 8m(보라색 원기둥). 10m는 컸고 6m는 작았다(2026-11-06~07 사용자 의견)
 	static constexpr float ZoneDpsEdge = 100.f;      // 범위 가장자리 초당 피해. 체력 100이면 1초
@@ -45,7 +45,7 @@ struct FLabConfig
 {
 	int32 N = 500;
 	int32 Preset = 1;          // 1 오브 시점, 2 탑뷰(P3는 2026-11-07에 뺐다)
-	int32 Seed = 1;
+	int32 Seed = 20261106;
 	ELabVariant Variant = ELabVariant::Full;
 	bool bBench = false;       // 벤치마크 러너(M0 7번)
 	FString Label;
