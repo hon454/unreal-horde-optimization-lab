@@ -11,6 +11,7 @@
 | [0001](0001-test-package-for-measurement.md) | 수치는 Test 구성 패키지에서 `csvprofile`과 트레이스로 잰다. Development 빌드는 개발과 오버레이용 | 승인됨 |
 | 0002 | 측정 인프라 동결(M0 끝에 쓴다) | 예정 |
 | [0003](0003-two-camera-presets.md) | 카메라 프리셋을 오브 시점(P1)과 탑뷰(P2) 둘로 줄인다 | 승인됨 |
+| [0004](0004-stages-as-run-modes.md) | 최적화 단계를 한 빌드 안의 실행 모드(`-LabStage=`)로 공존시킨다 | 승인됨 |
 
 ## ADR 이전의 결정
 

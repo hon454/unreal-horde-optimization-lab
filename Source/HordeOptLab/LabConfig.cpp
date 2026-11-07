@@ -15,6 +15,13 @@ const FLabConfig& FLabConfig::Get()
 		FParse::Value(Cmd, TEXT("-LabDuration="), C.DurationSec);
 		FParse::Value(Cmd, TEXT("-LabShotAt="), C.ShotAtSec);
 		C.bBench = FParse::Param(Cmd, TEXT("LabBench"));
+		C.bHud = FParse::Param(Cmd, TEXT("LabHud")) && !C.bBench;
+
+		FString Stage;
+		if (FParse::Value(Cmd, TEXT("-LabStage="), Stage))
+		{
+			C.bStageValid = Stage.Equals(TEXT("M0"), ESearchCase::IgnoreCase);
+		}
 
 		FString Variant;
 		if (FParse::Value(Cmd, TEXT("-LabVariant="), Variant))
@@ -41,8 +48,17 @@ const TCHAR* FLabConfig::VariantName(ELabVariant V)
 	}
 }
 
+const TCHAR* FLabConfig::StageName(ELabStage S)
+{
+	switch (S)
+	{
+	case ELabStage::M0:
+	default: return TEXT("M0");
+	}
+}
+
 FString FLabConfig::ToLogString() const
 {
-	return FString::Printf(TEXT("lab_config n=%d preset=P%d seed=%d variant=%s bench=%d label=%s duration=%.1f"),
-		N, Preset, Seed, VariantName(Variant), bBench ? 1 : 0, *Label, DurationSec);
+	return FString::Printf(TEXT("lab_config stage=%s n=%d preset=P%d seed=%d variant=%s bench=%d label=%s duration=%.1f"),
+		StageName(Stage), N, Preset, Seed, VariantName(Variant), bBench ? 1 : 0, *Label, DurationSec);
 }

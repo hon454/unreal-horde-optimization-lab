@@ -40,9 +40,23 @@ struct FLabScenario
 	static constexpr float BudgetMs = 2.f;
 };
 
+/**
+ * 최적화 단계(마일스톤). 모든 단계가 한 빌드에 공존하고 -LabStage=로 고른다(ADR-0004).
+ * 스포너·오브·카메라·러너·CSV는 모든 단계가 공유하고, 단계는 개체를 표현하고 움직이는 방식만 바꾼다.
+ * 마일스톤을 끝낼 때 이전 단계를 지우지 않고 새 단계를 더한다.
+ */
+enum class ELabStage : uint8
+{
+	M0, // 액터 군중(변형은 ELabVariant)
+	// M1 Mass 코어, M2 ISM+VAT, M3 하이드레이션, M3b, M4 Simulation LOD, M5 ISKM을 차례로 더한다.
+};
+
 /** 실행 인자. 프로세스 시작 시 한 번 읽는다. */
 struct FLabConfig
 {
+	ELabStage Stage = ELabStage::M0;
+	bool bStageValid = true;   // 아직 없는 단계를 고르면 false. 게임 모드가 종료 코드 2로 끝낸다
+	bool bHud = false;         // -LabHud: 상태 오버레이를 켠 채 시작(F1로도 토글). -LabBench에서는 무시
 	int32 N = 500;
 	int32 Preset = 1;          // 1 오브 시점, 2 탑뷰(P3는 2026-11-07에 뺐다)
 	int32 Seed = 20261106;
@@ -54,5 +68,6 @@ struct FLabConfig
 
 	static const FLabConfig& Get();
 	static const TCHAR* VariantName(ELabVariant V);
+	static const TCHAR* StageName(ELabStage S);
 	FString ToLogString() const;
 };

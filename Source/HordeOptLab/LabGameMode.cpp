@@ -3,6 +3,8 @@
 #include "LabCameraRig.h"
 #include "LabConfig.h"
 #include "LabCrowdSpawner.h"
+#include "LabHud.h"
+#include "InputCoreTypes.h"
 #include "LabOrb.h"
 #include "Engine/Engine.h"
 #include "Engine/World.h"
@@ -32,6 +34,7 @@ ALabGameMode::ALabGameMode()
 {
 	PrimaryActorTick.bCanEverTick = true;
 	DefaultPawnClass = nullptr;
+	HUDClass = ALabHud::StaticClass();
 }
 
 void ALabGameMode::StartPlay()
@@ -40,6 +43,13 @@ void ALabGameMode::StartPlay()
 
 	const FLabConfig& Config = FLabConfig::Get();
 	UE_LOG(LogLab, Log, TEXT("%s"), *Config.ToLogString());
+	if (!Config.bStageValid)
+	{
+		// 아직 구현하지 않은 단계. 러너가 실패로 알아보도록 종료 코드 2로 끝낸다.
+		UE_LOG(LogLab, Error, TEXT("lab_stage_unknown"));
+		FPlatformMisc::RequestExitWithStatus(false, 2, TEXT("LabStage"));
+		return;
+	}
 
 	ApplyVariantCVars();
 	if (Config.bBench)
@@ -152,10 +162,36 @@ void ALabGameMode::TickBench()
 	}
 }
 
+FString ALabGameMode::GetHudCrowdLine() const
+{
+	if (!Spawner || !Orb)
+	{
+		return FString();
+	}
+	return FString::Printf(TEXT("alive %d   respawns %d   zone kills %d   snipes %d   t %.0f s"),
+		Spawner->GetMinions().Num(), Spawner->GetRespawnCount(), Orb->GetKillCount(), Orb->GetSnipeCount(), Elapsed);
+}
+
 void ALabGameMode::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 	Elapsed += DeltaSeconds;
+	if (!Spawner)
+	{
+		return;
+	}
+
+	// F1: 상태 오버레이 토글(벤치마크 실행에서는 오버레이가 그려지지 않는다).
+	if (APlayerController* PC = GetWorld()->GetFirstPlayerController())
+	{
+		if (PC->WasInputKeyJustPressed(EKeys::F1))
+		{
+			if (ALabHud* Hud = Cast<ALabHud>(PC->GetHUD()))
+			{
+				Hud->Toggle();
+			}
+		}
+	}
 
 	// budget 변형: Significance Manager는 게임이 시점을 넘겨 갱신해야 한다(SignificanceManager.h:118 Update).
 	if (FLabConfig::Get().Variant == ELabVariant::Budget && Camera)

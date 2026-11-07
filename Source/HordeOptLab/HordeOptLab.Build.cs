@@ -12,6 +12,8 @@ public class HordeOptLab : ModuleRules
 			"CoreUObject",
 			"Engine",
 			"InputCore",
+			"RenderCore",               // 상태 오버레이: GGameThreadTime, GRenderThreadTime
+			"RHI",                      // 상태 오버레이: RHIGetGPUFrameCycles
 			"AnimationBudgetAllocator", // M0 budget 변형: USkeletalMeshComponentBudgeted
 			"SignificanceManager",      // M0 budget 변형: 거리 단계 중요도
 			"Niagara"                   // 오브 이펙트(테슬라 코일, 피해 범위)
