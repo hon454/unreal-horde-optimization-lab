@@ -2,9 +2,7 @@
 # 바닥은 맵 반경 R(250m, LabConfig.h FLabScenario::MapRadius)보다 20m 넓게 키운다. 오브·스포너·카메라는 ALabGameMode가 실행 시 만든다.
 # Open World 템플릿(지형)은 쓰지 않는다. 경사가 개체마다 이동 거리와 CharacterMovement 비용을 바꿔 실행 간 수치가 흔들린다(plan.md "평지 맵").
 # VolumetricCloud는 지운다. 군중과 무관한 GPU 비용이다.
-# 조명은 템플릿 한낮(해 6 lux, 피치 -49.5, 스카이 1.0)과 시험한 해 질 녘(해 0.4 lux, 피치 -6, 요 60, 스카이 0.25) 사이에서
-# 사용자가 고른 "해 질 녘 -1, 한낮 1 척도의 0.7"이다(2026-11-07, 0.4 → 0.6 → 0.7로 밝힘). 자동 노출이 밝기를 보정해서 체감 밝기는 해의 높이(하늘 대기 색)가
-# 정한다. 선형 70% 지점(피치 -36.5)은 한낮과 거의 같아 보여서, 해 높이를 낮춰 눈으로 맞췄다.
+# 조명은 템플릿 기본값(해 6 lux, 피치 -49.5, 스카이 1.0) 그대로 둔다. 해 질 녘 쪽으로 낮추는 안을 시험했다가 되돌렸다(2026-11-07 사용자 결정).
 # 실행: UnrealEditor-Cmd.exe HordeOptLab.uproject -run=pythonscript -script=Scripts/create-bench-map.py -unattended -nullrhi
 import unreal
 
@@ -12,9 +10,6 @@ PATH = "/Game/Lab/Maps/L_Bench"
 TEMPLATE = "/Engine/Maps/Templates/Template_Default"
 MAP_RADIUS = 25000.0
 MARGIN = 2000.0
-SUN_INTENSITY = 4.0           # 0.7: 0.6 설정(3.33)에서 한낮(6.0)까지의 1/4
-SUN_ROTATION = unreal.Rotator(roll=0.0, pitch=-31.7, yaw=30.0)  # 0.6 설정(-25.8)에서 한낮(-49.5)까지의 1/4
-SKY_INTENSITY = 0.75          # 0.6 설정(0.67)에서 한낮(1.0)까지의 1/4
 
 if unreal.EditorAssetLibrary.does_asset_exist(PATH):
     unreal.EditorAssetLibrary.delete_asset(PATH)
@@ -34,13 +29,6 @@ for actor in eas.get_all_level_actors():
         scale = (MAP_RADIUS + MARGIN) * 2.0 / size
         actor.set_actor_scale3d(unreal.Vector(scale, scale, 1.0))
         unreal.log_warning("LABMAP floor mesh_size=%.1f scale=%.2f" % (size, scale))
-    elif isinstance(actor, unreal.DirectionalLight):
-        actor.get_component_by_class(unreal.DirectionalLightComponent).set_editor_property("intensity", SUN_INTENSITY)
-        actor.set_actor_rotation(SUN_ROTATION, False)
-        unreal.log_warning("LABMAP sun %.2f lux" % SUN_INTENSITY)
-    elif isinstance(actor, unreal.SkyLight):
-        actor.get_component_by_class(unreal.SkyLightComponent).set_editor_property("intensity", SKY_INTENSITY)
-        unreal.log_warning("LABMAP sky %.3f" % SKY_INTENSITY)
 
 ok = les.save_current_level()
 unreal.log_warning("LABMAP saved=%s %s" % (ok, PATH))
