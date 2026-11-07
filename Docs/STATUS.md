@@ -24,7 +24,7 @@
 
 - [x] `-LabStage=M1`: 같은 스포너·오브에서 미니언을 Mass 엔티티로 만든다. EntityConfig는 실행 시 C++([ADR-0005](Decisions/0005-entity-config-in-code.md)). 프로세서 `ULabApproachProcessor`(엔진 조향 앞), `ULabOrbContactProcessor`, `ULabOrbSnipeProcessor`, `ULabMinionStateProcessor`(지연 파괴 + 재생성). 표현은 `UMassMovableVisualizationTrait`의 ISM 하나(모든 LOD), `Config/DefaultMass.ini`로 LOD·표현 프로세서를 켠다.
 - [x] 로직 일치: N=300 개발 실행 25초에서 처치·재생성·저격 수가 M0 static과 같다. 프레임이 100ms를 넘으면 엔진 이동이 시간을 0.1초로 잘라 느려진다([engine-notes.md](Reference/engine-notes.md) 11절).
-- [x] GPU 병목: 움직이는 ISM 2,000개가 Lumen 장면에 들어가 GPU 29ms였다. 모든 단계에서 미니언 표현을 Lumen 장면에서 빼고(`LabExcludeFromLumen`) Mass ISM 그림자를 켰다(2026-11-07 사용자 결정, measurement.md 확정값). 시험 수치는 engine-notes.md 11절. E0 재측정은 이 조건의 패키지(c9c0af6)로 한다.
+- [x] GPU 병목: 움직이는 ISM 2,000개가 Lumen 장면에 들어가 GPU 29ms였다. 모든 단계에서 미니언 표현을 Lumen 장면에서 빼고(`LabExcludeFromLumen`) Mass ISM 그림자를 켰다(2026-11-07 사용자 결정, measurement.md 확정값). 시험 수치는 engine-notes.md 11절. E0 재측정은 이 조건과 화면 안 구간별 저격을 넣은 패키지(4c96b83)로 한다.
 - [ ] `ULabDamageApplyProcessor`(피해 이벤트 엔티티)는 E1 (d)에서 더한다. 지금 저격은 직접 태그를 붙인다.
 - [x] `Scripts/run-e1.ps1`: E1 (a) mass N {1k, 2k, 5k, 20k, 50k} x P1·P2 x 3회(31회, 약 45분). 50k 시험(Test 패키지, 비교용 아님): 프레임 p50 40ms, Game 34ms라 이동 시간 상한(100ms) 안이다.
 - [ ] E1 (a) 측정, (b) `mass.FullyParallel`, (c) 회피, (d) 피해 전달.
@@ -65,4 +65,4 @@ P2는 full·static 모두 P1보다 0.2\~1.7ms 낮다(N=5k full만 18ms 차이). 
 
 - [ADR-0001](Decisions/0001-test-package-for-measurement.md) 승인 확인.
 - [ADR-0002](Decisions/0002-freeze-measurement-infra.md) 승인(측정 인프라 동결).
-- 밤에 직접 시작: `powershell -ExecutionPolicy Bypass -File Scripts/run-e0.ps1 -Tag fx` 뒤 `powershell -ExecutionPolicy Bypass -File Scripts/run-e1.ps1`(Test 패키지 c9c0af6, 합쳐 약 2시간 45분).
+- 밤에 직접 시작: `powershell -ExecutionPolicy Bypass -File Scripts/run-e0.ps1 -Tag fx` 뒤 `powershell -ExecutionPolicy Bypass -File Scripts/run-e1.ps1`(Test 패키지 4c96b83, 합쳐 약 2시간 45분).
