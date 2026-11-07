@@ -85,11 +85,18 @@ void ALabOrb::Tick(float DeltaSeconds)
 	const FVector Center = GetActorLocation();
 	// 피해는 중심에 가까울수록 세다: 가장자리 ZoneDpsEdge → 중심 ZoneDpsCenter.
 	const float ZoneRadiusSq = FMath::Square(FLabScenario::ZoneRadius);
+	const ALabMinion* Nearest = nullptr;
+	float NearestDistSq = TNumericLimits<float>::Max();
 	for (ALabMinion* Minion : Spawner->GetMinions())
 	{
 		const float DistSq = FVector::DistSquared2D(Minion->GetActorLocation(), Center);
 		if (Minion->IsAlive() && DistSq <= ZoneRadiusSq)
 		{
+			if (DistSq < NearestDistSq)
+			{
+				NearestDistSq = DistSq;
+				Nearest = Minion;
+			}
 			const float Closeness = 1.f - FMath::Sqrt(DistSq) / FLabScenario::ZoneRadius;
 			const float Dps = FMath::Lerp(FLabScenario::ZoneDpsEdge, FLabScenario::ZoneDpsCenter, Closeness);
 			if (Minion->ApplyDamage(Dps * DeltaSeconds))
@@ -98,6 +105,11 @@ void ALabOrb::Tick(float DeltaSeconds)
 			}
 		}
 	}
+
+	// 번개는 범위 안에서 가장 가까운 개체로 뻗는다. 원본 BP도 User.PositionTarget을 대상(플레이어) 위치로 갱신한다.
+	// 대상이 없으면 타워 밑동으로 떨어진다. 파라미터 하나만 바꾸므로 비용은 개체 수와 무관하다.
+	const FVector Target = Nearest ? Nearest->GetActorLocation() : Center;
+	CoilFx->SetVariablePosition(TEXT("User.PositionTarget"), Target);
 
 	SnipeAccumulator += DeltaSeconds;
 	while (SnipeAccumulator >= FLabScenario::SnipeInterval)

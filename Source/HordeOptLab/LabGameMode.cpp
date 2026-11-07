@@ -7,6 +7,12 @@
 #include "Engine/World.h"
 #include "GameFramework/PlayerController.h"
 #include "HAL/IConsoleManager.h"
+#include "Components/LightComponent.h"
+#include "Components/SkyLightComponent.h"
+#include "Engine/DirectionalLight.h"
+#include "Engine/SkyLight.h"
+#include "EngineUtils.h"
+#include "Misc/CommandLine.h"
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
 #include "ProfilingDebugging/CsvProfiler.h"
@@ -44,6 +50,20 @@ void ALabGameMode::StartPlay()
 	if (Config.bBench)
 	{
 		ApplyBenchCVars();
+	}
+
+	// 실험: 해 질 녘 조명(-LabDusk). 오브의 발광과 번개가 낮 조명에 묻혀서 비교용으로 둔다.
+	if (FParse::Param(FCommandLine::Get(), TEXT("LabDusk")))
+	{
+		for (TActorIterator<ADirectionalLight> It(GetWorld()); It; ++It)
+		{
+			It->GetLightComponent()->SetIntensity(0.4f);
+			It->SetActorRotation(FRotator(-6.f, 60.f, 0.f));
+		}
+		for (TActorIterator<ASkyLight> It(GetWorld()); It; ++It)
+		{
+			It->GetLightComponent()->SetIntensity(0.25f);
+		}
 	}
 
 	UWorld* World = GetWorld();

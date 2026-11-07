@@ -7,6 +7,7 @@ param(
     [ValidateSet("full", "static", "budget", "uro")][string]$Variant = "full",
     [double]$Duration = 0,
     [double]$ShotAt = 0,
+    [string[]]$Extra = @(),
     [switch]$Small
 )
 . "$PSScriptRoot\common.ps1"
@@ -17,7 +18,7 @@ $LogName = "LabDev-$Variant-N$N-$Preset.log"
 $GameArgs = @(
     "`"$Project`"", "-game", "-windowed", "-ResX=1280", "-ResY=720", "-log", "-LOG=$LogName", "-nosound",
     "-LabN=$N", "-LabPreset=$($Preset.Substring(1))", "-LabSeed=$Seed", "-LabVariant=$Variant"
-)
+) + $Extra
 if ($Duration -gt 0) { $GameArgs += "-LabDuration=$Duration" }
 if ($ShotAt -gt 0) { $GameArgs += "-LabShotAt=$ShotAt" }
 
