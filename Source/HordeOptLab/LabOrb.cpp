@@ -68,7 +68,6 @@ void ALabOrb::BeginPlay()
 		OverlayMid->SetVectorParameterValue(TEXT("Secondary Color"), FLinearColor(0.25f, 0.f, 4.f) * OrbGlowBoost);
 		OverlayMid->SetScalarParameterValue(TEXT("Flicker Low"), 0.6f);
 		Sphere->SetOverlayMaterial(OverlayMid);
-		BoltMaterial = OverlayMid;
 	}
 
 	if (UNiagaraSystem* Coil = LoadObject<UNiagaraSystem>(nullptr, TEXT("/Game/NiagaraExamples/FX_Ribbons/NS_TeslaCoil.NS_TeslaCoil"), nullptr, LOAD_Quiet | LOAD_NoWarn))
@@ -77,7 +76,7 @@ void ALabOrb::BeginPlay()
 		CoilFx->SetVariablePosition(TEXT("User.PositionTarget"), GetActorLocation()); // 구체에서 타워 밑동으로 번개가 내려온다
 		CoilFx->Activate(true);
 	}
-	BoltMesh = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Cylinder.Cylinder"));
+	StrikeSystem = LoadObject<UNiagaraSystem>(nullptr, TEXT("/Game/Lab/FX/NS_LabBolt.NS_LabBolt"), nullptr, LOAD_Quiet | LOAD_NoWarn);
 	ImpactSystem = LoadObject<UNiagaraSystem>(nullptr, TEXT("/Game/NiagaraExamples/FX_Sparks/NS_Spark_Burst.NS_Spark_Burst"), nullptr, LOAD_Quiet | LOAD_NoWarn);
 
 	if (UNiagaraSystem* Zone = LoadObject<UNiagaraSystem>(nullptr, TEXT("/Game/NiagaraExamples/FX_Misc/NS_Boundary_Cylinder.NS_Boundary_Cylinder"), nullptr, LOAD_Quiet | LOAD_NoWarn))
@@ -179,22 +178,28 @@ void ALabOrb::Snipe()
 
 void ALabOrb::SpawnStrikeFx(const FVector& Target)
 {
-	// 측정 실행(-LabBench)에서는 그리지 않는다. E0가 이펙트 없이 측정됐고, 이펙트 비용이 단계 비교에 섞이지 않게 한다(2026-11-07 사용자 결정).
-	if (FLabConfig::Get().bBench || !BoltMaterial)
+	// 측정 실행을 포함해 언제나 그린다. 이펙트는 시나리오의 고정된 일부이고 모든 단계에서 같은 비용이다(2026-11-07 사용자 결정).
+	// 저격 번개는 엔진 Niagara DynamicBeam 템플릿으로 만든 /Game/Lab/FX/NS_LabBolt다(Scripts/create-bolt-fx.md). User.BeamEnd(월드 좌표)로
+	// 끝점을, User.BoltColor·User.BoltWidth로 색과 굵기를 정한다. 굵고 강해 보이도록 StrikeLayers겹을 굵기를 달리해 겹친다.
+	if (!StrikeSystem)
 	{
 		return;
 	}
-	// NS_TeslaCoil의 번개는 수 미터용이라 80m 밖 저격 대상까지 보이지 않았다. 그래서 저격 번개는 지그재그로 이은 굵은 원기둥 조각으로 그리고,
-	// 구체와 같은 보라 오버레이 머티리얼(MI_Mesh_Overlay_TeslaCoil, 발광 3배)을 입힌다. 조각은 재사용하고 짧은 수명 동안 모양을 바꿔 번쩍인다.
-	FActiveStrike& Strike = ActiveStrikes.AddDefaulted_GetRef();
-	Strike.From = Sphere->GetComponentLocation();
-	Strike.To = Target;
-	Strike.TimeLeft = StrikeDuration;
-	for (int32 i = 0; i < BoltSegments; ++i)
+	const FVector Start = Sphere->GetComponentLocation();
+	for (int32 i = 0; i < StrikeLayers; ++i)
 	{
-		Strike.Segments.Add(AcquireBoltSegment());
+		UNiagaraComponent* Bolt = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), StrikeSystem, Start, FRotator::ZeroRotator,
+			FVector(1.f), /*bAutoDestroy*/ true, /*bAutoActivate*/ false, ENCPoolMethod::AutoRelease);
+		if (!Bolt)
+		{
+			continue;
+		}
+		Bolt->SetVariableVec3(TEXT("User.BeamEnd"), Target);
+		Bolt->SetVariableLinearColor(TEXT("User.BoltColor"), i == 0 ? FLinearColor(8.f, 4.f, 40.f) : FLinearColor(2.f, 0.2f, 14.f));
+		Bolt->SetVariableFloat(TEXT("User.BoltWidth"), i == 0 ? BoltCoreWidth : BoltGlowWidth);
+		Bolt->Activate(true);
+		ActiveStrikes.Add({ Bolt, StrikeDuration });
 	}
-	ShapeStrike(Strike);
 
 	if (ImpactSystem)
 	{
@@ -207,77 +212,19 @@ void ALabOrb::SpawnStrikeFx(const FVector& Target)
 	}
 }
 
-UStaticMeshComponent* ALabOrb::AcquireBoltSegment()
-{
-	if (FreeBoltSegments.Num() > 0)
-	{
-		UStaticMeshComponent* Seg = FreeBoltSegments.Pop();
-		Seg->SetVisibility(true);
-		return Seg;
-	}
-	UStaticMeshComponent* Seg = NewObject<UStaticMeshComponent>(this);
-	Seg->SetMobility(EComponentMobility::Movable);
-	Seg->SetStaticMesh(BoltMesh);
-	Seg->SetMaterial(0, BoltMaterial);
-	Seg->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	Seg->SetCastShadow(false);
-	Seg->SetUsingAbsoluteLocation(true);
-	Seg->SetUsingAbsoluteRotation(true);
-	Seg->SetUsingAbsoluteScale(true);
-	Seg->SetupAttachment(Root);
-	Seg->RegisterComponent();
-	return Seg;
-}
-
-void ALabOrb::ShapeStrike(FActiveStrike& Strike)
-{
-	// 양 끝은 고정하고 중간 점을 진행 방향에 수직으로 흔든다. 기본 원기둥은 높이 100cm, 지름 100cm, 피벗이 가운데다.
-	const int32 Count = Strike.Segments.Num();
-	const FVector Dir = (Strike.To - Strike.From).GetSafeNormal();
-	const FVector Side = FVector::CrossProduct(Dir, FVector::UpVector).GetSafeNormal();
-	const float Length = FVector::Dist(Strike.From, Strike.To);
-	TArray<FVector, TInlineAllocator<16>> Points;
-	for (int32 i = 0; i <= Count; ++i)
-	{
-		const float T = float(i) / Count;
-		FVector P = FMath::Lerp(Strike.From, Strike.To, T);
-		if (i > 0 && i < Count)
-		{
-			const float Amp = Length * BoltJitter;
-			P += Side * FMath::FRandRange(-Amp, Amp) + FVector::UpVector * FMath::FRandRange(-Amp, Amp) * 0.5f;
-		}
-		Points.Add(P);
-	}
-	for (int32 i = 0; i < Count; ++i)
-	{
-		const FVector A = Points[i];
-		const FVector B = Points[i + 1];
-		UStaticMeshComponent* Seg = Strike.Segments[i];
-		Seg->SetWorldLocationAndRotation((A + B) * 0.5f, FRotationMatrix::MakeFromZ(B - A).Rotator());
-		Seg->SetWorldScale3D(FVector(BoltThickness / 100.f, BoltThickness / 100.f, FVector::Dist(A, B) / 100.f));
-	}
-}
-
 void ALabOrb::TickStrikes(float DeltaSeconds)
 {
 	for (int32 i = ActiveStrikes.Num() - 1; i >= 0; --i)
 	{
-		FActiveStrike& Strike = ActiveStrikes[i];
-		Strike.TimeLeft -= DeltaSeconds;
-		Strike.ReshapeIn -= DeltaSeconds;
-		if (Strike.TimeLeft <= 0.f)
+		ActiveStrikes[i].TimeLeft -= DeltaSeconds;
+		if (ActiveStrikes[i].TimeLeft <= 0.f)
 		{
-			for (UStaticMeshComponent* Seg : Strike.Segments)
+			// DynamicBeam 템플릿은 루프 이미터라 직접 꺼야 사라진다.
+			if (UNiagaraComponent* Bolt = ActiveStrikes[i].Component.Get())
 			{
-				Seg->SetVisibility(false);
-				FreeBoltSegments.Add(Seg);
+				Bolt->Deactivate();
 			}
 			ActiveStrikes.RemoveAtSwap(i);
-		}
-		else if (Strike.ReshapeIn <= 0.f)
-		{
-			Strike.ReshapeIn = BoltReshapeInterval;
-			ShapeStrike(Strike);
 		}
 	}
 }
