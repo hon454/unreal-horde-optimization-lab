@@ -48,6 +48,7 @@ void ULabCrowdSubsystem::Activate(ALabCrowdSpawner* InSpawner, UStaticMesh* Mesh
 	FMassStaticMeshInstanceVisualizationMeshDesc& MeshDesc = Visual->StaticMeshInstanceDesc.Meshes.AddDefaulted_GetRef();
 	MeshDesc.Mesh = Mesh;
 	MeshDesc.LocalTransform = FTransform(FRotator(0.f, -90.f, 0.f)); // M0 액터와 같이 메시를 -90도 돌려 진행 방향을 보게 한다(LabMinion.cpp)
+	MeshDesc.bCastShadows = true; // 엔진 기본값은 false(MassRepresentationTypes.h:105). M0 액터와 같이 그림자를 그린다
 	for (int32 LOD = 0; LOD < EMassLOD::Max; ++LOD)
 	{
 		Visual->Params.LODRepresentation[LOD] = EMassRepresentationType::StaticMeshInstance;
