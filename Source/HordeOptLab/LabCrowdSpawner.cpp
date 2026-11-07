@@ -1,6 +1,7 @@
 #include "LabCrowdSpawner.h"
 #include "HordeOptLab.h"
 #include "LabConfig.h"
+#include "Animation/AnimBlueprintGeneratedClass.h"
 #include "Animation/AnimInstance.h"
 #include "Animation/AnimSequence.h"
 #include "Engine/SkeletalMesh.h"
@@ -25,6 +26,14 @@ void ALabCrowdSpawner::LoadAssets()
 	Assets.Hit = LoadObject<UAnimSequence>(nullptr, *FString::Printf(TEXT("%s/Animations/Melee/HitReact_Front.HitReact_Front"), MinionRoot));
 	Assets.Death = LoadObject<UAnimSequence>(nullptr, *FString::Printf(TEXT("%s/Animations/Melee/Death_A.Death_A"), MinionRoot));
 	Assets.AnimClass = LoadClass<UAnimInstance>(nullptr, TEXT("/Game/Lab/Anim/ABP_LabMinion.ABP_LabMinion_C"), nullptr, LOAD_Quiet | LOAD_NoWarn);
+	// 그래프가 아직 비어 있는 AnimBP(출력 포즈 노드 하나뿐)는 레퍼런스 포즈만 내므로 쓰지 않고 싱글 노드로 대신한다.
+	if (const UAnimBlueprintGeneratedClass* AnimBPClass = Cast<UAnimBlueprintGeneratedClass>(Assets.AnimClass.Get()))
+	{
+		if (AnimBPClass->GetAnimNodeProperties().Num() <= 1)
+		{
+			Assets.AnimClass = nullptr;
+		}
+	}
 	// static 변형의 메시. Scripts/make-static-minion.py가 만든다. 없으면 엔진 실린더로 대신한다.
 	Assets.StaticMesh = LoadObject<UStaticMesh>(nullptr, TEXT("/Game/Lab/Derived/SM_LabMinion.SM_LabMinion"), nullptr, LOAD_Quiet | LOAD_NoWarn);
 	if (!Assets.StaticMesh)

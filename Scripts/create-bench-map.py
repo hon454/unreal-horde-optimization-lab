@@ -3,7 +3,7 @@
 # Open World 템플릿(지형)은 쓰지 않는다. 경사가 개체마다 이동 거리와 CharacterMovement 비용을 바꿔 실행 간 수치가 흔들린다(plan.md "평지 맵").
 # VolumetricCloud는 지운다. 군중과 무관한 GPU 비용이다.
 # 조명은 템플릿 한낮(해 6 lux, 피치 -49.5, 스카이 1.0)과 시험한 해 질 녘(해 0.4 lux, 피치 -6, 요 60, 스카이 0.25) 사이에서
-# 사용자가 고른 "해 질 녘 -1, 한낮 1 척도의 0.4"다(2026-11-07). 자동 노출이 밝기를 보정해서 체감 밝기는 해의 높이(하늘 대기 색)가
+# 사용자가 고른 "해 질 녘 -1, 한낮 1 척도의 0.6"이다(2026-11-07, 0.4에서 한 번 더 밝힘). 자동 노출이 밝기를 보정해서 체감 밝기는 해의 높이(하늘 대기 색)가
 # 정한다. 선형 70% 지점(피치 -36.5)은 한낮과 거의 같아 보여서, 해 높이를 낮춰 눈으로 맞췄다.
 # 실행: UnrealEditor-Cmd.exe HordeOptLab.uproject -run=pythonscript -script=Scripts/create-bench-map.py -unattended -nullrhi
 import unreal
@@ -12,9 +12,9 @@ PATH = "/Game/Lab/Maps/L_Bench"
 TEMPLATE = "/Engine/Maps/Templates/Template_Default"
 MAP_RADIUS = 25000.0
 MARGIN = 2000.0
-SUN_INTENSITY = 2.0
-SUN_ROTATION = unreal.Rotator(roll=0.0, pitch=-14.0, yaw=30.0)
-SKY_INTENSITY = 0.5
+SUN_INTENSITY = 3.33          # 0.6: 0.4 설정(2.0)에서 한낮(6.0)까지의 1/3
+SUN_ROTATION = unreal.Rotator(roll=0.0, pitch=-25.8, yaw=30.0)  # 0.4 설정(-14)에서 한낮(-49.5)까지의 1/3
+SKY_INTENSITY = 0.67          # 0.4 설정(0.5)에서 한낮(1.0)까지의 1/3
 
 if unreal.EditorAssetLibrary.does_asset_exist(PATH):
     unreal.EditorAssetLibrary.delete_asset(PATH)
