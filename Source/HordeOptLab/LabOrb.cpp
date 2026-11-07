@@ -4,7 +4,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "NiagaraComponent.h"
 #include "NiagaraSystem.h"
-#include "DrawDebugHelpers.h"
+#include "NiagaraFunctionLibrary.h"
 #include "Engine/StaticMesh.h"
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Materials/MaterialInterface.h"
@@ -68,6 +68,7 @@ void ALabOrb::BeginPlay()
 		OverlayMid->SetVectorParameterValue(TEXT("Secondary Color"), FLinearColor(0.25f, 0.f, 4.f) * OrbGlowBoost);
 		OverlayMid->SetScalarParameterValue(TEXT("Flicker Low"), 0.6f);
 		Sphere->SetOverlayMaterial(OverlayMid);
+		BoltMaterial = OverlayMid;
 	}
 
 	if (UNiagaraSystem* Coil = LoadObject<UNiagaraSystem>(nullptr, TEXT("/Game/NiagaraExamples/FX_Ribbons/NS_TeslaCoil.NS_TeslaCoil"), nullptr, LOAD_Quiet | LOAD_NoWarn))
@@ -76,6 +77,9 @@ void ALabOrb::BeginPlay()
 		CoilFx->SetVariablePosition(TEXT("User.PositionTarget"), GetActorLocation()); // 구체에서 타워 밑동으로 번개가 내려온다
 		CoilFx->Activate(true);
 	}
+	BoltMesh = LoadObject<UStaticMesh>(nullptr, TEXT("/Engine/BasicShapes/Cylinder.Cylinder"));
+	ImpactSystem = LoadObject<UNiagaraSystem>(nullptr, TEXT("/Game/NiagaraExamples/FX_Sparks/NS_Spark_Burst.NS_Spark_Burst"), nullptr, LOAD_Quiet | LOAD_NoWarn);
+
 	if (UNiagaraSystem* Zone = LoadObject<UNiagaraSystem>(nullptr, TEXT("/Game/NiagaraExamples/FX_Misc/NS_Boundary_Cylinder.NS_Boundary_Cylinder"), nullptr, LOAD_Quiet | LOAD_NoWarn))
 	{
 		// User.Radius·User.Height·User.Color는 이 시스템의 사용자 파라미터다(에셋 문자열에서 확인).
@@ -124,6 +128,8 @@ void ALabOrb::Tick(float DeltaSeconds)
 	const FVector Target = Nearest ? Nearest->GetActorLocation() : Center;
 	CoilFx->SetVariablePosition(TEXT("User.PositionTarget"), Target);
 
+	TickStrikes(DeltaSeconds);
+
 	SnipeAccumulator += DeltaSeconds;
 	while (SnipeAccumulator >= FLabScenario::SnipeInterval)
 	{
@@ -167,8 +173,111 @@ void ALabOrb::Snipe()
 	{
 		Pick.Value->Snipe();
 		++SnipeCount;
-#if ENABLE_DRAW_DEBUG
-		DrawDebugLine(GetWorld(), Sphere->GetComponentLocation(), Pick.Value->GetActorLocation(), FColor::Cyan, false, 0.2f, 0, 4.f);
-#endif
+		SpawnStrikeFx(Pick.Value->GetActorLocation() + FVector(0.f, 0.f, 100.f));
+	}
+}
+
+void ALabOrb::SpawnStrikeFx(const FVector& Target)
+{
+	// 측정 실행(-LabBench)에서는 그리지 않는다. E0가 이펙트 없이 측정됐고, 이펙트 비용이 단계 비교에 섞이지 않게 한다(2026-11-07 사용자 결정).
+	if (FLabConfig::Get().bBench || !BoltMaterial)
+	{
+		return;
+	}
+	// NS_TeslaCoil의 번개는 수 미터용이라 80m 밖 저격 대상까지 보이지 않았다. 그래서 저격 번개는 지그재그로 이은 굵은 원기둥 조각으로 그리고,
+	// 구체와 같은 보라 오버레이 머티리얼(MI_Mesh_Overlay_TeslaCoil, 발광 3배)을 입힌다. 조각은 재사용하고 짧은 수명 동안 모양을 바꿔 번쩍인다.
+	FActiveStrike& Strike = ActiveStrikes.AddDefaulted_GetRef();
+	Strike.From = Sphere->GetComponentLocation();
+	Strike.To = Target;
+	Strike.TimeLeft = StrikeDuration;
+	for (int32 i = 0; i < BoltSegments; ++i)
+	{
+		Strike.Segments.Add(AcquireBoltSegment());
+	}
+	ShapeStrike(Strike);
+
+	if (ImpactSystem)
+	{
+		if (UNiagaraComponent* Impact = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ImpactSystem, Target))
+		{
+			// 파라미터 이름은 NS_Spark_Burst의 사용자 파라미터(에셋 문자열에서 확인).
+			Impact->SetVariableFloat(TEXT("User.Spark Color Gain"), 20.f);
+			Impact->SetVariableFloat(TEXT("User.Size"), 2.f);
+		}
+	}
+}
+
+UStaticMeshComponent* ALabOrb::AcquireBoltSegment()
+{
+	if (FreeBoltSegments.Num() > 0)
+	{
+		UStaticMeshComponent* Seg = FreeBoltSegments.Pop();
+		Seg->SetVisibility(true);
+		return Seg;
+	}
+	UStaticMeshComponent* Seg = NewObject<UStaticMeshComponent>(this);
+	Seg->SetMobility(EComponentMobility::Movable);
+	Seg->SetStaticMesh(BoltMesh);
+	Seg->SetMaterial(0, BoltMaterial);
+	Seg->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	Seg->SetCastShadow(false);
+	Seg->SetUsingAbsoluteLocation(true);
+	Seg->SetUsingAbsoluteRotation(true);
+	Seg->SetUsingAbsoluteScale(true);
+	Seg->SetupAttachment(Root);
+	Seg->RegisterComponent();
+	return Seg;
+}
+
+void ALabOrb::ShapeStrike(FActiveStrike& Strike)
+{
+	// 양 끝은 고정하고 중간 점을 진행 방향에 수직으로 흔든다. 기본 원기둥은 높이 100cm, 지름 100cm, 피벗이 가운데다.
+	const int32 Count = Strike.Segments.Num();
+	const FVector Dir = (Strike.To - Strike.From).GetSafeNormal();
+	const FVector Side = FVector::CrossProduct(Dir, FVector::UpVector).GetSafeNormal();
+	const float Length = FVector::Dist(Strike.From, Strike.To);
+	TArray<FVector, TInlineAllocator<16>> Points;
+	for (int32 i = 0; i <= Count; ++i)
+	{
+		const float T = float(i) / Count;
+		FVector P = FMath::Lerp(Strike.From, Strike.To, T);
+		if (i > 0 && i < Count)
+		{
+			const float Amp = Length * BoltJitter;
+			P += Side * FMath::FRandRange(-Amp, Amp) + FVector::UpVector * FMath::FRandRange(-Amp, Amp) * 0.5f;
+		}
+		Points.Add(P);
+	}
+	for (int32 i = 0; i < Count; ++i)
+	{
+		const FVector A = Points[i];
+		const FVector B = Points[i + 1];
+		UStaticMeshComponent* Seg = Strike.Segments[i];
+		Seg->SetWorldLocationAndRotation((A + B) * 0.5f, FRotationMatrix::MakeFromZ(B - A).Rotator());
+		Seg->SetWorldScale3D(FVector(BoltThickness / 100.f, BoltThickness / 100.f, FVector::Dist(A, B) / 100.f));
+	}
+}
+
+void ALabOrb::TickStrikes(float DeltaSeconds)
+{
+	for (int32 i = ActiveStrikes.Num() - 1; i >= 0; --i)
+	{
+		FActiveStrike& Strike = ActiveStrikes[i];
+		Strike.TimeLeft -= DeltaSeconds;
+		Strike.ReshapeIn -= DeltaSeconds;
+		if (Strike.TimeLeft <= 0.f)
+		{
+			for (UStaticMeshComponent* Seg : Strike.Segments)
+			{
+				Seg->SetVisibility(false);
+				FreeBoltSegments.Add(Seg);
+			}
+			ActiveStrikes.RemoveAtSwap(i);
+		}
+		else if (Strike.ReshapeIn <= 0.f)
+		{
+			Strike.ReshapeIn = BoltReshapeInterval;
+			ShapeStrike(Strike);
+		}
 	}
 }

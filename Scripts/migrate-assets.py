@@ -27,6 +27,7 @@ SETS = {
         "/Game/NiagaraExamples/Gallery/StaticMesh/SM_TorchBase",  # 타워 받침대
         "/Game/NiagaraExamples/Gallery/Materials/M_Target_Metal", # 타워·구체 머티리얼
         "/Game/NiagaraExamples/Materials/MI_Mesh_Overlay_TeslaCoil", # 구체의 보라색 오버레이
+        "/Game/NiagaraExamples/FX_Sparks/NS_Spark_Burst",  # 저격 피격 불꽃
     ],
 }
 SEEDS = SETS[os.environ.get("LAB_MIGRATE_SET", "minion")]

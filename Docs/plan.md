@@ -23,6 +23,7 @@ M0\~M5가 필수다. 마일스톤마다 바꾸는 최적화 변수는 하나고,
 - 미니언 `ACharacter` 변형 셋. 변형은 실행 인자 `-LabVariant=`로 고른다.
   - `full`: `ACharacter` + 스켈레탈 메시 + AnimBP(걷기·피격·죽기). 대표 기준선.
   - `static`: 같은 `ACharacter`에 `UStaticMeshComponent`, 애니메이션 없음. M1의 "애니 없는 ISM"과 컨테이너(액터 vs Mass)만 다르다.
+  - `pawn`: `full`에서 CharacterMovement를 빼고 위치를 직접 옮긴다. 가장 가벼운 액터의 천장(2026-11-07 추가).
   - `budget`: `full` + `USkeletalMeshComponentBudgeted` + Significance Manager 거리 단계(25/50/100/250m) + `a.Budget.BudgetMs 2`. 액터 위에 올릴 수 있는 최적화를 다 올린 상태. 변형 `uro`(URO만)도 인자로 둔다.
 - 오브: 소멸 반경 안의 개체는 체력 0. 주기마다 먼 개체 K개를 쏜다. 대상은 난수가 아니라 결정적 해시(스폰 일련번호 + 저격 틱)로 고른다. 피격은 피격 애니 뒤 즉사다.
 - 스포너: 시작 시 디스크 전체에 정상 상태 분포(반지름당 개체 수 일정, 밀도 ∝ 1/r)로 N개를 놓는다. 사망한 개체는 가장자리 링에서 다시 생성한다. 시드로 초기 위치와 재생성 순서를 재현한다.
