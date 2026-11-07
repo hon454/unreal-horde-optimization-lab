@@ -10,6 +10,7 @@ enum class ELabVariant : uint8
 	Budget, // Full + USkeletalMeshComponentBudgeted + Significance 거리 단계 + a.Budget.BudgetMs 2
 	Uro,    // Full + URO만
 	Pawn,   // Full에서 CharacterMovement 틱을 끄고 위치를 직접 이동
+	Mass,   // M1부터의 라벨용. 단계가 표현을 정하므로 M0에서는 Full과 같다
 };
 
 /**
@@ -49,7 +50,8 @@ struct FLabScenario
 enum class ELabStage : uint8
 {
 	M0, // 액터 군중(변형은 ELabVariant)
-	// M1 Mass 코어, M2 ISM+VAT, M3 하이드레이션, M3b, M4 Simulation LOD, M5 ISKM을 차례로 더한다.
+	M1, // Mass 코어: 같은 로직을 Fragment·Processor로, 표현은 애니 없는 ISM
+	// M2 ISM+VAT, M3 하이드레이션, M3b, M4 Simulation LOD, M5 ISKM을 차례로 더한다.
 };
 
 /** 실행 인자. 프로세스 시작 시 한 번 읽는다. */

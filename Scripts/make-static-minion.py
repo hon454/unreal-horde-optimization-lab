@@ -20,3 +20,17 @@ else:
         unreal.log_warning("LABSM saved %s bounds=%s..%s mats=%d" % (DST, b.min, b.max, len(sm.static_materials)))
     else:
         unreal.log_error("LABSM failed")
+
+# M1 ISM(UInstancedStaticMeshComponent)에 쓰려면 바탕 머티리얼에 bUsedWithInstancedStaticMeshes가 켜져 있어야 한다.
+# 꺼져 있으면 쿠킹하지 않은 -game 실행에서 기본 머티리얼(회색)로 그려진다. 바탕 머티리얼은 Fab 에셋이라 커밋되지 않는다.
+sm = unreal.load_asset(DST)
+for slot in sm.static_materials:
+    mi = slot.material_interface
+    base = mi.get_base_material() if mi else None
+    if base and not base.get_editor_property("used_with_instanced_static_meshes"):
+        base.set_editor_property("used_with_instanced_static_meshes", True)
+        unreal.MaterialEditingLibrary.recompile_material(base)
+        unreal.EditorAssetLibrary.save_loaded_asset(base)
+        unreal.log_warning("LABSM ism usage on " + base.get_path_name())
+    elif base:
+        unreal.log_warning("LABSM ism usage already on " + base.get_path_name())

@@ -20,12 +20,21 @@
 - [ ] 9. E0 다시 재기: 아래 표는 측정 실행에서 이펙트를 끈 빌드의 값이라 Test 패키지를 새로 만들어 전 조건(`Scripts/run-e0.ps1 -Tag fx`, pawn 포함 88회, 약 2시간)을 다시 잰다. 첫 측정 CSV는 `Saved/Profiling/CSV/superseded-nofx/`로 옮겼고, 새 값이 나오면 `Measurements/M0/`의 두 CSV를 새로 만든다(첫 값은 git 이력에 남는다). 그 뒤 대표 스크린샷(P1, N=5k), `plot.py`, `LODMaxCount` 결정.
 - [ ] 10. README 결과 초판, 태그 `M0`, Worklog. ADR-0002 초안은 썼고 글 대기열(00, 01)은 이미 있다.
 
+## M1 진행(M0 태그 전에 시작, 2026-11-07)
+
+- [x] `-LabStage=M1`: 같은 스포너·오브에서 미니언을 Mass 엔티티로 만든다. EntityConfig는 실행 시 C++([ADR-0005](Decisions/0005-entity-config-in-code.md)). 프로세서 `ULabApproachProcessor`(엔진 조향 앞), `ULabOrbContactProcessor`, `ULabOrbSnipeProcessor`, `ULabMinionStateProcessor`(지연 파괴 + 재생성). 표현은 `UMassMovableVisualizationTrait`의 ISM 하나(모든 LOD), `Config/DefaultMass.ini`로 LOD·표현 프로세서를 켠다.
+- [x] 로직 일치: N=300 개발 실행 25초에서 처치·재생성·저격 수가 M0 static과 같다. 프레임이 100ms를 넘으면 엔진 이동이 시간을 0.1초로 잘라 느려진다([engine-notes.md](Reference/engine-notes.md) 11절).
+- [ ] 렌더 스레드 병목: Test 패키지 시험(N=2000, P1, `Saved/Profiling/CSV/trial/`, 비교 수치로 쓰지 않음)에서 Game 2.1ms(M0 static 24.5ms)인데 렌더 스레드 `EventWait/Visibility` p50 24ms, 프레임 p99 358ms다. ISM 인스턴스 추가·삭제(재생성)마다 표현이 다시 만들어지는지부터 본다.
+- [ ] `ULabDamageApplyProcessor`(피해 이벤트 엔티티)는 E1 (d)에서 더한다. 지금 저격은 직접 태그를 붙인다.
+- [ ] E1 측정 조건과 `run-e1.ps1`.
+
 ## 명령
 
 ```bash
 powershell -ExecutionPolicy Bypass -File Scripts/build.ps1
 powershell -ExecutionPolicy Bypass -File Scripts/run-dev.ps1 -Small
 powershell -ExecutionPolicy Bypass -File Scripts/run-dev.ps1 -N 2000 -Preset P1 -Duration 13 -ShotAt 10
+powershell -ExecutionPolicy Bypass -File Scripts/run-dev.ps1 -N 2000 -Preset P1 -Duration 13 -ShotAt 10 -Extra "-LabStage=M1"
 powershell -ExecutionPolicy Bypass -File Scripts/package.ps1
 powershell -ExecutionPolicy Bypass -File Scripts/run-bench.ps1 -Milestone M0 -N 1000 -Preset P1 -Variant full
 py -3 Scripts/summarize.py --milestone M0

@@ -1,0 +1,91 @@
+#include "LabCrowdSubsystem.h"
+#include "HordeOptLab.h"
+#include "LabConfig.h"
+#include "LabCrowdSpawner.h"
+#include "LabMassTraits.h"
+#include "LabMassTypes.h"
+#include "MassCommonFragments.h"
+#include "MassEntityConfigAsset.h"
+#include "MassEntityManager.h"
+#include "MassEntityUtils.h"
+#include "MassLODTrait.h"
+#include "MassMovableVisualizationTrait.h"
+#include "MassSpawnerSubsystem.h"
+#include "SmoothOrientation/MassSmoothOrientationTrait.h"
+#include "Steering/MassSteeringTrait.h"
+#include "Engine/StaticMesh.h"
+#include "Engine/World.h"
+
+namespace
+{
+	/** UMassEntityConfigAsset::AddTrait(TSubclassOf)는 에디터 전용이라(MassEntityConfigAsset.h WITH_EDITOR) 런타임 API인 FMassEntityConfig::AddTrait(Trait&)를 쓴다. */
+	template<typename T>
+	T* AddLabTrait(UMassEntityConfigAsset& Config)
+	{
+		T* Trait = NewObject<T>(&Config);
+		Config.GetMutableConfig().AddTrait(*Trait);
+		return Trait;
+	}
+}
+
+void ULabCrowdSubsystem::Activate(ALabCrowdSpawner* InSpawner, UStaticMesh* Mesh, float InHitDuration, float InDeathDuration)
+{
+	Spawner = InSpawner;
+	HitDuration = InHitDuration;
+	DeathDuration = InDeathDuration;
+
+	// EntityConfig를 실행 시 만든다(ADR-0005). 소유자가 있으면 ConfigGuid가 경로로 결정적으로 정해져 실행마다 같은 템플릿이 된다
+	// (MassSpawner/Private/MassEntityConfigAsset.cpp:33, 템플릿 ID는 :137).
+	EntityConfig = NewObject<UMassEntityConfigAsset>(this, TEXT("LabMinionConfig"));
+	AddLabTrait<ULabMinionTrait>(*EntityConfig);
+	AddLabTrait<ULabMovementTrait>(*EntityConfig);
+	AddLabTrait<UMassSteeringTrait>(*EntityConfig);
+	AddLabTrait<UMassSmoothOrientationTrait>(*EntityConfig);
+	AddLabTrait<UMassLODCollectorTrait>(*EntityConfig);
+
+	// 표현: 애니 없는 ISM 하나. 밴드 없이 모든 LOD에서 같은 ISM이다(plan.md "M1"). 거리 밴드는 M2에서 켠다.
+	UMassMovableVisualizationTrait* Visual = AddLabTrait<UMassMovableVisualizationTrait>(*EntityConfig);
+	FMassStaticMeshInstanceVisualizationMeshDesc& MeshDesc = Visual->StaticMeshInstanceDesc.Meshes.AddDefaulted_GetRef();
+	MeshDesc.Mesh = Mesh;
+	MeshDesc.LocalTransform = FTransform(FRotator(0.f, -90.f, 0.f)); // M0 액터와 같이 메시를 -90도 돌려 진행 방향을 보게 한다(LabMinion.cpp)
+	for (int32 LOD = 0; LOD < EMassLOD::Max; ++LOD)
+	{
+		Visual->Params.LODRepresentation[LOD] = EMassRepresentationType::StaticMeshInstance;
+		Visual->LODParams.BaseLODDistance[LOD] = LOD == 0 ? 0.f : 1.e7f;     // 맵(반경 500m) 안에서는 LOD가 바뀌지 않는다
+		Visual->LODParams.VisibleLODDistance[LOD] = LOD == 0 ? 0.f : 1.e7f;
+		Visual->LODParams.LODMaxCount[LOD] = MAX_int32;
+	}
+
+	bActive = true;
+	UE_LOG(LogLab, Log, TEXT("lab_mass_config traits=%d mesh=%s"), EntityConfig->GetConfig().GetTraits().Num(), *GetNameSafe(Mesh));
+}
+
+void ULabCrowdSubsystem::SpawnEntities(TConstArrayView<FVector> Locations, TConstArrayView<uint32> Serials)
+{
+	check(bActive && Locations.Num() == Serials.Num());
+	UWorld* World = GetWorld();
+	UMassSpawnerSubsystem* SpawnerSubsystem = World->GetSubsystem<UMassSpawnerSubsystem>();
+	FMassEntityManager& EntityManager = UE::Mass::Utils::GetEntityManagerChecked(*World);
+	const FMassEntityTemplate& Template = EntityConfig->GetOrCreateEntityTemplate(*World);
+
+	TArray<FMassEntityHandle> Entities;
+	TSharedPtr<FMassEntityManager::FEntityCreationContext> Creation = SpawnerSubsystem->SpawnEntities(Template, Locations.Num(), Entities);
+	for (int32 i = 0; i < Entities.Num(); ++i)
+	{
+		const FVector Facing = (OrbCenter - Locations[i]).GetSafeNormal2D();
+		EntityManager.GetFragmentDataChecked<FTransformFragment>(Entities[i]).SetTransform(FTransform(Facing.Rotation(), Locations[i]));
+		EntityManager.GetFragmentDataChecked<FLabMinionFragment>(Entities[i]).Serial = Serials[i];
+		EntityManager.GetFragmentDataChecked<FLabHealthFragment>(Entities[i]).Health = FLabScenario::MinionHealth;
+	}
+	Creation.Reset(); // 옵저버(엔진 초기화 프로세서)가 여기서 돈다
+	AliveCount += Entities.Num();
+}
+
+void ULabCrowdSubsystem::RequestRespawn(int32 Count)
+{
+	AliveCount -= Count;
+	if (ALabCrowdSpawner* S = Spawner.Get())
+	{
+		S->RespawnEntities(Count);
+	}
+}

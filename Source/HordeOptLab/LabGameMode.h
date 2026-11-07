@@ -53,6 +53,7 @@ protected:
 	UPROPERTY() TObjectPtr<ALabCameraRig> Camera;
 
 	float Elapsed = 0.f;
+	uint64 StartFrame = 0; // 개발 실행 요약의 평균 프레임 시간용
 	bool bQuitRequested = false;
 	bool bShotTaken = false;
 

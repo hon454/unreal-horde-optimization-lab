@@ -30,11 +30,13 @@ public:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;
 
-	int32 GetKillCount() const { return KillCount; }
-	int32 GetSnipeCount() const { return SnipeCount; }
+	int32 GetKillCount() const;
+	int32 GetSnipeCount() const;
 
 protected:
 	void Snipe();
+	/** M1부터: 피해와 저격은 프로세서(LabMassProcessors)가 하고, 오브는 저격 틱을 올리고 이펙트만 그린다. */
+	void TickMass(float DeltaSeconds, class ULabCrowdSubsystem* Crowd);
 	void SpawnStrikeFx(const FVector& Target);
 	void TickStrikes(float DeltaSeconds);
 

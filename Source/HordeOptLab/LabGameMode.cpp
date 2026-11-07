@@ -63,6 +63,7 @@ void ALabGameMode::StartPlay()
 	Orb = World->SpawnActor<ALabOrb>(FVector::ZeroVector, FRotator::ZeroRotator);
 	Orb->SetSpawner(Spawner);
 	Spawner->SpawnInitial();
+	StartFrame = GFrameCounter;
 
 	Camera = World->SpawnActor<ALabCameraRig>();
 	Camera->SetPreset(Config.Preset, FVector::ZeroVector);
@@ -126,7 +127,7 @@ void ALabGameMode::TickBench()
 			BenchPhase = ELabBenchPhase::Measure;
 			BenchPhaseTime = 0.f;
 			BenchFrames = 0;
-			UE_LOG(LogLab, Log, TEXT("lab_measure_start n=%d"), Spawner->GetMinions().Num());
+			UE_LOG(LogLab, Log, TEXT("lab_measure_start n=%d"), Spawner->GetAliveCount());
 		}
 		break;
 
@@ -134,7 +135,7 @@ void ALabGameMode::TickBench()
 		++BenchFrames;
 		if (BenchPhaseTime >= FLabBench::MeasureSec)
 		{
-			const int32 Alive = Spawner->GetMinions().Num();
+			const int32 Alive = Spawner->GetAliveCount();
 			const bool bOk = Alive == Config.N && BenchFrames > 0;
 			const FString Summary = FString::Printf(TEXT("lab_summary label=%s measure_sec=%.2f frames=%d avg_ms=%.3f n=%d respawns=%d ok=%d"),
 				*Config.Label, BenchPhaseTime, BenchFrames, BenchPhaseTime * 1000.f / FMath::Max(BenchFrames, 1),
@@ -176,7 +177,7 @@ FString ALabGameMode::GetHudCrowdLine() const
 		return FString();
 	}
 	return FString::Printf(TEXT("alive %d   respawns %d   zone kills %d   snipes %d   t %.0f s"),
-		Spawner->GetMinions().Num(), Spawner->GetRespawnCount(), Orb->GetKillCount(), Orb->GetSnipeCount(), Elapsed);
+		Spawner->GetAliveCount(), Spawner->GetRespawnCount(), Orb->GetKillCount(), Orb->GetSnipeCount(), Elapsed);
 }
 
 void ALabGameMode::Tick(float DeltaSeconds)
@@ -230,8 +231,9 @@ void ALabGameMode::Tick(float DeltaSeconds)
 	if (Duration > 0.f && Elapsed >= Duration && !bQuitRequested)
 	{
 		bQuitRequested = true;
-		UE_LOG(LogLab, Log, TEXT("lab_summary elapsed=%.1f n=%d respawns=%d kills=%d snipes=%d"),
-			Elapsed, Spawner->GetMinions().Num(), Spawner->GetRespawnCount(), Orb->GetKillCount(), Orb->GetSnipeCount());
+		UE_LOG(LogLab, Log, TEXT("lab_summary elapsed=%.1f n=%d respawns=%d kills=%d snipes=%d avg_ms=%.1f"),
+			Elapsed, Spawner->GetAliveCount(), Spawner->GetRespawnCount(), Orb->GetKillCount(), Orb->GetSnipeCount(),
+			1000.f * Elapsed / FMath::Max<uint64>(GFrameCounter - StartFrame, 1));
 		FPlatformMisc::RequestExit(false, TEXT("LabDuration"));
 	}
 }

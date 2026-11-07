@@ -20,7 +20,9 @@ const FLabConfig& FLabConfig::Get()
 		FString Stage;
 		if (FParse::Value(Cmd, TEXT("-LabStage="), Stage))
 		{
-			C.bStageValid = Stage.Equals(TEXT("M0"), ESearchCase::IgnoreCase);
+			if (Stage.Equals(TEXT("M0"), ESearchCase::IgnoreCase)) { C.Stage = ELabStage::M0; }
+			else if (Stage.Equals(TEXT("M1"), ESearchCase::IgnoreCase)) { C.Stage = ELabStage::M1; }
+			else { C.bStageValid = false; }
 		}
 
 		FString Variant;
@@ -30,6 +32,7 @@ const FLabConfig& FLabConfig::Get()
 			else if (Variant == TEXT("budget")) { C.Variant = ELabVariant::Budget; }
 			else if (Variant == TEXT("uro")) { C.Variant = ELabVariant::Uro; }
 			else if (Variant == TEXT("pawn")) { C.Variant = ELabVariant::Pawn; }
+			else if (Variant == TEXT("mass")) { C.Variant = ELabVariant::Mass; }
 		}
 		C.N = FMath::Max(C.N, 1);
 		C.Preset = FMath::Clamp(C.Preset, 1, 2);
@@ -46,6 +49,7 @@ const TCHAR* FLabConfig::VariantName(ELabVariant V)
 	case ELabVariant::Budget: return TEXT("budget");
 	case ELabVariant::Uro: return TEXT("uro");
 	case ELabVariant::Pawn: return TEXT("pawn");
+	case ELabVariant::Mass: return TEXT("mass");
 	default: return TEXT("full");
 	}
 }
@@ -54,6 +58,7 @@ const TCHAR* FLabConfig::StageName(ELabStage S)
 {
 	switch (S)
 	{
+	case ELabStage::M1: return TEXT("M1");
 	case ELabStage::M0:
 	default: return TEXT("M0");
 	}

@@ -18,19 +18,25 @@ public:
 
 	void SpawnInitial();
 	void OnMinionFinished(ALabMinion* Minion);
+	/** M1부터: 지워진 엔티티 수만큼 가장자리 링에서 새로 만든다. ULabCrowdSubsystem이 부른다. */
+	void RespawnEntities(int32 Count);
 
 	FVector GetOrbLocation() const { return OrbLocation; }
 	const TArray<TObjectPtr<ALabMinion>>& GetMinions() const { return Minions; }
+	/** 단계와 무관한 개체 수(M0 액터, M1부터 엔티티). 러너의 LabAlive와 오버레이가 쓴다. */
+	int32 GetAliveCount() const;
 	int32 GetRespawnCount() const { return RespawnCount; }
 
 protected:
 	ALabMinion* SpawnAt(float Radius, float Angle);
 	TSubclassOf<ALabMinion> MinionClass() const;
 	void LoadAssets();
+	void SpawnEntitiesAt(TConstArrayView<FVector2D> RadiusAngles);
 
 	UPROPERTY() FLabMinionAssets Assets;
 	UPROPERTY() TArray<TObjectPtr<ALabMinion>> Minions;
 
+	UPROPERTY() TObjectPtr<class ULabCrowdSubsystem> Crowd; // M1부터
 	FRandomStream Stream;
 	FVector OrbLocation = FVector::ZeroVector;
 	uint32 NextSerial = 0;

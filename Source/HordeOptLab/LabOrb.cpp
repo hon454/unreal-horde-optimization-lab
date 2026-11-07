@@ -2,6 +2,7 @@
 #include "LabConfig.h"
 #include "HordeOptLab.h"
 #include "LabCrowdSpawner.h"
+#include "LabCrowdSubsystem.h"
 #include "Components/StaticMeshComponent.h"
 #include "NiagaraComponent.h"
 #include "NiagaraSystem.h"
@@ -95,6 +96,11 @@ void ALabOrb::Tick(float DeltaSeconds)
 	Super::Tick(DeltaSeconds);
 	if (!Spawner)
 	{
+		return;
+	}
+	if (ULabCrowdSubsystem* Crowd = GetWorld()->GetSubsystem<ULabCrowdSubsystem>(); Crowd && Crowd->IsActive())
+	{
+		TickMass(DeltaSeconds, Crowd);
 		return;
 	}
 
@@ -212,5 +218,49 @@ void ALabOrb::TickStrikes(float DeltaSeconds)
 			}
 			ActiveStrikes.RemoveAtSwap(i);
 		}
+	}
+}
+
+int32 ALabOrb::GetKillCount() const
+{
+	const ULabCrowdSubsystem* Crowd = GetWorld()->GetSubsystem<ULabCrowdSubsystem>();
+	return Crowd && Crowd->IsActive() ? Crowd->KillCount : KillCount;
+}
+
+int32 ALabOrb::GetSnipeCount() const
+{
+	const ULabCrowdSubsystem* Crowd = GetWorld()->GetSubsystem<ULabCrowdSubsystem>();
+	return Crowd && Crowd->IsActive() ? Crowd->SnipeCount : SnipeCount;
+}
+
+void ALabOrb::TickMass(float DeltaSeconds, ULabCrowdSubsystem* Crowd)
+{
+	Crowd->OrbCenter = GetActorLocation();
+
+	TArray<FVector> Targets;
+	FVector CoilTarget = GetActorLocation();
+	{
+		FScopeLock Lock(&Crowd->ResultLock);
+		Targets = MoveTemp(Crowd->SnipeTargets);
+		Crowd->SnipeTargets.Reset();
+		if (Crowd->bHasNearest)
+		{
+			CoilTarget = Crowd->Nearest;
+		}
+	}
+	// M0과 같이 번개는 범위 안에서 가장 가까운 개체로, 없으면 타워 밑동으로 뻗는다.
+	CoilFx->SetVariablePosition(TEXT("User.PositionTarget"), CoilTarget);
+	for (const FVector& Target : Targets)
+	{
+		SpawnStrikeFx(Target);
+	}
+	TickStrikes(DeltaSeconds);
+
+	// 저격 시점은 M0과 같은 누적 시간으로 정하고, 대상 선택은 저격 프로세서가 다음 Mass 처리에서 한다.
+	SnipeAccumulator += DeltaSeconds;
+	while (SnipeAccumulator >= FLabScenario::SnipeInterval)
+	{
+		SnipeAccumulator -= FLabScenario::SnipeInterval;
+		Crowd->PendingSnipeTick = ++SnipeTick;
 	}
 }

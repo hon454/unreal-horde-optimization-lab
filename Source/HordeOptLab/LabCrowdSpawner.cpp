@@ -1,6 +1,7 @@
 #include "LabCrowdSpawner.h"
 #include "HordeOptLab.h"
 #include "LabConfig.h"
+#include "LabCrowdSubsystem.h"
 #include "Animation/AnimBlueprintGeneratedClass.h"
 #include "Animation/AnimInstance.h"
 #include "Animation/AnimSequence.h"
@@ -63,15 +64,67 @@ void ALabCrowdSpawner::SpawnInitial()
 	Stream.Initialize(Config.Seed);
 	OrbLocation = FVector::ZeroVector;
 
-	// 반지름을 [피해 범위, R]에서 균등하게 뽑으면 반지름당 개체 수가 일정하다(밀도 ∝ 1/r).
-	Minions.Reserve(Config.N);
+	// 반지름을 [피해 범위, R]에서 균등하게 뽑으면 반지름당 개체 수가 일정하다(밀도 ∝ 1/r). 모든 단계가 같은 순서로 뽑는다.
+	TArray<FVector2D> RadiusAngles;
+	RadiusAngles.Reserve(Config.N);
 	for (int32 i = 0; i < Config.N; ++i)
 	{
 		const float Radius = Stream.FRandRange(FLabScenario::ZoneRadius, FLabScenario::MapRadius);
 		const float Angle = Stream.FRandRange(0.f, UE_TWO_PI);
-		SpawnAt(Radius, Angle);
+		RadiusAngles.Emplace(Radius, Angle);
 	}
-	UE_LOG(LogLab, Log, TEXT("lab_spawned n=%d"), Minions.Num());
+
+	if (Config.Stage == ELabStage::M0)
+	{
+		Minions.Reserve(Config.N);
+		for (const FVector2D& RA : RadiusAngles)
+		{
+			SpawnAt(RA.X, RA.Y);
+		}
+	}
+	else
+	{
+		// M1부터 개체는 Mass 엔티티다. 표현은 static 변형과 같은 정적 메시, 피격·사망 시간은 M0 애니 길이와 같다.
+		Crowd = GetWorld()->GetSubsystem<ULabCrowdSubsystem>();
+		Crowd->OrbCenter = OrbLocation;
+		Crowd->Activate(this, Assets.StaticMesh,
+			Assets.Hit ? Assets.Hit->GetPlayLength() : 0.5f, Assets.Death ? Assets.Death->GetPlayLength() : 1.f);
+		SpawnEntitiesAt(RadiusAngles);
+	}
+	UE_LOG(LogLab, Log, TEXT("lab_spawned n=%d"), GetAliveCount());
+}
+
+int32 ALabCrowdSpawner::GetAliveCount() const
+{
+	return Crowd ? Crowd->GetAliveCount() : Minions.Num();
+}
+
+void ALabCrowdSpawner::SpawnEntitiesAt(TConstArrayView<FVector2D> RadiusAngles)
+{
+	TArray<FVector> Locations;
+	TArray<uint32> Serials;
+	Locations.Reserve(RadiusAngles.Num());
+	Serials.Reserve(RadiusAngles.Num());
+	for (const FVector2D& RA : RadiusAngles)
+	{
+		Locations.Emplace(RA.X * FMath::Cos(RA.Y), RA.X * FMath::Sin(RA.Y), 0.f); // 엔티티 위치는 발밑(지면)이다
+		Serials.Add(NextSerial++);
+	}
+	Crowd->SpawnEntities(Locations, Serials);
+}
+
+void ALabCrowdSpawner::RespawnEntities(int32 Count)
+{
+	// M0 OnMinionFinished와 같은 스트림, 같은 링에서 뽑는다.
+	TArray<FVector2D> RadiusAngles;
+	for (int32 i = 0; i < Count; ++i)
+	{
+		const float Radius = Stream.FRandRange(FLabScenario::MapRadius - FLabScenario::RespawnRingWidth, FLabScenario::MapRadius);
+		const float Angle = Stream.FRandRange(0.f, UE_TWO_PI);
+		RadiusAngles.Emplace(Radius, Angle);
+	}
+	SpawnEntitiesAt(RadiusAngles);
+	RespawnCount += Count;
 }
 
 ALabMinion* ALabCrowdSpawner::SpawnAt(float Radius, float Angle)

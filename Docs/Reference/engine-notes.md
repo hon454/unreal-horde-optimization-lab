@@ -107,3 +107,14 @@
 | 정적 메시 변환 | `UAnimToTextureBPLibrary::ConvertSkeletalMeshToStaticMesh`는 커맨드렛에서 `-nullrhi`면 실패하고 `-AllowCommandletRendering`이 필요하다. 패키지 이름은 점 없는 경로여야 한다(`CreatePackage`에서 `check`) | `AnimToTextureBPLibrary.cpp:775-813`, `MeshUtilities.cpp:680` |
 | Unreal MCP 툴셋 | 툴은 `list_toolsets`/`describe_toolset`/`call_tool` 셋으로 노출된다(`bEnableToolSearch` 기본 true). 블루프린트 그래프 DSL(`BlueprintTools.write_graph_dsl`)은 이벤트 그래프용이고 애님 그래프·스테이트 머신을 다루지 않는다. 애니메이션 툴셋은 Control Rig·Sequencer뿐이다 | 실행 중 `tools/call list_toolsets`, `get_graph_dsl_docs` |
 | BP_TeslaCoil 구성 | 루트 아래 `SM_TorchBase`(z360, roll 180, x4, `M_Target_Metal`), 구체(z400, 오버레이 `MI_Mesh_Overlay_TeslaCoil`), `NS_TeslaCoil`(`User.PositionTarget`), `NS_Boundary_Cylinder`(`User.Radius`/`Height`/`Color`). GAS 상태 효과를 참조한다 | AssetHost에서 BP 인스턴스 컴포넌트 조회, 에셋 문자열 |
+
+## 11. M1 Mass 코어에서 확인한 것(2026-11-07)
+
+| 항목 | 내용 | 근거 |
+| --- | --- | --- |
+| 실행 시 EntityConfig | `UMassEntityConfigAsset::AddTrait(TSubclassOf<UMassEntityTraitBase>)`는 에디터 전용(`WITH_EDITOR`)이다. 패키지에서는 `FMassEntityConfig::AddTrait(UMassEntityTraitBase&)`(`:61`)에 `NewObject`로 만든 Trait을 넘긴다. 소유자가 있으면 `ConfigGuid`를 경로로 결정적으로 만들고 템플릿 ID는 그 GUID로 만든다 | `MassSpawner/Public/MassEntityConfigAsset.h:159`, `Private/MassEntityConfigAsset.cpp:33,137` |
+| 기본으로 꺼진 프로세서 | `UMassLODCollectorProcessor`, `UMassVisualizationLODProcessor`, `UMassRepresentationProcessor`(하위 `UMassVisualizationProcessor`)는 `bAutoRegisterWithProcessingPhases = false`다. ISM 표현을 쓰려면 `Config/DefaultMass.ini`에서 켠다. 안 켜면 로직은 돌지만 아무것도 그려지지 않는다 | `MassLODCollectorProcessor.cpp:14`, `MassVisualizationLODProcessor.cpp:13`, `MassRepresentationProcessor.cpp:54`. 프로세서는 `config=Mass, defaultconfig`(`MassEntity/Public/MassProcessor.h:78`) |
+| 이동 프로세서의 시간 상한 | `UMassApplyForceProcessor`와 `UMassApplyMovementProcessor`는 프레임 시간을 0.1초로 자른다. 프레임이 100ms를 넘으면 엔티티가 실제보다 느리게 간다. CharacterMovement는 하위 스텝으로 나눠 이 손실이 없다. 개발 빌드(N=2000, 평균 64ms, 자주 100ms 초과)에서 M1의 범위 처치가 M0의 약 60%로 나온 원인이다. N=300(평균 7.6ms)에서는 처치·재생성 수가 M0과 같았다 | `MassMovement/Private/MassMovementProcessors.cpp:41,100`. 실행: 2026-11-07 개발 빌드 `-LabStage=M1` |
+| 엔진 조향의 이동 목표 | `UMassSteerToMoveTargetProcessor`는 `FMassMoveTargetFragment`의 `Center`·`Forward`·`DesiredSpeed`를 쓰고, `IntentAtGoal`이 `Stand`일 때만 도착 감속한다. 이동 프로세서는 `FMassCodeDrivenMovementTag`가 있는 엔티티만 옮긴다(태그를 빼면 멈춘다) | `MassNavigation/Private/MassSteeringProcessors.cpp:62-87,145-215`, `MassMovementProcessors.cpp:88` |
+| ISM용 머티리얼 사용 플래그 | 바탕 머티리얼에 `bUsedWithInstancedStaticMeshes`가 꺼져 있으면 쿠킹하지 않은 `-game` 실행에서 ISM이 기본(회색) 머티리얼로 그려진다. `Scripts/make-static-minion.py`가 켠다 | 실행: 2026-11-07 스크린샷 |
+| ACharacter 캡슐 | 기본 반지름 34, 반높이 88 | `Engine/Source/Runtime/Engine/Private/Character.cpp:78` |

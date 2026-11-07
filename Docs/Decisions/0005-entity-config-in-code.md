@@ -24,4 +24,5 @@ EntityConfig 에셋을 두지 않고, 단계마다 실행 시 `UMassEntityConfig
 
 ## 결과
 
-(M1 구현 뒤 덧붙인다.) 글에 Trait 구성 화면이 필요하면 같은 구성을 에셋으로 한 번 저장해 찍는다.
+- 2026-11-07 Test 패키지 빌드에서 확인: `UMassEntityConfigAsset::AddTrait(TSubclassOf)`는 `#if WITH_EDITOR` 안에 있어 패키지에서 쓸 수 없다. 런타임 API인 `FMassEntityConfig::AddTrait(UMassEntityTraitBase&)`(`MassEntityConfigAsset.h:61`)에 `NewObject`로 만든 Trait을 넘긴다(`LabCrowdSubsystem.cpp` `AddLabTrait`). 결정은 그대로다.
+- 글에 Trait 구성 화면이 필요하면 같은 구성을 에셋으로 한 번 저장해 찍는다.
