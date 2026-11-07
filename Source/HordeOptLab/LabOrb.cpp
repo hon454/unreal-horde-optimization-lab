@@ -32,6 +32,7 @@ ALabOrb::ALabOrb()
 	// 이펙트와 타워는 Niagara Examples Pack에서 옮긴 것(Scripts/migrate-assets.py "orbfx"). 없으면 구체만 남는다.
 	CoilFx = CreateDefaultSubobject<UNiagaraComponent>(TEXT("CoilFx"));
 	CoilFx->SetupAttachment(Root);
+	CoilFx->SetRelativeLocation(FVector(0.f, 0.f, 400.f)); // 구체 중심. 시스템의 발광(플레어)이 컴포넌트 원점에 생긴다
 	ZoneFx = CreateDefaultSubobject<UNiagaraComponent>(TEXT("ZoneFx"));
 	ZoneFx->SetupAttachment(Root);
 }
@@ -59,8 +60,7 @@ void ALabOrb::BeginPlay()
 	if (UNiagaraSystem* Coil = LoadObject<UNiagaraSystem>(nullptr, TEXT("/Game/NiagaraExamples/FX_Ribbons/NS_TeslaCoil.NS_TeslaCoil"), nullptr, LOAD_Quiet | LOAD_NoWarn))
 	{
 		CoilFx->SetAsset(Coil);
-		// BP는 번개가 구체로 모이도록 User.PositionTarget에 구체 위치를 넘긴다(BP 문자열의 SetVariablePosition).
-		CoilFx->SetVariablePosition(TEXT("User.PositionTarget"), Sphere->GetComponentLocation());
+		CoilFx->SetVariablePosition(TEXT("User.PositionTarget"), GetActorLocation()); // 구체에서 타워 밑동으로 번개가 내려온다
 		CoilFx->Activate(true);
 	}
 	if (UNiagaraSystem* Zone = LoadObject<UNiagaraSystem>(nullptr, TEXT("/Game/NiagaraExamples/FX_Misc/NS_Boundary_Cylinder.NS_Boundary_Cylinder"), nullptr, LOAD_Quiet | LOAD_NoWarn))
