@@ -4,7 +4,7 @@
 
 ## 단계
 
-**M0 기준선.** 시나리오(오브·스포너·카메라·변형)와 측정 파이프라인(러너·Test 패키지·run-bench·summarize)이 돈다. 남은 것은 E0 측정이다. 각 항목의 완료 조건은 [plan.md](plan.md) "M0"이다.
+**M0 기준선.** 시나리오(오브·스포너·카메라·변형)와 측정 파이프라인(러너·Test 패키지·run-bench·summarize)이 돈다. 남은 것은 이펙트를 켠 채 E0를 다시 재는 일과 마무리다. 각 항목의 완료 조건은 [plan.md](plan.md) "M0"이다.
 
 ## 다음 할 일
 
@@ -13,10 +13,11 @@
 - [x] 3. `build`, `run-dev`, `package`(Test, 첫 빌드 26분), `run-bench`. 시험 측정 1회로 패키지 → CSV → `runs.csv` 경로 확인.
 - [x] 4. 미니언은 옮겼고(`Scripts/migrate-assets.py`) 늘어짐은 메시 콜리전을 꺼서 막았다. AnimBP `ABP_LabMinion`(Blend Poses by `ELabMinionState`: 걷기 루프 / 피격 / 죽기)은 2026-11-07 사용자가 에디터에서 그래프를 채웠다. 실행에서 `lab_assets animbp=1` 확인.
 - [x] 5. 맵 `L_Bench`(Basic 템플릿, 바닥 540m), 오브(테슬라 코일 타워, 보라 범위 8m, 가중 피해, 번개가 범위 안 대상을 향함), 스포너, 카메라 P1 오브 뒤 회전 / P2 탑뷰 100m(P3는 ADR-0003으로 뺐다). 조명은 한낮과 해 질 녘 사이로 고정(`Scripts/create-bench-map.py`).
-- [x] 6. 변형 `full`/`static`/`budget`/`uro`. `static`은 `Scripts/make-static-minion.py`가 만든 `/Game/Lab/Derived/SM_LabMinion`.
+- [x] 6. 변형 `full`/`static`/`budget`/`uro`/`pawn`(CharacterMovement 틱 끔). `static`은 `Scripts/make-static-minion.py`가 만든 `/Game/Lab/Derived/SM_LabMinion`.
 - [x] 7. 벤치마크 러너(`-LabBench`), `summarize.py`(표준 라이브러리만).
 - [x] 8. 시나리오 고정값 확정(2026-11-07): R 500m, 피해 범위 8m, 저격 2초 5명, 밴드 30/80/200m, 2560x1440 Epic, 시드 20261106. 표는 [measurement.md](Guides/measurement.md) "확정값". `LODMaxCount`만 E0 뒤에 정한다.
-- [ ] 9. E0 측정 완료(아래 표). 남은 것: 대표 스크린샷(P1, N=5k), `plot.py`, `LODMaxCount` 결정.
+- [x] 8b. 오브 이펙트를 측정 실행에서도 늘 그린다(2026-11-07 사용자 결정). 저격은 구체에서 대상까지 곧은 보라 선 하나(`/Game/Lab/FX/NS_LabBolt`, 만드는 법은 `Scripts/create-bolt-fx.md`). 번개 표현과 피격 이펙트는 시험 뒤 뺐다.
+- [ ] 9. E0 다시 재기: 아래 표는 측정 실행에서 이펙트를 끈 빌드의 값이라 Test 패키지를 새로 만들어 전 조건(`Scripts/run-e0.ps1 -Tag fx`, pawn 포함 88회, 약 2시간)을 다시 잰다. 첫 측정 CSV는 `Saved/Profiling/CSV/superseded-nofx/`로 옮겼고, 새 값이 나오면 `Measurements/M0/`의 두 CSV를 새로 만든다(첫 값은 git 이력에 남는다). 그 뒤 대표 스크린샷(P1, N=5k), `plot.py`, `LODMaxCount` 결정.
 - [ ] 10. ADR-0002 초안, README 결과 초판, 태그 `M0`, Worklog, 글 대기열.
 
 ## 명령
@@ -34,7 +35,7 @@ py -3 Scripts/summarize.py --milestone M0
 
 ## 측정 결과
 
-E0(M0, Test 패키지, 2560x1440 Epic, 2026-11-07, `Measurements/M0/summary.csv`). Game Thread p50(ms)이 병목이고 Render·GPU는 N=5k에서도 16ms 안팎이다.
+E0 첫 측정(M0, Test 패키지, 2560x1440 Epic, 2026-11-07, 측정 실행에서 저격 이펙트를 끈 빌드, `Measurements/M0/summary.csv`). 다시 재면 바뀐다. Game Thread p50(ms)이 병목이고 Render·GPU는 N=5k에서도 16ms 안팎이다.
 
 | 변형 | P1 N250 | 500 | 1k | 2k | 5k | N@16.7ms(P1, 로그 보간) |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -42,6 +43,7 @@ E0(M0, Test 패키지, 2560x1440 Epic, 2026-11-07, `Measurements/M0/summary.csv`
 | static | 3.6 | 6.7 | 12.5 | 24.6 | 84.4 | 약 1,270 |
 | budget(v2) | | | 15.9 | 29.0 | 109.9 | 약 1,050 |
 | uro | | | 16.7 | 34.1 | 124.1 | 약 1,000 |
+| pawn(v2) | | | 13.4 | 26.5 | 69.3 | 약 1,190 |
 
 P2는 full·static 모두 P1보다 0.2\~1.7ms 낮다(N=5k full만 18ms 차이). 첫 묶음의 budget 9회는 할당기가 꺼져 있어 무효(`Saved/Profiling/CSV/invalid/`), v2로 다시 쟀다.
 
