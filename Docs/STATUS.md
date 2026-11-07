@@ -18,7 +18,7 @@
 - [x] 8. 시나리오 고정값 확정(2026-11-07): R 500m, 피해 범위 8m, 저격 2초 5명, 밴드 30/80/200m, 2560x1440 Epic, 시드 20261106. 표는 [measurement.md](Guides/measurement.md) "확정값". `LODMaxCount`만 E0 뒤에 정한다.
 - [x] 8b. 오브 이펙트를 측정 실행에서도 늘 그린다(2026-11-07 사용자 결정). 저격은 구체에서 대상까지 곧은 보라 선 하나(`/Game/Lab/FX/NS_LabBolt`, 만드는 법은 `Scripts/create-bolt-fx.md`). 번개 표현과 피격 이펙트는 시험 뒤 뺐다.
 - [ ] 9. E0 다시 재기: 아래 표는 측정 실행에서 이펙트를 끈 빌드의 값이라 Test 패키지를 새로 만들어 전 조건(`Scripts/run-e0.ps1 -Tag fx`, pawn 포함 88회, 약 2시간)을 다시 잰다. 첫 측정 CSV는 `Saved/Profiling/CSV/superseded-nofx/`로 옮겼고, 새 값이 나오면 `Measurements/M0/`의 두 CSV를 새로 만든다(첫 값은 git 이력에 남는다). 그 뒤 대표 스크린샷(P1, N=5k), `plot.py`, `LODMaxCount` 결정.
-- [ ] 10. ADR-0002 초안, README 결과 초판, 태그 `M0`, Worklog, 글 대기열.
+- [ ] 10. README 결과 초판, 태그 `M0`, Worklog. ADR-0002 초안은 썼고 글 대기열(00, 01)은 이미 있다.
 
 ## 명령
 
@@ -54,3 +54,5 @@ P2는 full·static 모두 P1보다 0.2\~1.7ms 낮다(N=5k full만 18ms 차이). 
 ## 사용자에게 요청한 일
 
 - [ADR-0001](Decisions/0001-test-package-for-measurement.md) 승인 확인.
+- [ADR-0002](Decisions/0002-freeze-measurement-infra.md) 승인(측정 인프라 동결).
+- E0 재측정을 밤에 직접 시작: `powershell -ExecutionPolicy Bypass -File Scripts/run-e0.ps1 -Tag fx`(Test 패키지가 최신인지 먼저 확인).
