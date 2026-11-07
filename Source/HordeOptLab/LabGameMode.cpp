@@ -13,6 +13,7 @@
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
 #include "ProfilingDebugging/CsvProfiler.h"
+#include "IAnimationBudgetAllocator.h"
 #include "SignificanceManager.h"
 
 namespace
@@ -80,6 +81,12 @@ void ALabGameMode::ApplyVariantCVars()
 	// a.Budget.Enabled 기본값은 0이다(AnimationBudgetAllocatorCVars.cpp:7).
 	LabSetCVar(TEXT("a.Budget.Enabled"), TEXT("1"));
 	LabSetCVar(TEXT("a.Budget.BudgetMs"), *FString::SanitizeFloat(FLabScenario::BudgetMs));
+	// CVar만으로는 켜지지 않는다. 월드마다 만들어지는 할당기는 bEnabled(false)로 시작한다(AnimationBudgetAllocator.cpp:71).
+	// 이걸 빠뜨린 2026-11-07 첫 E0의 budget 3조건은 무효로 하고 다시 쟀다.
+	if (IAnimationBudgetAllocator* Allocator = IAnimationBudgetAllocator::Get(GetWorld()))
+	{
+		Allocator->SetEnabled(true);
+	}
 }
 
 void ALabGameMode::ApplyBenchCVars()
