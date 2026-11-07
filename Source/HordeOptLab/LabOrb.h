@@ -11,7 +11,7 @@ class UStaticMeshComponent;
 
 /**
  * 맵 중앙의 목표(테슬라 코일 타워). 피해 범위(보라색 원기둥) 안의 개체는 중심에 가까울수록 센 피해(초당 ZoneDpsEdge~ZoneDpsCenter)를 받고, 저격 간격마다 먼 개체 K개를 쏜다.
- * 저격 대상은 난수가 아니라 결정적 해시(스폰 일련번호 + 저격 틱)로 고른다. plan.md "M0".
+ * 저격 대상은 화면 안의 산 개체 중 거리 구간마다 결정적 해시(스폰 일련번호 + 저격 틱)가 가장 작은 개체다(LabSnipe.h, 2026-11-07 사용자 결정).
  * 겉모습은 Niagara Examples Pack의 BP_TeslaCoil 구성(타워 메시, 구체, NS_TeslaCoil, NS_Boundary_Cylinder)을 같은 배치로 옮긴 것이다.
  * BP는 GAS 상태 효과를 끌고 와서 쓰지 않는다. 타워 이펙트는 모든 실행에서 상시로 돈다. 저격은 대상마다 구체에서 대상까지 곧은 보라 선 하나
  * (엔진 DynamicBeam 기반 NS_LabBolt)로 그린다. 측정 실행에서도 그린다(시나리오의 일부).
@@ -35,6 +35,7 @@ public:
 
 protected:
 	void Snipe();
+	struct FLabSnipeView GetSnipeView() const;
 	/** M1부터: 피해와 저격은 프로세서(LabMassProcessors)가 하고, 오브는 저격 틱을 올리고 이펙트만 그린다. */
 	void TickMass(float DeltaSeconds, class ULabCrowdSubsystem* Crowd);
 	void SpawnStrikeFx(const FVector& Target);

@@ -2,6 +2,7 @@
 #include "LabConfig.h"
 #include "LabCrowdSubsystem.h"
 #include "LabMassTypes.h"
+#include "LabSnipe.h"
 #include "MassCommands.h"
 #include "MassCommonFragments.h"
 #include "MassCommonTypes.h"
@@ -186,11 +187,14 @@ void ULabOrbSnipeProcessor::Execute(FMassEntityManager& EntityManager, FMassExec
 	const uint32 SnipeTick = Crowd->PendingSnipeTick;
 	Crowd->PendingSnipeTick = 0;
 	const FVector Center = Crowd->OrbCenter;
-	const float MinDistSq = FMath::Square(FLabScenario::SnipeMinDistance);
+	const FLabSnipeView View = Crowd->SnipeView;
+	if (!View.bValid)
+	{
+		return;
+	}
 
-	// M0 ALabOrb::Snipe와 같은 선택: 먼 산 개체 중 해시(일련번호, 저격 틱)가 가장 작은 K개.
-	struct FPick { uint32 Hash; FMassEntityHandle Entity; FVector Location; };
-	TArray<FPick, TInlineAllocator<FLabScenario::SnipeCount>> Best;
+	// M0 ALabOrb::Snipe와 같은 선택: 화면 안의 산 개체를 거리 구간별로 나눠 구간마다 해시가 가장 작은 개체(LabSnipe.h).
+	TLabSnipePicker<FMassEntityHandle> Picker;
 	EntityQuery.ForEachEntityChunk(Context, [&](FMassExecutionContext& Context)
 	{
 		const TConstArrayView<FTransformFragment> Transforms = Context.GetFragmentView<FTransformFragment>();
@@ -198,40 +202,31 @@ void ULabOrbSnipeProcessor::Execute(FMassEntityManager& EntityManager, FMassExec
 		const TConstArrayView<FLabMinionFragment> Minions = Context.GetFragmentView<FLabMinionFragment>();
 		for (FMassExecutionContext::FEntityIterator It = Context.CreateEntityIterator(); It; ++It)
 		{
-			const FVector Location = Transforms[It].GetTransform().GetLocation();
 			// 같은 프레임 범위 피해로 죽은 개체는 태그가 아직 붙지 않았으므로 체력으로 거른다.
-			if (Healths[It].Health <= 0.f || FVector::DistSquared2D(Location, Center) < MinDistSq)
+			if (Healths[It].Health <= 0.f)
 			{
 				continue;
 			}
-			const uint32 Hash = HashCombineFast(::GetTypeHash(Minions[It].Serial), ::GetTypeHash(SnipeTick));
-			if (Best.Num() < FLabScenario::SnipeCount)
+			const FVector Location = Transforms[It].GetTransform().GetLocation();
+			const int32 Band = FLabSnipeBands::BandOf(FVector::Dist2D(Location, Center));
+			if (Band == INDEX_NONE || !View.Contains(FVector(Location.X, Location.Y, LabSnipeAimHeight)))
 			{
-				Best.Add({ Hash, Context.GetEntity(It), Location });
 				continue;
 			}
-			int32 Worst = 0;
-			for (int32 i = 1; i < Best.Num(); ++i)
-			{
-				if (Best[i].Hash > Best[Worst].Hash) { Worst = i; }
-			}
-			if (Hash < Best[Worst].Hash)
-			{
-				Best[Worst] = { Hash, Context.GetEntity(It), Location };
-			}
+			Picker.Offer(Band, HashCombineFast(::GetTypeHash(Minions[It].Serial), ::GetTypeHash(SnipeTick)), Context.GetEntity(It), Location);
 		}
 	});
 
 	const float HitDuration = Crowd->HitDuration;
 	FScopeLock Lock(&Crowd->ResultLock);
-	for (const FPick& Pick : Best)
+	Picker.ForEach([&](const TLabSnipePicker<FMassEntityHandle>::FPick& Pick)
 	{
-		EntityManager.GetFragmentDataChecked<FLabMinionFragment>(Pick.Entity).StateTimeLeft = HitDuration;
-		Context.Defer().AddTag<FLabHitTag>(Pick.Entity);
-		StopMoving(Context, Pick.Entity);
-		Crowd->SnipeTargets.Add(Pick.Location + FVector(0.f, 0.f, 100.f)); // M0과 같이 몸통 높이를 노린다
+		EntityManager.GetFragmentDataChecked<FLabMinionFragment>(Pick.Target).StateTimeLeft = HitDuration;
+		Context.Defer().AddTag<FLabHitTag>(Pick.Target);
+		StopMoving(Context, Pick.Target);
+		Crowd->SnipeTargets.Add(FVector(Pick.Location.X, Pick.Location.Y, LabSnipeAimHeight)); // M0과 같은 몸통 높이
 		++Crowd->SnipeCount;
-	}
+	});
 }
 
 // 상태 타이머 ----------------------------------------------------------------

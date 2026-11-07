@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "Subsystems/WorldSubsystem.h"
 #include "MassEntityHandle.h"
+#include "LabSnipe.h"
 #include "LabCrowdSubsystem.generated.h"
 
 class ALabCrowdSpawner;
@@ -38,6 +39,7 @@ public:
 	// 오브 상태. 오브가 쓰고 프로세서가 읽는다.
 	FVector OrbCenter = FVector::ZeroVector;
 	uint32 PendingSnipeTick = 0; // 0이 아니면 이번 처리에서 저격한다
+	FLabSnipeView SnipeView;     // 화면 판정용 카메라(오브가 매 틱 갱신)
 	float HitDuration = 0.5f;
 	float DeathDuration = 1.f;
 

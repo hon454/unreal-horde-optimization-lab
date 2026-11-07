@@ -3,6 +3,9 @@
 #include "HordeOptLab.h"
 #include "LabCrowdSpawner.h"
 #include "LabCrowdSubsystem.h"
+#include "LabSnipe.h"
+#include "Camera/PlayerCameraManager.h"
+#include "GameFramework/PlayerController.h"
 #include "Components/StaticMeshComponent.h"
 #include "NiagaraComponent.h"
 #include "NiagaraSystem.h"
@@ -143,43 +146,43 @@ void ALabOrb::Tick(float DeltaSeconds)
 	}
 }
 
+FLabSnipeView ALabOrb::GetSnipeView() const
+{
+	// 화면 판정은 실제로 렌더하는 카메라로 한다. 해상도는 늘 16:9(벤치 2560x1440, 개발 1280x720)다.
+	const APlayerController* PC = GetWorld()->GetFirstPlayerController();
+	const APlayerCameraManager* Cam = PC ? PC->PlayerCameraManager.Get() : nullptr;
+	return Cam ? FLabSnipeView::Make(Cam->GetCameraLocation(), Cam->GetCameraRotation(), Cam->GetFOVAngle(), 16.f / 9.f) : FLabSnipeView();
+}
+
 void ALabOrb::Snipe()
 {
 	++SnipeTick;
 	const FVector Center = GetActorLocation();
-	const float MinDistSq = FMath::Square(FLabScenario::SnipeMinDistance);
+	const FLabSnipeView View = GetSnipeView();
 
-	// 먼 산 개체 중 해시(일련번호, 저격 틱)가 가장 작은 K개.
-	TArray<TPair<uint32, ALabMinion*>, TInlineAllocator<64>> Best;
+	// 화면 안의 산 개체를 거리 구간별로 나눠, 구간마다 해시(일련번호, 저격 틱)가 가장 작은 개체를 고른다(LabSnipe.h).
+	TLabSnipePicker<ALabMinion*> Picker;
 	for (ALabMinion* Minion : Spawner->GetMinions())
 	{
-		if (!Minion->IsAlive() || FVector::DistSquared2D(Minion->GetActorLocation(), Center) < MinDistSq)
+		if (!Minion->IsAlive())
 		{
 			continue;
 		}
-		const uint32 Hash = HashCombineFast(::GetTypeHash(Minion->GetSerial()), ::GetTypeHash(SnipeTick));
-		if (Best.Num() < FLabScenario::SnipeCount)
+		const FVector Location = Minion->GetActorLocation();
+		const int32 Band = FLabSnipeBands::BandOf(FVector::Dist2D(Location, Center));
+		if (Band == INDEX_NONE || !View.bValid || !View.Contains(FVector(Location.X, Location.Y, LabSnipeAimHeight)))
 		{
-			Best.Emplace(Hash, Minion);
 			continue;
 		}
-		int32 WorstIndex = 0;
-		for (int32 i = 1; i < Best.Num(); ++i)
-		{
-			if (Best[i].Key > Best[WorstIndex].Key) { WorstIndex = i; }
-		}
-		if (Hash < Best[WorstIndex].Key)
-		{
-			Best[WorstIndex] = TPair<uint32, ALabMinion*>(Hash, Minion);
-		}
+		Picker.Offer(Band, HashCombineFast(::GetTypeHash(Minion->GetSerial()), ::GetTypeHash(SnipeTick)), Minion, Location);
 	}
 
-	for (const TPair<uint32, ALabMinion*>& Pick : Best)
+	Picker.ForEach([this](const TLabSnipePicker<ALabMinion*>::FPick& Pick)
 	{
-		Pick.Value->Snipe();
+		Pick.Target->Snipe();
 		++SnipeCount;
-		SpawnStrikeFx(Pick.Value->GetActorLocation() + FVector(0.f, 0.f, 100.f));
-	}
+		SpawnStrikeFx(FVector(Pick.Location.X, Pick.Location.Y, LabSnipeAimHeight));
+	});
 }
 
 void ALabOrb::SpawnStrikeFx(const FVector& Target)
@@ -236,6 +239,7 @@ int32 ALabOrb::GetSnipeCount() const
 void ALabOrb::TickMass(float DeltaSeconds, ULabCrowdSubsystem* Crowd)
 {
 	Crowd->OrbCenter = GetActorLocation();
+	Crowd->SnipeView = GetSnipeView();
 	Crowd->ExcludeVisualsFromLumen();
 
 	TArray<FVector> Targets;

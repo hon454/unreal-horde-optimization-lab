@@ -28,7 +28,7 @@ struct FLabScenario
 	static constexpr float MoveSpeed = 300.f;        // 이동 속도 3m/s
 	static constexpr float SnipeInterval = 2.f;      // 저격 간격(0.5초 10발은 화면에서 너무 잦았다, 2026-11-06 사용자 확인)
 	static constexpr int32 SnipeCount = 5;           // 저격당 대상 수 K
-	static constexpr float SnipeMinDistance = 8000.f; // 저격 대상 최소 거리(초안 밴드 80m 밖)
+	// 저격 대상은 화면 안에서 거리 구간별로 고른다(LabSnipe.h FLabSnipeBands, 2026-11-07 사용자 결정. 그전에는 80m 밖 전체에서 5명)
 
 	// 카메라 프리셋. 오브(중앙)에서 바깥을 본다. 근거리 액터부터 지평선 원거리까지 한 화면에 들어온다(2026-11-06 사용자 의견으로 궤도에서 변경).
 	static constexpr float OrbViewBack = 1500.f;     // P1 오브 뒤 15m. 오브가 화면 아래 가운데에 보이게 한다(2026-11-06 사용자 의견)

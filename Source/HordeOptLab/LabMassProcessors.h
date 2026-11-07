@@ -37,7 +37,7 @@ protected:
 	FMassEntityQuery EntityQuery;
 };
 
-/** 오브 저격. 오브가 저격 틱을 올린 처리에서, 먼 산 개체 중 해시(일련번호, 저격 틱)가 가장 작은 K개를 피격 상태로 바꾼다(M0과 같은 선택). */
+/** 오브 저격. 오브가 저격 틱을 올린 처리에서, 화면 안의 산 개체를 거리 구간별로 골라 피격 상태로 바꾼다(M0과 같은 규칙, LabSnipe.h). */
 UCLASS()
 class ULabOrbSnipeProcessor : public UMassProcessor
 {
