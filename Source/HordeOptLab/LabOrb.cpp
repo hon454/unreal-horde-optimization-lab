@@ -1,5 +1,6 @@
 #include "LabOrb.h"
 #include "LabConfig.h"
+#include "HordeOptLab.h"
 #include "LabCrowdSpawner.h"
 #include "Components/StaticMeshComponent.h"
 #include "NiagaraComponent.h"
@@ -77,7 +78,6 @@ void ALabOrb::BeginPlay()
 		CoilFx->Activate(true);
 	}
 	StrikeSystem = LoadObject<UNiagaraSystem>(nullptr, TEXT("/Game/Lab/FX/NS_LabBolt.NS_LabBolt"), nullptr, LOAD_Quiet | LOAD_NoWarn);
-	ImpactSystem = LoadObject<UNiagaraSystem>(nullptr, TEXT("/Game/NiagaraExamples/FX_Sparks/NS_Spark_Burst.NS_Spark_Burst"), nullptr, LOAD_Quiet | LOAD_NoWarn);
 
 	if (UNiagaraSystem* Zone = LoadObject<UNiagaraSystem>(nullptr, TEXT("/Game/NiagaraExamples/FX_Misc/NS_Boundary_Cylinder.NS_Boundary_Cylinder"), nullptr, LOAD_Quiet | LOAD_NoWarn))
 	{
@@ -179,37 +179,23 @@ void ALabOrb::Snipe()
 void ALabOrb::SpawnStrikeFx(const FVector& Target)
 {
 	// 측정 실행을 포함해 언제나 그린다. 이펙트는 시나리오의 고정된 일부이고 모든 단계에서 같은 비용이다(2026-11-07 사용자 결정).
-	// 저격 번개는 엔진 Niagara DynamicBeam 템플릿으로 만든 /Game/Lab/FX/NS_LabBolt다(Scripts/create-bolt-fx.md). User.BeamEnd(월드 좌표)로
-	// 끝점을, User.BoltColor·User.BoltWidth로 색과 굵기를 정한다. 굵고 강해 보이도록 StrikeLayers겹을 굵기를 달리해 겹친다.
+	// 저격 궤적은 구체에서 대상까지 곧은 보라 선 하나다. 디버그 라인은 Test 빌드에서 그려지지 않아서, 엔진 DynamicBeam 템플릿으로 만든
+	// /Game/Lab/FX/NS_LabBolt(빔 점 2개, 리본 하나)로 그린다(Scripts/create-bolt-fx.md). 번개 표현은 화면에서 읽기 어려워 접었다(2026-11-07 사용자 결정).
 	if (!StrikeSystem)
 	{
 		return;
 	}
-	const FVector Start = Sphere->GetComponentLocation();
-	for (int32 i = 0; i < StrikeLayers; ++i)
+	UNiagaraComponent* Bolt = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), StrikeSystem, Sphere->GetComponentLocation(), FRotator::ZeroRotator,
+		FVector(1.f), /*bAutoDestroy*/ true, /*bAutoActivate*/ false, ENCPoolMethod::AutoRelease);
+	if (!Bolt)
 	{
-		UNiagaraComponent* Bolt = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), StrikeSystem, Start, FRotator::ZeroRotator,
-			FVector(1.f), /*bAutoDestroy*/ true, /*bAutoActivate*/ false, ENCPoolMethod::AutoRelease);
-		if (!Bolt)
-		{
-			continue;
-		}
-		Bolt->SetVariableVec3(TEXT("User.BeamEnd"), Target);
-		Bolt->SetVariableLinearColor(TEXT("User.BoltColor"), i == 0 ? FLinearColor(8.f, 4.f, 40.f) : FLinearColor(2.f, 0.2f, 14.f));
-		Bolt->SetVariableFloat(TEXT("User.BoltWidth"), i == 0 ? BoltCoreWidth : BoltGlowWidth);
-		Bolt->Activate(true);
-		ActiveStrikes.Add({ Bolt, StrikeDuration });
+		return;
 	}
-
-	if (ImpactSystem)
-	{
-		if (UNiagaraComponent* Impact = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), ImpactSystem, Target))
-		{
-			// 파라미터 이름은 NS_Spark_Burst의 사용자 파라미터(에셋 문자열에서 확인).
-			Impact->SetVariableFloat(TEXT("User.Spark Color Gain"), 20.f);
-			Impact->SetVariableFloat(TEXT("User.Size"), 2.f);
-		}
-	}
+	Bolt->SetVariableVec3(TEXT("User.BeamEnd"), Target);
+	Bolt->SetVariableLinearColor(TEXT("User.BoltColor"), BoltColor);
+	Bolt->SetVariableFloat(TEXT("User.BoltWidth"), BoltWidth);
+	Bolt->Activate(true);
+	ActiveStrikes.Add({ Bolt, StrikeDuration });
 }
 
 void ALabOrb::TickStrikes(float DeltaSeconds)
