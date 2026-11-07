@@ -6,8 +6,15 @@
 #include "NiagaraSystem.h"
 #include "DrawDebugHelpers.h"
 #include "Engine/StaticMesh.h"
+#include "Materials/MaterialInstanceDynamic.h"
 #include "Materials/MaterialInterface.h"
 #include "UObject/ConstructorHelpers.h"
+
+namespace
+{
+	// 오브 발광 배율. 구체 오버레이와 범위 원기둥 색에만 곱한다. 번개(NS_TeslaCoil)는 색이 사용자 파라미터로 열려 있지 않아 못 바꾼다.
+	constexpr float OrbGlowBoost = 3.f; // 6배는 블룸으로 하얗게 날아가 보라색이 사라졌다
+}
 
 ALabOrb::ALabOrb()
 {
@@ -54,7 +61,13 @@ void ALabOrb::BeginPlay()
 	// BP_TeslaCoil은 구체에 보라색 오버레이 머티리얼을 씌운다(BP 문자열의 OverlayMaterial, MI_Mesh_Overlay_TeslaCoil).
 	if (UMaterialInterface* Overlay = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/NiagaraExamples/Materials/MI_Mesh_Overlay_TeslaCoil.MI_Mesh_Overlay_TeslaCoil"), nullptr, LOAD_Quiet | LOAD_NoWarn))
 	{
-		Sphere->SetOverlayMaterial(Overlay);
+		// 한낮 조명에서는 자동 노출 때문에 발광이 묻힌다. 조명 대신 이 오브의 발광만 키운다(2026-11-07 사용자 의견).
+		// 파라미터 이름과 기본값은 MI_Mesh_Overlay_TeslaCoil에서 읽었다(Base/Secondary Color = (0.4, 0, 4), Flicker Low = 0.1).
+		UMaterialInstanceDynamic* OverlayMid = UMaterialInstanceDynamic::Create(Overlay, this);
+		OverlayMid->SetVectorParameterValue(TEXT("Base Color"), FLinearColor(0.25f, 0.f, 4.f) * OrbGlowBoost);
+		OverlayMid->SetVectorParameterValue(TEXT("Secondary Color"), FLinearColor(0.25f, 0.f, 4.f) * OrbGlowBoost);
+		OverlayMid->SetScalarParameterValue(TEXT("Flicker Low"), 0.6f);
+		Sphere->SetOverlayMaterial(OverlayMid);
 	}
 
 	if (UNiagaraSystem* Coil = LoadObject<UNiagaraSystem>(nullptr, TEXT("/Game/NiagaraExamples/FX_Ribbons/NS_TeslaCoil.NS_TeslaCoil"), nullptr, LOAD_Quiet | LOAD_NoWarn))
@@ -69,7 +82,7 @@ void ALabOrb::BeginPlay()
 		ZoneFx->SetAsset(Zone);
 		ZoneFx->SetVariableFloat(TEXT("User.Radius"), FLabScenario::ZoneRadius);
 		ZoneFx->SetVariableFloat(TEXT("User.Height"), 400.f);
-		ZoneFx->SetVariableLinearColor(TEXT("User.Color"), FLinearColor(1.5f, 0.3f, 6.f)); // 보라. 기본값은 초록이다
+		ZoneFx->SetVariableLinearColor(TEXT("User.Color"), FLinearColor(0.8f, 0.05f, 6.f) * OrbGlowBoost); // 보라. 기본값은 초록이다
 		ZoneFx->Activate(true);
 	}
 }
