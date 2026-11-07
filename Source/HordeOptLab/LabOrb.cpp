@@ -236,6 +236,7 @@ int32 ALabOrb::GetSnipeCount() const
 void ALabOrb::TickMass(float DeltaSeconds, ULabCrowdSubsystem* Crowd)
 {
 	Crowd->OrbCenter = GetActorLocation();
+	Crowd->ExcludeVisualsFromLumen();
 
 	TArray<FVector> Targets;
 	FVector CoilTarget = GetActorLocation();

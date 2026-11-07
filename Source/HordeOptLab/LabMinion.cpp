@@ -167,6 +167,7 @@ ALabMinionStatic::ALabMinionStatic(const FObjectInitializer& ObjectInitializer)
 	StaticVisual->SetupAttachment(GetMesh());
 	StaticVisual->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	StaticVisual->SetGenerateOverlapEvents(false);
+	LabExcludeFromLumen(*StaticVisual);
 }
 
 void ALabMinionStatic::SetupVisual(const FLabMinionAssets& Assets)

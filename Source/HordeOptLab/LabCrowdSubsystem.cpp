@@ -14,6 +14,10 @@
 #include "SmoothOrientation/MassSmoothOrientationTrait.h"
 #include "Steering/MassSteeringTrait.h"
 #include "Engine/StaticMesh.h"
+#include "EngineUtils.h"
+#include "MassVisualizer.h"
+#include "Components/InstancedStaticMeshComponent.h"
+#include "LabMinion.h"
 #include "Engine/World.h"
 
 namespace
@@ -88,5 +92,23 @@ void ULabCrowdSubsystem::RequestRespawn(int32 Count)
 	if (ALabCrowdSpawner* S = Spawner.Get())
 	{
 		S->RespawnEntities(Count);
+	}
+}
+
+void ULabCrowdSubsystem::ExcludeVisualsFromLumen()
+{
+	if (bLumenExcluded)
+	{
+		return;
+	}
+	for (TActorIterator<AMassVisualizer> It(GetWorld()); It; ++It)
+	{
+		TArray<UInstancedStaticMeshComponent*> Components;
+		It->GetComponents(Components);
+		for (UInstancedStaticMeshComponent* Component : Components)
+		{
+			LabExcludeFromLumen(*Component);
+			bLumenExcluded = true;
+		}
 	}
 }

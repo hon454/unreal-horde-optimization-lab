@@ -23,6 +23,18 @@ struct FLabMinionAssets
 };
 
 /**
+ * 미니언 표현을 Lumen 장면에서 뺀다(모든 단계 공통, 2026-11-07 사용자 결정). 소프트웨어 Lumen은 "동적 간접광에 영향"이 켜져 있고
+ * 거리 필드가 있는 메시만 장면에 넣는다(Engine/Private/PrimitiveSceneProxy.cpp:1701-1734 UpdateVisibleInLumenScene).
+ * 스켈레탈 메시는 거리 필드가 없어 원래 빠져 있으므로 정적 메시 표현(M0 static, M1부터의 ISM)도 같은 조건으로 맞춘다.
+ * 두 조건 중 하나만 꺼도 결과가 같아(M1 N=2000 시험: 간접광만 끔 GPU 6.0ms, 거리 필드만 끔 5.8ms, 둘 다 켬 29.0ms) 뜻이 맞는 간접광 쪽만 끈다.
+ * 미니언은 여전히 Lumen GI를 받고 그림자를 그린다.
+ */
+inline void LabExcludeFromLumen(UPrimitiveComponent& Component)
+{
+	Component.SetAffectDynamicIndirectLighting(false);
+}
+
+/**
  * M0 액터 군중의 개체. 오브로 직진하고, 소멸 반경에 들거나 저격되면 죽는 애니 뒤 사라진다.
  * AI 컨트롤러 없이 CharacterMovement가 직접 돈다(bRunPhysicsWithNoController). 개체끼리는 충돌하지 않는다(회피 없음, plan.md M1 (c)).
  */
