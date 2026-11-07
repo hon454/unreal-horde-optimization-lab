@@ -53,7 +53,7 @@ struct FLabSnipeBands
 	 * 거기서 죽기 때문이다(2026-11-07 사용자 의견). 근거리 밴드의 사망은 피해 범위가 만든다.
 	 */
 	static constexpr float Edges[4] = { 3000.f, 8000.f, 20000.f, FLabScenario::MapRadius + 1.f };
-	/** 구간마다 고르는 수(30\~80m, 80\~200m, 200m\~). 합이 FLabScenario::SnipeCount(5)다. */
+	/** 구간마다 고르는 수(30~80m, 80~200m, 200m~). 합이 FLabScenario::SnipeCount(5)다. */
 	static constexpr int32 Counts[3] = { 1, 2, 2 };
 	static constexpr int32 Num = 3;
 
