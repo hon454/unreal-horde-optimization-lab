@@ -34,9 +34,6 @@ struct FLabScenario
 	static constexpr float OrbViewPitch = -12.f;     // P1 내려다보는 각
 	static constexpr float OrbViewPeriod = 60.f;     // P1 1rpm으로 제자리 회전, 측정 60초에 한 바퀴
 	static constexpr float TopDownHeight = 10000.f;  // P2 탑뷰 100m. 가장 가까운 개체도 100m 떨어져 근거리 밴드(초안 30m)에 들지 않는다. 300m는 너무 멀었다(2026-11-06 사용자 의견)
-	static constexpr float GroundOffset = 1000.f;    // P3 오브 뒤 10m(피해 범위 8m 밖)에서 +X 방향 고정. 오브 타워가 화면 가운데에 보인다(2026-11-06 사용자 의견)
-	static constexpr float GroundEyeHeight = 500.f;  // P3 높이 5m(1.7m는 너무 낮았다, 2026-11-06 사용자 의견)
-	static constexpr float GroundPitch = -8.f;       // P3 내려다보는 각
 
 	// budget 변형의 Significance 거리 단계(25/50/100/250m). plan.md "M0"
 	static constexpr float BudgetTiers[4] = { 2500.f, 5000.f, 10000.f, 25000.f };
@@ -47,7 +44,7 @@ struct FLabScenario
 struct FLabConfig
 {
 	int32 N = 500;
-	int32 Preset = 1;          // 1 궤도, 2 탑뷰, 3 지상
+	int32 Preset = 1;          // 1 오브 시점, 2 탑뷰(P3는 2026-11-07에 뺐다)
 	int32 Seed = 1;
 	ELabVariant Variant = ELabVariant::Full;
 	bool bBench = false;       // 벤치마크 러너(M0 7번)

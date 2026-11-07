@@ -12,7 +12,7 @@
 - [x] 2. 엔진 프로젝트, 모듈, 플러그인. `EngineAssociation` = `{DEC43C63-4155-0388-B4B3-6B830A2347BA}`.
 - [x] 3. `build`, `run-dev`, `package`(Test, 첫 빌드 26분), `run-bench`. 시험 측정 1회로 패키지 → CSV → `runs.csv` 경로 확인.
 - [ ] 4. 미니언은 옮겼고(`Scripts/migrate-assets.py`) 늘어짐은 메시 콜리전을 꺼서 막았다. **AnimBP `ABP_LabMinion`이 없다**(사용자에게 요청한 일). 그때까지 `full`은 싱글 노드 임시 경로로 돈다.
-- [x] 5. 맵 `L_Bench`(Basic 템플릿, 바닥 540m), 오브(테슬라 코일 타워, 보라 범위 6m, 가중 피해), 스포너, 카메라 P1 오브 뒤 회전 / P2 탑뷰 100m / P3 오브 뒤 고정.
+- [x] 5. 맵 `L_Bench`(Basic 템플릿, 바닥 540m), 오브(테슬라 코일 타워, 보라 범위 8m, 가중 피해, 번개가 범위 안 대상을 향함), 스포너, 카메라 P1 오브 뒤 회전 / P2 탑뷰 100m(P3는 ADR-0003으로 뺐다). 조명은 한낮과 해 질 녘 사이로 고정(`Scripts/create-bench-map.py`).
 - [x] 6. 변형 `full`/`static`/`budget`/`uro`. `static`은 `Scripts/make-static-minion.py`가 만든 `/Game/Lab/Derived/SM_LabMinion`.
 - [x] 7. 벤치마크 러너(`-LabBench`), `summarize.py`(표준 라이브러리만).
 - [ ] 8. 시나리오 고정값 실측 보고와 사용자 확정. 초안은 `Source/HordeOptLab/LabConfig.h` `FLabScenario`. **맵 반경 결정 대기**(250m 유지 vs 500m 추천).

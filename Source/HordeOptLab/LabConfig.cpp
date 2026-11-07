@@ -24,7 +24,7 @@ const FLabConfig& FLabConfig::Get()
 			else if (Variant == TEXT("uro")) { C.Variant = ELabVariant::Uro; }
 		}
 		C.N = FMath::Max(C.N, 1);
-		C.Preset = FMath::Clamp(C.Preset, 1, 3);
+		C.Preset = FMath::Clamp(C.Preset, 1, 2);
 		return C;
 	}();
 	return Config;

@@ -4,7 +4,7 @@
 param(
     [Parameter(Mandatory)][string]$Milestone,
     [Parameter(Mandatory)][int]$N,
-    [ValidateSet("P1", "P2", "P3")][string]$Preset = "P1",
+    [ValidateSet("P1", "P2")][string]$Preset = "P1",
     [ValidateSet("full", "static", "budget", "uro")][string]$Variant = "full",
     [int]$Seed = 1,
     [int]$Runs = 3,

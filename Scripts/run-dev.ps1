@@ -2,7 +2,7 @@
 #   -Small: N=100, P1, 20초 뒤 자동 종료. 완료 확인(AGENTS.md "완료 확인" 2번)에 쓴다.
 param(
     [int]$N = 500,
-    [ValidateSet("P1", "P2", "P3")][string]$Preset = "P1",
+    [ValidateSet("P1", "P2")][string]$Preset = "P1",
     [int]$Seed = 1,
     [ValidateSet("full", "static", "budget", "uro")][string]$Variant = "full",
     [double]$Duration = 0,
