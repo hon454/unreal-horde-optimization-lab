@@ -16,7 +16,7 @@
 - [x] 6. 변형 `full`/`static`/`budget`/`uro`. `static`은 `Scripts/make-static-minion.py`가 만든 `/Game/Lab/Derived/SM_LabMinion`.
 - [x] 7. 벤치마크 러너(`-LabBench`), `summarize.py`(표준 라이브러리만).
 - [x] 8. 시나리오 고정값 확정(2026-11-07): R 500m, 피해 범위 8m, 저격 2초 5명, 밴드 30/80/200m, 2560x1440 Epic, 시드 20261106. 표는 [measurement.md](Guides/measurement.md) "확정값". `LODMaxCount`만 E0 뒤에 정한다.
-- [ ] 9. E0 측정, 대표 스크린샷, `plot.py`.
+- [ ] 9. E0 측정 완료(아래 표). 남은 것: 대표 스크린샷(P1, N=5k), `plot.py`, `LODMaxCount` 결정.
 - [ ] 10. ADR-0002 초안, README 결과 초판, 태그 `M0`, Worklog, 글 대기열.
 
 ## 명령
@@ -34,7 +34,16 @@ py -3 Scripts/summarize.py --milestone M0
 
 ## 측정 결과
 
-진행 중인 묶음이 없다. 시험 1회(N=500 P1 full, 싱글 노드 애니, 1920x1080 창): Game p50 13.7ms, 프레임 p50 14.5ms. 비교에 쓰지 않는다.
+E0(M0, Test 패키지, 2560x1440 Epic, 2026-11-07, `Measurements/M0/summary.csv`). Game Thread p50(ms)이 병목이고 Render·GPU는 N=5k에서도 16ms 안팎이다.
+
+| 변형 | P1 N250 | 500 | 1k | 2k | 5k | N@16.7ms(P1, 로그 보간) |
+| --- | --- | --- | --- | --- | --- | --- |
+| full | 5.3 | 9.8 | 18.2 | 38.0 | 150.0 | 약 880 |
+| static | 3.6 | 6.7 | 12.5 | 24.6 | 84.4 | 약 1,270 |
+| budget(v2) | | | 15.9 | 29.0 | 109.9 | 약 1,050 |
+| uro | | | 16.7 | 34.1 | 124.1 | 약 1,000 |
+
+P2는 full·static 모두 P1보다 0.2\~1.7ms 낮다(N=5k full만 18ms 차이). 첫 묶음의 budget 9회는 할당기가 꺼져 있어 무효(`Saved/Profiling/CSV/invalid/`), v2로 다시 쟀다.
 
 ## 막힌 것
 
