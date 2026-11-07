@@ -28,10 +28,13 @@ ALabMinion::ALabMinion(const FObjectInitializer& ObjectInitializer)
 	SkelMesh->SetRelativeLocation(FVector(0.f, 0.f, -Capsule->GetUnscaledCapsuleHalfHeight()));
 	SkelMesh->SetRelativeRotation(FRotator(0.f, -90.f, 0.f));
 
-	UCharacterMovementComponent* Move = GetCharacterMovement();
-	Move->bRunPhysicsWithNoController = true;
-	Move->MaxWalkSpeed = FLabScenario::MoveSpeed;
-	Move->bOrientRotationToMovement = true;
+	// pawn 변형은 CharacterMovement를 만들지 않는다(ALabMinionPawn).
+	if (UCharacterMovementComponent* Move = GetCharacterMovement())
+	{
+		Move->bRunPhysicsWithNoController = true;
+		Move->MaxWalkSpeed = FLabScenario::MoveSpeed;
+		Move->bOrientRotationToMovement = true;
+	}
 	bUseControllerRotationYaw = false;
 }
 
@@ -76,7 +79,7 @@ void ALabMinion::EnterState(ELabMinionState NewState)
 	case ELabMinionState::Hit: Seq = AssetsRef->Hit; StateTimeLeft = Seq ? Seq->GetPlayLength() : 0.5f; break;
 	case ELabMinionState::Dead: Seq = AssetsRef->Death; StateTimeLeft = Seq ? Seq->GetPlayLength() : 1.f; break;
 	}
-	if (NewState != ELabMinionState::Walk)
+	if (NewState != ELabMinionState::Walk && GetCharacterMovement())
 	{
 		GetCharacterMovement()->StopMovementImmediately();
 		GetCharacterMovement()->DisableMovement();
@@ -127,7 +130,16 @@ void ALabMinion::Tick(float DeltaSeconds)
 	if (State == ELabMinionState::Walk)
 	{
 		const FVector ToOrb = Spawner->GetOrbLocation() - GetActorLocation();
-		AddMovementInput(FVector(ToOrb.X, ToOrb.Y, 0.f).GetSafeNormal());
+		const FVector Dir = FVector(ToOrb.X, ToOrb.Y, 0.f).GetSafeNormal();
+		if (GetCharacterMovement())
+		{
+			AddMovementInput(Dir);
+		}
+		else
+		{
+			// pawn 변형: 평지라 바닥 검사 없이 위치만 옮기고 진행 방향을 본다(스윕 없음).
+			SetActorLocationAndRotation(GetActorLocation() + Dir * FLabScenario::MoveSpeed * DeltaSeconds, Dir.Rotation());
+		}
 		return;
 	}
 
@@ -162,6 +174,13 @@ void ALabMinionStatic::SetupVisual(const FLabMinionAssets& Assets)
 	GetMesh()->SetSkeletalMesh(nullptr);
 	GetMesh()->SetComponentTickEnabled(false);
 	StaticVisual->SetStaticMesh(Assets.StaticMesh);
+}
+
+// pawn 변형 ----------------------------------------------------------------
+
+ALabMinionPawn::ALabMinionPawn(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer.DoNotCreateDefaultSubobject(ACharacter::CharacterMovementComponentName))
+{
 }
 
 // budget 변형 ---------------------------------------------------------------

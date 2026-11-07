@@ -9,6 +9,7 @@ enum class ELabVariant : uint8
 	Static, // 같은 ACharacter + UStaticMeshComponent, 애니메이션 없음
 	Budget, // Full + USkeletalMeshComponentBudgeted + Significance 거리 단계 + a.Budget.BudgetMs 2
 	Uro,    // Full + URO만
+	Pawn,   // Full에서 CharacterMovement를 빼고 위치를 직접 이동
 };
 
 /**

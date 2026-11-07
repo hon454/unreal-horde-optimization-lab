@@ -51,6 +51,7 @@ TSubclassOf<ALabMinion> ALabCrowdSpawner::MinionClass() const
 	{
 	case ELabVariant::Static: return ALabMinionStatic::StaticClass();
 	case ELabVariant::Budget: return ALabMinionBudget::StaticClass();
+	case ELabVariant::Pawn: return ALabMinionPawn::StaticClass();
 	default: return ALabMinion::StaticClass();
 	}
 }

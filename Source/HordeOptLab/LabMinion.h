@@ -71,6 +71,19 @@ protected:
 	virtual void SetupVisual(const FLabMinionAssets& Assets) override;
 };
 
+/**
+ * pawn 변형: CharacterMovement를 만들지 않고 위치를 직접 옮긴다. 캡슐·스켈레탈 메시·AnimBP는 full과 같다.
+ * "액터를 최대한 가볍게 만들어도 여기까지"를 보는 액터 쪽 천장이다(2026-11-07 사용자 결정, budget·uro와 같은 대조군).
+ * APawn을 새로 만들지 않고 ACharacter에서 이동 컴포넌트만 빼서 스포너·오브 코드를 그대로 쓴다.
+ */
+UCLASS()
+class ALabMinionPawn : public ALabMinion
+{
+	GENERATED_BODY()
+public:
+	ALabMinionPawn(const FObjectInitializer& ObjectInitializer);
+};
+
 /** budget 변형: 메시가 USkeletalMeshComponentBudgeted이고 Significance Manager 거리 단계로 중요도를 받는다. */
 UCLASS()
 class ALabMinionBudget : public ALabMinion

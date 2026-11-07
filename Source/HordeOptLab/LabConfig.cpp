@@ -29,6 +29,7 @@ const FLabConfig& FLabConfig::Get()
 			if (Variant == TEXT("static")) { C.Variant = ELabVariant::Static; }
 			else if (Variant == TEXT("budget")) { C.Variant = ELabVariant::Budget; }
 			else if (Variant == TEXT("uro")) { C.Variant = ELabVariant::Uro; }
+			else if (Variant == TEXT("pawn")) { C.Variant = ELabVariant::Pawn; }
 		}
 		C.N = FMath::Max(C.N, 1);
 		C.Preset = FMath::Clamp(C.Preset, 1, 2);
@@ -44,6 +45,7 @@ const TCHAR* FLabConfig::VariantName(ELabVariant V)
 	case ELabVariant::Static: return TEXT("static");
 	case ELabVariant::Budget: return TEXT("budget");
 	case ELabVariant::Uro: return TEXT("uro");
+	case ELabVariant::Pawn: return TEXT("pawn");
 	default: return TEXT("full");
 	}
 }
