@@ -58,10 +58,6 @@ def const(mat, value, x, y):
     return c
 
 
-def const2(mat, x, y):
-    return mel.create_material_expression(mat, unreal.MaterialExpressionConstant2Vector, x, y)  # (0, 0)
-
-
 def binary(mat, cls, a, b, x, y, a_out=""):
     e = mel.create_material_expression(mat, cls, x, y)
     mel.connect_material_expressions(a, a_out, e, "A")
@@ -91,7 +87,7 @@ def make_material(mode):
     mel.connect_material_expressions(rough, "", make, "Roughness")
 
     # 죽기 표현(2026-11-08 사용자 요청): 로직은 그대로 두고 머티리얼만 바꾼다. 커스텀 데이터 0(Frame)이 죽기 클립 안이면
-    # 진행도 t = saturate((Frame - DeathStart) / (DeathEnd - DeathStart))로 (1) 색을 어둡게 (2) 끝부분에서 땅속으로 내린다.
+    # 진행도 t = saturate((Frame - DeathStart) / (DeathEnd - DeathStart))로 색을 붉게 바꾼다.
     # CPU가 넘기는 숫자는 늘지 않는다(E2에서 잰 VAT 비용은 커스텀 데이터 쓰기였다). 걷기·피격 프레임은 DeathStart보다 작아 t = 0이다.
     frame = mel.create_material_expression(mat, unreal.MaterialExpressionPerInstanceCustomData, -1800, 700)
     frame.set_editor_property("data_index", 0)
@@ -102,37 +98,25 @@ def make_material(mode):
     t = mel.create_material_expression(mat, unreal.MaterialExpressionSaturate, -1300, 750)
     mel.connect_material_expressions(binary(mat, unreal.MaterialExpressionDivide, num, den, -1450, 750), "", t, "")
 
-    # (1) 어둡게: 진행도 0.4에 이미 다 어두워진다. 밝기 1 → DeadTint
+    # 붉게 물들이기: 진행도 0.4에 다 바뀐다. 원래 색 x 흰색 → 원래 색 x DeadColor. 땅으로 꺼지기는 시험 뒤 뺐다(2026-11-08 사용자 의견:
+    # 어둡게만 하면 산 미니언과 잘 구별되지 않고, 붉은 기를 섞는 편이 낫다).
     dark = mel.create_material_expression(mat, unreal.MaterialExpressionSaturate, -1100, 600)
     mel.connect_material_expressions(binary(mat, unreal.MaterialExpressionMultiply, t, const(mat, 2.5, -1300, 600), -1200, 600), "", dark, "")
+    white = mel.create_material_expression(mat, unreal.MaterialExpressionConstant3Vector, -1100, 400)
+    white.set_editor_property("constant", unreal.LinearColor(1.0, 1.0, 1.0, 1.0))
+    dead = mel.create_material_expression(mat, unreal.MaterialExpressionVectorParameter, -1100, 500)
+    dead.set_editor_property("parameter_name", "DeadColor")
+    dead.set_editor_property("default_value", unreal.LinearColor(0.9, 0.12, 0.08, 1.0))
     tint = mel.create_material_expression(mat, unreal.MaterialExpressionLinearInterpolate, -900, 500)
-    mel.connect_material_expressions(const(mat, 1.0, -1100, 450), "", tint, "A")
-    mel.connect_material_expressions(scalar_param(mat, "DeadTint", 0.3, -1100, 500), "", tint, "B")
+    mel.connect_material_expressions(white, "", tint, "A")
+    mel.connect_material_expressions(dead, "RGB", tint, "B")
     mel.connect_material_expressions(dark, "", tint, "Alpha")
     mel.connect_material_expressions(binary(mat, unreal.MaterialExpressionMultiply, base, tint, -750, -200, "RGB"), "", make, "BaseColor")
 
     call = mel.create_material_expression(mat, unreal.MaterialExpressionMaterialFunctionCall, -250, 0)
     call.set_editor_property("material_function", unreal.load_asset(A2T + "/MF_%sAnimation" % mode))
     mel.connect_material_expressions(make, "", call, "Material Attributes")
-
-    # (2) 가라앉히기: 진행도 SinkStart부터 끝까지 SinkDepth(cm)만큼 내린다. MF가 쓴 WPO에 더해야 하므로 속성을 풀어 다시 묶는다.
-    brk = mel.create_material_expression(mat, unreal.MaterialExpressionBreakMaterialAttributes, 0, 0)
-    mel.connect_material_expressions(call, "Result", brk, "")
-    sink_start = scalar_param(mat, "SinkStart", 0.68, -1100, 900)
-    st = mel.create_material_expression(mat, unreal.MaterialExpressionSaturate, -700, 900)
-    sink_num = binary(mat, unreal.MaterialExpressionSubtract, t, sink_start, -900, 850)
-    sink_den = binary(mat, unreal.MaterialExpressionSubtract, const(mat, 1.0, -1100, 1000), sink_start, -900, 950)
-    mel.connect_material_expressions(binary(mat, unreal.MaterialExpressionDivide, sink_num, sink_den, -800, 900), "", st, "")
-    depth = binary(mat, unreal.MaterialExpressionMultiply, st, scalar_param(mat, "SinkDepth", 150.0, -700, 1000), -550, 950)
-    down = mel.create_material_expression(mat, unreal.MaterialExpressionAppendVector, -350, 950)
-    mel.connect_material_expressions(const2(mat, -550, 1050), "", down, "A")
-    mel.connect_material_expressions(binary(mat, unreal.MaterialExpressionMultiply, depth, const(mat, -1.0, -650, 1100), -450, 1050), "", down, "B")
-    wpo = binary(mat, unreal.MaterialExpressionAdd, brk, down, 250, 400, "WorldPositionOffset")
-    out = mel.create_material_expression(mat, unreal.MaterialExpressionMakeMaterialAttributes, 500, 0)
-    for pin in ["BaseColor", "Metallic", "Specular", "Roughness", "Normal"]:
-        mel.connect_material_expressions(brk, pin, out, pin)
-    mel.connect_material_expressions(wpo, "", out, "WorldPositionOffset")
-    mel.connect_material_property(out, "", unreal.MaterialProperty.MP_MATERIAL_ATTRIBUTES)
+    mel.connect_material_property(call, "Result", unreal.MaterialProperty.MP_MATERIAL_ATTRIBUTES)
     mel.recompile_material(mat)
     eal.save_loaded_asset(mat)
     return mat
