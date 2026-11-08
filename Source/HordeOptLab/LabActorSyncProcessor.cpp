@@ -23,7 +23,7 @@ CSV_DECLARE_CATEGORY_EXTERN(Lab);
 bool ULabActorManagement::IsActorReadyForRepresentation(const AActor& Actor) const
 {
 	const ALabMinionMassActor* Minion = Cast<ALabMinionMassActor>(&Actor);
-	return !Minion || Minion->bPoseReady;
+	return !Minion || Minion->bPoseReady || FLabConfig::Get().HydrateFix < 2;
 }
 
 void ULabActorManagement::TeleportActor(const FTransform& Transform, AActor& Actor, FMassCommandBuffer& CommandBuffer) const
@@ -32,7 +32,7 @@ void ULabActorManagement::TeleportActor(const FTransform& Transform, AActor& Act
 	// 우리 액터의 원점은 캡슐 중심이라 그대로 두면 그 프레임에 88cm 가라앉았다가 다음 프레임 동기화에서 올라온다.
 	// 그 수직 이동이 모션 블러로 세로 줄무늬 잔상을 만들었다(2026-11-08 60fps 연속 캡처). 동기화 프로세서와 같은 높이로 옮긴다.
 	FTransform Lifted = Transform;
-	if (const ACharacter* Character = Cast<ACharacter>(&Actor))
+	if (const ACharacter* Character = Cast<ACharacter>(&Actor); Character && FLabConfig::Get().HydrateFix >= 4)
 	{
 		Lifted.AddToTranslation(FVector(0.f, 0.f, Character->GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight()));
 	}
@@ -42,7 +42,8 @@ void ULabActorManagement::TeleportActor(const FTransform& Transform, AActor& Act
 EMassActorSpawnRequestAction ULabActorManagement::OnPostActorSpawn(const FMassActorSpawnRequestHandle& SpawnRequestHandle, FConstStructView SpawnRequest, TSharedRef<FMassEntityManager> EntityManager) const
 {
 	// 새로 스폰된 액터도 엔진이 보이게 만든 직후다(MassActorSpawnerSubsystem.cpp:328). 포즈를 맞출 때까지 숨긴다.
-	if (ALabMinionMassActor* Minion = Cast<ALabMinionMassActor>(SpawnRequest.Get<const FMassActorSpawnRequest>().SpawnedActor.Get()))
+	ALabMinionMassActor* Minion = Cast<ALabMinionMassActor>(SpawnRequest.Get<const FMassActorSpawnRequest>().SpawnedActor.Get());
+	if (Minion && FLabConfig::Get().HydrateFix >= 2)
 	{
 		Minion->HideUntilPoseReady();
 	}
@@ -83,6 +84,7 @@ void ULabActorSyncProcessor::Execute(FMassEntityManager& EntityManager, FMassExe
 	const float HitDuration = Crowd->HitDuration;
 	const float DeathDuration = Crowd->DeathDuration;
 	const bool bSigBudget = FLabConfig::Get().Variant == ELabVariant::M3BudgetSig;
+	const int32 HydrateFix = FLabConfig::Get().HydrateFix;
 	int32 Actors = 0;
 	int32 Rebinds = 0;
 	int32 DbgHoles = 0, DbgOverlaps = 0, DbgSwitches = 0;
@@ -145,15 +147,25 @@ void ULabActorSyncProcessor::Execute(FMassEntityManager& EntityManager, FMassExe
 				case ELabMinionState::Dead: T = DeathDuration - Minion.StateTimeLeft; break;
 				}
 				Anim->State = State;
-				Anim->StartTime = FMath::Max(T, 0.f);
-				Anim->InitializeAnimation(); // 시퀀스 플레이어가 StartTime부터 다시 시작한다(AnimNode_SequencePlayer.cpp:61)
+				if (HydrateFix >= 1)
+				{
+					Anim->StartTime = FMath::Max(T, 0.f);
+					Anim->InitializeAnimation(); // 시퀀스 플레이어가 StartTime부터 다시 시작한다(AnimNode_SequencePlayer.cpp:61)
+				}
 				Actor->BoundSerial = Minion.Serial;
 				Actor->AppliedState = State;
-				// 이 프레임에는 아직 포즈가 계산되지 않았다. 메시가 두 번 틱할 때까지 숨기고, 그동안 VAT 인스턴스가 대신 보인다.
-				Actor->HideUntilPoseReady();
-				Actor->PendingReadyFrames = 2;
-				SkelMesh->ResetSceneVelocity();
-				SkelMesh->ClearMotionVector();
+				if (HydrateFix >= 2)
+				{
+					// 이 프레임에는 아직 포즈가 계산되지 않았다. 메시가 두 번 틱할 때까지 숨기고, 그동안 VAT 인스턴스가 대신 보인다.
+					Actor->HideUntilPoseReady();
+					Actor->PendingReadyFrames = 2;
+					SkelMesh->ResetSceneVelocity();
+					SkelMesh->ClearMotionVector();
+				}
+				else
+				{
+					Actor->bPoseReady = true;
+				}
 				++Rebinds;
 #if !UE_BUILD_TEST
 				LabLogScreenEvent(TEXT("hydrate"), Crowd->SnipeView, Xf.GetLocation());

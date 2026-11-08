@@ -90,6 +90,12 @@ struct FLabConfig
 	FString Label;
 	float DurationSec = 0.f;   // 0보다 크면 그 시간 뒤 종료(개발용 -Small 실행)
 	float ShotAtSec = 0.f;     // 0보다 크면 그 시각에 QHD 스크린샷 한 장(Saved/Screenshots/)
+	/**
+	 * M3 전환(하이드레이션) 대책 단계. 대책을 하나씩 쌓아 온 과정을 같은 장면으로 다시 보이려고 둔다(-LabHydrateFix=, 기본 4 = 전부).
+	 * 0 상태만 맞춤, 1 + 시작 시각 맞추기, 2 + 준비될 때까지 VAT 유지(액터 숨김), 3 숨김 대신 화면·그림자에서만 빼기, 4 + 엔진 이동 높이 맞추기.
+	 * 근거와 캡처는 Measurements/M3/shots/transition/README.md.
+	 */
+	int32 HydrateFix = 4;
 
 	static const FLabConfig& Get();
 	static const TCHAR* VariantName(ELabVariant V);

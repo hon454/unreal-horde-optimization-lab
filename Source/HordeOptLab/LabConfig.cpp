@@ -14,6 +14,7 @@ const FLabConfig& FLabConfig::Get()
 		FParse::Value(Cmd, TEXT("-LabLabel="), C.Label);
 		FParse::Value(Cmd, TEXT("-LabDuration="), C.DurationSec);
 		FParse::Value(Cmd, TEXT("-LabShotAt="), C.ShotAtSec);
+		FParse::Value(Cmd, TEXT("-LabHydrateFix="), C.HydrateFix);
 		C.bBench = FParse::Param(Cmd, TEXT("LabBench"));
 		C.bHud = FParse::Param(Cmd, TEXT("LabHud")) && !C.bBench;
 
