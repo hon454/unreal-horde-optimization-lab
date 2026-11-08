@@ -14,11 +14,25 @@ Night of the Dead에서 측정 없이 액터로 했던 좀비 호드 최적화�
 
 ## 결과 한눈에 보기
 
-M0을 재면 채운다. 대표 그래프는 "60fps를 지키는 최대 N"이고, 보조 그래프는 고정 조건(N=5k, 오브 시점)의 Game / Render / GPU ms다.
+![60fps를 지키는 최대 N](Docs/figures/n-at-60fps.svg)
+
+60fps(Game·Render·GPU 중 가장 느린 것의 p50이 16.7ms 이하)를 지키는 최대 개체 수다. 오브 시점, 2560x1440 Epic, Test 패키지, 3회 중앙값(`Measurements/M0/summary.csv`, `Measurements/M1/summary.csv`).
+
+| 단계 · 변형 | 1k | 2k | 5k | 20k | 50k | 60fps 최대 N |
+| --- | --- | --- | --- | --- | --- | --- |
+| M0 액터 + AnimBP | 18.4 | 38.5 | 150.7 | | | 874 |
+| M0 Animation Budget Allocator | 16.3 | 30.1 | 111.9 | | | 1,019 |
+| M0 CharacterMovement 틱 끔 | 13.3 | 26.4 | 70.0 | | | 1,197 |
+| M0 애니 없는 액터 | 12.1 | 25.1 | 98.1 | | | 1,278 |
+| M1 Mass(애니 없는 ISM) | 1.4 | 1.8 | 3.1 | 12.4 | 32.9 | 약 21,200 |
+
+칸의 수치는 Game Thread p50(ms)이다. 액터는 무엇을 덧대도 1천 개 근처에서 막혔다. 같은 로직을 Mass로 옮기기만 하자 한계가 약 16배 올랐고, 2만 개에서는 Game Thread가 아니라 GPU가 먼저 한계에 닿았다(M1은 측정 중이다).
+
+![오브 시점, 액터 5,000개](Measurements/M0/shots/full-N5000-P1.png)
 
 | 단계 | 바꾼 것 | 태그 |
 | --- | --- | --- |
-| M0 기준선 | `ACharacter` + AnimBP 군중. 변형: 애니 없는 액터, URO, Animation Budget Allocator | |
+| M0 기준선 | `ACharacter` + AnimBP 군중. 변형: 애니 없는 액터, CharacterMovement 틱 끔, URO, Animation Budget Allocator | |
 | M1 Mass 코어 | 이동·피해·사망 로직을 Fragment와 Processor로. 표현은 애니 없는 ISM | |
 | M2 ISM + VAT | 먼 개체를 AnimToTexture로 구운 애니메이션이 있는 ISM으로 | |
 | M3 하이드레이션 + 예산 | 가까운 개체에 액터를 붙이고, 그 애니메이션 비용을 URO / Budget Allocator로 제한 | |
@@ -34,7 +48,7 @@ M0을 재면 채운다. 대표 그래프는 "60fps를 지키는 최대 N"이고,
 
 ## 측정 방법
 
-- 고정 시드로 초기 조건을 재현한다. 개체는 정상 상태 분포(밀도 ∝ 1/r)로 미리 놓고 30초 뒤 60초를 잰다. 궤적은 비결정적이라 3회 실행의 중앙값과 범위를 함께 적는다.
+- 고정 시드로 초기 조건을 재현한다. 개체는 정상 상태 분포(밀도 ∝ 1/r)로 미리 놓고 15초 뒤 60초를 잰다. 궤적은 비결정적이라 3회 실행의 중앙값과 범위를 함께 적는다.
 - 개체 수 N은 1k와 5k를 모든 단계에서 재고, 단계마다 범위를 넓힌다.
 - 수치는 Test 구성 패키지에서 `csvprofile`로 얻는다. Development 빌드의 수치는 비교에 쓰지 않는다.
 - 중앙값의 차이가 두 구성의 범위 중 큰 쪽보다 작으면 "구별되지 않았다"고 적는다.
@@ -49,7 +63,17 @@ M0을 재면 채운다. 대표 그래프는 "60fps를 지키는 최대 N"이고,
 
 ## 실행
 
-M0 뒤에 채운다. 명령은 [Docs/Guides/commands.md](Docs/Guides/commands.md)에 있다.
+단계는 한 빌드 안의 실행 모드다(`-LabStage=M0|M1`). Test 패키지를 만들고 묶음 스크립트로 잰다.
+
+```powershell
+powershell -ExecutionPolicy Bypass -File Scripts/package.ps1
+powershell -ExecutionPolicy Bypass -File Scripts/run-e0.ps1
+powershell -ExecutionPolicy Bypass -File Scripts/run-e1.ps1
+py -3 Scripts/summarize.py --milestone M0
+py -3 Scripts/plot.py
+```
+
+Fab 에셋은 저장소에 없다. 준비와 나머지 명령은 [Docs/Guides/commands.md](Docs/Guides/commands.md)에 있다.
 
 ## 구조
 
