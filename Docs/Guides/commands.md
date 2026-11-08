@@ -65,6 +65,7 @@ LAB_MIGRATE_SET=minion LAB_MIGRATE_DRY=0 LAB_MIGRATE_DEST="G:/Epic Games/UE_5.8.
 ## 파생 에셋과 맵
 
 - `Scripts/make-static-minion.py`: `static` 변형의 `/Game/Lab/Derived/SM_LabMinion`을 만든다(gitignore). 커맨드렛에 `-AllowCommandletRendering`이 필요하다. 새 체크아웃에서는 에셋 이전 뒤 한 번 돌린다.
+- `Scripts/bake-vat.py`: M2 VAT(걷기·피격·죽기)를 Bone·Vertex 모드로 굽고 정적 메시·데이터 에셋·텍스처·머티리얼을 `/Game/Lab/VAT/Baked/`(gitignore)에 만든다. 실행은 `make-static-minion.py`와 같다(`-AllowCommandletRendering`). 새 체크아웃에서 M2 이상을 돌리기 전에 한 번 돌린다.
 - `Scripts/create-bench-map.py`: `L_Bench`를 엔진 Basic 템플릿으로 다시 만든다(바닥을 맵 반경 + 20m로 키우고 VolumetricCloud 삭제). 기존 맵이 있으면 `.umap` 파일을 먼저 지운다(스크립트의 `delete_asset`이 커맨드렛에서 듣지 않았다).
 
 ```bash
@@ -76,6 +77,8 @@ LAB_MIGRATE_SET=minion LAB_MIGRATE_DRY=0 LAB_MIGRATE_DEST="G:/Epic Games/UE_5.8.
 - `package.ps1`이 `Packaged/Test/Windows/`를 만들고 `Packaged/Test/commit.txt`에 커밋 해시(작업 트리가 더러우면 `(dirty)`)를 남긴다. 쿡은 `L_Bench`와, 코드가 경로로 부르는 `/Game/ParagonMinions`·`/Game/NiagaraExamples`·`/Game/Lab` 폴더다(`Config/DefaultGame.ini`).
 - `run-bench.ps1 -Milestone M0 -N <n> -Preset <P1|P2> -Variant <v> [-Runs 3] [-Tag x] [-ResX -ResY]`: r0 + r1\~rRuns. 실행마다 CSV를 패키지 `Saved/Profiling/CSV/`에서 프로젝트 `Saved/Profiling/CSV/`로 옮기고 `Saved/Lab/<라벨>.summary.txt`를 출력한다. 해상도 기본값 1920x1080 창은 M0 8번에서 확정한다.
 - `run-e1.ps1 [-Tag x]`: M1 E1 (a) 묶음(mass N {1k, 2k, 5k, 20k, 50k} x P1·P2 x 3회, 첫 조건만 r0). M1부터 변형 이름은 라벨용 `mass`다. 개발 실행은 `run-dev.ps1 -Extra "-LabStage=M1"`.
+- `run-e2.ps1 [-Tag x] [-OnlySub]`: M2 E2 묶음. (a) N {1k, 5k, 20k, 50k} x P1·P2 x 3회로 M1(`noanim`, `run-bench.ps1 -Stage M1`)과 M2(`mass`)를 번갈아, (b)(c)(d) 변형(`vatvert`, `vatcull`, `vatcullvis`, `vatdie0`, `vatdie1k`)은 5k P1 x 3회. 약 90분. (d)는 다시 설계해 `run-bench.ps1 -Milestone M2 -Variant kill0|kill1k -N 5000`으로 쟀다.
+- `run-bench.ps1 -Stage <M>`: 결과 폴더·라벨은 `-Milestone`, 실행 단계만 바꾼다(같은 묶음에서 이전 단계를 잴 때).
 - `summarize.py`는 `py -3`(3.9)로 돌린다. pandas 없이 표준 라이브러리만 쓴다.
 
 ## Unreal MCP를 HTTP로 직접 부르기
