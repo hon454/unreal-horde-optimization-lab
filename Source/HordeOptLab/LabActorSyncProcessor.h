@@ -3,7 +3,18 @@
 #include "CoreMinimal.h"
 #include "MassProcessor.h"
 #include "MassEntityQuery.h"
+#include "MassRepresentationActorManagement.h"
 #include "LabActorSyncProcessor.generated.h"
+
+/** 하이드레이션 액터가 포즈를 맞춘 뒤에만 "준비됨"을 엔진에 알린다. 그 전까지 엔진이 VAT 인스턴스를 계속 그린다(bWaitForActorVisualReadiness). */
+UCLASS()
+class ULabActorManagement : public UMassRepresentationActorManagement
+{
+	GENERATED_BODY()
+protected:
+	virtual bool IsActorReadyForRepresentation(const AActor& Actor) const override;
+	virtual EMassActorSpawnRequestAction OnPostActorSpawn(const FMassActorSpawnRequestHandle& SpawnRequestHandle, FConstStructView SpawnRequest, TSharedRef<FMassEntityManager> EntityManager) const override;
+};
 
 /**
  * M3 액터 동기화. 0~30m에서 액터로 그리는 엔티티마다 매 프레임 액터 위치, 애니 상태, 죽기 색을 쓴다(plan.md "M3", 2026-11-08 사용자 결정).

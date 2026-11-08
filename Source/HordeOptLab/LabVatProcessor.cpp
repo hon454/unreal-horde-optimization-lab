@@ -71,7 +71,9 @@ void ULabVatISMProcessor::Execute(FMassEntityManager& EntityManager, FMassExecut
 			const FMassRepresentationLODFragment& RepresentationLOD = RepresentationLODList[EntityIt];
 			FMassRepresentationFragment& Representation = RepresentationList[EntityIt];
 
-			if (Representation.CurrentRepresentation == EMassRepresentationType::StaticMeshInstance)
+			// 액터 준비를 기다리는 동안(bWaitForActorVisualReadiness) 엔진은 ISM을 떼지 않는다. 그동안도 위치와 프레임을 계속 써서 VAT 인스턴스가 멈추지 않게 한다.
+			const bool bWaitingForActor = Representation.IsWaitingForActorVisualReadiness() && Representation.PrevRepresentation == EMassRepresentationType::StaticMeshInstance;
+			if (Representation.CurrentRepresentation == EMassRepresentationType::StaticMeshInstance || bWaitingForActor)
 			{
 				const int32 ISMInfoIndex = Representation.StaticMeshDescHandle.ToIndex();
 				if (ensureMsgf(ISMInfo.IsValidIndex(ISMInfoIndex), TEXT("Invalid handle index %u for ISMInfosView"), ISMInfoIndex))

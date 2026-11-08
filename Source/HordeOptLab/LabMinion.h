@@ -132,6 +132,14 @@ public:
 	uint32 BoundSerial = MAX_uint32;
 	ELabMinionState AppliedState = ELabMinionState::Walk;
 	float AppliedDeadAmount = 0.f;
+
+	/**
+	 * 전환 팝핑 대책(2026-11-08 사용자 결정): 새로 붙은 액터는 애니를 맞춘 뒤 메시가 포즈를 계산할 때까지 숨겨 두고,
+	 * 그동안 엔진이 VAT 인스턴스를 계속 그린다(bWaitForActorVisualReadiness, ULabActorManagement가 이 값을 돌려준다).
+	 */
+	bool bPoseReady = false;
+	int32 PendingReadyFrames = 0;
+	void HideUntilPoseReady() { bPoseReady = false; PendingReadyFrames = 0; SetActorHiddenInGame(true); }
 };
 
 /**

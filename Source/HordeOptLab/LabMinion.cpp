@@ -282,6 +282,8 @@ void ALabMinionMassActor::PrepareForPooling_Implementation()
 void ALabMinionMassActor::PrepareForGame_Implementation()
 {
 	GetMesh()->SetComponentTickEnabled(true);
+	// 엔진은 풀에서 꺼낸 액터를 이 함수 바로 앞에서 보이게 한다(MassActorSpawnerSubsystem.cpp:252-255). 포즈를 맞출 때까지 다시 숨긴다.
+	HideUntilPoseReady();
 }
 
 // E3 (3) Budget 하이드레이션 액터 --------------------------------------------

@@ -7,6 +7,7 @@
 #include "LabMinion.h"
 #include "LabMinionAnimInstance.h"
 #include "MassActorSubsystem.h"
+#include "MassActorSpawnerSubsystem.h"
 #include "MassCommonFragments.h"
 #include "MassCommonTypes.h"
 #include "MassExecutionContext.h"
@@ -17,6 +18,22 @@
 #include "Engine/World.h"
 
 CSV_DECLARE_CATEGORY_EXTERN(Lab);
+
+bool ULabActorManagement::IsActorReadyForRepresentation(const AActor& Actor) const
+{
+	const ALabMinionMassActor* Minion = Cast<ALabMinionMassActor>(&Actor);
+	return !Minion || Minion->bPoseReady;
+}
+
+EMassActorSpawnRequestAction ULabActorManagement::OnPostActorSpawn(const FMassActorSpawnRequestHandle& SpawnRequestHandle, FConstStructView SpawnRequest, TSharedRef<FMassEntityManager> EntityManager) const
+{
+	// 새로 스폰된 액터도 엔진이 보이게 만든 직후다(MassActorSpawnerSubsystem.cpp:328). 포즈를 맞출 때까지 숨긴다.
+	if (ALabMinionMassActor* Minion = Cast<ALabMinionMassActor>(SpawnRequest.Get<const FMassActorSpawnRequest>().SpawnedActor.Get()))
+	{
+		Minion->HideUntilPoseReady();
+	}
+	return Super::OnPostActorSpawn(SpawnRequestHandle, SpawnRequest, EntityManager);
+}
 
 ULabActorSyncProcessor::ULabActorSyncProcessor()
 	: EntityQuery(*this)
@@ -103,7 +120,15 @@ void ULabActorSyncProcessor::Execute(FMassEntityManager& EntityManager, FMassExe
 				Anim->InitializeAnimation(); // 시퀀스 플레이어가 StartTime부터 다시 시작한다(AnimNode_SequencePlayer.cpp:61)
 				Actor->BoundSerial = Minion.Serial;
 				Actor->AppliedState = State;
+				// 이 프레임에는 아직 포즈가 계산되지 않았다. 메시가 두 번 틱할 때까지 숨기고, 그동안 VAT 인스턴스가 대신 보인다.
+				Actor->HideUntilPoseReady();
+				Actor->PendingReadyFrames = 2;
 				++Rebinds;
+			}
+			else if (!Actor->bPoseReady && Actor->BoundSerial == Minion.Serial && --Actor->PendingReadyFrames <= 0)
+			{
+				Actor->bPoseReady = true; // ULabActorManagement가 엔진에 "준비됨"을 알리고, 엔진이 VAT 인스턴스를 뗀다
+				Actor->SetActorHiddenInGame(false);
 			}
 			else if (Anim && Actor->AppliedState != State)
 			{
