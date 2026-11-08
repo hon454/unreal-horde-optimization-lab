@@ -4,7 +4,7 @@
 
 ## 단계
 
-**M0 기준선.** 시나리오(오브·스포너·카메라·변형)와 측정 파이프라인(러너·Test 패키지·run-bench·summarize)이 돈다. 남은 것은 이펙트를 켠 채 E0를 다시 재는 일과 마무리다. 각 항목의 완료 조건은 [plan.md](plan.md) "M0"이다.
+**M0 기준선.** 시나리오와 측정 파이프라인이 돌고 E0를 이펙트를 켠 조건으로 다시 쟀다. 남은 것은 마무리(ADR-0002 승인, README, 태그)다. 각 항목의 완료 조건은 [plan.md](plan.md) "M0"이다.
 
 ## 다음 할 일
 
@@ -17,7 +17,7 @@
 - [x] 7. 벤치마크 러너(`-LabBench`), `summarize.py`(표준 라이브러리만).
 - [x] 8. 시나리오 고정값 확정(2026-11-07): R 500m, 피해 범위 8m, 저격 2초 5명, 밴드 30/80/200m, 2560x1440 Epic, 시드 20261106. 표는 [measurement.md](Guides/measurement.md) "확정값". `LODMaxCount`만 E0 뒤에 정한다.
 - [x] 8b. 오브 이펙트를 측정 실행에서도 늘 그린다(2026-11-07 사용자 결정). 저격은 구체에서 대상까지 곧은 보라 선 하나(`/Game/Lab/FX/NS_LabBolt`, 만드는 법은 `Scripts/create-bolt-fx.md`). 번개 표현과 피격 이펙트는 시험 뒤 뺐다.
-- [ ] 9. E0 다시 재기: 아래 표는 측정 실행에서 이펙트를 끈 빌드의 값이라 Test 패키지를 새로 만들어 전 조건(`Scripts/run-e0.ps1 -Tag fx`, pawn 포함 88회, 약 2시간)을 다시 잰다. 첫 측정 CSV는 `Saved/Profiling/CSV/superseded-nofx/`로 옮겼고, 새 값이 나오면 `Measurements/M0/`의 두 CSV를 새로 만든다(첫 값은 git 이력에 남는다). **`summarize.py` 전에 `runs.csv`·`summary.csv`를 먼저 지운다.** summarize는 기존 행에 덧붙이고 summary를 (variant, n, preset)으로만 묶어 태그를 보지 않으므로, 남겨 두면 이펙트 끈 3회와 `fx` 3회가 한 중앙값에 섞인다(2026-11-07 검토). 그 뒤 대표 스크린샷(P1, N=5k), `plot.py`, `LODMaxCount` 결정.
+- [x] 9. E0 다시 재기(2026-11-08, 아래 표). 남은 것: 대표 스크린샷(P1, N=5k). `plot.py`는 돌렸다(`Docs/figures/`).
 - [ ] 9b. 문서를 코드에 맞춘다(2026-11-07 검토, 측정과 무관). `measurement.md` "시나리오"와 `plan.md` M0 오브 설명의 "소멸 반경 즉사, 먼 개체 K개"를 8m 범위 피해와 화면 안 구간별 저격으로. `plan.md` M1의 `ULabDeathProcessor` → `ULabMinionStateProcessor`, 저격 피해 이벤트 엔티티는 E1 (d)로, "전부 Medium" → 모든 LOD 같은 ISM, 측정 N에 2k 추가. ADR-0002 표의 "저격 최소 거리" → "화면 판정과 거리 구간 배분(`LabSnipe.h`)"(승인 전에).
 - [ ] 10. README 결과 초판, 태그 `M0`, Worklog. ADR-0002 초안은 썼고 글 대기열(00, 01)은 이미 있다.
 
@@ -28,7 +28,8 @@
 - [x] GPU 병목: 움직이는 ISM 2,000개가 Lumen 장면에 들어가 GPU 29ms였다. 모든 단계에서 미니언 표현을 Lumen 장면에서 빼고(`LabExcludeFromLumen`) Mass ISM 그림자를 켰다(2026-11-07 사용자 결정, measurement.md 확정값). 시험 수치는 engine-notes.md 11절. E0 재측정은 이 조건과 화면 안 구간별 저격을 넣은 패키지(96f8202)로 한다.
 - [ ] `ULabDamageApplyProcessor`(피해 이벤트 엔티티)는 E1 (d)에서 더한다. 지금 저격은 직접 태그를 붙인다.
 - [x] `Scripts/run-e1.ps1`: E1 (a) mass N {1k, 2k, 5k, 20k, 50k} x P1·P2 x 3회(31회, 약 45분). 50k 시험(Test 패키지, 비교용 아님): 프레임 p50 40ms, Game 34ms라 이동 시간 상한(100ms) 안이다.
-- [ ] E1 (a) 측정, (b) `mass.FullyParallel`, (c) 회피, (d) 피해 전달.
+- [x] E1 (a) 측정(2026-11-08, 아래 표).
+- [ ] E1 (b) `mass.FullyParallel`, (c) 회피, (d) 피해 전달.
 
 ## 명령
 
@@ -46,17 +47,20 @@ py -3 Scripts/summarize.py --milestone M0
 
 ## 측정 결과
 
-E0 첫 측정(M0, Test 패키지, 2560x1440 Epic, 2026-11-07, 측정 실행에서 저격 이펙트를 끈 빌드, `Measurements/M0/summary.csv`). 다시 재면 바뀐다. Game Thread p50(ms)이 병목이고 Render·GPU는 N=5k에서도 16ms 안팎이다.
+Test 패키지 96f8202, 2560x1440 Epic, P1, Game Thread p50(ms). 이펙트 켬, 화면 안 구간별 저격, 미니언 Lumen 제외. M0은 `Measurements/M0/summary.csv`(태그 `fx`, 밤 측정 중 외부 부하로 느려진 14조건은 `fxb`로 다시 잼, 2026-11-08), M1은 `Measurements/M1/summary.csv`. N@16.7ms는 Game·Render·GPU p50 최댓값 기준 로그 보간(`Scripts/plot.py`).
 
-| 변형 | P1 N250 | 500 | 1k | 2k | 5k | N@16.7ms(P1, 로그 보간) |
+| 단계·변형 | 1k | 2k | 5k | 20k | 50k | N@16.7ms |
 | --- | --- | --- | --- | --- | --- | --- |
-| full | 5.3 | 9.8 | 18.2 | 38.0 | 150.0 | 약 880 |
-| static | 3.6 | 6.7 | 12.5 | 24.6 | 84.4 | 약 1,270 |
-| budget(v2) | | | 15.9 | 29.0 | 109.9 | 약 1,050 |
-| uro | | | 16.7 | 34.1 | 124.1 | 약 1,000 |
-| pawn(v2) | | | 13.4 | 26.5 | 69.3 | 약 1,190 |
+| M0 full | 18.4 | 38.5 | 150.7 | | | 874 |
+| M0 static | 12.1 | 25.1 | 98.1 | | | 1,278 |
+| M0 budget | 16.3 | 30.1 | 111.9 | | | 1,019 |
+| M0 uro | 17.5 | 35.4 | 127.0 | | | |
+| M0 pawn | 13.3 | 26.4 | 70.0 | | | 1,197 |
+| M1 mass | 1.4 | 1.8 | 3.1 | 12.4 | 32.9 | 21,207 |
 
-P2는 full·static 모두 P1보다 0.2\~1.7ms 낮다(N=5k full만 18ms 차이). 첫 묶음의 budget 9회는 할당기가 꺼져 있어 무효(`Saved/Profiling/CSV/invalid/`), v2로 다시 쟀다.
+- E1 (a) 대표 비교(M1 대 M0 static, 같은 N): Game Thread 1k 8.4배, 2k 13.8배, 5k 31.8배 가볍다. N@16.7ms는 1,278 → 21,207(약 16.6배).
+- M1의 20k는 Game 12.4 / Render 12.0 / GPU 15.6ms로 GPU가 먼저 한계에 닿는다. 50k는 세 값이 모두 30ms 안팎이다.
+- 이펙트를 끈 첫 측정과 비교하면 full은 같고(1k 18.2 → 18.4), static 5k는 84.4 → 98.1로 늘었다. 첫 값은 git 이력(`a4e1a8c` 이전 `Measurements/M0/`)에 있다.
 
 ## 막힌 것
 
@@ -66,4 +70,3 @@ P2는 full·static 모두 P1보다 0.2\~1.7ms 낮다(N=5k full만 18ms 차이). 
 
 - [ADR-0001](Decisions/0001-test-package-for-measurement.md) 승인 확인.
 - [ADR-0002](Decisions/0002-freeze-measurement-infra.md) 승인(측정 인프라 동결).
-- 밤에 직접 시작: `powershell -ExecutionPolicy Bypass -File Scripts/run-e0.ps1 -Tag fx` 뒤 `powershell -ExecutionPolicy Bypass -File Scripts/run-e1.ps1`(Test 패키지 96f8202, 합쳐 약 2시간 45분).
