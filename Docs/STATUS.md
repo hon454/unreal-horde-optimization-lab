@@ -43,4 +43,4 @@ py -3 Scripts/summarize.py --milestone M2
 
 ## 사용자에게 요청한 일
 
-- GitHub 푸시(main, 태그 `M2`).
+- 없음.
