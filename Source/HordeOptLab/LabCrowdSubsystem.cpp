@@ -69,6 +69,25 @@ void ULabCrowdSubsystem::Activate(ALabCrowdSpawner* InSpawner, UStaticMesh* Mesh
 		Visual->LODParams.LODMaxCount[LOD] = MAX_int32;
 	}
 
+	// E2 (c): 확정 밴드(30/80/200m, measurement.md "확정값")를 켜고 Off(200m 밖)를 그리지 않는다. 대표(M2)는 M1과 같이 모든 거리를 그린다.
+	const ELabVariant Variant = FLabConfig::Get().Variant;
+	if (Variant == ELabVariant::VatCull || Variant == ELabVariant::VatCullVis)
+	{
+		const float Bands[EMassLOD::Max] = { 0.f, 3000.f, 8000.f, 20000.f };
+		const int32 MaxCounts[EMassLOD::Max] = { 500, 5000, MAX_int32, MAX_int32 }; // 확정값 LODMaxCount
+		for (int32 LOD = 0; LOD < EMassLOD::Max; ++LOD)
+		{
+			Visual->LODParams.BaseLODDistance[LOD] = Bands[LOD];
+			Visual->LODParams.VisibleLODDistance[LOD] = Bands[LOD];
+			Visual->LODParams.LODMaxCount[LOD] = MaxCounts[LOD];
+		}
+		if (Variant == ELabVariant::VatCullVis)
+		{
+			Visual->LODParams.VisibleLODDistance[EMassLOD::Off] = 1.e7f; // 화면 안이면 맵 끝까지 그린다
+		}
+		Visual->Params.LODRepresentation[EMassLOD::Off] = EMassRepresentationType::None;
+	}
+
 	bActive = true;
 	UE_LOG(LogLab, Log, TEXT("lab_mass_config traits=%d mesh=%s"), EntityConfig->GetConfig().GetTraits().Num(), *GetNameSafe(Mesh));
 }

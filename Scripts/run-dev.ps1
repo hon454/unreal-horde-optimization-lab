@@ -4,7 +4,7 @@ param(
     [int]$N = 500,
     [ValidateSet("P1", "P2")][string]$Preset = "P1",
     [int]$Seed = 20261106,
-    [ValidateSet("full", "static", "budget", "uro", "pawn", "mass", "massst", "massav", "massdirlo", "massdirhi", "massevtlo", "massevthi")][string]$Variant = "full",
+    [ValidateSet("full", "static", "budget", "uro", "pawn", "mass", "massst", "massav", "massdirlo", "massdirhi", "massevtlo", "massevthi", "vatvert", "vatcull", "vatcullvis", "vatdie0", "vatdie1k")][string]$Variant = "full",
     [double]$Duration = 0,
     [double]$ShotAt = 0,
     [string[]]$Extra = @(),

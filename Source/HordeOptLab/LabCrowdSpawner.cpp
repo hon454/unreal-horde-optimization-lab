@@ -92,7 +92,7 @@ void ALabCrowdSpawner::SpawnInitial()
 		if (Config.Stage >= ELabStage::M2)
 		{
 			// M2: VAT 메시(Scripts/bake-vat.py). 클립 프레임은 데이터 에셋에서 읽는다. 없으면 시작하지 않는다(정지 메시로 재면 M1과 같아진다).
-			const TCHAR* Mode = TEXT("Bone");
+			const TCHAR* Mode = Config.Variant == ELabVariant::VatVert ? TEXT("Vertex") : TEXT("Bone"); // E2 (b)
 			UStaticMesh* VatMesh = LoadObject<UStaticMesh>(nullptr, *FString::Printf(TEXT("/Game/Lab/VAT/Baked/SM_LabMinionVAT_%s.SM_LabMinionVAT_%s"), Mode, Mode));
 			const UAnimToTextureDataAsset* VatData = LoadObject<UAnimToTextureDataAsset>(nullptr, *FString::Printf(TEXT("/Game/Lab/VAT/Baked/DA_LabMinionVAT_%s.DA_LabMinionVAT_%s"), Mode, Mode));
 			checkf(VatMesh && VatData && VatData->Animations.Num() == 3, TEXT("VAT assets missing: run Scripts/bake-vat.py"));

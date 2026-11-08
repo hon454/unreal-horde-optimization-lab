@@ -107,6 +107,11 @@ void ULabOrbContactProcessor::Execute(FMassEntityManager& EntityManager, FMassEx
 		Crowd->NearestDistSq = TNumericLimits<float>::Max();
 	}
 	const FVector Center = Crowd->OrbCenter;
+	const ELabVariant Variant = FLabConfig::Get().Variant;
+	if (Variant == ELabVariant::VatDie0 || Variant == ELabVariant::VatDie1k)
+	{
+		return; // E2 (d): 범위 피해로 죽지 않게 한다(사망은 발생기만 만든다)
+	}
 	const float ZoneRadiusSq = FMath::Square(FLabScenario::ZoneRadius);
 	const float DeathDuration = Crowd->DeathDuration;
 
@@ -186,6 +191,10 @@ void ULabOrbSnipeProcessor::Execute(FMassEntityManager& EntityManager, FMassExec
 	}
 	const uint32 SnipeTick = Crowd->PendingSnipeTick;
 	Crowd->PendingSnipeTick = 0;
+	if (FLabConfig::Get().Variant == ELabVariant::VatDie0 || FLabConfig::Get().Variant == ELabVariant::VatDie1k)
+	{
+		return; // E2 (d): 저격도 끈다(사망은 발생기만 만든다)
+	}
 	const FVector Center = Crowd->OrbCenter;
 	const FLabSnipeView View = Crowd->SnipeView;
 	if (!View.bValid)
@@ -311,6 +320,7 @@ namespace
 		case ELabVariant::MassDirHi: bOutEvent = false; return 10000;
 		case ELabVariant::MassEvtLo: bOutEvent = true; return 1000;
 		case ELabVariant::MassEvtHi: bOutEvent = true; return 10000;
+		case ELabVariant::VatDie1k: bOutEvent = false; return 1000; // E2 (d): 치명(피격→사망)
 		default: bOutEvent = false; return 0;
 		}
 	}
@@ -328,7 +338,7 @@ ULabDamageGenProcessor::ULabDamageGenProcessor()
 void ULabDamageGenProcessor::ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager)
 {
 	EntityQuery.AddRequirement<FLabHealthFragment>(EMassFragmentAccess::ReadWrite);
-	EntityQuery.AddRequirement<FLabMinionFragment>(EMassFragmentAccess::ReadOnly);
+	EntityQuery.AddRequirement<FLabMinionFragment>(EMassFragmentAccess::ReadWrite); // E2 (d) 치명 모드가 피격 시간을 쓴다
 	EntityQuery.AddTagRequirement<FLabMinionTag>(EMassFragmentPresence::All);
 	EntityQuery.AddTagRequirement<FLabHitTag>(EMassFragmentPresence::None);
 	EntityQuery.AddTagRequirement<FLabDeadTag>(EMassFragmentPresence::None);
@@ -350,22 +360,35 @@ void ULabDamageGenProcessor::Execute(FMassEntityManager& EntityManager, FMassExe
 		return;
 	}
 	Owed -= Wanted;
+	const bool bLethal = FLabConfig::Get().Variant == ELabVariant::VatDie1k;
 	// 개체마다 해시로 확률 Wanted / 산 개체 수에 뽑는다. 기대 건수가 Wanted다.
-	const uint32 Threshold = static_cast<uint32>(FMath::Min(1.0, double(Wanted) / Crowd->GetAliveCount()) * double(MAX_uint32));
+	// 치명 모드(E2 (d))는 피격·사망 중인 개체가 많아(초당 1천 x 약 2.9초) 걷는 개체 수로 나눠야 기대 건수가 맞는다.
+	const int32 Pool = bLethal ? FMath::Max(1, EntityQuery.GetNumMatchingEntities(EntityManager)) : Crowd->GetAliveCount();
+	const uint32 Threshold = static_cast<uint32>(FMath::Min(1.0, double(Wanted) / Pool) * double(MAX_uint32));
 	const uint32 Frame = static_cast<uint32>(GFrameCounter);
+	const float HitDuration = Crowd->HitDuration;
 
 	TArray<FMassEntityHandle> Targets;
 	EntityQuery.ForEachEntityChunk(Context, [&](FMassExecutionContext& Context)
 	{
 		const TArrayView<FLabHealthFragment> Healths = Context.GetMutableFragmentView<FLabHealthFragment>();
-		const TConstArrayView<FLabMinionFragment> Minions = Context.GetFragmentView<FLabMinionFragment>();
+		const TArrayView<FLabMinionFragment> Minions = Context.GetMutableFragmentView<FLabMinionFragment>();
 		for (FMassExecutionContext::FEntityIterator It = Context.CreateEntityIterator(); It; ++It)
 		{
 			if (MurmurFinalize32(HashCombineFast(::GetTypeHash(Minions[It].Serial), ::GetTypeHash(Frame))) > Threshold) // 섞지 않은 HashCombineFast는 작은 입력에서 고르게 퍼지지 않는다
 			{
 				continue;
 			}
-			if (bEvent)
+			if (bLethal)
+			{
+				// 저격과 같은 경로: 피격 상태로 바꾸고 멈춘다. 피격이 끝나면 상태 프로세서가 사망 → 제거 → 재생성한다.
+				const FMassEntityHandle Entity = Context.GetEntity(It);
+				Minions[It].StateTimeLeft = HitDuration;
+				Context.Defer().AddTag<FLabHitTag>(Entity);
+				StopMoving(Context, Entity);
+				++Crowd->DamageHits;
+			}
+			else if (bEvent)
 			{
 				Targets.Add(Context.GetEntity(It));
 			}

@@ -40,6 +40,11 @@ const FLabConfig& FLabConfig::Get()
 			else if (Variant == TEXT("massdirhi")) { C.Variant = ELabVariant::MassDirHi; }
 			else if (Variant == TEXT("massevtlo")) { C.Variant = ELabVariant::MassEvtLo; }
 			else if (Variant == TEXT("massevthi")) { C.Variant = ELabVariant::MassEvtHi; }
+			else if (Variant == TEXT("vatvert")) { C.Variant = ELabVariant::VatVert; }
+			else if (Variant == TEXT("vatcull")) { C.Variant = ELabVariant::VatCull; }
+			else if (Variant == TEXT("vatcullvis")) { C.Variant = ELabVariant::VatCullVis; }
+			else if (Variant == TEXT("vatdie0")) { C.Variant = ELabVariant::VatDie0; }
+			else if (Variant == TEXT("vatdie1k")) { C.Variant = ELabVariant::VatDie1k; }
 		}
 		C.N = FMath::Max(C.N, 1);
 		C.Preset = FMath::Clamp(C.Preset, 1, 2);
@@ -63,6 +68,11 @@ const TCHAR* FLabConfig::VariantName(ELabVariant V)
 	case ELabVariant::MassDirHi: return TEXT("massdirhi");
 	case ELabVariant::MassEvtLo: return TEXT("massevtlo");
 	case ELabVariant::MassEvtHi: return TEXT("massevthi");
+	case ELabVariant::VatVert: return TEXT("vatvert");
+	case ELabVariant::VatCull: return TEXT("vatcull");
+	case ELabVariant::VatCullVis: return TEXT("vatcullvis");
+	case ELabVariant::VatDie0: return TEXT("vatdie0");
+	case ELabVariant::VatDie1k: return TEXT("vatdie1k");
 	default: return TEXT("full");
 	}
 }

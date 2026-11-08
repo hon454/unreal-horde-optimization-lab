@@ -18,6 +18,12 @@ enum class ELabVariant : uint8
 	MassDirHi, // 직접 깎기, 초당 1만
 	MassEvtLo, // 피해 이벤트 엔티티로 모아 깎기, 초당 1천
 	MassEvtHi, // 피해 이벤트 엔티티로 모아 깎기, 초당 1만
+	// M2 E2 하위 실험(-LabStage=M2와 함께). 대표는 Mass(모든 거리를 Bone VAT로 그림)
+	VatVert,    // E2 (b): Vertex 모드 VAT(텍스처 메모리 비교)
+	VatCull,    // E2 (c)(1): 200m 밖은 그리지 않는다(거리만, 확정값 "200m~ 없음")
+	VatCullVis, // E2 (c)(2): 화면 밖일 때만 200m 밖을 그리지 않는다(BaseLODDistance 200m, VisibleLODDistance 맵 끝)
+	VatDie0,    // E2 (d): 사망 없음(범위 피해·저격 끔)
+	VatDie1k,   // E2 (d): VatDie0 + 초당 1천 명을 무작위로 피격→사망(인스턴스 제거·재생성 비용)
 };
 
 /**
