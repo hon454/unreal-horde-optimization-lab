@@ -63,17 +63,17 @@ M0\~M5가 필수다. 마일스톤마다 바꾸는 최적화 변수는 하나고,
 
 **목표:** 먼 개체를 애니메이션이 있는 ISM으로. **비교 상대는 M1.**
 
-**바꾸는 변수:** 원거리 표현(정지 ISM → VAT ISM). 밴드는 M0 확정값이고 High = None(아직 액터 없음), Medium / Low = ISM, Off = 없음.
+**바꾸는 변수:** 표현(정지 ISM → VAT ISM). 대표 설정은 모든 거리(High / Medium / Low / Off)를 같은 VAT ISM으로 그린다. 바뀐 것이 "모든 조각상에 애니메이션이 붙었다" 하나다(2026-11-08 사용자 결정. 처음 계획은 High = None, Off = 없음이었으나 그러면 그리는 개체 수가 바뀌어 변수가 둘이 된다). High는 M3에서 액터로 바뀐다. 200m 밖을 지우는 효과는 E2 (c)에서 따로 재고 M3부터 쓸 방식을 그 결과로 정한다.
 
 **만드는 것**
-- AnimToTexture로 걷기·피격·죽기 베이크(Bone 모드 기본, Vertex는 메모리 비교용). VAT 머티리얼.
-- Representation 그룹에서 `UMassUpdateISMProcessor` 뒤에 도는 별도 프로세서가 `FMassInstancedStaticMeshInfo::AddBatchedCustomData`로 애니 인덱스·시작 시각을 쓴다(상속하지 않는다. engine-notes.md).
-- 저격으로 ISM 티어에서 피격·사망 애니가 재생되고 끝나면 인스턴스가 제거되는지 확인.
+- AnimToTexture로 걷기·피격·죽기 베이크(Bone 모드 기본, Vertex는 메모리 비교용). VAT 머티리얼. 에디터 작업은 Python 커맨드렛 스크립트로 한다.
+- `UMassUpdateISMProcessor`를 상속한 프로세서가 한 반복에서 위치(`UpdateISMTransform`)와 애니 정보(`AddBatchedCustomData`)를 쓴다. City Sample `MassCrowdUpdateISMVertexAnimationProcessor`와 같은 구조다. 엔진 프로세서와 이 프로세서 중 어느 쪽을 돌릴지는 시작 시 `-LabStage`로 정한다(M1은 엔진 것 그대로, M2부터 이 프로세서. CDO의 `SetShouldAutoRegisterWithGlobalList`, `MassProcessor.h:180-185`). 시점이 맞지 않으면 엔진 것을 ini에서 끄는 방식으로 물러난다(2026-11-08 사용자 결정).
+- 저격으로 피격·사망 애니가 재생되고 끝나면 인스턴스가 제거되는지 확인.
 
 **실험 E2**
-- (a) M1 vs M2: Render Thread, GPU, 드로우 콜. 대표 비교.
+- (a) M1 vs M2: Render Thread, GPU, 드로우 콜. 대표 비교. M1을 같은 날 다시 잰다.
 - (b) Bone vs Vertex VAT 텍스처 메모리.
-- (c) Off 밴드 끔 / 켬(원거리 컬링의 몫 분리).
+- (c) 200m 밖 지우기: (1) 거리만으로 지우기(확정값 "200m\~ 없음") (2) 화면 밖일 때만 200m에서 지우기(`BaseLODDistance` 200m, `VisibleLODDistance`는 맵 끝까지). 대표(지우지 않음)와 비교해 M3부터 쓸 방식을 고른다.
 - (d) 저격 빈도 초당 사망 0 / 1k에서 인스턴스 추가·제거 비용.
 
 **측정 조건:** N {1k, 5k, 20k, 50k}.
