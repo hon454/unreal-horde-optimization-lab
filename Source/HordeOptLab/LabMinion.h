@@ -139,7 +139,14 @@ public:
 	 */
 	bool bPoseReady = false;
 	int32 PendingReadyFrames = 0;
-	void HideUntilPoseReady() { bPoseReady = false; PendingReadyFrames = 0; SetActorHiddenInGame(true); }
+	int32 ClearVelocityFrames = 0; // 보이기 시작한 뒤 이전 프레임 변환을 지울 남은 프레임 수
+	/**
+	 * 숨기는 방법: 액터 숨김(SetActorHiddenInGame)은 렌더 프록시를 장면에서 빼서, 다시 보일 때 지난번 보였던 위치·뼈 변환이 이전 프레임으로 쓰여
+	 * 모션 블러가 미니언을 번진 잔상으로 그렸다(2026-11-08 연속 캡처, 모션 블러를 끄면 사라짐). 그래서 프록시는 장면에 둔 채
+	 * 메인 패스·깊이 패스·그림자에서만 뺀다. 그동안에도 위치와 뼈가 렌더러에 전달돼 보이는 첫 프레임의 속도가 맞다.
+	 */
+	void HideUntilPoseReady();
+	void ShowPoseReady();
 };
 
 /**

@@ -1,4 +1,5 @@
 #include "LabActorSyncProcessor.h"
+#include "LabVatProcessor.h"
 #include "HordeOptLab.h"
 #include "LabConfig.h"
 #include "LabCrowdSubsystem.h"
@@ -71,6 +72,7 @@ void ULabActorSyncProcessor::Execute(FMassEntityManager& EntityManager, FMassExe
 	const bool bSigBudget = FLabConfig::Get().Variant == ELabVariant::M3BudgetSig;
 	int32 Actors = 0;
 	int32 Rebinds = 0;
+	int32 DbgHoles = 0, DbgOverlaps = 0, DbgSwitches = 0;
 
 	EntityQuery.ForEachEntityChunk(Context, [&](FMassExecutionContext& Context)
 	{
@@ -86,6 +88,20 @@ void ULabActorSyncProcessor::Execute(FMassEntityManager& EntityManager, FMassExe
 		for (FMassExecutionContext::FEntityIterator It = Context.CreateEntityIterator(); It; ++It)
 		{
 			const EMassRepresentationType Rep = Representations[It].CurrentRepresentation;
+#if !UE_BUILD_TEST
+			{
+				// 전환 진단(개발 빌드만): 그려지는 것이 없는 엔티티(구멍)와 둘 다 그려지는 엔티티(겹침)를 센다.
+				const FMassRepresentationFragment& R = Representations[It];
+				const AActor* A = ActorList[It].Get();
+				const bool bActorVisible = A && !A->IsHidden();
+				const bool bIsmDrawn = R.CurrentRepresentation == EMassRepresentationType::StaticMeshInstance
+					|| (R.IsWaitingForActorVisualReadiness() && R.PrevRepresentation == EMassRepresentationType::StaticMeshInstance);
+				const bool bWantsDrawn = R.CurrentRepresentation != EMassRepresentationType::None;
+				if (bWantsDrawn && !bActorVisible && !bIsmDrawn) { ++DbgHoles; }
+				if (bActorVisible && bIsmDrawn) { ++DbgOverlaps; }
+				if (R.PrevRepresentation != R.CurrentRepresentation && !R.IsWaitingForActorVisualReadiness()) { ++DbgSwitches; }
+			}
+#endif
 			if (Rep != EMassRepresentationType::HighResSpawnedActor && Rep != EMassRepresentationType::LowResSpawnedActor)
 			{
 				continue;
@@ -123,18 +139,33 @@ void ULabActorSyncProcessor::Execute(FMassEntityManager& EntityManager, FMassExe
 				// 이 프레임에는 아직 포즈가 계산되지 않았다. 메시가 두 번 틱할 때까지 숨기고, 그동안 VAT 인스턴스가 대신 보인다.
 				Actor->HideUntilPoseReady();
 				Actor->PendingReadyFrames = 2;
+				SkelMesh->ResetSceneVelocity();
+				SkelMesh->ClearMotionVector();
 				++Rebinds;
+#if !UE_BUILD_TEST
+				LabLogScreenEvent(TEXT("hydrate"), Crowd->SnipeView, Xf.GetLocation());
+#endif
 			}
 			else if (!Actor->bPoseReady && Actor->BoundSerial == Minion.Serial && --Actor->PendingReadyFrames <= 0)
 			{
-				Actor->bPoseReady = true; // ULabActorManagement가 엔진에 "준비됨"을 알리고, 엔진이 VAT 인스턴스를 뗀다
-				Actor->SetActorHiddenInGame(false);
+				Actor->ShowPoseReady(); // ULabActorManagement가 엔진에 "준비됨"을 알리고, 엔진이 VAT 인스턴스를 뗀다
+				// 풀에 들어가기 전의 뼈 변환이 이전 프레임으로 남지 않게 몇 프레임 동안 모션 벡터를 지운다(보조 대책).
+				Actor->ClearVelocityFrames = 2;
+#if !UE_BUILD_TEST
+				LabLogScreenEvent(TEXT("shown"), Crowd->SnipeView, Xf.GetLocation());
+#endif
 			}
 			else if (Anim && Actor->AppliedState != State)
 			{
 				Anim->StartTime = 0.f;
 				Anim->State = State;
 				Actor->AppliedState = State;
+			}
+			if (Actor->bPoseReady && Actor->ClearVelocityFrames > 0)
+			{
+				--Actor->ClearVelocityFrames;
+				SkelMesh->ResetSceneVelocity();      // PrimitiveComponent.h:2745 "Useful to prevent motion blur when teleporting"
+				SkelMesh->ClearMotionVector();       // SkinnedMeshComponent.h:430 뼈 속도(모션 블러·TAA)를 지운다
 			}
 
 			if (bSigBudget)
@@ -161,5 +192,9 @@ void ULabActorSyncProcessor::Execute(FMassEntityManager& EntityManager, FMassExe
 	if (GFrameCounter % 300 == 0)
 	{
 		UE_LOG(LogLab, Log, TEXT("lab_actors actors=%d rebinds=%d"), Actors, Rebinds); // 개발 실행 확인용(Test 구성은 로그가 없다)
+	}
+	if (DbgHoles > 0 || DbgOverlaps > 0 || DbgSwitches > 0)
+	{
+		UE_LOG(LogLab, Log, TEXT("lab_transition frame=%llu holes=%d overlaps=%d switches=%d rebinds=%d"), (unsigned long long)GFrameCounter, DbgHoles, DbgOverlaps, DbgSwitches, Rebinds);
 	}
 }

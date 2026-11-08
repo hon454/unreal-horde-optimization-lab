@@ -26,6 +26,21 @@ protected:
 	virtual void Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context) override;
 };
 
+#if !UE_BUILD_TEST
+#include "LabSnipe.h"
+#include "HordeOptLab.h"
+/** 개발용 전환 진단: 사건 하나를 프레임 번호와 화면 좌표(1280x720 창 기준)로 로그에 남긴다. 연속 캡처(-LabShotBurst)와 맞춰 본다. */
+inline void LabLogScreenEvent(const TCHAR* What, const FLabSnipeView& View, const FVector& World)
+{
+	const FVector V = World + FVector(0.f, 0.f, 90.f) - View.Location;
+	const float Depth = FVector::DotProduct(V, View.Forward);
+	if (Depth <= 1.f) { return; }
+	const float X = FVector::DotProduct(V, View.Right) / Depth / View.TanHalfH;
+	const float Y = FVector::DotProduct(V, View.Up) / Depth / (View.TanHalfH * 9.f / 16.f);
+	UE_LOG(LogLab, Log, TEXT("lab_event %s frame=%llu u=%.0f v=%.0f dist=%.0f"), What, (unsigned long long)GFrameCounter, (X + 1.f) * 640.f, (1.f - Y) * 360.f, V.Size2D());
+}
+#endif
+
 /** VAT 머티리얼이 읽는 인스턴스 커스텀 데이터(GetFrameSwitch, AutoPlay 끔). */
 struct FLabVatFrameData
 {

@@ -14,6 +14,10 @@
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
 #include "ProfilingDebugging/CsvProfiler.h"
+#include "UnrealClient.h"
+#include "Misc/Paths.h"
+#include "Misc/CommandLine.h"
+#include "Misc/Parse.h"
 #include "IAnimationBudgetAllocator.h"
 #include "SignificanceManager.h"
 
@@ -225,6 +229,21 @@ void ALabGameMode::Tick(float DeltaSeconds)
 	}
 
 	const float ShotAt = FLabConfig::Get().ShotAtSec;
+#if !UE_BUILD_TEST
+	// 개발용 연속 캡처(-LabShotBurst=N): ShotAt부터 N프레임을 창 해상도로 한 장씩 남긴다. 전환 깜빡임 진단용(2026-11-08).
+	static int32 BurstLeft = -1;
+	int32 Burst = 0;
+	if (ShotAt > 0.f && Elapsed >= ShotAt && FParse::Value(FCommandLine::Get(), TEXT("-LabShotBurst="), Burst))
+	{
+		if (BurstLeft < 0) { BurstLeft = Burst; }
+		if (BurstLeft > 0)
+		{
+			--BurstLeft;
+			FScreenshotRequest::RequestScreenshot(FString::Printf(TEXT("%s/Screenshots/LabBurst/f%06llu.png"), *FPaths::ProjectSavedDir(), (unsigned long long)GFrameCounter), false, false);
+		}
+		bShotTaken = true;
+	}
+#endif
 	if (ShotAt > 0.f && !bShotTaken && Elapsed >= ShotAt)
 	{
 		bShotTaken = true;

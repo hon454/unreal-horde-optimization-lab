@@ -7,6 +7,8 @@
 #include "MassRepresentationFragments.h"
 #include "MassRepresentationSubsystem.h"
 #include "MassVisualizationComponent.h"
+#include "MassRepresentationProcessor.h"
+#include "HordeOptLab.h"
 #include "ProfilingDebugging/CsvProfiler.h"
 #include "Engine/World.h"
 
@@ -104,6 +106,12 @@ void ULabVatISMProcessor::Execute(FMassEntityManager& EntityManager, FMassExecut
 					}
 					ISMInfo[ISMInfoIndex].AddBatchedCustomData<FLabVatFrameData>(Data, RepresentationLOD.LODSignificance, Representation.PrevLODSignificance);
 
+#if !UE_BUILD_TEST
+					if (UE::Mass::Representation::IsValidActorRepresentation(Representation.PrevRepresentation) && Representation.CurrentRepresentation == EMassRepresentationType::StaticMeshInstance)
+					{
+						LabLogScreenEvent(TEXT("dehydrate"), Crowd->SnipeView, TransformFragment.GetTransform().GetLocation());
+					}
+#endif
 					// 표현 축(measurement.md): 거리 밴드별로 그린 개체 수. 밴드 경계는 확정값 30/80/200m
 					const float Dist = FVector::Dist2D(TransformFragment.GetTransform().GetLocation(), ViewLocation);
 					++BandCounts[Dist < 3000.f ? 0 : Dist < 8000.f ? 1 : Dist < 20000.f ? 2 : 3];

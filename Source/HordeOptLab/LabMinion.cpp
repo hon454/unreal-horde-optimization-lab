@@ -273,10 +273,33 @@ void ALabMinionMassActor::BeginPlay()
 	}
 }
 
+void ALabMinionMassActor::HideUntilPoseReady()
+{
+	bPoseReady = false;
+	PendingReadyFrames = 0;
+	SetActorHiddenInGame(false);
+	USkeletalMeshComponent* SkelMesh = GetMesh();
+	SkelMesh->SetRenderInMainPass(false);
+	SkelMesh->SetRenderInDepthPass(false);
+	SkelMesh->SetCastShadow(false);
+}
+
+void ALabMinionMassActor::ShowPoseReady()
+{
+	bPoseReady = true;
+	USkeletalMeshComponent* SkelMesh = GetMesh();
+	SkelMesh->SetRenderInMainPass(true);
+	SkelMesh->SetRenderInDepthPass(true);
+	SkelMesh->SetCastShadow(!IsA<ALabMinionMassActorLow>()); // 저품질 액터는 그림자를 끈다(E3 (5))
+}
+
 void ALabMinionMassActor::PrepareForPooling_Implementation()
 {
 	GetMesh()->SetComponentTickEnabled(false);
 	BoundSerial = MAX_uint32;
+	// 죽은 채 풀에 들어온 액터의 진홍색을 지운다. 숨긴 동안 바꾼 커스텀 프리미티브 데이터는 보이는 첫 프레임에 반영되지 않는 것을 연속 캡처로 봤다(2026-11-08).
+	GetMesh()->SetCustomPrimitiveDataFloat(0, 0.f);
+	AppliedDeadAmount = 0.f;
 }
 
 void ALabMinionMassActor::PrepareForGame_Implementation()
