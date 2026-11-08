@@ -208,6 +208,25 @@
 
 - 원본 Paragon 머티리얼(마스크·발광·금속 광택)과 VAT용 단순 머티리얼이 다르면 30m에서 전환될 때 색과 광택이 툭 바뀐다. 액터도 같은 단순 머티리얼을 써서 전환 때는 자세만 이어지면 되게 했다. 죽기 진홍색도 같은 값으로 그린다.
 
+## 06 Simulation LOD
+
+### Simulation LOD는 무엇이고 Representation LOD와 어떻게 다른가 **설명 강조**
+
+- 사용자 요청(2026-11-09): 개념 설명을 글에 넣고 싶다. Representation LOD(M1\~M3)는 거리별로 "어떻게 그릴지"(액터 / VAT / 안 그림), Simulation LOD(M4)는 거리별로 "로직을 얼마나 자주 돌릴지"다. 한 줄로: 덜 그리기에 덜 생각하기를 더한다.
+- 동작: `UMassSimulationLODTrait`이 거리 밴드로 High / Medium / Low / Off를 매기고 `FMassSimulationVariableTickParameters::TickRates`에 단계별 간격을 둔다. 같은 단계 개체가 같은 청크에 모이고, `TMassLODTickRateController`가 이번 프레임에 돌릴 청크만 고른다. 건너뛴 시간은 누적돼 다음 틱에 한 번에 들어간다(`MassLOD/Public/MassSimulationLOD.h`, `MassLODTickRateController.h`).
+- 얻는 것: 먼 개체만큼 Mass 로직의 Game Thread 비용이 준다. 회피 프로세서는 High만 처리해 먼 개체의 회피가 자동으로 빠진다(E4 (c)에서 가까운 개체만 비켜 가기).
+- 잃는 것: 먼 개체가 간격마다 한 번에 움직여 끊겨 보인다(E4 (b)). 표현은 매 프레임 갱신되므로 보간을 넣을지가 쟁점이다.
+
+## 07 ISKM vs VAT
+
+### ISKM은 무엇이고 VAT와 어떻게 다른가 **설명 강조**
+
+- 사용자 요청(2026-11-09): 개념 설명을 글에 넣고 싶다. ISKM(Instanced Skinned Mesh, `UInstancedSkinnedMeshComponent`)은 엔진의 인스턴스 스켈레탈 메시다. MetaHuman Crowd Sample이 쓴다.
+- VAT: 애니메이션을 텍스처로 굽고 머티리얼이 정점을 옮기는 정적 메시. 어디서나 돌고 싸지만 굽기가 필요하고, Bone 모드는 본 영향 4개 근사라 실제 스킨과 조금 다르며 클립 블렌딩은 직접 만든다(M2).
+- ISKM: 실제 스켈레탈 메시를 GPU에서 스키닝한다. 애니메이션은 AnimSequence의 뼈 변환을 뽑은 데이터(`AnimSequenceTransformProviderData`)로 재생하고 블렌드 시간 크로스페이드·BlendSpace 트랙이 있다. AnimBP는 없다(`InstancedSkinnedMeshComponent.h`). 액터와 같은 메시·스킨이라 전환 때 모양 차이가 줄 수 있다.
+- Mass 연결: `FMassSkinnedMeshInstanceVisualizationMeshDesc`로 등록, `UMassConsumeInstancedSkinnedMeshAnimationProcessor`가 엔티티 상태를 재생 데이터로 넘긴다. 5.8.4에도 동적 엔티티의 트랙 풀이 해제되지 않아 사망 때 엔티티를 재활용한다(engine-notes.md).
+- M5에서 볼 것: 같은 원거리 개체 수에서 GPU·Game Thread·메모리 비용과 화질(전환 튐 점수 포함).
+
 ## 00 시나리오와 측정 방법
 
 ### 원거리 공격(저격) 대상은 어떻게 고르나
