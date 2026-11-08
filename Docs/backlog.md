@@ -12,7 +12,7 @@
 | 01 | 액터 군중 기준선 — URO와 Budget을 켜도 어디서 멈추나 | `M0` | 대기 |
 | 02 | Mass 코어 — 로직만 엔티티로 | `M1` | |
 
-글에 넣을 것(사용자 요청, 2026-11-07):
+글에 넣을 것(사용자 요청, 2026-11-07). 질답에서 나온 설명할 부분은 [post-material.md](post-material.md)에 모은다:
 - Lumen을 끄거나 미니언을 Lumen에서 뺀 경우, Lumen이 무엇인지 짧게 설명하고 시험 중 Lumen이 프레임 저하를 일으켜 그렇게 했다는 경위를 쓴다. 근거 수치: M1 N=2000 Test 패키지 시험에서 미니언 ISM이 Lumen에 참여하면 GPU 29.0ms, 제외하면 5.3ms, Lumen 전체를 끄면 4.0ms(`Saved/Profiling/CSV/trial/`, 비교 수치가 아닌 시험 실행). 정식 수치는 그 글의 `measurements.md`에 다시 잰 값으로 둔다.
 - 엔진 Mass ISM은 기본으로 그림자를 그리지 않는다(`FMassStaticMeshInstanceVisualizationMeshDesc::bCastShadows = false`). M0 액터와 맞추려고 켰다는 것.
 | 03 | ISM + VAT — 먼 개체를 애니메이션 있는 인스턴스로 | `M2` | |
