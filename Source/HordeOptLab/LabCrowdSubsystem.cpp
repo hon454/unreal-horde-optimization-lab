@@ -75,7 +75,8 @@ void ULabCrowdSubsystem::Activate(ALabCrowdSpawner* InSpawner, UStaticMesh* Mesh
 	const bool bM3 = FLabConfig::Get().Stage >= ELabStage::M3;
 	if (bM3)
 	{
-		Visual->HighResTemplateActor = ALabMinionMassActor::StaticClass();
+		const bool bBudget = Variant == ELabVariant::M3BudgetDist || Variant == ELabVariant::M3BudgetSig;
+		Visual->HighResTemplateActor = bBudget ? ALabMinionMassActorBudget::StaticClass() : ALabMinionMassActor::StaticClass();
 		Visual->Params.LODRepresentation[EMassLOD::High] = EMassRepresentationType::HighResSpawnedActor;
 	}
 	if (bM3 || Variant == ELabVariant::VatCull || Variant == ELabVariant::VatCullVis)
@@ -93,6 +94,20 @@ void ULabCrowdSubsystem::Activate(ALabCrowdSpawner* InSpawner, UStaticMesh* Mesh
 			Visual->LODParams.VisibleLODDistance[EMassLOD::Off] = 1.e7f; // 화면 안이면 맵 끝까지 그린다
 		}
 		Visual->Params.LODRepresentation[EMassLOD::Off] = EMassRepresentationType::None;
+	}
+	if (bM3 && Variant == ELabVariant::M3LowRes)
+	{
+		// E3 (5): 0~15m 액터, 15~30m 저품질 액터, 30~200m VAT 인스턴스, 200m 밖 Off. 액터 상한은 대표와 같은 500을 둘이 나눈다.
+		const float Bands[EMassLOD::Max] = { 0.f, 1500.f, 3000.f, 20000.f };
+		const int32 MaxCounts[EMassLOD::Max] = { 250, 250, MAX_int32, MAX_int32 };
+		for (int32 LOD = 0; LOD < EMassLOD::Max; ++LOD)
+		{
+			Visual->LODParams.BaseLODDistance[LOD] = Bands[LOD];
+			Visual->LODParams.VisibleLODDistance[LOD] = Bands[LOD];
+			Visual->LODParams.LODMaxCount[LOD] = MaxCounts[LOD];
+		}
+		Visual->LowResTemplateActor = ALabMinionMassActorLow::StaticClass();
+		Visual->Params.LODRepresentation[EMassLOD::Medium] = EMassRepresentationType::LowResSpawnedActor;
 	}
 
 	bActive = true;

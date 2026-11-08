@@ -81,7 +81,8 @@ void ALabGameMode::StartPlay()
 
 void ALabGameMode::ApplyVariantCVars()
 {
-	if (FLabConfig::Get().Variant != ELabVariant::Budget)
+	const ELabVariant V = FLabConfig::Get().Variant;
+	if (V != ELabVariant::Budget && V != ELabVariant::M3BudgetDist && V != ELabVariant::M3BudgetSig)
 	{
 		return;
 	}
@@ -208,7 +209,7 @@ void ALabGameMode::Tick(float DeltaSeconds)
 	}
 
 	// budget 변형: Significance Manager는 게임이 시점을 넘겨 갱신해야 한다(SignificanceManager.h:118 Update).
-	if (FLabConfig::Get().Variant == ELabVariant::Budget && Camera)
+	if ((FLabConfig::Get().Variant == ELabVariant::Budget || FLabConfig::Get().Variant == ELabVariant::M3BudgetDist) && Camera)
 	{
 		if (USignificanceManager* Sig = USignificanceManager::Get(GetWorld()))
 		{

@@ -1,6 +1,8 @@
 #include "LabActorSyncProcessor.h"
 #include "HordeOptLab.h"
+#include "LabConfig.h"
 #include "LabCrowdSubsystem.h"
+#include "SkeletalMeshComponentBudgeted.h"
 #include "LabMassTypes.h"
 #include "LabMinion.h"
 #include "LabMinionAnimInstance.h"
@@ -32,6 +34,7 @@ void ULabActorSyncProcessor::ConfigureQueries(const TSharedRef<FMassEntityManage
 	EntityQuery.AddRequirement<FMassActorFragment>(EMassFragmentAccess::ReadWrite);
 	EntityQuery.AddRequirement<FMassRepresentationFragment>(EMassFragmentAccess::ReadOnly);
 	EntityQuery.AddRequirement<FLabMinionFragment>(EMassFragmentAccess::ReadOnly);
+	EntityQuery.AddRequirement<FMassRepresentationLODFragment>(EMassFragmentAccess::ReadOnly);
 	EntityQuery.AddTagRequirement<FLabMinionTag>(EMassFragmentPresence::All);
 }
 
@@ -48,6 +51,7 @@ void ULabActorSyncProcessor::Execute(FMassEntityManager& EntityManager, FMassExe
 	const float Now = World->GetTimeSeconds();
 	const float HitDuration = Crowd->HitDuration;
 	const float DeathDuration = Crowd->DeathDuration;
+	const bool bSigBudget = FLabConfig::Get().Variant == ELabVariant::M3BudgetSig;
 	int32 Actors = 0;
 	int32 Rebinds = 0;
 
@@ -57,13 +61,15 @@ void ULabActorSyncProcessor::Execute(FMassEntityManager& EntityManager, FMassExe
 		const TArrayView<FMassActorFragment> ActorList = Context.GetMutableFragmentView<FMassActorFragment>();
 		const TConstArrayView<FMassRepresentationFragment> Representations = Context.GetFragmentView<FMassRepresentationFragment>();
 		const TConstArrayView<FLabMinionFragment> Minions = Context.GetFragmentView<FLabMinionFragment>();
+		const TConstArrayView<FMassRepresentationLODFragment> LODs = Context.GetFragmentView<FMassRepresentationLODFragment>();
 		const bool bHit = Context.DoesArchetypeHaveTag(*FLabHitTag::StaticStruct());
 		const bool bDead = Context.DoesArchetypeHaveTag(*FLabDeadTag::StaticStruct());
 		const ELabMinionState State = bDead ? ELabMinionState::Dead : bHit ? ELabMinionState::Hit : ELabMinionState::Walk;
 
 		for (FMassExecutionContext::FEntityIterator It = Context.CreateEntityIterator(); It; ++It)
 		{
-			if (Representations[It].CurrentRepresentation != EMassRepresentationType::HighResSpawnedActor)
+			const EMassRepresentationType Rep = Representations[It].CurrentRepresentation;
+			if (Rep != EMassRepresentationType::HighResSpawnedActor && Rep != EMassRepresentationType::LowResSpawnedActor)
 			{
 				continue;
 			}
@@ -104,6 +110,15 @@ void ULabActorSyncProcessor::Execute(FMassEntityManager& EntityManager, FMassExe
 				Anim->StartTime = 0.f;
 				Anim->State = State;
 				Actor->AppliedState = State;
+			}
+
+			if (bSigBudget)
+			{
+				// E3 (3b): Mass는 0이 High, Budget은 큰 값이 중요하다(engine-notes.md 3절)
+				if (USkeletalMeshComponentBudgeted* Budgeted = Cast<USkeletalMeshComponentBudgeted>(SkelMesh))
+				{
+					Budgeted->SetComponentSignificance(1.f - FMath::Clamp(LODs[It].LODSignificance / 3.f, 0.f, 1.f));
+				}
 			}
 
 			// 죽기 진홍색: VAT 머티리얼과 같은 곡선(진행도 x 2.5, 0~1로 자름, Scripts/bake-vat.py)

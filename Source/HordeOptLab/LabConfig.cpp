@@ -42,12 +42,16 @@ const FLabConfig& FLabConfig::Get()
 			else if (Variant == TEXT("massevtlo")) { C.Variant = ELabVariant::MassEvtLo; }
 			else if (Variant == TEXT("massevthi")) { C.Variant = ELabVariant::MassEvtHi; }
 			else if (Variant == TEXT("vatvert")) { C.Variant = ELabVariant::VatVert; }
-			else if (Variant == TEXT("vatcull")) { C.Variant = ELabVariant::VatCull; }
+			else if (Variant == TEXT("vatcull") || Variant == TEXT("m2off")) { C.Variant = ELabVariant::VatCull; } // m2off: M3 묶음에서 잰 M2 + 200m 밖 Off(M3의 비교 상대). 이름만 다르다
 			else if (Variant == TEXT("vatcullvis")) { C.Variant = ELabVariant::VatCullVis; }
 			else if (Variant == TEXT("vatdie0")) { C.Variant = ELabVariant::VatDie0; }
 			else if (Variant == TEXT("vatdie1k")) { C.Variant = ELabVariant::VatDie1k; }
 			else if (Variant == TEXT("kill0")) { C.Variant = ELabVariant::Kill0; }
 			else if (Variant == TEXT("kill1k")) { C.Variant = ELabVariant::Kill1k; }
+			else if (Variant == TEXT("m3uro")) { C.Variant = ELabVariant::M3Uro; }
+			else if (Variant == TEXT("m3budgetdist")) { C.Variant = ELabVariant::M3BudgetDist; }
+			else if (Variant == TEXT("m3budgetsig")) { C.Variant = ELabVariant::M3BudgetSig; }
+			else if (Variant == TEXT("m3lowres")) { C.Variant = ELabVariant::M3LowRes; }
 		}
 		C.N = FMath::Max(C.N, 1);
 		C.Preset = FMath::Clamp(C.Preset, 1, 2);
@@ -78,6 +82,10 @@ const TCHAR* FLabConfig::VariantName(ELabVariant V)
 	case ELabVariant::VatDie1k: return TEXT("vatdie1k");
 	case ELabVariant::Kill0: return TEXT("kill0");
 	case ELabVariant::Kill1k: return TEXT("kill1k");
+	case ELabVariant::M3Uro: return TEXT("m3uro");
+	case ELabVariant::M3BudgetDist: return TEXT("m3budgetdist");
+	case ELabVariant::M3BudgetSig: return TEXT("m3budgetsig");
+	case ELabVariant::M3LowRes: return TEXT("m3lowres");
 	default: return TEXT("full");
 	}
 }

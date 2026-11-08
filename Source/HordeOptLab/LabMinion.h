@@ -133,3 +133,29 @@ public:
 	ELabMinionState AppliedState = ELabMinionState::Walk;
 	float AppliedDeadAmount = 0.f;
 };
+
+/**
+ * E3 (3): 메시가 USkeletalMeshComponentBudgeted인 하이드레이션 액터. 중요도는 (a) Significance Manager 거리 단계(M0 budget과 같다) 또는
+ * (b) 동기화 프로세서가 넘기는 Mass LODSignificance 변환값. 풀에 들어가면 중요도 0(숨긴 액터가 예산을 쓰지 않게, engine-notes.md 4절).
+ */
+UCLASS()
+class ALabMinionMassActorBudget : public ALabMinionMassActor
+{
+	GENERATED_BODY()
+public:
+	ALabMinionMassActorBudget(const FObjectInitializer& ObjectInitializer);
+	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type Reason) override;
+	virtual void PrepareForPooling_Implementation() override;
+	virtual void PrepareForGame_Implementation() override;
+};
+
+/** E3 (5): 저품질 액터(City Sample의 LowRes 단계에 해당). URO, 가장 낮은 메시 LOD 고정, 그림자 끔. */
+UCLASS()
+class ALabMinionMassActorLow : public ALabMinionMassActor
+{
+	GENERATED_BODY()
+public:
+	ALabMinionMassActorLow(const FObjectInitializer& ObjectInitializer);
+	virtual void BeginPlay() override;
+};

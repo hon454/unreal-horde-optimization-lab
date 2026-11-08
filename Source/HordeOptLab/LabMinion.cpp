@@ -1,6 +1,7 @@
 #include "LabMinion.h"
 #include "LabConfig.h"
 #include "LabCrowdSpawner.h"
+#include "HordeOptLab.h"
 #include "Animation/AnimSequence.h"
 #include "Animation/AnimInstance.h"
 #include "Engine/SkeletalMesh.h"
@@ -266,6 +267,10 @@ void ALabMinionMassActor::BeginPlay()
 		SkelMesh->SetMaterial(0, Material);
 	}
 	SkelMesh->SetCustomPrimitiveDataFloat(0, 0.f);
+	if (FLabConfig::Get().Variant == ELabVariant::M3Uro)
+	{
+		SkelMesh->bEnableUpdateRateOptimizations = true; // E3 (2). 거리 단계는 FAnimUpdateRateParameters 기본값(M0 uro와 같다)
+	}
 }
 
 void ALabMinionMassActor::PrepareForPooling_Implementation()
@@ -277,4 +282,74 @@ void ALabMinionMassActor::PrepareForPooling_Implementation()
 void ALabMinionMassActor::PrepareForGame_Implementation()
 {
 	GetMesh()->SetComponentTickEnabled(true);
+}
+
+// E3 (3) Budget 하이드레이션 액터 --------------------------------------------
+
+ALabMinionMassActorBudget::ALabMinionMassActorBudget(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer.SetDefaultSubobjectClass<USkeletalMeshComponentBudgeted>(ACharacter::MeshComponentName))
+{
+}
+
+void ALabMinionMassActorBudget::BeginPlay()
+{
+	Super::BeginPlay();
+	PrepareForGame_Implementation();
+}
+
+void ALabMinionMassActorBudget::EndPlay(const EEndPlayReason::Type Reason)
+{
+	if (USignificanceManager* Sig = USignificanceManager::Get(GetWorld()))
+	{
+		Sig->UnregisterObject(this);
+	}
+	Super::EndPlay(Reason);
+}
+
+void ALabMinionMassActorBudget::PrepareForPooling_Implementation()
+{
+	Super::PrepareForPooling_Implementation();
+	if (USignificanceManager* Sig = USignificanceManager::Get(GetWorld()))
+	{
+		Sig->UnregisterObject(this);
+	}
+	CastChecked<USkeletalMeshComponentBudgeted>(GetMesh())->SetComponentSignificance(0.f);
+}
+
+void ALabMinionMassActorBudget::PrepareForGame_Implementation()
+{
+	Super::PrepareForGame_Implementation();
+	if (FLabConfig::Get().Variant != ELabVariant::M3BudgetDist)
+	{
+		return; // (b) 중요도는 동기화 프로세서가 매 프레임 넘긴다
+	}
+	USignificanceManager* Sig = USignificanceManager::Get(GetWorld());
+	if (Sig && !Sig->GetManagedObject(this))
+	{
+		// M0 budget 변형과 같은 거리 단계(ALabMinionBudget::BeginPlay)
+		Sig->RegisterObject(this, LabMinionSignificanceTag, &LabTierSignificance,
+			USignificanceManager::EPostSignificanceType::Sequential,
+			[](USignificanceManager::FManagedObjectInfo* Info, float /*Old*/, float New, bool /*bFinal*/)
+			{
+				ACharacter* Character = CastChecked<ACharacter>(Info->GetObject());
+				CastChecked<USkeletalMeshComponentBudgeted>(Character->GetMesh())->SetComponentSignificance(New);
+			});
+	}
+}
+
+// E3 (5) 저품질 액터 ---------------------------------------------------------
+
+ALabMinionMassActorLow::ALabMinionMassActorLow(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+{
+}
+
+void ALabMinionMassActorLow::BeginPlay()
+{
+	Super::BeginPlay();
+	USkeletalMeshComponent* SkelMesh = GetMesh();
+	SkelMesh->bEnableUpdateRateOptimizations = true;
+	SkelMesh->SetForcedLOD(SkelMesh->GetNumLODs()); // 1부터 센다(0은 자동). 가장 낮은 LOD
+	SkelMesh->SetCastShadow(false);
+	UE_LOG(LogLab, Verbose, TEXT("lab_lowres lods=%d"), SkelMesh->GetNumLODs());
 }
