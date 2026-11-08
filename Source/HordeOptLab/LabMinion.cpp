@@ -269,21 +269,14 @@ void ALabMinionMassActor::BeginPlay()
 		SkelMesh->SetMaterial(0, Material);
 	}
 	SkelMesh->SetCustomPrimitiveDataFloat(0, 0.f);
-	// 진단(2026-11-09): ActorSync 이동 비용이 캡슐 콜리전 쪽인지 나눠 본다. -LabActorMoveCheap은 콜리전을 두고 물리 볼륨·오버랩 갱신만 끈다.
-	static const bool bMoveCheap = FParse::Param(FCommandLine::Get(), TEXT("LabActorMoveCheap"));
-	static const bool bNoCollision = FParse::Param(FCommandLine::Get(), TEXT("LabActorNoCollision"));
-	if (bMoveCheap || bNoCollision)
+	// E3 (6) 콜리전 줄이기(2026-11-09 사용자 결정 A). 대표(mass)는 캡슐 기본값(Pawn 프로필) 그대로다.
+	const ELabVariant Variant = FLabConfig::Get().Variant;
+	if (Variant == ELabVariant::M3ColQuery || Variant == ELabVariant::M3NoCol)
 	{
 		GetCapsuleComponent()->SetShouldUpdatePhysicsVolume(false);
 		GetCapsuleComponent()->SetGenerateOverlapEvents(false);
-	}
-	if (bNoCollision)
-	{
-		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	}
-	else if (bMoveCheap && FParse::Param(FCommandLine::Get(), TEXT("LabActorQueryOnly")))
-	{
-		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryOnly); // 트레이스·스윕은 받고 물리 바디(피직스 씬 갱신)는 만들지 않는다
+		// QueryOnly: 트레이스·스윕은 받고 물리 시뮬레이션 바디는 만들지 않는다. NoCollision: 피직스 씬에서 뺀다
+		GetCapsuleComponent()->SetCollisionEnabled(Variant == ELabVariant::M3NoCol ? ECollisionEnabled::NoCollision : ECollisionEnabled::QueryOnly);
 	}
 	if (FLabConfig::Get().Variant == ELabVariant::M3Uro)
 	{

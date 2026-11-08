@@ -32,6 +32,8 @@ enum class ELabVariant : uint8
 	M3BudgetSig, // E3 (3b): Budget Allocator, 중요도는 Mass LODSignificance 변환값(1 - LODSignificance / 3)
 	M3NoActor,   // 진단: M3 단계 그대로 두되 0~30m도 VAT 인스턴스(액터 없음). 액터가 다른 프로세서 비용에 주는 영향을 가른다
 	M3LowRes,    // E3 (5): 0~15m 액터, 15~30m 저품질 액터(URO, 가장 낮은 메시 LOD, 그림자 끔), 30~200m VAT 인스턴스
+	M3ColQuery,  // E3 (6): 액터 캡슐을 QueryOnly로, 오버랩·물리 볼륨 갱신 끔(트레이스로 맞히는 게임의 절충)
+	M3NoCol,     // E3 (6): 액터 캡슐 콜리전 끔(판정을 Mass가 갖는 퍼핏 구조)
 };
 
 /**
