@@ -2,6 +2,9 @@
 #include "LabConfig.h"
 #include "LabCrowdSpawner.h"
 #include "Animation/AnimSequence.h"
+#include "Animation/AnimInstance.h"
+#include "Engine/SkeletalMesh.h"
+#include "Materials/MaterialInterface.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
@@ -238,4 +241,40 @@ void ALabMinionBudget::EndPlay(const EEndPlayReason::Type Reason)
 		Sig->UnregisterObject(this);
 	}
 	Super::EndPlay(Reason);
+}
+
+// M3 하이드레이션 액터 ------------------------------------------------------
+
+ALabMinionMassActor::ALabMinionMassActor(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+{
+	// 로직은 엔티티에 있다. 엔진이 SetActorTickEnabled(true)를 불러도 bCanEverTick이 false면 틱 함수가 등록되지 않는다.
+	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bStartWithTickEnabled = false;
+}
+
+void ALabMinionMassActor::BeginPlay()
+{
+	Super::BeginPlay();
+	// M0 스포너와 같은 에셋(LabCrowdSpawner.cpp LoadAssets). 이미 메모리에 있으면 LoadObject는 찾기만 한다.
+	USkeletalMeshComponent* SkelMesh = GetMesh();
+	SkelMesh->SetSkeletalMesh(LoadObject<USkeletalMesh>(nullptr, TEXT("/Game/ParagonMinions/Characters/Minions/Down_Minions/Meshes/Minion_Lane_Melee_Dawn.Minion_Lane_Melee_Dawn")));
+	SkelMesh->SetAnimationMode(EAnimationMode::AnimationBlueprint);
+	SkelMesh->SetAnimInstanceClass(LoadClass<UAnimInstance>(nullptr, TEXT("/Game/Lab/Anim/ABP_LabMinion.ABP_LabMinion_C")));
+	if (UMaterialInterface* Material = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/Lab/VAT/Baked/M_LabMinionActor.M_LabMinionActor"), nullptr, LOAD_Quiet | LOAD_NoWarn))
+	{
+		SkelMesh->SetMaterial(0, Material);
+	}
+	SkelMesh->SetCustomPrimitiveDataFloat(0, 0.f);
+}
+
+void ALabMinionMassActor::PrepareForPooling_Implementation()
+{
+	GetMesh()->SetComponentTickEnabled(false);
+	BoundSerial = MAX_uint32;
+}
+
+void ALabMinionMassActor::PrepareForGame_Implementation()
+{
+	GetMesh()->SetComponentTickEnabled(true);
 }

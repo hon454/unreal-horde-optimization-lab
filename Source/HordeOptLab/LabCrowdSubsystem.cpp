@@ -70,8 +70,15 @@ void ULabCrowdSubsystem::Activate(ALabCrowdSpawner* InSpawner, UStaticMesh* Mesh
 	}
 
 	// E2 (c): 확정 밴드(30/80/200m, measurement.md "확정값")를 켜고 Off(200m 밖)를 그리지 않는다. 대표(M2)는 M1과 같이 모든 거리를 그린다.
+	// M3부터는 이 밴드가 대표 설정이고, High(0~30m)는 액터다(plan.md "M3").
 	const ELabVariant Variant = FLabConfig::Get().Variant;
-	if (Variant == ELabVariant::VatCull || Variant == ELabVariant::VatCullVis)
+	const bool bM3 = FLabConfig::Get().Stage >= ELabStage::M3;
+	if (bM3)
+	{
+		Visual->HighResTemplateActor = ALabMinionMassActor::StaticClass();
+		Visual->Params.LODRepresentation[EMassLOD::High] = EMassRepresentationType::HighResSpawnedActor;
+	}
+	if (bM3 || Variant == ELabVariant::VatCull || Variant == ELabVariant::VatCullVis)
 	{
 		const float Bands[EMassLOD::Max] = { 0.f, 3000.f, 8000.f, 20000.f };
 		const int32 MaxCounts[EMassLOD::Max] = { 500, 5000, MAX_int32, MAX_int32 }; // 확정값 LODMaxCount

@@ -23,6 +23,7 @@ const FLabConfig& FLabConfig::Get()
 			if (Stage.Equals(TEXT("M0"), ESearchCase::IgnoreCase)) { C.Stage = ELabStage::M0; }
 			else if (Stage.Equals(TEXT("M1"), ESearchCase::IgnoreCase)) { C.Stage = ELabStage::M1; }
 			else if (Stage.Equals(TEXT("M2"), ESearchCase::IgnoreCase)) { C.Stage = ELabStage::M2; }
+			else if (Stage.Equals(TEXT("M3"), ESearchCase::IgnoreCase)) { C.Stage = ELabStage::M3; }
 			else { C.bStageValid = false; }
 		}
 
@@ -87,6 +88,7 @@ const TCHAR* FLabConfig::StageName(ELabStage S)
 	{
 	case ELabStage::M1: return TEXT("M1");
 	case ELabStage::M2: return TEXT("M2");
+	case ELabStage::M3: return TEXT("M3");
 	case ELabStage::M0:
 	default: return TEXT("M0");
 	}

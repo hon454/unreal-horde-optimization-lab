@@ -21,6 +21,7 @@ DIFFUSE = MINION + "/Textures/Melee/T_Minion_Dawn_Melee_D"
 NORMAL = MINION + "/Textures/Melee/T_Minion_Dawn_Melee_N"
 OUT = "/Game/Lab/VAT/Baked"
 A2T = "/AnimToTexture/Materials/MaterialFunctions"
+DEAD_COLOR = unreal.LinearColor(0.6, 0.06, 0.05, 1.0)  # 죽기 진홍색(2026-11-08 사용자 확정). VAT·액터 머티리얼이 같은 값을 쓴다
 
 lib = unreal.AnimToTextureBPLibrary
 mel = unreal.MaterialEditingLibrary
@@ -106,7 +107,7 @@ def make_material(mode):
     white.set_editor_property("constant", unreal.LinearColor(1.0, 1.0, 1.0, 1.0))
     dead = mel.create_material_expression(mat, unreal.MaterialExpressionVectorParameter, -1100, 500)
     dead.set_editor_property("parameter_name", "DeadColor")
-    dead.set_editor_property("default_value", unreal.LinearColor(0.6, 0.06, 0.05, 1.0))
+    dead.set_editor_property("default_value", DEAD_COLOR)
     tint = mel.create_material_expression(mat, unreal.MaterialExpressionLinearInterpolate, -900, 500)
     mel.connect_material_expressions(white, "", tint, "A")
     mel.connect_material_expressions(dead, "RGB", tint, "B")
@@ -177,8 +178,45 @@ def bake(mode):
                                                          unreal.EditorStaticMeshLibrary.get_number_verts(sm, 0)))
 
 
+def make_actor_material():
+    """M3 액터용. VAT 머티리얼과 같은 기본 색·노멀·거칠기와 죽기 진홍색이라 30m 전환 때 색이 튀지 않는다(plan.md "M3").
+    죽기 정도(0\~1)는 C++이 컴포넌트의 커스텀 프리미티브 데이터 0번에 넣는다(ULabActorSyncProcessor)."""
+    mat = new_asset("M_LabMinionActor", unreal.Material, unreal.MaterialFactoryNew())
+    mat.set_editor_property("tangent_space_normal", True)
+    mel.set_material_usage(mat, unreal.MaterialUsage.MATUSAGE_SKELETAL_MESH)
+    base = mel.create_material_expression(mat, unreal.MaterialExpressionTextureSampleParameter2D, -1000, -200)
+    base.set_editor_property("parameter_name", "Diffuse")
+    base.set_editor_property("texture", unreal.load_asset(DIFFUSE))
+    nrm = mel.create_material_expression(mat, unreal.MaterialExpressionTextureSampleParameter2D, -1000, 200)
+    nrm.set_editor_property("parameter_name", "Normal")
+    nrm.set_editor_property("texture", unreal.load_asset(NORMAL))
+    nrm.set_editor_property("sampler_type", unreal.MaterialSamplerType.SAMPLERTYPE_NORMAL)
+    dead_amount = scalar_param(mat, "DeadAmount", 0.0, -1100, 600)  # 커스텀 프리미티브 데이터 0번에서 읽는다(MaterialExpressionScalarParameter.h:56-60)
+    dead_amount.set_editor_property("use_custom_primitive_data", True)
+    dead_amount.set_editor_property("primitive_data_index", 0)
+    white = mel.create_material_expression(mat, unreal.MaterialExpressionConstant3Vector, -1100, 400)
+    white.set_editor_property("constant", unreal.LinearColor(1.0, 1.0, 1.0, 1.0))
+    dead = mel.create_material_expression(mat, unreal.MaterialExpressionVectorParameter, -1100, 500)
+    dead.set_editor_property("parameter_name", "DeadColor")
+    dead.set_editor_property("default_value", DEAD_COLOR)
+    tint = mel.create_material_expression(mat, unreal.MaterialExpressionLinearInterpolate, -900, 500)
+    mel.connect_material_expressions(white, "", tint, "A")
+    mel.connect_material_expressions(dead, "RGB", tint, "B")
+    mel.connect_material_expressions(dead_amount, "", tint, "Alpha")
+    mel.connect_material_property(binary(mat, unreal.MaterialExpressionMultiply, base, tint, -700, -200, "RGB"), "", unreal.MaterialProperty.MP_BASE_COLOR)
+    mel.connect_material_property(nrm, "RGB", unreal.MaterialProperty.MP_NORMAL)
+    mel.connect_material_property(const(mat, 0.6, -700, 300), "", unreal.MaterialProperty.MP_ROUGHNESS)
+    mel.recompile_material(mat)
+    eal.save_loaded_asset(mat)
+    log("actor material saved")
+
+
 for m in ["Bone", "Vertex"]:
     try:
         bake(m)
     except Exception as e:
         unreal.log_error("LABVAT %s failed: %s" % (m, e))
+try:
+    make_actor_material()
+except Exception as e:
+    unreal.log_error("LABVAT actor material failed: %s" % e)

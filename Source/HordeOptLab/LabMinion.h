@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "LabMinionAnimInstance.h"
+#include "MassActorPoolableInterface.h"
 #include "LabMinion.generated.h"
 
 class ALabCrowdSpawner;
@@ -106,4 +107,29 @@ public:
 	ALabMinionBudget(const FObjectInitializer& ObjectInitializer);
 	virtual void BeginPlay() override;
 	virtual void EndPlay(const EEndPlayReason::Type Reason) override;
+};
+
+/**
+ * M3 하이드레이션 액터. Mass가 0~30m 엔티티에 붙였다 떼는 표현일 뿐이고 로직은 엔티티에 있다(plan.md "M3").
+ * pawn 변형과 같은 부품(캡슐, 스켈레탈 메시, ABP_LabMinion, CharacterMovement 틱 끔)이라 E0 수치와 견줄 수 있다.
+ * 위치·애니 상태·죽기 색은 ULabActorSyncProcessor가 매 프레임 쓴다. 액터 자신은 틱하지 않는다.
+ * 머티리얼은 VAT 인스턴스와 같은 M_LabMinionActor(Scripts/bake-vat.py)라 전환 때 색이 튀지 않는다.
+ * 엔진 풀은 액터를 숨기기만 하고 컴포넌트 틱은 남겨 두므로(engine-notes.md 4절) 풀에 들어갈 때 메시 틱을 끈다.
+ */
+UCLASS()
+class ALabMinionMassActor : public ALabMinionPawn, public IMassActorPoolableInterface
+{
+	GENERATED_BODY()
+public:
+	ALabMinionMassActor(const FObjectInitializer& ObjectInitializer);
+	virtual void BeginPlay() override;
+
+	virtual bool CanBePooled_Implementation() override { return true; }
+	virtual void PrepareForPooling_Implementation() override;
+	virtual void PrepareForGame_Implementation() override;
+
+	// 동기화 프로세서가 쓰는 상태. 엔티티가 바뀌면(새로 붙음, 풀에서 다시 씀) 애니를 처음부터 맞춘다.
+	uint32 BoundSerial = MAX_uint32;
+	ELabMinionState AppliedState = ELabMinionState::Walk;
+	float AppliedDeadAmount = 0.f;
 };

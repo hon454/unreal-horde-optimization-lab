@@ -1,6 +1,7 @@
 #include "HordeOptLab.h"
 #include "LabConfig.h"
 #include "LabVatProcessor.h"
+#include "LabActorSyncProcessor.h"
 #include "MassUpdateISMProcessor.h"
 #include "Modules/ModuleManager.h"
 
@@ -29,6 +30,7 @@ public:
 		const bool bVat = FLabConfig::Get().Stage >= ELabStage::M2;
 		LabSetAutoRegister(GetMutableDefault<UMassUpdateISMProcessor>(), !bVat);
 		LabSetAutoRegister(GetMutableDefault<ULabVatISMProcessor>(), bVat);
+		LabSetAutoRegister(GetMutableDefault<ULabActorSyncProcessor>(), FLabConfig::Get().Stage >= ELabStage::M3); // M3 액터 동기화
 		UE_LOG(LogLab, Log, TEXT("lab_ism_processor %s"), bVat ? TEXT("vat") : TEXT("engine"));
 	}
 };
