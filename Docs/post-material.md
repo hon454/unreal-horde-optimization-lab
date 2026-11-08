@@ -161,17 +161,18 @@
 - 흔한 구성: 졸개는 Mass(멀리는 인스턴스, 가까이는 하이드레이션 액터), 엘리트는 이번 M3 같은 하이브리드(City Sample의 사람들), 보스는 처음부터 액터. 보스와 졸개가 상호작용하면 `UMassAgentComponent`로 보스 액터를 Mass 쪽에 등록해 졸개가 장애물·목표로 인식하게 한다(로직은 액터에 남는다).
 - 이 프로젝트: 보스는 범위 밖. M3b의 큰 미니언(시즈 10%)은 엘리트에 가깝고 같은 Mass 엔티티로 중요도만 다르게 둔다. 글 마무리(08 총괄)에서 "어디까지 Mass로 만드나"로 다룰 만하다.
 
-### 하이브리드에서 로직은 누가 갖나: 꼭두각시 vs 넘겨주기 **설명 강조**
+### 하이브리드에서 로직은 누가 갖나: 퍼핏(Mass-driven) vs 액터 구동(actor-driven) **설명 강조**
 
 - 사용자 질문(2026-11-08): 우리는 로직을 전부 Mass가 갖고 액터는 표현만 하는데, 하이브리드는 액터화되는 순간부터 로직을 액터에 맡기나?
-- 갈래 셋: (1) 꼭두각시(우리): 로직은 늘 Mass, 데이터는 Mass → 액터 한 방향. 진실이 한 곳이라 전환 때 어긋남이 없다. (2) 넘겨주기: 액터가 붙으면 액터가 자기 AI·CharacterMovement·물리로 움직이고 엔티티가 액터를 따라간다(액터 → Mass), 떨어질 때 상태를 돌려준다. 엔진의 변환기(translator) 프로세서가 태그로 방향을 정한다(`MassActors/Public/Translators/MassSceneComponentLocationTranslator.h`의 `FMassSceneComponentLocationCopyToMassTag` / `CopyToActorTag`, `MassCharacterMovementTranslators.h`). 경계에서 상태 어긋남 버그가 나기 쉽고 가까운 개체의 로직이 액터 비용이 된다. (3) 섞기: 핵심 상태는 Mass, 액터는 IK·피격 물리·래그돌 같은 근거리 기능만 더하고 결과를 사건으로 Mass에 알린다.
+- 용어: "퍼핏(puppet)"은 엔진 용어다. `UMassAgentComponent` 상태 `PuppetPendingInitialization` 등, 주석 "Actor driven by Mass (puppet)"(`MassActors/Public/MassAgentComponent.h:23`). 반대로 액터가 자기를 대표하는 엔티티를 만드는 경우는 `EntityPendingCreation`/`EntityCreated`로 구분한다. 처음 채팅에서 쓴 "넘겨주기"는 설명용으로 붙인 이름이라 쓰지 않는다(사용자 질문으로 확인, 2026-11-08).
+- 갈래 셋: (1) 퍼핏(Mass-driven, 우리): 로직은 늘 Mass, 데이터는 Mass → 액터 한 방향. 진실이 한 곳이라 전환 때 어긋남이 없다. (2) 액터 구동(actor-driven): 액터가 붙으면 액터가 자기 AI·CharacterMovement·물리로 움직이고 엔티티가 액터를 따라간다(액터 → Mass), 떨어질 때 상태를 돌려준다. 엔진의 변환기(translator) 프로세서가 태그로 방향을 정한다(`MassActors/Public/Translators/MassSceneComponentLocationTranslator.h`의 `FMassSceneComponentLocationCopyToMassTag` / `CopyToActorTag`, `MassCharacterMovementTranslators.h`). 경계에서 상태 어긋남 버그가 나기 쉽고 가까운 개체의 로직이 액터 비용이 된다. (3) 섞기: 핵심 상태는 Mass, 액터는 IK·피격 물리·래그돌 같은 근거리 기능만 더하고 결과를 사건으로 Mass에 알린다.
 - 우리가 (1)을 고른 이유: 이 프로젝트는 단계마다 로직이 같아야 표현 비용을 비교할 수 있고, E0에서 액터 비용의 가장 큰 몫이 CharacterMovement(1k에서 8.6ms)라 (2)는 그 비용을 다시 산다.
 
 ### Mass에서 AI는 어떻게 짜나: StateTree, BT, 태그 **설명 강조**
 
 - 사용자 질문(2026-11-08): BT나 StateTree를 쓸 수 있나?
 - StateTree: MassAI 플러그인에 Mass용이 있다. `MassAIBehavior/Public/MassStateTreeTrait.h`(엔티티에 붙임), `MassStateTreeProcessors.h`(실행), `MassStateTreeSchema.h`. Mass용 태스크(`Tasks/`: NavMesh 경로 따라가기, 스마트 오브젝트 찾기·사용, 바라보기). Mass Signal로 필요한 엔티티만 깨워 판단 비용을 줄인다. City Sample 보행자가 StateTree + ZoneGraph + 스마트 오브젝트 조합이다(구성은 City Sample 설정·에셋으로 다시 확인할 것).
-- Behavior Tree: AI 컨트롤러·폰 전제라 엔티티에 바로 못 붙인다. BT 변환기(`MassTranslator_BehaviorTree`)는 액터 BT와 엔티티를 잇는 오래된 다리이고 City Sample은 꺼 둔다(`CitySample/Config/DefaultMass.ini`). BT를 쓰려면 하이브리드 "넘겨주기"로 액터가 됐을 때만 돌린다.
+- Behavior Tree: AI 컨트롤러·폰 전제라 엔티티에 바로 못 붙인다. BT 변환기(`MassTranslator_BehaviorTree`)는 액터 BT와 엔티티를 잇는 오래된 다리이고 City Sample은 꺼 둔다(`CitySample/Config/DefaultMass.ini`). BT를 쓰려면 하이브리드의 액터 구동(actor-driven) 방식으로, 액터가 됐을 때만 돌린다.
 - 태그 + 프로세서(이 프로젝트 M1\~): 상태가 몇 개면 가장 싸고 단순하다. plan.md M4b(선택)가 태그 vs StateTree + Signal 비교다.
 
 ### 액터화 거리는 어떻게 정하나
