@@ -2,8 +2,9 @@
 
 그리는 것
 - n-at-60fps.svg   : 단계·변형별 "60fps(16.7ms)를 지키는 최대 N"(P1). README 대표 그래프. 값은 measurement.md "N@16.7ms" 정의대로
-                     Game/Render/GPU p50 중 최댓값이 16.7ms를 넘기 직전 N을 측정 N 사이에서 로그 보간한다.
-- n-scaling-P1.svg : N에 따른 프레임 병목 ms(Game/Render/GPU p50 최댓값), P1, 로그-로그.
+                     Game/Render/GPU/프레임 p50 중 최댓값이 16.7ms를 넘기 직전 N을 측정 N 사이에서 로그 보간한다.
+                     프레임 시간을 넣는 이유: Game Thread 시간은 워커 대기를 빼서 워커 병목(E1 massav)을 놓친다(2026-11-08 사용자 결정).
+- n-scaling-P1.svg : N에 따른 프레임 병목 ms(Game/Render/GPU/프레임 p50 최댓값), P1, 로그-로그.
 
 실행: py -3 Scripts/plot.py
 """
@@ -23,7 +24,7 @@ def load():
         stage = path.parent.name
         with open(path, newline="", encoding="utf-8") as f:
             for r in csv.DictReader(f):
-                vals = [float(r[k]) for k in ("game_p50_ms", "render_p50_ms", "gpu_p50_ms") if r.get(k)]
+                vals = [float(r[k]) for k in ("game_p50_ms", "render_p50_ms", "gpu_p50_ms", "frame_p50_ms") if r.get(k)]
                 if not vals:
                     continue
                 rows.append({"stage": stage, "variant": r["variant"], "n": int(r["n"]), "preset": r["preset"], "ms": max(vals)})
@@ -106,11 +107,13 @@ def main():
     p1 = series(rows, "P1")
     bars = []
     for name, pts in sorted(p1.items()):
+        if len(pts) < 2:
+            continue  # N 하나만 잰 실험 변형(E1 (d) 등)은 한계 N을 보간할 수 없다
         n, note = n_at_budget(pts)
         if n is not None:
             bars.append((name, n, note))
     bar_chart(bars, "Max N at 60 fps (P1, bottleneck p50 ≤ 16.7 ms)", OUT / "n-at-60fps.svg")
-    line_chart(p1, "Frame bottleneck vs N (P1)", OUT / "n-scaling-P1.svg")
+    line_chart({k: v for k, v in p1.items() if len(v) >= 2}, "Frame bottleneck vs N (P1)", OUT / "n-scaling-P1.svg")
     for name, n, note in bars:
         print(f"{name}: N@16.7ms = {n:,.0f} {note}")
     print(f"wrote {OUT}")

@@ -16,17 +16,17 @@ Night of the Dead에서 측정 없이 액터로 했던 좀비 호드 최적화�
 
 ![60fps를 지키는 최대 N](Docs/figures/n-at-60fps.svg)
 
-60fps(Game·Render·GPU 중 가장 느린 것의 p50이 16.7ms 이하)를 지키는 최대 개체 수다. 오브 시점, 2560x1440 Epic, Test 패키지, 3회 중앙값(`Measurements/M0/summary.csv`, `Measurements/M1/summary.csv`).
+60fps(프레임·Game·Render·GPU 중 가장 느린 것의 p50이 16.7ms 이하)를 지키는 최대 개체 수다. 오브 시점, 2560x1440 Epic, Test 패키지, 3회 중앙값(`Measurements/M0/summary.csv`, `Measurements/M1/summary.csv`).
 
 | 단계 · 변형 | 1k | 2k | 5k | 20k | 50k | 60fps 최대 N |
 | --- | --- | --- | --- | --- | --- | --- |
-| M0 액터 + AnimBP | 18.4 | 38.5 | 150.7 | | | 874 |
-| M0 Animation Budget Allocator | 16.3 | 30.1 | 111.9 | | | 1,019 |
-| M0 CharacterMovement 틱 끔 | 13.3 | 26.4 | 70.0 | | | 1,197 |
-| M0 애니 없는 액터 | 12.1 | 25.1 | 98.1 | | | 1,278 |
-| M1 Mass(애니 없는 ISM) | 1.4 | 1.8 | 3.1 | 12.4 | 32.9 | 약 21,200 |
+| M0 액터 + AnimBP | 19.5 | 40.6 | 156.9 | | | 813 |
+| M0 Animation Budget Allocator | 17.4 | 32.3 | 118.3 | | | 1,000 미만 |
+| M0 CharacterMovement 틱 끔 | 14.3 | 28.3 | 75.3 | | | 1,128 |
+| M0 애니 없는 액터 | 13.1 | 27.0 | 104.0 | | | 1,196 |
+| M1 Mass(애니 없는 ISM) | 5.9 | 6.5 | 8.0 | 16.0 | 39.2 | 약 20,600 |
 
-칸의 수치는 Game Thread p50(ms)이다. 액터는 무엇을 덧대도 1천 개 근처에서 막혔다. 같은 로직을 Mass로 옮기기만 하자 한계가 약 16배 올랐고, 2만 개에서는 Game Thread가 아니라 GPU가 먼저 한계에 닿았다(M1은 측정 중이다).
+칸의 수치는 프레임 시간 p50(ms)이다. 액터는 무엇을 덧대도 1천 개 근처에서 막혔다. 같은 로직을 Mass로 옮기기만 하자 한계가 약 17배 올랐다. 병렬 처리를 꺼도 거의 같아서(N=20k 16.1ms) 이 차이는 데이터를 연달아 놓고 한꺼번에 처리하는 구조에서 온다. 미니언끼리 비켜 가기(충돌 회피)를 켜면 N=20k에서 57.7ms로 크게 무거워진다.
 
 ![오브 시점, 액터 5,000개](Measurements/M0/shots/full-N5000-P1.png)
 

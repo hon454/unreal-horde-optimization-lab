@@ -29,7 +29,7 @@ COLS = {
 RUN_FIELDS = ["label", "milestone", "variant", "n", "preset", "seed", "run", "pc", "frames",
               "game_p50_ms", "game_p99_ms", "render_p50_ms", "gpu_p50_ms", "frame_p50_ms", "frame_p99_ms",
               "hitch_abs", "hitch_rel", "draw_calls_p50", "mem_total_mb"]
-CORE = ["game_p50_ms", "game_p99_ms", "render_p50_ms", "gpu_p50_ms", "frame_p99_ms",
+CORE = ["game_p50_ms", "game_p99_ms", "render_p50_ms", "gpu_p50_ms", "frame_p50_ms", "frame_p99_ms",
         "hitch_abs", "hitch_rel", "draw_calls_p50", "mem_total_mb"]
 
 
