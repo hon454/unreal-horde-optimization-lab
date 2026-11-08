@@ -15,7 +15,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 CSV_DIR = ROOT / "Saved" / "Profiling" / "CSV"
-LABEL_RE = re.compile(r"^(?P<m>M\d+b?)-(?P<variant>[a-z]+)-N(?P<n>\d+)-(?P<preset>P\d)(?P<tag>[a-z0-9]*)-r(?P<run>\d+)$")
+LABEL_RE = re.compile(r"^(?P<m>M\d+b?)-(?P<variant>[a-z][a-z0-9]*)-N(?P<n>\d+)-(?P<preset>P\d)(?P<tag>[a-z0-9]*)-r(?P<run>\d+)$")
 
 # 엔진 CSV 열(LaunchEngineLoop.cpp:1518-1525)과 후보 이름
 COLS = {

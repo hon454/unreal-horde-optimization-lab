@@ -22,8 +22,10 @@ enum class ELabVariant : uint8
 	VatVert,    // E2 (b): Vertex 모드 VAT(텍스처 메모리 비교)
 	VatCull,    // E2 (c)(1): 200m 밖은 그리지 않는다(거리만, 확정값 "200m~ 없음")
 	VatCullVis, // E2 (c)(2): 화면 밖일 때만 200m 밖을 그리지 않는다(BaseLODDistance 200m, VisibleLODDistance 맵 끝)
-	VatDie0,    // E2 (d): 사망 없음(범위 피해·저격 끔)
-	VatDie1k,   // E2 (d): VatDie0 + 초당 1천 명을 무작위로 피격→사망(인스턴스 제거·재생성 비용)
+	VatDie0,    // E2 (d) 첫 설계(쓰지 않음): 범위 피해·저격을 꺼서 개체가 오브 주위에 쌓였다. 사망 비용이 아니라 밀집을 쟀다
+	VatDie1k,   // E2 (d) 첫 설계(쓰지 않음): VatDie0 + 초당 1천 명 피격→사망
+	Kill0,      // E2 (d): 평소 시나리오(범위 피해·저격으로 초당 약 10명 사망). Mass와 같고 같은 묶음에서 잴 이름만 다르다
+	Kill1k,     // E2 (d): 평소 시나리오 + 초당 1천 명을 무작위로 피격→사망(인스턴스 제거·재생성 비용)
 };
 
 /**

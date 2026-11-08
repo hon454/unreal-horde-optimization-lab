@@ -320,7 +320,8 @@ namespace
 		case ELabVariant::MassDirHi: bOutEvent = false; return 10000;
 		case ELabVariant::MassEvtLo: bOutEvent = true; return 1000;
 		case ELabVariant::MassEvtHi: bOutEvent = true; return 10000;
-		case ELabVariant::VatDie1k: bOutEvent = false; return 1000; // E2 (d): 치명(피격→사망)
+		case ELabVariant::VatDie1k: bOutEvent = false; return 1000; // E2 (d) 첫 설계: 치명(피격→사망)
+		case ELabVariant::Kill1k: bOutEvent = false; return 1000;   // E2 (d): 치명(피격→사망), 평소 시나리오 위에 더한다
 		default: bOutEvent = false; return 0;
 		}
 	}
@@ -360,7 +361,7 @@ void ULabDamageGenProcessor::Execute(FMassEntityManager& EntityManager, FMassExe
 		return;
 	}
 	Owed -= Wanted;
-	const bool bLethal = FLabConfig::Get().Variant == ELabVariant::VatDie1k;
+	const bool bLethal = FLabConfig::Get().Variant == ELabVariant::VatDie1k || FLabConfig::Get().Variant == ELabVariant::Kill1k;
 	// 개체마다 해시로 확률 Wanted / 산 개체 수에 뽑는다. 기대 건수가 Wanted다.
 	// 치명 모드(E2 (d))는 피격·사망 중인 개체가 많아(초당 1천 x 약 2.9초) 걷는 개체 수로 나눠야 기대 건수가 맞는다.
 	const int32 Pool = bLethal ? FMath::Max(1, EntityQuery.GetNumMatchingEntities(EntityManager)) : Crowd->GetAliveCount();

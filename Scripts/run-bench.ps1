@@ -6,7 +6,7 @@ param(
     [Parameter(Mandatory)][string]$Milestone,
     [Parameter(Mandatory)][int]$N,
     [ValidateSet("P1", "P2")][string]$Preset = "P1",
-    [ValidateSet("full", "static", "budget", "uro", "pawn", "mass", "massst", "massav", "massdirlo", "massdirhi", "massevtlo", "massevthi", "vatvert", "vatcull", "vatcullvis", "vatdie0", "vatdie1k", "noanim")][string]$Variant = "full",
+    [ValidateSet("full", "static", "budget", "uro", "pawn", "mass", "massst", "massav", "massdirlo", "massdirhi", "massevtlo", "massevthi", "vatvert", "vatcull", "vatcullvis", "vatdie0", "vatdie1k", "kill0", "kill1k", "noanim")][string]$Variant = "full",
     [int]$Seed = 20261106,
     [int]$Runs = 3,
     [string]$Tag = "",

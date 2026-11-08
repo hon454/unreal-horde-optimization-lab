@@ -45,6 +45,8 @@ const FLabConfig& FLabConfig::Get()
 			else if (Variant == TEXT("vatcullvis")) { C.Variant = ELabVariant::VatCullVis; }
 			else if (Variant == TEXT("vatdie0")) { C.Variant = ELabVariant::VatDie0; }
 			else if (Variant == TEXT("vatdie1k")) { C.Variant = ELabVariant::VatDie1k; }
+			else if (Variant == TEXT("kill0")) { C.Variant = ELabVariant::Kill0; }
+			else if (Variant == TEXT("kill1k")) { C.Variant = ELabVariant::Kill1k; }
 		}
 		C.N = FMath::Max(C.N, 1);
 		C.Preset = FMath::Clamp(C.Preset, 1, 2);
@@ -73,6 +75,8 @@ const TCHAR* FLabConfig::VariantName(ELabVariant V)
 	case ELabVariant::VatCullVis: return TEXT("vatcullvis");
 	case ELabVariant::VatDie0: return TEXT("vatdie0");
 	case ELabVariant::VatDie1k: return TEXT("vatdie1k");
+	case ELabVariant::Kill0: return TEXT("kill0");
+	case ELabVariant::Kill1k: return TEXT("kill1k");
 	default: return TEXT("full");
 	}
 }
