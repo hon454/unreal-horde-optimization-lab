@@ -3,6 +3,7 @@
 #include "LabCrowdSubsystem.h"
 #include "LabMassTypes.h"
 #include "LabSnipe.h"
+#include "LabVatProcessor.h"
 #include "MassCommands.h"
 #include "MassCommonFragments.h"
 #include "MassCommonTypes.h"
@@ -281,6 +282,12 @@ void ULabMinionStateProcessor::Execute(FMassEntityManager& EntityManager, FMassE
 			if (bDead)
 			{
 				Finished.Add(Entity);
+#if !UE_BUILD_TEST
+				if (const FTransformFragment* Xf = EntityManager.GetFragmentDataPtr<FTransformFragment>(Entity))
+				{
+					LabLogScreenEvent(TEXT("removed"), Crowd->SnipeView, Xf->GetTransform().GetLocation()); // 개발용 진단: 사망 후 제거 위치
+				}
+#endif
 			}
 			else
 			{

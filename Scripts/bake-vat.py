@@ -10,6 +10,7 @@
 # 결과는 Fab 에셋에서 나온 것이라 /Game/Lab/VAT/Baked/(gitignore)에 둔다. 새 체크아웃에서는 미니언 이전 뒤 한 번 돌린다.
 # 실행: UnrealEditor-Cmd.exe HordeOptLab.uproject -run=pythonscript -script=Scripts/bake-vat.py -unattended -nosplash -AllowCommandletRendering -stdout
 #   (-nullrhi면 스켈레탈 메시 정점을 읽지 못한다. make-static-minion.py와 같다)
+import os
 import unreal
 
 MINION = "/Game/ParagonMinions/Characters/Minions/Down_Minions"
@@ -21,7 +22,8 @@ DIFFUSE = MINION + "/Textures/Melee/T_Minion_Dawn_Melee_D"
 NORMAL = MINION + "/Textures/Melee/T_Minion_Dawn_Melee_N"
 OUT = "/Game/Lab/VAT/Baked"
 A2T = "/AnimToTexture/Materials/MaterialFunctions"
-DEAD_COLOR = unreal.LinearColor(0.6, 0.06, 0.05, 1.0)  # 죽기 진홍색(2026-11-08 사용자 확정). VAT·액터 머티리얼이 같은 값을 쓴다
+DEAD_COLOR = unreal.LinearColor(0.6, 0.06, 0.05, 1.0)
+VERTEX_BBOX = []  # Vertex 굽기에서 얻은 모든 프레임의 정점 범위. Bone 메시 바운드에 쓴다(bake())  # 죽기 진홍색(2026-11-08 사용자 확정). VAT·액터 머티리얼이 같은 값을 쓴다
 
 lib = unreal.AnimToTextureBPLibrary
 mel = unreal.MaterialEditingLibrary
@@ -167,6 +169,26 @@ def bake(mode):
     mel.set_material_instance_scalar_parameter_value(mi, "DeathEndFrame", float(death.end_frame))
     mel.update_material_instance(mi)
     sm.set_material(0, mi)
+    # 바운드: AnimationToTexture는 Bone 모드에서 "뼈 위치"의 범위로만 바운드를 넓힌다(AnimToTextureBPLibrary.cpp:290, SetBoundsExtensions).
+    # 칼날 끝처럼 뼈에서 멀리 뻗은 정점은 그 밖으로 나가, 죽기 애니 중 Virtual Shadow Map이 바운드 밖의 그림자 페이지를 무효화하지 않아
+    # 칼날 끝 그림자가 바닥에 남았다(2026-11-08 사용자 관찰, 캐시를 끄면 사라짐).
+    # Vertex 모드는 모든 프레임의 정점 범위(VertexMinBBox/SizeBBox)로 바운드를 넓혀 정확하다. 먼저 구운 Vertex 결과의 범위를 Bone 메시에도 쓴다.
+    if mode == "Vertex":
+        VERTEX_BBOX.append((da.get_editor_property("vertex_min_b_box"), da.get_editor_property("vertex_size_b_box")))
+    elif VERTEX_BBOX and not os.environ.get("LAB_VAT_TIGHT"):  # LAB_VAT_TIGHT=1: 수정 전(뼈 위치 범위) 바운드로 굽는다. 전후 기록용
+        # UAnimToTextureBPLibrary::SetBoundsExtensions(private, AnimToTextureBPLibrary.cpp:1108)와 같은 계산
+        vmin, vsize = VERTEX_BBOX[0]
+        pos = sm.get_editor_property("positive_bounds_extension")
+        neg = sm.get_editor_property("negative_bounds_extension")
+        bb = sm.get_bounding_box()
+        base_max = unreal.Vector(bb.max.x - pos.x, bb.max.y - pos.y, bb.max.z - pos.z)
+        base_min = unreal.Vector(bb.min.x + neg.x, bb.min.y + neg.y, bb.min.z + neg.z)
+        new_max = unreal.Vector(max(base_max.x, vmin.x + vsize.x), max(base_max.y, vmin.y + vsize.y), max(base_max.z, vmin.z + vsize.z))
+        new_min = unreal.Vector(min(base_min.x, vmin.x), min(base_min.y, vmin.y), min(base_min.z, vmin.z))
+        sm.set_editor_property("positive_bounds_extension", unreal.Vector(new_max.x - base_max.x, new_max.y - base_max.y, new_max.z - base_max.z))
+        sm.set_editor_property("negative_bounds_extension", unreal.Vector(base_min.x - new_min.x, base_min.y - new_min.y, base_min.z - new_min.z))
+    b = sm.get_bounding_box()
+    log("%s bounds %s .. %s" % (mode, b.min, b.max))
 
     for a in [sm, da, mi] + [unreal.load_asset("%s/T_LabMinionVAT_%s_%s" % (OUT, mode, t)) for t in tex_names]:
         eal.save_loaded_asset(a)
@@ -211,7 +233,7 @@ def make_actor_material():
     log("actor material saved")
 
 
-for m in ["Bone", "Vertex"]:
+for m in ["Vertex", "Bone"]:  # Vertex를 먼저 구워 정점 범위를 Bone 메시 바운드에 쓴다
     try:
         bake(m)
     except Exception as e:

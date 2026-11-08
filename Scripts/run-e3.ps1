@@ -5,7 +5,8 @@
 # 묶음의 맨 첫 조건만 r0(버리는 실행)을 둔다. 총 20조건 60회 + r0, 실행 하나 약 85초(약 85분).
 param(
     [string]$Tag = "",
-    [switch]$OnlySub
+    [switch]$OnlySub,
+    [switch]$OnlyMain  # (1) 대표만. 결과의 비용 내역을 보고 하위 실험을 고른다(2026-11-08 사용자 결정)
 )
 $ErrorActionPreference = "Stop"
 $Bench = "$PSScriptRoot\run-bench.ps1"
@@ -19,7 +20,7 @@ if (-not $OnlySub) {
         }
     }
 }
-foreach ($V in @("m3uro", "m3budgetdist", "m3budgetsig", "m3lowres")) { $Conditions += , @($V, 5000, "P1", "") }
+if (-not $OnlyMain) { foreach ($V in @("m3uro", "m3budgetdist", "m3budgetsig", "m3lowres")) { $Conditions += , @($V, 5000, "P1", "") } }
 
 $Start = Get-Date
 $Failed = @()

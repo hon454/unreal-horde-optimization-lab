@@ -42,6 +42,10 @@ void ALabHud::DrawHUD()
 	Lines.Add(FString::Printf(TEXT("%.0f fps   frame %.2f ms   game %.2f   render %.2f   gpu %.2f"),
 		SmoothedFrameMs > 0.f ? 1000.f / SmoothedFrameMs : 0.f, SmoothedFrameMs, GameMs, RenderMs, GpuMs));
 	Lines.Add(FString::Printf(TEXT("memory %.0f MB used physical"), Mem.UsedPhysical / (1024.0 * 1024.0)));
+	if (!Config.Label.IsEmpty())
+	{
+		Lines.Add(FString::Printf(TEXT(">> %s"), *Config.Label)); // 사용자가 화면으로 비교할 때 어느 창인지 보이게 한다(개발 실행 -LabLabel=)
+	}
 	if (GameMode)
 	{
 		Lines.Add(GameMode->GetHudCrowdLine());

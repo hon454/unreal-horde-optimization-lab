@@ -17,6 +17,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "ProfilingDebugging/CsvProfiler.h"
 #include "Engine/World.h"
+#include "EngineUtils.h"
 
 CSV_DECLARE_CATEGORY_EXTERN(Lab);
 
@@ -216,7 +217,19 @@ void ULabActorSyncProcessor::Execute(FMassEntityManager& EntityManager, FMassExe
 	CSV_CUSTOM_STAT(Lab, ActorRebinds, Rebinds, ECsvCustomStatOp::Set);
 	if (GFrameCounter % 300 == 0)
 	{
-		UE_LOG(LogLab, Log, TEXT("lab_actors actors=%d rebinds=%d"), Actors, Rebinds); // 개발 실행 확인용(Test 구성은 로그가 없다)
+#if !UE_BUILD_TEST
+		// 남는 액터 진단: 월드의 하이드레이션 액터를 상태별로 센다(보임 / 숨김(풀) / 화면 패스 꺼짐(대기)).
+		int32 Total = 0, Hidden = 0, Visible = 0, Shadow = 0;
+		for (TActorIterator<ALabMinionMassActor> AIt(World); AIt; ++AIt)
+		{
+			++Total;
+			const USkeletalMeshComponent* M = AIt->GetMesh();
+			if (AIt->IsHidden()) { ++Hidden; }
+			else if (M->bRenderInMainPass) { ++Visible; }
+			if (!AIt->IsHidden() && M->CastShadow) { ++Shadow; }
+		}
+		UE_LOG(LogLab, Log, TEXT("lab_actors synced=%d rebinds=%d world_total=%d hidden=%d visible=%d shadow_casting=%d"), Actors, Rebinds, Total, Hidden, Visible, Shadow);
+#endif
 	}
 	if (DbgHoles > 0 || DbgOverlaps > 0 || DbgSwitches > 0)
 	{

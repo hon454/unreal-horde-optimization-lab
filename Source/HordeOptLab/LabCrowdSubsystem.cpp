@@ -152,17 +152,29 @@ void ULabCrowdSubsystem::RequestRespawn(int32 Count)
 
 void ULabCrowdSubsystem::ExcludeVisualsFromLumen()
 {
-	if (bLumenExcluded)
-	{
-		return;
-	}
+	// ISM 컴포넌트는 표현 프로세서가 필요할 때 만든다. 처음 한 개만 고치면 뒤에 생긴 컴포넌트가 빠져서(2026-11-08 그림자 캐시 수정이
+	// 듣지 않았다), 매 틱 컴포넌트를 훑어 아직 설정되지 않은 것만 고친다(비주얼라이저 하나, 컴포넌트 몇 개).
 	for (TActorIterator<AMassVisualizer> It(GetWorld()); It; ++It)
 	{
 		TArray<UInstancedStaticMeshComponent*> Components;
 		It->GetComponents(Components);
 		for (UInstancedStaticMeshComponent* Component : Components)
 		{
+			const bool bWantAlways = false; // 그림자 캐시 남음은 VAT 메시 바운드로 고쳤다(Scripts/bake-vat.py BOUNDS_MARGIN). Always는 매 프레임 무효화라 비용이 커서 끈다
+			if (!Component->bAffectDynamicIndirectLighting && (!bWantAlways || Component->ShadowCacheInvalidationBehavior == EShadowCacheInvalidationBehavior::Always))
+			{
+				continue; // 이미 고친 컴포넌트
+			}
 			LabExcludeFromLumen(*Component);
+			UE_LOG(LogLab, Log, TEXT("lab_ism_setup %s instances=%d"), *Component->GetName(), Component->GetInstanceCount());
+			if (bWantAlways)
+			{
+				// VAT 인스턴스는 셰이더(WPO)로 모양이 바뀐다. 죽기 애니 중에는 제자리에 멈춰 위치 변화가 없어서 Virtual Shadow Map이
+				// 그림자를 캐시해 쓰러지기 전 자세(칼날 끝)의 그림자가 바닥에 남았다(2026-11-08 사용자 관찰, M2 N=1000).
+				// 엔진 설명대로 "시스템이 모르는 방식으로 움직이는" 프리미티브라 항상 다시 그리게 한다(Engine/Public/SceneTypes.h:222-235).
+				Component->ShadowCacheInvalidationBehavior = EShadowCacheInvalidationBehavior::Always;
+				Component->MarkRenderStateDirty();
+			}
 			bLumenExcluded = true;
 		}
 	}
