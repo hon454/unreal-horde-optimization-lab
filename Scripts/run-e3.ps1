@@ -14,7 +14,7 @@ $ErrorActionPreference = "Stop"
 $Bench = "$PSScriptRoot\run-bench.ps1"
 
 $Conditions = @()
-if (-not $OnlySub) {
+if (-not $OnlySub -and -not $OnlyCollision -and -not $OnlyDistance) {
     foreach ($N in @(1000, 5000, 20000, 50000)) {
         foreach ($Preset in @("P1", "P2")) {
             $Conditions += , @("m2off", $N, $Preset, "M2")
