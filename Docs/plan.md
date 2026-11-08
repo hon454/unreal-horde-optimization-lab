@@ -85,7 +85,11 @@ M0\~M5가 필수다. 마일스톤마다 바꾸는 최적화 변수는 하나고,
 **바꾸는 변수:** 근거리 표현(VAT ISM → HighResActor). 200m 밖은 Off(그리지 않음)로 둔다(E2 (c), 2026-11-08 사용자 결정). 비교 상대는 M2 + 200m 밖 Off이고 같은 묶음에서 다시 잰다. 예산 기법은 E3 안에서 계단으로 비교하고, **M3의 대표점은 (1) 하이드레이션만**이다.
 
 **만드는 것**
-- Representation High = HighResActor. `UMassActorSpawnerSubsystem` 풀, `UMassAgentComponent` + Mass→Actor Sync. 전환 시 VAT 재생 시각 ↔ AnimBP 시각 동기화.
+- 단계: 액터(0\~30m, 최대 500) → VAT 인스턴스(30\~200m) → Off. 저품질 액터 단계는 두지 않는다(2026-11-08 사용자 결정. City Sample은 MetaHuman 한 명이 매우 비싸 저품질 액터를 끼우지만, 메시 하나짜리 미니언은 줄어드는 몫이 작고 액터 비용은 URO·Budget으로 같은 액터 안에서 줄인다. 근거는 E3 (5)로 잰다).
+- 액터: M0 캐릭터에서 CharacterMovement 틱만 끈 것(E0 `pawn`과 같은 부품, 같은 AnimBP). 엔진 풀(`UMassActorSpawnerSubsystem`)을 쓴다.
+- 동기화: 우리 프로세서 하나가 매 프레임 액터 위치, 애니 상태, 죽기 진홍색을 쓴다(엔진은 액터를 붙이는 순간에만 위치를 맞춘다, `MassRepresentationProcessor.cpp:272`).
+- 전환 시 VAT 재생 시각 ↔ AnimBP 시각 동기화: AnimBP 시퀀스 플레이어의 Start Position을 `ULabMinionAnimInstance::StartTime`에 묶었다(Unreal MCP, `Scripts/bind-anim-start.md`).
+- 액터 머티리얼은 VAT 인스턴스와 같은 단순 머티리얼(기본 색·노멀, 죽기 진홍색)로 맞춰 전환 때 색이 튀지 않게 한다.
 - 액터 메시를 `USkeletalMeshComponentBudgeted`로. 중요도는 `1 - LODSignificance / 3`으로 변환해 `SetComponentSignificance`에 넘긴다(Mass는 0이 High, Budget은 큰 값이 중요. engine-notes.md).
 - 풀에 돌아간 액터는 `IMassActorPoolableInterface`에서 중요도 0, 틱 끔. Mass 풀링은 액터를 숨기기만 한다(engine-notes.md).
 
@@ -94,6 +98,7 @@ M0\~M5가 필수다. 마일스톤마다 바꾸는 최적화 변수는 하나고,
 2. + URO.
 3. URO 대신 Budget Allocator(`BudgetMs` 2). Significance 소스 (a) 거리 단계(M0 `budget`과 같음) vs (b) Mass `LODSignificance` 변환값.
 4. 풀 크기별 스폰 비용(부록).
+5. 저품질 액터 단계 비교(5k P1, 참고): 15\~30m를 가벼운 액터로 둔 구성 vs 두지 않은 대표 구성. 글에서 City Sample과 다른 선택의 근거로 쓴다(2026-11-08 사용자 요청).
 
 **측정 조건:** N {1k, 5k, 20k, 50k}. P1 오브 시점의 근거리(피해 범위 주변)가 이 마일스톤의 주 관찰점이다.
 
