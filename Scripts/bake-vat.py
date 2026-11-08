@@ -106,7 +106,7 @@ def make_material(mode):
     white.set_editor_property("constant", unreal.LinearColor(1.0, 1.0, 1.0, 1.0))
     dead = mel.create_material_expression(mat, unreal.MaterialExpressionVectorParameter, -1100, 500)
     dead.set_editor_property("parameter_name", "DeadColor")
-    dead.set_editor_property("default_value", unreal.LinearColor(0.9, 0.12, 0.08, 1.0))
+    dead.set_editor_property("default_value", unreal.LinearColor(0.6, 0.06, 0.05, 1.0))
     tint = mel.create_material_expression(mat, unreal.MaterialExpressionLinearInterpolate, -900, 500)
     mel.connect_material_expressions(white, "", tint, "A")
     mel.connect_material_expressions(dead, "RGB", tint, "B")
