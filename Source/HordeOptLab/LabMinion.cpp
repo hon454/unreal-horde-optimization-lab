@@ -1,4 +1,4 @@
-#include "LabMinion.h"
+﻿#include "LabMinion.h"
 #include "LabConfig.h"
 #include "LabCrowdSpawner.h"
 #include "HordeOptLab.h"
@@ -8,6 +8,8 @@
 #include "Materials/MaterialInterface.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Misc/CommandLine.h"
+#include "Misc/Parse.h"
 #include "Components/StaticMeshComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "SignificanceManager.h"
@@ -267,6 +269,22 @@ void ALabMinionMassActor::BeginPlay()
 		SkelMesh->SetMaterial(0, Material);
 	}
 	SkelMesh->SetCustomPrimitiveDataFloat(0, 0.f);
+	// 진단(2026-11-09): ActorSync 이동 비용이 캡슐 콜리전 쪽인지 나눠 본다. -LabActorMoveCheap은 콜리전을 두고 물리 볼륨·오버랩 갱신만 끈다.
+	static const bool bMoveCheap = FParse::Param(FCommandLine::Get(), TEXT("LabActorMoveCheap"));
+	static const bool bNoCollision = FParse::Param(FCommandLine::Get(), TEXT("LabActorNoCollision"));
+	if (bMoveCheap || bNoCollision)
+	{
+		GetCapsuleComponent()->SetShouldUpdatePhysicsVolume(false);
+		GetCapsuleComponent()->SetGenerateOverlapEvents(false);
+	}
+	if (bNoCollision)
+	{
+		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	}
+	else if (bMoveCheap && FParse::Param(FCommandLine::Get(), TEXT("LabActorQueryOnly")))
+	{
+		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryOnly); // 트레이스·스윕은 받고 물리 바디(피직스 씬 갱신)는 만들지 않는다
+	}
 	if (FLabConfig::Get().Variant == ELabVariant::M3Uro)
 	{
 		SkelMesh->bEnableUpdateRateOptimizations = true; // E3 (2). 거리 단계는 FAnimUpdateRateParameters 기본값(M0 uro와 같다)
@@ -277,7 +295,7 @@ void ALabMinionMassActor::HideUntilPoseReady()
 {
 	bPoseReady = false;
 	PendingReadyFrames = 0;
-	if (FLabConfig::Get().HydrateFix == 2)
+	if (!FLabConfig::Get().HasFix(FLabConfig::FixPassHide))
 	{
 		SetActorHiddenInGame(true); // 대책 2단계의 숨김 방식(모션 블러 번짐이 생긴다). 기록용
 		return;
@@ -292,7 +310,7 @@ void ALabMinionMassActor::HideUntilPoseReady()
 void ALabMinionMassActor::ShowPoseReady()
 {
 	bPoseReady = true;
-	if (FLabConfig::Get().HydrateFix == 2)
+	if (!FLabConfig::Get().HasFix(FLabConfig::FixPassHide))
 	{
 		SetActorHiddenInGame(false);
 		return;
@@ -308,15 +326,18 @@ void ALabMinionMassActor::PrepareForPooling_Implementation()
 	GetMesh()->SetComponentTickEnabled(false);
 	BoundSerial = MAX_uint32;
 	// 죽은 채 풀에 들어온 액터의 진홍색을 지운다. 숨긴 동안 바꾼 커스텀 프리미티브 데이터는 보이는 첫 프레임에 반영되지 않는 것을 연속 캡처로 봤다(2026-11-08).
-	GetMesh()->SetCustomPrimitiveDataFloat(0, 0.f);
-	AppliedDeadAmount = 0.f;
+	if (FLabConfig::Get().HasFix(FLabConfig::FixTintReset))
+	{
+		GetMesh()->SetCustomPrimitiveDataFloat(0, 0.f);
+		AppliedDeadAmount = 0.f;
+	}
 }
 
 void ALabMinionMassActor::PrepareForGame_Implementation()
 {
 	GetMesh()->SetComponentTickEnabled(true);
 	// 엔진은 풀에서 꺼낸 액터를 이 함수 바로 앞에서 보이게 한다(MassActorSpawnerSubsystem.cpp:252-255). 포즈를 맞출 때까지 다시 숨긴다.
-	if (FLabConfig::Get().HydrateFix >= 2)
+	if (FLabConfig::Get().HasFix(FLabConfig::FixWait))
 	{
 		HideUntilPoseReady();
 	}

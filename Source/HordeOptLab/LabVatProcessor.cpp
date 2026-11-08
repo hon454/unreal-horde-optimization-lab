@@ -11,6 +11,8 @@
 #include "HordeOptLab.h"
 #include "ProfilingDebugging/CsvProfiler.h"
 #include "Engine/World.h"
+#include "Misc/CommandLine.h"
+#include "Misc/Parse.h"
 
 CSV_DEFINE_CATEGORY(Lab, true);
 
@@ -53,9 +55,19 @@ void ULabVatISMProcessor::Execute(FMassEntityManager& EntityManager, FMassExecut
 	const float DeathDuration = Crowd->DeathDuration;
 	const FVector ViewLocation = Crowd->SnipeView.Location;
 	int32 BandCounts[4] = { 0, 0, 0, 0 };
+	// 진단(-LabVatTiming): 처리 안쪽을 나눠 잰다. 액터가 있을 때만 이 프로세서가 2.3ms 느려지는 원인 찾기(2026-11-09)
+	static const bool bTiming = FParse::Param(FCommandLine::Get(), TEXT("LabVatTiming"));
+	uint64 CyXf = 0, CyCustom = 0, CyChunkSetup = 0;
+	int32 Chunks = 0, Entities = 0, IsmEntities = 0;
 
+	const uint64 F0 = bTiming ? FPlatformTime::Cycles64() : 0;
+	uint64 CyFirstChunk = 0;
 	EntityQuery.ForEachEntityChunk(Context, [&](FMassExecutionContext& Context)
 	{
+		const uint64 C0 = bTiming ? FPlatformTime::Cycles64() : 0;
+		if (bTiming && Chunks == 0) { CyFirstChunk = C0 - F0; } // 첫 청크 람다까지 걸린 시간(질의 준비)
+		++Chunks;
+		Entities += Context.GetNumEntities();
 		UMassRepresentationSubsystem* RepresentationSubsystem = Context.GetSharedFragment<FMassRepresentationSubsystemSharedFragment>().RepresentationSubsystem;
 		check(RepresentationSubsystem);
 		FMassInstancedStaticMeshInfoArrayView ISMInfo = RepresentationSubsystem->GetMutableInstancedStaticMeshInfos();
@@ -67,6 +79,7 @@ void ULabVatISMProcessor::Execute(FMassEntityManager& EntityManager, FMassExecut
 		const bool bHit = Context.DoesArchetypeHaveTag(*FLabHitTag::StaticStruct());
 		const bool bDead = Context.DoesArchetypeHaveTag(*FLabDeadTag::StaticStruct());
 		const float DeltaSeconds = Context.GetDeltaTimeSeconds();
+		if (bTiming) { CyChunkSetup += FPlatformTime::Cycles64() - C0; }
 
 		for (FMassExecutionContext::FEntityIterator EntityIt = Context.CreateEntityIterator(); EntityIt; ++EntityIt)
 		{
@@ -81,8 +94,11 @@ void ULabVatISMProcessor::Execute(FMassEntityManager& EntityManager, FMassExecut
 				const int32 ISMInfoIndex = Representation.StaticMeshDescHandle.ToIndex();
 				if (ensureMsgf(ISMInfo.IsValidIndex(ISMInfoIndex), TEXT("Invalid handle index %u for ISMInfosView"), ISMInfoIndex))
 				{
+					++IsmEntities;
+					const uint64 X0 = bTiming ? FPlatformTime::Cycles64() : 0;
 					UpdateISMTransform(Context.GetEntity(EntityIt), ISMInfo[ISMInfoIndex], TransformFragment.GetTransform(), Representation.PrevTransform,
 						RepresentationLOD.LODSignificance, Representation.PrevLODSignificance);
+					if (bTiming) { CyXf += FPlatformTime::Cycles64() - X0; }
 
 					const FLabMinionFragment& Minion = Minions[EntityIt];
 					FLabVatFrameData Data;
@@ -105,7 +121,9 @@ void ULabVatISMProcessor::Execute(FMassEntityManager& EntityManager, FMassExecut
 						Data.Frame = ClipFrame(Clips.Walk, Now + Phase, Clips.SampleRate, true);
 						Data.PrevFrame = ClipFrame(Clips.Walk, Now + Phase - DeltaSeconds, Clips.SampleRate, true);
 					}
+					const uint64 D0 = bTiming ? FPlatformTime::Cycles64() : 0;
 					ISMInfo[ISMInfoIndex].AddBatchedCustomData<FLabVatFrameData>(Data, RepresentationLOD.LODSignificance, Representation.PrevLODSignificance);
+					if (bTiming) { CyCustom += FPlatformTime::Cycles64() - D0; }
 
 #if !UE_BUILD_TEST
 					if (UE::Mass::Representation::IsValidActorRepresentation(Representation.PrevRepresentation) && Representation.CurrentRepresentation == EMassRepresentationType::StaticMeshInstance)
@@ -123,6 +141,17 @@ void ULabVatISMProcessor::Execute(FMassEntityManager& EntityManager, FMassExecut
 		}
 	});
 
+	if (bTiming)
+	{
+		CSV_CUSTOM_STAT(Lab, VatForEachMs, float(FPlatformTime::ToMilliseconds64(FPlatformTime::Cycles64() - F0)), ECsvCustomStatOp::Set);
+		CSV_CUSTOM_STAT(Lab, VatFirstChunkMs, float(FPlatformTime::ToMilliseconds64(CyFirstChunk)), ECsvCustomStatOp::Set);
+		CSV_CUSTOM_STAT(Lab, VatXfMs, float(FPlatformTime::ToMilliseconds64(CyXf)), ECsvCustomStatOp::Set);
+		CSV_CUSTOM_STAT(Lab, VatCustomMs, float(FPlatformTime::ToMilliseconds64(CyCustom)), ECsvCustomStatOp::Set);
+		CSV_CUSTOM_STAT(Lab, VatChunkSetupMs, float(FPlatformTime::ToMilliseconds64(CyChunkSetup)), ECsvCustomStatOp::Set);
+		CSV_CUSTOM_STAT(Lab, VatChunks, Chunks, ECsvCustomStatOp::Set);
+		CSV_CUSTOM_STAT(Lab, VatEntities, Entities, ECsvCustomStatOp::Set);
+		CSV_CUSTOM_STAT(Lab, VatIsmEntities, IsmEntities, ECsvCustomStatOp::Set);
+	}
 	CSV_CUSTOM_STAT(Lab, IsmBand0, BandCounts[0], ECsvCustomStatOp::Set);
 	CSV_CUSTOM_STAT(Lab, IsmBand1, BandCounts[1], ECsvCustomStatOp::Set);
 	CSV_CUSTOM_STAT(Lab, IsmBand2, BandCounts[2], ECsvCustomStatOp::Set);

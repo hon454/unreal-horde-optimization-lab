@@ -18,13 +18,15 @@
 #include "ProfilingDebugging/CsvProfiler.h"
 #include "Engine/World.h"
 #include "EngineUtils.h"
+#include "Misc/CommandLine.h"
+#include "Misc/Parse.h"
 
 CSV_DECLARE_CATEGORY_EXTERN(Lab);
 
 bool ULabActorManagement::IsActorReadyForRepresentation(const AActor& Actor) const
 {
 	const ALabMinionMassActor* Minion = Cast<ALabMinionMassActor>(&Actor);
-	return !Minion || Minion->bPoseReady || FLabConfig::Get().HydrateFix < 2;
+	return !Minion || Minion->bPoseReady || !FLabConfig::Get().HasFix(FLabConfig::FixWait);
 }
 
 void ULabActorManagement::TeleportActor(const FTransform& Transform, AActor& Actor, FMassCommandBuffer& CommandBuffer) const
@@ -33,7 +35,7 @@ void ULabActorManagement::TeleportActor(const FTransform& Transform, AActor& Act
 	// 우리 액터의 원점은 캡슐 중심이라 그대로 두면 그 프레임에 88cm 가라앉았다가 다음 프레임 동기화에서 올라온다.
 	// 그 수직 이동이 모션 블러로 세로 줄무늬 잔상을 만들었다(2026-11-08 60fps 연속 캡처). 동기화 프로세서와 같은 높이로 옮긴다.
 	FTransform Lifted = Transform;
-	if (const ACharacter* Character = Cast<ACharacter>(&Actor); Character && FLabConfig::Get().HydrateFix >= 4)
+	if (const ACharacter* Character = Cast<ACharacter>(&Actor); Character && FLabConfig::Get().HasFix(FLabConfig::FixLift))
 	{
 		Lifted.AddToTranslation(FVector(0.f, 0.f, Character->GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight()));
 	}
@@ -44,7 +46,7 @@ EMassActorSpawnRequestAction ULabActorManagement::OnPostActorSpawn(const FMassAc
 {
 	// 새로 스폰된 액터도 엔진이 보이게 만든 직후다(MassActorSpawnerSubsystem.cpp:328). 포즈를 맞출 때까지 숨긴다.
 	ALabMinionMassActor* Minion = Cast<ALabMinionMassActor>(SpawnRequest.Get<const FMassActorSpawnRequest>().SpawnedActor.Get());
-	if (Minion && FLabConfig::Get().HydrateFix >= 2)
+	if (Minion && FLabConfig::Get().HasFix(FLabConfig::FixWait))
 	{
 		Minion->HideUntilPoseReady();
 	}
@@ -86,10 +88,14 @@ void ULabActorSyncProcessor::Execute(FMassEntityManager& EntityManager, FMassExe
 	const float HitDuration = Crowd->HitDuration;
 	const float DeathDuration = Crowd->DeathDuration;
 	const bool bSigBudget = FLabConfig::Get().Variant == ELabVariant::M3BudgetSig;
-	const int32 HydrateFix = FLabConfig::Get().HydrateFix;
+	const bool bFixStartTime = FLabConfig::Get().HasFix(FLabConfig::FixStartTime);
+	const bool bFixWait = FLabConfig::Get().HasFix(FLabConfig::FixWait);
 	int32 Actors = 0;
 	int32 Rebinds = 0;
 	int32 DbgHoles = 0, DbgOverlaps = 0, DbgSwitches = 0;
+	// 진단(-LabVatTiming): 액터 이동(SetActorLocationAndRotation)만 따로 잰다(2026-11-09, ActorSync 비용 나누기)
+	static const bool bTiming = FParse::Param(FCommandLine::Get(), TEXT("LabVatTiming"));
+	uint64 CyMove = 0;
 
 	EntityQuery.ForEachEntityChunk(Context, [&](FMassExecutionContext& Context)
 	{
@@ -133,7 +139,9 @@ void ULabActorSyncProcessor::Execute(FMassEntityManager& EntityManager, FMassExe
 			// 위치: 엔티티는 발밑(지면), 액터는 캡슐 중심이다(M0 스포너의 SpawnZ와 같은 관계).
 			const FTransform& Xf = Transforms[It].GetTransform();
 			const float HalfHeight = Actor->GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight();
+			const uint64 M0 = bTiming ? FPlatformTime::Cycles64() : 0;
 			Actor->SetActorLocationAndRotation(Xf.GetLocation() + FVector(0.f, 0.f, HalfHeight), Xf.GetRotation(), false, nullptr, ETeleportType::TeleportPhysics);
+			if (bTiming) { CyMove += FPlatformTime::Cycles64() - M0; }
 
 			const FLabMinionFragment& Minion = Minions[It];
 			USkeletalMeshComponent* SkelMesh = Actor->GetMesh();
@@ -149,14 +157,14 @@ void ULabActorSyncProcessor::Execute(FMassEntityManager& EntityManager, FMassExe
 				case ELabMinionState::Dead: T = DeathDuration - Minion.StateTimeLeft; break;
 				}
 				Anim->State = State;
-				if (HydrateFix >= 1)
+				if (bFixStartTime)
 				{
 					Anim->StartTime = FMath::Max(T, 0.f);
 					Anim->InitializeAnimation(); // 시퀀스 플레이어가 StartTime부터 다시 시작한다(AnimNode_SequencePlayer.cpp:61)
 				}
 				Actor->BoundSerial = Minion.Serial;
 				Actor->AppliedState = State;
-				if (HydrateFix >= 2)
+				if (bFixWait)
 				{
 					// 이 프레임에는 아직 포즈가 계산되지 않았다. 메시가 두 번 틱할 때까지 숨기고, 그동안 VAT 인스턴스가 대신 보인다.
 					Actor->HideUntilPoseReady();
@@ -216,6 +224,10 @@ void ULabActorSyncProcessor::Execute(FMassEntityManager& EntityManager, FMassExe
 
 	CSV_CUSTOM_STAT(Lab, Actors, Actors, ECsvCustomStatOp::Set);
 	CSV_CUSTOM_STAT(Lab, ActorRebinds, Rebinds, ECsvCustomStatOp::Set);
+	if (bTiming)
+	{
+		CSV_CUSTOM_STAT(Lab, ActorMoveMs, float(FPlatformTime::ToMilliseconds64(CyMove)), ECsvCustomStatOp::Set);
+	}
 	if (GFrameCounter % 300 == 0)
 	{
 #if !UE_BUILD_TEST

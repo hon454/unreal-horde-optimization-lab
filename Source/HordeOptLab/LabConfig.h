@@ -97,6 +97,20 @@ struct FLabConfig
 	 * 근거와 캡처는 Measurements/M3/shots/transition/README.md.
 	 */
 	int32 HydrateFix = 4;
+	/**
+	 * 전환 대책을 하나씩 따로 켜고 끈다(-LabHydrateFixMask=, 기본 31 = 전부). 문제 크기를 대책마다 따로 재려고 둔다(2026-11-09 사용자 요청).
+	 * -LabHydrateFix=L을 주면 단계 L에 맞는 마스크가 된다(0→0, 1→1, 2→3, 3→7, 4→31).
+	 */
+	int32 HydrateFixMask = 31;
+	enum EHydrateFix : int32
+	{
+		FixStartTime = 1,  // 시작 시각 맞추기(AnimBP Start Position)
+		FixWait = 2,       // 준비될 때까지 VAT 유지 + 되돌아갈 때 한 프레임 더 + 그동안 액터 숨김
+		FixPassHide = 4,   // 숨김을 액터 숨김 대신 메인·깊이 패스·그림자에서만 빼기(FixWait일 때만 뜻이 있다)
+		FixLift = 8,       // 엔진 이동(TeleportActor)에 캡슐 반높이 더하기
+		FixTintReset = 16, // 풀에 넣을 때 진홍색 지우기
+	};
+	bool HasFix(EHydrateFix F) const { return (HydrateFixMask & F) != 0; }
 
 	static const FLabConfig& Get();
 	static const TCHAR* VariantName(ELabVariant V);
