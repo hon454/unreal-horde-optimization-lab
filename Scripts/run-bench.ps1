@@ -6,13 +6,15 @@ param(
     [Parameter(Mandatory)][string]$Milestone,
     [Parameter(Mandatory)][int]$N,
     [ValidateSet("P1", "P2")][string]$Preset = "P1",
-    [ValidateSet("full", "static", "budget", "uro", "pawn", "mass", "massst", "massav", "massdirlo", "massdirhi", "massevtlo", "massevthi", "vatvert", "vatcull", "vatcullvis", "vatdie0", "vatdie1k")][string]$Variant = "full",
+    [ValidateSet("full", "static", "budget", "uro", "pawn", "mass", "massst", "massav", "massdirlo", "massdirhi", "massevtlo", "massevthi", "vatvert", "vatcull", "vatcullvis", "vatdie0", "vatdie1k", "noanim")][string]$Variant = "full",
     [int]$Seed = 20261106,
     [int]$Runs = 3,
     [string]$Tag = "",
     [int]$ResX = 2560,
     [int]$ResY = 1440,
-    [switch]$SkipR0
+    [switch]$SkipR0,
+    # 결과는 -Milestone 폴더·라벨로 두고 실행 단계만 바꾼다. M2 E2 (a)가 M1을 같은 묶음에서 잴 때 쓴다(변형 noanim, 2026-11-08).
+    [string]$Stage = ""
 )
 . "$PSScriptRoot\common.ps1"
 
@@ -32,7 +34,7 @@ for ($i = $First; $i -le $Runs; $i++) {
     $Label = "$Base-r$i"
     if (Test-Path "$OutCsv\$Label.csv") { Write-Host "FAIL: $Label.csv already exists. Use -Tag."; exit 1 }
     $GameArgs = @("-windowed", "-ResX=$ResX", "-ResY=$ResY", "-nosound",
-        "-LabBench", "-LabStage=$Milestone", "-LabN=$N", "-LabPreset=$($Preset.Substring(1))", "-LabSeed=$Seed", "-LabVariant=$Variant", "-LabLabel=$Label")
+        "-LabBench", "-LabStage=$(if ($Stage) { $Stage } else { $Milestone })", "-LabN=$N", "-LabPreset=$($Preset.Substring(1))", "-LabSeed=$Seed", "-LabVariant=$Variant", "-LabLabel=$Label")
     Write-Host "RUN $Label"
     $Proc = Start-Process -FilePath $Exe -ArgumentList $GameArgs -PassThru
     $Proc.WaitForExit()

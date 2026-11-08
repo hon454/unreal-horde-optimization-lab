@@ -33,7 +33,7 @@ const FLabConfig& FLabConfig::Get()
 			else if (Variant == TEXT("budget")) { C.Variant = ELabVariant::Budget; }
 			else if (Variant == TEXT("uro")) { C.Variant = ELabVariant::Uro; }
 			else if (Variant == TEXT("pawn")) { C.Variant = ELabVariant::Pawn; }
-			else if (Variant == TEXT("mass")) { C.Variant = ELabVariant::Mass; }
+			else if (Variant == TEXT("mass") || Variant == TEXT("noanim")) { C.Variant = ELabVariant::Mass; } // noanim: M2 묶음에서 잰 M1(애니 없는 ISM). 이름만 다르다
 			else if (Variant == TEXT("massst")) { C.Variant = ELabVariant::MassSt; }
 			else if (Variant == TEXT("massav")) { C.Variant = ELabVariant::MassAv; }
 			else if (Variant == TEXT("massdirlo")) { C.Variant = ELabVariant::MassDirLo; }
