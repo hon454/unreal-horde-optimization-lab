@@ -53,6 +53,11 @@ void ALabGameMode::StartPlay()
 	}
 
 	ApplyVariantCVars();
+	if (Config.Variant == ELabVariant::MassSt)
+	{
+		// E1 (b): Mass 처리 단계를 태스크 그래프에 나누지 않는다. 런타임에 바꿔도 단계가 다시 구성된다(MassProcessingPhaseManager.cpp:576).
+		IConsoleManager::Get().FindConsoleVariable(TEXT("mass.FullyParallel"))->Set(0, ECVF_SetByCode);
+	}
 	if (Config.bBench)
 	{
 		ApplyBenchCVars();

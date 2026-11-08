@@ -33,6 +33,8 @@ const FLabConfig& FLabConfig::Get()
 			else if (Variant == TEXT("uro")) { C.Variant = ELabVariant::Uro; }
 			else if (Variant == TEXT("pawn")) { C.Variant = ELabVariant::Pawn; }
 			else if (Variant == TEXT("mass")) { C.Variant = ELabVariant::Mass; }
+			else if (Variant == TEXT("massst")) { C.Variant = ELabVariant::MassSt; }
+			else if (Variant == TEXT("massav")) { C.Variant = ELabVariant::MassAv; }
 		}
 		C.N = FMath::Max(C.N, 1);
 		C.Preset = FMath::Clamp(C.Preset, 1, 2);
@@ -50,6 +52,8 @@ const TCHAR* FLabConfig::VariantName(ELabVariant V)
 	case ELabVariant::Uro: return TEXT("uro");
 	case ELabVariant::Pawn: return TEXT("pawn");
 	case ELabVariant::Mass: return TEXT("mass");
+	case ELabVariant::MassSt: return TEXT("massst");
+	case ELabVariant::MassAv: return TEXT("massav");
 	default: return TEXT("full");
 	}
 }

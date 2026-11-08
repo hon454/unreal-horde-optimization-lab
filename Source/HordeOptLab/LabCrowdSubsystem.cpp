@@ -13,6 +13,8 @@
 #include "MassSpawnerSubsystem.h"
 #include "SmoothOrientation/MassSmoothOrientationTrait.h"
 #include "Steering/MassSteeringTrait.h"
+#include "Avoidance/MassAvoidanceTrait.h"
+#include "Avoidance/MassNavigationObstacleTrait.h"
 #include "Engine/StaticMesh.h"
 #include "EngineUtils.h"
 #include "MassVisualizer.h"
@@ -46,6 +48,12 @@ void ULabCrowdSubsystem::Activate(ALabCrowdSpawner* InSpawner, UStaticMesh* Mesh
 	AddLabTrait<UMassSteeringTrait>(*EntityConfig);
 	AddLabTrait<UMassSmoothOrientationTrait>(*EntityConfig);
 	AddLabTrait<UMassLODCollectorTrait>(*EntityConfig);
+	if (FLabConfig::Get().Variant == ELabVariant::MassAv)
+	{
+		// E1 (c): 엔진 회피. 이웃을 찾으려면 장애물 격자에 등록돼야 하므로 두 Trait을 함께 붙인다. 파라미터는 엔진 기본값.
+		AddLabTrait<UMassObstacleAvoidanceTrait>(*EntityConfig);
+		AddLabTrait<UMassNavigationObstacleTrait>(*EntityConfig);
+	}
 
 	// 표현: 애니 없는 ISM 하나. 밴드 없이 모든 LOD에서 같은 ISM이다(plan.md "M1"). 거리 밴드는 M2에서 켠다.
 	UMassMovableVisualizationTrait* Visual = AddLabTrait<UMassMovableVisualizationTrait>(*EntityConfig);

@@ -10,7 +10,9 @@ enum class ELabVariant : uint8
 	Budget, // Full + USkeletalMeshComponentBudgeted + Significance 거리 단계 + a.Budget.BudgetMs 2
 	Uro,    // Full + URO만
 	Pawn,   // Full에서 CharacterMovement 틱을 끄고 위치를 직접 이동
-	Mass,   // M1부터의 라벨용. 단계가 표현을 정하므로 M0에서는 Full과 같다
+	Mass,   // M1부터의 기본. 단계가 표현을 정하므로 M0에서는 Full과 같다
+	MassSt, // M1 E1 (b): mass.FullyParallel 0(Mass 처리를 게임 스레드 하나에서)
+	MassAv, // M1 E1 (c): 엔진 회피(UMassObstacleAvoidanceTrait + UMassNavigationObstacleTrait) 켬
 };
 
 /**
