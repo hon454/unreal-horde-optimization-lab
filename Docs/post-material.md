@@ -83,6 +83,27 @@
 - 질문: Lumen을 끄면 실제 게임과 멀어지지 않나? → 끄지 않고 미니언만 뺐다. 미니언은 여전히 Lumen GI를 받고 그림자를 그린다. 현업 근거: City Sample도 `r.RayTracing.Geometry.InstancedStaticMeshes=0`으로 ISM을 레이 트레이싱 장면에서 뺀다(`CitySample/Config/DefaultEngine.ini:122-123`).
 - 같이 쓸 것: 엔진 Mass ISM은 기본으로 그림자를 그리지 않아(`bCastShadows = false`, `MassRepresentationTypes.h:105`) M0 액터와 맞추려고 켰다.
 
+## 03 ISM + VAT
+
+### 거리 단계 기준(30 / 80 / 200m)은 어디서 왔나
+
+- City Sample에서 가져오지 않았다. 계획 초안 값을 M0에서 확정했다(measurement.md "확정값"). 근거: 미니언 키 1.76m가 30m에서 화면 높이 약 3%, 맵 반경 500m에서 모든 구간에 개체가 찬다(0\~30m 6%, 200m 밖 60%).
+
+### 왜 M2에서는 모든 거리를 VAT로 그리나 **설명 강조**
+
+- 질문: 원래 계획은 고품질 액터 / 저품질 액터 / ISM(VAT) / 안 그리기 같은 단계였는데, 왜 다 VAT인가? 극적인 비교를 위해서인가?
+- 답: M2 동안만의 임시 상태다. 액터 표현은 M3에서 만들고, 한 마일스톤에 변수 하나만 더한다. 최종 모습(plan.md)은 0\~30m 액터, 30\~200m VAT 조각상, 200m 밖 안 그림.
+- 200m 밖을 안 그리면 숫자가 크게 좋아지지만 VAT의 비용과 안 그린 이득이 한 숫자에 섞인다. 둘을 따로 재는 쪽이 오히려 덜 극적이다.
+- 네 표현 종류(HighResSpawnedActor, LowResSpawnedActor, StaticMeshInstance, None)는 Mass `EMassRepresentationType` 그대로다.
+
+### City Sample은 단계별로 무엇으로 그리나 **설명 강조**
+
+- 엔진 군중 기본값(`Engine/Plugins/AI/MassCrowd/Source/MassCrowd/Private/MassCrowdVisualizationTrait.cpp:16-38`): High 고품질 액터 0\~5m 최대 10, Medium 저품질 액터 5\~10m 최대 20, Low ISM(VAT) 10\~50m 최대 500, Off 50m\~. 화면 안의 개체는 Medium 10m, Low 50m, Off 100m부터.
+- City Sample `Config/DefaultMass.ini:15-23`은 Low 30m, Off 50m(화면 안 60m / 500m), 최대 High 10 / Medium 20으로 덮어쓴다. 군중 설정 에셋이 다시 덮어쓸 수 있어 최종값은 에디터에서 확인해야 한다.
+- 전환: Medium ↔ Low에서 저품질 액터를 지우지 않고 꺼 둔 채 둔다(`bKeepLowResActors`, 스폰 비용 절약). 액터를 한 프레임 더 남겨 깜빡임을 가린다(`bKeepActorExtraFrame`).
+- 우리와 다른 점: City Sample은 MetaHuman이 비싸 액터를 10\~20명, 수 m 안으로만 쓴다. 우리는 액터 500명(0\~30m)으로 넓다(E0 액터 천장 약 880명). 저품질 액터 단계는 plan.md에 없고 M3에서 넣을지 고를 수 있다.
+- City Sample의 VAT ISM 프로세서(`MassCrowdUpdateISMVertexAnimationProcessor`)는 엔진 `UMassUpdateISMProcessor`를 상속해 위치와 애니 정보를 한 반복에서 쓰고, 엔진 것은 ini에서 끈다(`CitySample/Config/DefaultMass.ini:131-138`).
+
 ## 00 시나리오와 측정 방법
 
 ### 원거리 공격(저격) 대상은 어떻게 고르나
