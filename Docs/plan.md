@@ -82,7 +82,7 @@ M0\~M5가 필수다. 마일스톤마다 바꾸는 최적화 변수는 하나고,
 
 **목표:** 가까운 개체를 액터 + AnimBP로 바꾸고 그 티어의 비용을 제한한다. 프로젝트의 중심. **비교 상대는 M2.**
 
-**바꾸는 변수:** 근거리 표현(None → HighResActor). 예산 기법은 E3 안에서 계단으로 비교하고, **M3의 대표점은 (1) 하이드레이션만**이다.
+**바꾸는 변수:** 근거리 표현(VAT ISM → HighResActor). 200m 밖은 Off(그리지 않음)로 둔다(E2 (c), 2026-11-08 사용자 결정). 비교 상대는 M2 + 200m 밖 Off이고 같은 묶음에서 다시 잰다. 예산 기법은 E3 안에서 계단으로 비교하고, **M3의 대표점은 (1) 하이드레이션만**이다.
 
 **만드는 것**
 - Representation High = HighResActor. `UMassActorSpawnerSubsystem` 풀, `UMassAgentComponent` + Mass→Actor Sync. 전환 시 VAT 재생 시각 ↔ AnimBP 시각 동기화.
