@@ -25,11 +25,11 @@ M0\~M5가 필수다. 마일스톤마다 바꾸는 최적화 변수는 하나고,
   - `static`: 같은 `ACharacter`에 `UStaticMeshComponent`, 애니메이션 없음. M1의 "애니 없는 ISM"과 컨테이너(액터 vs Mass)만 다르다.
   - `pawn`: `full`에서 CharacterMovement를 빼고 위치를 직접 옮긴다. 가장 가벼운 액터의 천장(2026-11-07 추가).
   - `budget`: `full` + `USkeletalMeshComponentBudgeted` + Significance Manager 거리 단계(25/50/100/250m) + `a.Budget.BudgetMs 2`. 액터 위에 올릴 수 있는 최적화를 다 올린 상태. 변형 `uro`(URO만)도 인자로 둔다.
-- 오브: 소멸 반경 안의 개체는 체력 0. 주기마다 먼 개체 K개를 쏜다. 대상은 난수가 아니라 결정적 해시(스폰 일련번호 + 저격 틱)로 고른다. 피격은 피격 애니 뒤 즉사다.
+- 오브: 반경 8m 피해 범위 안의 개체는 중심에 가까울수록 센 초당 피해를 받는다. 2초마다 화면 안의 개체를 거리 구간별로(30\~80m 1, 80\~200m 2, 200m\~ 2) 결정적 해시(스폰 일련번호 + 저격 틱)로 골라 쏜다(`LabSnipe.h`). 피격은 피격 애니 뒤 즉사다.
 - 스포너: 시작 시 디스크 전체에 정상 상태 분포(반지름당 개체 수 일정, 밀도 ∝ 1/r)로 N개를 놓는다. 사망한 개체는 가장자리 링에서 다시 생성한다. 시드로 초기 위치와 재생성 순서를 재현한다.
 
 **고정하는 것(사용자 확정 뒤 measurement.md "확정값")**
-- 맵 반경 R, 이동 속도, 소멸 반경, 저격 간격과 K, 프리셋 좌표.
+- 맵 반경 R, 이동 속도, 피해 범위와 피해량, 저격 간격·수·구간 배분, 프리셋 좌표.
 - 거리 밴드 경계(초안 30 / 80 / 200m)와 `LODMaxCount`. 미니언 실제 크기와 프리셋으로 정한다. **M3이 아니라 여기서 동결한다.** 밴드가 바뀌면 M2의 ISM 개체 수가 달라져 비교가 끊긴다.
 - 프리셋의 역할([ADR-0003](Decisions/0003-two-camera-presets.md)): P1 오브 시점 = 대표(오브 뒤 15m·높이 9m에서 오브 너머를 보며 1 rpm으로 돈다. 한 바퀴가 측정 60초다. 근거리 액터부터 지평선까지 한 화면), P2 탑뷰 = 원거리 밴드 대조군(높이 100m, 가장 가까운 개체도 근거리 밴드 밖).
 
@@ -41,13 +41,13 @@ M0\~M5가 필수다. 마일스톤마다 바꾸는 최적화 변수는 하나고,
 
 ## M1. Mass 코어 — 로직을 엔티티로
 
-**목표:** 같은 이동·피해·사망 로직을 Fragment와 Processor로. 표현은 애니 없는 ISM(`UMassMovableVisualizationTrait`, 밴드 없이 전부 Medium). **비교 상대는 M0 `static`이다.**
+**목표:** 같은 이동·피해·사망 로직을 Fragment와 Processor로. 표현은 애니 없는 ISM(`UMassMovableVisualizationTrait`, 밴드 없이 모든 LOD가 같은 ISM). **비교 상대는 M0 `static`이다.**
 
 **바꾸는 변수:** 컨테이너(액터 → Mass). 회피는 켜지 않는다(M0에도 없다).
 
 **만드는 것**
 - Fragment: `FLabTargetFragment`(목표 방향), `FLabHealthFragment`(float). 엔진 `FTransformFragment`, `FMassVelocityFragment`, `FMassMoveTargetFragment` 재사용. Tag: `FLabHitTag`, `FLabDeadTag`. Const Shared Fragment `FLabUnitTypeParams`(속도, 체력, 바운드 반경).
-- Processor: `ULabApproachProcessor`(MoveTarget을 오브로), 엔진 스티어링, `ULabOrbContactProcessor`, `ULabOrbSnipeProcessor`(피해 이벤트 엔티티 생성), `ULabDamageApplyProcessor`, `ULabDeathProcessor`(Dead 태그 → 지연 파괴 + 재생성). CDO 자동 등록 프로세서 끄기.
+- Processor: `ULabApproachProcessor`(MoveTarget을 오브로), 엔진 스티어링, `ULabOrbContactProcessor`, `ULabOrbSnipeProcessor`, `ULabMinionStateProcessor`(피격·사망 타이머 → 지연 파괴 + 재생성). 피해 이벤트 엔티티와 `ULabDamageApplyProcessor`는 E1 (d)에서 더한다. CDO 자동 등록 프로세서 끄기.
 - EntityConfig(실행 시 C++로 만든다, [ADR-0005](Decisions/0005-entity-config-in-code.md)), Spawner 연결(M0 스포너가 액터 대신 엔티티를 만든다. 분포·시드 로직은 같다).
 
 **실험 E1**
@@ -57,7 +57,7 @@ M0\~M5가 필수다. 마일스톤마다 바꾸는 최적화 변수는 하나고,
 - (d) 저격 피해 전달: 직접 호출 vs 피해 이벤트 엔티티(수명 1프레임). 비치명 피해(체력 차감만)로 초당 1k / 10k. 사망·재생성 비용과 섞지 않는다.
 - 부록(측정만, 글에는 한 줄): 프로세서 하나 vs 셋, 큰 프래그먼트 vs 작은 프래그먼트 셋.
 
-**측정 조건:** N {1k, 5k, 20k, 50k}. 예상: 50k가 로직만으로 16.7ms 안.
+**측정 조건:** N {1k, 2k, 5k, 20k, 50k}(1k·2k·5k는 E0 static과 겹치는 비교점). 예상: 50k가 로직만으로 16.7ms 안.
 
 ## M2. Representation LOD — ISM + VAT
 

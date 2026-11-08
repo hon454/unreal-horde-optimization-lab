@@ -18,7 +18,7 @@
 - [x] 8. 시나리오 고정값 확정(2026-11-07): R 500m, 피해 범위 8m, 저격 2초 5명, 밴드 30/80/200m, 2560x1440 Epic, 시드 20261106. 표는 [measurement.md](Guides/measurement.md) "확정값". `LODMaxCount`만 E0 뒤에 정한다.
 - [x] 8b. 오브 이펙트를 측정 실행에서도 늘 그린다(2026-11-07 사용자 결정). 저격은 구체에서 대상까지 곧은 보라 선 하나(`/Game/Lab/FX/NS_LabBolt`, 만드는 법은 `Scripts/create-bolt-fx.md`). 번개 표현과 피격 이펙트는 시험 뒤 뺐다.
 - [x] 9. E0 다시 재기(2026-11-08, 아래 표), `plot.py`, 대표 스크린샷 `Measurements/M0/shots/full-N5000-P1.png`.
-- [ ] 9b. 문서를 코드에 맞춘다(2026-11-07 검토, 측정과 무관). `measurement.md` "시나리오"와 `plan.md` M0 오브 설명의 "소멸 반경 즉사, 먼 개체 K개"를 8m 범위 피해와 화면 안 구간별 저격으로. `plan.md` M1의 `ULabDeathProcessor` → `ULabMinionStateProcessor`, 저격 피해 이벤트 엔티티는 E1 (d)로, "전부 Medium" → 모든 LOD 같은 ISM, 측정 N에 2k 추가. ADR-0002 표의 "저격 최소 거리" → "화면 판정과 거리 구간 배분(`LabSnipe.h`)"(승인 전에).
+- [x] 9b. 문서를 코드에 맞췄다(plan.md M0 오브·M1 프로세서·측정 N, measurement.md 시나리오, ADR-0002 결과 절).
 - [x] 10. README 결과 초판, 대표 스크린샷, Worklog, ADR-0002 승인, 태그 `M0`.
 
 ## M1 진행(M0 태그 전에 시작, 2026-11-07)
