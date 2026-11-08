@@ -73,6 +73,7 @@ void ULabActorSyncProcessor::ConfigureQueries(const TSharedRef<FMassEntityManage
 
 void ULabActorSyncProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context)
 {
+	CSV_SCOPED_TIMING_STAT(Lab, ActorSync); // 병목 분석용(Exclusive/GameThread/TickActors를 나눠 보려고, 2026-11-09)
 	UWorld* World = Context.GetWorld();
 	const ULabCrowdSubsystem* Crowd = World ? World->GetSubsystem<ULabCrowdSubsystem>() : nullptr;
 	if (!Crowd || !Crowd->IsActive())

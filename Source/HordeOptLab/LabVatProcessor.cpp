@@ -40,6 +40,7 @@ void ULabVatISMProcessor::ConfigureQueries(const TSharedRef<FMassEntityManager>&
 
 void ULabVatISMProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context)
 {
+	CSV_SCOPED_TIMING_STAT(Lab, VatIsm); // 병목 분석용(2026-11-09)
 	UWorld* World = Context.GetWorld();
 	const ULabCrowdSubsystem* Crowd = World ? World->GetSubsystem<ULabCrowdSubsystem>() : nullptr;
 	if (!Crowd || !Crowd->IsActive())

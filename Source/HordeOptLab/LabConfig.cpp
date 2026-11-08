@@ -35,7 +35,7 @@ const FLabConfig& FLabConfig::Get()
 			else if (Variant == TEXT("budget")) { C.Variant = ELabVariant::Budget; }
 			else if (Variant == TEXT("uro")) { C.Variant = ELabVariant::Uro; }
 			else if (Variant == TEXT("pawn")) { C.Variant = ELabVariant::Pawn; }
-			else if (Variant == TEXT("mass") || Variant == TEXT("noanim")) { C.Variant = ELabVariant::Mass; } // noanim: M2 묶음에서 잰 M1(애니 없는 ISM). 이름만 다르다
+			else if (Variant == TEXT("mass") || Variant == TEXT("noanim") || Variant == TEXT("m3base")) { C.Variant = ELabVariant::Mass; } // noanim: M2 묶음에서 잰 M1, m3base: E3 하위 실험 묶음에서 다시 잰 M3 대표. 이름만 다르다
 			else if (Variant == TEXT("massst")) { C.Variant = ELabVariant::MassSt; }
 			else if (Variant == TEXT("massav")) { C.Variant = ELabVariant::MassAv; }
 			else if (Variant == TEXT("massdirlo")) { C.Variant = ELabVariant::MassDirLo; }
@@ -53,6 +53,7 @@ const FLabConfig& FLabConfig::Get()
 			else if (Variant == TEXT("m3budgetdist")) { C.Variant = ELabVariant::M3BudgetDist; }
 			else if (Variant == TEXT("m3budgetsig")) { C.Variant = ELabVariant::M3BudgetSig; }
 			else if (Variant == TEXT("m3lowres")) { C.Variant = ELabVariant::M3LowRes; }
+			else if (Variant == TEXT("m3noactor")) { C.Variant = ELabVariant::M3NoActor; }
 		}
 		C.N = FMath::Max(C.N, 1);
 		C.Preset = FMath::Clamp(C.Preset, 1, 2);
@@ -87,6 +88,7 @@ const TCHAR* FLabConfig::VariantName(ELabVariant V)
 	case ELabVariant::M3BudgetDist: return TEXT("m3budgetdist");
 	case ELabVariant::M3BudgetSig: return TEXT("m3budgetsig");
 	case ELabVariant::M3LowRes: return TEXT("m3lowres");
+	case ELabVariant::M3NoActor: return TEXT("m3noactor");
 	default: return TEXT("full");
 	}
 }

@@ -20,7 +20,8 @@ if (-not $OnlySub) {
         }
     }
 }
-if (-not $OnlyMain) { foreach ($V in @("m3uro", "m3budgetdist", "m3budgetsig", "m3lowres")) { $Conditions += , @($V, 5000, "P1", "") } }
+# 하위 실험은 같은 묶음 안에서 비교하도록 대표(m3base = mass와 같음)를 맨 앞에 다시 잰다(2026-11-09).
+if (-not $OnlyMain) { foreach ($V in @("m3base", "m3uro", "m3budgetdist", "m3budgetsig", "m3lowres")) { $Conditions += , @($V, 5000, "P1", "") } }
 
 $Start = Get-Date
 $Failed = @()

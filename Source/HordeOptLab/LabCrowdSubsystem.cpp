@@ -78,7 +78,7 @@ void ULabCrowdSubsystem::Activate(ALabCrowdSpawner* InSpawner, UStaticMesh* Mesh
 	{
 		const bool bBudget = Variant == ELabVariant::M3BudgetDist || Variant == ELabVariant::M3BudgetSig;
 		Visual->HighResTemplateActor = bBudget ? ALabMinionMassActorBudget::StaticClass() : ALabMinionMassActor::StaticClass();
-		Visual->Params.LODRepresentation[EMassLOD::High] = EMassRepresentationType::HighResSpawnedActor;
+		Visual->Params.LODRepresentation[EMassLOD::High] = Variant == ELabVariant::M3NoActor ? EMassRepresentationType::StaticMeshInstance : EMassRepresentationType::HighResSpawnedActor;
 		// 전환 팝핑 대책(2026-11-08 사용자 결정). VAT → 액터: 액터의 포즈가 준비될 때까지 VAT 인스턴스를 그린다.
 		// 액터 → VAT: 액터를 한 프레임 더 남긴다(엔진 군중 기본값도 켠다, MassCrowdVisualizationTrait.cpp:22). bKeepLowResActors가 켜져 있어야 동작한다(MassRepresentationProcessor.h:27-30).
 		Visual->Params.RepresentationActorManagementClass = ULabActorManagement::StaticClass();

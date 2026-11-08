@@ -30,6 +30,7 @@ enum class ELabVariant : uint8
 	M3Uro,       // E3 (2): 액터 메시에 URO
 	M3BudgetDist,// E3 (3a): URO 대신 Animation Budget Allocator, 중요도는 거리 단계(M0 budget과 같은 25/50/100/250m)
 	M3BudgetSig, // E3 (3b): Budget Allocator, 중요도는 Mass LODSignificance 변환값(1 - LODSignificance / 3)
+	M3NoActor,   // 진단: M3 단계 그대로 두되 0~30m도 VAT 인스턴스(액터 없음). 액터가 다른 프로세서 비용에 주는 영향을 가른다
 	M3LowRes,    // E3 (5): 0~15m 액터, 15~30m 저품질 액터(URO, 가장 낮은 메시 LOD, 그림자 끔), 30~200m VAT 인스턴스
 };
 
