@@ -35,6 +35,10 @@ const FLabConfig& FLabConfig::Get()
 			else if (Variant == TEXT("mass")) { C.Variant = ELabVariant::Mass; }
 			else if (Variant == TEXT("massst")) { C.Variant = ELabVariant::MassSt; }
 			else if (Variant == TEXT("massav")) { C.Variant = ELabVariant::MassAv; }
+			else if (Variant == TEXT("massdirlo")) { C.Variant = ELabVariant::MassDirLo; }
+			else if (Variant == TEXT("massdirhi")) { C.Variant = ELabVariant::MassDirHi; }
+			else if (Variant == TEXT("massevtlo")) { C.Variant = ELabVariant::MassEvtLo; }
+			else if (Variant == TEXT("massevthi")) { C.Variant = ELabVariant::MassEvtHi; }
 		}
 		C.N = FMath::Max(C.N, 1);
 		C.Preset = FMath::Clamp(C.Preset, 1, 2);
@@ -54,6 +58,10 @@ const TCHAR* FLabConfig::VariantName(ELabVariant V)
 	case ELabVariant::Mass: return TEXT("mass");
 	case ELabVariant::MassSt: return TEXT("massst");
 	case ELabVariant::MassAv: return TEXT("massav");
+	case ELabVariant::MassDirLo: return TEXT("massdirlo");
+	case ELabVariant::MassDirHi: return TEXT("massdirhi");
+	case ELabVariant::MassEvtLo: return TEXT("massevtlo");
+	case ELabVariant::MassEvtHi: return TEXT("massevthi");
 	default: return TEXT("full");
 	}
 }

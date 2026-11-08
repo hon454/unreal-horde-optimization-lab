@@ -297,3 +297,147 @@ void ULabMinionStateProcessor::Execute(FMassEntityManager& EntityManager, FMassE
 		});
 	}
 }
+
+// E1 (d) 피해 적용 방식 -----------------------------------------------------
+
+namespace
+{
+	/** 변형에서 초당 건수와 방식을 읽는다. 0이면 E1 (d) 모드가 아니다. */
+	int32 LabDamageRate(bool& bOutEvent)
+	{
+		switch (FLabConfig::Get().Variant)
+		{
+		case ELabVariant::MassDirLo: bOutEvent = false; return 1000;
+		case ELabVariant::MassDirHi: bOutEvent = false; return 10000;
+		case ELabVariant::MassEvtLo: bOutEvent = true; return 1000;
+		case ELabVariant::MassEvtHi: bOutEvent = true; return 10000;
+		default: bOutEvent = false; return 0;
+		}
+	}
+	constexpr float LabNonLethalDamage = 1.f; // 한 건의 피해. 체력 100에서 최소 1까지만 깎는다
+	constexpr float LabNonLethalFloor = 1.f;
+}
+
+ULabDamageGenProcessor::ULabDamageGenProcessor()
+	: EntityQuery(*this)
+{
+	ExecutionFlags = (int32)EProcessorExecutionFlags::AllNetModes;
+	ExecutionOrder.ExecuteAfter.Add(ULabMinionStateProcessor::StaticClass()->GetFName());
+}
+
+void ULabDamageGenProcessor::ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager)
+{
+	EntityQuery.AddRequirement<FLabHealthFragment>(EMassFragmentAccess::ReadWrite);
+	EntityQuery.AddRequirement<FLabMinionFragment>(EMassFragmentAccess::ReadOnly);
+	EntityQuery.AddTagRequirement<FLabMinionTag>(EMassFragmentPresence::All);
+	EntityQuery.AddTagRequirement<FLabHitTag>(EMassFragmentPresence::None);
+	EntityQuery.AddTagRequirement<FLabDeadTag>(EMassFragmentPresence::None);
+}
+
+void ULabDamageGenProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context)
+{
+	bool bEvent = false;
+	const int32 Rate = LabDamageRate(bEvent);
+	ULabCrowdSubsystem* Crowd = LabCrowd(Context);
+	if (Rate == 0 || !Crowd || Crowd->GetAliveCount() <= 0)
+	{
+		return;
+	}
+	Owed += Rate * Context.GetDeltaTimeSeconds();
+	const int32 Wanted = FMath::FloorToInt(Owed);
+	if (Wanted <= 0)
+	{
+		return;
+	}
+	Owed -= Wanted;
+	// 개체마다 해시로 확률 Wanted / 산 개체 수에 뽑는다. 기대 건수가 Wanted다.
+	const uint32 Threshold = static_cast<uint32>(FMath::Min(1.0, double(Wanted) / Crowd->GetAliveCount()) * double(MAX_uint32));
+	const uint32 Frame = static_cast<uint32>(GFrameCounter);
+
+	TArray<FMassEntityHandle> Targets;
+	EntityQuery.ForEachEntityChunk(Context, [&](FMassExecutionContext& Context)
+	{
+		const TArrayView<FLabHealthFragment> Healths = Context.GetMutableFragmentView<FLabHealthFragment>();
+		const TConstArrayView<FLabMinionFragment> Minions = Context.GetFragmentView<FLabMinionFragment>();
+		for (FMassExecutionContext::FEntityIterator It = Context.CreateEntityIterator(); It; ++It)
+		{
+			if (MurmurFinalize32(HashCombineFast(::GetTypeHash(Minions[It].Serial), ::GetTypeHash(Frame))) > Threshold) // 섞지 않은 HashCombineFast는 작은 입력에서 고르게 퍼지지 않는다
+			{
+				continue;
+			}
+			if (bEvent)
+			{
+				Targets.Add(Context.GetEntity(It));
+			}
+			else
+			{
+				FLabHealthFragment& Health = Healths[It];
+				Health.Health = FMath::Max(LabNonLethalFloor, Health.Health - LabNonLethalDamage);
+				++Crowd->DamageHits;
+			}
+		}
+	});
+
+	if (bEvent && Targets.Num() > 0)
+	{
+		// 피해 이벤트 엔티티는 처리 단계가 끝난 뒤(커맨드 플러시) 한꺼번에 만든다.
+		Context.Defer().PushCommand<FMassDeferredCreateCommand>([Targets = MoveTemp(Targets)](FMassEntityManager& Manager)
+		{
+			static FMassArchetypeHandle Archetype;
+			if (!Archetype.IsValid())
+			{
+				Archetype = Manager.CreateArchetype({ FLabDamageEventFragment::StaticStruct() });
+			}
+			TArray<FMassEntityHandle> Events;
+			TSharedRef<FMassEntityManager::FEntityCreationContext> Creation = Manager.BatchCreateEntities(Archetype, Targets.Num(), Events);
+			for (int32 i = 0; i < Events.Num(); ++i)
+			{
+				FLabDamageEventFragment& Event = Manager.GetFragmentDataChecked<FLabDamageEventFragment>(Events[i]);
+				Event.Target = Targets[i];
+				Event.Amount = LabNonLethalDamage;
+			}
+		});
+	}
+}
+
+ULabDamageApplyProcessor::ULabDamageApplyProcessor()
+	: EventQuery(*this)
+	, HealthQuery(*this)
+{
+	ExecutionFlags = (int32)EProcessorExecutionFlags::AllNetModes;
+	ExecutionOrder.ExecuteAfter.Add(ULabDamageGenProcessor::StaticClass()->GetFName());
+}
+
+void ULabDamageApplyProcessor::ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager)
+{
+	EventQuery.AddRequirement<FLabDamageEventFragment>(EMassFragmentAccess::ReadOnly);
+	HealthQuery.AddRequirement<FLabHealthFragment>(EMassFragmentAccess::ReadWrite);
+	HealthQuery.AddTagRequirement<FLabMinionTag>(EMassFragmentPresence::All);
+}
+
+void ULabDamageApplyProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context)
+{
+	TArray<FMassEntityHandle> Consumed;
+	EventQuery.ForEachEntityChunk(Context, [&](FMassExecutionContext& Context)
+	{
+		const TConstArrayView<FLabDamageEventFragment> Events = Context.GetFragmentView<FLabDamageEventFragment>();
+		for (FMassExecutionContext::FEntityIterator It = Context.CreateEntityIterator(); It; ++It)
+		{
+			const FLabDamageEventFragment& Event = Events[It];
+			// 대상이 그사이 지워졌으면(사망·재생성) 건너뛴다.
+			if (EntityManager.IsEntityValid(Event.Target))
+			{
+				if (FLabHealthFragment* Health = EntityManager.GetFragmentDataPtr<FLabHealthFragment>(Event.Target))
+				{
+					Health->Health = FMath::Max(LabNonLethalFloor, Health->Health - Event.Amount);
+					if (ULabCrowdSubsystem* Crowd = LabCrowd(Context)) { ++Crowd->DamageHits; }
+				}
+			}
+			Consumed.Add(Context.GetEntity(It));
+		}
+	});
+	if (Consumed.Num() > 0)
+	{
+		Context.Defer().DestroyEntities(MoveTemp(Consumed));
+	}
+}

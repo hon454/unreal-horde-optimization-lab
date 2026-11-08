@@ -51,6 +51,7 @@ public:
 	FVector Nearest = FVector::ZeroVector;
 	int32 KillCount = 0;
 	int32 SnipeCount = 0;
+	std::atomic<int64> DamageHits{0}; // E1 (d): 체력에 실제로 적용된 비치명 피해 건수(확인용)
 
 private:
 	UPROPERTY() TObjectPtr<UMassEntityConfigAsset> EntityConfig;

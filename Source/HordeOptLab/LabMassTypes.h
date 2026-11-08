@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "MassEntityTypes.h"
+#include "MassEntityHandle.h"
 #include "LabMassTypes.generated.h"
 
 /**
@@ -36,6 +37,16 @@ struct FLabUnitTypeParams : public FMassConstSharedFragment
 	UPROPERTY() float MoveSpeed = 0.f;
 	UPROPERTY() float MaxHealth = 0.f;
 	UPROPERTY() float BoundRadius = 0.f;
+};
+
+/** E1 (d) 이벤트 방식의 피해 한 건. 1프레임만 살고 ULabDamageApplyProcessor가 대상에 적용한 뒤 지운다. */
+USTRUCT()
+struct FLabDamageEventFragment : public FMassFragment
+{
+	GENERATED_BODY()
+
+	FMassEntityHandle Target;
+	float Amount = 0.f;
 };
 
 /** 이 프로젝트의 미니언 엔티티. 프로세서가 엔진 엔티티와 섞이지 않게 거른다. */

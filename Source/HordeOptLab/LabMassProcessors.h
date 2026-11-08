@@ -50,6 +50,37 @@ protected:
 	FMassEntityQuery EntityQuery;
 };
 
+/**
+ * E1 (d) 비치명 피해 발생기. 초당 정해진 건수를 무작위 개체에 넣는다. 개체마다 해시(일련번호, 프레임)로 뽑아 기대 건수를 맞춘다.
+ * 직접 방식은 그 자리에서 체력을 깎고(최소 1), 이벤트 방식은 피해 이벤트 엔티티를 만든다. 두 방식 모두 같은 순회를 하므로 차이는 적용 방식뿐이다.
+ */
+UCLASS()
+class ULabDamageGenProcessor : public UMassProcessor
+{
+	GENERATED_BODY()
+public:
+	ULabDamageGenProcessor();
+protected:
+	virtual void ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager) override;
+	virtual void Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context) override;
+	FMassEntityQuery EntityQuery;
+	double Owed = 0.0; // 아직 넣지 못한 건수(소수점 누적)
+};
+
+/** E1 (d) 이벤트 방식: 피해 이벤트 엔티티를 모아 대상 체력에 적용하고(최소 1) 이벤트를 지운다. */
+UCLASS()
+class ULabDamageApplyProcessor : public UMassProcessor
+{
+	GENERATED_BODY()
+public:
+	ULabDamageApplyProcessor();
+protected:
+	virtual void ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager) override;
+	virtual void Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context) override;
+	FMassEntityQuery EventQuery;
+	FMassEntityQuery HealthQuery; // 미니언 체력에 쓴다는 것을 의존성 해석기에 알리려고 등록만 한다
+};
+
 /** 피격·사망 상태의 남은 시간. 피격이 끝나면 사망, 사망이 끝나면 엔티티를 지우고 가장자리 링에서 새로 만든다. */
 UCLASS()
 class ULabMinionStateProcessor : public UMassProcessor

@@ -13,6 +13,11 @@ enum class ELabVariant : uint8
 	Mass,   // M1부터의 기본. 단계가 표현을 정하므로 M0에서는 Full과 같다
 	MassSt, // M1 E1 (b): mass.FullyParallel 0(Mass 처리를 게임 스레드 하나에서)
 	MassAv, // M1 E1 (c): 엔진 회피(UMassObstacleAvoidanceTrait + UMassNavigationObstacleTrait) 켬
+	// M1 E1 (d) 피해 적용 방식: 비치명 피해를 초당 1천(lo)·1만(hi) 건 무작위 개체에 넣는다(체력 최소 1, 사망 없음).
+	MassDirLo, // 직접 깎기, 초당 1천
+	MassDirHi, // 직접 깎기, 초당 1만
+	MassEvtLo, // 피해 이벤트 엔티티로 모아 깎기, 초당 1천
+	MassEvtHi, // 피해 이벤트 엔티티로 모아 깎기, 초당 1만
 };
 
 /**

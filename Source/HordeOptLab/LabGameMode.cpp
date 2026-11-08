@@ -3,6 +3,7 @@
 #include "LabCameraRig.h"
 #include "LabConfig.h"
 #include "LabCrowdSpawner.h"
+#include "LabCrowdSubsystem.h"
 #include "LabHud.h"
 #include "InputCoreTypes.h"
 #include "LabOrb.h"
@@ -236,6 +237,10 @@ void ALabGameMode::Tick(float DeltaSeconds)
 	if (Duration > 0.f && Elapsed >= Duration && !bQuitRequested)
 	{
 		bQuitRequested = true;
+		if (const ULabCrowdSubsystem* Crowd = GetWorld()->GetSubsystem<ULabCrowdSubsystem>(); Crowd && Crowd->DamageHits > 0)
+		{
+			UE_LOG(LogLab, Log, TEXT("lab_damage hits=%lld per_sec=%.0f"), Crowd->DamageHits.load(), Crowd->DamageHits.load() / FMath::Max(Elapsed, 0.01f));
+		}
 		UE_LOG(LogLab, Log, TEXT("lab_summary elapsed=%.1f n=%d respawns=%d kills=%d snipes=%d avg_ms=%.1f"),
 			Elapsed, Spawner->GetAliveCount(), Spawner->GetRespawnCount(), Orb->GetKillCount(), Orb->GetSnipeCount(),
 			1000.f * Elapsed / FMath::Max<uint64>(GFrameCounter - StartFrame, 1));
