@@ -26,7 +26,9 @@ public class HordeOptLab : ModuleRules
 			"MassNavigation",           // 엔진 조향, FMassMoveTargetFragment
 			"MassLOD",
 			"MassRepresentation",       // UMassMovableVisualizationTrait
-			"MassActors"                // FMassActorFragment
+			"MassActors",               // FMassActorFragment
+			// M2 VAT
+			"AnimToTexture"             // UAnimToTextureDataAsset(클립 프레임 범위)
 		});
 	}
 }

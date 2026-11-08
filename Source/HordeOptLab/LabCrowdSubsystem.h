@@ -10,6 +10,22 @@ class ALabCrowdSpawner;
 class UMassEntityConfigAsset;
 class UStaticMesh;
 
+/** VAT 텍스처 안의 클립 하나(프레임 범위, 끝 포함). Scripts/bake-vat.py가 굽는 순서: 걷기, 피격, 죽기. */
+struct FLabVatClip
+{
+	int32 StartFrame = 0;
+	int32 EndFrame = 0;
+};
+
+/** M2 VAT 재생 정보. 데이터 에셋(UAnimToTextureDataAsset::Animations, SampleRate)에서 읽는다. */
+struct FLabVatClips
+{
+	FLabVatClip Walk;
+	FLabVatClip Hit;
+	FLabVatClip Death;
+	float SampleRate = 30.f;
+};
+
 /**
  * M1부터 쓰는 Mass 군중의 공유 상태. 스포너(위치·일련번호의 주인)와 오브(이펙트), 프로세서(로직)가 이 객체로 이어진다.
  * EntityConfig는 에셋이 아니라 여기서 실행 시 만든다(ADR-0005). M0에서는 활성화하지 않는다.
@@ -42,6 +58,7 @@ public:
 	FLabSnipeView SnipeView;     // 화면 판정용 카메라(오브가 매 틱 갱신)
 	float HitDuration = 0.5f;
 	float DeathDuration = 1.f;
+	FLabVatClips VatClips;       // M2부터. Activate 전에 스포너가 채운다
 
 	// 프로세서가 쓰고 오브가 읽는다. 청크 단위로 병렬 실행될 수 있어 잠금으로 모은다.
 	FCriticalSection ResultLock;

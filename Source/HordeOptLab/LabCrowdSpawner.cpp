@@ -7,6 +7,7 @@
 #include "Animation/AnimSequence.h"
 #include "Engine/SkeletalMesh.h"
 #include "Engine/StaticMesh.h"
+#include "AnimToTextureDataAsset.h"
 #include "Engine/World.h"
 
 namespace
@@ -87,7 +88,27 @@ void ALabCrowdSpawner::SpawnInitial()
 		// M1부터 개체는 Mass 엔티티다. 표현은 static 변형과 같은 정적 메시, 피격·사망 시간은 M0 애니 길이와 같다.
 		Crowd = GetWorld()->GetSubsystem<ULabCrowdSubsystem>();
 		Crowd->OrbCenter = OrbLocation;
-		Crowd->Activate(this, Assets.StaticMesh,
+		UStaticMesh* CrowdMesh = Assets.StaticMesh;
+		if (Config.Stage >= ELabStage::M2)
+		{
+			// M2: VAT 메시(Scripts/bake-vat.py). 클립 프레임은 데이터 에셋에서 읽는다. 없으면 시작하지 않는다(정지 메시로 재면 M1과 같아진다).
+			const TCHAR* Mode = TEXT("Bone");
+			UStaticMesh* VatMesh = LoadObject<UStaticMesh>(nullptr, *FString::Printf(TEXT("/Game/Lab/VAT/Baked/SM_LabMinionVAT_%s.SM_LabMinionVAT_%s"), Mode, Mode));
+			const UAnimToTextureDataAsset* VatData = LoadObject<UAnimToTextureDataAsset>(nullptr, *FString::Printf(TEXT("/Game/Lab/VAT/Baked/DA_LabMinionVAT_%s.DA_LabMinionVAT_%s"), Mode, Mode));
+			checkf(VatMesh && VatData && VatData->Animations.Num() == 3, TEXT("VAT assets missing: run Scripts/bake-vat.py"));
+			FLabVatClips& Clips = Crowd->VatClips;
+			FLabVatClip* Targets[3] = { &Clips.Walk, &Clips.Hit, &Clips.Death };
+			for (int32 i = 0; i < 3; ++i)
+			{
+				Targets[i]->StartFrame = VatData->Animations[i].StartFrame;
+				Targets[i]->EndFrame = VatData->Animations[i].EndFrame;
+			}
+			Clips.SampleRate = VatData->SampleRate;
+			CrowdMesh = VatMesh;
+			UE_LOG(LogLab, Log, TEXT("lab_vat mode=%s walk=%d..%d hit=%d..%d death=%d..%d rate=%.0f"), Mode,
+				Clips.Walk.StartFrame, Clips.Walk.EndFrame, Clips.Hit.StartFrame, Clips.Hit.EndFrame, Clips.Death.StartFrame, Clips.Death.EndFrame, Clips.SampleRate);
+		}
+		Crowd->Activate(this, CrowdMesh,
 			Assets.Hit ? Assets.Hit->GetPlayLength() : 0.5f, Assets.Death ? Assets.Death->GetPlayLength() : 1.f);
 		SpawnEntitiesAt(RadiusAngles);
 	}
