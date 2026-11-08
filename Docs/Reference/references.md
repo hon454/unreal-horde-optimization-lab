@@ -4,8 +4,10 @@
 
 ## 영상
 
-1. **Unlearning OOP: Data-Oriented Gameplay Design with ECS and Mass Entity** — Jared Shabel, Unreal Fest Chicago 2026. https://www.youtube.com/watch?v=UXA8axmAb-U — 메모리 효율 논리, 이벤트 대신 엔티티, 태그로 분기, 작은 프로세서·프래그먼트, Mass Debugger.
-2. **언리얼 엔진의 매스 프레임워크와 대규모 씬 처리를 위한 기능들** — 윤준기(에픽게임즈 코리아), 언리얼 페스트 서울 2026. https://www.youtube.com/watch?v=yhtj9xuAu_c — 액터 vs Mass 단일 스레드 비교, Spawner·Trait·EntityConfig, 아키타입·청크, Representation LOD와 ISKM, Agent Component.
+> **개인 학습 중** 표시: 사용자가 프로젝트와 별도로 보며 공부하는 영상. 나중에 포스팅([post-material.md](../post-material.md))이나 프로젝트 문서를 쓸 때 근거·설명 자료로 다시 인용한다.
+
+1. **Unlearning OOP: Data-Oriented Gameplay Design with ECS and Mass Entity** — Jared Shabel, Unreal Fest Chicago 2026. https://www.youtube.com/watch?v=UXA8axmAb-U — **개인 학습 중.** Mass를 OOP가 아닌 데이터 중심으로 설계하는 법(전투 위치 잡기 시스템을 매니저 패턴에서 ECS로 바꾸는 사례). 메모리 효율 논리, 이벤트 대신 엔티티, 태그로 분기, 작은 프로세서·프래그먼트, Mass Debugger.
+2. **언리얼 엔진의 매스 프레임워크와 대규모 씬 처리를 위한 기능들** — 윤준기(에픽게임즈 코리아), 언리얼 페스트 서울 2026. https://www.youtube.com/watch?v=yhtj9xuAu_c — **개인 학습 중.** Mass 프레임워크 구조와 대규모 장면 처리 기능 전반을 한국어로 정리한 세션. 액터 vs Mass 단일 스레드 비교, Spawner·Trait·EntityConfig, 아키타입·청크, Representation LOD와 ISKM, Agent Component.
 3. Mike Acton, **Data-Oriented Design and C++** (CppCon 2014).
 4. 포럼 **AnimToTexture Plugin, How to Use it to make Vertex Animation Textures for Crowds** — M2 베이크 절차.
 
