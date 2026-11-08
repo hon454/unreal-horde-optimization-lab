@@ -7,6 +7,7 @@ param(
     [string]$Tag = "",
     [switch]$OnlySub,
     [switch]$OnlyMain,  # (1) 대표만. 결과의 비용 내역을 보고 하위 실험을 고른다(2026-11-08 사용자 결정)
+    [switch]$OnlyDistance,  # (7) 하이드레이션 거리만: m3hydbase(= mass, 30m), m3hyd15, m3hyd50 x {5k, 20k} P1(2026-11-09 사용자 결정)
     [switch]$OnlyCollision  # (6) 콜리전 줄이기만: m3colbase(= mass), m3colquery, m3nocol x {5k, 20k} P1(2026-11-09 사용자 결정)
 )
 $ErrorActionPreference = "Stop"
@@ -22,7 +23,10 @@ if (-not $OnlySub) {
     }
 }
 # 하위 실험은 같은 묶음 안에서 비교하도록 대표(m3base = mass와 같음)를 맨 앞에 다시 잰다(2026-11-09).
-if ($OnlyCollision) {
+if ($OnlyDistance) {
+    foreach ($N in @(5000, 20000)) { foreach ($V in @("m3hydbase", "m3hyd15", "m3hyd50")) { $Conditions += , @($V, $N, "P1", "") } }
+}
+elseif ($OnlyCollision) {
     foreach ($N in @(5000, 20000)) { foreach ($V in @("m3colbase", "m3colquery", "m3nocol")) { $Conditions += , @($V, $N, "P1", "") } }
 }
 elseif (-not $OnlyMain) { foreach ($V in @("m3base", "m3uro", "m3budgetdist", "m3budgetsig", "m3lowres")) { $Conditions += , @($V, 5000, "P1", "") } }

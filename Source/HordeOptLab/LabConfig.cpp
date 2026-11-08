@@ -40,7 +40,7 @@ const FLabConfig& FLabConfig::Get()
 			else if (Variant == TEXT("budget")) { C.Variant = ELabVariant::Budget; }
 			else if (Variant == TEXT("uro")) { C.Variant = ELabVariant::Uro; }
 			else if (Variant == TEXT("pawn")) { C.Variant = ELabVariant::Pawn; }
-			else if (Variant == TEXT("mass") || Variant == TEXT("noanim") || Variant == TEXT("m3base") || Variant == TEXT("m3colbase")) { C.Variant = ELabVariant::Mass; } // noanim: M2 묶음에서 잰 M1, m3base·m3colbase: E3 하위 실험 묶음(5, 6)에서 다시 잰 M3 대표. 이름만 다르다
+			else if (Variant == TEXT("mass") || Variant == TEXT("noanim") || Variant == TEXT("m3base") || Variant == TEXT("m3colbase") || Variant == TEXT("m3hydbase")) { C.Variant = ELabVariant::Mass; } // noanim: M2 묶음에서 잰 M1, m3base·m3colbase·m3hydbase: E3 하위 실험 묶음(5, 6, 7)에서 다시 잰 M3 대표. 이름만 다르다
 			else if (Variant == TEXT("massst")) { C.Variant = ELabVariant::MassSt; }
 			else if (Variant == TEXT("massav")) { C.Variant = ELabVariant::MassAv; }
 			else if (Variant == TEXT("massdirlo")) { C.Variant = ELabVariant::MassDirLo; }
@@ -61,6 +61,8 @@ const FLabConfig& FLabConfig::Get()
 			else if (Variant == TEXT("m3noactor")) { C.Variant = ELabVariant::M3NoActor; }
 			else if (Variant == TEXT("m3colquery")) { C.Variant = ELabVariant::M3ColQuery; }
 			else if (Variant == TEXT("m3nocol")) { C.Variant = ELabVariant::M3NoCol; }
+			else if (Variant == TEXT("m3hyd15")) { C.Variant = ELabVariant::M3Hyd15; }
+			else if (Variant == TEXT("m3hyd50")) { C.Variant = ELabVariant::M3Hyd50; }
 		}
 		C.N = FMath::Max(C.N, 1);
 		C.Preset = FMath::Clamp(C.Preset, 1, 2);
@@ -98,6 +100,8 @@ const TCHAR* FLabConfig::VariantName(ELabVariant V)
 	case ELabVariant::M3NoActor: return TEXT("m3noactor");
 	case ELabVariant::M3ColQuery: return TEXT("m3colquery");
 	case ELabVariant::M3NoCol: return TEXT("m3nocol");
+	case ELabVariant::M3Hyd15: return TEXT("m3hyd15");
+	case ELabVariant::M3Hyd50: return TEXT("m3hyd50");
 	default: return TEXT("full");
 	}
 }

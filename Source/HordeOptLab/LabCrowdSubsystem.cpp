@@ -87,7 +87,9 @@ void ULabCrowdSubsystem::Activate(ALabCrowdSpawner* InSpawner, UStaticMesh* Mesh
 	}
 	if (bM3 || Variant == ELabVariant::VatCull || Variant == ELabVariant::VatCullVis)
 	{
-		const float Bands[EMassLOD::Max] = { 0.f, 3000.f, 8000.f, 20000.f };
+		// E3 (7): 하이드레이션 거리만 바꾼다(대표 30m). 80m·200m 밴드와 상한은 그대로(2026-11-09 사용자 결정 A)
+		const float HydrateCm = Variant == ELabVariant::M3Hyd15 ? 1500.f : Variant == ELabVariant::M3Hyd50 ? 5000.f : 3000.f;
+		const float Bands[EMassLOD::Max] = { 0.f, HydrateCm, 8000.f, 20000.f };
 		const int32 MaxCounts[EMassLOD::Max] = { 500, 5000, MAX_int32, MAX_int32 }; // 확정값 LODMaxCount
 		for (int32 LOD = 0; LOD < EMassLOD::Max; ++LOD)
 		{
