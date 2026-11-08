@@ -26,6 +26,19 @@ bool ULabActorManagement::IsActorReadyForRepresentation(const AActor& Actor) con
 	return !Minion || Minion->bPoseReady;
 }
 
+void ULabActorManagement::TeleportActor(const FTransform& Transform, AActor& Actor, FMassCommandBuffer& CommandBuffer) const
+{
+	// 엔진은 액터를 붙일 때와 준비가 끝날 때 엔티티 변환(발밑, z=0)으로 액터를 옮긴다(MassRepresentationProcessor.cpp:272, 428).
+	// 우리 액터의 원점은 캡슐 중심이라 그대로 두면 그 프레임에 88cm 가라앉았다가 다음 프레임 동기화에서 올라온다.
+	// 그 수직 이동이 모션 블러로 세로 줄무늬 잔상을 만들었다(2026-11-08 60fps 연속 캡처). 동기화 프로세서와 같은 높이로 옮긴다.
+	FTransform Lifted = Transform;
+	if (const ACharacter* Character = Cast<ACharacter>(&Actor))
+	{
+		Lifted.AddToTranslation(FVector(0.f, 0.f, Character->GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight()));
+	}
+	Super::TeleportActor(Lifted, Actor, CommandBuffer);
+}
+
 EMassActorSpawnRequestAction ULabActorManagement::OnPostActorSpawn(const FMassActorSpawnRequestHandle& SpawnRequestHandle, FConstStructView SpawnRequest, TSharedRef<FMassEntityManager> EntityManager) const
 {
 	// 새로 스폰된 액터도 엔진이 보이게 만든 직후다(MassActorSpawnerSubsystem.cpp:328). 포즈를 맞출 때까지 숨긴다.

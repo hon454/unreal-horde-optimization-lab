@@ -13,6 +13,7 @@ class ULabActorManagement : public UMassRepresentationActorManagement
 	GENERATED_BODY()
 protected:
 	virtual bool IsActorReadyForRepresentation(const AActor& Actor) const override;
+	virtual void TeleportActor(const FTransform& Transform, AActor& Actor, FMassCommandBuffer& CommandBuffer) const override;
 	virtual EMassActorSpawnRequestAction OnPostActorSpawn(const FMassActorSpawnRequestHandle& SpawnRequestHandle, FConstStructView SpawnRequest, TSharedRef<FMassEntityManager> EntityManager) const override;
 };
 
