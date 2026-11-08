@@ -167,6 +167,13 @@
 - 갈래 셋: (1) 꼭두각시(우리): 로직은 늘 Mass, 데이터는 Mass → 액터 한 방향. 진실이 한 곳이라 전환 때 어긋남이 없다. (2) 넘겨주기: 액터가 붙으면 액터가 자기 AI·CharacterMovement·물리로 움직이고 엔티티가 액터를 따라간다(액터 → Mass), 떨어질 때 상태를 돌려준다. 엔진의 변환기(translator) 프로세서가 태그로 방향을 정한다(`MassActors/Public/Translators/MassSceneComponentLocationTranslator.h`의 `FMassSceneComponentLocationCopyToMassTag` / `CopyToActorTag`, `MassCharacterMovementTranslators.h`). 경계에서 상태 어긋남 버그가 나기 쉽고 가까운 개체의 로직이 액터 비용이 된다. (3) 섞기: 핵심 상태는 Mass, 액터는 IK·피격 물리·래그돌 같은 근거리 기능만 더하고 결과를 사건으로 Mass에 알린다.
 - 우리가 (1)을 고른 이유: 이 프로젝트는 단계마다 로직이 같아야 표현 비용을 비교할 수 있고, E0에서 액터 비용의 가장 큰 몫이 CharacterMovement(1k에서 8.6ms)라 (2)는 그 비용을 다시 산다.
 
+### Mass에서 AI는 어떻게 짜나: StateTree, BT, 태그 **설명 강조**
+
+- 사용자 질문(2026-11-08): BT나 StateTree를 쓸 수 있나?
+- StateTree: MassAI 플러그인에 Mass용이 있다. `MassAIBehavior/Public/MassStateTreeTrait.h`(엔티티에 붙임), `MassStateTreeProcessors.h`(실행), `MassStateTreeSchema.h`. Mass용 태스크(`Tasks/`: NavMesh 경로 따라가기, 스마트 오브젝트 찾기·사용, 바라보기). Mass Signal로 필요한 엔티티만 깨워 판단 비용을 줄인다. City Sample 보행자가 StateTree + ZoneGraph + 스마트 오브젝트 조합이다(구성은 City Sample 설정·에셋으로 다시 확인할 것).
+- Behavior Tree: AI 컨트롤러·폰 전제라 엔티티에 바로 못 붙인다. BT 변환기(`MassTranslator_BehaviorTree`)는 액터 BT와 엔티티를 잇는 오래된 다리이고 City Sample은 꺼 둔다(`CitySample/Config/DefaultMass.ini`). BT를 쓰려면 하이브리드 "넘겨주기"로 액터가 됐을 때만 돌린다.
+- 태그 + 프로세서(이 프로젝트 M1\~): 상태가 몇 개면 가장 싸고 단순하다. plan.md M4b(선택)가 태그 vs StateTree + Signal 비교다.
+
 ### 액터화 거리는 어떻게 정하나
 
 - 사용자 질문(2026-11-08): 실제 게임이라면 액터화가 더 이른 시점(먼 거리)에서 되어야 하나. 현업 기준은 (1) 상호작용 반경 + 생성 지연 여유(액터 스폰은 시간 분할, `MassSimulationSettings` `DesiredActorSpawningTimeSlicePerTick` 1.5ms), (2) VAT와 액터의 차이가 보이기 시작하는 화면 크기, (3) 동시 액터 상한(`LODMaxCount` 500). 우리 시나리오는 상호작용이 피해 범위 8m뿐이라 15m면 충분하고 30m는 여유가 크다. 저격(30\~200m)은 VAT로 피격·죽기를 재생하는데, 실제 게임은 "맞힌 적은 거리와 상관없이 액터로" 같은 사건 기반 액터화도 흔하다(backlog 후보).
