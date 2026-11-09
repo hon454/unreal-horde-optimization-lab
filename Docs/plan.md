@@ -122,6 +122,17 @@ M0\~M5가 필수다. 마일스톤마다 바꾸는 최적화 변수는 하나고,
 - 엔진 기본 프로세서 점검: 개발 빌드 Mass Debugger로 켜져 있는 프로세서 목록을 보고 쓰지 않는 것은 `DefaultMass.ini`에서 끈다(윤준기 16:10, talk-notes.md). 묶음 1 기준점에 포함.
 - 같이 넣는 두 줄: `PendingSnipeTick`을 `std::atomic`으로(오브 틱과 프로세서가 잠금 없이 공유, `LabOrb.cpp:269`), `mass.commands.LockObserversDuringFlushing=1`(City Sample `DefaultEngine.ini:405`, 엔진 기본 0 `MassCommandBuffer.cpp:23`).
 - 실험으로: E3b (8) 화면 밖 액터. `BaseLODDistance = VisibleLODDistance = 30m`이라(`LabCrowdSubsystem.cpp:96-97`) P1에서 30m 원의 절반이 카메라 뒤인데도 액터가 된다. 기본값은 두고 변형 `m3vis`(화면 밖 Base 거리 축소)로 20k·5k P1을 잰다. 대표점 변경은 결과를 보고 M4 전에 따로 결정한다.
+**측정 방법(2026-11-09 사용자 결정 D안).** 묶음 1부터 적용. 규약 본문은 [measurement.md](Guides/measurement.md).
+1. 앵커: M1\~M3 {1k, 5k, 20k, 30k, 50k} × P1·P2, M0 {1k, 5k} × P1·P2(budget·uro·pawn·staticpawn은 P1).
+2. 대표 지표 N@16.7ms를 프레임 p95로. p50 N과 병목 자원을 병기. M0\~M3은 원본 CSV에서 다시 요약(`Scripts/summarize.py`, `plot.py` 수정).
+3. 하위 실험 앵커 5k → 20k P1.
+4. `Scripts/spikes.py`로 묶음마다 주기 스파이크 검사. 히치 정규화 없음.
+5. CSV 메타데이터에 빌드 커밋 해시, 고정 CVar 값, GPU 드라이버 버전. `runs.csv` `build` 열. [pc-specs.md](Reference/pc-specs.md) 빈칸 채움.
+6. 묶음 끝에 기준점 A/A 3회. A/B 하위 실험은 실행 단위로 섞음.
+7. Insights 트레이스: 20k P1 단계별 병렬 1 + 직렬 1(`Scripts/run-bench.ps1 -Trace`).
+8. 메모리 지표는 유지(`PhysicalUsedMB`는 프로세스 작업 집합, `CsvProfiler.cpp:4174`). GPU 메모리는 M5 `memreport`.
+- 묶음 크기(추천 반영): 조건 약 50 × 3회 + 30k 18회 + A/A 3회 + 트레이스 8회 ≈ 170회, 약 4.2시간. 묶음 2도 같다.
+
 - 확인만: 걷기 루프가 `Fmod(Local, Length)`로 End + 0.99 프레임까지 가 다음 클립 첫 행이 섞일 수 있다(`LabVatProcessor.cpp:26`, 가설). 개발 빌드에서 시간을 멈춰 확인하고 사실이면 고친다.
 
 **바꾸는 것:** 개체 종류 1 → 2(소형 90 / 대형 10). 행동은 같고 크기만 다르다. `FLabUnitTypeParams` 값이 달라 아키타입이 갈린다. VAT 텍스처, ISM 컴포넌트, 액터 풀이 종류별로 생긴다.
