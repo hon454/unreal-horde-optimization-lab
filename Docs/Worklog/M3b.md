@@ -465,3 +465,11 @@ plan.md "M3b" 146\~158행(2종 구성, 저격 E안, E3 (3c) 화면 크기 중요
 **에디터 상태 메모.** 확인 때 `L_Bench`의 Floor 머티리얼을 바꿨다가 되돌렸으므로 레벨이 수정됨 표시일 수 있다. 저장해도 내용은 같고, 저장하지 않아도 된다. `HordeOptLab.uproject`의 `EngineAssociation`이 `{31E80386…}`로 바뀌고 끝 개행이 빠져 있다(troubleshooting.md의 그 줄. 에디터를 켜면서 바뀐 것으로 보인다. 이 세션은 고치지 않았다. 에디터를 닫은 뒤 되돌려야 한다).
 
 **남은 것.** 사용자가 에디터를 닫은 뒤 `Scripts/run-dev.ps1 -Small -Extra "-LabTypes=2"`로 `lab_types types=2 large_assets=ok`와 종료 코드 0을 보고, 대형이 보이는 스크린샷을 `Saved/Screenshots/Lab/`에 남긴다.
+
+### 바닥 띠(코드)(코디네이터 지시, 결정 6, 2026-11-09)
+
+커밋 6ad7f7e. 사양은 위 "2종(에셋)"의 "바닥 띠 파라미터(코드 세션에 요청)"와 backlog.md 결정 6. 개발 전용(`#if !UE_BUILD_TEST`, 기본 꺼짐)이라 Test 패키지에는 코드가 없다.
+
+- 인자 `-LabBandFloor`(`ALabGameMode::StartPlay`·`SetupBandFloor`·`Tick`, `LabGameMode.h/.cpp`). P1이면 CVar `lab.BandFloor`를 1로 두고(새 CVar. `LabFixedCVarString`의 목록에 더해 `lab_build` 로그와 CSV 메타데이터 `LabCVars`에 `lab.BandFloor=1`로 찍힌다. 켜고 잰 실행을 걸러내는 용도), `L_Bench`의 바닥(`Floor*` 이름의 `AStaticMeshActor`. 라벨은 에디터 전용이라 이름 접두사로 찾는다)의 머티리얼 0을 `M_LabBandFloor`의 MID로 바꾼다. `BandRadius1~3`은 `FLabSnipeBands::Edges`(3000/8000/20000cm)에서, `BandCenter`는 오브 월드 위치에서 매 프레임 넣는다. P2(탑뷰)면 `lab_bandfloor on=0 reason=P2`로 끈다. 머티리얼 경로는 `Config/DefaultGame.ini` `[Lab] BandFloorMaterial`(코드에 박지 않음). ini 키·머티리얼·바닥이 없으면 경고만 남기고 기본 바닥으로 돈다.
+- 확인: `Scripts/build.ps1` 성공. `-Small`(M3, N=100, 20초) 종료 코드 0: `m3mass` P1(기본 바닥, `respawns=43 kills=8 snipes=39`), `m3mass` P1 `-LabBandFloor`(`lab_bandfloor on=1 floor=Floor_0 previous=MI_ProcGrid material=M_LabBandFloor radii=3000/8000/20000`, `cvars=…|lab.BandFloor=1`, 같은 43/8/39), `m3mass` P2 `-LabBandFloor`(`lab_bandfloor on=0 reason=P2`, `lab.BandFloor=0`). `run-dev.ps1`은 `-Extra` 두 값을 떨어뜨리므로 뒤 둘은 같은 인자로 에디터를 직접 띄웠다.
+- 캡처는 하지 않았다(지시 범위 밖). 띠가 보이는 확인 캡처는 에셋 세션의 `m3b_bandfloor_top.png`·`m3b_bandfloor_p1.png`(위 절).
