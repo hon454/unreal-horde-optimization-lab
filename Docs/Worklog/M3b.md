@@ -270,3 +270,38 @@ plan.md "M3b" E3b (8)의 화질 쪽. 개발 빌드, `-LabStage=M3 -LabN=20000 -L
   - mass: `E3b-mass-empty-f002094.png`(near_vat 415, near_actors 219), `E3b-mass-filled-f002359.png`(359, 240).
 - `py -3 Scripts/transition-score.py <캡처 폴더> <로그>`(전환 튐, 문턱 6): m3vis0 사건 4754건, 튐 평균 2.85, 중앙값 1.98, 눈에 띈 전환 15/4754(0%). mass 1726건, 평균 2.80, 중앙값 2.47, 0/1726(0%). 사건 수가 표의 hydrate 수와 다른 것은 스크립트가 화면 가장자리 30px 안과 캡처 범위 끝 프레임의 사건을 빼기 때문이다.
 - 빌드·실행: `Scripts/build.ps1` 성공. `run-dev.ps1 -Small -Variant m3vis0 -Extra "-LabStage=M3"` 종료 코드 0(`respawns=43 kills=8 snipes=39`). `-LabFrameLog`는 run-dev.ps1의 `-Extra`에 두 번째 값으로 주면 PowerShell `-File` 바인딩에서 빠지므로 에디터를 직접 띄워 썼다.
+
+#### 빠른 회전(코디네이터 지시, 2026-11-09)
+
+조건은 위 1rpm 캡처와 같고(20k, P1 위치·높이·피치, 시드 20261106, 1280x720, `-benchmark -fps=60`, 10\~70초 3600장) 카메라만 개발 전용 `-LabCamTurn`이다(`LabCameraRig.cpp`, `#if !UE_BUILD_TEST`): 5초마다 요 90도를 0.5초(30프레임)에 돌고 4.5초 멈춘다. 한 방향, 60초에 12회(k=2\~13, 회전 시작 프레임 600, 901, 1201, …, 3901. 회전마다 `lab_turn k start_frame end_frame yaw` 한 줄). 세 변형 모두 `respawns=8327 kills=8432 snipes=175`. 캡처 `Saved/Screenshots/LabBurst-e3bturn-<변형>/`, 로그 `Saved/Logs/LabE3bTurn-<변형>.log`.
+
+정의(프레임 단위, `lab_frame`은 위와 같다):
+
+- 회복(<100): 회전이 끝난 프레임부터 `near_vat < 100`이 처음 되는 프레임까지의 프레임 수. 다음 회전 시작 전까지 안 내려가면 "미달".
+- 회복(직전): 회전이 끝난 프레임부터 `near_vat`가 회전 직전 프레임의 값 이하로 처음 돌아오기까지의 프레임 수. 못 돌아오면 "미달"(코디네이터 정의 밖, 100 아래로 내려가지 않는 변형을 위해 더했다).
+- near_vat 최댓값·near_actors 최솟값: 회전 구간 [시작 프레임, 다음 회전 시작 프레임).
+
+| 변형 | 회복(<100) 중앙값 / 최댓값 / 미달 | 회복(직전) 중앙값 / 최댓값 / 미달 | near_vat 최댓값 중앙값 / 최댓값 | near_actors 최솟값 중앙값 / 최솟값 |
+| --- | --- | --- | --- | --- |
+| `m3vis0` | 14 / 53 / 0/12 | 6 / 79 / 1/12 | 160 / 171 | 418 / 385 |
+| `m3vis15` | 미달 12/12 | 6 / 200 / 1/12 | 250 / 275 | 324 / 310 |
+| `mass` | 미달 12/12 | 20 / 115 / 3/12 | 402 / 433 | 174 / 150 |
+
+회전별(k=2\~13 순):
+
+- `m3vis0`: near_vat 최댓값 159 147 158 161 161 171 164 147 140 167 138 168. near_actors 최솟값 420 433 421 434 400 438 391 432 396 385 416 408. 회복(<100) 6 5 18 27 16 53 4 17 35 5 12 3. 회복(직전) 6 5 미달 25 42 6 4 6 79 4 11 2.
+- `m3vis15`: near_vat 최댓값 251 256 269 270 248 275 232 245 224 240 233 265. near_actors 최솟값 328 323 326 335 313 334 323 343 310 312 330 315. 회복(<100) 전부 미달. 회복(직전) 6 200 29 6 35 6 5 15 미달 4 12 6.
+- `mass`: near_vat 최댓값 403 406 407 414 402 430 382 393 368 369 377 433. near_actors 최솟값 169 170 171 186 170 175 178 188 174 179 180 150. 회복(<100) 전부 미달. 회복(직전) 115 미달 22 60 미달 20 1 13 33 2 4 미달.
+- `lab_actors` `synced`: m3vis0 450\~497, m3vis15 487\~496, mass 489\~496(상한 500).
+
+대표 프레임(`Saved/Screenshots/Lab/`, git 밖): k=7 회전이 끝난 뒤 60프레임 창에서 near_vat가 가장 큰 프레임(after)과 그 240프레임(4초) 뒤(settled). 회전 도중 프레임은 모션 블러가 있어 쓰지 않았다.
+
+| 변형 | after | settled |
+| --- | --- | --- |
+| `m3vis0` | `E3b-turn-m3vis0-after-f002132.png`(near_vat 171, near_actors 442) | `E3b-turn-m3vis0-settled-f002372.png`(107, 487) |
+| `m3vis15` | `E3b-turn-m3vis15-after-f002132.png`(266, 348) | `E3b-turn-m3vis15-settled-f002372.png`(211, 383) |
+| `mass` | `E3b-turn-mass-after-f002131.png`(420, 186) | `E3b-turn-mass-settled-f002371.png`(369, 226) |
+
+`py -3 Scripts/transition-score.py <캡처 폴더> <로그>`(전환 튐, 문턱 6): m3vis0 사건 7500건, 튐 평균 4.27, 중앙값 2.70, 눈에 띈 전환 157/7500(2%). m3vis15 7646건, 3.94, 2.77, 128/7646(2%). mass 3077건, 3.08, 2.69, 19/3077(1%). 1rpm 캡처(위)는 m3vis0 15/4754(0%), mass 0/1726(0%)이었다.
+
+빌드·실행: `Scripts/build.ps1` 성공, `run-dev.ps1 -Small -Variant m3vis15 -Extra "-LabStage=M3"` 종료 코드 0(`respawns=43 kills=8 snipes=39`). `-LabCamTurn` 12초 확인 실행에서 `lab_turn` 세 줄(k=0\~2, 회전 30프레임). 측정 프리셋 P1/P2·러너·CSV는 바꾸지 않았다.

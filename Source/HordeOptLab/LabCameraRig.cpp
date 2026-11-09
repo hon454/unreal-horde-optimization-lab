@@ -1,9 +1,15 @@
 #include "LabCameraRig.h"
 #include "LabConfig.h"
+#include "HordeOptLab.h"
+#include "Misc/CommandLine.h"
+#include "Misc/Parse.h"
 
 ALabCameraRig::ALabCameraRig()
 {
 	PrimaryActorTick.bCanEverTick = true;
+#if !UE_BUILD_TEST
+	bCamTurn = FParse::Param(FCommandLine::Get(), TEXT("LabCamTurn"));
+#endif
 }
 
 void ALabCameraRig::SetPreset(int32 InPreset, const FVector& InTarget)
@@ -36,7 +42,23 @@ void ALabCameraRig::Apply()
 	{
 		// 오브 시점(대표): 오브 뒤에서 오브 너머 바깥을 보며 1rpm으로 오브 둘레를 돈다.
 		// 측정 창 60초에 정확히 한 바퀴라 방향 편차가 평균으로 정리된다.
-		const float Yaw = 360.f * Elapsed / FLabScenario::OrbViewPeriod;
+		float Yaw = 360.f * Elapsed / FLabScenario::OrbViewPeriod;
+#if !UE_BUILD_TEST
+		if (bCamTurn)
+		{
+			// 회전 k는 [k·5초, k·5초 + 0.5초]에 90·k → 90·(k+1)도로 돌고, 그 뒤 4.5초는 90·(k+1)도에 멈춘다.
+			const int32 K = FMath::FloorToInt(Elapsed / TurnPeriod);
+			const float InPeriod = Elapsed - K * TurnPeriod;
+			const float Progress = FMath::Clamp(InPeriod / TurnDuration, 0.f, 1.f);
+			Yaw = TurnStep * (K + Progress);
+			if (TurnStarted != K) { TurnStarted = K; TurnStartFrame = GFrameCounter; }
+			if (Progress >= 1.f && TurnLogged != K)
+			{
+				TurnLogged = K;
+				UE_LOG(LogLab, Log, TEXT("lab_turn k=%d start_frame=%llu end_frame=%llu yaw=%.0f"), K, (unsigned long long)TurnStartFrame, (unsigned long long)GFrameCounter, Yaw);
+			}
+		}
+#endif
 		const FVector Forward = FRotator(0.f, Yaw, 0.f).Vector();
 		const FVector Location = Target - Forward * FLabScenario::OrbViewBack + FVector(0.f, 0.f, FLabScenario::OrbViewHeight);
 		SetActorLocationAndRotation(Location, FRotator(FLabScenario::OrbViewPitch, Yaw, 0.f));
