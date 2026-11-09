@@ -35,7 +35,7 @@ RUN_FIELDS = ["label", "milestone", "variant", "n", "preset", "seed", "run", "pc
 CORE = ["game_p50_ms", "game_p99_ms", "render_p50_ms", "gpu_p50_ms", "frame_p50_ms", "frame_p95_ms", "frame_p99_ms",
         "hitch_abs", "hitch_rel", "draw_calls_p50", "mem_total_mb"]
 # 병목 후보: p50 열 이름 -> 표시 이름 (measurement.md "N@16.7ms": 프레임·Game·Render·GPU p50 중 최댓값)
-BOTTLENECK_COLS = [("frame_p50_ms", "frame"), ("game_p50_ms", "game"), ("render_p50_ms", "render"), ("gpu_p50_ms", "gpu")]
+BOTTLENECK_COLS = [("game_p50_ms", "game"), ("render_p50_ms", "render"), ("gpu_p50_ms", "gpu")]
 # 게임이 CSV_METADATA로 쓰는 빌드 키(소문자). 키 이름은 Docs/Worklog/M3b.md. 없으면 build는 빈칸.
 BUILD_KEYS = ["labbuild", "labcvars", "labdriver"]
 

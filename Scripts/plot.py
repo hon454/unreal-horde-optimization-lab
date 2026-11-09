@@ -28,8 +28,9 @@ def load():
                 if not named or not r.get("frame_p95_ms") or r["variant"].endswith("-aa"):  # A/A는 잡음 기준이라 곡선에 잇지 않는다
                     continue
                 top = max(named, key=named.get)
+                parts = {k: v for k, v in named.items() if not k.startswith("frame")}
                 rows.append({"stage": stage, "variant": r["variant"], "n": int(r["n"]), "preset": r["preset"],
-                             "ms50": named[top], "ms95": float(r["frame_p95_ms"]), "bottleneck": top.split("_")[0]})
+                             "ms50": named[top], "ms95": float(r["frame_p95_ms"]), "bottleneck": max(parts, key=parts.get).split("_")[0] if parts else ""})
     return rows
 
 

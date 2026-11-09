@@ -16,7 +16,7 @@ STATUS.md "명령"에는 매번 쓰는 것만 둔다. 여기에는 스크립트 
 | `plot.py` | `Measurements/*/summary.csv`로 `Docs/figures/`의 그래프를 다시 그린다: 60fps 최대 N(대표), 고정 조건 Game/Render/GPU 스택, N 스케일링, 밴드 분포(M2+), 예산 사용(M3+) | |
 | `summarize.py --milestone M<N> [--rebuild]` (M3b) | 열 추가: `frame_p95_ms`, `bottleneck`(프레임·Game·Render·GPU p50 중 최댓값 이름), `build`(CSV 메타데이터 `LabBuild`·`LabCVars`·`LabDriver`, 없으면 빈칸). `--rebuild`는 기존 행도 원본 CSV로 다시 계산한다. 태그 `aa*` 라벨은 `<변형>-aa` 조건으로 따로 요약, `trace*`는 summary에서 뺀다 | |
 | `spikes.py <라벨 접두사 또는 CSV...> [--factor 2] [--verbose] [--with-r0]` (M3b) | 묶음의 주기적 스파이크 검사: 중앙값 2배 초과 프레임의 사건 간격 중앙값과 ±10% 비율, 실행의 주기성 판정, 묶음 요약. 예: `py -3 -I Scripts/spikes.py M3b-` | 대상 없으면 |
-| `run-m3b.ps1 [-Phase all\|e3b\|matrix\|aa\|trace] [-IncludeBase] [-Tag x] [-DryRun]` (M3b, 초안) | 묶음 1 러너. E3b (8) 18회를 실행 단위로 섞어 먼저, 전수(M0\~M3, 30k 포함), 묶음 끝 A/A 3회, 20k P1 트레이스 병렬 1 + 직렬 1 순서. `-DryRun`은 목록과 예상 시간만 출력 | 다른 실행이 떠 있으면(run-bench.ps1) |
+| `run-m3b.ps1 [-Phase all\|e3b\|matrix\|aa\|trace] [-NoBase] [-Tag x] [-DryRun]` (M3b, 초안) | 묶음 1 러너. E3b (8) 18회를 실행 단위로 섞어 먼저, 전수(M0\~M3, 30k 포함), 묶음 끝 A/A 3회, 20k P1 트레이스 병렬 1 + 직렬 1 순서. `-DryRun`은 목록과 예상 시간만 출력 | 다른 실행이 떠 있으면(run-bench.ps1) |
 | `run-bench.ps1 ... [-RunIndex i] [-Trace] [-ExtraArgs "..."]` (M3b) | `-RunIndex`는 r<i> 하나만(실행 단위 섞기), `-Trace`는 `Saved/Traces/<라벨>.utrace`(`-trace=cpu,gpu,frame,counters,mass`), `-ExtraArgs`는 게임 인자 덧붙임 | |
 | `capture-video.ps1` | 화면 녹화. 찍기 전 승인 필요(AGENTS.md) | 측정 실행이 떠 있으면 |
 

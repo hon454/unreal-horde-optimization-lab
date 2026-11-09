@@ -1,21 +1,21 @@
 series,n_p95,note_p95,n_p50,note_p50,bottleneck
-M0 full,667,,813,,frame
-M0 static,1044,,1196,,frame
-M1 mass,15498,,20577,,frame
-M1 massav,5025,,5578,,frame
-M1 massst,12949,,20530,,frame
-M2 mass,16460,,20518,,frame
-M2 noanim,20156,,21396,,frame
-M3 m2off,30812,,35763,,frame
-M3 m3base,18455,,20000,above range,frame
-M3 m3budgetdist,20000,above range,20000,above range,frame
-M3 m3budgetsig,20000,above range,20000,above range,frame
-M3 m3colbase,18046,,20000,above range,frame
-M3 m3colquery,18988,,20000,above range,frame
-M3 m3hyd15,20000,above range,20000,above range,frame
-M3 m3hyd50,17479,,20000,above range,frame
-M3 m3hydbase,17854,,20000,above range,frame
-M3 m3lowres,19559,,20000,above range,frame
-M3 m3nocol,20000,above range,20000,above range,frame
-M3 m3uro,20000,above range,20000,above range,frame
-M3 mass,18475,,22046,,frame
+M0 full,667,,813,,game
+M0 static,1044,,1196,,game
+M1 mass,15498,,20577,,gpu
+M1 massav,5025,,5578,,gpu
+M1 massst,12949,,20530,,gpu
+M2 mass,16460,,20518,,gpu
+M2 noanim,20156,,21396,,gpu
+M3 m2off,30812,,35763,,gpu
+M3 m3base,18455,,20000,above range,gpu
+M3 m3budgetdist,20000,above range,20000,above range,game
+M3 m3budgetsig,20000,above range,20000,above range,game
+M3 m3colbase,18046,,20000,above range,gpu
+M3 m3colquery,18988,,20000,above range,gpu
+M3 m3hyd15,20000,above range,20000,above range,game
+M3 m3hyd50,17479,,20000,above range,game
+M3 m3hydbase,17854,,20000,above range,gpu
+M3 m3lowres,19559,,20000,above range,gpu
+M3 m3nocol,20000,above range,20000,above range,game
+M3 m3uro,20000,above range,20000,above range,game
+M3 mass,18475,,22046,,gpu

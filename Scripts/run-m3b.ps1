@@ -1,7 +1,7 @@
 ﻿# M3b 묶음 러너(초안, 아직 실행하지 않는다). plan.md "M3b" 측정 방법, measurement.md "벤치마크 조건".
 # 한 묶음 = 정비 기준선(묶음 1). 같은 빌드로 한 번에 연달아 돌린다. 결과는 모두 Measurements/M3b/ (라벨 접두사 M3b).
 #   Phase e3b   : E3b (8) 표현 LOD 값. m3vis0 / m3vis15 / m3hys20 x {20k, 5k} P1 x 3회 = 18회를 실행 단위로 섞는다(r1 라운드: 6조건, r2, r3).
-#                 결과로 대표값(Base, 히스테리시스)을 정한 뒤 이어서 전수를 돌린다. -IncludeBase면 기준점 mass를 같은 섞기에 넣는다(24회).
+#                 결과로 대표값(Base, 히스테리시스)을 정한 뒤 이어서 전수를 돌린다. 기준점 m3mass를 같은 섞기에 넣는다(24회, 2026-11-09 코디네이터 결정). -NoBase면 18회.
 #   Phase matrix: 전수 매트릭스, 조건 단위. M0 {full, static} x {1k, 5k} x P1, P2 / staticpawn {1k, 5k} P1 /
 #                 M1~M3 {1k, 5k, 20k, 30k, 50k} x P1, P2. 각 3회.
 #   Phase aa    : 묶음 끝 기준점 A/A. m3mass 20k P1 3회, 태그 aa(summary에서 m3mass-aa 조건으로 따로 쓰임).
@@ -14,7 +14,7 @@
 param(
     [string]$Tag = "",
     [ValidateSet("all", "e3b", "matrix", "aa", "trace")][string]$Phase = "all",
-    [switch]$IncludeBase,
+    [switch]$NoBase,
     [switch]$DryRun,
     [string]$SerialArgs = "-LabFullyParallel=0"   # 직렬 트레이스용 게임 인자(코드 세션이 확정)
 )
@@ -30,7 +30,7 @@ function Add-Run($Variant, $N, $Preset, $Stage, $RunIdx, $RunTag, $Trace, $Extra
 # --- Phase e3b: 실행 단위로 섞는다 (A r1, B r1, C r1, ... A r2, ...) ---
 if ($Phase -in @("all", "e3b")) {
     $Variants = @("m3vis0", "m3vis15", "m3hys20")
-    if ($IncludeBase) { $Variants = @("m3mass") + $Variants }
+    if (-not $NoBase) { $Variants = @("m3mass") + $Variants }
     foreach ($R in 1..3) {
         foreach ($N in @(20000, 5000)) {
             foreach ($V in $Variants) { Add-Run $V $N "P1" "M3" $R "" $false "" }
