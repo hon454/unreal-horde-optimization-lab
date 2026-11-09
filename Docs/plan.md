@@ -113,6 +113,16 @@ M0\~M5가 필수다. 마일스톤마다 바꾸는 최적화 변수는 하나고,
 - 측정 방법 변경은 묶음 1부터 적용하고 [measurement.md](Guides/measurement.md)에 날짜와 함께 적는다([ADR-0002](Decisions/0002-freeze-measurement-infra.md)의 "바꾸면 그날 모든 단계를 다시 재고 적는다"). 글의 수치는 태그 값을 유지한다.
 - 정비 항목은 하나씩 결정한다. 순서: 문서 정정 → 코드 수정 → 측정 방법 → 2종 시나리오 → M4 계획 재작성. 넣지 않는 항목은 [backlog.md](backlog.md)에 적는다.
 
+**코드 정비(2026-11-09 사용자 결정 A안 "핵심 5").** 문서 정정은 f8702c2에서 끝냈다.
+1. 표현 상태 분리: VAT 프로세서(`LabVatProcessor.cpp:39`)와 ActorSync가 로직 프래그먼트 `FLabMinionFragment`를 읽어 로직 프로세서와 쿼리 자원을 다툰다(20k P1 게임 스레드 스핀 대기 +2ms, `MassProcessingQueueTypes.h:776`). 상태(Walk/Hit/Dead)와 클립 시각을 표현 전용 프래그먼트로 나누고 로직만 쓴다. **A/B(`m3qold` vs 기준점, 20k P1 3회).**
+2. 실행 순서 선언: Lab 로직 프로세서를 한 그룹으로 묶고 VAT·ActorSync에 `ExecuteAfter`를 선언한다. 지금은 State와 VAT 사이에 선언이 없어 솔버가 접근·등록 순서로 정한다(`MassProcessorDependencySolver.cpp:215-265`).
+3. Hit → Dead 한 프레임 튐: State가 `StateTimeLeft`를 즉시 쓰고 태그는 지연해(`LabMassProcessors.cpp:294`) 그 프레임에 Hit 클립 시각이 음수가 된다. 시간과 태그를 같은 지연 명령에서 바꾼다. 1과 함께.
+4. ActorSync 필터: 쿼리에 표현 필터가 없어 전 엔티티를 순회한다(`LabActorSyncProcessor.cpp:68,128`). 액터가 붙은 엔티티에 태그를 두고 거른다. **A/B(`m3syncall` vs 기준점, 20k P1 3회).**
+5. M0 변형 `staticpawn`: CharacterMovement 틱 끔 + 애니 없음. 지금 `static`은 CharacterMovement를 유지해(`LabMinion.cpp:194`는 pawn만) "17배"가 컨테이너 전환만의 값이 아니다. 묶음 1에서 {1k, 5k} × P1 × 3회.
+- 같이 넣는 두 줄: `PendingSnipeTick`을 `std::atomic`으로(오브 틱과 프로세서가 잠금 없이 공유, `LabOrb.cpp:269`), `mass.commands.LockObserversDuringFlushing=1`(City Sample `DefaultEngine.ini:405`, 엔진 기본 0 `MassCommandBuffer.cpp:23`).
+- 실험으로: E3b (8) 화면 밖 액터. `BaseLODDistance = VisibleLODDistance = 30m`이라(`LabCrowdSubsystem.cpp:96-97`) P1에서 30m 원의 절반이 카메라 뒤인데도 액터가 된다. 기본값은 두고 변형 `m3vis`(화면 밖 Base 거리 축소)로 20k·5k P1을 잰다. 대표점 변경은 결과를 보고 M4 전에 따로 결정한다.
+- 확인만: 걷기 루프가 `Fmod(Local, Length)`로 End + 0.99 프레임까지 가 다음 클립 첫 행이 섞일 수 있다(`LabVatProcessor.cpp:26`, 가설). 개발 빌드에서 시간을 멈춰 확인하고 사실이면 고친다.
+
 **바꾸는 것:** 개체 종류 1 → 2(소형 90 / 대형 10). 행동은 같고 크기만 다르다. `FLabUnitTypeParams` 값이 달라 아키타입이 갈린다. VAT 텍스처, ISM 컴포넌트, 액터 풀이 종류별로 생긴다.
 
 **함께 바꾸는 설정:** 하이드레이션 액터의 캡슐 콜리전을 끈다(E3 (6) `m3nocol`, 20k P1 프레임 15.58 → 14.12ms, 판정은 Mass가 가져 캡슐을 쓰는 곳이 없다. 2026-11-09 사용자 결정). 재측정 표의 M3 칸이 개체 종류 하나만 다르도록 "1종 + 콜리전 끔" M3를 앵커(1k·5k × P1·P2 × 3회)에서 같이 잰다.
