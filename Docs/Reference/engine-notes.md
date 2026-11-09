@@ -55,8 +55,8 @@
 
 | 항목 | 확인한 것 | 위치 |
 | --- | --- | --- |
-| 가변 틱 | `FMassSimulationVariableTickParameters::TickRates[EMassLOD::Max]`, `TMassLODTickRateController`가 청크 단위로 이 프레임에 돌릴지 결정 | `MassLOD/Public/MassSimulationLOD.h`, `MassLODTickRateController.h` |
-| 회피는 High만 | `UMassMovingAvoidanceProcessor`는 High LOD 엔티티만 처리한다. Simulation LOD를 켜면 먼 개체의 회피는 자동으로 꺼진다 | `MassNavigation/Private/MassAvoidanceProcessors.cpp`(M4 전에 줄 번호 확인) |
+| 가변 틱 | `FMassSimulationVariableTickParameters::TickRates[EMassLOD::Max]`, `TMassLODTickRateController`가 청크 단위로 이 프레임에 돌릴지 결정. **기본은 꺼져 있다**(`bEnableVariableTicking = false`). 켜면 Trait이 가변 틱 프래그먼트를 붙인다(`MassLODTrait.cpp:129,144`). 건너뛴 시간의 보상(누적 델타)은 소스에서 확인하지 않았다. Lab 프로세서는 프레임 델타를 쓴다 | `MassLOD/Public/MassSimulationLOD.h`, `MassLODTickRateController.h`, `MassLOD/Public/MassLODTrait.h:52`(2026-11-09 확인) |
+| 회피는 High만(미확인) | `UMassMovingAvoidanceProcessor`가 High LOD만 처리한다는 것은 소스로 확인하지 않은 추정이다. M4 계획 재작성 때 확인한다 | `MassNavigation/Private/MassAvoidanceProcessors.cpp`(확인 전) |
 | Avoidance 상태 | Experimental | `MassAI.uplugin` |
 
 ## 6. Test 구성 매크로(측정 빌드)
@@ -128,6 +128,7 @@
 | City Sample의 레이 트레이싱 ISM | `r.RayTracing.Geometry.InstancedStaticMeshes=0`("Disable ISM")으로 모든 ISM을 레이 트레이싱 장면에서 뺀다. Niagara도 같은 이유로 끈다 | `../unreal-horde-references/CitySample/Config/DefaultEngine.ini:116-123` |
 | CharacterMovement 하위 스텝 | `MaxSimulationTimeStep = 0.05`, `MaxSimulationIterations = 8`. 프레임이 50ms를 넘으면 한 틱에 여러 번 시뮬레이션한다. E0 full P1에서 미니언당 이동 비용이 2k(프레임 약 38ms) 8.9µs → 5k(약 150ms) 19.3µs로 늘어, Game Thread가 N보다 빠르게 는다(2k → 5k에 CharacterMovement 5.4배, Animation·TickActors 2.8배) | `Engine/Private/Components/CharacterMovementComponent.cpp:698-699`, 나누는 규칙과 8회째에 남은 시간을 몰아 쓰는 것은 `GetSimulationTimeStep` `:8162-8186`. 수치는 `Measurements/M0/runs.csv`의 fx 실행 CSV |
 | URO의 효과 범위 | E0 uro N=1000 P1: Game Thread Animation 4.1 → 3.0ms, CharacterMovement·TickActors는 그대로라 전체 18.4 → 17.5ms. 거리 단계는 `FAnimUpdateRateParameters` 기본값 | `Engine/Classes/Engine/EngineTypes.h:2768-2785`, M0-uro-N1000-P1fxb CSV |
+| 병렬 Mass의 게임 스레드 스핀 대기 | 프로세서가 쿼리를 시작할 때 `WaitForQueryResources`가 쿼리·청크 경합 인덱스를 예약하고, 다른 프로세서가 쥐고 있으면 `WaitForChange`가 `FPlatformProcess::YieldThread()` 루프로 돈다. 게임 스레드에서 돌면 그 시간은 CSV의 그 프로세서 스탯에 들어가는 실제 게임 스레드 비용이다(M3 `diag-vt*`: VAT ISM 프로세서 1.41 → 3.68ms, 직렬 1.35ms). 읽기 요구가 겹치는 프래그먼트가 많을수록 경합이 는다 | `Engine/Source/Runtime/MassEntity/Private/MassProcessingQueueTypes.cpp:678`, `Public/MassProcessingQueueTypes.h:760-778`(2026-11-09 확인) |
 | Game Thread 시간과 워커 대기 | CSV `GameThreadTime`은 게임 스레드가 태스크를 기다린 시간(`Exclusive/GameThread/EventWait/*`)을 뺀다. Mass 작업이 워커 스레드에서 길어지면 Game Thread p50은 작게 나오고 프레임만 길어진다. E1 `massav` N=20k: GameThreadTime 9.3ms, `EventWait/PrePhysics` 46.5ms, 프레임 57.7ms | `Measurements/M1/runs.csv`, M1-massav-N20000-P1 CSV |
 | 병렬 Mass의 질의 대기 | `FMassEntityQuery::ForEachEntityChunk`는 `FScopedEntityQueryContext`에서 `PreQueryCallback`을 먼저 부르고, 병렬 처리 큐에서는 이것이 `FProcessorWorker::WaitForQueryResources`로 같은 자원을 쥔 다른 프로세서가 끝날 때까지 기다린다. 그 시간은 기다린 프로세서의 실행 시간에 잡힌다. M3 20k P1에서 VAT ISM 프로세서가 액터 유무로 1.41 / 3.68ms였는데 첫 청크 전 대기가 0.006 → 2.06ms였고, `mass.FullyParallel=0`이면 1.35 / 1.35ms였다 | `MassEntity/Private/MassEntityQuery.cpp:39-47,258-276`, `MassProcessingQueueTypes.cpp:640-650,678-690`. diag-vtC/vtD/vtE/vtF CSV |
 | 하이드레이션 액터 캡슐 | `ACharacter` 캡슐은 `Pawn` 프로필에 `SetShouldUpdatePhysicsVolume(true)`다. M3 20k P1(액터 495개, 3회): 이동 1.22ms, 프레임 15.78. 오버랩·물리 볼륨 갱신을 끄면 15.64, QueryOnly를 더하면 15.49, 콜리전을 끄면 14.23(이동 0.43, EndPhysics 대기 0.52 → 0.06) | `Engine/Private/Character.cpp:77-84`. diag-vtG/vtH/vtJ/vtI CSV, `-LabActorMoveCheap`·`-LabActorQueryOnly`·`-LabActorNoCollision` |
