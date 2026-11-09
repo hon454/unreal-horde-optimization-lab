@@ -97,6 +97,9 @@
 | 툴셋 | `AllToolsets`가 21개 툴셋 플러그인을 묶는다(`AIModuleToolset`, `AnimationAssistantToolset`, `ConfigSettingsToolset`, `EditorToolset`, `NiagaraToolsets`, `PhysicsToolsets`, `StateTreeToolset`, …) | `Engine/Plugins/Experimental/Toolsets/AllToolsets/AllToolsets.uplugin` |
 | 콘솔 | `ModelContextProtocol.StartServer`, `StopServer`, `RefreshTools`, `GenerateClientConfig <ClaudeCode\|Cursor\|VSCode\|Gemini\|…>` → `.mcp.json` | `ModelContextProtocolEditor` 소스 |
 | Runtime 모듈 포함 | Runtime 타입 모듈이 있으므로 Test 패키지에 들어갈 수 있다. `.uproject`에서 `TargetAllowList: ["Editor"]`로 제한한다 | |
+| 툴 스크립트 | `editor_toolset…ProgrammaticToolset.execute_tool_script`는 `execute_tool()`로 다른 툴을 묶어 부를 뿐 `unreal` 모듈을 들여오지 못한다(허용 `copy`·`json`·`re`·`time`·`datetime`·`math`). 콘솔 명령을 실행하는 툴도 없다. 에디터 Python이 필요하면 커맨드렛으로 돌린다 | 실행 중 `get_execution_environment`(2026-11-09) |
+| 블루프린트 프로퍼티 | `ObjectTools.get_properties`·`set_properties`는 블루프린트 경로를 받으면 CDO(`Default__X_C`)로 바꿔 읽는다. 블루프린트 에셋 자체의 프로퍼티(AnimBP `TargetSkeleton` 등)에는 닿지 않는다. 그래프 노드 경로(`…:AnimGraph.AnimGraphNode_SequencePlayer_0`)는 노드 그대로 읽고 쓴다 | 실행 결과(2026-11-09) |
+| AnimBP 스켈레톤 | `UAnimBlueprint::TargetSkeleton`은 `EditAnywhere`라 Python `set_editor_property("target_skeleton", …)`로 바꿀 수 있다. AnimBP를 복제해 다른 스켈레톤으로 옮길 때 쓴다(`Scripts/create-anim-bp-large.md`) | `Runtime/Engine/Classes/Animation/AnimBlueprint.h:90-91` |
 
 ## 9. 에셋과 피직스
 

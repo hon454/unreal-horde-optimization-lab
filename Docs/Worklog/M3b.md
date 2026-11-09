@@ -435,3 +435,33 @@ plan.md "M3b" 146\~158행(2종 구성, 저격 E안, E3 (3c) 화면 크기 중요
 - 실행: commands.md "에셋 마이그레이션"의 명령에 `LAB_MIGRATE_SET=siege`. 건식(`LAB_MIGRATE_DRY=1`) 의존성 36개, 원본 기준 149.1MB. 그중 25개(근접 세트가 이미 옮긴 `Characters/Global/` 머티리얼 함수·레이어·텍스처, `M_Dawn_Minion_MASTER`, Super 텍스처 3장)는 대상에 있어 건너뛰었다(엔진 기본 `EAssetMigrationConflict::Skip`, `IAssetTools.h` `FMigrationOptions`. 스크립트가 값을 로그에 찍는다). 이전 전후 `Content/ParagonMinions/` 기존 파일의 md5가 모두 같았다.
 - 새로 온 11개(원본 기준 56.5MB): 애니 3(`Death_A`, `HitReact_Front`, `Jog_Fwd_NonCombat`), 메시 `Minion_Lane_Siege_Dawn`, 피직스 `Minion_Lane_Siege_Physics`, 스켈레톤 `Minion_Lane_Siege_Skeleton`, 그림자 원기둥 `Minion_Lane_Siege_ShadowCyl`(메시 의존성), 머티리얼 `Materials/Siege/M_Dawn_Minion_Siege`, 텍스처 `Textures/Siege/T_Minion_Dawn_Seige_D`·`_MASK01`·`_N`. 옮긴 뒤 `Content/ParagonMinions/` 244 → 292MB. gitignore 대상이라 커밋하지 않았다(`.gitignore:26`).
 - 막힌 것과 대처: 첫 건식 실행이 Python 출력 없이 종료 코드 1로 끝났다. AssetHost 로그에 "The game module 'AssetHost' could not be found". AssetHost의 빈 C++ 모듈(`Source/AssetHost`)이 11-07에 소스 빌드로 컴파일되어(`Binaries/Win64/UnrealEditor.modules` BuildId `4f0f03df…`) 런처 엔진(BuildId `55116800`)이 건너뛰었다. 런처 엔진 `Engine/Build/BatchFiles/Build.bat AssetHostEditor Win64 Development -project=…AssetHost.uproject`로 모듈만 다시 컴파일해(18초, AssetHost의 `Binaries/`만 바뀜) 해결했다. commands.md에 적힌 11-06의 `orbfx` 종료 코드 1도 같은 증상이다. troubleshooting.md에 한 줄 더했다. AssetHost `.uproject`의 `EngineAssociation`은 지금 레지스트리에 없는 GUID `{31E80386…}`이라 탐색기에서 열면 엔진을 묻는다(손대지 않음).
+
+**2단계: 에디터 작업(2026-11-09, 에디터는 사용자가 소스 빌드로 켬).** 이 세션의 MCP 클라이언트는 세션 시작 때(에디터 꺼짐) 붙지 못한 채로 남아, 에디터의 MCP 서버(127.0.0.1:8001)를 HTTP JSON-RPC로 직접 불렀다(commands.md "Unreal MCP를 HTTP로 직접 부르기"). MCP의 `ProgrammaticToolset.execute_tool_script`는 `unreal` 모듈을 들여오지 못하고(허용 모듈 `json`·`math`·`re`·`time`·`datetime`·`copy`) 콘솔 명령 툴도 없어, Python이 필요한 일은 소스 빌드 커맨드렛으로 돌렸다(에디터가 떠 있는 채로. 새 패키지만 쓴다).
+
+| 표의 에셋 | 만든 것 | 방법 |
+| --- | --- | --- |
+| (a) AnimBP | `/Game/Lab/Anim/ABP_LabMinionLarge`(커밋, LFS). 스켈레톤 `Minion_Lane_Siege_Skeleton`, 부모 `LabMinionAnimInstance`, 플레이어 `_0`·`_3` `Jog_Fwd_NonCombat`, `_1` `HitReact_Front`, `_2` `Death_A` | `ABP_LabMinion` 복제 + 스켈레톤(`create-anim-bp.py` `LAB_UNIT=large`) → 클립 교체·컴파일·저장(MCP). Start Position 연결과 `ResetChildOnActivate`는 복제로 그대로 왔다(`get_node_infos`로 확인). 순서 `Scripts/create-anim-bp-large.md` |
+| (b) 피직스 | 수정 없음 | 소형도 에셋을 고치지 않았다. 래그돌 방지는 코드가 메시 콜리전을 끄는 것이고(`LabMinion.cpp:30-34`, `ALabMinion` 생성자), `ALabMinionMassActorLarge`·`…BudgetLarge`도 그 클래스를 상속한다. 메시에는 `Minion_Lane_Siege_Physics`가 지정돼 있다 |
+| (c) 정적 메시 | `/Game/Lab/Derived/SM_LabMinionLarge`(gitignore) | `make-static-minion.py` `LAB_UNIT=large`. 바운드 (−78.2, −41.7, −0.1)..(77.7, 169.3, 196.0). 바탕 머티리얼 `M_Dawn_Minion_MASTER`의 ISM 사용 플래그는 이미 켜져 있었다 |
+| (d) VAT | `/Game/Lab/VAT/Baked/SM_LabMinionLargeVAT_Bone`·`DA_LabMinionLargeVAT_Bone`(+ `_Vertex` 한 벌, 텍스처·MI, gitignore) | `bake-vat.py` `LAB_UNIT=large`. 86프레임(걷기 0..40, 피격 41..65, 죽기 66..85, 30fps), Bone 텍스처 위치·회전 39x87, 가중치 2649x4. Bone 메시 바운드는 Vertex 굽기의 전 프레임 정점 범위 (−140.8, −151.1, −108.0)..(213.3, 206.1, 204.1) |
+| (e) 액터 머티리얼 | `/Game/Lab/VAT/Baked/M_LabMinionLargeActor`(gitignore) | `bake-vat.py`의 `make_actor_material`(VAT 머티리얼과 같은 기본 색·노멀·거칠기·죽기 진홍색, 텍스처는 `Textures/Siege/T_Minion_Dawn_Seige_D`·`_N`, 팩의 철자 그대로) |
+| (f) ini | `LargeWalk`를 `Animations/Siege/Jog_Fwd_NonCombat`로, `LargeBoundRadius`를 47로 바꿨다. 나머지 Large 키는 이미 맞았다 | `Config/DefaultGame.ini` `[LabUnitAssets]` |
+| (g) 반경 | `LargeBoundRadius=47` | 아래 |
+| (h) 바닥 띠 | `/Game/Lab/Materials/M_LabBandFloor`(커밋, LFS) | `Scripts/create-band-floor.py`(커맨드렛), 순서·파라미터 `Scripts/create-band-floor.md` |
+
+스크립트 셋(`make-static-minion.py`, `bake-vat.py`, `create-anim-bp.py`)은 `LAB_UNIT=large` 환경 변수로 대형을 만든다. 변수가 없으면 경로와 이름이 전과 같다(소형 에셋은 다시 만들지 않았다).
+
+**대형 반경(g).** 소형 40은 측정값이 아니라 M1 트레이트의 값이고(`LabUnitAssets.cpp:43`), 중요도는 상대값만 쓰인다(`m3sig`, `AnimationBudgetAllocator.cpp:327-342`). 그래서 소형 40을 기준으로 두 메시 바운드의 비를 곱했다. 바운드는 Unreal MCP `SkeletalMeshTools.get_bounds`(레퍼런스 포즈, 메시 로컬)로 쟀다.
+
+| 메시 | 박스 반폭 x·y·z(cm) | 구 반지름(cm) |
+| --- | --- | --- |
+| `Minion_Lane_Melee_Dawn`(소형) | 64.9 · 87.1 · 87.9 | 139.74 |
+| `Minion_Lane_Siege_Dawn`(대형) | 78.0 · 105.5 · 98.1 | 163.81 |
+
+대형 = 40 × 163.81 ÷ 139.74 = 40 × 1.172 = 46.9 → **47**(정수로 반올림, 소형과 같은 자리수). 박스 반폭 비는 1.20 · 1.21 · 1.12라 어느 축으로 재도 1.1\~1.2배다. 구 반지름을 그대로(소형 140 / 대형 164) 쓰면 비는 같고 절대값만 바뀐다. 소형 값을 바꾸는 일이라 하지 않았다. measurement.md 확정값 반영은 코디네이터 몫이다.
+
+**바닥 띠 파라미터(코드 세션에 요청).** `-LabBandFloor`일 때 Floor(`L_Bench` `Floor_0`의 `StaticMeshComponent0`, 지금 머티리얼 `MI_ProcGrid`)에 `M_LabBandFloor`의 MID를 넣고 Vector 파라미터 **`BandCenter`**에 오브 월드 위치(cm, XY만 씀)를 넣는다. 반경은 Scalar **`BandRadius1`·`BandRadius2`·`BandRadius3`**(기본 3000·8000·20000cm = `FLabSnipeBands`)라 넣지 않아도 되고, 넣는다면 같은 상수에서 넣는다. 색은 `ColorNear`·`ColorMid`·`ColorFar`·`ColorOff`·`LineColor`, 선 폭 `LineWidth`(40), 격자 `GridSize`(1000), `BaseGray`(0.35). 확인 캡처(에디터에서 Floor에 잠시 넣고 찍은 뒤 되돌림): `Saved/Screenshots/Lab/m3b_bandfloor_top.png`(탑뷰 260m, 30 : 80 : 200 반지름 비 일치), `m3b_bandfloor_p1.png`(오브 뒤 15m 낮은 시점).
+
+**에디터 상태 메모.** 확인 때 `L_Bench`의 Floor 머티리얼을 바꿨다가 되돌렸으므로 레벨이 수정됨 표시일 수 있다. 저장해도 내용은 같고, 저장하지 않아도 된다. `HordeOptLab.uproject`의 `EngineAssociation`이 `{31E80386…}`로 바뀌고 끝 개행이 빠져 있다(troubleshooting.md의 그 줄. 에디터를 켜면서 바뀐 것으로 보인다. 이 세션은 고치지 않았다. 에디터를 닫은 뒤 되돌려야 한다).
+
+**남은 것.** 사용자가 에디터를 닫은 뒤 `Scripts/run-dev.ps1 -Small -Extra "-LabTypes=2"`로 `lab_types types=2 large_assets=ok`와 종료 코드 0을 보고, 대형이 보이는 스크린샷을 `Saved/Screenshots/Lab/`에 남긴다.

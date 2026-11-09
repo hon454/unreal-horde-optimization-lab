@@ -8,18 +8,30 @@
 #   AutoPlay 스위치를 끄면 인스턴스 커스텀 데이터 0 = Frame, 1 = PrevFrame을 읽고 [0, NumFrames-1]로 자른다(GetFrameSwitch, GetFrame).
 #   한 번만 도는 피격·죽기가 반복 재생(AutoPlay는 fmod)으로 튀지 않게 프레임은 C++이 계산해 넘긴다.
 # 결과는 Fab 에셋에서 나온 것이라 /Game/Lab/VAT/Baked/(gitignore)에 둔다. 새 체크아웃에서는 미니언 이전 뒤 한 번 돌린다.
-# 실행: UnrealEditor-Cmd.exe HordeOptLab.uproject -run=pythonscript -script=Scripts/bake-vat.py -unattended -nosplash -AllowCommandletRendering -stdout
+# 실행: [LAB_UNIT=large] UnrealEditor-Cmd.exe HordeOptLab.uproject -run=pythonscript -script=Scripts/bake-vat.py -unattended -nosplash -AllowCommandletRendering -stdout
 #   (-nullrhi면 스켈레탈 메시 정점을 읽지 못한다. make-static-minion.py와 같다)
 import os
 import unreal
 
 MINION = "/Game/ParagonMinions/Characters/Minions/Down_Minions"
-SKEL = MINION + "/Meshes/Minion_Lane_Melee_Dawn"
-ANIMS = [MINION + "/Animations/Melee/NonCombat_JogFwd",  # 0 걷기(루프)
-         MINION + "/Animations/Melee/HitReact_Front",    # 1 피격
-         MINION + "/Animations/Melee/Death_A"]           # 2 죽기
-DIFFUSE = MINION + "/Textures/Melee/T_Minion_Dawn_Melee_D"
-NORMAL = MINION + "/Textures/Melee/T_Minion_Dawn_Melee_N"
+# LAB_UNIT=large: M3b 2종의 대형(시즈 미니언)을 같은 방식으로 굽는다. 이름의 LabMinion이 LabMinionLarge가 된다
+# (SM_LabMinionLargeVAT_Bone, DA_LabMinionLargeVAT_Bone, M_LabMinionLargeActor. Config/DefaultGame.ini [LabUnitAssets] Large 키).
+LARGE = os.environ.get("LAB_UNIT", "small") == "large"
+TOKEN = "LabMinionLarge" if LARGE else "LabMinion"
+if LARGE:
+    SKEL = MINION + "/Meshes/Minion_Lane_Siege_Dawn"
+    ANIMS = [MINION + "/Animations/Siege/Jog_Fwd_NonCombat",  # 0 걷기(루프). 근접과 이름이 다르다
+             MINION + "/Animations/Siege/HitReact_Front",     # 1 피격
+             MINION + "/Animations/Siege/Death_A"]            # 2 죽기
+    DIFFUSE = MINION + "/Textures/Siege/T_Minion_Dawn_Seige_D"  # 팩의 철자 그대로(Seige)
+    NORMAL = MINION + "/Textures/Siege/T_Minion_Dawn_Seige_N"
+else:
+    SKEL = MINION + "/Meshes/Minion_Lane_Melee_Dawn"
+    ANIMS = [MINION + "/Animations/Melee/NonCombat_JogFwd",  # 0 걷기(루프)
+             MINION + "/Animations/Melee/HitReact_Front",    # 1 피격
+             MINION + "/Animations/Melee/Death_A"]           # 2 죽기
+    DIFFUSE = MINION + "/Textures/Melee/T_Minion_Dawn_Melee_D"
+    NORMAL = MINION + "/Textures/Melee/T_Minion_Dawn_Melee_N"
 OUT = "/Game/Lab/VAT/Baked"
 A2T = "/AnimToTexture/Materials/MaterialFunctions"
 DEAD_COLOR = unreal.LinearColor(0.6, 0.06, 0.05, 1.0)
@@ -70,7 +82,7 @@ def binary(mat, cls, a, b, x, y, a_out=""):
 
 def make_material(mode):
     """Diffuse·Normal → Make Material Attributes → MF_*Animation → 출력. Paragon 마스터 머티리얼의 마스크·발광은 옮기지 않는다."""
-    name = "M_LabMinionVAT_" + mode
+    name = "M_" + TOKEN + "VAT_" + mode
     mat = new_asset(name, unreal.Material, unreal.MaterialFactoryNew())
     mat.set_editor_property("use_material_attributes", True)
     mat.set_editor_property("tangent_space_normal", True)
@@ -126,7 +138,7 @@ def make_material(mode):
 
 
 def bake(mode):
-    sm_path = OUT + "/SM_LabMinionVAT_" + mode
+    sm_path = OUT + "/SM_" + TOKEN + "VAT_" + mode
     fresh(sm_path)
     sm = lib.convert_skeletal_mesh_to_static_mesh(unreal.load_asset(SKEL), sm_path, 0)
     if not sm:
@@ -135,7 +147,7 @@ def bake(mode):
     # (AnimationToTexture가 겹치면 거부한다, AnimToTextureBPLibrary.cpp:418-424).
     lib.set_light_map_index(sm, 0, 2, False)
 
-    da = new_asset("DA_LabMinionVAT_" + mode, unreal.AnimToTextureDataAsset, unreal.DataAssetFactory())
+    da = new_asset("DA_" + TOKEN + "VAT_" + mode, unreal.AnimToTextureDataAsset, unreal.DataAssetFactory())
     da.set_editor_property("skeletal_mesh", unreal.load_asset(SKEL))
     da.set_editor_property("static_mesh", sm)
     da.set_editor_property("uv_channel", 1)
@@ -154,14 +166,14 @@ def bake(mode):
     props = {"BonePosition": "bone_position_texture", "BoneRotation": "bone_rotation_texture", "BoneWeight": "bone_weight_texture",
              "VertexPosition": "vertex_position_texture", "VertexNormal": "vertex_normal_texture"}
     for t in tex_names:
-        tex = new_asset("T_LabMinionVAT_%s_%s" % (mode, t), unreal.Texture2D, unreal.Texture2DFactoryNew())
+        tex = new_asset("T_%sVAT_%s_%s" % (TOKEN, mode, t), unreal.Texture2D, unreal.Texture2DFactoryNew())
         da.set_editor_property(props[t], tex)
 
     if not lib.animation_to_texture(da):
         raise RuntimeError("AnimationToTexture failed (see LogAnimToTextureEditor)")
 
     mat = make_material(mode)
-    mi = new_asset("MI_LabMinionVAT_" + mode, unreal.MaterialInstanceConstant, unreal.MaterialInstanceConstantFactoryNew())
+    mi = new_asset("MI_" + TOKEN + "VAT_" + mode, unreal.MaterialInstanceConstant, unreal.MaterialInstanceConstantFactoryNew())
     mel.set_material_instance_parent(mi, mat)
     lib.update_material_instance_from_data_asset(da, mi)
     death = da.get_editor_property("animations")[2]  # ANIMS 순서: 걷기, 피격, 죽기
@@ -190,12 +202,12 @@ def bake(mode):
     b = sm.get_bounding_box()
     log("%s bounds %s .. %s" % (mode, b.min, b.max))
 
-    for a in [sm, da, mi] + [unreal.load_asset("%s/T_LabMinionVAT_%s_%s" % (OUT, mode, t)) for t in tex_names]:
+    for a in [sm, da, mi] + [unreal.load_asset("%s/T_%sVAT_%s_%s" % (OUT, TOKEN, mode, t)) for t in tex_names]:
         eal.save_loaded_asset(a)
 
     anims = ", ".join("%d..%d" % (a.start_frame, a.end_frame) for a in da.get_editor_property("animations"))
-    sizes = ", ".join("%s %dx%d" % (t, unreal.load_asset("%s/T_LabMinionVAT_%s_%s" % (OUT, mode, t)).blueprint_get_size_x(),
-                                     unreal.load_asset("%s/T_LabMinionVAT_%s_%s" % (OUT, mode, t)).blueprint_get_size_y()) for t in tex_names)
+    sizes = ", ".join("%s %dx%d" % (t, unreal.load_asset("%s/T_%sVAT_%s_%s" % (OUT, TOKEN, mode, t)).blueprint_get_size_x(),
+                                     unreal.load_asset("%s/T_%sVAT_%s_%s" % (OUT, TOKEN, mode, t)).blueprint_get_size_y()) for t in tex_names)
     log("%s frames=%d anims=[%s] textures=[%s] verts=%d" % (mode, da.get_editor_property("num_frames"), anims, sizes,
                                                          unreal.EditorStaticMeshLibrary.get_number_verts(sm, 0)))
 
@@ -203,7 +215,7 @@ def bake(mode):
 def make_actor_material():
     """M3 액터용. VAT 머티리얼과 같은 기본 색·노멀·거칠기와 죽기 진홍색이라 30m 전환 때 색이 튀지 않는다(plan.md "M3").
     죽기 정도(0\~1)는 C++이 컴포넌트의 커스텀 프리미티브 데이터 0번에 넣는다(ULabActorSyncProcessor)."""
-    mat = new_asset("M_LabMinionActor", unreal.Material, unreal.MaterialFactoryNew())
+    mat = new_asset("M_" + TOKEN + "Actor", unreal.Material, unreal.MaterialFactoryNew())
     mat.set_editor_property("tangent_space_normal", True)
     mel.set_material_usage(mat, unreal.MaterialUsage.MATUSAGE_SKELETAL_MESH)
     base = mel.create_material_expression(mat, unreal.MaterialExpressionTextureSampleParameter2D, -1000, -200)
