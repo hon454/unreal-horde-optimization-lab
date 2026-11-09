@@ -76,8 +76,8 @@ def main():
     out.append(f"`summarize.py` 경고 {len(warns)}건(`LabTypesAssets=substituted` 제외 등)" + ("".join(f"\n- {x}" for x in warns)) + ".")
     out.append("")
 
-    builds = sorted({r.get("build", "").split(";")[0] for r in runs if r.get("run") != "0" and r.get("build")})
-    out.append(f"runs.csv {len(runs)}행, summary.csv {len(summ)}조건. `labbuild` 값: {', '.join('`' + b + '`' for b in builds) or '(없음)'}.")
+    builds = sorted({r.get("build", "").split(";")[0] for r in runs if r.get("build")})
+    out.append(f"**점검.** 최종 묶음(`final=1`): runs.csv {len(runs)}행(r0 {sum(1 for r in runs if r.get('run') == '0')}행 포함), summary.csv {len(summ)}조건. `labbuild` 값 {len(builds)}개: {', '.join('`' + b + '`' for b in builds) or '(없음)'}. (runs.csv 전체는 옛 prelude 60행을 포함해 빌드가 3개다.)")
     out.append("")
 
     def med(variant):
@@ -108,6 +108,52 @@ def main():
     out.append(f"- 요약: `{head.strip()}`")
     per = [l.strip() for l in spikes if l.rstrip().endswith("PERIODIC") or l.startswith("periodic runs:")]
     out.append(f"- 주기적으로 표시된 줄 {len(per)}개" + ("".join(f"\n  - `{x}`" for x in per[:30])) + ("" if len(per) <= 30 else "\n  - …(나머지는 spikes.txt)"))
+    out.append("")
+
+    def row(variant, n="20000"):
+        for r in summ:
+            if r["variant"] == variant and r["n"] == n and r["preset"] == "P1":
+                return r
+        return None
+
+    def rng(r, c):
+        return f"{float(r[c]):.2f} ({float(r[c + '_min']):.2f}\~{float(r[c + '_max']):.2f})"
+
+    out.append("**대표 조건 (P1, 3회 중앙값(최소\~최대), ms; 병목 = Game·Render·GPU p50 중 최대)**")
+    out.append("")
+    out.append("| 조건 | N | 종 | 프레임 p95 | 프레임 p50 | Game p50 | Render p50 | GPU p50 | 병목 | 대형 스킵 비율 |")
+    out.append("| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |")
+    for v, n in (("m3mass-fin", "20000"), ("m3vis30-fin", "20000"), ("m3vis15-fin", "20000"), ("m3vis0-fin", "20000"), ("m3hys20-fin", "20000"),
+                 ("m3mass-fin", "5000"), ("m3vis30-fin", "5000"), ("m3vis15-fin", "5000"), ("m3vis0-fin", "5000"), ("m3hys20-fin", "5000"),
+                 ("m3mass-t2-fin", "20000"), ("m3mass-t2-fin", "5000"),
+                 ("m3budgetdist-fin", "20000"), ("m3budgetdist-t2-fin", "20000"), ("m3sig-fin", "20000"), ("m3sig-t2-fin", "20000")):
+        r = row(v, n)
+        if r:
+            out.append(f"| {v} | {n} | {r.get('types') or '-'} | {rng(r, 'frame_p95_ms')} | {rng(r, 'frame_p50_ms')} | {float(r['game_p50_ms']):.2f} | {float(r['render_p50_ms']):.2f} | {float(r['gpu_p50_ms']):.2f} | {r['bottleneck']} | {r.get('large_skip_ratio') or '-'} |")
+        else:
+            out.append(f"| {v} | {n} | | (없음) | | | | | | |")
+    out.append("")
+    base, m30 = row("m3mass-fin"), row("m3vis30-fin")
+    if base and m30:
+        out.append(f"기준점 대비(20k P1): `m3mass-fin`(기본 15/30 m) − `m3vis30-fin`(옛 M3 값, Base 30 m) = 프레임 p95 {float(base['frame_p95_ms']) - float(m30['frame_p95_ms']):+.2f} ms, p50 {float(base['frame_p50_ms']) - float(m30['frame_p50_ms']):+.2f} ms.")
+        out.append("")
+    t2r, t1r = row("m3mass-t2-fin"), row("m3mass-fin")
+    if t2r and t1r:
+        out.append(f"2종 − 1종(`m3mass`, 20k P1): 프레임 p95 {float(t2r['frame_p95_ms']) - float(t1r['frame_p95_ms']):+.2f} ms, p50 {float(t2r['frame_p50_ms']) - float(t1r['frame_p50_ms']):+.2f} ms.")
+        out.append("")
+
+    out.append("**코드 A/B (ab2, 20k P1)**")
+    out.append("")
+    out.append("| 조건 | 프레임 p95 | 프레임 p50 | Game p50 |")
+    out.append("| --- | --- | --- | --- |")
+    for v in ("m3mass-ab2-fin", "m3lock0-ab2-fin", "m3order-ab2-fin"):
+        r = row(v)
+        if r:
+            out.append(f"| {v} | {rng(r, 'frame_p95_ms')} | {rng(r, 'frame_p50_ms')} | {float(r['game_p50_ms']):.2f} |")
+    out.append("")
+
+    traces = sorted((ROOT / "Saved" / "Traces").glob("M3b-*fin-r*.utrace"))
+    out.append("**트레이스 파일 (git 밖, `Saved/Traces/`)**: " + (", ".join(f"`{t.name}`({t.stat().st_size // 1_000_000} MB)" for t in traces) or "(없음)") + ". 트레이스 실행의 수치는 비교에 쓰지 않는다.")
     out.append("")
 
     t2 = [r for r in runs if r.get("types_assets") == "substituted"]
