@@ -464,7 +464,7 @@ plan.md "M3b" 146\~158행(2종 구성, 저격 E안, E3 (3c) 화면 크기 중요
 
 **에디터 상태 메모.** 확인 때 `L_Bench`의 Floor 머티리얼을 바꿨다가 되돌렸으므로 레벨이 수정됨 표시일 수 있다. 저장해도 내용은 같고, 저장하지 않아도 된다. `HordeOptLab.uproject`의 `EngineAssociation`이 `{31E80386…}`로 바뀌고 끝 개행이 빠져 있다(troubleshooting.md의 그 줄. 에디터를 켜면서 바뀐 것으로 보인다. 이 세션은 고치지 않았다. 에디터를 닫은 뒤 되돌려야 한다).
 
-**남은 것.** 사용자가 에디터를 닫은 뒤 `Scripts/run-dev.ps1 -Small -Extra "-LabTypes=2"`로 `lab_types types=2 large_assets=ok`와 종료 코드 0을 보고, 대형이 보이는 스크린샷을 `Saved/Screenshots/Lab/`에 남긴다.
+**확인(에디터를 닫은 뒤, 코드 세션 빌드 6ad7f7e).** `Scripts/run-dev.ps1 -Small -Extra "-LabTypes=2"`(M0 `full`): `lab_types types=2 large_assets=ok large_radius=47 small_radius=40`, `respawns=43 kills=8 snipes=39`, 종료 코드 0. `Scripts/run-dev.ps1 -N 5000 -Preset P1 -Duration 13 -ShotAt 10 -Variant m3mass -Extra "-LabStage=M3 -LabTypes=2"`(두 인자를 한 문자열로 넘기면 PowerShell이 떨어뜨리지 않는다): `large_assets=ok`, `lab_mass_config type=1 … mesh=SM_LabMinionLargeVAT_Bone actor=LabMinionMassActorLarge`, 종료 코드 0. 스크린샷 `Saved/Screenshots/Lab/m3b_types2_m3mass_n5000_p1.png`(2560x1440, 10초, git 밖). 대형은 칼이 없고 몸통이 굵은 시즈 미니언으로 가까운 액터와 먼 VAT 양쪽에 보인다. 크기 차이가 1.17배라 멀리서는 실루엣으로만 구별된다.
 
 ### 바닥 띠(코드)(코디네이터 지시, 결정 6, 2026-11-09)
 
