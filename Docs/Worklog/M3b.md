@@ -12,6 +12,7 @@ plan.md "M3b" 측정 방법 1\~7번을 `Scripts/`에 구현했다. 빌드·패�
 - `run-bench.ps1`: `-RunIndex`, `-Trace`(`Saved/Traces/<라벨>.utrace`), `-ExtraArgs`, 변형 이름 `m3vis0 m3vis15 m3hys20 m0full m0static staticpawn m1mass m2mass m3mass`를 ValidateSet에 추가. 게임이 이 이름을 모르면 실행이 실패한다(코드 세션 몫).
 - `run-m3b.ps1`(초안): 위상 e3b(기준점 m3mass 포함 24회 섞기, `-NoBase`면 18회) → matrix(M0 24 + staticpawn 6 + M1\~M3 90) → aa 3 → trace 2. 143회 + 버리는 r0 1 = 144회, 약 204분(85초/회). `-DryRun`으로 목록 확인(동작 확인함). 계획서의 "약 170회"는 budget·uro·pawn 같은 P1 전용 변형까지 센 값으로 보이고 이 러너에는 넣지 않았다.
 - `Docs/Reference/pc-specs.md`: CPU·RAM·GPU·드라이버·OS·엔진 커밋을 채웠다. commands.md에 행을 더했다.
+- 변형 이름 갱신(대표값 결정 1·결정 4, 2026-11-09): E3b 기준점 `m3mass`→`m3vis30`(조건 이름 `m3vis0`·`m3vis15`·`m3hys20`이 그대로 남고 24회 유지. `m3mass`를 4번째로 두면 `m3vis15`와 같은 기본값이 두 이름으로 나온다), ab2의 `m3noorder`→`m3order`. `-DryRun`으로 e3b 25행·ab2 9행 확인, 모든 변형이 `LabConfig.cpp` `-LabStage`에 있음. 커밋 HASH.
 
 ### M0\~M3 재요약
 
