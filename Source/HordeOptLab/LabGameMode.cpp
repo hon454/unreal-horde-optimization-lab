@@ -8,7 +8,14 @@
 #include "LabHud.h"
 #include "InputCoreTypes.h"
 #include "LabOrb.h"
+#include "LabSnipe.h" // FLabSnipeBands(바닥 띠 반경)
 #include "Engine/Engine.h"
+#include "Engine/StaticMeshActor.h"
+#include "EngineUtils.h"
+#include "Components/StaticMeshComponent.h"
+#include "Materials/MaterialInterface.h"
+#include "Materials/MaterialInstanceDynamic.h"
+#include "Misc/ConfigCacheIni.h"
 #include "Engine/World.h"
 #include "GameFramework/PlayerController.h"
 #include "HAL/IConsoleManager.h"
@@ -26,6 +33,9 @@
 
 namespace
 {
+	/** 결정 6 바닥 띠가 켜져 있는가(개발 전용 -LabBandFloor가 1로 둔다). 측정 CSV 메타데이터 LabCVars에 찍혀 켜고 잰 실행을 걸러낸다. Test 빌드에서는 늘 0. */
+	TAutoConsoleVariable<int32> CVarLabBandFloor(TEXT("lab.BandFloor"), 0, TEXT("1 if the dev-only -LabBandFloor orb-centred band floor is active (never in Test builds)"), ECVF_Default);
+
 	void LabSetCVar(const TCHAR* Name, const TCHAR* Value)
 	{
 		if (IConsoleVariable* Var = IConsoleManager::Get().FindConsoleVariable(Name))
@@ -49,6 +59,7 @@ namespace
 			TEXT("sg.ShadowQuality"), TEXT("sg.AntiAliasingQuality"), TEXT("sg.GlobalIlluminationQuality"), TEXT("sg.EffectsQuality"),
 			TEXT("r.DynamicGlobalIlluminationMethod"), TEXT("r.Shadow.Virtual.Enable"), TEXT("r.AntiAliasingMethod"),
 			TEXT("mass.FullyParallel"), TEXT("mass.commands.LockObserversDuringFlushing"),
+			TEXT("lab.BandFloor"), // 결정 6 바닥 띠(개발 전용). 1이면 그 실행은 비교에 쓰지 않는다
 		};
 		FString Out;
 		for (const TCHAR* Name : Names)
@@ -96,6 +107,19 @@ void ALabGameMode::StartPlay()
 		// 진단 D안(2026-11-09): DefaultEngine.ini의 1을 이 변형에서만 0으로 덮는다. LabFixedCVarString이 실제 값을 읽어 LabCVars 메타데이터에 0으로 찍힌다.
 		LabSetCVar(TEXT("mass.commands.LockObserversDuringFlushing"), TEXT("0"));
 	}
+#if !UE_BUILD_TEST
+	// 결정 6 바닥 띠(개발 전용). P2(탑뷰)에서는 끈다. CVar는 lab_build 로그와 CSV 메타데이터 LabCVars에 찍히도록 여기서 먼저 둔다.
+	const bool bBandFloorArg = FParse::Param(FCommandLine::Get(), TEXT("LabBandFloor"));
+	const bool bBandFloor = bBandFloorArg && Config.Preset != 2;
+	if (bBandFloor)
+	{
+		LabSetCVar(TEXT("lab.BandFloor"), TEXT("1"));
+	}
+	else if (bBandFloorArg)
+	{
+		UE_LOG(LogLab, Log, TEXT("lab_bandfloor on=0 reason=P2"));
+	}
+#endif
 	UE_LOG(LogLab, Log, TEXT("lab_build commit=%s driver=%s %s cvars=%s"), TEXT(LAB_BUILD_COMMIT), *GRHIAdapterName, *GRHIAdapterUserDriverVersion, *LabFixedCVarString());
 	if (Config.bBench)
 	{
@@ -106,6 +130,12 @@ void ALabGameMode::StartPlay()
 	Spawner = World->SpawnActor<ALabCrowdSpawner>();
 	Orb = World->SpawnActor<ALabOrb>(FVector::ZeroVector, FRotator::ZeroRotator);
 	Orb->SetSpawner(Spawner);
+#if !UE_BUILD_TEST
+	if (bBandFloor)
+	{
+		SetupBandFloor();
+	}
+#endif
 	Spawner->SpawnInitial();
 	StartFrame = GFrameCounter;
 
@@ -115,6 +145,50 @@ void ALabGameMode::StartPlay()
 	{
 		PC->SetViewTarget(Camera);
 	}
+}
+
+void ALabGameMode::SetupBandFloor()
+{
+#if !UE_BUILD_TEST
+	// 머티리얼 경로는 코드에 박지 않고 Config/DefaultGame.ini [Lab] BandFloorMaterial에서 읽는다(에셋 세션이 만든 에셋).
+	FString MaterialPath;
+	if (!GConfig || !GConfig->GetString(TEXT("Lab"), TEXT("BandFloorMaterial"), MaterialPath, GGameIni) || MaterialPath.IsEmpty())
+	{
+		UE_LOG(LogLab, Warning, TEXT("lab_bandfloor on=0 reason=no_ini_key [Lab] BandFloorMaterial"));
+		return;
+	}
+	UMaterialInterface* Material = LoadObject<UMaterialInterface>(nullptr, *MaterialPath, nullptr, LOAD_Quiet | LOAD_NoWarn);
+	if (!Material)
+	{
+		UE_LOG(LogLab, Warning, TEXT("lab_bandfloor on=0 reason=material_missing %s"), *MaterialPath);
+		return;
+	}
+	// L_Bench의 바닥(Basic 템플릿의 StaticMeshActor "Floor", Scripts/create-bench-map.py). 액터 라벨은 에디터 전용이라 이름 접두사로 찾는다.
+	UStaticMeshComponent* Floor = nullptr;
+	for (TActorIterator<AStaticMeshActor> It(GetWorld()); It; ++It)
+	{
+		if (It->GetName().StartsWith(TEXT("Floor")) && It->GetStaticMeshComponent())
+		{
+			Floor = It->GetStaticMeshComponent();
+			break;
+		}
+	}
+	if (!Floor)
+	{
+		UE_LOG(LogLab, Warning, TEXT("lab_bandfloor on=0 reason=floor_not_found"));
+		return;
+	}
+	BandFloorMID = UMaterialInstanceDynamic::Create(Material, this);
+	// 띠 반경은 저격 구간과 같은 상수 하나에서(FLabSnipeBands::Edges 30/80/200m). 머티리얼 기본값도 같지만 한 곳만 바꾸면 되게 넣는다.
+	BandFloorMID->SetScalarParameterValue(TEXT("BandRadius1"), FLabSnipeBands::Edges[0]);
+	BandFloorMID->SetScalarParameterValue(TEXT("BandRadius2"), FLabSnipeBands::Edges[1]);
+	BandFloorMID->SetScalarParameterValue(TEXT("BandRadius3"), FLabSnipeBands::Edges[2]);
+	BandFloorMID->SetVectorParameterValue(TEXT("BandCenter"), FLinearColor(Orb->GetActorLocation()));
+	const FString Previous = GetNameSafe(Floor->GetMaterial(0));
+	Floor->SetMaterial(0, BandFloorMID);
+	UE_LOG(LogLab, Log, TEXT("lab_bandfloor on=1 floor=%s previous=%s material=%s radii=%.0f/%.0f/%.0f"), *Floor->GetOwner()->GetName(), *Previous, *Material->GetName(),
+		FLabSnipeBands::Edges[0], FLabSnipeBands::Edges[1], FLabSnipeBands::Edges[2]);
+#endif
 }
 
 void ALabGameMode::ApplyVariantCVars()
@@ -252,6 +326,10 @@ void ALabGameMode::Tick(float DeltaSeconds)
 		return;
 	}
 #if !UE_BUILD_TEST
+	if (BandFloorMID && Orb)
+	{
+		BandFloorMID->SetVectorParameterValue(TEXT("BandCenter"), FLinearColor(Orb->GetActorLocation())); // 결정 6: 띠 중심은 오브(맵 중앙 고정이지만 매 프레임 넣는다)
+	}
 	// E3b (8) 화질 캡처(-LabFrameLog): 이전 프레임의 화면 안 30m VAT 인스턴스 수·보이는 액터 수를 남기고 슬롯을 비운다. 프로세서는 이번 프레임 슬롯에 쓴다.
 	static const bool bFrameLog = FParse::Param(FCommandLine::Get(), TEXT("LabFrameLog"));
 	if (bFrameLog)

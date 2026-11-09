@@ -7,6 +7,7 @@
 class ALabCameraRig;
 class ALabCrowdSpawner;
 class ALabOrb;
+class UMaterialInstanceDynamic;
 
 /** 벤치마크 러너 시간. commands.md "벤치마크 러너 인자", measurement.md "벤치마크 조건". */
 struct FLabBench
@@ -47,10 +48,17 @@ protected:
 	void ApplyVariantCVars();
 	void ApplyBenchCVars();
 	void TickBench();
+	/**
+	 * 결정 6 바닥 띠(개발 전용 -LabBandFloor, 2026-11-09, backlog.md). L_Bench의 Floor 머티리얼을 M_LabBandFloor(에셋 세션 245cc35, Scripts/create-band-floor.md)의 MID로 바꾸고
+	 * 띠 반경은 저격 구간 FLabSnipeBands(30/80/200m)에서, 중심(BandCenter)은 오브 위치에서 매 프레임 넣는다. P2(탑뷰)에서는 켜지 않는다(3D 거리라 200m 경계가 XY 173m).
+	 * 켜짐은 CVar lab.BandFloor=1로 CSV 메타데이터 LabCVars에 남아 실수로 켜고 잰 실행을 걸러낸다. Test 빌드에는 코드가 없다.
+	 */
+	void SetupBandFloor();
 
 	UPROPERTY() TObjectPtr<ALabCrowdSpawner> Spawner;
 	UPROPERTY() TObjectPtr<ALabOrb> Orb;
 	UPROPERTY() TObjectPtr<ALabCameraRig> Camera;
+	UPROPERTY() TObjectPtr<UMaterialInstanceDynamic> BandFloorMID; // -LabBandFloor(개발 전용)일 때만 있다
 
 	float Elapsed = 0.f;
 	uint64 StartFrame = 0; // 개발 실행 요약의 평균 프레임 시간용
