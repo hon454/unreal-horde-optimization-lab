@@ -12,11 +12,19 @@ $Runner = "$PSScriptRoot\run-m3b.ps1"
 $LogDir = "$Root\Saved\Lab"; New-Item -ItemType Directory -Force -Path $LogDir | Out-Null
 $Log = "$LogDir\m3b-all.log"
 $PhaseCsv = "$Root\Measurements\M3b\batch-phases.csv"
-function Say($m) { $l = "{0:yyyy-MM-dd HH:mm:ss} {1}" -f (Get-Date), $m; Write-Host $l; if (-not $DryRun) { Add-Content -Path $Log -Value $l -Encoding UTF8 } }
+# 로그 쓰기는 다른 프로세스가 읽는 중이어도 실패하지 않게 FileShare.ReadWrite로 열고, 실패하면 무시한다(측정을 멈추지 않는다).
+function Add-Log($Text) {
+    try {
+        $fs = New-Object System.IO.FileStream($Log, [System.IO.FileMode]::Append, [System.IO.FileAccess]::Write, [System.IO.FileShare]::ReadWrite)
+        $w = New-Object System.IO.StreamWriter($fs, (New-Object System.Text.UTF8Encoding($false)))
+        $w.WriteLine($Text); $w.Close()
+    } catch { }
+}
+function Say($m) { $l = "{0:yyyy-MM-dd HH:mm:ss} {1}" -f (Get-Date), $m; Write-Host $l; if (-not $DryRun) { Add-Log $l } }
 
 # 묶음 1(start r0 포함 1회) -> 묶음 2. 첫 항목만 r0을 둔다.
 $Phases = @(
-    @{ Name = "start"; Args = @() },
+    @{ Name = "start"; Args = @("-NoR0") }   # 첫 시도에서 r0(startfin-r0)이 이미 돌았다(2026-11-09 23:27, 같은 패키지). 라벨 재사용 금지라 r0 없이 r1부터,
     @{ Name = "e3b"; Args = @("-NoR0") },
     @{ Name = "matrix"; Args = @("-NoR0") },
     @{ Name = "ab2"; Args = @("-NoR0") },
@@ -57,7 +65,7 @@ $Failed = $false
 foreach ($P in $Phases) {
     $T0 = Get-Date
     Say "PHASE $($P.Name) start"
-    & powershell -NoProfile -ExecutionPolicy Bypass -File $Runner -Phase $P.Name @($P.Args) -Tag fin 2>&1 | ForEach-Object { Add-Content -Path $Log -Value $_ -Encoding UTF8; Write-Host $_ }
+    & powershell -NoProfile -ExecutionPolicy Bypass -File $Runner -Phase $P.Name @($P.Args) -Tag fin 2>&1 | ForEach-Object { Add-Log $_; Write-Host $_ }
     $Code = $LASTEXITCODE
     $T1 = Get-Date
     Add-Content -Path $PhaseCsv -Value ("{0},{1:s},{2:s},{3},{4}" -f $P.Name, $T0, $T1, [int]($T1 - $T0).TotalSeconds, $Code) -Encoding UTF8
@@ -67,9 +75,9 @@ foreach ($P in $Phases) {
 
 # --- 마무리: 실패해도 지금까지의 결과를 요약한다 ---
 Say "summarize"
-& py -3 -I "$PSScriptRoot\summarize.py" --milestone M3b 2>&1 | ForEach-Object { Add-Content -Path $Log -Value $_ -Encoding UTF8; Write-Host $_ }
+& py -3 -I "$PSScriptRoot\summarize.py" --milestone M3b 2>&1 | ForEach-Object { Add-Log $_; Write-Host $_ }
 Say "spikes"
 & py -3 -I "$PSScriptRoot\spikes.py" "M3b-" --verbose 2>&1 | Out-File -FilePath "$Root\Measurements\M3b\spikes.txt" -Encoding UTF8
-& py -3 -I "$PSScriptRoot\m3b-report.py" --failed $(if ($Failed) { 1 } else { 0 }) 2>&1 | ForEach-Object { Add-Content -Path $Log -Value $_ -Encoding UTF8; Write-Host $_ }
+& py -3 -I "$PSScriptRoot\m3b-report.py" --failed $(if ($Failed) { 1 } else { 0 }) 2>&1 | ForEach-Object { Add-Log $_; Write-Host $_ }
 Say "M3b ALL done. failed=$Failed. 커밋은 하지 않았다(Measurements/M3b/, Docs/Worklog/M3b.md)."
 exit $(if ($Failed) { 1 } else { 0 })
