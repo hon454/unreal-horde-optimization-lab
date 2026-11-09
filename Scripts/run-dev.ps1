@@ -4,7 +4,7 @@ param(
     [int]$N = 500,
     [ValidateSet("P1", "P2")][string]$Preset = "P1",
     [int]$Seed = 20261106,
-    [ValidateSet("full", "static", "budget", "uro", "pawn", "mass", "massst", "massav", "massdirlo", "massdirhi", "massevtlo", "massevthi", "vatvert", "vatcull", "vatcullvis", "vatdie0", "vatdie1k", "kill0", "kill1k", "m3uro", "m3budgetdist", "m3budgetsig", "m3lowres", "m3colquery", "m3nocol", "m3colbase", "m3hyd15", "m3hyd50", "m3hydbase", "m2off", "m3noactor", "m3base", "m3qold", "m3syncall", "m3lock0", "m3order", "m3vis30", "m3vis0", "m3vis15", "m3hys20", "m0full", "m0static", "staticpawn", "m1mass", "m2mass", "m3mass")][string]$Variant = "full",
+    [ValidateSet("full", "static", "budget", "uro", "pawn", "mass", "massst", "massav", "massdirlo", "massdirhi", "massevtlo", "massevthi", "vatvert", "vatcull", "vatcullvis", "vatdie0", "vatdie1k", "kill0", "kill1k", "m3uro", "m3budgetdist", "m3budgetsig", "m3lowres", "m3colquery", "m3nocol", "m3colbase", "m3hyd15", "m3hyd50", "m3hydbase", "m2off", "m3noactor", "m3base", "m3qold", "m3syncall", "m3lock0", "m3order", "m3vis30", "m3sig", "m3vis0", "m3vis15", "m3hys20", "m0full", "m0static", "staticpawn", "m1mass", "m2mass", "m3mass")][string]$Variant = "full",
     [double]$Duration = 0,
     [double]$ShotAt = 0,
     [string[]]$Extra = @(),

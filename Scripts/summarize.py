@@ -3,7 +3,7 @@
 Saved/Profiling/CSV/<라벨>.csv(run-bench.ps1이 패키지에서 가져온 것)를 읽어
 Measurements/<M>/runs.csv에 실행마다 한 행을 더하고, summary.csv를 조건별 중앙값·최소·최대로 다시 쓴다.
 라벨 형식은 <M>-<variant>-N<n>-<preset><tag>-r<i>이고, r0(묶음의 첫 실행, 셰이더 캐시)은 summary에서 뺀다.
-태그 aa*는 묶음 끝 A/A, ab*는 선행 A/B, aff*/noaff*는 어피니티 진단, start*는 묶음 시작 확인, ab2*는 코드 A/B(D안)으로 summary에 <variant>-aa / -ab 조건으로 따로 쓰고, trace*는 summary에서 뺀다.
+태그 t2*는 2종(-LabTypes=2) 묶음 2로 summary에 <variant>-t2 조건으로 따로 쓰고, 태그 aa*는 묶음 끝 A/A, ab*는 선행 A/B, aff*/noaff*는 어피니티 진단, start*는 묶음 시작 확인, ab2*는 코드 A/B(D안)으로 summary에 <variant>-aa / -ab 조건으로 따로 쓰고, trace*는 summary에서 뺀다.
 열 정의는 Docs/Guides/measurement.md "지표". 표준 라이브러리만 쓴다.
 
 M3b부터: frame_p95_ms(대표 지표), bottleneck(프레임·Game·Render·GPU p50 중 최댓값의 이름), build(CSV 메타데이터)를 더한다.
@@ -31,7 +31,8 @@ COLS = {
 }
 RUN_FIELDS = ["label", "milestone", "variant", "n", "preset", "seed", "run", "pc", "frames",
               "game_p50_ms", "game_p99_ms", "render_p50_ms", "gpu_p50_ms", "frame_p50_ms", "frame_p95_ms", "frame_p99_ms",
-              "hitch_abs", "hitch_rel", "draw_calls_p50", "mem_total_mb", "bottleneck", "build"]
+              "hitch_abs", "hitch_rel", "draw_calls_p50", "mem_total_mb", "bottleneck", "build",
+              "types", "types_assets", "large_actor_frames", "large_actor_skips", "large_skip_ratio"]
 CORE = ["game_p50_ms", "game_p99_ms", "render_p50_ms", "gpu_p50_ms", "frame_p50_ms", "frame_p95_ms", "frame_p99_ms",
         "hitch_abs", "hitch_rel", "draw_calls_p50", "mem_total_mb"]
 # 병목 후보: p50 열 이름 -> 표시 이름 (measurement.md "N@16.7ms": 프레임·Game·Render·GPU p50 중 최댓값)
@@ -58,6 +59,17 @@ def bottleneck(row):
         if best is None or float(v) > best:
             best, name = float(v), label
     return name
+
+
+def types_fields(meta):
+    """2종(M3b) 메타데이터: LabTypes, LabTypesAssets(ok/substituted/-), LabLargeActorFrames/Skips. 없으면 빈칸(옛 CSV)."""
+    fr, sk = meta.get("lablargeactorframes", ""), meta.get("lablargeactorskips", "")
+    try:
+        ratio = round(int(sk) / int(fr), 4) if int(fr) > 0 else ""
+    except ValueError:
+        ratio = ""
+    return {"types": meta.get("labtypes", ""), "types_assets": meta.get("labtypesassets", ""),
+            "large_actor_frames": fr, "large_actor_skips": sk, "large_skip_ratio": ratio}
 
 
 def build_string(meta):
@@ -131,6 +143,7 @@ def summarize_run(path, pc):
         "build": build_string(meta),
     }
     row["bottleneck"] = bottleneck(row)
+    row.update(types_fields(meta))
     return row
 
 
@@ -173,15 +186,18 @@ def main():
         if int(r["run"]) == 0:
             continue
         tag = LABEL_RE.match(r["label"])["tag"]
+        if r.get("types_assets", "") == "substituted":
+            print(f"WARNING: {r['label']} LabTypesAssets=substituted (대형 에셋 대체, 스모크 전용) -> summary에서 뺀다")
+            continue
         if tag.startswith("trace"):
             continue  # Insights 트레이스 실행은 비교에 쓰지 않는다(runs.csv에는 남는다)
-        variant = r["variant"] + next((f"-{t}" for t in ("noaff", "aff", "start", "aa", "ab2", "ab") if tag.startswith(t)), "")  # 묶음 끝 A/A와 선행 A/B(ab)는 기준점과 따로 요약한다
+        variant = r["variant"] + next((f"-{t}" for t in ("noaff", "aff", "start", "aa", "ab2", "ab", "t2") if tag.startswith(t)), "")  # 묶음 끝 A/A와 선행 A/B(ab)는 기준점과 따로 요약한다
         groups.setdefault((variant, int(r["n"]), r["preset"]), []).append(r)
 
     fields = ["variant", "n", "preset", "runs"]
     for c in CORE:
         fields += [c, f"{c}_min", f"{c}_max"]
-    fields += ["bottleneck", "build"]
+    fields += ["bottleneck", "build", "types", "types_assets", "large_skip_ratio"]
     with open(out_dir / "summary.csv", "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=fields)
         w.writeheader()
@@ -195,6 +211,10 @@ def main():
             out["bottleneck"] = bottleneck(out)
             builds = sorted({r.get("build", "") for r in rs if r.get("build", "")})
             out["build"] = builds[0] if len(builds) == 1 else " // ".join(builds)
+            out["types"] = "/".join(sorted({str(r.get("types", "")) for r in rs if str(r.get("types", "")) != ""}))
+            out["types_assets"] = "/".join(sorted({str(r.get("types_assets", "")) for r in rs if str(r.get("types_assets", "")) != ""}))
+            ratios = [float(r["large_skip_ratio"]) for r in rs if str(r.get("large_skip_ratio", "")) != ""]
+            out["large_skip_ratio"] = round(statistics.median(ratios), 4) if ratios else ""
             w.writerow(out)
 
     print(f"runs.csv: {len(rows)} rows (+{added}), summary.csv: {len(groups)} conditions -> {out_dir}")

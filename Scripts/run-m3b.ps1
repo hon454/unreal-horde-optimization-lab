@@ -12,6 +12,9 @@
 #                 summary 조건 m3mass-aff / m3mass-noaff. -Phase all에는 넣지 않는다(진단 전용).
 #   Phase matrix: 전수 매트릭스, 조건 단위. M0 {full, static} x {1k, 5k} x P1, P2 / staticpawn {1k, 5k} P1 /
 #                 M1~M3 {1k, 5k, 20k, 30k, 50k} x P1, P2. 각 3회.
+#   Phase types2: 묶음 2(2종, -LabTypes=2). 묶음 1 전수 매트릭스와 같은 조건 40개 x 3회 = 120회를 라벨 태그 t2로(summary 조건 <변형>-t2),
+#                 이어서 E3 (3c) 20k P1 3회: m3budgetdist 1종 / 2종(t2), m3sig 1종 / 2종(t2)를 섞어 12회(1종 m3sig·m3budgetdist는 태그 없음).
+#                 E3b 24회·A/B·A/A는 묶음 1에만 있다. LabTypesAssets=substituted인 CSV는 summary에서 빠진다. -Phase all에는 넣지 않는다.
 #   Phase aa    : 묶음 끝 기준점 A/A. m3mass 20k P1 3회, 태그 aa(summary에서 m3mass-aa 조건으로 따로 쓰임).
 #   Phase trace : 20k P1 m3mass 트레이스 병렬 1 + 직렬 1(-Trace). 태그 tracepar / traceser. 직렬은 mass.FullyParallel=0.
 # 묶음의 맨 첫 실행 1회(r0)만 드라이버 PSO 캐시용으로 버린다. 나머지는 모두 r1 이상.
@@ -21,7 +24,7 @@
 # -DryRun은 실행 목록만 찍고 아무것도 실행하지 않는다.
 param(
     [string]$Tag = "",
-    [ValidateSet("all", "e3b", "ab", "start", "ab2", "aff", "matrix", "aa", "trace")][string]$Phase = "all",
+    [ValidateSet("all", "e3b", "ab", "start", "ab2", "aff", "matrix", "types2", "aa", "trace")][string]$Phase = "all",
     [switch]$NoBase,
     [switch]$NoR0,   # 묶음의 버리는 r0을 두지 않는다(같은 묶음의 두 번째 이후 호출. 예: e3b 다음 ab)
     [switch]$DryRun,
@@ -33,8 +36,8 @@ $Bench = "$PSScriptRoot\run-bench.ps1"
 
 # 실행 하나 = @(변형, N, 프리셋, 실행 단계 -Stage, 실행 번호, 라벨 태그, 트레이스 여부, 추가 인자)
 $Runs = New-Object System.Collections.ArrayList
-function Add-Run($Variant, $N, $Preset, $Stage, $RunIdx, $RunTag, $Trace, $Extra, $Aff = "") {
-    [void]$Runs.Add(@{ Variant = $Variant; N = $N; Preset = $Preset; Stage = $Stage; Run = $RunIdx; Tag = "$RunTag$Tag"; Trace = $Trace; Extra = $Extra; Aff = $Aff })
+function Add-Run($Variant, $N, $Preset, $Stage, $RunIdx, $RunTag, $Trace, $Extra, $Aff = "", $Types = 1) {
+    [void]$Runs.Add(@{ Variant = $Variant; N = $N; Preset = $Preset; Stage = $Stage; Run = $RunIdx; Tag = "$RunTag$Tag"; Trace = $Trace; Extra = $Extra; Aff = $Aff; Types = $Types })
 }
 
 # --- Phase e3b: 실행 단위로 섞는다 (A r1, B r1, C r1, ... A r2, ...) ---
@@ -72,14 +75,25 @@ if ($Phase -eq "aff") {
 }
 
 # --- Phase matrix: 조건 단위, 3회 ---
-if ($Phase -in @("all", "matrix")) {
+if ($Phase -in @("all", "matrix", "types2")) {
+    $T2 = ($Phase -eq "types2")   # 묶음 2: 같은 조건을 -LabTypes=2(-Types 2)로, 라벨 태그 t2
     $Cond = @()
     foreach ($V in @("m0full", "m0static")) { foreach ($N in @(1000, 5000)) { foreach ($P in @("P1", "P2")) { $Cond += , @($V, $N, $P, "M0") } } }
     foreach ($N in @(1000, 5000)) { $Cond += , @("staticpawn", $N, "P1", "M0") }
     foreach ($S in @(@("m1mass", "M1"), @("m2mass", "M2"), @("m3mass", "M3"))) {
         foreach ($N in @(1000, 5000, 20000, 30000, 50000)) { foreach ($P in @("P1", "P2")) { $Cond += , @($S[0], $N, $P, $S[1]) } }
     }
-    foreach ($C in $Cond) { foreach ($R in 1..3) { Add-Run $C[0] $C[1] $C[2] $C[3] $R "" $false "" } }
+    foreach ($C in $Cond) { foreach ($R in 1..3) { if ($T2) { Add-Run $C[0] $C[1] $C[2] $C[3] $R "t2" $false "" "" 2 } else { Add-Run $C[0] $C[1] $C[2] $C[3] $R "" $false "" } } }
+}
+
+# --- Phase types2 추가분: E3 (3c) 20k P1 3회. m3sig(1종, 2종)와 비교 상대 3a m3budgetdist(1종, 2종)를 실행 단위로 섞는다 ---
+if ($Phase -eq "types2") {
+    foreach ($R in 1..3) {
+        foreach ($V in @("m3budgetdist", "m3sig")) {
+            Add-Run $V 20000 "P1" "M3" $R "" $false "" "" 1
+            Add-Run $V 20000 "P1" "M3" $R "t2" $false "" "" 2
+        }
+    }
 }
 
 # --- Phase aa: 묶음 끝 기준점 A/A ---
@@ -99,11 +113,11 @@ $Minutes = [math]::Round($Total * 85 / 60)
 Write-Host "M3b batch: $($Runs.Count) runs + 1 discarded r0 = $Total, about $Minutes min (85 s each)"
 $Idx = 0
 $Plan = $Runs.ToArray()
-if (-not $NoR0) { $Plan = @(@{ Variant = $Runs[0].Variant; N = $Runs[0].N; Preset = $Runs[0].Preset; Stage = $Runs[0].Stage; Run = 0; Tag = $Runs[0].Tag; Trace = $false; Extra = ""; Aff = $Runs[0].Aff }) + $Plan }
+if (-not $NoR0) { $Plan = @(@{ Variant = $Runs[0].Variant; N = $Runs[0].N; Preset = $Runs[0].Preset; Stage = $Runs[0].Stage; Run = 0; Tag = $Runs[0].Tag; Trace = $false; Extra = ""; Aff = $Runs[0].Aff; Types = $Runs[0].Types }) + $Plan }
 foreach ($R in $Plan) {
     $Idx++
     $Label = "M3b-$($R.Variant)-N$($R.N)-$($R.Preset)$($R.Tag)-r$($R.Run)"
-    Write-Host ("{0,3}. {1}  stage={2}{3}{4}" -f $Idx, $Label, $R.Stage, $(if ($R.Trace) { " trace" } else { "" }), $(if ($R.Extra) { " extra=$($R.Extra)" } else { "" }) + $(if ($R.Aff) { " affinity=0x$($R.Aff)" } else { "" }))
+    Write-Host ("{0,3}. {1}  stage={2}{3}{4}" -f $Idx, $Label, $R.Stage, $(if ($R.Trace) { " trace" } else { "" }), $(if ($R.Extra) { " extra=$($R.Extra)" } else { "" }) + $(if ($R.Aff) { " affinity=0x$($R.Aff)" } else { "" }) + $(if ($R.Types -eq 2) { " types=2" } else { "" }))
 }
 if ($DryRun) { Write-Host "DryRun: nothing executed."; exit 0 }
 
@@ -116,6 +130,7 @@ foreach ($R in $Plan) {
     if ($R.Trace) { $Args += "-Trace" }
     if ($R.Extra) { $Args += @("-ExtraArgs", $R.Extra) }
     if ($R.Aff) { $Args += @("-Affinity", $R.Aff) }
+    if ($R.Types -eq 2) { $Args += @("-Types", 2) }
     & powershell @Args
     if ($LASTEXITCODE -ne 0) { $Failed += "$($R.Variant) N$($R.N) $($R.Preset)$($R.Tag) r$($R.Run)" }
 }

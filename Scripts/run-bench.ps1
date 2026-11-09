@@ -6,7 +6,7 @@ param(
     [Parameter(Mandatory)][string]$Milestone,
     [Parameter(Mandatory)][int]$N,
     [ValidateSet("P1", "P2")][string]$Preset = "P1",
-    [ValidateSet("full", "static", "budget", "uro", "pawn", "mass", "massst", "massav", "massdirlo", "massdirhi", "massevtlo", "massevthi", "vatvert", "vatcull", "vatcullvis", "vatdie0", "vatdie1k", "kill0", "kill1k", "m3uro", "m3budgetdist", "m3budgetsig", "m3lowres", "m3colquery", "m3nocol", "m3colbase", "m3hyd15", "m3hyd50", "m3hydbase", "m2off", "m3noactor", "m3base", "noanim", "m3vis0", "m3vis15", "m3hys20", "m3qold", "m3syncall", "m3lock0", "m3order", "m3vis30", "m0full", "m0static", "staticpawn", "m1mass", "m2mass", "m3mass")][string]$Variant = "full",
+    [ValidateSet("full", "static", "budget", "uro", "pawn", "mass", "massst", "massav", "massdirlo", "massdirhi", "massevtlo", "massevthi", "vatvert", "vatcull", "vatcullvis", "vatdie0", "vatdie1k", "kill0", "kill1k", "m3uro", "m3budgetdist", "m3budgetsig", "m3lowres", "m3colquery", "m3nocol", "m3colbase", "m3hyd15", "m3hyd50", "m3hydbase", "m2off", "m3noactor", "m3base", "noanim", "m3vis0", "m3vis15", "m3hys20", "m3qold", "m3syncall", "m3lock0", "m3order", "m3vis30", "m3sig", "m0full", "m0static", "staticpawn", "m1mass", "m2mass", "m3mass")][string]$Variant = "full",
     [int]$Seed = 20261106,
     [int]$Runs = 3,
     [string]$Tag = "",
@@ -22,7 +22,9 @@ param(
     # 게임 인자를 그대로 덧붙인다(예: 직렬 트레이스의 "-LabFullyParallel=0", 인자 이름은 코드 세션이 정한다).
     [string]$ExtraArgs = "",
     # 프로세스 시작 직후 CPU 어피니티 마스크(16진수, 예: FFFF)를 건다. 없으면 걸지 않는다. 잡음 진단용(5950X 두 CCD). 로그와 Saved/Lab/<라벨>.summary.txt에 affinity=0x...를 남긴다.
-    [string]$Affinity = ""
+    [string]$Affinity = "",
+    # 개체 종류 수. 2면 -LabTypes=2를 붙인다(M3b 묶음 2). 라벨은 -Tag로 따로 구분한다(예: t2). 1은 인자를 붙이지 않는다.
+    [ValidateSet(1, 2)][int]$Types = 1
 )
 . "$PSScriptRoot\common.ps1"
 
@@ -47,6 +49,7 @@ for ($i = $First; $i -le $Last; $i++) {
     $GameArgs = @("-windowed", "-ResX=$ResX", "-ResY=$ResY", "-nosound",
         "-LabBench", "-LabStage=$(if ($Stage) { $Stage } else { $Milestone })", "-LabN=$N", "-LabPreset=$($Preset.Substring(1))", "-LabSeed=$Seed", "-LabVariant=$Variant", "-LabLabel=$Label")
     if ($Trace) { $GameArgs += @("-trace=cpu,gpu,frame,counters,mass", "-tracefile=`"$ProjectDir\Saved\Traces\$Label.utrace`"") }
+    if ($Types -eq 2) { $GameArgs += "-LabTypes=2" }
     if ($ExtraArgs) { $GameArgs += $ExtraArgs.Split(" ", [StringSplitOptions]::RemoveEmptyEntries) }
     Write-Host "RUN $Label"
     $Proc = Start-Process -FilePath $Exe -ArgumentList $GameArgs -PassThru
