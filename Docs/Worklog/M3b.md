@@ -15,6 +15,16 @@ plan.md "M3b" 측정 방법 1\~7번을 `Scripts/`에 구현했다. 빌드·패�
 - 변형 이름 갱신(대표값 결정 1·결정 4, 2026-11-09): E3b 기준점 `m3mass`→`m3vis30`(조건 이름 `m3vis0`·`m3vis15`·`m3hys20`이 그대로 남고 24회 유지. `m3mass`를 4번째로 두면 `m3vis15`와 같은 기본값이 두 이름으로 나온다), ab2의 `m3noorder`→`m3order`. `-DryRun`으로 e3b 25행·ab2 9행 확인, 모든 변형이 `LabConfig.cpp` `-LabStage`에 있음. 커밋 2fb7507.
 - 2종 측정 준비(코디네이터 지시, 2026-11-09): `m3sig`를 ValidateSet에 더했고 `run-bench.ps1 -Types 2`(→ `-LabTypes=2`, 라벨은 `-Tag`로 구분)를 더했다. `run-m3b.ps1 -Phase types2` = 묶음 2: 묶음 1 전수 매트릭스와 같은 40조건 x 3회 = 120회를 태그 `t2`(summary 조건 `<변형>-t2`)로 + E3 (3c) 20k P1 3회 12회(`m3budgetdist`·`m3sig` 각각 1종/2종 쌍. 3a 비교 상대 `m3budgetdist`는 `LabConfig.cpp` 변형 이름이고, 2종끼리 비교하려고 2종도 넣었다). `-DryRun`: 묶음 1 `-Phase all` 158회(+r0), 묶음 2 132회(+r0, 약 188분). `summarize.py`: runs.csv에 `types`·`types_assets`·`large_actor_frames`·`large_actor_skips`·`large_skip_ratio`(= Skips ÷ Frames) 열, summary에 `types`·`types_assets`·`large_skip_ratio`(중앙값) 열, `LabTypesAssets=substituted` 행은 summary에서 빼고 경고를 찍는다(runs.csv에는 남는다), 태그 `t2`는 `-t2` 조건으로 따로 요약, `plot.py`는 `-t2`를 곡선에서 뺀다. 옛 CSV(해당 메타데이터 없음)는 새 열이 빈칸. 실행·빌드 없음. 커밋 0a47b9f.
 
+### 측정 전 점검표 (묶음 1·2, 2026-11-09)
+
+1. **PC 상태.** 에디터·Epic Games Launcher·UBT/`dotnet` 빌드 서버·다른 게임이 꺼져 있다(`tasklist`로 확인). 에디터나 런처가 `.uproject`의 `EngineAssociation`을 다시 쓸 수 있다. 모니터는 켜 두고 화면 끄기·절전을 하지 않는다. 사용자는 측정 동안 PC를 쓰지 않는다.
+2. **세션.** 다른 세션은 모두 대기이고 빌드·패키징·에디터를 하지 않는다. `git status`가 깨끗하고 `.uproject`가 바뀌지 않았다.
+3. **패키지.** Test 패키지의 `commit.txt` 해시가 HEAD와 같다(dirty는 추적 안 된 `Config/DefaultEditor.ini`뿐). 묶음 1·2는 같은 패키지로 같은 날 연달아 돈다.
+4. **순서와 r0.** 묶음 1 `-Phase e3b`(r0 포함) → `matrix -NoR0` → `ab2 -NoR0` → `aa -NoR0` → `trace -NoR0`. 묶음 2 `-Phase types2 -NoR0`. 실행 도중 실패가 있으면 멈추고 알린다. 같은 라벨은 다시 쓰지 않는다(`-Tag`).
+5. **묶음 끝 검사.** `py -3 -I Scripts/spikes.py M3b- --verbose`로 주기적 스파이크가 없는지 본다. `summarize.py --milestone M3b` 뒤 `labbuild`가 한 값인지(`build` 열에 `//`가 없는지) 본다.
+6. **A/A 판정.** 시작 A/A(`-Phase start`, 조건 `m3mass-start`, 필요하면 e3b 앞에 돌린다)와 끝 A/A(`m3mass-aa`)의 프레임 p50 차이가 0.5 ms 이하면 한 묶음으로 쓴다. 넘으면 그 사실을 적고 코디네이터가 판정한다.
+7. **2종 행.** `LabTypesAssets=substituted`인 CSV는 summary에서 빠진다(경고가 찍힌다). 경고가 하나라도 있으면 보고한다. 2종 행의 `large_skip_ratio`도 같이 본다.
+
 ### M0\~M3 재요약
 
 `summarize.py --milestone M<N> --rebuild`를 M0\~M3에 돌렸다. 재요약 전후 `runs.csv`·`summary.csv`의 기존 열을 모든 행에서 비교했다(행 수 89/63/71/118, 29/20/23/38 조건): **차이 0, 행 수 같음.** 새 열만 더해졌다(`frame_p95_ms`, summary는 `_min`/`_max`도, `bottleneck`, `build`). `build`는 M0\~M3 CSV에 `lab*` 메타데이터가 없어 비었다. `bottleneck`은 처음 정의(프레임 포함)에서는 항상 `frame`이라, 프레임을 빼는 정의로 바꿔 다시 요약했다(기존 열 차이 0 재확인). M0은 `game`, M1\~M3은 `gpu`다.
