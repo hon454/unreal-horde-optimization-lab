@@ -152,6 +152,47 @@ def main():
             out.append(f"| {v} | {rng(r, 'frame_p95_ms')} | {rng(r, 'frame_p50_ms')} | {float(r['game_p50_ms']):.2f} |")
     out.append("")
 
+    # N@16.7ms (P1): plot.py와 같은 로그 보간. p95 정의 = 프레임 p95, p50 정의 = Game/Render/GPU/프레임 p50 중 최댓값(M3까지의 정의).
+    sys.path.insert(0, str(ROOT / "Scripts"))
+    from plot import n_at_budget  # noqa: E402
+
+    def n_at(variant, defn):
+        pts = []
+        for r in summ:
+            if r["variant"] != variant or r["preset"] != "P1":
+                continue
+            if defn == "p95":
+                v = float(r["frame_p95_ms"])
+            else:
+                v = max(float(r[c]) for c in ("game_p50_ms", "render_p50_ms", "gpu_p50_ms", "frame_p50_ms") if r.get(c))
+            pts.append((int(r["n"]), v))
+        n, note = n_at_budget(sorted(pts))
+        rng_n = f"{min(p[0] for p in pts):,}\~{max(p[0] for p in pts):,}" if pts else "-"
+        if not pts:
+            return "-"
+        if n is None:
+            return f"< {min(p[0] for p in pts):,}"
+        return (">" if note == "above range" else "") + f"{n:,.0f}"
+
+    out.append("**N@16.7ms (P1, 측정 N 사이 로그 보간. p95 정의 / p50 정의 = Game·Render·GPU·프레임 p50 중 최댓값)**")
+    out.append("")
+    out.append("| 단계 | 1종 p95 | 1종 p50 | 2종(t2) p95 | 2종(t2) p50 |")
+    out.append("| --- | --- | --- | --- | --- |")
+    for name, v in (("M0 full", "m0full"), ("M0 static", "m0static"), ("M1", "m1mass"), ("M2", "m2mass"), ("M3 (m3mass)", "m3mass")):
+        out.append(f"| {name} | {n_at(v + '-fin', 'p95')} | {n_at(v + '-fin', 'p50')} | {n_at(v + '-t2-fin', 'p95')} | {n_at(v + '-t2-fin', 'p50')} |")
+    out.append("")
+    out.append("`>`는 측정한 가장 큰 N에서도 16.7ms를 넘지 않았다는 뜻(그 N 이상). N 범위는 M0가 1k\~5k, M1\~M3가 1k\~50k다. `< 1,000`은 최종 묶음의 가장 작은 N(1,000)이 이미 16.7ms를 넘어 보간할 수 없다는 뜻이다(M0 full은 M0 마일스톤 측정의 더 작은 N 값을 쓴다). 2종 M0는 대형 개체 10%를 같은 M0 액터 경로로 돌린 값이다.")
+    out.append("")
+
+    out.append("**E3 (3a·3c) 프레임 p95, 20k P1 (3회 중앙값(최소\~최대), ms)**")
+    out.append("")
+    out.append("| 변형 | 1종 | 2종(t2) |")
+    out.append("| --- | --- | --- |")
+    for label, v in (("m3mass (기준)", "m3mass"), ("m3budgetdist (3a)", "m3budgetdist"), ("m3sig (3c)", "m3sig")):
+        r1, r2 = row(v + "-fin"), row(v + "-t2-fin")
+        out.append(f"| {label} | {rng(r1, 'frame_p95_ms') if r1 else '(없음)'} | {rng(r2, 'frame_p95_ms') if r2 else '(없음)'} |")
+    out.append("")
+
     traces = sorted((ROOT / "Saved" / "Traces").glob("M3b-*fin-r*.utrace"))
     out.append("**트레이스 파일 (git 밖, `Saved/Traces/`)**: " + (", ".join(f"`{t.name}`({t.stat().st_size // 1_000_000} MB)" for t in traces) or "(없음)") + ". 트레이스 실행의 수치는 비교에 쓰지 않는다.")
     out.append("")
