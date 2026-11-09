@@ -52,7 +52,8 @@ for ($i = $First; $i -le $Last; $i++) {
     $Proc = Start-Process -FilePath $Exe -ArgumentList $GameArgs -PassThru
     $AffNote = "affinity=none"
     if ($Affinity) {
-        $Mask = [Convert]::ToInt64($Affinity -replace "^0x", "", 16)
+        $Hex = $Affinity -replace "^0x", ""
+        $Mask = [Convert]::ToInt64($Hex, 16)
         try { $Proc.ProcessorAffinity = [IntPtr]$Mask; $AffNote = "affinity=0x{0:X}" -f $Mask } catch { Write-Host "WARN: could not set affinity: $_"; $AffNote = "affinity=FAILED" }
     }
     Write-Host $AffNote
