@@ -32,7 +32,7 @@ COLS = {
 RUN_FIELDS = ["label", "milestone", "variant", "n", "preset", "seed", "run", "pc", "frames",
               "game_p50_ms", "game_p99_ms", "render_p50_ms", "gpu_p50_ms", "frame_p50_ms", "frame_p95_ms", "frame_p99_ms",
               "hitch_abs", "hitch_rel", "draw_calls_p50", "mem_total_mb", "bottleneck", "build",
-              "types", "types_assets", "large_actor_frames", "large_actor_skips", "large_skip_ratio"]
+              "types", "types_assets", "large_actor_frames", "large_actor_skips", "large_skip_ratio", "final"]
 CORE = ["game_p50_ms", "game_p99_ms", "render_p50_ms", "gpu_p50_ms", "frame_p50_ms", "frame_p95_ms", "frame_p99_ms",
         "hitch_abs", "hitch_rel", "draw_calls_p50", "mem_total_mb"]
 # 병목 후보: p50 열 이름 -> 표시 이름 (measurement.md "N@16.7ms": 프레임·Game·Render·GPU p50 중 최댓값)
@@ -144,6 +144,7 @@ def summarize_run(path, pc):
     }
     row["bottleneck"] = bottleneck(row)
     row.update(types_fields(meta))
+    row["final"] = 1 if m["tag"].endswith("fin") else ""  # 최종 묶음(묶음 1·2, 2026-11-09)은 라벨 태그가 fin으로 끝난다
     return row
 
 
@@ -191,13 +192,15 @@ def main():
             continue
         if tag.startswith("trace"):
             continue  # Insights 트레이스 실행은 비교에 쓰지 않는다(runs.csv에는 남는다)
-        variant = r["variant"] + next((f"-{t}" for t in ("noaff", "aff", "start", "aa", "ab2", "ab", "t2") if tag.startswith(t)), "")  # 묶음 끝 A/A와 선행 A/B(ab)는 기준점과 따로 요약한다
+        final = tag.endswith("fin")
+        btag = tag[:-3] if final else tag
+        variant = r["variant"] + next((f"-{t}" for t in ("noaff", "aff", "start", "aa", "ab2", "ab", "t2") if btag.startswith(t)), "") + ("-fin" if final else "")  # 묶음 끝 A/A와 선행 A/B(ab)는 기준점과 따로 요약한다
         groups.setdefault((variant, int(r["n"]), r["preset"]), []).append(r)
 
     fields = ["variant", "n", "preset", "runs"]
     for c in CORE:
         fields += [c, f"{c}_min", f"{c}_max"]
-    fields += ["bottleneck", "build", "types", "types_assets", "large_skip_ratio"]
+    fields += ["bottleneck", "build", "types", "types_assets", "large_skip_ratio", "final"]
     with open(out_dir / "summary.csv", "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=fields)
         w.writeheader()
@@ -213,6 +216,7 @@ def main():
             out["build"] = builds[0] if len(builds) == 1 else " // ".join(builds)
             out["types"] = "/".join(sorted({str(r.get("types", "")) for r in rs if str(r.get("types", "")) != ""}))
             out["types_assets"] = "/".join(sorted({str(r.get("types_assets", "")) for r in rs if str(r.get("types_assets", "")) != ""}))
+            out["final"] = 1 if all(str(r.get("final", "")) == "1" for r in rs) else ""
             ratios = [float(r["large_skip_ratio"]) for r in rs if str(r.get("large_skip_ratio", "")) != ""]
             out["large_skip_ratio"] = round(statistics.median(ratios), 4) if ratios else ""
             w.writerow(out)

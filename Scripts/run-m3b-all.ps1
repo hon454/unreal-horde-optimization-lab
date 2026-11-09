@@ -3,6 +3,7 @@
 # 실행이 하나라도 실패하면 거기서 멈추고 로그에 남긴다(이어서 돌지 않는다). 끝나면 spikes.py와 summarize.py를 돌리고
 # Measurements/M3b/ 에 batch-phases.csv, spikes.txt, batch-report.md 를 쓰고 Docs/Worklog/M3b.md "묶음 1·2 결과" 절을 만든다.
 # 커밋은 하지 않는다. 로그: Saved/Lab/m3b-all.log. -DryRun은 각 페이즈의 -DryRun만 돌려 행 수를 합산한다.
+# 모든 라벨에 태그 fin을 붙인다(옛 M3b 라벨과 겹치지 않게. 예 M3b-m3mass-N20000-P1startfin-r0, ...P1t2fin-r1). summary 조건은 <변형>[-접미사]-fin, runs·summary의 final=1.
 param([switch]$DryRun, [switch]$SkipPreflight)
 $ErrorActionPreference = "Stop"
 $Root = Split-Path $PSScriptRoot -Parent
@@ -27,7 +28,7 @@ $Phases = @(
 if ($DryRun) {
     $Sum = 0
     foreach ($P in $Phases) {
-        $Out = & powershell -NoProfile -ExecutionPolicy Bypass -File $Runner -Phase $P.Name @($P.Args) -DryRun
+        $Out = & powershell -NoProfile -ExecutionPolicy Bypass -File $Runner -Phase $P.Name @($P.Args) -Tag fin -DryRun
         $Line = $Out | Where-Object { $_ -match "^M3b batch:" } | Select-Object -First 1
         $N = [int]([regex]::Match($Line, "= (\d+),").Groups[1].Value)
         if (-not $N) { $N = [int]([regex]::Match($Line, "= (\d+)").Groups[1].Value) }
@@ -56,7 +57,7 @@ $Failed = $false
 foreach ($P in $Phases) {
     $T0 = Get-Date
     Say "PHASE $($P.Name) start"
-    & powershell -NoProfile -ExecutionPolicy Bypass -File $Runner -Phase $P.Name @($P.Args) 2>&1 | ForEach-Object { Add-Content -Path $Log -Value $_ -Encoding UTF8; Write-Host $_ }
+    & powershell -NoProfile -ExecutionPolicy Bypass -File $Runner -Phase $P.Name @($P.Args) -Tag fin 2>&1 | ForEach-Object { Add-Content -Path $Log -Value $_ -Encoding UTF8; Write-Host $_ }
     $Code = $LASTEXITCODE
     $T1 = Get-Date
     Add-Content -Path $PhaseCsv -Value ("{0},{1:s},{2:s},{3},{4}" -f $P.Name, $T0, $T1, [int]($T1 - $T0).TotalSeconds, $Code) -Encoding UTF8
