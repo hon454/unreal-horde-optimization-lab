@@ -229,15 +229,16 @@ plan.md "M3b" 코드 정비 핵심 5 + 두 줄 + 기본 프로세서 점검. 대
 1. **표현 전용 프래그먼트 `FLabAnimStateFragment { ELabMinionState State; float StateStartTime; }`**(A안). 재생 시각 = 월드 시각 − StateStartTime. Walk는 StateStartTime = −위상(`LabWalkPhase(Serial)`)이라 M2와 같은 위상이다. 쓰는 쪽: SpawnEntities(Walk), Contact(Dead, 쿼리 안), State(Dead, 쿼리 안, `StateTimeLeft`와 같은 자리), DamageGen 치명(Hit, 쿼리 안), Snipe(Hit, 지연 명령 `FMassDeferredSetCommand`로 태그 추가와 같은 플러시에서. 대상이 순회 뒤에 정해져 쿼리 안에서 쓸 수 없다). 읽는 쪽: VatISM, ActorSync만. 둘은 태그를 보지 않고 `State`만 보므로 3번(한 프레임 튐)이 구조적으로 사라진다. 버린 안 B(표현 프래그먼트에 `StateTimeLeft` 사본을 매 프레임 복사): 표현이 여전히 태그를 봐야 해서 3번을 따로 고쳐야 한다.
 2. **그룹 `LabLogic`**(A안). Contact·Snipe·State·DamageGen·DamageApply가 `ExecuteInGroup = "LabLogic"`, VatISM·ActorSync가 `ExecuteAfter("LabLogic")`. Approach는 엔진 조향이 Tasks 뒤에 돌아야 해서 `Tasks`에 남긴다(MoveTgt만 써서 표현과 무관). 솔버는 그룹 이름 의존성을 자식 노드 전부로 펼친다(`MassProcessorDependencySolver.cpp:680-719`). 엔진(`Movement`·`Tasks`·`Representation`)과 City Sample(`Behavior`·`Traffic`)이 같은 방식이다. 버린 안 B(`ExecuteAfter(State)`만): 체인 끝이 바뀌면 같이 고쳐야 한다.
 3. **액터 태그 `FLabActorTag` + 자가 정리**(A안). 붙이기: `ULabActorManagement::OnPostActorSpawn`(새 스폰과 풀 재사용 모두 이 델리게이트를 지난다, `MassActorSpawnerSubsystem.cpp:255,480`)에서 `EntityManager->Defer().AddTag`. 스포너 서브시스템 틱 중 Mass 처리가 워커에서 돌 수 있어 즉시 바꾸지 않는다(`MassEntityManager.h:1625`). 떼기: ActorSync가 "태그는 있는데 `FMassActorFragment`가 비었다"를 보면 `Defer().RemoveTag`. 떼는 쪽 엔진 훅이 없어서다(`ReleaseActorOrCancelSpawning`은 static, `MassRepresentationProcessor.cpp:481`). 표현 종류가 아니라 액터 포인터로 판단하는 이유: 액터를 한 프레임 더 두는 동안 LOD가 되돌아오면 엔진이 같은 액터를 다시 써서(`MassRepresentationProcessor.cpp` "NewActor = Actor") OnPostActorSpawn이 다시 불리지 않는다. 버린 안 B(엔진 `FMassVisualizationChunkFragment`의 표현 종류 비트로 청크 거르기): 액터 엔티티가 청크에 흩어져 있어 거의 거르지 못한다. 확인 스탯 `Lab/ActorTagsRemoved`.
+4. **표현 프로세서의 `ExecuteAfter("LabLogic")` 선언을 뺀다**(코디네이터 확정, 2026-11-09, 커밋 4f6db5b). 결정 2의 그룹 `LabLogic` 선언(Contact·Snipe·State·DamageGen·DamageApply의 `ExecuteInGroup`)은 그대로 두고, VatISM·ActorSync 쪽의 `ExecuteAfter(LabLogic)`만 지운다. 순서는 솔버가 프래그먼트 접근(`FLabAnimStateFragment` 쓰기 → 읽기)으로만 정한다. 근거: 20k P1 `m3noorder` 15.52 vs `m3mass` 16.12ms, 세 쌍 모두 0.4\~0.7 빠름(위 "코드 A/B(D안)"). 바뀐 줄: `LabVatProcessor.cpp`·`LabActorSyncProcessor.cpp` 생성자의 `if (!LabUseOldQueries() && !LabSkipLogicOrder())` → `if (LabExplicitLogicOrder())`, `LabMassProcessors.h`의 `LabSkipLogicOrder()`(m3noorder) → `LabExplicitLogicOrder()`(m3order). 변형 `m3noorder`는 지우고 "선언 있음"을 재는 A/B 변형 `m3order`를 남긴다(묶음 1 A/B). `mass.commands.LockObserversDuringFlushing=1`은 비용 없음(`m3lock0` 16.27 vs 16.12)이라 유지하고 `m3lock0` 변형도 유지한다.
 
 ### 바꾼 것
 
 - `LabMassTypes.h`: `FLabAnimStateFragment`, `FLabActorTag`, `LabWalkPhase()`. `LabMassTraits.cpp`: 템플릿에 `FLabAnimStateFragment` 추가.
 - `LabMassProcessors.*`: 그룹 이름 `LabLogicGroupName`, `LabUseOldQueries()`(m3qold). Contact·State·DamageGen이 `FLabAnimStateFragment`를 쿼리 안에서 쓴다. Snipe는 `FLabMinionFragment`와 `FLabAnimStateFragment`를 쓰기로 선언하고, 고른 대상은 지연 명령으로 쓴다(m3qold는 정비 전처럼 쿼리 밖 쓰기). `PendingSnipeTick`은 `std::atomic<uint32>`로 `exchange(0)`. State는 `FTransformFragment`를 읽기로 선언해 진단 로그의 쿼리 밖 읽기를 없앴다.
-- `LabVatProcessor.*`: `FLabAnimStateFragment`만 읽고 태그를 보지 않는다. `ExecuteAfter("LabLogic")`. m3qold는 `FLabMinionFragment` + 태그, 순서 선언 없음.
+- `LabVatProcessor.*`: `FLabAnimStateFragment`만 읽고 태그를 보지 않는다. `ExecuteAfter("LabLogic")`(결정 4, 4f6db5b부터는 `m3order`만 선언하고 기본은 선언 없음). m3qold는 `FLabMinionFragment` + 태그, 순서 선언 없음.
 - `LabActorSyncProcessor.*`: 위와 같은 읽기·순서. 쿼리에 `FLabActorTag` All 필터(m3qold·m3syncall은 없음). 액터가 비면 태그를 뗀다. 재바인딩 판정을 `BoundSerial`(로직 프래그먼트) 대신 `BoundEntity`(엔티티 핸들)로. `OnPostActorSpawn`이 태그를 붙인다.
 - `LabMinion.*`: `ALabMinionStaticPawn : ALabMinionStatic`(정적 메시 + CharacterMovement 틱 끔). `LabCrowdSpawner.cpp`가 `staticpawn`에 쓴다.
-- `LabConfig.*`: 변형 `staticpawn`, `m3qold`, `m3syncall`, `m3vis0`, `m3vis15`, `m3hys20`. 별칭 `m0full` = full, `m0static` = static, `m1mass`·`m2mass`·`m3mass` = mass(설정 같고 라벨만 다르다. `-LabStage`는 러너가 따로 준다). 인자 `-LabFullyParallel=0`(게임 모드가 `mass.FullyParallel`을 0으로, massst와 같은 경로. 측정 세션 질문 3·4의 답).
+- `LabConfig.*`: 변형 `staticpawn`, `m3qold`, `m3syncall`, `m3vis0`, `m3vis15`, `m3hys20`, `m3lock0`(98be269), `m3order`(4f6db5b. 그 전 98be269\~7f0685a의 `m3noorder`는 기본값이 되어 지웠다). 별칭 `m0full` = full, `m0static` = static, `m1mass`·`m2mass`·`m3mass` = mass(설정 같고 라벨만 다르다. `-LabStage`는 러너가 따로 준다). 인자 `-LabFullyParallel=0`(게임 모드가 `mass.FullyParallel`을 0으로, massst와 같은 경로. 측정 세션 질문 3·4의 답).
 - `LabCrowdSubsystem.cpp`: SpawnEntities가 `FLabAnimStateFragment`를 Walk·−위상으로 초기화. E3b (8) 변형: `m3vis0`는 `BaseLODDistance[Medium] = 0`(화면 밖 High 밴드 0m), `m3vis15`는 1500, `m3hys20`은 `BufferHysteresisOnDistancePercentage = 20`(`FMassVisualizationLODParameters`, `MassRepresentationFragments.h:299-309`). 코드 정비 목록 밖이지만 `run-m3b.ps1`이 이 이름을 부르므로 함께 넣었다.
 - `Config/DefaultEngine.ini`: `[ConsoleVariables] mass.commands.LockObserversDuringFlushing=1`. 이 섹션은 GEngineIni에서 `SetBySystemSettingsIni`로 읽힌다(`ConsoleManager.cpp:607`).
 - `LabGameMode.cpp`·`HordeOptLab.Build.cs`: CSV 메타데이터(아래).
@@ -275,6 +276,7 @@ plan.md "M3b" 코드 정비 핵심 5 + 두 줄 + 기본 프로세서 점검. 대
 - M3 N=2000 13초: `lab_actors synced=120\~133 rebinds` 로그로 태그 필터 상태에서 액터 동기화가 돈다. `lab_build commit=6274752b9668 driver=NVIDIA GeForce RTX 4090 621.14 cvars=r.VSync=0|…|mass.FullyParallel=true|mass.commands.LockObserversDuringFlushing=true`로 메타데이터 값이 찍힌다(개발 실행이라 `r.ScreenPercentage=0`, 벤치에서는 러너 값).
 - 측정 세션이 `run-bench.ps1`·`run-dev.ps1`에 `m3qold`·`m3syncall`·별칭을 넣었다(53c7b05). `run-m3b.ps1 -SerialArgs "-LabFullyParallel=0"`은 그대로 동작한다.
 - 패키징·벤치마크는 하지 않았다(측정 세션 몫). A/B(`m3qold`·`m3syncall` vs `m3mass`, 20k P1 3회)는 묶음 1에서 잰다.
+- 결정 4(4f6db5b) 뒤: `Scripts/build.ps1` 성공(24.9초). `run-dev.ps1 -Small` 종료 코드 0: `m0full`(M0), `m1mass`(M1), `m2mass`(M2), `m3mass`(M3). `m3order`(M3)는 ValidateSet에 아직 없어 같은 인자(N=100, P1, 20초)로 에디터를 직접 띄워 0. 다섯 실행 모두 `respawns=43 kills=8 snipes=39`.
 
 ### 패키징 경합(코디네이터 보고, 2026-11-09)
 
@@ -336,6 +338,32 @@ plan.md "M3b" E3b (8)의 화질 쪽. 개발 빌드, `-LabStage=M3 -LabN=20000 -L
 
 빌드·실행: `Scripts/build.ps1` 성공, `run-dev.ps1 -Small -Variant m3vis15 -Extra "-LabStage=M3"` 종료 코드 0(`respawns=43 kills=8 snipes=39`). `-LabCamTurn` 12초 확인 실행에서 `lab_turn` 세 줄(k=0\~2, 회전 30프레임). 측정 프리셋 P1/P2·러너·CSV는 바꾸지 않았다.
 
+##### 5k(코디네이터 지시, 결정 1 재검토, 2026-11-09)
+
+위 20k와 같은 절차·지표에서 `-LabN=5000`만 다르다(커밋 4f6db5b 빌드, P1, `-LabCamTurn -LabFrameLog`, 10\~70초 3600장, 회전 12회 k=2\~13, 시작 프레임 600, 901, …, 3901). 두 변형 모두 `respawns=2188 kills=2074 snipes=175`. 캡처 `Saved/Screenshots/LabBurst-e3bturn5k-<변형>/`, 로그 `Saved/Logs/Labe3bturn5k-<변형>.log`. 20k 표는 위에 그대로 둔다.
+
+| 변형(5k) | 회복(<100) 중앙값 / 최댓값 / 미달 | 회복(직전) 중앙값 / 최댓값 / 미달 | near_vat 최댓값 중앙값 / 최댓값 | near_actors 최솟값 중앙값 / 최솟값 |
+| --- | --- | --- | --- | --- |
+| `m3vis0` | 0 / 0 / 0/12 | 11 / 125 / 0/12 | 40 / 50 | 99 / 90 |
+| `m3vis15` | 0 / 0 / 0/12 | 5 / 32 / 0/12 | 21 / 27 | 119 / 103 |
+
+회복(<100)이 0인 것은 두 변형 모두 near_vat가 60초 동안 한 번도 100에 닿지 않아서다(최댓값 50, 27).
+
+회전별(k=2\~13 순):
+
+- `m3vis0`: near_vat 최댓값 50 40 38 43 39 40 31 43 36 44 31 36. near_actors 최솟값 101 111 93 110 102 95 90 105 109 96 97 95. 회복(직전) 5 54 2 69 4 11 5 16 11 13 125 0.
+- `m3vis15`: near_vat 최댓값 27 21 20 17 21 21 18 24 27 20 17 24. near_actors 최솟값 124 120 108 124 121 109 104 125 119 119 108 103. 회복(직전) 4 32 2 5 5 29 0 8 3 12 12 2.
+- `lab_actors` `synced`: m3vis0 101\~138, m3vis15 150\~194(상한 500에 닿지 않음).
+
+대표 프레임(`Saved/Screenshots/Lab/`, git 밖): 두 변형 모두 k=11 회전이 끝난 프레임 3331(after, m3vis0은 60프레임 창의 near_vat 최댓값 프레임)과 240프레임 뒤 3571(settled).
+
+| 변형(5k) | after | settled |
+| --- | --- | --- |
+| `m3vis0` | `E3b-turn-5k-m3vis0-after-f003331.png`(near_vat 44, near_actors 96) | `E3b-turn-5k-m3vis0-settled-f003571.png`(24, 119) |
+| `m3vis15` | `E3b-turn-5k-m3vis15-after-f003331.png`(20, 121) | `E3b-turn-5k-m3vis15-settled-f003571.png`(13, 129) |
+
+`py -3 Scripts/transition-score.py`(문턱 6): m3vis0 사건 1803건, 튐 평균 3.77, 중앙값 2.42, 눈에 띈 전환 52/1803(3%). m3vis15 1374건, 3.45, 2.16, 44/1374(3%).
+
 ### 진단 변형 m3lock0·m3noorder(코디네이터 지시, 사용자 승인 D안, 2026-11-09)
 
 깨끗한 상태의 `m3mass` 20k P1이 16.2ms로 M3 묶음(15.5)보다 0.7ms 느리고 `m3qold`도 느렸으므로, 공통 요소 둘을 변형으로 가른다.
@@ -343,7 +371,8 @@ plan.md "M3b" E3b (8)의 화질 쪽. 개발 빌드, `-LabStage=M3 -LabN=20000 -L
 - `m3lock0`(`ELabVariant::M3Lock0`): 정비 코드 그대로, 게임 모드 시작 시 `mass.commands.LockObserversDuringFlushing`을 0으로 쓴다(`LabGameMode.cpp`, `-LabFullyParallel=0`과 같은 `LabSetCVar` 경로. `DefaultEngine.ini`의 1은 그대로). 확인: `-Small` 로그 `lab_build … cvars=…|mass.commands.LockObserversDuringFlushing=false`(다른 변형은 true). CSV 메타데이터 `LabCVars`는 같은 함수의 문자열이다.
 - `m3noorder`(`ELabVariant::M3NoOrder`): 정비 쿼리(표현 프래그먼트, 액터 태그 필터)는 그대로 두고 VatISM·ActorSync의 `ExecuteAfter(LabLogic)`만 뺀다(`LabMassProcessors.h` `LabSkipLogicOrder()`, 그룹 선언은 유지). 확인: `-LogCmds="LogMass Log"` 실행의 처리 그래프에서 VatISM·ActorSync가 저격·상태 프로세서 앞에도 놓인다(프래그먼트 접근으로만 순서가 정해진다).
 - 빌드 성공, `run-dev.ps1 -Small -Extra "-LabStage=M3"` 두 변형 모두 종료 코드 0(`respawns=43 kills=8 snipes=39`).
+- 결과(측정 세션 6d040cd, 위 "코드 A/B(D안)"): `m3noorder`가 `m3mass`보다 0.4\~0.7ms 빠르고 `m3lock0`은 차이 없음. 결정 4(4f6db5b)로 `m3noorder` 동작이 기본값이 되었고 변형 이름은 `m3order`(선언 있음)로 바뀌었다. `m3lock0`은 그대로 있다.
 
 #### 측정 세션에 요청
 
-- `run-bench.ps1`·`run-dev.ps1`의 `-Variant` ValidateSet에 `m3lock0`, `m3noorder`를 더해 달라(이번 `-Small` 확인은 현재 스크립트로 통과했다).
+- `run-bench.ps1`·`run-dev.ps1`의 `-Variant` ValidateSet에 `m3lock0`, `m3noorder`를 더해 달라(이번 `-Small` 확인은 현재 스크립트로 통과했다). → 4f6db5b부터 `m3noorder`는 없고 `m3order`다. ValidateSet의 `m3noorder`를 `m3order`로 바꿔 달라.
