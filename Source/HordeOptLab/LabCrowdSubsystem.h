@@ -69,6 +69,14 @@ public:
 	int32 KillCount = 0;
 	int32 SnipeCount = 0;
 	std::atomic<int64> DamageHits{0}; // E1 (d): 체력에 실제로 적용된 비치명 피해 건수(확인용)
+#if !UE_BUILD_TEST
+	/**
+	 * 개발용 프레임 진단(-LabFrameLog, E3b (8) 화질 캡처 2026-11-09): 화면 안 30m에서 아직 VAT 인스턴스로 그리는 개체 수와 보이는 액터 수를 프레임마다 로그에 남긴다.
+	 * VAT·ActorSync 프로세서가 GFrameCounter&1 슬롯에 더하고, 게임 모드 Tick이 다음 프레임에 이전 슬롯을 읽고 비운다(두 프로세서의 실행 순서와 무관).
+	 */
+	struct FFrameDiag { std::atomic<int32> NearVat{0}; std::atomic<int32> NearActors{0}; std::atomic<int32> ViewActors{0}; };
+	mutable FFrameDiag FrameDiag[2];
+#endif
 
 private:
 	UPROPERTY() TObjectPtr<UMassEntityConfigAsset> EntityConfig;

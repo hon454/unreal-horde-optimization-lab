@@ -69,6 +69,12 @@ void ULabVatISMProcessor::Execute(FMassEntityManager& EntityManager, FMassExecut
 	const FVector ViewLocation = Crowd->SnipeView.Location;
 	const bool bOld = LabUseOldQueries();
 	int32 BandCounts[4] = { 0, 0, 0, 0 };
+#if !UE_BUILD_TEST
+	// E3b (8) 화질 캡처(-LabFrameLog): 화면 안 30m에서 아직 VAT 인스턴스로 그리는 개체 수(LabCrowdSubsystem::FrameDiag)
+	static const bool bFrameLog = FParse::Param(FCommandLine::Get(), TEXT("LabFrameLog"));
+	const FLabSnipeView FrameView = Crowd->SnipeView;
+	std::atomic<int32>* NearVatCounter = bFrameLog ? &Crowd->FrameDiag[GFrameCounter & 1].NearVat : nullptr;
+#endif
 	// 진단(-LabVatTiming): 처리 안쪽을 나눠 잰다. 액터가 있을 때만 이 프로세서가 2.3ms 느려지는 원인 찾기(2026-11-09)
 	static const bool bTiming = FParse::Param(FCommandLine::Get(), TEXT("LabVatTiming"));
 	uint64 CyXf = 0, CyCustom = 0, CyChunkSetup = 0;
@@ -149,6 +155,9 @@ void ULabVatISMProcessor::Execute(FMassEntityManager& EntityManager, FMassExecut
 					// 표현 축(measurement.md): 거리 밴드별로 그린 개체 수. 밴드 경계는 확정값 30/80/200m
 					const float Dist = FVector::Dist2D(TransformFragment.GetTransform().GetLocation(), ViewLocation);
 					++BandCounts[Dist < 3000.f ? 0 : Dist < 8000.f ? 1 : Dist < 20000.f ? 2 : 3];
+#if !UE_BUILD_TEST
+					if (NearVatCounter && Dist < 3000.f && FrameView.Contains(TransformFragment.GetTransform().GetLocation() + FVector(0.f, 0.f, 90.f))) { ++*NearVatCounter; }
+#endif
 				}
 			}
 			Representation.PrevTransform = TransformFragment.GetTransform();

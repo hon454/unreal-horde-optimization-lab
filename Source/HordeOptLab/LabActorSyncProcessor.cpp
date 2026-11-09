@@ -134,6 +134,11 @@ void ULabActorSyncProcessor::Execute(FMassEntityManager& EntityManager, FMassExe
 	// 진단(-LabVatTiming): 액터 이동(SetActorLocationAndRotation)만 따로 잰다(2026-11-09, ActorSync 비용 나누기)
 	static const bool bTiming = FParse::Param(FCommandLine::Get(), TEXT("LabVatTiming"));
 	uint64 CyMove = 0;
+#if !UE_BUILD_TEST
+	// E3b (8) 화질 캡처(-LabFrameLog): 화면 안의 보이는 액터 수와 그중 30m 안의 수(LabCrowdSubsystem::FrameDiag)
+	static const bool bFrameLog = FParse::Param(FCommandLine::Get(), TEXT("LabFrameLog"));
+	const FLabSnipeView FrameView = Crowd->SnipeView;
+#endif
 
 	EntityQuery.ForEachEntityChunk(Context, [&](FMassExecutionContext& Context)
 	{
@@ -184,6 +189,17 @@ void ULabActorSyncProcessor::Execute(FMassEntityManager& EntityManager, FMassExe
 				continue; // 액터는 아직 붙어 있지만 이번 프레임은 VAT 인스턴스로 그린다(한 프레임 더 두기)
 			}
 			++Actors;
+#if !UE_BUILD_TEST
+			if (bFrameLog && Actor->bPoseReady)
+			{
+				const FVector Loc = Transforms[It].GetTransform().GetLocation();
+				if (FrameView.Contains(Loc + FVector(0.f, 0.f, 90.f)))
+				{
+					++Crowd->FrameDiag[GFrameCounter & 1].ViewActors;
+					if (FVector::Dist2D(Loc, FrameView.Location) < 3000.f) { ++Crowd->FrameDiag[GFrameCounter & 1].NearActors; }
+				}
+			}
+#endif
 			// 상태와 재생 시각(VAT 인스턴스와 같은 식, LabVatProcessor.cpp)
 			ELabMinionState State;
 			float T;
