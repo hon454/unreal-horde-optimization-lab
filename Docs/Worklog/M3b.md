@@ -54,6 +54,37 @@ p50 열은 STATUS.md의 기존 수치(813 / 1,196 / 20,577 / 20,518 / 22,046 / 3
 4. 직렬 트레이스: 인자 `-LabFullyParallel=0`이 구현됐다. `run-m3b.ps1 -SerialArgs` 기본값과 같다.
 5. 메타데이터 키: `LabBuild`·`LabCVars`·`LabDriver` 그대로. `summarize.py`의 `BUILD_KEYS`와 같다. `LabCVars` 값에 `|`가 있어 여러 빌드가 섞인 조건의 `build`는 ` // `로 잇는다. 패키지를 만든 뒤 실제 CSV로 한 번 확인한다.
 
+### 선행 묶음 (측정 세션, 2026-11-09)
+
+E3b (8) 표현 LOD 값(기준점 포함 24회 + 버리는 r0 1회)과 코드 정비 A/B(9회)를 한 패키지로 연달아 쟀다. 해석은 쓰지 않는다. 대표값 결정은 코디네이터 몫.
+
+**실행 경위.** 패키지: `package.ps1 -Config Test` 두 번째 시도에서 성공(1분 29초). 첫 시도는 11초 만에 실패했다: UBT가 `HordeOptLab.Build.cs`를 여러 타깃(Editor, UnrealPak, ShaderCompileWorker, 게임)에서 동시에 평가하며 `Intermediate/Build/LabGenerated/LabBuildVersion.h`를 동시에 쓰다 `IOException: file used by another process`(`HordeOptLab.Build.cs:96`, `File.WriteAllText`). 헤더가 이미 현재 커밋 값이어서 쓰기가 생략된 재시도는 통과했다. **커밋이 바뀐 직후 첫 패키징에서는 다시 날 수 있다**(코드 세션이 고칠 것: 쓰기 재시도 또는 임시 파일 + 교체). `commit.txt` = `58674cea25d130c62a3d72e831451a6e2c669506 (dirty)`(dirty는 추적 안 된 `Config/DefaultEditor.ini`, 그리고 코드 세션이 고치는 중이던 `Build.cs`·이 Worklog). `build` 열 = `labbuild=58674cea25d1`(CSV 메타데이터 `labbuild`·`labcvars`·`labdriver`가 모두 채워짐, 드라이버 `NVIDIA GeForce RTX 4090 621.14`, `mass.FullyParallel=true`, `LockObserversDuringFlushing=true`). 실행: `run-m3b.ps1 -Phase e3b`(25회 33분 31초, 실패 0) → `-Phase ab -NoR0`(9회 12분 3초, 실패 0). 라벨 `M3b-<변형>-N<N>-P1-r<i>`, ab는 태그 `ab`(`M3b-<변형>-N20000-P1ab-r<i>`, summary 조건 `<변형>-ab`). 스파이크 검사 `spikes.py M3b-`: 실행 33개 중 주기적 0(실행당 사건 중앙값 0). 원본 CSV는 `Saved/Profiling/CSV/M3b-*.csv`, 요약은 `Measurements/M3b/`.
+
+**표 1. E3b (8), P1, 3회 중앙값(최소\~최대), ms.** 액터 수 = CSV `Lab/Actors` p50(액터 총수, "화면 안 액터 수" 스탯은 없다). 전환/초 = `Lab/ActorRebinds` 합 ÷ 측정 시간.
+
+| 변형 | N | 프레임 p50 | 프레임 p95 | Game p50 | Render p50 | GPU p50 | 액터 수 | 전환/초 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| m3mass(기준점) | 20k | 18.04 (17.78\~18.43) | 20.12 (19.68\~20.31) | 16.84 (16.61\~17.23) | 8.11 (7.92\~8.24) | 9.46 (9.41\~9.51) | 493 | 81.0 (80.5\~81.3) |
+| m3vis0 | 20k | 16.74 (16.66\~19.21) | 19.80 (18.26\~21.06) | 15.74 (15.68\~18.04) | 7.16 (7.03\~10.37) | 9.13 (9.11\~9.22) | 482 (482\~483) | 103.3 (103.1\~103.6) |
+| m3vis15 | 20k | 18.41 (18.26\~18.97) | 20.08 (20.00\~20.43) | 17.28 (17.16\~17.82) | 7.87 (7.81\~8.14) | 9.25 (9.24\~9.26) | 491 | 135.1 (134.7\~135.5) |
+| m3hys20 | 20k | 18.15 (17.66\~18.30) | 19.50 (19.36\~19.89) | 16.97 (16.51\~17.11) | 7.83 (7.78\~7.90) | 9.26 (9.25\~9.29) | 493 | 81.2 (81.0\~81.7) |
+| m3mass(기준점) | 5k | 7.30 (7.29\~8.23) | 8.45 (8.36\~9.31) | 6.74 (6.73\~7.62) | 3.95 (3.91\~4.13) | 5.84 (5.84\~5.85) | 262 | 28.7 (28.7\~28.7) |
+| m3vis0 | 5k | 6.38 (6.38\~6.40) | 7.04 (6.97\~7.21) | 4.99 (4.91\~5.21) | 3.92 (3.85\~4.07) | 5.96 (5.93\~5.97) | 114 | 24.3 (24.3\~24.3) |
+| m3vis15 | 5k | 6.55 (6.34\~6.76) | 7.75 (7.28\~7.85) | 6.04 (5.69\~6.26) | 3.90 (3.78\~3.99) | 5.89 (5.88\~5.91) | 172 | 29.6 (29.6\~29.6) |
+| m3hys20 | 5k | 7.72 (7.33\~7.86) | 8.61 (8.40\~9.09) | 7.16 (6.77\~7.29) | 3.90 (3.85\~3.93) | 5.79 (5.78\~5.79) | 262 (262\~263) | 28.7 (28.7\~28.7) |
+
+**표 2. 코드 정비 A/B, 20k P1, 3회, ms.** 정비된 코드의 `m3mass`(ab 묶음 안에서 다시 잼) vs `m3qold`(쿼리 정비 전 방식) vs `m3syncall`(ActorSync 필터 없음).
+
+| 변형 | 프레임 p50 | 프레임 p95 | Game p50 | Render p50 | GPU p50 | 액터 수 | 전환/초 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| m3mass | 17.77 (16.25\~18.47) | 19.25 (17.71\~19.89) | 16.61 (15.19\~17.27) | 7.88 (7.08\~7.97) | 9.45 (9.42\~9.48) | 493 | 81.1 (80.8\~82.3) |
+| m3qold | 17.01 (16.83\~17.73) | 18.95 (18.85\~19.35) | 15.83 (15.67\~16.53) | 8.03 (8.00\~8.07) | 9.60 (9.54\~9.62) | 495 | 87.1 (86.9\~87.5) |
+| m3syncall | 18.04 (17.99\~18.72) | 20.02 (19.51\~20.11) | 16.87 (16.84\~17.51) | 8.03 (7.97\~8.14) | 9.46 (9.45\~9.49) | 495 | 86.0 (85.7\~86.1) |
+
+**잡음 기준.** A/A 묶음(`-Phase aa`)은 아직 안 잼. 지금은 세 실행의 범위만 있다. 같은 조건 `m3mass` 20k P1이 한 패키지의 두 묶음(e3b 라운드, ab 라운드)에서 프레임 p50 18.04(17.78\~18.43)와 17.77(16.25\~18.47)로 나왔다. 참고 수치: 정비 전 코드의 M3 `m3base` 20k P1은 프레임 p50 15.46, p95 17.26(`Measurements/M3/summary.csv`, 11-09 이전 묶음, 비교는 "참고").
+
+**메모.** `m3vis0` 20k의 프레임·Render 범위는 세 실행 중 한 실행이 큰 쪽이다(최대 프레임 p50 19.21, Render 10.37). 액터 수는 거의 상한(High 500) 근처에서 일정하고, `m3vis0`·`m3vis15`의 5k는 114·172로 다르다.
+
 ## 코드 정비 (코드 세션, 2026-11-09)
 
 plan.md "M3b" 코드 정비 핵심 5 + 두 줄 + 기본 프로세서 점검. 대상 소스는 `Source/HordeOptLab/LabMassProcessors.cpp`(Approach, Contact, Snipe, State, DamageGen, DamageApply), `LabVatProcessor.cpp`, `LabActorSyncProcessor.cpp`, `LabCrowdSubsystem.cpp`, `LabOrb.cpp`(커밋 915773c 기준). 설계는 사용자와 하나씩 정했다(아래 "결정").
@@ -130,3 +161,9 @@ plan.md "M3b" 코드 정비 핵심 5 + 두 줄 + 기본 프로세서 점검. 대
 - M3 N=2000 13초: `lab_actors synced=120\~133 rebinds` 로그로 태그 필터 상태에서 액터 동기화가 돈다. `lab_build commit=6274752b9668 driver=NVIDIA GeForce RTX 4090 621.14 cvars=r.VSync=0|…|mass.FullyParallel=true|mass.commands.LockObserversDuringFlushing=true`로 메타데이터 값이 찍힌다(개발 실행이라 `r.ScreenPercentage=0`, 벤치에서는 러너 값).
 - 측정 세션이 `run-bench.ps1`·`run-dev.ps1`에 `m3qold`·`m3syncall`·별칭을 넣었다(53c7b05). `run-m3b.ps1 -SerialArgs "-LabFullyParallel=0"`은 그대로 동작한다.
 - 패키징·벤치마크는 하지 않았다(측정 세션 몫). A/B(`m3qold`·`m3syncall` vs `m3mass`, 20k P1 3회)는 묶음 1에서 잰다.
+
+### 패키징 경합(코디네이터 보고, 2026-11-09)
+
+- 증상: 측정 세션의 `package.ps1 -Config Test` 첫 실행이 실패했다. UBT 인스턴스 여럿(쿠킹용 에디터 타깃 + 게임 타깃)이 `Intermediate/Build/LabGenerated/LabBuildVersion.h`를 동시에 만들려다 파일 잠금이 충돌했다. 헤더가 아직 없을 때 "없으면 쓴다" 분기가 모든 프로세스에서 참이 된다. 개발 빌드는 UBT가 하나라 드러나지 않았다.
+- 고침(`HordeOptLab.Build.cs` `WriteHeaderIfChanged`): 임시 파일 `LabBuildVersion.h.<guid>`에 쓰고 `File.Move(…, overwrite)`로 바꾼다. `IOException`·`UnauthorizedAccessException`이면 200ms×시도 뒤 다시 읽어 내용이 같으면 성공(다른 인스턴스가 먼저 씀), 다르면 3회까지 재시도 후 예외. 디렉터리 생성 예외도 삼킨다. UBT는 net10.0(`Engine/Source/Programs/Shared/UnrealEngine.csproj.props:32`)이라 덮어쓰기 `Move` 오버로드가 있다.
+- 상태: 파일만 고쳤다. 측정 세션의 패키징과 선행 묶음이 도는 동안 `build.ps1`·`run-dev.ps1`을 돌리지 않았고 커밋도 하지 않았다. 묶음이 끝나면 코디네이터 신호로 빌드와 `run-dev.ps1 -Small`을 확인한 뒤 커밋한다.
