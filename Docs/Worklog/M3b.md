@@ -25,6 +25,8 @@ plan.md "M3b" 측정 방법 1\~7번을 `Scripts/`에 구현했다. 빌드·패�
 6. **A/A 판정.** 시작 A/A(`-Phase start`, 조건 `m3mass-start`, 필요하면 e3b 앞에 돌린다)와 끝 A/A(`m3mass-aa`)의 프레임 p50 차이가 0.5 ms 이하면 한 묶음으로 쓴다. 넘으면 그 사실을 적고 코디네이터가 판정한다.
 7. **2종 행.** `LabTypesAssets=substituted`인 CSV는 summary에서 빠진다(경고가 찍힌다). 경고가 하나라도 있으면 보고한다. 2종 행의 `large_skip_ratio`도 같이 본다.
 
+**점검 결과(1·2번, 시작 대기 중에 실제로 확인).** `tasklist`: `UnrealEditor`·`UnrealBuildTool`·`HordeOptLab` 없음, `dotnet` 없음, **`EpicGamesLauncher.exe` 1개 켜져 있음**(끄는 것은 사용자). `git status`(추적 파일) 깨끗, `.uproject` `EngineAssociation` = `{DEC43C63-4155-0388-B4B3-6B830A2347BA}` 그대로. 패키지 `6a98c46`(코드 변화 없음), 패키징 뒤 HEAD는 `c5fe174`로 차이는 문서·`DefaultEditor.ini`뿐. 모니터 켜 둠·화면 끄기·절전 설정은 사용자 확인 항목이다. 전체 러너 `Scripts/run-m3b-all.ps1`(-DryRun 합계 294행 = r0 1 + start 3 + e3b 24 + matrix 120 + ab2 9 + aa 3 + trace 2 + types2 132, 85초 기준 6.94시간, 80초 기준 6.53시간)가 사전 점검(에디터·UBT·게임 프로세스, 패키지 존재, 추적 파일 깨끗함)을 스스로 한다.
+
 ### M0\~M3 재요약
 
 `summarize.py --milestone M<N> --rebuild`를 M0\~M3에 돌렸다. 재요약 전후 `runs.csv`·`summary.csv`의 기존 열을 모든 행에서 비교했다(행 수 89/63/71/118, 29/20/23/38 조건): **차이 0, 행 수 같음.** 새 열만 더해졌다(`frame_p95_ms`, summary는 `_min`/`_max`도, `bottleneck`, `build`). `build`는 M0\~M3 CSV에 `lab*` 메타데이터가 없어 비었다. `bottleneck`은 처음 정의(프레임 포함)에서는 항상 `frame`이라, 프레임을 빼는 정의로 바꿔 다시 요약했다(기존 열 차이 0 재확인). M0은 `game`, M1\~M3은 `gpu`다.
