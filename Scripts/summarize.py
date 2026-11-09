@@ -194,7 +194,7 @@ def main():
                 out[f"{c}_max"] = max(vals) if vals else ""
             out["bottleneck"] = bottleneck(out)
             builds = sorted({r.get("build", "") for r in rs if r.get("build", "")})
-            out["build"] = builds[0] if len(builds) == 1 else " | ".join(builds)
+            out["build"] = builds[0] if len(builds) == 1 else " // ".join(builds)
             w.writerow(out)
 
     print(f"runs.csv: {len(rows)} rows (+{added}), summary.csv: {len(groups)} conditions -> {out_dir}")
