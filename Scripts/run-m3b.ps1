@@ -2,6 +2,8 @@
 # 한 묶음 = 정비 기준선(묶음 1). 같은 빌드로 한 번에 연달아 돌린다. 결과는 모두 Measurements/M3b/ (라벨 접두사 M3b).
 #   Phase e3b   : E3b (8) 표현 LOD 값. m3vis0 / m3vis15 / m3hys20 x {20k, 5k} P1 x 3회 = 18회를 실행 단위로 섞는다(r1 라운드: 6조건, r2, r3).
 #                 결과로 대표값(Base, 히스테리시스)을 정한 뒤 이어서 전수를 돌린다. 기준점 m3mass를 같은 섞기에 넣는다(24회, 2026-11-09 코디네이터 결정). -NoBase면 18회.
+#   Phase ab    : 선행 A/B(코드 정비 효과). m3mass / m3qold / m3syncall x 20k P1 x 3회 = 9회를 실행 단위로 섞는다. -LabStage=M3.
+#                 e3b의 m3mass 20k와 라벨이 겹치지 않도록 태그 ab를 붙인다(summary에서 <변형>-ab 조건으로 따로 쓰임).
 #   Phase matrix: 전수 매트릭스, 조건 단위. M0 {full, static} x {1k, 5k} x P1, P2 / staticpawn {1k, 5k} P1 /
 #                 M1~M3 {1k, 5k, 20k, 30k, 50k} x P1, P2. 각 3회.
 #   Phase aa    : 묶음 끝 기준점 A/A. m3mass 20k P1 3회, 태그 aa(summary에서 m3mass-aa 조건으로 따로 쓰임).
@@ -13,8 +15,9 @@
 # -DryRun은 실행 목록만 찍고 아무것도 실행하지 않는다.
 param(
     [string]$Tag = "",
-    [ValidateSet("all", "e3b", "matrix", "aa", "trace")][string]$Phase = "all",
+    [ValidateSet("all", "e3b", "ab", "matrix", "aa", "trace")][string]$Phase = "all",
     [switch]$NoBase,
+    [switch]$NoR0,   # 묶음의 버리는 r0을 두지 않는다(같은 묶음의 두 번째 이후 호출. 예: e3b 다음 ab)
     [switch]$DryRun,
     [string]$SerialArgs = "-LabFullyParallel=0"   # 직렬 트레이스용 게임 인자(코드 세션이 확정)
 )
@@ -36,6 +39,11 @@ if ($Phase -in @("all", "e3b")) {
             foreach ($V in $Variants) { Add-Run $V $N "P1" "M3" $R "" $false "" }
         }
     }
+}
+
+# --- Phase ab: 실행 단위로 섞는다 ---
+if ($Phase -in @("all", "ab")) {
+    foreach ($R in 1..3) { foreach ($V in @("m3mass", "m3qold", "m3syncall")) { Add-Run $V 20000 "P1" "M3" $R "ab" $false "" } }
 }
 
 # --- Phase matrix: 조건 단위, 3회 ---
@@ -61,11 +69,12 @@ if ($Phase -in @("all", "trace")) {
 }
 
 # 묶음의 맨 첫 실행은 r0(버리는 실행)로 한 번 더 돈다.
-$Total = $Runs.Count + 1
+$Total = $Runs.Count + $(if ($NoR0) { 0 } else { 1 })
 $Minutes = [math]::Round($Total * 85 / 60)
 Write-Host "M3b batch: $($Runs.Count) runs + 1 discarded r0 = $Total, about $Minutes min (85 s each)"
 $Idx = 0
-$Plan = @(@{ Variant = $Runs[0].Variant; N = $Runs[0].N; Preset = $Runs[0].Preset; Stage = $Runs[0].Stage; Run = 0; Tag = $Runs[0].Tag; Trace = $false; Extra = "" }) + $Runs.ToArray()
+$Plan = $Runs.ToArray()
+if (-not $NoR0) { $Plan = @(@{ Variant = $Runs[0].Variant; N = $Runs[0].N; Preset = $Runs[0].Preset; Stage = $Runs[0].Stage; Run = 0; Tag = $Runs[0].Tag; Trace = $false; Extra = "" }) + $Plan }
 foreach ($R in $Plan) {
     $Idx++
     $Label = "M3b-$($R.Variant)-N$($R.N)-$($R.Preset)$($R.Tag)-r$($R.Run)"
