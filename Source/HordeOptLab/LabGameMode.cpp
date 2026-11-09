@@ -90,6 +90,11 @@ void ALabGameMode::StartPlay()
 		// M3b 직렬 트레이스는 -LabFullyParallel=0으로 같은 경로를 쓴다(run-m3b.ps1 -SerialArgs).
 		IConsoleManager::Get().FindConsoleVariable(TEXT("mass.FullyParallel"))->Set(0, ECVF_SetByCode);
 	}
+	if (Config.Variant == ELabVariant::M3Lock0)
+	{
+		// 진단 D안(2026-11-09): DefaultEngine.ini의 1을 이 변형에서만 0으로 덮는다. LabFixedCVarString이 실제 값을 읽어 LabCVars 메타데이터에 0으로 찍힌다.
+		LabSetCVar(TEXT("mass.commands.LockObserversDuringFlushing"), TEXT("0"));
+	}
 	UE_LOG(LogLab, Log, TEXT("lab_build commit=%s driver=%s %s cvars=%s"), TEXT(LAB_BUILD_COMMIT), *GRHIAdapterName, *GRHIAdapterUserDriverVersion, *LabFixedCVarString());
 	if (Config.bBench)
 	{

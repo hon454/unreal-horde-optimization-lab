@@ -78,7 +78,7 @@ ULabActorSyncProcessor::ULabActorSyncProcessor()
 {
 	ExecutionFlags = (int32)(EProcessorExecutionFlags::Client | EProcessorExecutionFlags::Standalone);
 	ExecutionOrder.ExecuteAfter.Add(UE::Mass::ProcessorGroupNames::Representation);
-	if (!LabUseOldQueries())
+	if (!LabUseOldQueries() && !LabSkipLogicOrder())
 	{
 		ExecutionOrder.ExecuteAfter.Add(LabLogicGroupName); // 로직이 이 프레임에 바꾼 표현 상태를 읽는다(M3b 정비 2)
 	}

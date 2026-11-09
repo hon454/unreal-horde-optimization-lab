@@ -43,6 +43,8 @@ enum class ELabVariant : uint8
 	M3Vis0,      // E3b (8): 화면 밖 High 밴드 0m(카메라 뒤는 액터로 만들지 않음), 화면 안 30m
 	M3Vis15,     // E3b (8): 화면 밖 High 밴드 15m, 화면 안 30m(MetaHuman Crowd 비율)
 	M3Hys20,     // E3b (8): 30/30m에 히스테리시스 20%(엔진 기본 10)
+	M3Lock0,     // 진단(2026-11-09 D안): 정비 코드 그대로, mass.commands.LockObserversDuringFlushing만 0(ini의 1을 이 변형에서만 덮는다). m3mass가 M3 묶음보다 0.7ms 느린 원인 가르기
+	M3NoOrder,   // 진단(D안): 정비 쿼리(새 프래그먼트, 태그 필터) 그대로, VatISM·ActorSync의 ExecuteAfter(LabLogic)만 뺀다(그룹 선언 유지)
 };
 
 /**

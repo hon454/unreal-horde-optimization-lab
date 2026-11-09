@@ -23,6 +23,12 @@ inline bool LabUseOldQueries()
 	return FLabConfig::Get().Variant == ELabVariant::M3QOld;
 }
 
+/** 진단 변형 m3noorder: 표현 프로세서(VatISM·ActorSync)의 ExecuteAfter(LabLogic)만 뺀다. 쿼리는 정비된 것이다(2026-11-09 D안). */
+inline bool LabSkipLogicOrder()
+{
+	return FLabConfig::Get().Variant == ELabVariant::M3NoOrder;
+}
+
 /** 살아 있는 개체의 이동 목표를 오브로 둔다. 실제 이동은 엔진 조향(UMassSteerToMoveTargetProcessor)과 이동 프로세서가 한다. */
 UCLASS()
 class ULabApproachProcessor : public UMassProcessor

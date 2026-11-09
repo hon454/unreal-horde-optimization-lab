@@ -305,3 +305,15 @@ plan.md "M3b" E3b (8)의 화질 쪽. 개발 빌드, `-LabStage=M3 -LabN=20000 -L
 `py -3 Scripts/transition-score.py <캡처 폴더> <로그>`(전환 튐, 문턱 6): m3vis0 사건 7500건, 튐 평균 4.27, 중앙값 2.70, 눈에 띈 전환 157/7500(2%). m3vis15 7646건, 3.94, 2.77, 128/7646(2%). mass 3077건, 3.08, 2.69, 19/3077(1%). 1rpm 캡처(위)는 m3vis0 15/4754(0%), mass 0/1726(0%)이었다.
 
 빌드·실행: `Scripts/build.ps1` 성공, `run-dev.ps1 -Small -Variant m3vis15 -Extra "-LabStage=M3"` 종료 코드 0(`respawns=43 kills=8 snipes=39`). `-LabCamTurn` 12초 확인 실행에서 `lab_turn` 세 줄(k=0\~2, 회전 30프레임). 측정 프리셋 P1/P2·러너·CSV는 바꾸지 않았다.
+
+### 진단 변형 m3lock0·m3noorder(코디네이터 지시, 사용자 승인 D안, 2026-11-09)
+
+깨끗한 상태의 `m3mass` 20k P1이 16.2ms로 M3 묶음(15.5)보다 0.7ms 느리고 `m3qold`도 느렸으므로, 공통 요소 둘을 변형으로 가른다.
+
+- `m3lock0`(`ELabVariant::M3Lock0`): 정비 코드 그대로, 게임 모드 시작 시 `mass.commands.LockObserversDuringFlushing`을 0으로 쓴다(`LabGameMode.cpp`, `-LabFullyParallel=0`과 같은 `LabSetCVar` 경로. `DefaultEngine.ini`의 1은 그대로). 확인: `-Small` 로그 `lab_build … cvars=…|mass.commands.LockObserversDuringFlushing=false`(다른 변형은 true). CSV 메타데이터 `LabCVars`는 같은 함수의 문자열이다.
+- `m3noorder`(`ELabVariant::M3NoOrder`): 정비 쿼리(표현 프래그먼트, 액터 태그 필터)는 그대로 두고 VatISM·ActorSync의 `ExecuteAfter(LabLogic)`만 뺀다(`LabMassProcessors.h` `LabSkipLogicOrder()`, 그룹 선언은 유지). 확인: `-LogCmds="LogMass Log"` 실행의 처리 그래프에서 VatISM·ActorSync가 저격·상태 프로세서 앞에도 놓인다(프래그먼트 접근으로만 순서가 정해진다).
+- 빌드 성공, `run-dev.ps1 -Small -Extra "-LabStage=M3"` 두 변형 모두 종료 코드 0(`respawns=43 kills=8 snipes=39`).
+
+#### 측정 세션에 요청
+
+- `run-bench.ps1`·`run-dev.ps1`의 `-Variant` ValidateSet에 `m3lock0`, `m3noorder`를 더해 달라(이번 `-Small` 확인은 현재 스크립트로 통과했다).
