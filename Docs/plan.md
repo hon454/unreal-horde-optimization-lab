@@ -121,7 +121,14 @@ M0\~M5가 필수다. 마일스톤마다 바꾸는 최적화 변수는 하나고,
 5. M0 변형 `staticpawn`: CharacterMovement 틱 끔 + 애니 없음. 지금 `static`은 CharacterMovement를 유지해(`LabMinion.cpp:194`는 pawn만) "17배"가 컨테이너 전환만의 값이 아니다. 묶음 1에서 {1k, 5k} × P1 × 3회.
 - 엔진 기본 프로세서 점검: 개발 빌드 Mass Debugger로 켜져 있는 프로세서 목록을 보고 쓰지 않는 것은 `DefaultMass.ini`에서 끈다(윤준기 16:10, talk-notes.md). 묶음 1 기준점에 포함.
 - 같이 넣는 두 줄: `PendingSnipeTick`을 `std::atomic`으로(오브 틱과 프로세서가 잠금 없이 공유, `LabOrb.cpp:269`), `mass.commands.LockObserversDuringFlushing=1`(City Sample `DefaultEngine.ini:405`, 엔진 기본 0 `MassCommandBuffer.cpp:23`).
-- 실험으로: E3b (8) 화면 밖 액터. `BaseLODDistance = VisibleLODDistance = 30m`이라(`LabCrowdSubsystem.cpp:96-97`) P1에서 30m 원의 절반이 카메라 뒤인데도 액터가 된다. 기본값은 두고 변형 `m3vis`(화면 밖 Base 거리 축소)로 20k·5k P1을 잰다. 대표점 변경은 결과를 보고 M4 전에 따로 결정한다.
+- 실험으로: E3b (8) 표현 LOD 값(아래).
+
+**E3b (8) 표현 LOD 값(2026-11-09 사용자 결정 A안 "먼저 재고 결정").** `BaseLODDistance = VisibleLODDistance = 30m`, 히스테리시스 10%라(`LabCrowdSubsystem.cpp:96-97`, 엔진 기본) 레퍼런스 셋(엔진 기본, City Sample, MetaHuman Crowd `MetaHumanMassCrowdVisualizationTrait.cpp:34-49`)과 모두 다르다. P1은 30m 원의 절반이 카메라 뒤인데도 액터가 되고, 상한 배분은 거리 버킷 순이라 카메라 뒤 10m가 화면 안 25m보다 먼저 자리를 가져간다(`MassLODCalculator.h` `AdjustDistancesFromCountForRuntimeData`).
+- 변형: `m3vis0`(Base High 0, Visible 30m), `m3vis15`(Base 15m, Visible 30m, MetaHuman 비율), `m3hys20`(30/30m, 히스테리시스 20%). 기준점은 `mass`.
+- 조건: 20k·5k P1 × 3회, 실행 단위로 섞음. 지표: 프레임 p50·p95, Game, 액터 수, 전환 수/초(`Lab/ActorRebinds`를 summary 열로), 화면 안 액터 수(새 스탯).
+- 화질: 개발 빌드 `m3vis0`로 카메라가 도는 60초 연속 캡처. 돌아볼 때 액터가 채워지는 프레임 수(`Scripts/transition-score.py`). 상한은 스폰 시간 분할 1.5ms/틱.
+- 순서: **묶음 1은 이 18회로 시작한다.** 결과로 M3b 대표값(Base, 히스테리시스)을 그 자리에서 정하고, 그다음 전수 매트릭스를 돌린다. 대표값 변경이 재측정을 다시 부르지 않게 하기 위해서다. 묶음 1 ↔ 묶음 2 비교(종류 수)는 영향 없다.
+- 미룬 변형: `m3visoff`(Base Off 80m, 화면 밖은 80m부터 안 그림). 대표점 결정이 하나 더 늘어 M4 뒤 후보로 둔다.
 **측정 방법(2026-11-09 사용자 결정 D안).** 묶음 1부터 적용. 규약 본문은 [measurement.md](Guides/measurement.md).
 1. 앵커: M1\~M3 {1k, 5k, 20k, 30k, 50k} × P1·P2, M0 {1k, 5k} × P1·P2(budget·uro·pawn·staticpawn은 P1).
 2. 대표 지표 N@16.7ms를 프레임 p95로. p50 N과 병목 자원을 병기. M0\~M3은 원본 CSV에서 다시 요약(`Scripts/summarize.py`, `plot.py` 수정).
