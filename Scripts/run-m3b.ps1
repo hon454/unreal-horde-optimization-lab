@@ -4,6 +4,9 @@
 #                 결과로 대표값(Base, 히스테리시스)을 정한 뒤 이어서 전수를 돌린다. 기준점 m3mass를 같은 섞기에 넣는다(24회, 2026-11-09 코디네이터 결정). -NoBase면 18회.
 #   Phase ab    : 선행 A/B(코드 정비 효과). m3mass / m3qold / m3syncall x 20k P1 x 3회 = 9회를 실행 단위로 섞는다. -LabStage=M3.
 #                 e3b의 m3mass 20k와 라벨이 겹치지 않도록 태그 ab를 붙인다(summary에서 <변형>-ab 조건으로 따로 쓰임).
+#   Phase start : 묶음 시작 수준 확인. 기준 m3mass 20k P1 -LabStage=M3 r0(버리는 실행) 1회 + 3회, 태그 start(summary 조건 m3mass-start). -NoR0로 r0 끔.
+#   Phase ab2   : 코드 A/B(D안). m3mass / m3lock0(LockObservers=0) / m3noorder(순서 선언 없음) x 20k P1 x 3회를 실행 단위로 섞는다. 태그 ab2(summary 조건 <변형>-ab2).
+#                 start 다음에 -Phase ab2 -NoR0로 돌린다. -Phase all에는 넣지 않는다.
 #   Phase aff   : 잡음 진단(어피니티). m3mass 20k P1 -LabStage=M3를 고정(0xFFFF, 논리 코어 0~15 = CCD0 추정, 태그 aff)과
 #                 고정 없음(태그 noaff)으로 번갈아 6회씩(aff r1, noaff r1, aff r2, ...). 앞에 버리는 r0 1회(-NoR0로 끔).
 #                 summary 조건 m3mass-aff / m3mass-noaff. -Phase all에는 넣지 않는다(진단 전용).
@@ -18,7 +21,7 @@
 # -DryRun은 실행 목록만 찍고 아무것도 실행하지 않는다.
 param(
     [string]$Tag = "",
-    [ValidateSet("all", "e3b", "ab", "aff", "matrix", "aa", "trace")][string]$Phase = "all",
+    [ValidateSet("all", "e3b", "ab", "start", "ab2", "aff", "matrix", "aa", "trace")][string]$Phase = "all",
     [switch]$NoBase,
     [switch]$NoR0,   # 묶음의 버리는 r0을 두지 않는다(같은 묶음의 두 번째 이후 호출. 예: e3b 다음 ab)
     [switch]$DryRun,
@@ -48,6 +51,16 @@ if ($Phase -in @("all", "e3b")) {
 # --- Phase ab: 실행 단위로 섞는다 ---
 if ($Phase -in @("all", "ab")) {
     foreach ($R in 1..3) { foreach ($V in @("m3mass", "m3qold", "m3syncall")) { Add-Run $V 20000 "P1" "M3" $R "ab" $false "" } }
+}
+
+# --- Phase start: 묶음 시작 수준 확인 ---
+if ($Phase -eq "start") {
+    foreach ($R in 1..3) { Add-Run "m3mass" 20000 "P1" "M3" $R "start" $false "" }
+}
+
+# --- Phase ab2: 실행 단위로 섞는다 (all에는 포함하지 않는다) ---
+if ($Phase -eq "ab2") {
+    foreach ($R in 1..3) { foreach ($V in @("m3mass", "m3lock0", "m3noorder")) { Add-Run $V 20000 "P1" "M3" $R "ab2" $false "" } }
 }
 
 # --- Phase aff: 고정 / 고정 없음 번갈아 (all에는 포함하지 않는다) ---

@@ -25,7 +25,7 @@ def load():
         with open(path, newline="", encoding="utf-8") as f:
             for r in csv.DictReader(f):
                 named = {k: float(r[k]) for k in ("game_p50_ms", "render_p50_ms", "gpu_p50_ms", "frame_p50_ms") if r.get(k)}
-                if not named or not r.get("frame_p95_ms") or r["variant"].endswith(("-aa", "-ab", "-aff", "-noaff")):  # A/A는 잡음 기준이라 곡선에 잇지 않는다
+                if not named or not r.get("frame_p95_ms") or r["variant"].endswith(("-aa", "-ab", "-aff", "-noaff", "-start", "-ab2")):  # A/A는 잡음 기준이라 곡선에 잇지 않는다
                     continue
                 top = max(named, key=named.get)
                 parts = {k: v for k, v in named.items() if not k.startswith("frame")}

@@ -3,7 +3,7 @@
 Saved/Profiling/CSV/<라벨>.csv(run-bench.ps1이 패키지에서 가져온 것)를 읽어
 Measurements/<M>/runs.csv에 실행마다 한 행을 더하고, summary.csv를 조건별 중앙값·최소·최대로 다시 쓴다.
 라벨 형식은 <M>-<variant>-N<n>-<preset><tag>-r<i>이고, r0(묶음의 첫 실행, 셰이더 캐시)은 summary에서 뺀다.
-태그 aa*는 묶음 끝 A/A, ab*는 선행 A/B, aff*/noaff*는 어피니티 진단으로 summary에 <variant>-aa / -ab 조건으로 따로 쓰고, trace*는 summary에서 뺀다.
+태그 aa*는 묶음 끝 A/A, ab*는 선행 A/B, aff*/noaff*는 어피니티 진단, start*는 묶음 시작 확인, ab2*는 코드 A/B(D안)으로 summary에 <variant>-aa / -ab 조건으로 따로 쓰고, trace*는 summary에서 뺀다.
 열 정의는 Docs/Guides/measurement.md "지표". 표준 라이브러리만 쓴다.
 
 M3b부터: frame_p95_ms(대표 지표), bottleneck(프레임·Game·Render·GPU p50 중 최댓값의 이름), build(CSV 메타데이터)를 더한다.
@@ -175,7 +175,7 @@ def main():
         tag = LABEL_RE.match(r["label"])["tag"]
         if tag.startswith("trace"):
             continue  # Insights 트레이스 실행은 비교에 쓰지 않는다(runs.csv에는 남는다)
-        variant = r["variant"] + next((f"-{t}" for t in ("noaff", "aff", "aa", "ab") if tag.startswith(t)), "")  # 묶음 끝 A/A와 선행 A/B(ab)는 기준점과 따로 요약한다
+        variant = r["variant"] + next((f"-{t}" for t in ("noaff", "aff", "start", "aa", "ab2", "ab") if tag.startswith(t)), "")  # 묶음 끝 A/A와 선행 A/B(ab)는 기준점과 따로 요약한다
         groups.setdefault((variant, int(r["n"]), r["preset"]), []).append(r)
 
     fields = ["variant", "n", "preset", "runs"]
