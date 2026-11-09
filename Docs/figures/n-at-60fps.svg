@@ -1,66 +1,63 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="760" height="360" viewBox="0 0 760 360" font-family="Segoe UI, Arial, sans-serif" font-size="13">
 <rect width="100%" height="100%" fill="white"/>
-<text x="380.0" y="28" text-anchor="middle" font-size="16" font-weight="600">Max N at 60 fps (P1, bottleneck p50 ≤ 16.7 ms)</text>
-<text x="160" y="57.714285714285715" text-anchor="end">M0 full</text>
-<rect x="170" y="51.92857142857143" width="10.9" height="9.0" fill="#2563eb"/>
-<text x="186.9" y="57.714285714285715">813</text>
-<text x="160" y="70.57142857142858" text-anchor="end">M0 pawn</text>
-<rect x="170" y="64.78571428571429" width="15.1" height="9.0" fill="#dc2626"/>
-<text x="191.1" y="70.57142857142858">1,128</text>
-<text x="160" y="83.42857142857144" text-anchor="end">M0 static</text>
-<rect x="170" y="77.64285714285715" width="16.0" height="9.0" fill="#16a34a"/>
-<text x="192.0" y="83.42857142857144">1,196</text>
-<text x="160" y="96.28571428571429" text-anchor="end">M1 mass</text>
-<rect x="170" y="90.5" width="275.2" height="9.0" fill="#9333ea"/>
-<text x="451.2" y="96.28571428571429">20,577</text>
-<text x="160" y="109.14285714285715" text-anchor="end">M1 massav</text>
-<rect x="170" y="103.35714285714286" width="74.6" height="9.0" fill="#ea580c"/>
-<text x="250.6" y="109.14285714285715">5,578</text>
-<text x="160" y="122.00000000000001" text-anchor="end">M1 massst</text>
-<rect x="170" y="116.21428571428572" width="274.6" height="9.0" fill="#0891b2"/>
-<text x="450.6" y="122.00000000000001">20,530</text>
-<text x="160" y="134.85714285714283" text-anchor="end">M2 mass</text>
-<rect x="170" y="129.07142857142856" width="274.4" height="9.0" fill="#4b5563"/>
-<text x="450.4" y="134.85714285714283">20,518</text>
-<text x="160" y="147.7142857142857" text-anchor="end">M2 noanim</text>
-<rect x="170" y="141.92857142857142" width="286.1" height="9.0" fill="#2563eb"/>
-<text x="462.1" y="147.7142857142857">21,396</text>
-<text x="160" y="160.57142857142856" text-anchor="end">M3 m2off</text>
-<rect x="170" y="154.78571428571428" width="478.3" height="9.0" fill="#dc2626"/>
-<text x="654.3" y="160.57142857142856">35,763</text>
-<text x="160" y="173.42857142857142" text-anchor="end">M3 m3base</text>
-<rect x="170" y="167.64285714285714" width="267.5" height="9.0" fill="#16a34a"/>
-<text x="443.5" y="173.42857142857142">20,000 (above range)</text>
-<text x="160" y="186.28571428571428" text-anchor="end">M3 m3budgetdist</text>
-<rect x="170" y="180.5" width="267.5" height="9.0" fill="#9333ea"/>
-<text x="443.5" y="186.28571428571428">20,000 (above range)</text>
-<text x="160" y="199.14285714285714" text-anchor="end">M3 m3budgetsig</text>
-<rect x="170" y="193.35714285714286" width="267.5" height="9.0" fill="#ea580c"/>
-<text x="443.5" y="199.14285714285714">20,000 (above range)</text>
-<text x="160" y="211.99999999999997" text-anchor="end">M3 m3colbase</text>
-<rect x="170" y="206.2142857142857" width="267.5" height="9.0" fill="#0891b2"/>
-<text x="443.5" y="211.99999999999997">20,000 (above range)</text>
-<text x="160" y="224.85714285714283" text-anchor="end">M3 m3colquery</text>
-<rect x="170" y="219.07142857142856" width="267.5" height="9.0" fill="#4b5563"/>
-<text x="443.5" y="224.85714285714283">20,000 (above range)</text>
-<text x="160" y="237.7142857142857" text-anchor="end">M3 m3hyd15</text>
-<rect x="170" y="231.92857142857142" width="267.5" height="9.0" fill="#2563eb"/>
-<text x="443.5" y="237.7142857142857">20,000 (above range)</text>
-<text x="160" y="250.57142857142856" text-anchor="end">M3 m3hyd50</text>
-<rect x="170" y="244.78571428571428" width="267.5" height="9.0" fill="#dc2626"/>
-<text x="443.5" y="250.57142857142856">20,000 (above range)</text>
-<text x="160" y="263.42857142857144" text-anchor="end">M3 m3hydbase</text>
-<rect x="170" y="257.64285714285717" width="267.5" height="9.0" fill="#16a34a"/>
-<text x="443.5" y="263.42857142857144">20,000 (above range)</text>
-<text x="160" y="276.2857142857143" text-anchor="end">M3 m3lowres</text>
-<rect x="170" y="270.5" width="267.5" height="9.0" fill="#9333ea"/>
-<text x="443.5" y="276.2857142857143">20,000 (above range)</text>
-<text x="160" y="289.14285714285717" text-anchor="end">M3 m3nocol</text>
-<rect x="170" y="283.3571428571429" width="267.5" height="9.0" fill="#ea580c"/>
-<text x="443.5" y="289.14285714285717">20,000 (above range)</text>
-<text x="160" y="302.00000000000006" text-anchor="end">M3 m3uro</text>
-<rect x="170" y="296.2142857142858" width="267.5" height="9.0" fill="#0891b2"/>
-<text x="443.5" y="302.00000000000006">20,000 (above range)</text>
-<text x="160" y="314.8571428571429" text-anchor="end">M3 mass</text>
-<rect x="170" y="309.0714285714286" width="294.8" height="9.0" fill="#4b5563"/>
-<text x="470.8" y="314.8571428571429">22,046</text></svg>
+<text x="380.0" y="28" text-anchor="middle" font-size="16" font-weight="600">Max N at 60 fps (P1, frame p95 ≤ 16.7 ms)</text>
+<text x="160" y="58.1" text-anchor="end">M0 full</text>
+<rect x="170" y="52.025" width="10.4" height="9.4" fill="#2563eb"/>
+<text x="186.4" y="58.1">667 (p50 N 813, frame)</text>
+<text x="160" y="71.60000000000001" text-anchor="end">M0 static</text>
+<rect x="170" y="65.525" width="16.2" height="9.4" fill="#dc2626"/>
+<text x="192.2" y="71.60000000000001">1,044 (p50 N 1,196, frame)</text>
+<text x="160" y="85.10000000000001" text-anchor="end">M1 mass</text>
+<rect x="170" y="79.025" width="240.5" height="9.4" fill="#16a34a"/>
+<text x="416.5" y="85.10000000000001">15,498 (p50 N 20,577, frame)</text>
+<text x="160" y="98.60000000000001" text-anchor="end">M1 massav</text>
+<rect x="170" y="92.525" width="78.0" height="9.4" fill="#9333ea"/>
+<text x="254.0" y="98.60000000000001">5,025 (p50 N 5,578, frame)</text>
+<text x="160" y="112.10000000000001" text-anchor="end">M1 massst</text>
+<rect x="170" y="106.025" width="201.0" height="9.4" fill="#ea580c"/>
+<text x="377.0" y="112.10000000000001">12,949 (p50 N 20,530, frame)</text>
+<text x="160" y="125.60000000000001" text-anchor="end">M2 mass</text>
+<rect x="170" y="119.525" width="255.5" height="9.4" fill="#0891b2"/>
+<text x="431.5" y="125.60000000000001">16,460 (p50 N 20,518, frame)</text>
+<text x="160" y="139.1" text-anchor="end">M2 noanim</text>
+<rect x="170" y="133.025" width="312.9" height="9.4" fill="#4b5563"/>
+<text x="488.9" y="139.1">20,156 (p50 N 21,396, frame)</text>
+<text x="160" y="152.6" text-anchor="end">M3 m2off</text>
+<rect x="170" y="146.525" width="478.3" height="9.4" fill="#2563eb"/>
+<text x="654.3" y="152.6">30,812 (p50 N 35,763, frame)</text>
+<text x="160" y="166.1" text-anchor="end">M3 m3base</text>
+<rect x="170" y="160.025" width="286.5" height="9.4" fill="#dc2626"/>
+<text x="462.5" y="166.1">18,455 (p50 N 20,000, frame)</text>
+<text x="160" y="179.6" text-anchor="end">M3 m3budgetdist</text>
+<rect x="170" y="173.525" width="310.4" height="9.4" fill="#16a34a"/>
+<text x="486.4" y="179.6">20,000 (above range)</text>
+<text x="160" y="193.1" text-anchor="end">M3 m3budgetsig</text>
+<rect x="170" y="187.025" width="310.4" height="9.4" fill="#9333ea"/>
+<text x="486.4" y="193.1">20,000 (above range)</text>
+<text x="160" y="206.6" text-anchor="end">M3 m3colbase</text>
+<rect x="170" y="200.525" width="280.1" height="9.4" fill="#ea580c"/>
+<text x="456.1" y="206.6">18,046 (p50 N 20,000, frame)</text>
+<text x="160" y="220.1" text-anchor="end">M3 m3colquery</text>
+<rect x="170" y="214.025" width="294.7" height="9.4" fill="#0891b2"/>
+<text x="470.7" y="220.1">18,988 (p50 N 20,000, frame)</text>
+<text x="160" y="233.6" text-anchor="end">M3 m3hyd15</text>
+<rect x="170" y="227.525" width="310.4" height="9.4" fill="#4b5563"/>
+<text x="486.4" y="233.6">20,000 (above range)</text>
+<text x="160" y="247.1" text-anchor="end">M3 m3hyd50</text>
+<rect x="170" y="241.025" width="271.3" height="9.4" fill="#2563eb"/>
+<text x="447.3" y="247.1">17,479 (p50 N 20,000, frame)</text>
+<text x="160" y="260.6" text-anchor="end">M3 m3hydbase</text>
+<rect x="170" y="254.525" width="277.1" height="9.4" fill="#dc2626"/>
+<text x="453.1" y="260.6">17,854 (p50 N 20,000, frame)</text>
+<text x="160" y="274.09999999999997" text-anchor="end">M3 m3lowres</text>
+<rect x="170" y="268.025" width="303.6" height="9.4" fill="#16a34a"/>
+<text x="479.6" y="274.09999999999997">19,559 (p50 N 20,000, frame)</text>
+<text x="160" y="287.59999999999997" text-anchor="end">M3 m3nocol</text>
+<rect x="170" y="281.525" width="310.4" height="9.4" fill="#9333ea"/>
+<text x="486.4" y="287.59999999999997">20,000 (above range)</text>
+<text x="160" y="301.09999999999997" text-anchor="end">M3 m3uro</text>
+<rect x="170" y="295.025" width="310.4" height="9.4" fill="#ea580c"/>
+<text x="486.4" y="301.09999999999997">20,000 (above range)</text>
+<text x="160" y="314.59999999999997" text-anchor="end">M3 mass</text>
+<rect x="170" y="308.525" width="286.8" height="9.4" fill="#0891b2"/>
+<text x="462.8" y="314.59999999999997">18,475 (p50 N 22,046, frame)</text></svg>

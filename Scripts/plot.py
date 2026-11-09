@@ -1,12 +1,12 @@
 """Measurements/*/summary.csv로 Docs/figures/의 그래프를 다시 그린다. 표준 라이브러리만 써서 SVG를 직접 쓴다(PC에 matplotlib가 없다).
 
-그리는 것
-- n-at-60fps.svg   : 단계·변형별 "60fps(16.7ms)를 지키는 최대 N"(P1). README 대표 그래프. 값은 measurement.md "N@16.7ms" 정의대로
-                     Game/Render/GPU/프레임 p50 중 최댓값이 16.7ms를 넘기 직전 N을 측정 N 사이에서 로그 보간한다.
-                     프레임 시간을 넣는 이유: Game Thread 시간은 워커 대기를 빼서 워커 병목(E1 massav)을 놓친다(2026-11-08 사용자 결정).
-- n-scaling-P1.svg : N에 따른 프레임 병목 ms(Game/Render/GPU/프레임 p50 최댓값), P1, 로그-로그.
+그리는 것 (M3b부터 대표 지표는 프레임 p95, measurement.md "N@16.7ms")
+- n-at-60fps.svg   : 단계·변형별 "프레임 p95가 16.7ms를 넘기 직전 N"(P1). README 대표 그래프. 측정 N 사이를 로그 보간한다.
+                     막대 옆에 p50 기준 N(Game/Render/GPU/프레임 p50 중 최댓값, M3까지의 정의)과 병목 자원을 병기한다.
+- n-scaling-P1.svg : N에 따른 프레임 p95(실선)와 p50 최댓값(점선) ms, P1, 로그-로그. 16.7ms 선과 p95 교차점이 보이도록.
+- n-at-60fps.csv   : 위 막대의 값(p95 N, p50 N, 병목). 글의 표 재료.
 
-실행: py -3 Scripts/plot.py
+실행: py -3 -I Scripts/plot.py
 """
 import csv
 import math
@@ -24,20 +24,28 @@ def load():
         stage = path.parent.name
         with open(path, newline="", encoding="utf-8") as f:
             for r in csv.DictReader(f):
-                vals = [float(r[k]) for k in ("game_p50_ms", "render_p50_ms", "gpu_p50_ms", "frame_p50_ms") if r.get(k)]
-                if not vals:
+                named = {k: float(r[k]) for k in ("game_p50_ms", "render_p50_ms", "gpu_p50_ms", "frame_p50_ms") if r.get(k)}
+                if not named or not r.get("frame_p95_ms") or r["variant"].endswith("-aa"):  # A/A는 잡음 기준이라 곡선에 잇지 않는다
                     continue
-                rows.append({"stage": stage, "variant": r["variant"], "n": int(r["n"]), "preset": r["preset"], "ms": max(vals)})
+                top = max(named, key=named.get)
+                rows.append({"stage": stage, "variant": r["variant"], "n": int(r["n"]), "preset": r["preset"],
+                             "ms50": named[top], "ms95": float(r["frame_p95_ms"]), "bottleneck": top.split("_")[0]})
     return rows
 
 
-def series(rows, preset):
+def series(rows, preset, key):
     out = {}
     for r in rows:
         if r["preset"] != preset:
             continue
-        out.setdefault(f'{r["stage"]} {r["variant"]}', []).append((r["n"], r["ms"]))
+        out.setdefault(f'{r["stage"]} {r["variant"]}', []).append((r["n"], r[key]))
     return {k: sorted(v) for k, v in out.items()}
+
+
+def bottleneck_at(rows, preset, name, n):
+    """교차 직전 측정점(n 이하 중 가장 큰 N)의 병목 자원."""
+    cand = [r for r in rows if r["preset"] == preset and f'{r["stage"]} {r["variant"]}' == name and r["n"] <= n]
+    return max(cand, key=lambda r: r["n"])["bottleneck"] if cand else ""
 
 
 def n_at_budget(points):
@@ -71,10 +79,11 @@ def bar_chart(data, title, path):
     path.write_text(svg(W, H, "\n".join(body)), encoding="utf-8")
 
 
-def line_chart(sers, title, path):
+def line_chart(sers, title, path, sers50=None):
     W, H, L, R, T, B = 760, 440, 70, 170, 50, 50
     ns = [n for pts in sers.values() for n, _ in pts]
     ms = [m for pts in sers.values() for _, m in pts] + [BUDGET_MS]
+    sers50 = sers50 or {}
     x0, x1 = math.log10(min(ns)), math.log10(max(ns))
     y0, y1 = math.log10(min(ms) * 0.8), math.log10(max(ms) * 1.2)
     X = lambda n: L + (math.log10(n) - x0) / (x1 - x0) * (W - L - R)
@@ -91,11 +100,14 @@ def line_chart(sers, title, path):
             body.append(f'<text x="{L-8}" y="{Y(m)+4:.1f}" text-anchor="end">{m}</text>')
             body.append(f'<line x1="{L}" y1="{Y(m):.1f}" x2="{W-R}" y2="{Y(m):.1f}" stroke="#eee"/>')
     body.append(f'<text x="{(W-R+L)/2}" y="{H-12}" text-anchor="middle">N (log)</text>')
-    body.append(f'<text x="18" y="{(H)/2}" transform="rotate(-90 18 {H/2})" text-anchor="middle">bottleneck p50 ms (log)</text>')
+    body.append(f'<text x="18" y="{(H)/2}" transform="rotate(-90 18 {H/2})" text-anchor="middle">frame p95 (solid) / bottleneck p50 (dashed) ms, log</text>')
     for i, (name, pts) in enumerate(sorted(sers.items())):
         c = COLORS[i % len(COLORS)]
         d = " ".join(f'{"M" if j == 0 else "L"}{X(n):.1f},{Y(m):.1f}' for j, (n, m) in enumerate(pts))
         body.append(f'<path d="{d}" fill="none" stroke="{c}" stroke-width="2"/>')
+        if name in sers50:
+            d50 = " ".join(f'{"M" if j == 0 else "L"}{X(n):.1f},{Y(m):.1f}' for j, (n, m) in enumerate(sers50[name]))
+            body.append(f'<path d="{d50}" fill="none" stroke="{c}" stroke-width="1" stroke-dasharray="4 3" opacity="0.7"/>')
         body += [f'<circle cx="{X(n):.1f}" cy="{Y(m):.1f}" r="3" fill="{c}"/>' for n, m in pts]
         body.append(f'<text x="{W-R+12}" y="{T + 18*i + 10}" fill="{c}">{name}</text>')
     path.write_text(svg(W, H, "\n".join(body)), encoding="utf-8")
@@ -104,18 +116,30 @@ def line_chart(sers, title, path):
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
     rows = load()
-    p1 = series(rows, "P1")
-    bars = []
-    for name, pts in sorted(p1.items()):
+    p95 = series(rows, "P1", "ms95")
+    p50 = series(rows, "P1", "ms50")
+    bars, table = [], []
+    for name, pts in sorted(p95.items()):
         if len(pts) < 2:
             continue  # N 하나만 잰 실험 변형(E1 (d) 등)은 한계 N을 보간할 수 없다
         n, note = n_at_budget(pts)
-        if n is not None:
-            bars.append((name, n, note))
-    bar_chart(bars, "Max N at 60 fps (P1, bottleneck p50 ≤ 16.7 ms)", OUT / "n-at-60fps.svg")
-    line_chart({k: v for k, v in p1.items() if len(v) >= 2}, "Frame bottleneck vs N (P1)", OUT / "n-scaling-P1.svg")
-    for name, n, note in bars:
-        print(f"{name}: N@16.7ms = {n:,.0f} {note}")
+        if n is None:
+            continue
+        n50, note50 = n_at_budget(p50[name])
+        neck = bottleneck_at(rows, "P1", name, n)
+        label = note or (f"p50 N {n50:,.0f}, {neck}" if n50 else neck)
+        bars.append((name, n, label))
+        table.append({"series": name, "n_p95": round(n), "note_p95": note, "n_p50": round(n50) if n50 else "",
+                      "note_p50": note50, "bottleneck": neck})
+    bar_chart(bars, "Max N at 60 fps (P1, frame p95 ≤ 16.7 ms)", OUT / "n-at-60fps.svg")
+    line_chart({k: v for k, v in p95.items() if len(v) >= 2}, "Frame p95 vs N (P1)", OUT / "n-scaling-P1.svg",
+               {k: v for k, v in p50.items() if len(v) >= 2})
+    with open(OUT / "n-at-60fps.csv", "w", newline="", encoding="utf-8") as f:
+        w = csv.DictWriter(f, fieldnames=["series", "n_p95", "note_p95", "n_p50", "note_p50", "bottleneck"])
+        w.writeheader()
+        w.writerows(table)
+    for t in table:
+        print(f'{t["series"]}: N@16.7ms p95 = {t["n_p95"]:,} {t["note_p95"]} | p50 = {t["n_p50"]} {t["note_p50"]} | {t["bottleneck"]}')
     print(f"wrote {OUT}")
 
 
