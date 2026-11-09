@@ -55,8 +55,13 @@
 
 | 항목 | 확인한 것 | 위치 |
 | --- | --- | --- |
-| 가변 틱 | `FMassSimulationVariableTickParameters::TickRates[EMassLOD::Max]`, `TMassLODTickRateController`가 청크 단위로 이 프레임에 돌릴지 결정. **기본은 꺼져 있다**(`bEnableVariableTicking = false`). 켜면 Trait이 가변 틱 프래그먼트를 붙인다(`MassLODTrait.cpp:129,144`). 건너뛴 시간의 보상(누적 델타)은 소스에서 확인하지 않았다. Lab 프로세서는 프레임 델타를 쓴다 | `MassLOD/Public/MassSimulationLOD.h`, `MassLODTickRateController.h`, `MassLOD/Public/MassLODTrait.h:52`(2026-11-09 확인) |
-| 회피는 High만(미확인) | `UMassMovingAvoidanceProcessor`가 High LOD만 처리한다는 것은 소스로 확인하지 않은 추정이다. M4 계획 재작성 때 확인한다 | `MassNavigation/Private/MassAvoidanceProcessors.cpp`(확인 전) |
+| 가변 틱 | `FMassSimulationVariableTickParameters::TickRates[EMassLOD::Max]`, `TMassLODTickRateController`가 청크 단위로 이 프레임에 돌릴지 결정. **기본은 꺼져 있다**(`bEnableVariableTicking = false`). 켜면 Trait이 `FMassSimulationVariableTickFragment`와 청크 프래그먼트를 붙인다. 델타는 누적이다(`TickRate.DeltaTime = Time − LastTickedTime`). 그 델타와 청크 필터 `ShouldTickChunkThisFrame`를 쓰는 프로세서만 건너뛴다 | `MassLOD/Public/MassLODTrait.h:52`, `MassLODTrait.cpp:144`, `MassLODTickRateController.h` `UpdateTickRateFromLOD`(2026-11-09 확인) |
+| LOD 태그 | `FMassOffLODTag` 등은 `bSetLODTags` 또는 가변 틱을 켤 때만 붙는다. 없으면 어떤 프로세서도 LOD를 모른다 | `MassLODTrait.cpp:129` |
+| Simulation LOD 기본값 | 거리 0 / 50 / 100 / 300m, 상한 High 100 / Medium 200 / Low 300 / Off 무제한, 틱 0 / 0.5 / 1.0 / 1.5초, 히스테리시스 10% | `MassLOD/Private/MassSimulationLOD.cpp:20-39` |
+| Off 개체 스냅 | `UMassOffLODNavigationProcessor`가 Off 태그 엔티티의 위치를 매 틱 `MoveTarget.Center`로 옮긴다. 자동 등록(기본 true). 우리 Center는 오브라 Off를 두면 안 된다 | `MassAI/.../MassNavigation/Private/MassNavigationProcessors.cpp:23-61`, `MassEntity/Public/MassProcessor.h:252` |
+| TickRates를 읽는 엔진 프로세서 | Off 내비게이션, 부드러운 회전, SimpleMovement뿐. `UMassApplyMovementProcessor`·조향은 Off만 제외하고 매 프레임 프레임 델타(상한 0.1초) | `MassNavigationProcessors.cpp`, `MassSmoothOrientationProcessors.cpp`, `MassMovement/Private/MassSimpleMovementTrait.cpp:43`, `MassMovementProcessors.cpp:41,87,100`, `MassSteeringProcessors.cpp:86` |
+| 회피는 High만 | `UMassMovingAvoidanceProcessor`·장애물 회피 쿼리가 Medium·Low·Off 태그를 제외한다. LOD 태그가 있어야 동작한다 | `MassNavigation/Private/MassAvoidanceProcessors.cpp:301-303,1125-1127`(2026-11-09 확인) |
+| City Sample의 틱 절약 | 엔진에 맡기지 않고 자기 프로세서가 청크 LOD를 읽어 갱신 간격을 정한다(Off면 1.9\~2.1초) | `MassAIBehavior/Private/MassZoneGraphAnnotationFragments.cpp:19-48` |
 | Avoidance 상태 | Experimental | `MassAI.uplugin` |
 
 ## 6. Test 구성 매크로(측정 빌드)

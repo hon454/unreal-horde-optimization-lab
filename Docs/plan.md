@@ -158,18 +158,28 @@ M0\~M5가 필수다. 마일스톤마다 바꾸는 최적화 변수는 하나고,
 
 ## M4. Simulation LOD
 
-**목표:** 로직도 거리별로 가볍게. **비교 상대는 M3b 대표점.**
+**목표:** 로직도 거리별로 가볍게. **비교 상대는 M3b 대표점.** 2026-11-09에 엔진 소스로 전제를 확인하고 다시 썼다(사용자 결정 A안 "엔진 LOD + 자체 틱". 사실의 출처는 [engine-notes.md](Reference/engine-notes.md) 5절).
 
-**바꾸는 변수:** `UMassSimulationLODTrait`의 `TickRates[High/Medium/Low/Off]`. `UMassMovingAvoidanceProcessor`는 High LOD만 처리하므로 먼 개체의 회피는 자동으로 꺼진다(engine-notes.md). 시나리오는 바꾸지 않는다(넉다운은 backlog).
+**엔진이 해 주는 것과 해 주지 않는 것.** `UMassSimulationLODTrait`은 거리 등급(High/Medium/Low/Off), LOD 태그, 청크 단위 틱 결정(`ShouldTickChunkThisFrame`), 누적 델타(`FMassSimulationVariableTickFragment::DeltaTime`)를 준다. 그 틀을 읽는 엔진 프로세서는 Off 내비게이션, 부드러운 회전, SimpleMovement뿐이다. 엔진 이동·조향·회피는 Off만 제외하고 매 프레임 프레임 델타로 돈다. 가변 틱과 태그는 기본으로 꺼져 있고, 기본 상한(100/200/300)이면 20k 중 약 19,400이 Off가 되며, **Off 개체는 매 틱 `MoveTarget.Center`로 스냅된다**(우리 Center는 오브라 켜는 순간 전부 순간이동). City Sample도 틱 절약을 엔진에 맡기지 않고 자기 프로세서가 청크 LOD를 읽어 간격을 정한다(`MassZoneGraphAnnotationFragments.cpp:34-48`).
+
+**바꾸는 변수:** Lab 로직 프로세서의 틱 간격(`TickRates[High/Medium/Low]`). 시나리오는 바꾸지 않는다(넉다운은 backlog).
+
+**만드는 것**
+- Trait: `bEnableVariableTicking` 켬, `LODMaxCount` 무제한, 거리는 표현 밴드와 독립(초안 High 0\~80m / Medium 80\~200m / Low 200m\~, **Off 없음**). Off를 두지 않아 스냅과 이동 제외가 발동하지 않는다.
+- Lab 로직 프로세서 넷(접근, 범위 피해, 저격, 상태)에 청크 필터 `ShouldTickChunkThisFrame`를 걸고 델타를 누적 델타로 바꾼다. 범위 피해(초당 피해 × 델타)와 상태 타이머가 건너뛴 시간을 보상한다. 표현(VAT·ActorSync)은 M3b 정비로 로직 프래그먼트를 읽지 않으므로 로직이 건너뛰어도 재생이 멈추지 않는다. 저격 프로세서는 틱 간격이 저격 간격(2초)보다 짧아야 한다.
+- 엔진 이동·조향은 매 프레임 그대로 둔다. 이 비용은 M3b 트레이스(20k P1 병렬·직렬)로 먼저 보고, 크면 E4 (d)로 Low 밴드 이동을 우리 프로세서로 바꾼다(`FMassCustomMovementTag`, 누적 델타로 직진).
 
 **실험 E4**
-- (a) 끔 / 켬의 Game Thread, 프로세서별 ms.
-- (b) 먼 개체 움직임의 끊김(영상, 틱 간격별).
-- (c) 가까운 개체만 비켜 가기(충돌 회피): 회피 Trait을 켜고 Simulation LOD로 먼 개체의 회피가 빠지게 해(위의 High LOD 조건) E1 (c)의 전체 회피(N=20k 프레임 57.7ms)와 비교한다. M2\~M3에서는 회피를 끈 채로 둔다(2026-11-08 추가).
+- (a) 끔 / 켬의 Game Thread, 프로세서별 ms(트레이스).
+- (b) 틱 간격 스윕: Medium 0.25 / 0.5초, Low 0.5 / 1.0초. 먼 개체가 1초에 한 번 3m씩 뛰면 200m 밖(화면 높이 0.4%)에서도 보일 수 있다. 영상으로 확인한다.
+- (c) 가까운 개체만 비켜 가기(충돌 회피): 회피 Trait을 켠다. 회피 프로세서는 High 태그만 처리하므로(`MassAvoidanceProcessors.cpp:301-303`) 80m 안만 회피한다. E1 (c)의 전체 회피(N=20k 프레임 57.7ms)와 비교한다. M2\~M3b는 회피 끔.
+- (d) 선택: Low 밴드 이동을 우리 프로세서로. M3b 트레이스에서 이동·조향이 Game Thread의 큰 몫이면 한다.
 
-**선택 M4b. StateTree + Signal:** 접근 → 피격 → 사망 전이를 태그 상태(M1 방식) 대신 StateTree로. 피해 적용 프로세서가 Signal로 깨운다. (a) 저격 1회당 깨어나는 엔티티 수 (b) 태그 vs StateTree 비용. 글 하나 분량이면 하고, 아니면 backlog.
+**글 맥락(06):** Shabel은 틱 제한을 "OOP의 흔한 회피책"이라 했다(talk-notes.md 07:27). 글에서는 "쓰기 패턴 정리(M3b)가 먼저, 틱 간격은 그 뒤"로 쓴다.
 
-**측정 조건:** N {1k, 5k, 20k, 50k}.
+**선택 M4b. StateTree + Signal:** 접근 → 피격 → 사망 전이를 태그 상태(M1 방식) 대신 StateTree로. 피해 적용 프로세서가 Signal로 깨운다. (a) 저격 1회당 깨어나는 엔티티 수 (b) 태그 vs StateTree 비용. 글 하나 분량이면 하고, 아니면 backlog. 강연 근거는 윤준기 21:33뿐이라 "선택" 유지(talk-notes.md).
+
+**측정 조건:** N {1k, 5k, 20k, 30k, 50k}.
 
 ## M5. ISKM
 

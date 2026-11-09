@@ -217,7 +217,8 @@
 
 - 사용자 요청(2026-11-09): 개념 설명을 글에 넣고 싶다. Representation LOD(M1\~M3)는 거리별로 "어떻게 그릴지"(액터 / VAT / 안 그림), Simulation LOD(M4)는 거리별로 "로직을 얼마나 자주 돌릴지"다. 한 줄로: 덜 그리기에 덜 생각하기를 더한다.
 - 동작: `UMassSimulationLODTrait`이 거리 밴드로 High / Medium / Low / Off를 매기고 `FMassSimulationVariableTickParameters::TickRates`에 단계별 간격을 둔다. 같은 단계 개체가 같은 청크에 모이고, `TMassLODTickRateController`가 이번 프레임에 돌릴 청크만 고른다(`MassLOD/Public/MassSimulationLOD.h`, `MassLODTickRateController.h`).
-- 정정(2026-11-09): 앞서 적었던 "건너뛴 시간은 누적돼 다음 틱에 들어간다"와 "먼 개체의 회피는 자동으로 꺼진다"는 소스로 확인하지 않은 추정이었다. 확인한 것: 가변 틱은 기본으로 꺼져 있다(`bEnableVariableTicking = false`, `MassLOD/Public/MassLODTrait.h:52`). Lab 프로세서는 프레임 델타를 그대로 쓰므로 가변 틱을 켜도 건너뛴 시간을 보상하지 않는다. 엔진 기본 `LODMaxCount`와 Off 개체의 이동 동작은 M4 계획 재작성 때 소스로 확인해 적는다. 그때까지 M4 설명은 쓰지 않는다.
+- 정정(2026-11-09, 소스 확인 뒤): 누적 델타는 맞다(`MassLODTickRateController.h`, `Time − LastTickedTime`). 단 그 델타를 읽고 청크 필터를 건 프로세서만 건너뛴다. 엔진 이동·조향은 매 프레임 프레임 델타로 돌고 `TickRates`를 읽지 않는다. 회피가 High만 처리하는 것도 맞지만 LOD 태그가 있어야 한다(`bSetLODTags` 또는 가변 틱, 기본 둘 다 꺼짐). 기본 상한(100/200/300)이면 20k 중 약 19,400이 Off고, Off 개체는 `MoveTarget.Center`로 스냅된다(`MassNavigationProcessors.cpp:61`). 그래서 M4는 "엔진이 다 해 준다"가 아니라 "엔진이 등급·태그·누적 델타를 주고 우리 프로세서가 그 틀로 건너뛴다"로 다시 썼다(plan.md M4, engine-notes.md 5절).
+- 글에서 강조할 것: City Sample도 같은 구조다. 자기 프로세서가 청크 LOD를 읽어 갱신 간격을 정한다(`MassZoneGraphAnnotationFragments.cpp:34-48`). "Simulation LOD를 켰다"는 문장은 어느 프로세서가 그 틀을 쓰는지까지 말해야 뜻이 있다.
 - 얻는 것: 먼 개체만큼 Mass 로직의 Game Thread 비용이 준다. 회피 프로세서는 High만 처리해 먼 개체의 회피가 자동으로 빠진다(E4 (c)에서 가까운 개체만 비켜 가기).
 - 잃는 것: 먼 개체가 간격마다 한 번에 움직여 끊겨 보인다(E4 (b)). 표현은 매 프레임 갱신되므로 보간을 넣을지가 쟁점이다.
 
