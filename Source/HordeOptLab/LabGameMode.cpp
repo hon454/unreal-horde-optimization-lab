@@ -4,6 +4,7 @@
 #include "LabConfig.h"
 #include "LabCrowdSpawner.h"
 #include "LabCrowdSubsystem.h"
+#include "LabUnitAssets.h"
 #include "LabHud.h"
 #include "InputCoreTypes.h"
 #include "LabOrb.h"
@@ -119,7 +120,7 @@ void ALabGameMode::StartPlay()
 void ALabGameMode::ApplyVariantCVars()
 {
 	const ELabVariant V = FLabConfig::Get().Variant;
-	if (V != ELabVariant::Budget && V != ELabVariant::M3BudgetDist && V != ELabVariant::M3BudgetSig)
+	if (V != ELabVariant::Budget && V != ELabVariant::M3BudgetDist && V != ELabVariant::M3BudgetSig && V != ELabVariant::M3Sig)
 	{
 		return;
 	}
@@ -165,6 +166,9 @@ void ALabGameMode::TickBench()
 			CSV_METADATA(TEXT("LabSeed"), *FString::FromInt(Config.Seed));
 			CSV_METADATA(TEXT("LabVariant"), FLabConfig::VariantName(Config.Variant));
 			CSV_METADATA(TEXT("LabLabel"), *Config.Label);
+			// M3b 2종: 종류 수와 에셋 상태. substituted(대형 에셋 없음, 소형으로 대체)는 스모크 전용이라 비교에 쓰지 않는다(LabUnitAssets.h).
+			CSV_METADATA(TEXT("LabTypes"), *FString::FromInt(Config.Types));
+			CSV_METADATA(TEXT("LabTypesAssets"), Config.Types == 2 ? (FLabUnitTypes::bLargeSubstituted ? TEXT("substituted") : TEXT("ok")) : TEXT("-"));
 			// 측정 방법 5번(plan.md "M3b"): 빌드 커밋, 고정 CVar 값, GPU 드라이버. summarize.py BUILD_KEYS(labbuild·labcvars·labdriver)와 이름을 맞춘다.
 			CSV_METADATA(TEXT("LabBuild"), TEXT(LAB_BUILD_COMMIT));
 			CSV_METADATA(TEXT("LabCVars"), *LabFixedCVarString());
@@ -172,6 +176,11 @@ void ALabGameMode::TickBench()
 			FCsvProfiler::Get()->BeginCapture(-1, FString(), Config.Label);
 #endif
 			RespawnsAtStart = Spawner->GetRespawnCount();
+			if (ULabCrowdSubsystem* Crowd = GetWorld()->GetSubsystem<ULabCrowdSubsystem>(); Crowd && Crowd->IsActive())
+			{
+				LargeActorFramesAtStart = Crowd->LargeActorFrames.load();
+				LargeActorSkipsAtStart = Crowd->LargeActorSkips.load();
+			}
 			BenchPhase = ELabBenchPhase::Measure;
 			BenchPhaseTime = 0.f;
 			BenchFrames = 0;
@@ -192,6 +201,12 @@ void ALabGameMode::TickBench()
 			CSV_METADATA(TEXT("LabAlive"), *FString::FromInt(Alive));
 			CSV_METADATA(TEXT("LabRespawns"), *FString::FromInt(Spawner->GetRespawnCount() - RespawnsAtStart));
 			CSV_METADATA(TEXT("LabOk"), bOk ? TEXT("1") : TEXT("0"));
+			if (ULabCrowdSubsystem* Crowd = GetWorld()->GetSubsystem<ULabCrowdSubsystem>(); Crowd && Crowd->IsActive())
+			{
+				// E3 (3c) 지표: 측정 구간에서 대형 액터가 있었던 프레임 합(액터×프레임)과 그중 애니 틱을 건너뛴 수(ULabActorSyncProcessor). 비율 = Skips / Frames
+				CSV_METADATA(TEXT("LabLargeActorFrames"), *FString::Printf(TEXT("%lld"), (long long)(Crowd->LargeActorFrames.load() - LargeActorFramesAtStart)));
+				CSV_METADATA(TEXT("LabLargeActorSkips"), *FString::Printf(TEXT("%lld"), (long long)(Crowd->LargeActorSkips.load() - LargeActorSkipsAtStart)));
+			}
 			FCsvProfiler::Get()->EndCapture();
 #endif
 			// Test 구성은 로그를 남기지 않는다(Build.h UE_BUILD_TEST 블록, NO_LOGGING = !USE_LOGGING_IN_SHIPPING).

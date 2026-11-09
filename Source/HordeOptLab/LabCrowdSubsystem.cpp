@@ -35,16 +35,26 @@ namespace
 	}
 }
 
-void ULabCrowdSubsystem::Activate(ALabCrowdSpawner* InSpawner, UStaticMesh* Mesh, float InHitDuration, float InDeathDuration)
+void ULabCrowdSubsystem::Activate(ALabCrowdSpawner* InSpawner, TConstArrayView<UStaticMesh*> MeshesByType, float InHitDuration, float InDeathDuration)
 {
 	Spawner = InSpawner;
 	HitDuration = InHitDuration;
 	DeathDuration = InDeathDuration;
+	EntityConfigs.Reset();
+	for (int32 Type = 0; Type < MeshesByType.Num(); ++Type)
+	{
+		EntityConfigs.Add(BuildEntityConfig(Type, MeshesByType[Type]));
+	}
+	bActive = true;
+}
 
+UMassEntityConfigAsset* ULabCrowdSubsystem::BuildEntityConfig(int32 UnitType, UStaticMesh* Mesh)
+{
 	// EntityConfig를 실행 시 만든다(ADR-0005). 소유자가 있으면 ConfigGuid가 경로로 결정적으로 정해져 실행마다 같은 템플릿이 된다
-	// (MassSpawner/Private/MassEntityConfigAsset.cpp:33, 템플릿 ID는 :137).
-	EntityConfig = NewObject<UMassEntityConfigAsset>(this, TEXT("LabMinionConfig"));
-	AddLabTrait<ULabMinionTrait>(*EntityConfig);
+	// (MassSpawner/Private/MassEntityConfigAsset.cpp:33, 템플릿 ID는 :137). 2종(M3b)은 종류마다 이름이 다른 Config 하나씩이라 템플릿과 아키타입이 갈린다.
+	UMassEntityConfigAsset* EntityConfig = NewObject<UMassEntityConfigAsset>(this, UnitType == LabUnitLarge ? TEXT("LabMinionLargeConfig") : TEXT("LabMinionConfig"));
+	ULabMinionTrait* MinionTrait = AddLabTrait<ULabMinionTrait>(*EntityConfig);
+	MinionTrait->UnitType = UnitType;
 	AddLabTrait<ULabMovementTrait>(*EntityConfig);
 	AddLabTrait<UMassSteeringTrait>(*EntityConfig);
 	AddLabTrait<UMassSmoothOrientationTrait>(*EntityConfig);
@@ -76,8 +86,16 @@ void ULabCrowdSubsystem::Activate(ALabCrowdSpawner* InSpawner, UStaticMesh* Mesh
 	const bool bM3 = FLabConfig::Get().Stage >= ELabStage::M3;
 	if (bM3)
 	{
-		const bool bBudget = Variant == ELabVariant::M3BudgetDist || Variant == ELabVariant::M3BudgetSig;
-		Visual->HighResTemplateActor = bBudget ? ALabMinionMassActorBudget::StaticClass() : ALabMinionMassActor::StaticClass();
+		const bool bBudget = Variant == ELabVariant::M3BudgetDist || Variant == ELabVariant::M3BudgetSig || Variant == ELabVariant::M3Sig;
+		// 종류별 액터 클래스. 엔진 풀은 클래스가 키라(UMassActorSpawnerSubsystem::PooledActors, MassActorSpawnerSubsystem.h:321) 대형은 풀도 따로 생긴다.
+		if (UnitType == LabUnitLarge)
+		{
+			Visual->HighResTemplateActor = bBudget ? ALabMinionMassActorBudgetLarge::StaticClass() : ALabMinionMassActorLarge::StaticClass();
+		}
+		else
+		{
+			Visual->HighResTemplateActor = bBudget ? ALabMinionMassActorBudget::StaticClass() : ALabMinionMassActor::StaticClass();
+		}
 		Visual->Params.LODRepresentation[EMassLOD::High] = Variant == ELabVariant::M3NoActor ? EMassRepresentationType::StaticMeshInstance : EMassRepresentationType::HighResSpawnedActor;
 		// 전환 팝핑 대책(2026-11-08 사용자 결정). VAT → 액터: 액터의 포즈가 준비될 때까지 VAT 인스턴스를 그린다.
 		// 액터 → VAT: 액터를 한 프레임 더 남긴다(엔진 군중 기본값도 켠다, MassCrowdVisualizationTrait.cpp:22). bKeepLowResActors가 켜져 있어야 동작한다(MassRepresentationProcessor.h:27-30).
@@ -127,8 +145,8 @@ void ULabCrowdSubsystem::Activate(ALabCrowdSpawner* InSpawner, UStaticMesh* Mesh
 		Visual->Params.LODRepresentation[EMassLOD::Medium] = EMassRepresentationType::LowResSpawnedActor;
 	}
 
-	bActive = true;
-	UE_LOG(LogLab, Log, TEXT("lab_mass_config traits=%d mesh=%s"), EntityConfig->GetConfig().GetTraits().Num(), *GetNameSafe(Mesh));
+	UE_LOG(LogLab, Log, TEXT("lab_mass_config type=%d traits=%d mesh=%s actor=%s"), UnitType, EntityConfig->GetConfig().GetTraits().Num(), *GetNameSafe(Mesh), *GetNameSafe(Visual->HighResTemplateActor.Get()));
+	return EntityConfig;
 }
 
 void ULabCrowdSubsystem::SpawnEntities(TConstArrayView<FVector> Locations, TConstArrayView<uint32> Serials)
@@ -137,21 +155,35 @@ void ULabCrowdSubsystem::SpawnEntities(TConstArrayView<FVector> Locations, TCons
 	UWorld* World = GetWorld();
 	UMassSpawnerSubsystem* SpawnerSubsystem = World->GetSubsystem<UMassSpawnerSubsystem>();
 	FMassEntityManager& EntityManager = UE::Mass::Utils::GetEntityManagerChecked(*World);
-	const FMassEntityTemplate& Template = EntityConfig->GetOrCreateEntityTemplate(*World);
-
-	TArray<FMassEntityHandle> Entities;
-	TSharedPtr<FMassEntityManager::FEntityCreationContext> Creation = SpawnerSubsystem->SpawnEntities(Template, Locations.Num(), Entities);
-	// 생성 직후 초기화(생성 컨텍스트 안, 게임 스레드). 처리 중 접근이 아니라 쿼리 밖 접근을 그대로 둔다(Docs/Worklog/M3b.md 표).
-	for (int32 i = 0; i < Entities.Num(); ++i)
+	// 종류별로 나눠 각 템플릿으로 만든다(2종, LabUnitAssets.h). 1종이면 모두 [0]이라 전과 같은 한 번의 생성이다.
+	TArray<int32> IndicesByType[LabUnitTypeMax];
+	for (int32 i = 0; i < Serials.Num(); ++i)
 	{
-		const FVector Facing = (OrbCenter - Locations[i]).GetSafeNormal2D();
-		EntityManager.GetFragmentDataChecked<FTransformFragment>(Entities[i]).SetTransform(FTransform(Facing.Rotation(), Locations[i]));
-		EntityManager.GetFragmentDataChecked<FLabMinionFragment>(Entities[i]).Serial = Serials[i];
-		EntityManager.GetFragmentDataChecked<FLabHealthFragment>(Entities[i]).Health = FLabScenario::MinionHealth;
-		EntityManager.GetFragmentDataChecked<FLabAnimStateFragment>(Entities[i]).Set(ELabMinionState::Walk, -LabWalkPhase(Serials[i])); // 재생 시각 = Now + 위상
+		IndicesByType[FMath::Min(FLabUnitTypes::TypeOf(Serials[i]), EntityConfigs.Num() - 1)].Add(i);
 	}
-	Creation.Reset(); // 옵저버(엔진 초기화 프로세서)가 여기서 돈다
-	AliveCount += Entities.Num();
+	for (int32 Type = 0; Type < EntityConfigs.Num(); ++Type)
+	{
+		const TArray<int32>& Indices = IndicesByType[Type];
+		if (Indices.Num() == 0)
+		{
+			continue;
+		}
+		const FMassEntityTemplate& Template = EntityConfigs[Type]->GetOrCreateEntityTemplate(*World);
+		TArray<FMassEntityHandle> Entities;
+		TSharedPtr<FMassEntityManager::FEntityCreationContext> Creation = SpawnerSubsystem->SpawnEntities(Template, Indices.Num(), Entities);
+		// 생성 직후 초기화(생성 컨텍스트 안, 게임 스레드). 처리 중 접근이 아니라 쿼리 밖 접근을 그대로 둔다(Docs/Worklog/M3b.md 표).
+		for (int32 k = 0; k < Entities.Num(); ++k)
+		{
+			const int32 i = Indices[k];
+			const FVector Facing = (OrbCenter - Locations[i]).GetSafeNormal2D();
+			EntityManager.GetFragmentDataChecked<FTransformFragment>(Entities[k]).SetTransform(FTransform(Facing.Rotation(), Locations[i]));
+			EntityManager.GetFragmentDataChecked<FLabMinionFragment>(Entities[k]).Serial = Serials[i];
+			EntityManager.GetFragmentDataChecked<FLabHealthFragment>(Entities[k]).Health = FLabScenario::MinionHealth;
+			EntityManager.GetFragmentDataChecked<FLabAnimStateFragment>(Entities[k]).Set(ELabMinionState::Walk, -LabWalkPhase(Serials[i])); // 재생 시각 = Now + 위상
+		}
+		Creation.Reset(); // 옵저버(엔진 초기화 프로세서)가 여기서 돈다
+		AliveCount += Entities.Num();
+	}
 }
 
 void ULabCrowdSubsystem::RequestRespawn(int32 Count)

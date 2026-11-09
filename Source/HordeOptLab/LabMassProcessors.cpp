@@ -3,6 +3,7 @@
 #include "LabCrowdSubsystem.h"
 #include "LabMassTypes.h"
 #include "LabSnipe.h"
+#include "LabUnitAssets.h"
 #include "LabVatProcessor.h"
 #include "MassCommands.h"
 #include "MassCommonFragments.h"
@@ -186,6 +187,7 @@ void ULabOrbSnipeProcessor::ConfigureQueries(const TSharedRef<FMassEntityManager
 	// 순회에서는 Serial만 읽지만 고른 대상의 StateTimeLeft와 표현 상태를 바꾸므로 쓰기로 선언한다(Shabel 12:32, talk-notes.md).
 	EntityQuery.AddRequirement<FLabMinionFragment>(EMassFragmentAccess::ReadWrite);
 	EntityQuery.AddRequirement<FLabAnimStateFragment>(EMassFragmentAccess::ReadWrite);
+	EntityQuery.AddConstSharedRequirement<FLabUnitTypeParams>(EMassFragmentPresence::All); // 2종: 청크의 종류(대형 예약 발, LabSnipe.h E안)
 	EntityQuery.AddTagRequirement<FLabMinionTag>(EMassFragmentPresence::All);
 	EntityQuery.AddTagRequirement<FLabHitTag>(EMassFragmentPresence::None);
 	EntityQuery.AddTagRequirement<FLabDeadTag>(EMassFragmentPresence::None);
@@ -214,10 +216,11 @@ void ULabOrbSnipeProcessor::Execute(FMassEntityManager& EntityManager, FMassExec
 		return;
 	}
 
-	// M0 ALabOrb::Snipe와 같은 선택: 화면 안의 산 개체를 거리 구간별로 나눠 구간마다 해시가 가장 작은 개체(LabSnipe.h).
-	TLabSnipePicker<FMassEntityHandle> Picker;
+	// M0 ALabOrb::Snipe와 같은 선택: 화면 안의 산 개체를 거리 구간별로 나눠 구간마다 해시가 가장 작은 개체(LabSnipe.h). 2종은 예약 발만 대형(E안).
+	TLabSnipeSelector<FMassEntityHandle> Picker(SnipeTick);
 	EntityQuery.ForEachEntityChunk(Context, [&](FMassExecutionContext& Context)
 	{
+		const bool bLarge = Context.GetConstSharedFragment<FLabUnitTypeParams>().UnitType == LabUnitLarge; // 종류는 청크 단위(아키타입)
 		const TConstArrayView<FTransformFragment> Transforms = Context.GetFragmentView<FTransformFragment>();
 		const TConstArrayView<FLabHealthFragment> Healths = Context.GetFragmentView<FLabHealthFragment>();
 		const TConstArrayView<FLabMinionFragment> Minions = Context.GetFragmentView<FLabMinionFragment>();
@@ -234,7 +237,7 @@ void ULabOrbSnipeProcessor::Execute(FMassEntityManager& EntityManager, FMassExec
 			{
 				continue;
 			}
-			Picker.Offer(Band, HashCombineFast(::GetTypeHash(Minions[It].Serial), ::GetTypeHash(SnipeTick)), Context.GetEntity(It), Location);
+			Picker.Offer(Band, HashCombineFast(::GetTypeHash(Minions[It].Serial), ::GetTypeHash(SnipeTick)), Context.GetEntity(It), Location, bLarge);
 		}
 	});
 
@@ -242,7 +245,7 @@ void ULabOrbSnipeProcessor::Execute(FMassEntityManager& EntityManager, FMassExec
 	const float Now = Crowd->GetWorld()->GetTimeSeconds();
 	const bool bOld = LabUseOldQueries();
 	FScopeLock Lock(&Crowd->ResultLock);
-	Picker.ForEach([&](const TLabSnipePicker<FMassEntityHandle>::FPick& Pick)
+	Picker.ForEach([&](const TLabSnipeSelector<FMassEntityHandle>::FPick& Pick)
 	{
 		const FMassEntityHandle Target = Pick.Target;
 		if (bOld)

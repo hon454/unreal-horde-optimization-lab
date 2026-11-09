@@ -56,6 +56,8 @@ public:
 
 	bool IsAlive() const { return State == ELabMinionState::Walk; }
 	uint32 GetSerial() const { return Serial; }
+	/** 종류(ELabUnitType, LabUnitAssets.h). M0는 InitMinion이 일련번호로 정하고, M3 하이드레이션 액터는 클래스(…Large)가 정한다. 저격 E안이 읽는다 */
+	int32 GetUnitType() const { return UnitType; }
 
 	virtual void Tick(float DeltaSeconds) override;
 
@@ -68,6 +70,7 @@ protected:
 
 	const FLabMinionAssets* AssetsRef = nullptr;
 	uint32 Serial = 0;
+	int32 UnitType = 0; // ELabUnitType
 	ELabMinionState State = ELabMinionState::Walk;
 	float Health = 0.f;
 	float StateTimeLeft = 0.f;
@@ -176,6 +179,27 @@ public:
 	virtual void EndPlay(const EEndPlayReason::Type Reason) override;
 	virtual void PrepareForPooling_Implementation() override;
 	virtual void PrepareForGame_Implementation() override;
+};
+
+/**
+ * 2종 대형 하이드레이션 액터(M3b). 부품과 동작은 소형과 같고 에셋만 대형(BeginPlay가 종류로 읽는다, LabUnitAssets.h).
+ * 클래스를 따로 두는 이유: 엔진 액터 풀이 클래스를 키로 쓴다(UMassActorSpawnerSubsystem::PooledActors, MassActorSpawnerSubsystem.h:321). 그래서 대형 풀이 따로 생긴다.
+ */
+UCLASS()
+class ALabMinionMassActorLarge : public ALabMinionMassActor
+{
+	GENERATED_BODY()
+public:
+	ALabMinionMassActorLarge(const FObjectInitializer& ObjectInitializer);
+};
+
+/** 2종 대형 + E3 (3) Budget(m3budgetdist·m3budgetsig·m3sig). */
+UCLASS()
+class ALabMinionMassActorBudgetLarge : public ALabMinionMassActorBudget
+{
+	GENERATED_BODY()
+public:
+	ALabMinionMassActorBudgetLarge(const FObjectInitializer& ObjectInitializer);
 };
 
 /** E3 (5): 저품질 액터(City Sample의 LowRes 단계에 해당). URO, 가장 낮은 메시 LOD 고정, 그림자 끔. */

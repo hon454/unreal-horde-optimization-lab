@@ -61,5 +61,7 @@ protected:
 	float BenchPhaseTime = 0.f;
 	int32 BenchFrames = 0;
 	int32 RespawnsAtStart = 0;
+	int64 LargeActorFramesAtStart = 0; // E3 (3c) 스탯의 측정 시작 값(ULabCrowdSubsystem::LargeActorFrames·Skips)
+	int64 LargeActorSkipsAtStart = 0;
 	int32 BenchExitCode = 0;
 };

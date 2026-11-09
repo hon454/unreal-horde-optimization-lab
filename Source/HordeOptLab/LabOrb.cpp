@@ -4,6 +4,7 @@
 #include "LabCrowdSpawner.h"
 #include "LabCrowdSubsystem.h"
 #include "LabSnipe.h"
+#include "LabUnitAssets.h"
 #include "Camera/PlayerCameraManager.h"
 #include "GameFramework/PlayerController.h"
 #include "Components/StaticMeshComponent.h"
@@ -160,8 +161,8 @@ void ALabOrb::Snipe()
 	const FVector Center = GetActorLocation();
 	const FLabSnipeView View = GetSnipeView();
 
-	// 화면 안의 산 개체를 거리 구간별로 나눠, 구간마다 해시(일련번호, 저격 틱)가 가장 작은 개체를 고른다(LabSnipe.h).
-	TLabSnipePicker<ALabMinion*> Picker;
+	// 화면 안의 산 개체를 거리 구간별로 나눠, 구간마다 해시(일련번호, 저격 틱)가 가장 작은 개체를 고른다(LabSnipe.h). 2종은 예약 발만 대형(E안).
+	TLabSnipeSelector<ALabMinion*> Picker(SnipeTick);
 	for (ALabMinion* Minion : Spawner->GetMinions())
 	{
 		if (!Minion->IsAlive())
@@ -174,10 +175,10 @@ void ALabOrb::Snipe()
 		{
 			continue;
 		}
-		Picker.Offer(Band, HashCombineFast(::GetTypeHash(Minion->GetSerial()), ::GetTypeHash(SnipeTick)), Minion, Location);
+		Picker.Offer(Band, HashCombineFast(::GetTypeHash(Minion->GetSerial()), ::GetTypeHash(SnipeTick)), Minion, Location, Minion->GetUnitType() == LabUnitLarge);
 	}
 
-	Picker.ForEach([this](const TLabSnipePicker<ALabMinion*>::FPick& Pick)
+	Picker.ForEach([this](const TLabSnipeSelector<ALabMinion*>::FPick& Pick)
 	{
 		Pick.Target->Snipe();
 		++SnipeCount;

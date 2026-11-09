@@ -33,7 +33,8 @@ protected:
 	void LoadAssets();
 	void SpawnEntitiesAt(TConstArrayView<FVector2D> RadiusAngles);
 
-	UPROPERTY() FLabMinionAssets Assets;
+	UPROPERTY() FLabMinionAssets Assets;      // 소형(기본)
+	UPROPERTY() FLabMinionAssets LargeAssets; // 2종 대형(-LabTypes=2). 대형 에셋이 하나라도 없으면 Assets와 같다(대체, 스모크 전용. LabUnitAssets.h)
 	UPROPERTY() TArray<TObjectPtr<ALabMinion>> Minions;
 
 	UPROPERTY() TObjectPtr<class ULabCrowdSubsystem> Crowd; // M1부터

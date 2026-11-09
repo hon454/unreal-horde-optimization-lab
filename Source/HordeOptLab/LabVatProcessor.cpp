@@ -43,6 +43,7 @@ ULabVatISMProcessor::ULabVatISMProcessor()
 void ULabVatISMProcessor::ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager)
 {
 	Super::ConfigureQueries(EntityManager);
+	EntityQuery.AddConstSharedRequirement<FLabUnitTypeParams>(EMassFragmentPresence::All); // 2종: 청크의 종류로 VAT 클립을 고른다
 	if (LabUseOldQueries())
 	{
 		EntityQuery.AddRequirement<FLabMinionFragment>(EMassFragmentAccess::ReadOnly); // m3qold: 로직 프래그먼트를 읽어 로직 넷과 자원을 다툰다
@@ -62,7 +63,6 @@ void ULabVatISMProcessor::Execute(FMassEntityManager& EntityManager, FMassExecut
 	{
 		return;
 	}
-	const FLabVatClips& Clips = Crowd->VatClips;
 	const float Now = World->GetTimeSeconds();
 	const float HitDuration = Crowd->HitDuration;
 	const float DeathDuration = Crowd->DeathDuration;
@@ -88,6 +88,7 @@ void ULabVatISMProcessor::Execute(FMassEntityManager& EntityManager, FMassExecut
 		if (bTiming && Chunks == 0) { CyFirstChunk = C0 - F0; } // 첫 청크 람다까지 걸린 시간(질의 준비)
 		++Chunks;
 		Entities += Context.GetNumEntities();
+		const FLabVatClips& Clips = Crowd->VatClipsByType[Context.GetConstSharedFragment<FLabUnitTypeParams>().UnitType]; // 종류별 VAT(2종). 1종은 [0]
 		UMassRepresentationSubsystem* RepresentationSubsystem = Context.GetSharedFragment<FMassRepresentationSubsystemSharedFragment>().RepresentationSubsystem;
 		check(RepresentationSubsystem);
 		FMassInstancedStaticMeshInfoArrayView ISMInfo = RepresentationSubsystem->GetMutableInstancedStaticMeshInfos();

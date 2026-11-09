@@ -45,6 +45,7 @@ enum class ELabVariant : uint8
 	M3Vis30,     // E3b (8) 기준점: 결정 1 전의 M3 대표값(화면 밖 Base 30m, 화면 안 Visible 30m)
 	M3Hys20,     // E3b (8): 30/30m에 히스테리시스 20%(엔진 기본 10)
 	M3Lock0,     // 진단(2026-11-09 D안): 정비 코드 그대로, mass.commands.LockObserversDuringFlushing만 0(ini의 1을 이 변형에서만 덮는다). m3mass가 M3 묶음보다 0.7ms 느린 원인 가르기
+	M3Sig,       // E3 (3c)(2026-11-09 사용자 결정): Budget Allocator, 중요도는 화면 크기(바운드 반경 ÷ 카메라 거리). 비교 상대는 (3a) m3budgetdist. 새 스탯 LargeActorSkips
 	M3Order,     // A/B(결정 4, 2026-11-09): VatISM·ActorSync에 ExecuteAfter(LabLogic)를 선언한 쪽. 기본(m3mass)은 선언 없음(옛 m3noorder 동작). 20k P1 m3noorder 15.52 vs m3mass 16.12ms
 };
 
@@ -116,6 +117,11 @@ struct FLabConfig
 	 * -LabHydrateFix=L을 주면 단계 L에 맞는 마스크가 된다(0→0, 1→1, 2→3, 3→7, 4→31).
 	 */
 	int32 HydrateFixMask = 31;
+	/**
+	 * 개체 종류 수(-LabTypes=, 기본 1). 2면 일련번호 10의 배수가 대형이다(소형 90 / 대형 10, plan.md "M3b" 2종). 아키타입·VAT·ISM·액터 풀이 종류별로 갈리고
+	 * 저격은 예약 발에서만 대형을 쏜다(LabSnipe.h E안). 1이면 지금까지의 1종 결과가 그대로다(LabUnitAssets.h).
+	 */
+	int32 Types = 1;
 	/** -LabFullyParallel=0이면 mass.FullyParallel을 0으로 둔다(직렬 트레이스, run-m3b.ps1 -SerialArgs). -1은 건드리지 않음. massst 변형과 같은 경로 */
 	int32 FullyParallel = -1;
 	enum EHydrateFix : int32

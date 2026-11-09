@@ -21,6 +21,8 @@ const FLabConfig& FLabConfig::Get()
 		}
 		FParse::Value(Cmd, TEXT("-LabHydrateFixMask="), C.HydrateFixMask);
 		FParse::Value(Cmd, TEXT("-LabFullyParallel="), C.FullyParallel);
+		FParse::Value(Cmd, TEXT("-LabTypes="), C.Types);
+		C.Types = FMath::Clamp(C.Types, 1, 2);
 		C.bBench = FParse::Param(Cmd, TEXT("LabBench"));
 		C.bHud = FParse::Param(Cmd, TEXT("LabHud")) && !C.bBench;
 
@@ -53,6 +55,7 @@ const FLabConfig& FLabConfig::Get()
 			else if (Variant == TEXT("m3hys20")) { C.Variant = ELabVariant::M3Hys20; }
 			else if (Variant == TEXT("m3lock0")) { C.Variant = ELabVariant::M3Lock0; }
 			else if (Variant == TEXT("m3order")) { C.Variant = ELabVariant::M3Order; }
+			else if (Variant == TEXT("m3sig")) { C.Variant = ELabVariant::M3Sig; }
 			else if (Variant == TEXT("massst")) { C.Variant = ELabVariant::MassSt; }
 			else if (Variant == TEXT("massav")) { C.Variant = ELabVariant::MassAv; }
 			else if (Variant == TEXT("massdirlo")) { C.Variant = ELabVariant::MassDirLo; }
@@ -123,6 +126,7 @@ const TCHAR* FLabConfig::VariantName(ELabVariant V)
 	case ELabVariant::M3Hys20: return TEXT("m3hys20");
 	case ELabVariant::M3Lock0: return TEXT("m3lock0");
 	case ELabVariant::M3Order: return TEXT("m3order");
+	case ELabVariant::M3Sig: return TEXT("m3sig");
 	default: return TEXT("full");
 	}
 }
@@ -141,6 +145,6 @@ const TCHAR* FLabConfig::StageName(ELabStage S)
 
 FString FLabConfig::ToLogString() const
 {
-	return FString::Printf(TEXT("lab_config stage=%s n=%d preset=P%d seed=%d variant=%s bench=%d label=%s duration=%.1f"),
-		StageName(Stage), N, Preset, Seed, VariantName(Variant), bBench ? 1 : 0, *Label, DurationSec);
+	return FString::Printf(TEXT("lab_config stage=%s n=%d preset=P%d seed=%d variant=%s bench=%d label=%s duration=%.1f types=%d"),
+		StageName(Stage), N, Preset, Seed, VariantName(Variant), bBench ? 1 : 0, *Label, DurationSec, Types);
 }

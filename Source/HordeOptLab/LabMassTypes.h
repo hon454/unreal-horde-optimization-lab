@@ -52,12 +52,16 @@ struct FLabHealthFragment : public FMassFragment
 	float Health = 0.f;
 };
 
-/** 개체 종류마다 하나씩 공유하는 값. M3b에서 대형이 들어오면 종류별로 갈린다. */
+/**
+ * 개체 종류마다 하나씩 공유하는 값(const shared fragment). M3b 2종(-LabTypes=2)에서 소형·대형이 값이 달라 아키타입이 갈린다(LabUnitAssets.h).
+ * 속도·체력은 같고 UnitType과 BoundRadius만 다르다. 프로세서는 청크마다 Context.GetConstSharedFragment<FLabUnitTypeParams>()로 종류를 안다(개체별 비용 없음).
+ */
 USTRUCT()
 struct FLabUnitTypeParams : public FMassConstSharedFragment
 {
 	GENERATED_BODY()
 
+	UPROPERTY() int32 UnitType = 0; // ELabUnitType
 	UPROPERTY() float MoveSpeed = 0.f;
 	UPROPERTY() float MaxHealth = 0.f;
 	UPROPERTY() float BoundRadius = 0.f;

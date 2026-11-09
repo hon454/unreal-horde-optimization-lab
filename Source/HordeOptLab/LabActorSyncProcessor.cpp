@@ -101,6 +101,7 @@ void ULabActorSyncProcessor::ConfigureQueries(const TSharedRef<FMassEntityManage
 		EntityQuery.AddRequirement<FLabAnimStateFragment>(EMassFragmentAccess::ReadOnly);
 	}
 	EntityQuery.AddRequirement<FMassRepresentationLODFragment>(EMassFragmentAccess::ReadOnly);
+	EntityQuery.AddConstSharedRequirement<FLabUnitTypeParams>(EMassFragmentPresence::All); // 2종: 청크의 종류(VAT 클립, 반경, 대형 스탯)
 	EntityQuery.AddTagRequirement<FLabMinionTag>(EMassFragmentPresence::All);
 	if (LabUseActorTag())
 	{
@@ -117,12 +118,13 @@ void ULabActorSyncProcessor::Execute(FMassEntityManager& EntityManager, FMassExe
 	{
 		return;
 	}
-	const FLabVatClips& Clips = Crowd->VatClips;
-	const float WalkLength = float(Clips.Walk.EndFrame - Clips.Walk.StartFrame + 1) / Clips.SampleRate;
 	const float Now = World->GetTimeSeconds();
 	const float HitDuration = Crowd->HitDuration;
 	const float DeathDuration = Crowd->DeathDuration;
 	const bool bSigBudget = FLabConfig::Get().Variant == ELabVariant::M3BudgetSig;
+	const bool bScreenSig = FLabConfig::Get().Variant == ELabVariant::M3Sig; // E3 (3c)
+	const FVector CameraLocation = Crowd->SnipeView.Location;
+	int32 LargeActors = 0, LargeSkips = 0;
 	const bool bFixStartTime = FLabConfig::Get().HasFix(FLabConfig::FixStartTime);
 	const bool bFixWait = FLabConfig::Get().HasFix(FLabConfig::FixWait);
 	const bool bOld = LabUseOldQueries();
@@ -148,6 +150,11 @@ void ULabActorSyncProcessor::Execute(FMassEntityManager& EntityManager, FMassExe
 		const TConstArrayView<FLabAnimStateFragment> AnimStates = bOld ? TConstArrayView<FLabAnimStateFragment>() : Context.GetFragmentView<FLabAnimStateFragment>();
 		const TConstArrayView<FLabMinionFragment> Minions = bOld ? Context.GetFragmentView<FLabMinionFragment>() : TConstArrayView<FLabMinionFragment>();
 		const TConstArrayView<FMassRepresentationLODFragment> LODs = Context.GetFragmentView<FMassRepresentationLODFragment>();
+		// 종류(2종)는 청크 단위다. VAT 클립 길이(걷기 위상), 바운드 반경(m3sig), 대형 스탯에 쓴다.
+		const FLabUnitTypeParams& TypeParams = Context.GetConstSharedFragment<FLabUnitTypeParams>();
+		const FLabVatClips& Clips = Crowd->VatClipsByType[TypeParams.UnitType];
+		const float WalkLength = float(Clips.Walk.EndFrame - Clips.Walk.StartFrame + 1) / Clips.SampleRate;
+		const bool bLargeChunk = TypeParams.UnitType == LabUnitLarge;
 		// m3qold: 상태는 아키타입 태그에서. 새 구조: 엔티티마다 표현 프래그먼트에서(아래 루프 안).
 		const bool bHit = bOld && Context.DoesArchetypeHaveTag(*FLabHitTag::StaticStruct());
 		const bool bDead = bOld && Context.DoesArchetypeHaveTag(*FLabDeadTag::StaticStruct());
@@ -284,6 +291,22 @@ void ULabActorSyncProcessor::Execute(FMassEntityManager& EntityManager, FMassExe
 					Budgeted->SetComponentSignificance(1.f - FMath::Clamp(LODs[It].LODSignificance / 3.f, 0.f, 1.f));
 				}
 			}
+			else if (bScreenSig)
+			{
+				// E3 (3c)(2026-11-09 사용자 결정): 중요도 = 화면 크기 = 바운드 반경 ÷ 카메라 거리(Significance Manager의 기본형). 크기와 거리를 한 수로 합친다.
+				// 할당기는 큰 값을 먼저 틱하고 절대값은 쓰지 않는다(AnimationBudgetAllocator.cpp:327-342). 비교 상대는 (3a) 거리 단계(m3budgetdist).
+				if (USkeletalMeshComponentBudgeted* Budgeted = Cast<USkeletalMeshComponentBudgeted>(SkelMesh))
+				{
+					Budgeted->SetComponentSignificance(TypeParams.BoundRadius / FMath::Max(FVector::Dist(Xf.GetLocation(), CameraLocation), 1.f));
+				}
+			}
+			if (bLargeChunk)
+			{
+				// E3 (3c) 스탯: 대형 액터 수와 그중 이번 프레임 애니 틱을 건너뛴 수. 할당기가 외부 틱 제어로 둔 컴포넌트는 ShouldTickAnimation()이 bExternalUpdate를
+				// 돌려준다(SkeletalMeshComponent.cpp:1918-1923). 할당기 갱신 전후 어느 쪽 값인지는 틱 순서에 달려 한 프레임 어긋날 수 있다. 예산 변형이 아니면 0이다.
+				++LargeActors;
+				if (SkelMesh->IsUsingExternalTickRateControl() && !SkelMesh->ShouldTickAnimation()) { ++LargeSkips; }
+			}
 
 			// 죽기 진홍색: VAT 머티리얼과 같은 곡선(진행도 x 2.5, 0~1로 자름, Scripts/bake-vat.py)
 			const float DeadAmount = State == ELabMinionState::Dead ? FMath::Clamp(T / DeathDuration * 2.5f, 0.f, 1.f) : 0.f;
@@ -298,6 +321,10 @@ void ULabActorSyncProcessor::Execute(FMassEntityManager& EntityManager, FMassExe
 	CSV_CUSTOM_STAT(Lab, Actors, Actors, ECsvCustomStatOp::Set);
 	CSV_CUSTOM_STAT(Lab, ActorRebinds, Rebinds, ECsvCustomStatOp::Set);
 	CSV_CUSTOM_STAT(Lab, ActorTagsRemoved, TagsRemoved, ECsvCustomStatOp::Set); // 태그 필터 확인용: 떼어진 액터 수와 맞아야 한다
+	CSV_CUSTOM_STAT(Lab, LargeActors, LargeActors, ECsvCustomStatOp::Set);         // 2종: 이 프레임 동기화한 대형 액터 수
+	CSV_CUSTOM_STAT(Lab, LargeActorSkips, LargeSkips, ECsvCustomStatOp::Set);      // E3 (3c): 그중 애니 틱을 건너뛴 수
+	Crowd->LargeActorFrames += LargeActors;
+	Crowd->LargeActorSkips += LargeSkips;
 	if (bTiming)
 	{
 		CSV_CUSTOM_STAT(Lab, ActorMoveMs, float(FPlatformTime::ToMilliseconds64(CyMove)), ECsvCustomStatOp::Set);

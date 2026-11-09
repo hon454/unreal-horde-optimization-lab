@@ -4,6 +4,7 @@
 #include "Subsystems/WorldSubsystem.h"
 #include "MassEntityHandle.h"
 #include "LabSnipe.h"
+#include "LabUnitAssets.h"
 #include "LabCrowdSubsystem.generated.h"
 
 class ALabCrowdSpawner;
@@ -35,11 +36,11 @@ class ULabCrowdSubsystem : public UWorldSubsystem
 {
 	GENERATED_BODY()
 public:
-	/** M1 단계에서 스포너가 부른다. EntityConfig를 만들고 템플릿을 준비한다. */
-	void Activate(ALabCrowdSpawner* InSpawner, UStaticMesh* Mesh, float InHitDuration, float InDeathDuration);
+	/** M1 단계에서 스포너가 부른다. 종류별(MeshesByType.Num() = -LabTypes) EntityConfig를 만들고 템플릿을 준비한다. 종류마다 아키타입·ISM 컴포넌트·액터 클래스(풀)가 갈린다. */
+	void Activate(ALabCrowdSpawner* InSpawner, TConstArrayView<UStaticMesh*> MeshesByType, float InHitDuration, float InDeathDuration);
 	bool IsActive() const { return bActive; }
 
-	/** 땅 위(z=0) 위치와 일련번호로 엔티티를 만든다. 진행 방향은 오브를 본다. */
+	/** 땅 위(z=0) 위치와 일련번호로 엔티티를 만든다. 진행 방향은 오브를 본다. 2종이면 일련번호로 종류를 갈라 각 템플릿으로 만든다(순서 유지). */
 	void SpawnEntities(TConstArrayView<FVector> Locations, TConstArrayView<uint32> Serials);
 	/** 사망 프로세서가 지운 엔티티 수만큼 스포너에 재생성을 맡긴다(게임 스레드, 커맨드 플러시 중). */
 	void RequestRespawn(int32 Count);
@@ -58,7 +59,7 @@ public:
 	FLabSnipeView SnipeView;     // 화면 판정용 카메라(오브가 매 틱 갱신)
 	float HitDuration = 0.5f;
 	float DeathDuration = 1.f;
-	FLabVatClips VatClips;       // M2부터. Activate 전에 스포너가 채운다
+	FLabVatClips VatClipsByType[LabUnitTypeMax]; // M2부터, 종류별(2종). Activate 전에 스포너가 채운다. 1종은 [0]만 쓴다
 
 	// 프로세서가 쓰고 오브가 읽는다. 청크 단위로 병렬 실행될 수 있어 잠금으로 모은다.
 	FCriticalSection ResultLock;
@@ -69,6 +70,9 @@ public:
 	int32 KillCount = 0;
 	int32 SnipeCount = 0;
 	std::atomic<int64> DamageHits{0}; // E1 (d): 체력에 실제로 적용된 비치명 피해 건수(확인용)
+	// E3 (3c) 스탯(2종): 대형 액터가 있었던 액터×프레임 합과 그중 애니 틱을 건너뛴 수. ULabActorSyncProcessor가 더하고 게임 모드가 측정 구간 차이를 CSV 메타데이터로 쓴다
+	mutable std::atomic<int64> LargeActorFrames{0};
+	mutable std::atomic<int64> LargeActorSkips{0};
 #if !UE_BUILD_TEST
 	/**
 	 * 개발용 프레임 진단(-LabFrameLog, E3b (8) 화질 캡처 2026-11-09): 화면 안 30m에서 아직 VAT 인스턴스로 그리는 개체 수와 보이는 액터 수를 프레임마다 로그에 남긴다.
@@ -79,7 +83,8 @@ public:
 #endif
 
 private:
-	UPROPERTY() TObjectPtr<UMassEntityConfigAsset> EntityConfig;
+	UMassEntityConfigAsset* BuildEntityConfig(int32 UnitType, UStaticMesh* Mesh);
+	UPROPERTY() TArray<TObjectPtr<UMassEntityConfigAsset>> EntityConfigs; // 종류별(LabUnitAssets.h). [0] 소형, [1] 대형(-LabTypes=2)
 	TWeakObjectPtr<ALabCrowdSpawner> Spawner;
 	bool bActive = false;
 	bool bLumenExcluded = false;

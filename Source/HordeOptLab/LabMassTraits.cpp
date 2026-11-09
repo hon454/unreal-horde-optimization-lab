@@ -1,6 +1,7 @@
 #include "LabMassTraits.h"
 #include "LabConfig.h"
 #include "LabMassTypes.h"
+#include "LabUnitAssets.h"
 #include "MassActorSubsystem.h"
 #include "MassCommonFragments.h"
 #include "MassEntityTemplateRegistry.h"
@@ -20,9 +21,10 @@ void ULabMinionTrait::BuildTemplate(FMassEntityTemplateBuildContext& BuildContex
 	BuildContext.AddTag<FLabMinionTag>();
 
 	FLabUnitTypeParams Params;
+	Params.UnitType = UnitType;
 	Params.MoveSpeed = FLabScenario::MoveSpeed;
 	Params.MaxHealth = FLabScenario::MinionHealth;
-	Params.BoundRadius = 40.f;
+	Params.BoundRadius = FLabUnitAssetPaths::Get(UnitType).BoundRadius; // 소형 40(전과 같다), 대형은 ini LargeBoundRadius(임시값, 확정 전). FAgentRadiusFragment는 둘 다 40(회피가 꺼져 있어 쓰이지 않는다)
 	BuildContext.AddConstSharedFragment(EntityManager.GetOrCreateConstSharedFragment(Params));
 }
 

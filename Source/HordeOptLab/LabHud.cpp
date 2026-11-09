@@ -37,8 +37,8 @@ void ALabHud::DrawHUD()
 	const float GpuMs = FPlatformTime::ToMilliseconds(RHIGetGPUFrameCycles());
 
 	TArray<FString> Lines;
-	Lines.Add(FString::Printf(TEXT("HordeOptLab  %s / %s   N=%d   P%d   seed %d"),
-		FLabConfig::StageName(Config.Stage), FLabConfig::VariantName(Config.Variant), Config.N, Config.Preset, Config.Seed));
+	Lines.Add(FString::Printf(TEXT("HordeOptLab  %s / %s   N=%d   P%d   seed %d%s"),
+		FLabConfig::StageName(Config.Stage), FLabConfig::VariantName(Config.Variant), Config.N, Config.Preset, Config.Seed, Config.Types == 2 ? TEXT("   2 types") : TEXT("")));
 	Lines.Add(FString::Printf(TEXT("%.0f fps   frame %.2f ms   game %.2f   render %.2f   gpu %.2f"),
 		SmoothedFrameMs > 0.f ? 1000.f / SmoothedFrameMs : 0.f, SmoothedFrameMs, GameMs, RenderMs, GpuMs));
 	Lines.Add(FString::Printf(TEXT("memory %.0f MB used physical"), Mem.UsedPhysical / (1024.0 * 1024.0)));

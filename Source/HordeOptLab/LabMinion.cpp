@@ -1,6 +1,7 @@
 ﻿#include "LabMinion.h"
 #include "LabConfig.h"
 #include "LabCrowdSpawner.h"
+#include "LabUnitAssets.h"
 #include "HordeOptLab.h"
 #include "Animation/AnimSequence.h"
 #include "Animation/AnimInstance.h"
@@ -49,6 +50,7 @@ void ALabMinion::InitMinion(ALabCrowdSpawner* InSpawner, const FLabMinionAssets&
 	Spawner = InSpawner;
 	AssetsRef = &Assets;
 	Serial = InSerial;
+	UnitType = FLabUnitTypes::TypeOf(InSerial); // 2종이면 10의 배수가 대형
 	Health = FLabScenario::MinionHealth;
 	SetupVisual(Assets);
 	EnterState(ELabMinionState::Walk);
@@ -275,12 +277,14 @@ ALabMinionMassActor::ALabMinionMassActor(const FObjectInitializer& ObjectInitial
 void ALabMinionMassActor::BeginPlay()
 {
 	Super::BeginPlay();
-	// M0 스포너와 같은 에셋(LabCrowdSpawner.cpp LoadAssets). 이미 메모리에 있으면 LoadObject는 찾기만 한다.
+	// M0 스포너와 같은 에셋(LabCrowdSpawner.cpp LoadAssets, 경로는 ini [LabUnitAssets]). 이미 메모리에 있으면 LoadObject는 찾기만 한다.
+	// 종류(UnitType)는 클래스가 정한다(…Large). 대형 에셋이 없어 대체 중이면 소형 에셋이다(FLabUnitTypes::AssetType).
+	const FLabUnitAssetPaths& Paths = FLabUnitAssetPaths::Get(FLabUnitTypes::AssetType(UnitType));
 	USkeletalMeshComponent* SkelMesh = GetMesh();
-	SkelMesh->SetSkeletalMesh(LoadObject<USkeletalMesh>(nullptr, TEXT("/Game/ParagonMinions/Characters/Minions/Down_Minions/Meshes/Minion_Lane_Melee_Dawn.Minion_Lane_Melee_Dawn")));
+	SkelMesh->SetSkeletalMesh(LoadObject<USkeletalMesh>(nullptr, *Paths.SkeletalMesh));
 	SkelMesh->SetAnimationMode(EAnimationMode::AnimationBlueprint);
-	SkelMesh->SetAnimInstanceClass(LoadClass<UAnimInstance>(nullptr, TEXT("/Game/Lab/Anim/ABP_LabMinion.ABP_LabMinion_C")));
-	if (UMaterialInterface* Material = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/Lab/VAT/Baked/M_LabMinionActor.M_LabMinionActor"), nullptr, LOAD_Quiet | LOAD_NoWarn))
+	SkelMesh->SetAnimInstanceClass(LoadClass<UAnimInstance>(nullptr, *Paths.AnimClass));
+	if (UMaterialInterface* Material = Paths.ActorMaterial.IsEmpty() ? nullptr : LoadObject<UMaterialInterface>(nullptr, *Paths.ActorMaterial, nullptr, LOAD_Quiet | LOAD_NoWarn))
 	{
 		SkelMesh->SetMaterial(0, Material);
 	}
@@ -403,6 +407,20 @@ void ALabMinionMassActorBudget::PrepareForGame_Implementation()
 				CastChecked<USkeletalMeshComponentBudgeted>(Character->GetMesh())->SetComponentSignificance(New);
 			});
 	}
+}
+
+// 2종 대형 액터(M3b) --------------------------------------------------------
+
+ALabMinionMassActorLarge::ALabMinionMassActorLarge(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+{
+	UnitType = LabUnitLarge;
+}
+
+ALabMinionMassActorBudgetLarge::ALabMinionMassActorBudgetLarge(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+{
+	UnitType = LabUnitLarge;
 }
 
 // E3 (5) 저품질 액터 ---------------------------------------------------------

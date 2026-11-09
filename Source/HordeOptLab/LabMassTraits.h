@@ -14,6 +14,9 @@ UCLASS(meta = (DisplayName = "Lab Minion"))
 class ULabMinionTrait : public UMassEntityTraitBase
 {
 	GENERATED_BODY()
+public:
+	/** 종류(ELabUnitType). ULabCrowdSubsystem이 종류별 EntityConfig를 만들며 넣는다. FLabUnitTypeParams가 달라져 아키타입이 갈린다 */
+	UPROPERTY() int32 UnitType = 0;
 protected:
 	virtual void BuildTemplate(FMassEntityTemplateBuildContext& BuildContext, const UWorld& World) const override;
 };

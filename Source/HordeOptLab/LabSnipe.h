@@ -110,5 +110,65 @@ struct TLabSnipePicker
 	}
 };
 
+/**
+ * 2종 저격 규칙(E안, 2026-11-09 사용자 결정, plan.md "M3b" "저격 대상 규칙"). 저격 수·간격·구간 배분(1/2/2)은 그대로다.
+ * 대형은 예약된 발에서만 쏘고 나머지 발은 소형만 고른다. 저격 틱이 4의 배수면 200m 밖 구간(2)의 1발, 4로 나눈 나머지가 2면 80~200m 구간(1)의 1발이
+ * 대형 전용이다(그 구간 화면 안 대형 중 해시 최소). 홀수 틱은 예약이 없다. 예약 구간 화면 안에 대형이 없으면 그 발은 소형으로 떨어진다.
+ * 1종(대형 없음)에서는 예약 발이 늘 소형으로 떨어져 TLabSnipePicker만 쓸 때와 같은 대상이 같은 순서로 나온다(같은 시드에서 kills·snipes가 같다).
+ */
+inline int32 LabLargeReservedBand(uint32 SnipeTick)
+{
+	return SnipeTick % 4u == 0u ? 2 : SnipeTick % 4u == 2u ? 1 : INDEX_NONE;
+}
+
+template<typename T>
+struct TLabSnipeSelector
+{
+	using FPick = typename TLabSnipePicker<T>::FPick;
+	TLabSnipePicker<T> Small;   // 소형 후보(구간별 Counts개). 1종에서는 모든 개체
+	FPick LargeBest{};          // 예약 구간의 대형 중 해시 최소
+	bool bHasLarge = false;
+	int32 ReservedBand = INDEX_NONE;
+
+	explicit TLabSnipeSelector(uint32 SnipeTick) : ReservedBand(LabLargeReservedBand(SnipeTick)) {}
+
+	void Offer(int32 Band, uint32 Hash, const T& Target, const FVector& Location, bool bLarge)
+	{
+		if (!bLarge)
+		{
+			Small.Offer(Band, Hash, Target, Location);
+		}
+		else if (Band == ReservedBand && (!bHasLarge || Hash < LargeBest.Hash))
+		{
+			LargeBest = { Hash, Target, Location };
+			bHasLarge = true;
+		}
+	}
+
+	/** 구간 순서로 대상을 넘긴다. 예약 구간에 대형이 있으면 그 발을 대형이 가져가고 소형 후보 중 해시가 가장 큰 하나를 뺀다. */
+	template<typename F>
+	void ForEach(F&& Func) const
+	{
+		for (int32 Band = 0; Band < FLabSnipeBands::Num; ++Band)
+		{
+			const auto& Best = Small.Bands[Band];
+			int32 Skip = INDEX_NONE;
+			if (Band == ReservedBand && bHasLarge)
+			{
+				Func(LargeBest);
+				if (Best.Num() >= FLabSnipeBands::Counts[Band])
+				{
+					Skip = 0;
+					for (int32 i = 1; i < Best.Num(); ++i) { if (Best[i].Hash > Best[Skip].Hash) { Skip = i; } }
+				}
+			}
+			for (int32 i = 0; i < Best.Num(); ++i)
+			{
+				if (i != Skip) { Func(Best[i]); }
+			}
+		}
+	}
+};
+
 /** 화면 판정에 쓰는 몸통 높이(cm). M0 액터는 캡슐 중심(지면 위 88)이고 Mass 엔티티는 발밑(지면)이라 지면 기준으로 맞춘다. */
 constexpr float LabSnipeAimHeight = 100.f;
