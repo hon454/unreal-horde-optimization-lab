@@ -36,6 +36,13 @@ enum class ELabVariant : uint8
 	M3NoCol,     // E3 (6): 액터 캡슐 콜리전 끔(판정을 Mass가 갖는 퍼핏 구조)
 	M3Hyd15,     // E3 (7): 하이드레이션 거리 15m(대표 30m). 나머지 밴드·상한은 그대로
 	M3Hyd50,     // E3 (7): 하이드레이션 거리 50m
+	// M3b(plan.md "M3b"). 별칭 m0full = Full, m0static = Static, m1mass·m2mass·m3mass = Mass(묶음 1 라벨이 단계별로 갈리게 이름만 다르다)
+	StaticPawn,  // M0 코드 정비 5: static(정적 메시, 애니 없음) + pawn(CharacterMovement 틱 끔). 컨테이너 전환만의 값을 보는 대조군
+	M3QOld,      // 진단: 정비 전 구조. VAT·ActorSync가 로직 프래그먼트와 태그를 읽고, 저격이 쿼리 밖에서 쓰고, 로직 뒤 순서 선언 없음(코드 정비 1·2 A/B)
+	M3SyncAll,   // 진단: ActorSync가 액터 태그 필터 없이 전 엔티티를 순회(코드 정비 4 A/B)
+	M3Vis0,      // E3b (8): 화면 밖 High 밴드 0m(카메라 뒤는 액터로 만들지 않음), 화면 안 30m
+	M3Vis15,     // E3b (8): 화면 밖 High 밴드 15m, 화면 안 30m(MetaHuman Crowd 비율)
+	M3Hys20,     // E3b (8): 30/30m에 히스테리시스 20%(엔진 기본 10)
 };
 
 /**
@@ -106,6 +113,8 @@ struct FLabConfig
 	 * -LabHydrateFix=L을 주면 단계 L에 맞는 마스크가 된다(0→0, 1→1, 2→3, 3→7, 4→31).
 	 */
 	int32 HydrateFixMask = 31;
+	/** -LabFullyParallel=0이면 mass.FullyParallel을 0으로 둔다(직렬 트레이스, run-m3b.ps1 -SerialArgs). -1은 건드리지 않음. massst 변형과 같은 경로 */
+	int32 FullyParallel = -1;
 	enum EHydrateFix : int32
 	{
 		FixStartTime = 1,  // 시작 시각 맞추기(AnimBP Start Position)

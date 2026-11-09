@@ -20,6 +20,8 @@
 #include "Misc/Parse.h"
 #include "IAnimationBudgetAllocator.h"
 #include "SignificanceManager.h"
+#include "RHI.h" // GRHIAdapterName, GRHIAdapterUserDriverVersion
+#include "LabBuildVersion.h" // LAB_BUILD_COMMIT. HordeOptLab.Build.cs가 .git/HEAD에서 만든다
 
 namespace
 {
@@ -33,6 +35,30 @@ namespace
 		{
 			UE_LOG(LogLab, Warning, TEXT("lab_cvar_missing %s"), Name);
 		}
+	}
+
+	/**
+	 * 측정에 고정하는 CVar의 실제 값(측정 방법 5번, plan.md "M3b"). 이름=값을 '|'로 잇는다(CSV 메타데이터 행은 쉼표로 나뉘므로 쉼표를 쓰지 않는다).
+	 * 러너가 거는 렌더 고정값, 스케일러빌리티, 렌더 방식, Mass 병렬·옵저버 잠금이다. summarize.py가 `labcvars` 키로 읽어 build 열에 넣는다.
+	 */
+	FString LabFixedCVarString()
+	{
+		static const TCHAR* Names[] = {
+			TEXT("r.VSync"), TEXT("t.MaxFPS"), TEXT("r.ScreenPercentage"), TEXT("r.DynamicRes.OperationMode"),
+			TEXT("sg.ShadowQuality"), TEXT("sg.AntiAliasingQuality"), TEXT("sg.GlobalIlluminationQuality"), TEXT("sg.EffectsQuality"),
+			TEXT("r.DynamicGlobalIlluminationMethod"), TEXT("r.Shadow.Virtual.Enable"), TEXT("r.AntiAliasingMethod"),
+			TEXT("mass.FullyParallel"), TEXT("mass.commands.LockObserversDuringFlushing"),
+		};
+		FString Out;
+		for (const TCHAR* Name : Names)
+		{
+			if (const IConsoleVariable* Var = IConsoleManager::Get().FindConsoleVariable(Name))
+			{
+				if (!Out.IsEmpty()) { Out += TEXT("|"); }
+				Out += FString::Printf(TEXT("%s=%s"), Name, *Var->GetString());
+			}
+		}
+		return Out;
 	}
 }
 
@@ -58,11 +84,13 @@ void ALabGameMode::StartPlay()
 	}
 
 	ApplyVariantCVars();
-	if (Config.Variant == ELabVariant::MassSt)
+	if (Config.Variant == ELabVariant::MassSt || Config.FullyParallel == 0)
 	{
 		// E1 (b): Mass 처리 단계를 태스크 그래프에 나누지 않는다. 런타임에 바꿔도 단계가 다시 구성된다(MassProcessingPhaseManager.cpp:576).
+		// M3b 직렬 트레이스는 -LabFullyParallel=0으로 같은 경로를 쓴다(run-m3b.ps1 -SerialArgs).
 		IConsoleManager::Get().FindConsoleVariable(TEXT("mass.FullyParallel"))->Set(0, ECVF_SetByCode);
 	}
+	UE_LOG(LogLab, Log, TEXT("lab_build commit=%s driver=%s %s cvars=%s"), TEXT(LAB_BUILD_COMMIT), *GRHIAdapterName, *GRHIAdapterUserDriverVersion, *LabFixedCVarString());
 	if (Config.bBench)
 	{
 		ApplyBenchCVars();
@@ -132,6 +160,10 @@ void ALabGameMode::TickBench()
 			CSV_METADATA(TEXT("LabSeed"), *FString::FromInt(Config.Seed));
 			CSV_METADATA(TEXT("LabVariant"), FLabConfig::VariantName(Config.Variant));
 			CSV_METADATA(TEXT("LabLabel"), *Config.Label);
+			// 측정 방법 5번(plan.md "M3b"): 빌드 커밋, 고정 CVar 값, GPU 드라이버. summarize.py BUILD_KEYS(labbuild·labcvars·labdriver)와 이름을 맞춘다.
+			CSV_METADATA(TEXT("LabBuild"), TEXT(LAB_BUILD_COMMIT));
+			CSV_METADATA(TEXT("LabCVars"), *LabFixedCVarString());
+			CSV_METADATA(TEXT("LabDriver"), *FString::Printf(TEXT("%s %s"), *GRHIAdapterName, *GRHIAdapterUserDriverVersion));
 			FCsvProfiler::Get()->BeginCapture(-1, FString(), Config.Label);
 #endif
 			RespawnsAtStart = Spawner->GetRespawnCount();

@@ -20,6 +20,7 @@ const FLabConfig& FLabConfig::Get()
 			C.HydrateFixMask = LevelMasks[FMath::Clamp(C.HydrateFix, 0, 4)];
 		}
 		FParse::Value(Cmd, TEXT("-LabHydrateFixMask="), C.HydrateFixMask);
+		FParse::Value(Cmd, TEXT("-LabFullyParallel="), C.FullyParallel);
 		C.bBench = FParse::Param(Cmd, TEXT("LabBench"));
 		C.bHud = FParse::Param(Cmd, TEXT("LabHud")) && !C.bBench;
 
@@ -36,11 +37,19 @@ const FLabConfig& FLabConfig::Get()
 		FString Variant;
 		if (FParse::Value(Cmd, TEXT("-LabVariant="), Variant))
 		{
-			if (Variant == TEXT("static")) { C.Variant = ELabVariant::Static; }
+			if (Variant == TEXT("static") || Variant == TEXT("m0static")) { C.Variant = ELabVariant::Static; } // m0static: M3b 묶음 1 라벨
 			else if (Variant == TEXT("budget")) { C.Variant = ELabVariant::Budget; }
 			else if (Variant == TEXT("uro")) { C.Variant = ELabVariant::Uro; }
 			else if (Variant == TEXT("pawn")) { C.Variant = ELabVariant::Pawn; }
-			else if (Variant == TEXT("mass") || Variant == TEXT("noanim") || Variant == TEXT("m3base") || Variant == TEXT("m3colbase") || Variant == TEXT("m3hydbase")) { C.Variant = ELabVariant::Mass; } // noanim: M2 묶음에서 잰 M1, m3base·m3colbase·m3hydbase: E3 하위 실험 묶음(5, 6, 7)에서 다시 잰 M3 대표. 이름만 다르다
+			else if (Variant == TEXT("staticpawn")) { C.Variant = ELabVariant::StaticPawn; }
+			else if (Variant == TEXT("m0full")) { C.Variant = ELabVariant::Full; } // M3b 묶음 1 라벨
+			else if (Variant == TEXT("mass") || Variant == TEXT("noanim") || Variant == TEXT("m3base") || Variant == TEXT("m3colbase") || Variant == TEXT("m3hydbase")
+				|| Variant == TEXT("m1mass") || Variant == TEXT("m2mass") || Variant == TEXT("m3mass")) { C.Variant = ELabVariant::Mass; } // noanim: M2 묶음에서 잰 M1, m3base·m3colbase·m3hydbase: E3 하위 실험 묶음(5, 6, 7)에서 다시 잰 M3 대표, m1mass·m2mass·m3mass: M3b 묶음 1. 이름만 다르다
+			else if (Variant == TEXT("m3qold")) { C.Variant = ELabVariant::M3QOld; }
+			else if (Variant == TEXT("m3syncall")) { C.Variant = ELabVariant::M3SyncAll; }
+			else if (Variant == TEXT("m3vis0")) { C.Variant = ELabVariant::M3Vis0; }
+			else if (Variant == TEXT("m3vis15")) { C.Variant = ELabVariant::M3Vis15; }
+			else if (Variant == TEXT("m3hys20")) { C.Variant = ELabVariant::M3Hys20; }
 			else if (Variant == TEXT("massst")) { C.Variant = ELabVariant::MassSt; }
 			else if (Variant == TEXT("massav")) { C.Variant = ELabVariant::MassAv; }
 			else if (Variant == TEXT("massdirlo")) { C.Variant = ELabVariant::MassDirLo; }
@@ -102,6 +111,12 @@ const TCHAR* FLabConfig::VariantName(ELabVariant V)
 	case ELabVariant::M3NoCol: return TEXT("m3nocol");
 	case ELabVariant::M3Hyd15: return TEXT("m3hyd15");
 	case ELabVariant::M3Hyd50: return TEXT("m3hyd50");
+	case ELabVariant::StaticPawn: return TEXT("staticpawn");
+	case ELabVariant::M3QOld: return TEXT("m3qold");
+	case ELabVariant::M3SyncAll: return TEXT("m3syncall");
+	case ELabVariant::M3Vis0: return TEXT("m3vis0");
+	case ELabVariant::M3Vis15: return TEXT("m3vis15");
+	case ELabVariant::M3Hys20: return TEXT("m3hys20");
 	default: return TEXT("full");
 	}
 }

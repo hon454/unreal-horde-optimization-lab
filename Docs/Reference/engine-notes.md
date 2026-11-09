@@ -137,3 +137,21 @@
 | Game Thread 시간과 워커 대기 | CSV `GameThreadTime`은 게임 스레드가 태스크를 기다린 시간(`Exclusive/GameThread/EventWait/*`)을 뺀다. Mass 작업이 워커 스레드에서 길어지면 Game Thread p50은 작게 나오고 프레임만 길어진다. E1 `massav` N=20k: GameThreadTime 9.3ms, `EventWait/PrePhysics` 46.5ms, 프레임 57.7ms | `Measurements/M1/runs.csv`, M1-massav-N20000-P1 CSV |
 | 병렬 Mass의 질의 대기 | `FMassEntityQuery::ForEachEntityChunk`는 `FScopedEntityQueryContext`에서 `PreQueryCallback`을 먼저 부르고, 병렬 처리 큐에서는 이것이 `FProcessorWorker::WaitForQueryResources`로 같은 자원을 쥔 다른 프로세서가 끝날 때까지 기다린다. 그 시간은 기다린 프로세서의 실행 시간에 잡힌다. M3 20k P1에서 VAT ISM 프로세서가 액터 유무로 1.41 / 3.68ms였는데 첫 청크 전 대기가 0.006 → 2.06ms였고, `mass.FullyParallel=0`이면 1.35 / 1.35ms였다 | `MassEntity/Private/MassEntityQuery.cpp:39-47,258-276`, `MassProcessingQueueTypes.cpp:640-650,678-690`. diag-vtC/vtD/vtE/vtF CSV |
 | 하이드레이션 액터 캡슐 | `ACharacter` 캡슐은 `Pawn` 프로필에 `SetShouldUpdatePhysicsVolume(true)`다. M3 20k P1(액터 495개, 3회): 이동 1.22ms, 프레임 15.78. 오버랩·물리 볼륨 갱신을 끄면 15.64, QueryOnly를 더하면 15.49, 콜리전을 끄면 14.23(이동 0.43, EndPhysics 대기 0.52 → 0.06) | `Engine/Private/Character.cpp:77-84`. diag-vtG/vtH/vtJ/vtI CSV, `-LabActorMoveCheap`·`-LabActorQueryOnly`·`-LabActorNoCollision` |
+
+## 12. M3b 코드 정비에서 확인한 것(2026-11-09)
+
+| 항목 | 내용 | 근거 |
+| --- | --- | --- |
+| 프로세서 그룹 의존성 | `ExecuteAfter("그룹 이름")`은 솔버가 그 그룹의 자식 노드 전부로 펼친다. 그룹 노드의 의존성은 자식에게 내려간다. 그룹 안의 프로세서는 자기 `ExecuteAfter`를 따로 가질 수 있다(Contact가 LabLogic 그룹이면서 Movement 뒤) | `MassEntity/Private/MassProcessorDependencySolver.cpp:585-623,680-760` |
+| 지연 명령 종류 | `FMassDeferredSetCommand`(람다, 플러시 때 실행), `FMassCommandSwapTags<TOld, TNew>`, `FMassCommandAddTag`. 람다 안에서 `GetFragmentDataChecked`로 쓰는 것이 "쿼리 밖 쓰기"를 지연으로 바꾸는 길이다 | `MassEntity/Public/MassCommands.h:65,93,1294,1359,1673-1743` |
+| 기본 커맨드 버퍼 | `FMassEntityManager::Defer()`는 게임 스레드에서만 쓴다. 스포너 서브시스템 틱(액터 스폰 콜백)에서 태그를 붙일 때 이것을 쓴다 | `MassEntity/Public/MassEntityManager.h:910,1625` |
+| 태그 중복 추가 | `AddTagToEntity`는 아키타입에 이미 그 태그가 있으면 아무것도 하지 않는다 | `MassEntity/Private/MassEntityManager.cpp:1404-1416` |
+| 액터가 붙는 길목 | 새 스폰과 풀 재사용 모두 `UMassActorSpawnerSubsystem`이 `PrepareForGame`을 부른 뒤 같은 PostSpawn 델리게이트(`UMassRepresentationActorManagement::OnPostActorSpawn`)를 지난다. 액터를 떼는 `ReleaseActorOrCancelSpawning`은 static이라 하위 클래스가 끼어들 수 없다 | `MassActors/Private/MassActorSpawnerSubsystem.cpp:255,480`, `MassRepresentation/Private/MassRepresentationProcessor.cpp:481`, `MassRepresentationActorManagement.cpp:92` |
+| 액터 재사용 | 표현이 액터로 돌아올 때 `FMassActorFragment`에 액터가 남아 있으면 스폰 요청 없이 그 액터를 다시 쓴다(`NewActor = Actor`). 그때는 PostSpawn 콜백이 불리지 않는다 | `MassRepresentationProcessor.cpp` UpdateRepresentation의 HighRes/LowRes 분기 |
+| 표현 LOD 파라미터 | `FMassVisualizationLODParameters`: `BaseLODDistance`(화면 밖), `VisibleLODDistance`(화면 안), `BufferHysteresisOnDistancePercentage`(기본 10), `LODMaxCount`. Trait의 `LODParams` | `MassRepresentation/Public/MassRepresentationFragments.h:299-312`, `MassVisualizationTrait.h:52` |
+| 옵저버 잠금 CVar | `mass.commands.LockObserversDuringFlushing`, 기본 false. 제거 옵저버가 없으면 켜도 된다는 주석 | `MassEntity/Private/MassCommandBuffer.cpp:17-25` |
+| DefaultEngine.ini의 CVar 섹션 | `[ConsoleVariables]` 섹션을 GEngineIni에서 읽어 `SetBySystemSettingsIni`로 적용한다. City Sample이 같은 섹션에 옵저버 잠금을 둔다 | `Core/Private/HAL/ConsoleManager.cpp:607,697-698`, `CitySample/Config/DefaultEngine.ini:405` |
+| 등록된 프로세서 보기 | `UMassCompositeProcessor`가 그래프를 처음 만들 때 `LogMass`에 "flat processing graph"로 노드와 의존성을 찍는다(`mass.LogNewProcessingGraph` 기본 1). `LogMass` 기본 수준이 Warning이라 `-LogCmds="LogMass Log"`가 필요하다. 우리 프로세서는 모두 PrePhysics 단계다 | `MassEntity/Private/MassProcessor.cpp:22-31,555-575`, `MassEntityTypes.h:26` |
+| VAT 프레임 → 텍스처 행 | 머티리얼 함수 `BoneIndexUVs`의 Custom 노드: `UV.y = (0.5 / TextureSize.y) + (int(Frame) / TextureSize.y)`. 정수로 자르고 텍스처 필터는 `TF_Nearest`다. 그래서 걷기 루프의 End + 0.99는 End 행이고 다음 클립과 섞이지 않는다 | `AnimToTexture/Content/Materials/MaterialFunctions/BoneIndexUVs.uasset`(문자열), `AnimToTextureEditor/Public/AnimToTextureUtils.h:269` |
+| GPU 드라이버 전역 | `GRHIAdapterName`, `GRHIAdapterUserDriverVersion`, `GRHIAdapterInternalDriverVersion`, `GRHIAdapterDriverDate` | `RHI/Public/RHIGlobals.h:819-822` |
+| UBT ExternalDependencies | `ModuleRules.ExternalDependencies`에 넣은 파일이 바뀌면 Build.cs를 다시 평가한다(`.git/HEAD`로 커밋 해시 헤더 생성에 씀) | `Source/Programs/UnrealBuildTool/Configuration/Rules/ModuleRules.cs:1439` |

@@ -185,14 +185,30 @@ void ALabMinionStatic::SetupVisual(const FLabMinionAssets& Assets)
 
 // pawn 변형 ----------------------------------------------------------------
 
+namespace
+{
+	/** CharacterMovement 틱을 끄고 위치를 직접 옮기게 한다. pawn·staticpawn·M3 하이드레이션 액터가 같은 설정을 쓴다. */
+	void LabDisableCharacterMovement(UCharacterMovementComponent* Move)
+	{
+		// ACharacter는 CharacterMovement를 필수 하위 오브젝트로 만들어 DoNotCreateDefaultSubobject가 무시된다
+		// ("Ignored DoNotCreateDefaultSubobject for CharMoveComp as it's marked as required", 2026-11-07 로그). 그래서 컴포넌트는 두고 틱을 끈다.
+		Move->PrimaryComponentTick.bCanEverTick = false;
+		Move->PrimaryComponentTick.bStartWithTickEnabled = false;
+	}
+}
+
 ALabMinionPawn::ALabMinionPawn(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
 {
-	// ACharacter는 CharacterMovement를 필수 하위 오브젝트로 만들어 DoNotCreateDefaultSubobject가 무시된다
-	// ("Ignored DoNotCreateDefaultSubobject for CharMoveComp as it's marked as required", 2026-11-07 로그). 그래서 컴포넌트는 두고 틱을 끈다.
 	bManualMove = true;
-	GetCharacterMovement()->PrimaryComponentTick.bCanEverTick = false;
-	GetCharacterMovement()->PrimaryComponentTick.bStartWithTickEnabled = false;
+	LabDisableCharacterMovement(GetCharacterMovement());
+}
+
+ALabMinionStaticPawn::ALabMinionStaticPawn(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer)
+{
+	bManualMove = true;
+	LabDisableCharacterMovement(GetCharacterMovement());
 }
 
 // budget 변형 ---------------------------------------------------------------
@@ -317,7 +333,7 @@ void ALabMinionMassActor::ShowPoseReady()
 void ALabMinionMassActor::PrepareForPooling_Implementation()
 {
 	GetMesh()->SetComponentTickEnabled(false);
-	BoundSerial = MAX_uint32;
+	BoundEntity.Reset();
 	// 죽은 채 풀에 들어온 액터의 진홍색을 지운다. 숨긴 동안 바꾼 커스텀 프리미티브 데이터는 보이는 첫 프레임에 반영되지 않는 것을 연속 캡처로 봤다(2026-11-08).
 	if (FLabConfig::Get().HasFix(FLabConfig::FixTintReset))
 	{

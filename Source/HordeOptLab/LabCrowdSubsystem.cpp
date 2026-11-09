@@ -102,6 +102,11 @@ void ULabCrowdSubsystem::Activate(ALabCrowdSpawner* InSpawner, UStaticMesh* Mesh
 			Visual->LODParams.VisibleLODDistance[EMassLOD::Off] = 1.e7f; // 화면 안이면 맵 끝까지 그린다
 		}
 		Visual->Params.LODRepresentation[EMassLOD::Off] = EMassRepresentationType::None;
+		// E3b (8) 표현 LOD 값(plan.md "M3b"). 대표는 Base = Visible = 30m, 히스테리시스 10%(엔진 기본, MassRepresentationFragments.h:309).
+		// BaseLODDistance는 화면 밖(카메라 뒤 포함), VisibleLODDistance는 화면 안의 밴드 경계다.
+		if (Variant == ELabVariant::M3Vis0) { Visual->LODParams.BaseLODDistance[EMassLOD::Medium] = 0.f; }          // 카메라 뒤는 액터로 만들지 않는다
+		else if (Variant == ELabVariant::M3Vis15) { Visual->LODParams.BaseLODDistance[EMassLOD::Medium] = 1500.f; } // 화면 밖 15m, 화면 안 30m
+		else if (Variant == ELabVariant::M3Hys20) { Visual->LODParams.BufferHysteresisOnDistancePercentage = 20.f; }
 	}
 	if (bM3 && Variant == ELabVariant::M3LowRes)
 	{
@@ -132,12 +137,14 @@ void ULabCrowdSubsystem::SpawnEntities(TConstArrayView<FVector> Locations, TCons
 
 	TArray<FMassEntityHandle> Entities;
 	TSharedPtr<FMassEntityManager::FEntityCreationContext> Creation = SpawnerSubsystem->SpawnEntities(Template, Locations.Num(), Entities);
+	// 생성 직후 초기화(생성 컨텍스트 안, 게임 스레드). 처리 중 접근이 아니라 쿼리 밖 접근을 그대로 둔다(Docs/Worklog/M3b.md 표).
 	for (int32 i = 0; i < Entities.Num(); ++i)
 	{
 		const FVector Facing = (OrbCenter - Locations[i]).GetSafeNormal2D();
 		EntityManager.GetFragmentDataChecked<FTransformFragment>(Entities[i]).SetTransform(FTransform(Facing.Rotation(), Locations[i]));
 		EntityManager.GetFragmentDataChecked<FLabMinionFragment>(Entities[i]).Serial = Serials[i];
 		EntityManager.GetFragmentDataChecked<FLabHealthFragment>(Entities[i]).Health = FLabScenario::MinionHealth;
+		EntityManager.GetFragmentDataChecked<FLabAnimStateFragment>(Entities[i]).Set(ELabMinionState::Walk, -LabWalkPhase(Serials[i])); // 재생 시각 = Now + 위상
 	}
 	Creation.Reset(); // 옵저버(엔진 초기화 프로세서)가 여기서 돈다
 	AliveCount += Entities.Num();

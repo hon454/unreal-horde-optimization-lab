@@ -82,6 +82,7 @@ ULabOrbContactProcessor::ULabOrbContactProcessor()
 	: EntityQuery(*this)
 {
 	ExecutionFlags = (int32)EProcessorExecutionFlags::AllNetModes;
+	ExecutionOrder.ExecuteInGroup = LabLogicGroupName;
 	ExecutionOrder.ExecuteAfter.Add(UE::Mass::ProcessorGroupNames::Movement);
 }
 
@@ -90,6 +91,7 @@ void ULabOrbContactProcessor::ConfigureQueries(const TSharedRef<FMassEntityManag
 	EntityQuery.AddRequirement<FTransformFragment>(EMassFragmentAccess::ReadOnly);
 	EntityQuery.AddRequirement<FLabHealthFragment>(EMassFragmentAccess::ReadWrite);
 	EntityQuery.AddRequirement<FLabMinionFragment>(EMassFragmentAccess::ReadWrite);
+	EntityQuery.AddRequirement<FLabAnimStateFragment>(EMassFragmentAccess::ReadWrite); // 사망 전환을 표현에 알린다
 	EntityQuery.AddTagRequirement<FLabMinionTag>(EMassFragmentPresence::All);
 	EntityQuery.AddTagRequirement<FLabHitTag>(EMassFragmentPresence::None);
 	EntityQuery.AddTagRequirement<FLabDeadTag>(EMassFragmentPresence::None);
@@ -115,12 +117,14 @@ void ULabOrbContactProcessor::Execute(FMassEntityManager& EntityManager, FMassEx
 	}
 	const float ZoneRadiusSq = FMath::Square(FLabScenario::ZoneRadius);
 	const float DeathDuration = Crowd->DeathDuration;
+	const float Now = Crowd->GetWorld()->GetTimeSeconds();
 
 	EntityQuery.ForEachEntityChunk(Context, [&](FMassExecutionContext& Context)
 	{
 		const TConstArrayView<FTransformFragment> Transforms = Context.GetFragmentView<FTransformFragment>();
 		const TArrayView<FLabHealthFragment> Healths = Context.GetMutableFragmentView<FLabHealthFragment>();
 		const TArrayView<FLabMinionFragment> Minions = Context.GetMutableFragmentView<FLabMinionFragment>();
+		const TArrayView<FLabAnimStateFragment> AnimStates = Context.GetMutableFragmentView<FLabAnimStateFragment>();
 		const float DeltaSeconds = Context.GetDeltaTimeSeconds();
 
 		int32 Kills = 0;
@@ -147,6 +151,7 @@ void ULabOrbContactProcessor::Execute(FMassEntityManager& EntityManager, FMassEx
 			{
 				const FMassEntityHandle Entity = Context.GetEntity(It);
 				Minions[It].StateTimeLeft = DeathDuration;
+				AnimStates[It].Set(ELabMinionState::Dead, Now); // 표현은 이 값만 본다. 태그는 지연돼도 같은 프레임에 죽기 클립이 시작된다
 				Context.Defer().AddTag<FLabDeadTag>(Entity);
 				StopMoving(Context, Entity);
 				++Kills;
@@ -170,6 +175,7 @@ ULabOrbSnipeProcessor::ULabOrbSnipeProcessor()
 	: EntityQuery(*this)
 {
 	ExecutionFlags = (int32)EProcessorExecutionFlags::AllNetModes;
+	ExecutionOrder.ExecuteInGroup = LabLogicGroupName;
 	ExecutionOrder.ExecuteAfter.Add(ULabOrbContactProcessor::StaticClass()->GetFName());
 }
 
@@ -177,7 +183,9 @@ void ULabOrbSnipeProcessor::ConfigureQueries(const TSharedRef<FMassEntityManager
 {
 	EntityQuery.AddRequirement<FTransformFragment>(EMassFragmentAccess::ReadOnly);
 	EntityQuery.AddRequirement<FLabHealthFragment>(EMassFragmentAccess::ReadOnly);
+	// 순회에서는 Serial만 읽지만 고른 대상의 StateTimeLeft와 표현 상태를 바꾸므로 쓰기로 선언한다(Shabel 12:32, talk-notes.md).
 	EntityQuery.AddRequirement<FLabMinionFragment>(EMassFragmentAccess::ReadWrite);
+	EntityQuery.AddRequirement<FLabAnimStateFragment>(EMassFragmentAccess::ReadWrite);
 	EntityQuery.AddTagRequirement<FLabMinionTag>(EMassFragmentPresence::All);
 	EntityQuery.AddTagRequirement<FLabHitTag>(EMassFragmentPresence::None);
 	EntityQuery.AddTagRequirement<FLabDeadTag>(EMassFragmentPresence::None);
@@ -186,12 +194,15 @@ void ULabOrbSnipeProcessor::ConfigureQueries(const TSharedRef<FMassEntityManager
 void ULabOrbSnipeProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context)
 {
 	ULabCrowdSubsystem* Crowd = LabCrowd(Context);
-	if (!Crowd || Crowd->PendingSnipeTick == 0)
+	if (!Crowd || Crowd->PendingSnipeTick.load() == 0)
 	{
 		return;
 	}
-	const uint32 SnipeTick = Crowd->PendingSnipeTick;
-	Crowd->PendingSnipeTick = 0;
+	const uint32 SnipeTick = Crowd->PendingSnipeTick.exchange(0); // 오브 틱이 쓴 값을 한 번만 가져간다(std::atomic, M3b 정비)
+	if (SnipeTick == 0)
+	{
+		return;
+	}
 	if (FLabConfig::Get().Variant == ELabVariant::VatDie0 || FLabConfig::Get().Variant == ELabVariant::VatDie1k)
 	{
 		return; // E2 (d): 저격도 끈다(사망은 발생기만 만든다)
@@ -228,12 +239,32 @@ void ULabOrbSnipeProcessor::Execute(FMassEntityManager& EntityManager, FMassExec
 	});
 
 	const float HitDuration = Crowd->HitDuration;
+	const float Now = Crowd->GetWorld()->GetTimeSeconds();
+	const bool bOld = LabUseOldQueries();
 	FScopeLock Lock(&Crowd->ResultLock);
 	Picker.ForEach([&](const TLabSnipePicker<FMassEntityHandle>::FPick& Pick)
 	{
-		EntityManager.GetFragmentDataChecked<FLabMinionFragment>(Pick.Target).StateTimeLeft = HitDuration;
-		Context.Defer().AddTag<FLabHitTag>(Pick.Target);
-		StopMoving(Context, Pick.Target);
+		const FMassEntityHandle Target = Pick.Target;
+		if (bOld)
+		{
+			// m3qold: 정비 전 쿼리 밖 쓰기. 다른 청크의 메모리를 순회 밖에서 바로 고친다(plan.md 코드 정비 1).
+			EntityManager.GetFragmentDataChecked<FLabMinionFragment>(Target).StateTimeLeft = HitDuration;
+			EntityManager.GetFragmentDataChecked<FLabAnimStateFragment>(Target).Set(ELabMinionState::Hit, Now);
+		}
+		else
+		{
+			// 대상은 순회가 끝난 뒤에야 정해지므로 쿼리 안에서 쓸 수 없다. 태그 추가와 같은 플러시에서 지연 명령으로 쓴다(2초에 5건).
+			Context.Defer().PushCommand<FMassDeferredSetCommand>([Target, HitDuration, Now](FMassEntityManager& Manager)
+			{
+				if (Manager.IsEntityValid(Target))
+				{
+					Manager.GetFragmentDataChecked<FLabMinionFragment>(Target).StateTimeLeft = HitDuration;
+					Manager.GetFragmentDataChecked<FLabAnimStateFragment>(Target).Set(ELabMinionState::Hit, Now);
+				}
+			});
+		}
+		Context.Defer().AddTag<FLabHitTag>(Target);
+		StopMoving(Context, Target);
 		Crowd->SnipeTargets.Add(FVector(Pick.Location.X, Pick.Location.Y, LabSnipeAimHeight)); // M0과 같은 몸통 높이
 		++Crowd->SnipeCount;
 	});
@@ -245,12 +276,15 @@ ULabMinionStateProcessor::ULabMinionStateProcessor()
 	: EntityQuery(*this)
 {
 	ExecutionFlags = (int32)EProcessorExecutionFlags::AllNetModes;
+	ExecutionOrder.ExecuteInGroup = LabLogicGroupName;
 	ExecutionOrder.ExecuteAfter.Add(ULabOrbSnipeProcessor::StaticClass()->GetFName());
 }
 
 void ULabMinionStateProcessor::ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager)
 {
 	EntityQuery.AddRequirement<FLabMinionFragment>(EMassFragmentAccess::ReadWrite);
+	EntityQuery.AddRequirement<FLabAnimStateFragment>(EMassFragmentAccess::ReadWrite); // 피격 → 사망 전환
+	EntityQuery.AddRequirement<FTransformFragment>(EMassFragmentAccess::ReadOnly);     // 개발용 진단 로그(제거 위치). 쿼리 밖 읽기를 없애려고 선언한다
 	EntityQuery.AddTagRequirement<FLabMinionTag>(EMassFragmentPresence::All);
 	EntityQuery.AddTagRequirement<FLabHitTag>(EMassFragmentPresence::Any);
 	EntityQuery.AddTagRequirement<FLabDeadTag>(EMassFragmentPresence::Any);
@@ -264,11 +298,14 @@ void ULabMinionStateProcessor::Execute(FMassEntityManager& EntityManager, FMassE
 		return;
 	}
 	const float DeathDuration = Crowd->DeathDuration;
+	const float Now = Crowd->GetWorld()->GetTimeSeconds();
 	TArray<FMassEntityHandle> Finished;
 	EntityQuery.ForEachEntityChunk(Context, [&](FMassExecutionContext& Context)
 	{
 		const bool bDead = Context.DoesArchetypeHaveTag(*FLabDeadTag::StaticStruct());
 		const TArrayView<FLabMinionFragment> Minions = Context.GetMutableFragmentView<FLabMinionFragment>();
+		const TArrayView<FLabAnimStateFragment> AnimStates = Context.GetMutableFragmentView<FLabAnimStateFragment>();
+		const TConstArrayView<FTransformFragment> Transforms = Context.GetFragmentView<FTransformFragment>();
 		const float DeltaSeconds = Context.GetDeltaTimeSeconds();
 		for (FMassExecutionContext::FEntityIterator It = Context.CreateEntityIterator(); It; ++It)
 		{
@@ -283,15 +320,14 @@ void ULabMinionStateProcessor::Execute(FMassEntityManager& EntityManager, FMassE
 			{
 				Finished.Add(Entity);
 #if !UE_BUILD_TEST
-				if (const FTransformFragment* Xf = EntityManager.GetFragmentDataPtr<FTransformFragment>(Entity))
-				{
-					LabLogScreenEvent(TEXT("removed"), Crowd->SnipeView, Xf->GetTransform().GetLocation()); // 개발용 진단: 사망 후 제거 위치
-				}
+				LabLogScreenEvent(TEXT("removed"), Crowd->SnipeView, Transforms[It].GetTransform().GetLocation()); // 개발용 진단: 사망 후 제거 위치
 #endif
 			}
 			else
 			{
+				// 로직 시간과 표현 상태를 같은 자리에서 바꾼다. 표현은 태그가 아니라 AnimStates를 보므로 태그가 다음 플러시에 바뀌어도 한 프레임 튐이 없다(plan.md 코드 정비 3).
 				Minion.StateTimeLeft = DeathDuration;
+				AnimStates[It].Set(ELabMinionState::Dead, Now);
 				Context.Defer().RemoveTag<FLabHitTag>(Entity);
 				Context.Defer().AddTag<FLabDeadTag>(Entity);
 			}
@@ -340,6 +376,7 @@ ULabDamageGenProcessor::ULabDamageGenProcessor()
 	: EntityQuery(*this)
 {
 	ExecutionFlags = (int32)EProcessorExecutionFlags::AllNetModes;
+	ExecutionOrder.ExecuteInGroup = LabLogicGroupName;
 	ExecutionOrder.ExecuteAfter.Add(ULabMinionStateProcessor::StaticClass()->GetFName());
 }
 
@@ -347,6 +384,7 @@ void ULabDamageGenProcessor::ConfigureQueries(const TSharedRef<FMassEntityManage
 {
 	EntityQuery.AddRequirement<FLabHealthFragment>(EMassFragmentAccess::ReadWrite);
 	EntityQuery.AddRequirement<FLabMinionFragment>(EMassFragmentAccess::ReadWrite); // E2 (d) 치명 모드가 피격 시간을 쓴다
+	EntityQuery.AddRequirement<FLabAnimStateFragment>(EMassFragmentAccess::ReadWrite); // 치명 모드의 피격 전환
 	EntityQuery.AddTagRequirement<FLabMinionTag>(EMassFragmentPresence::All);
 	EntityQuery.AddTagRequirement<FLabHitTag>(EMassFragmentPresence::None);
 	EntityQuery.AddTagRequirement<FLabDeadTag>(EMassFragmentPresence::None);
@@ -375,12 +413,14 @@ void ULabDamageGenProcessor::Execute(FMassEntityManager& EntityManager, FMassExe
 	const uint32 Threshold = static_cast<uint32>(FMath::Min(1.0, double(Wanted) / Pool) * double(MAX_uint32));
 	const uint32 Frame = static_cast<uint32>(GFrameCounter);
 	const float HitDuration = Crowd->HitDuration;
+	const float Now = Crowd->GetWorld()->GetTimeSeconds();
 
 	TArray<FMassEntityHandle> Targets;
 	EntityQuery.ForEachEntityChunk(Context, [&](FMassExecutionContext& Context)
 	{
 		const TArrayView<FLabHealthFragment> Healths = Context.GetMutableFragmentView<FLabHealthFragment>();
 		const TArrayView<FLabMinionFragment> Minions = Context.GetMutableFragmentView<FLabMinionFragment>();
+		const TArrayView<FLabAnimStateFragment> AnimStates = Context.GetMutableFragmentView<FLabAnimStateFragment>();
 		for (FMassExecutionContext::FEntityIterator It = Context.CreateEntityIterator(); It; ++It)
 		{
 			if (MurmurFinalize32(HashCombineFast(::GetTypeHash(Minions[It].Serial), ::GetTypeHash(Frame))) > Threshold) // 섞지 않은 HashCombineFast는 작은 입력에서 고르게 퍼지지 않는다
@@ -392,6 +432,7 @@ void ULabDamageGenProcessor::Execute(FMassEntityManager& EntityManager, FMassExe
 				// 저격과 같은 경로: 피격 상태로 바꾸고 멈춘다. 피격이 끝나면 상태 프로세서가 사망 → 제거 → 재생성한다.
 				const FMassEntityHandle Entity = Context.GetEntity(It);
 				Minions[It].StateTimeLeft = HitDuration;
+				AnimStates[It].Set(ELabMinionState::Hit, Now);
 				Context.Defer().AddTag<FLabHitTag>(Entity);
 				StopMoving(Context, Entity);
 				++Crowd->DamageHits;
@@ -436,6 +477,7 @@ ULabDamageApplyProcessor::ULabDamageApplyProcessor()
 	, HealthQuery(*this)
 {
 	ExecutionFlags = (int32)EProcessorExecutionFlags::AllNetModes;
+	ExecutionOrder.ExecuteInGroup = LabLogicGroupName;
 	ExecutionOrder.ExecuteAfter.Add(ULabDamageGenProcessor::StaticClass()->GetFName());
 }
 

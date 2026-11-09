@@ -3,13 +3,25 @@
 #include "CoreMinimal.h"
 #include "MassProcessor.h"
 #include "MassEntityQuery.h"
+#include "LabConfig.h"
 #include "LabMassProcessors.generated.h"
 
 /**
  * M1 Mass 코어의 프로세서. M0 액터(ALabMinion, ALabOrb)의 이동·피해·사망 로직을 그대로 옮긴다. plan.md "M1".
  * 미니언 태그(FLabMinionTag)가 있는 엔티티만 다루므로 M0 실행에서는 대상이 없어 일하지 않는다.
- * 순서: 접근(Tasks 그룹, 엔진 조향 앞) → 엔진 조향·이동 → 범위 피해 → 저격 → 상태 타이머.
+ * 순서: 접근(Tasks 그룹, 엔진 조향 앞) → 엔진 조향·이동 → 그룹 LabLogic(범위 피해 → 저격 → 상태 타이머 → 피해 발생·적용) → 표현(VAT·ActorSync, LabLogic 뒤).
+ * M3b 정비(Docs/Worklog/M3b.md "코드 정비", 2026-11-09 사용자 결정): 로직은 상태 전환 때 FLabAnimStateFragment를 쓰고 표현은 그것만 읽는다.
+ * 엔진 조향은 Tasks 뒤에 돌아야 하므로 접근만 Tasks 그룹에 남긴다. 그룹 이름 의존성은 솔버가 자식 노드 전부로 펼친다(MassProcessorDependencySolver.cpp:680-719).
  */
+
+/** Lab 로직 프로세서 그룹. 표현 프로세서가 ExecuteAfter로 가리킨다. */
+inline const FName LabLogicGroupName(TEXT("LabLogic"));
+
+/** 진단 변형 m3qold: 정비 전 쿼리 구조(표현이 로직 프래그먼트와 태그를 읽고, 저격이 쿼리 밖에서 쓰고, 표현에 로직 뒤 순서 선언이 없다). */
+inline bool LabUseOldQueries()
+{
+	return FLabConfig::Get().Variant == ELabVariant::M3QOld;
+}
 
 /** 살아 있는 개체의 이동 목표를 오브로 둔다. 실제 이동은 엔진 조향(UMassSteerToMoveTargetProcessor)과 이동 프로세서가 한다. */
 UCLASS()

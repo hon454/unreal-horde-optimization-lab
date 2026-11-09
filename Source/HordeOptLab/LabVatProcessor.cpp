@@ -1,5 +1,6 @@
 #include "LabVatProcessor.h"
 #include "LabCrowdSubsystem.h"
+#include "LabMassProcessors.h" // LabLogicGroupName, LabUseOldQueries
 #include "LabMassTypes.h"
 #include "MassCommonFragments.h"
 #include "MassExecutionContext.h"
@@ -32,12 +33,24 @@ ULabVatISMProcessor::ULabVatISMProcessor()
 {
 	// 기본은 등록하지 않는다. 게임 모듈이 단계를 보고 켠다(HordeOptLab.cpp).
 	bAutoRegisterWithProcessingPhases = false;
+	if (!LabUseOldQueries())
+	{
+		// 로직이 이 프레임에 바꾼 표현 상태를 읽도록 로직 그룹 뒤에 돈다. 엔진의 Representation 뒤 선언은 부모 생성자가 더한다(MassUpdateISMProcessor.cpp:20).
+		ExecutionOrder.ExecuteAfter.Add(LabLogicGroupName);
+	}
 }
 
 void ULabVatISMProcessor::ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager)
 {
 	Super::ConfigureQueries(EntityManager);
-	EntityQuery.AddRequirement<FLabMinionFragment>(EMassFragmentAccess::ReadOnly);
+	if (LabUseOldQueries())
+	{
+		EntityQuery.AddRequirement<FLabMinionFragment>(EMassFragmentAccess::ReadOnly); // m3qold: 로직 프래그먼트를 읽어 로직 넷과 자원을 다툰다
+	}
+	else
+	{
+		EntityQuery.AddRequirement<FLabAnimStateFragment>(EMassFragmentAccess::ReadOnly);
+	}
 }
 
 void ULabVatISMProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context)
@@ -54,6 +67,7 @@ void ULabVatISMProcessor::Execute(FMassEntityManager& EntityManager, FMassExecut
 	const float HitDuration = Crowd->HitDuration;
 	const float DeathDuration = Crowd->DeathDuration;
 	const FVector ViewLocation = Crowd->SnipeView.Location;
+	const bool bOld = LabUseOldQueries();
 	int32 BandCounts[4] = { 0, 0, 0, 0 };
 	// 진단(-LabVatTiming): 처리 안쪽을 나눠 잰다. 액터가 있을 때만 이 프로세서가 2.3ms 느려지는 원인 찾기(2026-11-09)
 	static const bool bTiming = FParse::Param(FCommandLine::Get(), TEXT("LabVatTiming"));
@@ -75,9 +89,11 @@ void ULabVatISMProcessor::Execute(FMassEntityManager& EntityManager, FMassExecut
 		const TConstArrayView<FTransformFragment> TransformList = Context.GetFragmentView<FTransformFragment>();
 		const TArrayView<FMassRepresentationFragment> RepresentationList = Context.GetMutableFragmentView<FMassRepresentationFragment>();
 		const TConstArrayView<FMassRepresentationLODFragment> RepresentationLODList = Context.GetFragmentView<FMassRepresentationLODFragment>();
-		const TConstArrayView<FLabMinionFragment> Minions = Context.GetFragmentView<FLabMinionFragment>();
-		const bool bHit = Context.DoesArchetypeHaveTag(*FLabHitTag::StaticStruct());
-		const bool bDead = Context.DoesArchetypeHaveTag(*FLabDeadTag::StaticStruct());
+		// 새 구조: 표현 상태만 읽는다. m3qold: 로직 프래그먼트와 아키타입 태그로 상태를 안다.
+		const TConstArrayView<FLabAnimStateFragment> AnimStates = bOld ? TConstArrayView<FLabAnimStateFragment>() : Context.GetFragmentView<FLabAnimStateFragment>();
+		const TConstArrayView<FLabMinionFragment> Minions = bOld ? Context.GetFragmentView<FLabMinionFragment>() : TConstArrayView<FLabMinionFragment>();
+		const bool bHit = bOld && Context.DoesArchetypeHaveTag(*FLabHitTag::StaticStruct());
+		const bool bDead = bOld && Context.DoesArchetypeHaveTag(*FLabDeadTag::StaticStruct());
 		const float DeltaSeconds = Context.GetDeltaTimeSeconds();
 		if (bTiming) { CyChunkSetup += FPlatformTime::Cycles64() - C0; }
 
@@ -100,27 +116,26 @@ void ULabVatISMProcessor::Execute(FMassEntityManager& EntityManager, FMassExecut
 						RepresentationLOD.LODSignificance, Representation.PrevLODSignificance);
 					if (bTiming) { CyXf += FPlatformTime::Cycles64() - X0; }
 
-					const FLabMinionFragment& Minion = Minions[EntityIt];
-					FLabVatFrameData Data;
-					if (bDead)
+					// 상태와 재생 시각. 새 구조는 표현 프래그먼트 하나에서, m3qold는 태그 + 로직의 남은 시간에서 구한다.
+					ELabMinionState State;
+					float T;
+					if (bOld)
 					{
-						const float T = DeathDuration - Minion.StateTimeLeft;
-						Data.Frame = ClipFrame(Clips.Death, T, Clips.SampleRate, false);
-						Data.PrevFrame = ClipFrame(Clips.Death, T - DeltaSeconds, Clips.SampleRate, false);
-					}
-					else if (bHit)
-					{
-						const float T = HitDuration - Minion.StateTimeLeft;
-						Data.Frame = ClipFrame(Clips.Hit, T, Clips.SampleRate, false);
-						Data.PrevFrame = ClipFrame(Clips.Hit, T - DeltaSeconds, Clips.SampleRate, false);
+						const FLabMinionFragment& Minion = Minions[EntityIt];
+						State = bDead ? ELabMinionState::Dead : bHit ? ELabMinionState::Hit : ELabMinionState::Walk;
+						T = bDead ? DeathDuration - Minion.StateTimeLeft : bHit ? HitDuration - Minion.StateTimeLeft : Now + LabWalkPhase(Minion.Serial);
 					}
 					else
 					{
-						// 걷기 위상을 일련번호로 흩는다. 모두 같은 프레임이면 군중이 한 몸처럼 발을 맞춘다.
-						const float Phase = float(Minion.Serial % 997u) * 0.1031f;
-						Data.Frame = ClipFrame(Clips.Walk, Now + Phase, Clips.SampleRate, true);
-						Data.PrevFrame = ClipFrame(Clips.Walk, Now + Phase - DeltaSeconds, Clips.SampleRate, true);
+						const FLabAnimStateFragment& Anim = AnimStates[EntityIt];
+						State = Anim.State;
+						T = Now - Anim.StateStartTime;
 					}
+					const FLabVatClip& Clip = State == ELabMinionState::Dead ? Clips.Death : State == ELabMinionState::Hit ? Clips.Hit : Clips.Walk;
+					const bool bLoop = State == ELabMinionState::Walk;
+					FLabVatFrameData Data;
+					Data.Frame = ClipFrame(Clip, T, Clips.SampleRate, bLoop);
+					Data.PrevFrame = ClipFrame(Clip, T - DeltaSeconds, Clips.SampleRate, bLoop);
 					const uint64 D0 = bTiming ? FPlatformTime::Cycles64() : 0;
 					ISMInfo[ISMInfoIndex].AddBatchedCustomData<FLabVatFrameData>(Data, RepresentationLOD.LODSignificance, Representation.PrevLODSignificance);
 					if (bTiming) { CyCustom += FPlatformTime::Cycles64() - D0; }

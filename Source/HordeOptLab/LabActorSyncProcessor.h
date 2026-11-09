@@ -25,6 +25,10 @@ protected:
  * 애니 인스턴스를 다시 초기화해 그 시각부터 재생한다(AnimBP 시퀀스 플레이어 Start Position이 StartTime에 묶여 있다, Scripts/bind-anim-start.md).
  * 그 뒤 상태가 바뀌면 StartTime을 0으로 두고 상태만 바꾼다(블렌드 리스트가 다시 활성화된 클립을 처음부터 재생한다).
  * 게임 스레드에서 돈다(액터 API).
+ *
+ * M3b 정비(Docs/Worklog/M3b.md): 상태는 표현 전용 FLabAnimStateFragment에서만 읽고(정비 1), 그룹 LabLogic 뒤에 돈다고 선언하며(정비 2),
+ * 액터 태그 FLabActorTag가 있는 아키타입만 순회한다(정비 4). 태그는 ULabActorManagement::OnPostActorSpawn이 붙이고, 이 프로세서가 액터가 떼어진 엔티티에서 뗀다.
+ * 진단 변형: m3qold는 정비 전 구조(로직 프래그먼트 + 태그, 필터 없음, 순서 선언 없음), m3syncall은 태그 필터만 없다.
  */
 UCLASS()
 class ULabActorSyncProcessor : public UMassProcessor

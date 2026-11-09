@@ -54,7 +54,7 @@ public:
 
 	// 오브 상태. 오브가 쓰고 프로세서가 읽는다.
 	FVector OrbCenter = FVector::ZeroVector;
-	uint32 PendingSnipeTick = 0; // 0이 아니면 이번 처리에서 저격한다
+	std::atomic<uint32> PendingSnipeTick{0}; // 0이 아니면 이번 처리에서 저격한다. 오브 틱(게임 스레드)이 쓰고 저격 프로세서(워커일 수 있음)가 exchange(0)으로 가져간다(M3b 정비)
 	FLabSnipeView SnipeView;     // 화면 판정용 카메라(오브가 매 틱 갱신)
 	float HitDuration = 0.5f;
 	float DeathDuration = 1.f;

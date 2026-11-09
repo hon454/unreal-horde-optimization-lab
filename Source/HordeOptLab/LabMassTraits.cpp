@@ -16,6 +16,7 @@ void ULabMinionTrait::BuildTemplate(FMassEntityTemplateBuildContext& BuildContex
 	BuildContext.AddFragment<FMassActorFragment>();                        // UMassVisualizationTrait가 요구한다(MassVisualizationTrait.cpp RequireFragment)
 	BuildContext.AddFragment<FLabMinionFragment>();
 	BuildContext.AddFragment<FLabHealthFragment>();
+	BuildContext.AddFragment<FLabAnimStateFragment>(); // M3b: 표현 전용 상태
 	BuildContext.AddTag<FLabMinionTag>();
 
 	FLabUnitTypeParams Params;

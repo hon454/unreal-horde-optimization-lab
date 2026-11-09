@@ -4,6 +4,7 @@
 #include "GameFramework/Character.h"
 #include "LabMinionAnimInstance.h"
 #include "MassActorPoolableInterface.h"
+#include "MassEntityHandle.h"
 #include "LabMinion.generated.h"
 
 class ALabCrowdSpawner;
@@ -86,6 +87,18 @@ protected:
 };
 
 /**
+ * staticpawn 변형(M3b 코드 정비 5): static의 정적 메시 + pawn의 CharacterMovement 틱 끔. 애니메이션도 이동 컴포넌트 틱도 없는 액터라
+ * "액터 → Mass 컨테이너 전환"만의 값을 보는 M0 대조군이다. static은 CharacterMovement를 유지해 17배가 전환만의 값이 아니었다(plan.md "M3b").
+ */
+UCLASS()
+class ALabMinionStaticPawn : public ALabMinionStatic
+{
+	GENERATED_BODY()
+public:
+	ALabMinionStaticPawn(const FObjectInitializer& ObjectInitializer);
+};
+
+/**
  * pawn 변형: CharacterMovement의 틱을 끄고 위치를 직접 옮긴다(ACharacter는 이 컴포넌트를 필수로 만든다). 캡슐·스켈레탈 메시·AnimBP는 full과 같다.
  * "액터를 최대한 가볍게 만들어도 여기까지"를 보는 액터 쪽 천장이다(2026-11-07 사용자 결정, budget·uro와 같은 대조군).
  * APawn을 새로 만들지 않고 ACharacter에서 이동 틱만 꺼서 스포너·오브 코드를 그대로 쓴다.
@@ -128,8 +141,8 @@ public:
 	virtual void PrepareForPooling_Implementation() override;
 	virtual void PrepareForGame_Implementation() override;
 
-	// 동기화 프로세서가 쓰는 상태. 엔티티가 바뀌면(새로 붙음, 풀에서 다시 씀) 애니를 처음부터 맞춘다.
-	uint32 BoundSerial = MAX_uint32;
+	// 동기화 프로세서가 쓰는 상태. 엔티티가 바뀌면(새로 붙음, 풀에서 다시 씀) 애니를 처음부터 맞춘다. M3b부터 일련번호 대신 엔티티 핸들로 판정한다(표현이 로직 프래그먼트를 읽지 않게).
+	FMassEntityHandle BoundEntity;
 	ELabMinionState AppliedState = ELabMinionState::Walk;
 	float AppliedDeadAmount = 0.f;
 

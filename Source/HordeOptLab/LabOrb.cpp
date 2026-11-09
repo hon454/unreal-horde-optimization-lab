@@ -266,6 +266,6 @@ void ALabOrb::TickMass(float DeltaSeconds, ULabCrowdSubsystem* Crowd)
 	while (SnipeAccumulator >= FLabScenario::SnipeInterval)
 	{
 		SnipeAccumulator -= FLabScenario::SnipeInterval;
-		Crowd->PendingSnipeTick = ++SnipeTick;
+		Crowd->PendingSnipeTick.store(++SnipeTick);
 	}
 }

@@ -3,14 +3,17 @@
 #include "CoreMinimal.h"
 #include "MassEntityTypes.h"
 #include "MassEntityHandle.h"
+#include "LabMinionAnimInstance.h" // ELabMinionState
 #include "LabMassTypes.generated.h"
 
 /**
  * M1 Mass 코어의 Fragment와 Tag. plan.md "M1".
  * 위치·속도·이동 목표는 엔진 Fragment(FTransformFragment, FMassVelocityFragment, FMassMoveTargetFragment)를 쓴다.
+ * M3b 정비: 로직 데이터(FLabMinionFragment, FLabHealthFragment)는 로직 프로세서만 읽고 쓰고, 표현(VAT·ActorSync)은 FLabAnimStateFragment만 읽는다
+ * (Docs/Worklog/M3b.md "코드 정비", 2026-11-09 사용자 결정 A안).
  */
 
-/** 오브 저격 대상 선택(결정적 해시)에 쓰는 스폰 일련번호와, 피격·사망 상태에 남은 시간. */
+/** 로직 전용. 오브 저격 대상 선택(결정적 해시)에 쓰는 스폰 일련번호와, 피격·사망 상태에 남은 시간. */
 USTRUCT()
 struct FLabMinionFragment : public FMassFragment
 {
@@ -18,6 +21,27 @@ struct FLabMinionFragment : public FMassFragment
 
 	uint32 Serial = 0;
 	float StateTimeLeft = 0.f;
+};
+
+/** 걷기 위상(초). 모두 같은 프레임이면 군중이 한 몸처럼 발을 맞추므로 일련번호로 흩는다. VAT 인스턴스와 액터가 같은 식을 쓴다. */
+inline float LabWalkPhase(uint32 Serial)
+{
+	return float(Serial % 997u) * 0.1031f;
+}
+
+/**
+ * 표현 전용. 로직이 상태 전환 때만 쓰고 VAT·ActorSync가 읽는다. 표현은 태그(FLabHitTag·FLabDeadTag)를 보지 않고 이 값만 본다.
+ * 재생 시각 = 월드 시각 − StateStartTime. Walk는 StateStartTime = −위상이라 재생 시각 = 월드 시각 + 위상(M2와 같다).
+ */
+USTRUCT()
+struct FLabAnimStateFragment : public FMassFragment
+{
+	GENERATED_BODY()
+
+	ELabMinionState State = ELabMinionState::Walk;
+	float StateStartTime = 0.f;
+
+	void Set(ELabMinionState InState, float Now) { State = InState; StateStartTime = Now; }
 };
 
 USTRUCT()
@@ -66,6 +90,16 @@ struct FLabHitTag : public FMassTag
 /** 사망 상태. StateTimeLeft가 다하면 엔티티를 지우고 가장자리 링에서 새로 만든다(M0 액터의 사망 애니 길이와 같다). */
 USTRUCT()
 struct FLabDeadTag : public FMassTag
+{
+	GENERATED_BODY()
+};
+
+/**
+ * M3 하이드레이션 액터가 붙어 있는 엔티티(M3b 정비 4번). ULabActorManagement::OnPostActorSpawn이 붙이고,
+ * ULabActorSyncProcessor가 액터가 떼어진 것을 보면 뗀다. ActorSync는 이 태그가 있는 아키타입만 순회한다.
+ */
+USTRUCT()
+struct FLabActorTag : public FMassTag
 {
 	GENERATED_BODY()
 };
