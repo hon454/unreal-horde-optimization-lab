@@ -485,3 +485,41 @@ plan.md "M3b" 146\~158행(2종 구성, 저격 E안, E3 (3c) 화면 크기 중요
 - 인자 `-LabBandFloor`(`ALabGameMode::StartPlay`·`SetupBandFloor`·`Tick`, `LabGameMode.h/.cpp`). P1이면 CVar `lab.BandFloor`를 1로 두고(새 CVar. `LabFixedCVarString`의 목록에 더해 `lab_build` 로그와 CSV 메타데이터 `LabCVars`에 `lab.BandFloor=1`로 찍힌다. 켜고 잰 실행을 걸러내는 용도), `L_Bench`의 바닥(`Floor*` 이름의 `AStaticMeshActor`. 라벨은 에디터 전용이라 이름 접두사로 찾는다)의 머티리얼 0을 `M_LabBandFloor`의 MID로 바꾼다. `BandRadius1~3`은 `FLabSnipeBands::Edges`(3000/8000/20000cm)에서, `BandCenter`는 오브 월드 위치에서 매 프레임 넣는다. P2(탑뷰)면 `lab_bandfloor on=0 reason=P2`로 끈다. 머티리얼 경로는 `Config/DefaultGame.ini` `[Lab] BandFloorMaterial`(코드에 박지 않음). ini 키·머티리얼·바닥이 없으면 경고만 남기고 기본 바닥으로 돈다.
 - 확인: `Scripts/build.ps1` 성공. `-Small`(M3, N=100, 20초) 종료 코드 0: `m3mass` P1(기본 바닥, `respawns=43 kills=8 snipes=39`), `m3mass` P1 `-LabBandFloor`(`lab_bandfloor on=1 floor=Floor_0 previous=MI_ProcGrid material=M_LabBandFloor radii=3000/8000/20000`, `cvars=…|lab.BandFloor=1`, 같은 43/8/39), `m3mass` P2 `-LabBandFloor`(`lab_bandfloor on=0 reason=P2`, `lab.BandFloor=0`). `run-dev.ps1`은 `-Extra` 두 값을 떨어뜨리므로 뒤 둘은 같은 인자로 에디터를 직접 띄웠다.
 - 캡처는 하지 않았다(지시 범위 밖). 띠가 보이는 확인 캡처는 에셋 세션의 `m3b_bandfloor_top.png`·`m3b_bandfloor_p1.png`(위 절).
+
+## 묶음 1·2 결과 (측정 세션, 자동 생성)
+
+전체 실행 완료. 로그 `Saved/Lab/m3b-all.log`(git 밖). 해석은 쓰지 않았다.
+
+| 페이즈 | 시작 | 끝 | 소요 | 종료 코드 |
+| --- | --- | --- | --- | --- |
+| start | 2026-11-09T23:28:12 | 2026-11-09T23:32:15 | 0:04:03 | 0 |
+| e3b | 2026-11-09T23:32:15 | 2026-11-10T00:04:33 | 0:32:18 | 0 |
+| matrix | 2026-11-10T00:04:33 | 2026-11-10T02:46:19 | 2:41:46 | 0 |
+| ab2 | 2026-11-10T02:46:19 | 2026-11-10T02:58:26 | 0:12:07 | 0 |
+| aa | 2026-11-10T02:58:26 | 2026-11-10T03:02:29 | 0:04:03 | 0 |
+| trace | 2026-11-10T03:02:29 | 2026-11-10T03:05:11 | 0:02:42 | 0 |
+| types2 | 2026-11-10T03:05:11 | 2026-11-10T06:02:57 | 2:57:46 | 0 |
+| 합계 | | | 6:34:45 | |
+
+실패한 실행 0건.
+
+`summarize.py` 경고 0건(`LabTypesAssets=substituted` 제외 등).
+
+runs.csv 294행, summary.csv 97조건. `labbuild` 값: `labbuild=6a98c46cd7db`.
+
+**A/A (m3mass 20k P1, 프레임 p50 중앙값, ms)**
+
+| 구분 | 프레임 p50 | 최소\~최대 | 프레임 p95 |
+| --- | --- | --- | --- |
+| 시작(-start-fin) | 17.848 | 15.789\~17.997 | 19.867 |
+| 끝(-aa-fin) | 17.892 | 15.993\~17.959 | 19.573 |
+
+시작과 끝의 프레임 p50 차이 0.04 ms (판정선 0.5 ms: 넘지 않음).
+
+**스파이크 검사 (`spikes.py M3b- --verbose`, 전문은 `Measurements/M3b/spikes.txt`)**
+
+- 요약: `runs=293 periodic=0 (0%) factor=2.0x (r0 제외, 최종 묶음 fin 파일만)`
+- 주기적으로 표시된 줄 0개
+
+`LabTypesAssets=substituted` 행 0개(summary에서 제외).
+

@@ -8,6 +8,7 @@
 import argparse
 import csv
 import re
+import subprocess
 import sys
 from pathlib import Path
 
@@ -40,7 +41,21 @@ def main():
     runs = read_csv(M / "runs.csv")
     log = (ROOT / "Saved" / "Lab" / "m3b-all.log")
     log_text = log.read_text(encoding="utf-8-sig", errors="replace") if log.exists() else ""
-    spikes = (M / "spikes.txt").read_text(encoding="utf-8-sig", errors="replace").splitlines() if (M / "spikes.txt").exists() else []
+    # 최종 묶음(태그 fin)만 본다. 로그는 마지막 "M3b ALL start" 이후만 본다(앞선 시도의 실패 줄을 세지 않는다).
+    if "M3b ALL start" in log_text:
+        log_text = log_text[log_text.rindex("M3b ALL start"):]
+    runs = [r for r in runs if str(r.get("final", "")) == "1"]
+    summ = [r for r in summ if str(r.get("final", "")) == "1"]
+    csv_dir = ROOT / "Saved" / "Profiling" / "CSV"
+    files = sorted(str(p) for p in csv_dir.glob("M3b-*fin-r*.csv"))
+    spikes = []
+    for i in range(0, len(files), 60):
+        res = subprocess.run([sys.executable, "-I", str(ROOT / "Scripts" / "spikes.py"), *files[i:i + 60], "--verbose"], capture_output=True, text=True, encoding="utf-8")
+        spikes += [l for l in res.stdout.splitlines() if not l.startswith("runs=") and not l.startswith("periodic runs:")]
+    n_runs = len(spikes)
+    n_per = sum(1 for l in spikes if l.rstrip().endswith("PERIODIC"))
+    spikes = [f"runs={n_runs} periodic={n_per} ({(n_per / n_runs if n_runs else 0):.0%}) factor=2.0x (r0 제외, 최종 묶음 fin 파일만)"] + spikes
+    (M / "spikes.txt").write_text(chr(10).join(spikes) + chr(10), encoding="utf-8")
 
     out = [HEAD, ""]
     out.append(f"전체 실행 {'**실패로 중단**' if args.failed else '완료'}. 로그 `Saved/Lab/m3b-all.log`(git 밖). 해석은 쓰지 않았다.")
@@ -71,12 +86,12 @@ def main():
                 return r
         return None
 
-    a, b = med("m3mass-start"), med("m3mass-aa")
+    a, b = med("m3mass-start-fin"), med("m3mass-aa-fin")
     out.append("**A/A (m3mass 20k P1, 프레임 p50 중앙값, ms)**")
     out.append("")
     out.append("| 구분 | 프레임 p50 | 최소\\~최대 | 프레임 p95 |")
     out.append("| --- | --- | --- | --- |")
-    for name, r in (("시작(-start)", a), ("끝(-aa)", b)):
+    for name, r in (("시작(-start-fin)", a), ("끝(-aa-fin)", b)):
         if r:
             out.append(f"| {name} | {r['frame_p50_ms']} | {r['frame_p50_ms_min']}\\~{r['frame_p50_ms_max']} | {r['frame_p95_ms']} |")
         else:
