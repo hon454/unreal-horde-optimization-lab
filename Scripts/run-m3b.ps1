@@ -4,6 +4,9 @@
 #                 결과로 대표값(Base, 히스테리시스)을 정한 뒤 이어서 전수를 돌린다. 기준점 m3mass를 같은 섞기에 넣는다(24회, 2026-11-09 코디네이터 결정). -NoBase면 18회.
 #   Phase ab    : 선행 A/B(코드 정비 효과). m3mass / m3qold / m3syncall x 20k P1 x 3회 = 9회를 실행 단위로 섞는다. -LabStage=M3.
 #                 e3b의 m3mass 20k와 라벨이 겹치지 않도록 태그 ab를 붙인다(summary에서 <변형>-ab 조건으로 따로 쓰임).
+#   Phase aff   : 잡음 진단(어피니티). m3mass 20k P1 -LabStage=M3를 고정(0xFFFF, 논리 코어 0~15 = CCD0 추정, 태그 aff)과
+#                 고정 없음(태그 noaff)으로 번갈아 6회씩(aff r1, noaff r1, aff r2, ...). 앞에 버리는 r0 1회(-NoR0로 끔).
+#                 summary 조건 m3mass-aff / m3mass-noaff. -Phase all에는 넣지 않는다(진단 전용).
 #   Phase matrix: 전수 매트릭스, 조건 단위. M0 {full, static} x {1k, 5k} x P1, P2 / staticpawn {1k, 5k} P1 /
 #                 M1~M3 {1k, 5k, 20k, 30k, 50k} x P1, P2. 각 3회.
 #   Phase aa    : 묶음 끝 기준점 A/A. m3mass 20k P1 3회, 태그 aa(summary에서 m3mass-aa 조건으로 따로 쓰임).
@@ -15,10 +18,11 @@
 # -DryRun은 실행 목록만 찍고 아무것도 실행하지 않는다.
 param(
     [string]$Tag = "",
-    [ValidateSet("all", "e3b", "ab", "matrix", "aa", "trace")][string]$Phase = "all",
+    [ValidateSet("all", "e3b", "ab", "aff", "matrix", "aa", "trace")][string]$Phase = "all",
     [switch]$NoBase,
     [switch]$NoR0,   # 묶음의 버리는 r0을 두지 않는다(같은 묶음의 두 번째 이후 호출. 예: e3b 다음 ab)
     [switch]$DryRun,
+    [string]$AffinityMask = "FFFF",   # -Phase aff의 고정 마스크(16진수)
     [string]$SerialArgs = "-LabFullyParallel=0"   # 직렬 트레이스용 게임 인자(코드 세션이 확정)
 )
 $ErrorActionPreference = "Stop"
@@ -26,8 +30,8 @@ $Bench = "$PSScriptRoot\run-bench.ps1"
 
 # 실행 하나 = @(변형, N, 프리셋, 실행 단계 -Stage, 실행 번호, 라벨 태그, 트레이스 여부, 추가 인자)
 $Runs = New-Object System.Collections.ArrayList
-function Add-Run($Variant, $N, $Preset, $Stage, $RunIdx, $RunTag, $Trace, $Extra) {
-    [void]$Runs.Add(@{ Variant = $Variant; N = $N; Preset = $Preset; Stage = $Stage; Run = $RunIdx; Tag = "$RunTag$Tag"; Trace = $Trace; Extra = $Extra })
+function Add-Run($Variant, $N, $Preset, $Stage, $RunIdx, $RunTag, $Trace, $Extra, $Aff = "") {
+    [void]$Runs.Add(@{ Variant = $Variant; N = $N; Preset = $Preset; Stage = $Stage; Run = $RunIdx; Tag = "$RunTag$Tag"; Trace = $Trace; Extra = $Extra; Aff = $Aff })
 }
 
 # --- Phase e3b: 실행 단위로 섞는다 (A r1, B r1, C r1, ... A r2, ...) ---
@@ -44,6 +48,14 @@ if ($Phase -in @("all", "e3b")) {
 # --- Phase ab: 실행 단위로 섞는다 ---
 if ($Phase -in @("all", "ab")) {
     foreach ($R in 1..3) { foreach ($V in @("m3mass", "m3qold", "m3syncall")) { Add-Run $V 20000 "P1" "M3" $R "ab" $false "" } }
+}
+
+# --- Phase aff: 고정 / 고정 없음 번갈아 (all에는 포함하지 않는다) ---
+if ($Phase -eq "aff") {
+    foreach ($R in 1..6) {
+        Add-Run "m3mass" 20000 "P1" "M3" $R "aff" $false "" $AffinityMask
+        Add-Run "m3mass" 20000 "P1" "M3" $R "noaff" $false ""
+    }
 }
 
 # --- Phase matrix: 조건 단위, 3회 ---
@@ -74,11 +86,11 @@ $Minutes = [math]::Round($Total * 85 / 60)
 Write-Host "M3b batch: $($Runs.Count) runs + 1 discarded r0 = $Total, about $Minutes min (85 s each)"
 $Idx = 0
 $Plan = $Runs.ToArray()
-if (-not $NoR0) { $Plan = @(@{ Variant = $Runs[0].Variant; N = $Runs[0].N; Preset = $Runs[0].Preset; Stage = $Runs[0].Stage; Run = 0; Tag = $Runs[0].Tag; Trace = $false; Extra = "" }) + $Plan }
+if (-not $NoR0) { $Plan = @(@{ Variant = $Runs[0].Variant; N = $Runs[0].N; Preset = $Runs[0].Preset; Stage = $Runs[0].Stage; Run = 0; Tag = $Runs[0].Tag; Trace = $false; Extra = ""; Aff = $Runs[0].Aff }) + $Plan }
 foreach ($R in $Plan) {
     $Idx++
     $Label = "M3b-$($R.Variant)-N$($R.N)-$($R.Preset)$($R.Tag)-r$($R.Run)"
-    Write-Host ("{0,3}. {1}  stage={2}{3}{4}" -f $Idx, $Label, $R.Stage, $(if ($R.Trace) { " trace" } else { "" }), $(if ($R.Extra) { " extra=$($R.Extra)" } else { "" }))
+    Write-Host ("{0,3}. {1}  stage={2}{3}{4}" -f $Idx, $Label, $R.Stage, $(if ($R.Trace) { " trace" } else { "" }), $(if ($R.Extra) { " extra=$($R.Extra)" } else { "" }) + $(if ($R.Aff) { " affinity=0x$($R.Aff)" } else { "" }))
 }
 if ($DryRun) { Write-Host "DryRun: nothing executed."; exit 0 }
 
@@ -90,6 +102,7 @@ foreach ($R in $Plan) {
     if ($R.Tag) { $Args += @("-Tag", $R.Tag) }
     if ($R.Trace) { $Args += "-Trace" }
     if ($R.Extra) { $Args += @("-ExtraArgs", $R.Extra) }
+    if ($R.Aff) { $Args += @("-Affinity", $R.Aff) }
     & powershell @Args
     if ($LASTEXITCODE -ne 0) { $Failed += "$($R.Variant) N$($R.N) $($R.Preset)$($R.Tag) r$($R.Run)" }
 }

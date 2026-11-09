@@ -20,7 +20,9 @@ param(
     # M3b: Insights 트레이스를 Saved/Traces/<라벨>.utrace로 남긴다(-trace=cpu,gpu,frame,counters,mass). 트레이스 실행의 수치는 비교에 쓰지 않는다.
     [switch]$Trace,
     # 게임 인자를 그대로 덧붙인다(예: 직렬 트레이스의 "-LabFullyParallel=0", 인자 이름은 코드 세션이 정한다).
-    [string]$ExtraArgs = ""
+    [string]$ExtraArgs = "",
+    # 프로세스 시작 직후 CPU 어피니티 마스크(16진수, 예: FFFF)를 건다. 없으면 걸지 않는다. 잡음 진단용(5950X 두 CCD). 로그와 Saved/Lab/<라벨>.summary.txt에 affinity=0x...를 남긴다.
+    [string]$Affinity = ""
 )
 . "$PSScriptRoot\common.ps1"
 
@@ -48,9 +50,16 @@ for ($i = $First; $i -le $Last; $i++) {
     if ($ExtraArgs) { $GameArgs += $ExtraArgs.Split(" ", [StringSplitOptions]::RemoveEmptyEntries) }
     Write-Host "RUN $Label"
     $Proc = Start-Process -FilePath $Exe -ArgumentList $GameArgs -PassThru
+    $AffNote = "affinity=none"
+    if ($Affinity) {
+        $Mask = [Convert]::ToInt64($Affinity -replace "^0x", "", 16)
+        try { $Proc.ProcessorAffinity = [IntPtr]$Mask; $AffNote = "affinity=0x{0:X}" -f $Mask } catch { Write-Host "WARN: could not set affinity: $_"; $AffNote = "affinity=FAILED" }
+    }
+    Write-Host $AffNote
     $Proc.WaitForExit()
     # Test 구성은 로그 파일을 남기지 않는다(engine-notes.md 6절 NO_LOGGING). 게임이 Saved/Lab/<라벨>.summary.txt에 요약을 쓴다.
     $Summary = "$ProjectDir\Packaged\Test\Windows\HordeOptLab\Saved\Lab\$Label.summary.txt"
+    if ($Affinity -and (Test-Path $Summary)) { Add-Content -Path $Summary -Value $AffNote }
     if (Test-Path $Summary) { Get-Content $Summary }
     if ($Proc.ExitCode -ne 0 -or -not (Test-Path "$PkgCsv\$Label.csv")) {
         Write-Host "FAIL: $Label exit=$($Proc.ExitCode) csv=$(Test-Path "$PkgCsv\$Label.csv")"
