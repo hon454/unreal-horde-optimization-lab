@@ -88,13 +88,64 @@ public class HordeOptLab : ModuleRules
 		if (Commit.Length > 12) { Commit = Commit.Substring(0, 12); }
 
 		string GenDir = Path.Combine(ProjectDir, "Intermediate", "Build", "LabGenerated");
-		Directory.CreateDirectory(GenDir);
 		string HeaderPath = Path.Combine(GenDir, "LabBuildVersion.h");
 		string Content = "// HordeOptLab.Build.cs가 만든다. 고치지 않는다.\n#pragma once\n#define LAB_BUILD_COMMIT \"" + Commit + "\"\n";
-		if (!File.Exists(HeaderPath) || File.ReadAllText(HeaderPath) != Content)
-		{
-			File.WriteAllText(HeaderPath, Content);
-		}
+		WriteHeaderIfChanged(GenDir, HeaderPath, Content);
 		PrivateIncludePaths.Add(GenDir);
+	}
+
+	/**
+	 * 2026-11-09 package.ps1 -Config Test에서 UBT 인스턴스 여럿(쿠킹용 에디터 타깃 + 게임 타깃)이 아직 없는 헤더를 동시에 만들려다
+	 * 파일 잠금 충돌로 첫 패키징이 실패했다. 그래서 임시 파일에 쓰고 Move로 바꾸며, 잠금 예외가 나면 다른 인스턴스가 같은 내용을 먼저 썼는지 다시 읽어 확인한다.
+	 */
+	private static void WriteHeaderIfChanged(string GenDir, string HeaderPath, string Content)
+	{
+		const int MaxAttempts = 3;
+		for (int Attempt = 1; ; ++Attempt)
+		{
+			try
+			{
+				if (ReadOrNull(HeaderPath) == Content)
+				{
+					return;
+				}
+				try { Directory.CreateDirectory(GenDir); } catch (Exception) { }
+				string TempPath = HeaderPath + "." + Guid.NewGuid().ToString("N");
+				try
+				{
+					File.WriteAllText(TempPath, Content);
+					File.Move(TempPath, HeaderPath, true);
+				}
+				finally
+				{
+					try { if (File.Exists(TempPath)) { File.Delete(TempPath); } } catch (Exception) { }
+				}
+				return;
+			}
+			catch (Exception E) when (E is IOException || E is UnauthorizedAccessException)
+			{
+				System.Threading.Thread.Sleep(200 * Attempt);
+				if (ReadOrNull(HeaderPath) == Content)
+				{
+					return; // 다른 UBT 인스턴스가 먼저 썼다.
+				}
+				if (Attempt >= MaxAttempts)
+				{
+					throw;
+				}
+			}
+		}
+	}
+
+	private static string ReadOrNull(string FilePath)
+	{
+		try
+		{
+			return File.Exists(FilePath) ? File.ReadAllText(FilePath) : null;
+		}
+		catch (Exception E) when (E is IOException || E is UnauthorizedAccessException)
+		{
+			return null;
+		}
 	}
 }

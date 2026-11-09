@@ -166,4 +166,4 @@ plan.md "M3b" 코드 정비 핵심 5 + 두 줄 + 기본 프로세서 점검. 대
 
 - 증상: 측정 세션의 `package.ps1 -Config Test` 첫 실행이 실패했다. UBT 인스턴스 여럿(쿠킹용 에디터 타깃 + 게임 타깃)이 `Intermediate/Build/LabGenerated/LabBuildVersion.h`를 동시에 만들려다 파일 잠금이 충돌했다. 헤더가 아직 없을 때 "없으면 쓴다" 분기가 모든 프로세스에서 참이 된다. 개발 빌드는 UBT가 하나라 드러나지 않았다.
 - 고침(`HordeOptLab.Build.cs` `WriteHeaderIfChanged`): 임시 파일 `LabBuildVersion.h.<guid>`에 쓰고 `File.Move(…, overwrite)`로 바꾼다. `IOException`·`UnauthorizedAccessException`이면 200ms×시도 뒤 다시 읽어 내용이 같으면 성공(다른 인스턴스가 먼저 씀), 다르면 3회까지 재시도 후 예외. 디렉터리 생성 예외도 삼킨다. UBT는 net10.0(`Engine/Source/Programs/Shared/UnrealEngine.csproj.props:32`)이라 덮어쓰기 `Move` 오버로드가 있다.
-- 상태: 파일만 고쳤다. 측정 세션의 패키징과 선행 묶음이 도는 동안 `build.ps1`·`run-dev.ps1`을 돌리지 않았고 커밋도 하지 않았다. 묶음이 끝나면 코디네이터 신호로 빌드와 `run-dev.ps1 -Small`을 확인한 뒤 커밋한다.
+- 확인: 선행 묶음이 끝난 뒤(a0b9771) `Intermediate/Build/LabGenerated/LabBuildVersion.h`를 지우고 `Scripts/build.ps1`로 빌드해 "없을 때" 경로를 지났다. 성공, 헤더가 `a0b9771a98e7`로 다시 생겼고 임시 파일은 남지 않았다. `run-dev.ps1 -Small -Variant m3mass`가 M0 단계(별칭은 변형만 고르고 단계는 `-Extra "-LabStage=M3"`로 준다)와 M3 단계 모두 종료 코드 0, `respawns=43 kills=8 snipes=39`. 여러 UBT가 동시에 도는 Test 패키징은 측정 세션의 다음 패키징에서 확인한다.
