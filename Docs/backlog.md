@@ -44,7 +44,8 @@
 - 공간 격자 기반 저격 대상 선택(지금은 결정적 해시). 범위 피해·저격·ActorSync가 매 프레임 전 N을 순회한다(2026-11-09 점검). M4 뒤 실험.
 - Lab 프로세서 그룹을 게임 스레드 밖으로(`OffGameThreadGroupNames`, City Sample `DefaultMass.ini:7`). M3b에서 그룹을 선언한 뒤 M4에서 시험.
 - `m3visoff`: 화면 밖은 80m부터 안 그리기(Base Off 80m). E3b (8) 뒤 후보.
-- 바닥 밴드 표시(결정 6, 2026-11-09): 개발 빌드 `-LabBandFloor`로 카메라 기준 30/80/200m 띠를 바닥 머티리얼(`CameraPosition` − `AbsoluteWorldPosition` XY 거리)로 그린다. 측정 빌드는 기본 바닥. 대안 `DrawDebugCircle`.
+- 바닥 밴드 표시(결정 6 확정, 2026-11-09): 개발 빌드 인자 `-LabBandFloor`가 있으면 Floor의 머티리얼을 `Content/Lab/Materials/M_LabBandFloor`로 바꾼다. 띠는 **오브 중심** 30/80/200m(저격 구간 `FLabSnipeBands`와 같다). 중심은 머티리얼 파라미터로 한 번 넣는다(오브는 맵 중앙 고정). 표현 LOD는 카메라 기준이라 P1에서 XY 최대 15m 어긋난다(카메라가 오브 뒤 15m, `MassLODSubsystem.cpp:376-377`). 글에 그 한 줄을 적는다. P2(탑뷰)는 끈다(3D 거리라 200m 경계가 XY 173m). 측정 빌드는 기본 바닥. 에디터에서 만들고 순서를 `Scripts/create-band-floor.md`에 적는다. 버린 대안: 카메라 중심(띠가 1rpm으로 돈다), `DrawDebugCircle`(가늘고 Test에서 안 나온다), 링 메시(테두리만).
+- LOD 기준점을 오브로 옮기기: `UMassLODSubsystem`의 `bUsePlayerPawnLocationInsteadOfCamera`(`MassLODSubsystem.cpp:367-370`)로 뷰어 위치를 폰(오브)으로 둘 수 있다. 거리 밴드의 기준이 바뀌는 시나리오 변수라 M0 고정을 깬다. 새 기준선을 또 세울 때만 검토(2026-11-09 결정 6 대안 D).
 - "통합 Mass"(액터 없는 근거리) 프로토타입과 하이드레이션 비교.
 - 거리별 VAT 품질 단계: 가까운 쪽은 상세 메시 + 본 영향 4, 먼 쪽은 간략 메시 + 본 영향 1로 따로 굽는다(2026-11-08 M2 결정 1의 D안, 변수 둘이라 M2에서 뺐다).
 - 근거리 부위 판정 비용(2026-11-09 사용자 질문에서). 하이드레이션 액터에 판정용 피직스 애셋(뼈마다 QueryOnly 바디)을 켜고 트레이스 피격을 엔티티 사건으로 넘길 때의 비용을, E3 (6)의 캡슐 하나(20k 1.55ms)와 비교한다. 무기 전투는 비목표라 판정과 비용만 다룬다. 원본 피직스 애셋은 Simulated라 Kinematic·QueryOnly로 바꿔야 한다(engine-notes.md 9절).
