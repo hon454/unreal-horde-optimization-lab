@@ -12,8 +12,9 @@ M0\~M3 완료(태그 `M0`\~`M3`). 다음은 M3b 정비 + 새 기준선([plan.md]
 
 - [x] 1. M3b 코드 정비(코드 세션, 210bbac): 핵심 5 + 두 줄 + 엔진 프로세서 8개 끔 + CSV 메타데이터 + E3b (8) 변형 + 별칭 + `-LabFullyParallel=0`. 빌드 성공, `-Small` 전 단계·새 변형 종료 코드 0. 걷기 루프 가설은 사실 아님(Nearest 필터). 설계·표·끈 목록은 [Worklog/M3b.md](Worklog/M3b.md).
 - [x] 2. 측정 방법 구현(측정 세션, af4be11·d761020): summarize.py p95·`bottleneck`·`build` 열, M0\~M3 재요약(기존 값 차이 0), plot.py, `Scripts/spikes.py`, `Scripts/run-m3b.ps1 -DryRun`(E3b 24회, 기준점 포함), pc-specs.md. 병목 열은 M0가 game, M1 이후는 대체로 gpu다. 남은 것은 코드 세션에 달렸다: 변형 이름 ↔ `-LabStage` 매핑, 직렬 트레이스 인자(`-LabFullyParallel=0`), CSV 메타데이터 키(`LabBuild`·`LabCVars`·`LabDriver` 가정). 결과: p95 N@16.7ms P1은 M0 full 667 / M1 15,498 / M2 16,460 / M3 18,475 / M3 m2off 30,812(p50 정의 813 / 20,577 / 20,518 / 22,046 / 35,763). 7.0초 주기 스파이크는 M0·M1·M2 묶음(11-08 이전)에 있고 M3 묶음(11-09)에는 없다. `massav`의 2.0초 주기는 저격 간격과 같아 시나리오 효과다.
-- [ ] 3. 2종: 시즈 에셋 이전(`migrate-assets.py siege`), AnimBP·Start Position 바인딩(MCP), VAT 베이크, 예약 발 저격, 화면 크기 중요도. 같은 에디터 작업으로 바닥 띠 머티리얼 `M_LabBandFloor` + `-LabBandFloor`(결정 6).
-- [ ] 4. 묶음 1(E3b (8) 18회 → 대표값 결정 → 전수 + A/A + 트레이스), 묶음 2.
+- [ ] 3. 선행 묶음(측정 세션, A안 2026-11-09): Test 패키지 → `run-m3b.ps1 -Phase e3b`(24회) → `-Phase ab`(m3mass·m3qold·m3syncall 20k P1 3회) → 요약·스파이크 검사 → 코디네이터가 표현 LOD 대표값을 정한다. 그동안 다른 세션은 빌드·에디터 금지.
+- [ ] 4. 2종: 시즈 에셋 이전(`migrate-assets.py siege`), AnimBP·Start Position 바인딩(MCP), VAT 베이크, 예약 발 저격, 화면 크기 중요도. 같은 에디터 작업으로 바닥 띠 머티리얼 `M_LabBandFloor` + `-LabBandFloor`(결정 6).
+- [ ] 5. 최종 패키지 하나로 묶음 1 전수(+ A/B·A/A·트레이스)와 묶음 2(2종)를 같은 날 돌린다. 대표값은 3번에서 정한 것을 기본값으로 넣는다.
 
 ## 지금 유효한 조건
 
@@ -50,4 +51,4 @@ py -3 Scripts/summarize.py --milestone M3
 
 ## 사용자에게 요청한 일
 
-- 2종 구현 때: 시즈 에셋 이전은 런처 엔진 커맨드렛으로 돌린다(commands.md "에셋 마이그레이션"). AnimBP Start Position 바인딩은 Unreal MCP가 필요하니 그때 에디터를 띄워 달라(이번 세션은 MCP 연결 실패).
+- 2종 구현 때: 시즈 에셋 이전은 런처 엔진 커맨드렛으로 돌린다(commands.md "에셋 마이그레이션"). AnimBP Start Position 바인딩과 바닥 띠 머티리얼은 Unreal MCP가 필요하다. MCP 서버는 에디터를 켜면 자동으로 뜨므로(2026-11-09 사용자), 에셋 세션을 시작할 때 에디터를 띄워 달라. 선행 묶음(패키징·벤치마크)이 도는 동안은 에디터를 켜지 않는다.
