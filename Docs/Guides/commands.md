@@ -46,6 +46,18 @@ STATUS.md "명령"에는 매번 쓰는 것만 둔다. 여기에는 스크립트 
 - Test 패키지 스크린샷은 `stat unit`만 가능하다.
 - 영상은 수치 실행에서 찍지 않는다. 라벨 `visualN`으로 따로 돌린다.
 
+## 측정 PC 사양 읽기
+
+[pc-specs.md](../Reference/pc-specs.md)의 값은 PowerShell에서 아래 명령으로 읽었다. 구성이 바뀌면 같은 명령으로 다시 읽는다.
+
+- CPU, RAM, GPU: `Get-CimInstance Win32_Processor`, `Win32_PhysicalMemory`, `Win32_VideoController`
+- GPU 드라이버: `nvidia-smi --query-gpu=name,driver_version,memory.total --format=csv`
+- 저장 장치: `Get-Partition -DriveLetter G | Get-Disk`
+- 모니터 모델: `Get-CimInstance -Namespace root\wmi WmiMonitorID`
+- 전원 구성표: `powercfg /getactivescheme`
+- GPU 스케줄링, 게임 모드: `HKLM:\SYSTEM\CurrentControlSet\Control\GraphicsDrivers`의 `HwSchMode`, `HKCU:\Software\Microsoft\GameBar`의 `AutoGameModeEnabled`(없으면 기본값)
+- 엔진 커밋: `git -C "G:\Epic Games\UE_5.8.4" rev-parse --short HEAD`, `git -C "G:\Epic Games\UE_5.8.4" log -1 --format=%cs`
+
 ## Unreal MCP
 
 - 서버는 에디터가 뜨면 자동으로 열린다: `Config/DefaultEditorPerProjectUserSettings.ini`의 `bAutoStartServer=True`, `ServerPortNumber=8001`(DS 실험실의 기본 8000과 겹치지 않게). 수동은 콘솔 `ModelContextProtocol.StartServer`.

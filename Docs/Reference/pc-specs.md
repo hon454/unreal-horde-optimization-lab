@@ -1,7 +1,7 @@
 # 측정 PC
 
-**구성 1** (`runs.csv`의 `pc`=1). M0부터 지금까지의 모든 측정에 쓴 PC다. 값은 2026-11-09에 읽었다.
-구성이 바뀌면 이 문서 끝에 "구성 2" 절을 더하고 바뀐 항목만 적는다.
+**구성 1**(`runs.csv`의 `pc`=1). M0부터 지금까지의 모든 측정에 쓴 PC다. 값은 2026-11-09에 읽었고, 그 전에 드라이버나 OS를 갱신했는지는 모른다.
+구성이 바뀌면 끝에 "구성 2" 절을 더하고 바뀐 항목만 적는다. 값을 읽는 명령은 [commands.md](../Guides/commands.md) "측정 PC 사양 읽기"에 있다.
 
 ## 1. 하드웨어
 
@@ -26,35 +26,12 @@
 **2.3 엔진**: UE 5.8.4 소스 빌드, `G:\Epic Games\UE_5.8.4`.
 git `f45729c0b`(2026-10-20), BranchName `UE5`, CompatibleChangelist 55116800(`Engine/Build/Build.version`).
 
-## 3. 측정할 때의 상태
+## 3. Windows 설정
 
-**3.1 실행 방식**: Test 패키지, 2560×1440 창 모드.
+**3.1 전원 구성표**: 균형 조정.
 
-**3.2 화질**: 스케일러빌리티 Epic(3). VSync 끔, 프레임 제한 없음. 나머지 고정값은 [measurement.md](../Guides/measurement.md) "렌더 고정"을 따른다.
+**3.2 하드웨어 가속 GPU 스케줄링**: 레지스트리 값(`HwSchMode`)이 없다. 기본값으로 동작한다. 실제로 켜져 있는지는 확인하지 않았다.
 
-**3.3 전원 구성표**: 균형 조정.
+**3.3 게임 모드**: 레지스트리 값(`AutoGameModeEnabled`)이 없다. 기본값으로 동작한다.
 
-**3.4 하드웨어 가속 GPU 스케줄링**: 레지스트리 값(`HwSchMode`)이 없다. 기본값으로 동작한다. 실제로 켜져 있는지는 확인하지 않았다.
-
-**3.5 게임 모드**: 레지스트리 값(`AutoGameModeEnabled`)이 없다. 기본값으로 동작한다.
-
-> **주의**: 창 모드라서 Windows 데스크톱 합성을 거칠 수 있다. 이 수치를 전체 화면에서 잰 수치와 바로 비교하지 않는다.
-
-> **주의**: 측정 중에 모니터를 끄거나 PC를 오래 비워 두면 모든 조건이 느려진다. [measurement.md](../Guides/measurement.md) "측정 중 PC 상태"를 지킨다.
-
-## 4. 기록의 한계
-
-- M0\~M3 사이에 드라이버나 OS를 갱신했는지는 모른다. 2026-11-09 이전 값을 남기지 않았다.
-- OS 빌드 번호는 M0\~M3 CSV 메타데이터의 `[os]`와 같다.
-- M3b부터는 `runs.csv`의 `build` 열이 실행마다 드라이버와 빌드를 남긴다.
-
-## 5. 값을 다시 읽는 법
-
-PowerShell에서 읽는다.
-
-- CPU, RAM, GPU: `Get-CimInstance Win32_Processor`, `Win32_PhysicalMemory`, `Win32_VideoController`
-- GPU 드라이버: `nvidia-smi --query-gpu=name,driver_version,memory.total --format=csv`
-- 저장 장치: `Get-Partition -DriveLetter G | Get-Disk`
-- 모니터 모델: `Get-CimInstance -Namespace root\wmi WmiMonitorID`
-- 전원 구성표: `powercfg /getactivescheme`
-- 엔진 커밋: `git -C "G:\Epic Games\UE_5.8.4" rev-parse --short HEAD`, `git -C "G:\Epic Games\UE_5.8.4" log -1 --format=%cs`
+해상도, 화질, 측정 중 PC 상태는 [measurement.md](../Guides/measurement.md)를 따른다.
