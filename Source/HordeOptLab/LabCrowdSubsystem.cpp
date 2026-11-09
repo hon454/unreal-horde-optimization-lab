@@ -87,7 +87,7 @@ void ULabCrowdSubsystem::Activate(ALabCrowdSpawner* InSpawner, UStaticMesh* Mesh
 	}
 	if (bM3 || Variant == ELabVariant::VatCull || Variant == ELabVariant::VatCullVis)
 	{
-		// E3 (7): 하이드레이션 거리만 바꾼다(대표 30m). 80m·200m 밴드와 상한은 그대로(2026-11-09 사용자 결정 A)
+		// E3 (7): 하이드레이션 거리(화면 안 Visible)만 바꾼다(대표 30m). 80m·200m 밴드와 상한은 그대로(2026-11-09 사용자 결정 A)
 		const float HydrateCm = Variant == ELabVariant::M3Hyd15 ? 1500.f : Variant == ELabVariant::M3Hyd50 ? 5000.f : 3000.f;
 		const float Bands[EMassLOD::Max] = { 0.f, HydrateCm, 8000.f, 20000.f };
 		const int32 MaxCounts[EMassLOD::Max] = { 500, 5000, MAX_int32, MAX_int32 }; // 확정값 LODMaxCount
@@ -102,11 +102,15 @@ void ULabCrowdSubsystem::Activate(ALabCrowdSpawner* InSpawner, UStaticMesh* Mesh
 			Visual->LODParams.VisibleLODDistance[EMassLOD::Off] = 1.e7f; // 화면 안이면 맵 끝까지 그린다
 		}
 		Visual->Params.LODRepresentation[EMassLOD::Off] = EMassRepresentationType::None;
-		// E3b (8) 표현 LOD 값(plan.md "M3b"). 대표는 Base = Visible = 30m, 히스테리시스 10%(엔진 기본, MassRepresentationFragments.h:309).
-		// BaseLODDistance는 화면 밖(카메라 뒤 포함), VisibleLODDistance는 화면 안의 밴드 경계다.
-		if (Variant == ELabVariant::M3Vis0) { Visual->LODParams.BaseLODDistance[EMassLOD::Medium] = 0.f; }          // 카메라 뒤는 액터로 만들지 않는다
-		else if (Variant == ELabVariant::M3Vis15) { Visual->LODParams.BaseLODDistance[EMassLOD::Medium] = 1500.f; } // 화면 밖 15m, 화면 안 30m
-		else if (Variant == ELabVariant::M3Hys20) { Visual->LODParams.BufferHysteresisOnDistancePercentage = 20.f; }
+		// E3b (8) 표현 LOD 값(plan.md "M3b"). BaseLODDistance는 화면 밖(카메라 뒤 포함), VisibleLODDistance는 화면 안의 밴드 경계다. 히스테리시스 10%(엔진 기본, MassRepresentationFragments.h:309).
+		// M3 대표(m3mass, 별칭 m3vis15)는 결정 1(2026-11-09, 20k·5k 빠른 회전 캡처)로 화면 밖 Base 15m, 화면 안 Visible 30m다. 그 전 대표(30/30m)는 m3vis30으로 잰다.
+		// Base를 자기 정의로 고정한 변형(m3vis0 0m, m3vis30·m3hys20·m3hyd15·m3hyd50은 Visible과 같게)만 빼고 M3 변형은 모두 15m다. M2의 vatcull·vatcullvis는 bM3가 아니라 닿지 않는다.
+		if (bM3)
+		{
+			const bool bBaseIsVisible = Variant == ELabVariant::M3Vis30 || Variant == ELabVariant::M3Hys20 || Variant == ELabVariant::M3Hyd15 || Variant == ELabVariant::M3Hyd50;
+			Visual->LODParams.BaseLODDistance[EMassLOD::Medium] = Variant == ELabVariant::M3Vis0 ? 0.f : bBaseIsVisible ? HydrateCm : 1500.f;
+			if (Variant == ELabVariant::M3Hys20) { Visual->LODParams.BufferHysteresisOnDistancePercentage = 20.f; }
+		}
 	}
 	if (bM3 && Variant == ELabVariant::M3LowRes)
 	{

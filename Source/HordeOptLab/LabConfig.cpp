@@ -49,6 +49,7 @@ const FLabConfig& FLabConfig::Get()
 			else if (Variant == TEXT("m3syncall")) { C.Variant = ELabVariant::M3SyncAll; }
 			else if (Variant == TEXT("m3vis0")) { C.Variant = ELabVariant::M3Vis0; }
 			else if (Variant == TEXT("m3vis15")) { C.Variant = ELabVariant::M3Vis15; }
+			else if (Variant == TEXT("m3vis30")) { C.Variant = ELabVariant::M3Vis30; }
 			else if (Variant == TEXT("m3hys20")) { C.Variant = ELabVariant::M3Hys20; }
 			else if (Variant == TEXT("m3lock0")) { C.Variant = ELabVariant::M3Lock0; }
 			else if (Variant == TEXT("m3order")) { C.Variant = ELabVariant::M3Order; }
@@ -118,6 +119,7 @@ const TCHAR* FLabConfig::VariantName(ELabVariant V)
 	case ELabVariant::M3SyncAll: return TEXT("m3syncall");
 	case ELabVariant::M3Vis0: return TEXT("m3vis0");
 	case ELabVariant::M3Vis15: return TEXT("m3vis15");
+	case ELabVariant::M3Vis30: return TEXT("m3vis30");
 	case ELabVariant::M3Hys20: return TEXT("m3hys20");
 	case ELabVariant::M3Lock0: return TEXT("m3lock0");
 	case ELabVariant::M3Order: return TEXT("m3order");
