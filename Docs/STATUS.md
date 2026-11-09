@@ -11,7 +11,7 @@ M0\~M3 완료(태그 `M0`\~`M3`). 다음은 M3b 정비 + 새 기준선([plan.md]
 2026-11-09 점검 결정 1\~5·8·9는 끝났다([plan.md](plan.md) "M3b"·"M4", [measurement.md](Guides/measurement.md)). 결정 6(오브 중심 바닥 띠)·7(장애물 + 플로우 필드를 M5 뒤 첫 마일스톤으로, 퀄리티 앞)도 끝났다([backlog.md](backlog.md)). 아래 1\~4는 코디네이터 세션이 작업 세션에 나눠 맡긴다(AGENTS.md "여러 세션이 한 체크아웃을 쓴다").
 
 - [ ] 1. M3b 코드 정비(plan.md "코드 정비" 핵심 5 + 두 줄 + 기본 프로세서 점검). 먼저 프로세서별 읽기·쓰기 표를 그린다.
-- [x] 2. 측정 방법 구현(측정 세션, af4be11): summarize.py p95·`bottleneck`·`build` 열, M0\~M3 재요약(기존 값 차이 0), plot.py, `Scripts/spikes.py`, `Scripts/run-m3b.ps1 -DryRun`, pc-specs.md. 남은 것은 코드 세션에 달렸다: 변형 이름 ↔ `-LabStage` 매핑, 직렬 트레이스 인자(`-LabFullyParallel=0`), CSV 메타데이터 키(`LabBuild`·`LabCVars`·`LabDriver` 가정). 결과: p95 N@16.7ms P1은 M0 full 667 / M1 15,498 / M2 16,460 / M3 18,475 / M3 m2off 30,812(p50 정의 813 / 20,577 / 20,518 / 22,046 / 35,763). 7.0초 주기 스파이크는 M0·M1·M2 묶음(11-08 이전)에 있고 M3 묶음(11-09)에는 없다. `massav`의 2.0초 주기는 저격 간격과 같아 시나리오 효과다.
+- [x] 2. 측정 방법 구현(측정 세션, af4be11·d761020): summarize.py p95·`bottleneck`·`build` 열, M0\~M3 재요약(기존 값 차이 0), plot.py, `Scripts/spikes.py`, `Scripts/run-m3b.ps1 -DryRun`(E3b 24회, 기준점 포함), pc-specs.md. 병목 열은 M0가 game, M1 이후는 대체로 gpu다. 남은 것은 코드 세션에 달렸다: 변형 이름 ↔ `-LabStage` 매핑, 직렬 트레이스 인자(`-LabFullyParallel=0`), CSV 메타데이터 키(`LabBuild`·`LabCVars`·`LabDriver` 가정). 결과: p95 N@16.7ms P1은 M0 full 667 / M1 15,498 / M2 16,460 / M3 18,475 / M3 m2off 30,812(p50 정의 813 / 20,577 / 20,518 / 22,046 / 35,763). 7.0초 주기 스파이크는 M0·M1·M2 묶음(11-08 이전)에 있고 M3 묶음(11-09)에는 없다. `massav`의 2.0초 주기는 저격 간격과 같아 시나리오 효과다.
 - [ ] 3. 2종: 시즈 에셋 이전(`migrate-assets.py siege`), AnimBP·Start Position 바인딩(MCP), VAT 베이크, 예약 발 저격, 화면 크기 중요도. 같은 에디터 작업으로 바닥 띠 머티리얼 `M_LabBandFloor` + `-LabBandFloor`(결정 6).
 - [ ] 4. 묶음 1(E3b (8) 18회 → 대표값 결정 → 전수 + A/A + 트레이스), 묶음 2.
 
