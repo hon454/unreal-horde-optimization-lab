@@ -4,12 +4,13 @@
 
 ## 단계
 
-M0\~M3 완료(태그 `M0`\~`M3`). 다음은 M3b 새 기준선([plan.md](plan.md) "M3b"). 끝낸 단계의 경위는 `Worklog/M<N>.md`.
+M0\~M3 완료(태그 `M0`\~`M3`). 다음은 M3b 정비 + 새 기준선([plan.md](plan.md) "M3b"). 끝낸 단계의 경위는 `Worklog/M<N>.md`.
 
 ## 다음 할 일
 
-- [ ] 1. M3b 계획과 설계 선택지를 추천과 함께 보여 주고 승인받기. 정해진 것: 액터 콜리전 끔, 저격은 대형 우선(구간당 규칙은 계획에서), [plan.md](plan.md) "M3b".
-- [ ] 2. [pc-specs.md](Reference/pc-specs.md) 나머지 열(RAM, 해상도, `sg.*`).
+- [ ] 1. M3b 정비 항목을 하나씩 결정한다(2026-11-09 A안: M3b = 정비 + 새 기준선, [plan.md](plan.md) "M3b"). 순서: 문서 정정 → 코드 수정 → 측정 방법 → 2종 시나리오 → M4 계획 재작성. 결정한 것은 plan.md·measurement.md·backlog.md에 적는다.
+- [ ] 2. M3b 구현과 두 묶음 측정. 정해진 것: 액터 콜리전 끔, 저격은 대형 우선(구간당 규칙은 계획에서).
+- [ ] 3. [pc-specs.md](Reference/pc-specs.md) 나머지 열(RAM, 해상도, `sg.*`).
 
 ## 지금 유효한 조건
 
