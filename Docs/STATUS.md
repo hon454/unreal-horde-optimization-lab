@@ -12,7 +12,9 @@ M0\~M3 완료(태그 `M0`\~`M3`). 다음은 M3b 정비 + 새 기준선([plan.md]
 
 - [x] 1. M3b 코드 정비(코드 세션, 210bbac): 핵심 5 + 두 줄 + 엔진 프로세서 8개 끔 + CSV 메타데이터 + E3b (8) 변형 + 별칭 + `-LabFullyParallel=0`. 빌드 성공, `-Small` 전 단계·새 변형 종료 코드 0. 걷기 루프 가설은 사실 아님(Nearest 필터). 설계·표·끈 목록은 [Worklog/M3b.md](Worklog/M3b.md).
 - [x] 2. 측정 방법 구현(측정 세션, af4be11·d761020): summarize.py p95·`bottleneck`·`build` 열, M0\~M3 재요약(기존 값 차이 0), plot.py, `Scripts/spikes.py`, `Scripts/run-m3b.ps1 -DryRun`(E3b 24회, 기준점 포함), pc-specs.md. 병목 열은 M0가 game, M1 이후는 대체로 gpu다. 남은 것은 코드 세션에 달렸다: 변형 이름 ↔ `-LabStage` 매핑, 직렬 트레이스 인자(`-LabFullyParallel=0`), CSV 메타데이터 키(`LabBuild`·`LabCVars`·`LabDriver` 가정). 결과: p95 N@16.7ms P1은 M0 full 667 / M1 15,498 / M2 16,460 / M3 18,475 / M3 m2off 30,812(p50 정의 813 / 20,577 / 20,518 / 22,046 / 35,763). 7.0초 주기 스파이크는 M0·M1·M2 묶음(11-08 이전)에 있고 M3 묶음(11-09)에는 없다. `massav`의 2.0초 주기는 저격 간격과 같아 시나리오 효과다.
-- [ ] 3. 선행 묶음(측정 세션, A안 2026-11-09): Test 패키지 → `run-m3b.ps1 -Phase e3b`(24회) → `-Phase ab`(m3mass·m3qold·m3syncall 20k P1 3회) → 요약·스파이크 검사 → 코디네이터가 표현 LOD 대표값을 정한다. 그동안 다른 세션은 빌드·에디터 금지.
+- [x] 3. 선행 묶음(측정 세션, a0b9771): E3b 24회 + A/B 9회, 실패 0, 주기 스파이크 0. 결과는 [Worklog/M3b.md](Worklog/M3b.md) "선행 묶음", 해설 페이지 https://claude.ai/artifact/QzpD3b9rV8QC529CR4oZQN. m3vis0가 성능 최선(5k 액터 262→114, Game −1.7ms). **문제:** 같은 m3mass 20k P1이 실행마다 16.0/16.2 vs 17.8\~18.5 두 수준으로 갈리고 M3 묶음(15.5)보다 느리다. A/B 판정 불가.
+- [ ] 3a. 잡음 진단(사용자 결정 A안): m3mass 20k P1을 코어 고정(0xFFFF, CCD0 추정) vs 고정 없음 6회씩 번갈아. 조밀해지면 어피니티를 measurement.md 규약에 넣는다. 그 뒤 D안(LockObservers=0, 순서 선언 없음 변형 A/B)으로 +2.4ms의 원인을 가른다.
+- [ ] 3b. E3b 화질 캡처(코드 세션 진행 중): 개발 빌드 m3vis0·mass 20k 60초, 돌아볼 때 액터가 채워지는 프레임 수 → 표현 LOD 대표값 결정.
 - [ ] 4. 2종: 시즈 에셋 이전(`migrate-assets.py siege`), AnimBP·Start Position 바인딩(MCP), VAT 베이크, 예약 발 저격, 화면 크기 중요도. 같은 에디터 작업으로 바닥 띠 머티리얼 `M_LabBandFloor` + `-LabBandFloor`(결정 6).
 - [ ] 5. 최종 패키지 하나로 묶음 1 전수(+ A/B·A/A·트레이스)와 묶음 2(2종)를 같은 날 돌린다. 대표값은 3번에서 정한 것을 기본값으로 넣는다.
 
