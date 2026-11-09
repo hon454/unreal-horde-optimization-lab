@@ -380,3 +380,41 @@ plan.md "M3b" E3b (8)의 화질 쪽. 개발 빌드, `-LabStage=M3 -LabN=20000 -L
 
 - `run-bench.ps1`·`run-dev.ps1`의 `-Variant` ValidateSet에 `m3lock0`, `m3noorder`를 더해 달라(이번 `-Small` 확인은 현재 스크립트로 통과했다). → 4f6db5b부터 `m3noorder`는 없고 `m3order`다. ValidateSet의 `m3noorder`를 `m3order`로 바꿔 달라.
 - ValidateSet에 `m3vis30`도 더해 달라(7f0236f). E3b 24회의 "기준점"(30/30m) 자리는 `m3vis30`이고, `m3vis15`는 이제 `m3mass`와 같은 설정이다.
+
+### 2종(코드)(코디네이터 지시, STATUS 4, 2026-11-09)
+
+plan.md "M3b" 146\~158행(2종 구성, 저격 E안, E3 (3c) 화면 크기 중요도)의 코드 부분. 커밋 ee1a17d. 에셋(시즈 미니언 이전, AnimBP, 정적 메시, VAT 베이크, 피직스)은 에셋 세션 몫이고, 그 전까지 2종 모드는 소형 에셋으로 대체해 돈다(스모크 전용).
+
+**인자.** `-LabTypes=2`(기본 1, `FLabConfig::Types`). 2면 일련번호가 10의 배수인 개체가 대형이다(초기 배치와 재생성 모두, `FLabUnitTypes::IsLarge`). `lab_config … types=2`, HUD 첫 줄에 `2 types`. CSV 메타데이터 `LabTypes`(1·2), `LabTypesAssets`(`ok`·`substituted`·`-`). 1종은 코드 경로가 그대로라(아래 "확인") 결과가 바뀌지 않는다.
+
+**종류.** `FLabUnitTypeParams`(const shared fragment)에 `UnitType`을 더했다. 소형 `{0, 300, 100, 40}`, 대형 `{1, 300, 100, LargeBoundRadius}`로 값이 달라 공유 프래그먼트가 둘이 되고, 종류별 `UMassEntityConfigAsset`(`LabMinionConfig`, `LabMinionLargeConfig`, `ULabMinionTrait::UnitType`)에서 템플릿이 따로 나와 아키타입이 둘로 갈린다(`ULabCrowdSubsystem::BuildEntityConfig`). 프로세서는 `AddConstSharedRequirement<FLabUnitTypeParams>`로 청크마다 종류를 읽는다(개체별 비용 없음). `SpawnEntities`는 일련번호로 나눠 각 템플릿으로 만든다(순서 유지. 1종은 전부 [0]이라 전과 같은 한 번의 생성). `FAgentRadiusFragment`는 둘 다 40으로 두었다(회피가 꺼져 있어 쓰이지 않는다). 피격·사망 시간은 소형 애니 길이 하나다(행동은 같다).
+
+**표현.** 종류별 ISM(각 Config의 `StaticMeshInstanceDesc`가 다른 메시 → 엔진이 ISM 컴포넌트를 따로 만든다), 종류별 VAT 클립(`ULabCrowdSubsystem::VatClipsByType[2]`, VatISM·ActorSync가 청크의 종류로 고른다), 종류별 액터 클래스 `ALabMinionMassActorLarge`·`ALabMinionMassActorBudgetLarge`(엔진 액터 풀이 클래스 키라 풀도 갈린다, `MassActorSpawnerSubsystem.h:321`). M0 액터도 일련번호로 대형 에셋을 받는다(`ALabCrowdSpawner::SpawnAt`, `ALabMinion::UnitType`). 에셋 경로는 `Config/DefaultGame.ini` `[LabUnitAssets]`에서 읽는다(`LabUnitAssets.h/.cpp`, 키 접두사 Small·Large. Small 키가 없으면 2종 전 코드의 경로). 대형 세트가 하나라도 없으면 `FLabUnitTypes::bLargeSubstituted = true`: 소형 에셋으로 대체하고 `lab_types_warning … smoke_only=1 do_not_measure=1` 경고, 메타데이터 `LabTypesAssets=substituted`. 종류(아키타입·저격 예약·풀)는 대체 중에도 갈린다.
+
+필요한 에셋과 기대 경로(에셋 세션이 만들고 ini를 맞춘다. 이름은 소형 세트를 따라 지은 제안이라 바꿔도 된다. ini만 맞으면 코드는 그대로다):
+
+| 에셋 | 기대 경로(ini 키) | 비고 |
+| --- | --- | --- |
+| 스켈레탈 메시(시즈) | `/Game/ParagonMinions/Characters/Minions/Down_Minions/Meshes/Minion_Lane_Siege_Dawn`(`LargeSkeletalMesh`) | `Scripts/migrate-assets.py` `siege` 세트. 피직스 에셋은 메시에 지정된 것을 쓴다(소형과 같은 수정, 코드가 따로 읽지 않음) |
+| AnimBP | `/Game/Lab/Anim/ABP_LabMinionLarge`(`LargeAnimClass`, `…_C`) | 스켈레톤이 달라 따로 만든다. 부모 `ULabMinionAnimInstance`, Start Position 바인딩(`Scripts/bind-anim-start.md`). 그래프가 비어 있으면 없는 것으로 본다 |
+| 애니 셋 걷기·피격·죽기 | `…/Animations/Siege/NonCombat_JogFwd`, `HitReact_Front`, `Death_A`(`LargeWalk`·`LargeHit`·`LargeDeath`) | M0 액터와 AnimBP 시퀀스. 실제 시즈 애니 이름이 다르면 ini를 바꾼다 |
+| 정적 메시(M0 static·M1 ISM) | `/Game/Lab/Derived/SM_LabMinionLarge`(`LargeStaticMesh`) | `Scripts/make-static-minion.py` |
+| VAT 메시·데이터(Bone) | `/Game/Lab/VAT/Baked/SM_LabMinionLargeVAT_Bone`, `DA_LabMinionLargeVAT_Bone`(`LargeVatMesh`·`LargeVatData`, 접미사 없이) | `Scripts/bake-vat.py`. 걷기·피격·죽기 세 클립. 텍스처 2장(위치·회전)은 데이터 에셋이 가리킨다 |
+| 액터 머티리얼 | `/Game/Lab/VAT/Baked/M_LabMinionLargeActor`(`LargeActorMaterial`) | VAT 인스턴스와 같은 색. 비우면 메시 기본 머티리얼 |
+| 바운드 반경 | `LargeBoundRadius=60`(cm) | **확정 전** 임시값. 메시 바운드로 잰 뒤 바꾸고 measurement.md 확정값에 적는다 |
+
+**저격 E안**(`LabSnipe.h` `TLabSnipeSelector`, M0 `ALabOrb::Snipe`와 Mass `ULabOrbSnipeProcessor` 둘 다). 틱이 4의 배수면 200m 밖 구간 1발, 나머지 2면 80\~200m 구간 1발이 대형 전용(그 구간 화면 안 대형 중 해시 최소). 대형이 있으면 그 구간 소형 후보 중 해시가 가장 큰 하나를 뺀다. 예약 구간에 대형이 없으면 소형 후보가 그대로라 전과 같다. 1종은 대형이 없어 늘 이 경로다.
+
+**E3 (3c) `m3sig`**(`ELabVariant::M3Sig`). Budget 액터(`ALabMinionMassActorBudget`, `a.Budget.*` CVar는 m3budget*과 같다)에 ActorSync가 매 프레임 중요도 = `BoundRadius ÷ 카메라 거리`를 넘긴다(`LabActorSyncProcessor.cpp`, 할당기는 상대값만 쓴다 `AnimationBudgetAllocator.cpp:327-342`). 새 스탯: 프레임별 `Lab/LargeActors`, `Lab/LargeActorSkips`(대형 액터 중 이번 프레임 애니 틱을 건너뛴 수. `IsUsingExternalTickRateControl() && !ShouldTickAnimation()`, `SkeletalMeshComponent.cpp:1918-1923`), 측정 구간 합 메타데이터 `LabLargeActorFrames`·`LabLargeActorSkips`(비율 = Skips ÷ Frames). 할당기 갱신 전후 어느 값인지는 틱 순서에 달려 한 프레임 어긋날 수 있다. 1종이나 예산 변형이 아니면 0이다.
+
+**바꾼 파일.** 새 `LabUnitAssets.h/.cpp`. `LabConfig.h/.cpp`(Types, M3Sig), `LabMassTypes.h`, `LabMassTraits.h/.cpp`, `LabCrowdSubsystem.h/.cpp`, `LabCrowdSpawner.h/.cpp`, `LabMinion.h/.cpp`, `LabSnipe.h`, `LabOrb.cpp`, `LabMassProcessors.cpp`(Snipe), `LabVatProcessor.cpp`, `LabActorSyncProcessor.cpp`, `LabGameMode.h/.cpp`(메타데이터, m3sig CVar), `LabHud.cpp`, `Config/DefaultGame.ini`.
+
+**확인.** `Scripts/build.ps1` 성공. `-Small`(N=100, P1, 20초) 종료 코드 0:
+- 1종: `m0full`(M0) `m1mass`(M1) `m2mass`(M2) `m3mass`(M3) 모두 `respawns=43 kills=8 snipes=39`(2종 코드 전과 같다. 저격 대상 선택이 같은 경로를 지난다).
+- 2종(`-LabTypes=2`, 대형 에셋 없음 → 대체): `m0full`(M0), `m3mass`(M3) 종료 코드 0, `lab_types_warning … large_assets_missing=mesh,walk,hit,death,animbp,staticmesh,vatmesh,vatdata substituting=small smoke_only=1`, `lab_types types=2 large_assets=substituted large_radius=60 small_radius=40`. M3는 `lab_mass_config type=0 … actor=LabMinionMassActor`와 `type=1 … actor=LabMinionMassActorLarge` 두 줄(템플릿·아키타입 둘). `respawns=43 kills=8 snipes=39`.
+- `m3sig`(M3) 1종·2종 종료 코드 0, 액터 `LabMinionMassActorBudget`·`LabMinionMassActorBudgetLarge`. `run-dev.ps1`의 ValidateSet에 `m3sig`가 없고 `-Extra` 두 값은 PowerShell이 떨어뜨리므로 같은 인자로 에디터를 직접 띄웠다(`-LabTypes=2` 실행도 같다).
+- 패키징·벤치마크는 하지 않았다(측정 세션 몫).
+
+**측정 세션에 요청.** ValidateSet에 `m3sig`를 더해 달라. 2종 실행은 `-Extra "-LabTypes=2"`(러너에 인자를 두려면 `-Types 2` 같은 스위치). `LabTypesAssets=substituted`인 CSV는 비교에 쓰지 않는다.
+
+**에셋 세션에 요청.** 위 표의 에셋을 만들고 `Config/DefaultGame.ini` `[LabUnitAssets]`의 Large 키를 실제 경로로 맞춘 뒤, `-LabTypes=2` 실행 로그에 `lab_types types=2 large_assets=ok`가 찍히는지 본다. 반경을 재면 `LargeBoundRadius`를 바꾼다.
