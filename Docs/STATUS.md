@@ -8,13 +8,12 @@ M0\~M3 완료(태그 `M0`\~`M3`). 다음은 M3b 정비 + 새 기준선([plan.md]
 
 ## 다음 할 일
 
-2026-11-09 점검 결정 1\~5·8·9는 끝났다([plan.md](plan.md) "M3b"·"M4", [measurement.md](Guides/measurement.md)). 남은 결정 6·7은 M3b 측정과 무관해 구현 중 다룬다.
+2026-11-09 점검 결정 1\~5·8·9는 끝났다([plan.md](plan.md) "M3b"·"M4", [measurement.md](Guides/measurement.md)). 결정 6(오브 중심 바닥 띠)·7(장애물 + 플로우 필드를 M5 뒤 첫 마일스톤으로, 퀄리티 앞)도 끝났다([backlog.md](backlog.md)). 아래 1\~4는 코디네이터 세션이 작업 세션에 나눠 맡긴다(AGENTS.md "여러 세션이 한 체크아웃을 쓴다").
 
-- [ ] 1. 결정 7 장애물 + 플로우 필드 마일스톤의 위치(M5 뒤, 비주얼 퀄리티 앞/뒤). 결정 6은 끝났다(오브 중심 바닥 띠, [backlog.md](backlog.md) "바닥 밴드 표시").
-- [ ] 2. M3b 코드 정비(plan.md "코드 정비" 핵심 5 + 두 줄 + 기본 프로세서 점검). 먼저 프로세서별 읽기·쓰기 표를 그린다.
-- [ ] 3. 측정 방법 구현: summarize.py p95·병목·`build` 열, M0\~M3 재요약, plot.py, `Scripts/spikes.py`, CSV 메타데이터, run-bench A/A·섞기·30k, pc-specs.md.
-- [ ] 4. 2종: 시즈 에셋 이전(`migrate-assets.py siege`), AnimBP·Start Position 바인딩(MCP), VAT 베이크, 예약 발 저격, 화면 크기 중요도. 같은 에디터 작업으로 바닥 띠 머티리얼 `M_LabBandFloor` + `-LabBandFloor`(결정 6).
-- [ ] 5. 묶음 1(E3b (8) 18회 → 대표값 결정 → 전수 + A/A + 트레이스), 묶음 2.
+- [ ] 1. M3b 코드 정비(plan.md "코드 정비" 핵심 5 + 두 줄 + 기본 프로세서 점검). 먼저 프로세서별 읽기·쓰기 표를 그린다.
+- [ ] 2. 측정 방법 구현: summarize.py p95·병목·`build` 열, M0\~M3 재요약, plot.py, `Scripts/spikes.py`, CSV 메타데이터, run-bench A/A·섞기·30k, pc-specs.md.
+- [ ] 3. 2종: 시즈 에셋 이전(`migrate-assets.py siege`), AnimBP·Start Position 바인딩(MCP), VAT 베이크, 예약 발 저격, 화면 크기 중요도. 같은 에디터 작업으로 바닥 띠 머티리얼 `M_LabBandFloor` + `-LabBandFloor`(결정 6).
+- [ ] 4. 묶음 1(E3b (8) 18회 → 대표값 결정 → 전수 + A/A + 트레이스), 묶음 2.
 
 ## 지금 유효한 조건
 
