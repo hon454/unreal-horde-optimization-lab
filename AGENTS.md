@@ -46,6 +46,7 @@ Night of the Dead에서 측정 없이 액터로 했던 좀비 호드 최적화�
 - **측정 인프라는 M0 끝에 동결한다.** 스포너, 벤치마크 러너, 시드, 카메라 프리셋, CSV 스키마가 대상이다. 바꿔야 하면 그날 모든 단계를 다시 재고 그 사실을 적는다. 글의 수치는 그 시점 태그의 것으로 두고 고치지 않는다. 최종 비교표는 마지막에 최신 빌드 하나에서 전 단계를 한 날 연달아 잰다.
 - **단계는 한 빌드 안의 실행 모드다.** 마일스톤의 구현을 지우지 않고 `-LabStage=`로 고르는 새 단계로 더한다. 이전 단계를 재려고 태그를 체크아웃하지 않는다([ADR-0004](Docs/Decisions/0004-stages-as-run-modes.md)).
 - **개발 속도가 최우선이다.** 단위 테스트, CI, PR, 외부 이슈 트래커를 쓰지 않는다. main에 직접 커밋한다.
+- **여러 세션이 한 체크아웃을 쓴다.** 코디네이터 세션이 작업 세션(코드 정비, 측정, 에셋, 벤치마크 실행)을 띄우고, 모두 같은 폴더에서 일한다. 워크트리는 쓰지 않는다(`Binaries/`·`Intermediate/`·DDC를 세션마다 다시 만들게 된다). 그래서 네 가지를 지킨다. (1) 빌드·패키징은 한 번에 한 세션만 한다. 같은 `Binaries/`를 덮어쓴다. (2) Test 패키지 벤치마크가 도는 동안 다른 세션은 빌드·에디터·패키징을 하지 않는다. 주기 스파이크로 측정이 오염된다. (3) 파일 소유를 나눈다. 코드 세션은 `Source/`·`Config/`, 측정 세션은 `Scripts/`·`Measurements/`, 에셋 세션은 `Content/Lab/`·`Scripts/create-*.md`, STATUS.md·plan.md·backlog.md는 코디네이터만 고친다. 커밋은 자기 경로만 `git add`한다. `git add -A`를 쓰지 않는다. (4) 결과는 채팅이 아니라 파일에 남긴다(`Docs/Worklog/M<N>.md`의 절, `Measurements/M<N>/`). 코디네이터에게는 보고의 앞부분만 전달된다. 작업 세션은 턴을 끝낼 때 STATUS.md 대신 자기 Worklog 절을 갱신하고, 코디네이터가 STATUS.md에 옮긴다(2026-11-09 사용자 결정).
 - **STATUS.md에는 지금 유효한 것만 두고 10KB를 넘기지 않는다.** 세션마다 통째로 읽는 파일이다. 끝낸 마일스톤의 경위는 `Docs/Worklog/M<N>.md`로 옮기고, 다음 작업을 제약하는 결과만 한 줄 남긴다. 매번 쓰지 않는 명령은 commands.md에, 확정값은 measurement.md에, 다시 나올 문제는 troubleshooting.md에, 엔진 소스에서 확인한 사실은 engine-notes.md에 둔다.
 - **커밋 메시지는 [Conventional Commits](https://www.conventionalcommits.org/)로 쓴다.** `type(scope): summary` 한 줄, 영어 명령형 소문자. type은 `feat`, `fix`, `docs`, `build`, `refactor`, `chore`, `bench`(측정 결과 추가). 측정 조건이나 설정값을 바꾼 커밋은 본문에 이유를 쓴다.
 - **저장소 용량을 최소로 둔다.** 커밋하는 것은 소스, `Config/`, `.uproject`, 직접 만든 `Content/Lab/`, `Docs/`, `Posts/`, `Scripts/`, `Measurements/`의 `summary.csv`·`runs.csv`·대표 스크린샷이다. Fab 콘텐츠(`Content/ParagonMinions/`), VAT 베이크 산출물, `Saved/`, `Binaries/`, `Intermediate/`, `DerivedDataCache/`, 패키지는 커밋하지 않는다. 프레임 CSV·트레이스·영상은 저장소 밖에 두고 경로나 링크만 적는다. 이미지(`.png`, `.webp`, `.gif`)와 `.uasset`·`.umap`은 Git LFS다(`.gitattributes`).
@@ -102,6 +103,6 @@ Night of the Dead에서 측정 없이 액터로 했던 좀비 호드 최적화�
 
 ## 세션을 끝낼 때
 
-1. STATUS.md를 갱신한다: 끝낸 것, 다음 할 일, 막힌 것, 사용자에게 요청한 일.
+1. STATUS.md를 갱신한다: 끝낸 것, 다음 할 일, 막힌 것, 사용자에게 요청한 일. 코디네이터가 띄운 작업 세션은 STATUS.md 대신 자기 `Docs/Worklog/M<N>.md` 절을 갱신한다.
 2. 새 결정이 생겼으면 ADR 초안을 썼는지, 엔진 소스에서 새로 확인한 사실을 engine-notes.md에 적었는지 확인한다.
 3. 문서를 만들거나 옮겼으면 "문서 지도"를 고쳤는지 확인한다.
