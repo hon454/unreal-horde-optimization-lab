@@ -24,6 +24,7 @@ Night of the Dead에서 측정 없이 액터로 했던 좀비 호드 최적화�
 | 글 재료: 작업 중 질답에서 나온, 독자에게 설명이 필요한 부분 | [post-material.md](Docs/post-material.md). 사용자가 원인을 물어 답한 것은 여기에 더한다 |
 | 엔진 소스에서 확인한 사실(경로, 기본값, 매크로, 알려진 문제) | [engine-notes.md](Docs/Reference/engine-notes.md). 소스 위치가 필요하면 먼저 여기를 본다 |
 | 영상·문서·샘플·에셋·포럼 스레드 | [references.md](Docs/Reference/references.md) |
+| 강연 두 편(Shabel, 윤준기)의 자막 분석 요약과 타임스탬프 | [talk-notes.md](Docs/Reference/talk-notes.md) |
 | 측정 PC 사양과 엔진 버전 | [pc-specs.md](Docs/Reference/pc-specs.md) |
 | 끝낸 마일스톤의 경위, 실패한 실행 | `Docs/Worklog/M<N>.md`. 세션 시작 때 읽지 않고 검색만 한다 |
 | 글 본문과 이미지 | `Posts/NN-이름/README.md`, `Posts/NN-이름/images/` |
