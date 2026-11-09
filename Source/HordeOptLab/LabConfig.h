@@ -44,7 +44,7 @@ enum class ELabVariant : uint8
 	M3Vis15,     // E3b (8): 화면 밖 High 밴드 15m, 화면 안 30m(MetaHuman Crowd 비율)
 	M3Hys20,     // E3b (8): 30/30m에 히스테리시스 20%(엔진 기본 10)
 	M3Lock0,     // 진단(2026-11-09 D안): 정비 코드 그대로, mass.commands.LockObserversDuringFlushing만 0(ini의 1을 이 변형에서만 덮는다). m3mass가 M3 묶음보다 0.7ms 느린 원인 가르기
-	M3NoOrder,   // 진단(D안): 정비 쿼리(새 프래그먼트, 태그 필터) 그대로, VatISM·ActorSync의 ExecuteAfter(LabLogic)만 뺀다(그룹 선언 유지)
+	M3Order,     // A/B(결정 4, 2026-11-09): VatISM·ActorSync에 ExecuteAfter(LabLogic)를 선언한 쪽. 기본(m3mass)은 선언 없음(옛 m3noorder 동작). 20k P1 m3noorder 15.52 vs m3mass 16.12ms
 };
 
 /**

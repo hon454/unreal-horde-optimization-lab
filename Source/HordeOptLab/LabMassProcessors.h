@@ -23,10 +23,14 @@ inline bool LabUseOldQueries()
 	return FLabConfig::Get().Variant == ELabVariant::M3QOld;
 }
 
-/** 진단 변형 m3noorder: 표현 프로세서(VatISM·ActorSync)의 ExecuteAfter(LabLogic)만 뺀다. 쿼리는 정비된 것이다(2026-11-09 D안). */
-inline bool LabSkipLogicOrder()
+/**
+ * A/B 변형 m3order만 표현 프로세서(VatISM·ActorSync)에 ExecuteAfter(LabLogic)를 선언한다(결정 4, 2026-11-09).
+ * 기본은 선언 없음: 솔버가 프래그먼트 접근(FLabAnimStateFragment 쓰기 → 읽기)으로만 순서를 정한다.
+ * 20k P1에서 선언이 0.4~0.7ms 느렸다(m3noorder 15.52 vs m3mass 16.12ms, Docs/Worklog/M3b.md "코드 A/B(D안)").
+ */
+inline bool LabExplicitLogicOrder()
 {
-	return FLabConfig::Get().Variant == ELabVariant::M3NoOrder;
+	return FLabConfig::Get().Variant == ELabVariant::M3Order;
 }
 
 /** 살아 있는 개체의 이동 목표를 오브로 둔다. 실제 이동은 엔진 조향(UMassSteerToMoveTargetProcessor)과 이동 프로세서가 한다. */

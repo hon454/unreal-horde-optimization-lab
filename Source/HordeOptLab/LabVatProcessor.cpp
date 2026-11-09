@@ -33,9 +33,9 @@ ULabVatISMProcessor::ULabVatISMProcessor()
 {
 	// 기본은 등록하지 않는다. 게임 모듈이 단계를 보고 켠다(HordeOptLab.cpp).
 	bAutoRegisterWithProcessingPhases = false;
-	if (!LabUseOldQueries() && !LabSkipLogicOrder())
+	if (LabExplicitLogicOrder())
 	{
-		// 로직이 이 프레임에 바꾼 표현 상태를 읽도록 로직 그룹 뒤에 돈다. 엔진의 Representation 뒤 선언은 부모 생성자가 더한다(MassUpdateISMProcessor.cpp:20).
+		// A/B m3order만: 로직 그룹 뒤 선언. 기본은 FLabAnimStateFragment 접근으로 정해지는 순서만 쓴다(결정 4). 엔진의 Representation 뒤 선언은 부모 생성자가 더한다(MassUpdateISMProcessor.cpp:20).
 		ExecutionOrder.ExecuteAfter.Add(LabLogicGroupName);
 	}
 }

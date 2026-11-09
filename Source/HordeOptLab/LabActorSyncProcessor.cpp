@@ -78,9 +78,9 @@ ULabActorSyncProcessor::ULabActorSyncProcessor()
 {
 	ExecutionFlags = (int32)(EProcessorExecutionFlags::Client | EProcessorExecutionFlags::Standalone);
 	ExecutionOrder.ExecuteAfter.Add(UE::Mass::ProcessorGroupNames::Representation);
-	if (!LabUseOldQueries() && !LabSkipLogicOrder())
+	if (LabExplicitLogicOrder())
 	{
-		ExecutionOrder.ExecuteAfter.Add(LabLogicGroupName); // 로직이 이 프레임에 바꾼 표현 상태를 읽는다(M3b 정비 2)
+		ExecutionOrder.ExecuteAfter.Add(LabLogicGroupName); // A/B m3order만. 기본은 프래그먼트 접근 순서만(결정 4, 2026-11-09)
 	}
 	bRequiresGameThreadExecution = true;
 	// M3부터만 돈다. 게임 모듈이 단계를 보고 켠다(HordeOptLab.cpp). M1·M2 실행에 빈 순회 비용을 더하지 않는다.
