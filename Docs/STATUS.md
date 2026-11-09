@@ -11,7 +11,7 @@ M0\~M3 완료(태그 `M0`\~`M3`). 다음은 M3b 정비 + 새 기준선([plan.md]
 2026-11-09 점검 결정 1\~5·8·9는 끝났다([plan.md](plan.md) "M3b"·"M4", [measurement.md](Guides/measurement.md)). 결정 6(오브 중심 바닥 띠)·7(장애물 + 플로우 필드를 M5 뒤 첫 마일스톤으로, 퀄리티 앞)도 끝났다([backlog.md](backlog.md)). 아래 1\~4는 코디네이터 세션이 작업 세션에 나눠 맡긴다(AGENTS.md "여러 세션이 한 체크아웃을 쓴다").
 
 - [ ] 1. M3b 코드 정비(plan.md "코드 정비" 핵심 5 + 두 줄 + 기본 프로세서 점검). 먼저 프로세서별 읽기·쓰기 표를 그린다.
-- [ ] 2. 측정 방법 구현: summarize.py p95·병목·`build` 열, M0\~M3 재요약, plot.py, `Scripts/spikes.py`, CSV 메타데이터, run-bench A/A·섞기·30k, pc-specs.md.
+- [x] 2. 측정 방법 구현(측정 세션, af4be11): summarize.py p95·`bottleneck`·`build` 열, M0\~M3 재요약(기존 값 차이 0), plot.py, `Scripts/spikes.py`, `Scripts/run-m3b.ps1 -DryRun`, pc-specs.md. 남은 것은 코드 세션에 달렸다: 변형 이름 ↔ `-LabStage` 매핑, 직렬 트레이스 인자(`-LabFullyParallel=0`), CSV 메타데이터 키(`LabBuild`·`LabCVars`·`LabDriver` 가정). 결과: p95 N@16.7ms P1은 M0 full 667 / M1 15,498 / M2 16,460 / M3 18,475 / M3 m2off 30,812(p50 정의 813 / 20,577 / 20,518 / 22,046 / 35,763). 7.0초 주기 스파이크는 M0·M1·M2 묶음(11-08 이전)에 있고 M3 묶음(11-09)에는 없다. `massav`의 2.0초 주기는 저격 간격과 같아 시나리오 효과다.
 - [ ] 3. 2종: 시즈 에셋 이전(`migrate-assets.py siege`), AnimBP·Start Position 바인딩(MCP), VAT 베이크, 예약 발 저격, 화면 크기 중요도. 같은 에디터 작업으로 바닥 띠 머티리얼 `M_LabBandFloor` + `-LabBandFloor`(결정 6).
 - [ ] 4. 묶음 1(E3b (8) 18회 → 대표값 결정 → 전수 + A/A + 트레이스), 묶음 2.
 
@@ -23,7 +23,7 @@ M2\~M5 공통이고 근거는 [measurement.md](Guides/measurement.md) "확정값
 - 60fps 판정(N@16.7ms)은 프레임·Game·Render·GPU p50 중 최댓값.
 - 원거리 표현은 Bone VAT ISM(`Scripts/bake-vat.py`). M3부터 200m 밖은 Off(그리지 않음).
 - 0\~30m는 액터(상한 500), 전환 대책 다섯 가지 전부 켬(`-LabHydrateFixMask` 기본 31).
-- 비교는 같은 묶음에서 잰 것끼리만 한다. 같은 M1이 묶음에 따라 20k 16.0 / 15.2ms로 달랐다. M1·M2 묶음(11-08)에는 7.0초 주기 스파이크가 있었고 M3 묶음(11-09)에는 없었다(원인 미상, 환경 추정).
+- 비교는 같은 묶음에서 잰 것끼리만 한다. 같은 M1이 묶음에 따라 20k 16.0 / 15.2ms로 달랐다. M0·M1·M2 묶음(11-08 이전)에는 7.0초 주기 스파이크가 있었고 M3 묶음(11-09)에는 없었다(원인 미상, 환경 추정. `Scripts/spikes.py`로 확인).
 - M3b부터 대표 지표는 프레임 p95 N@16.7ms(p50 N·병목 병기), 하위 실험 앵커는 20k P1, Mass 단계 앵커에 30k 추가, 묶음 끝 A/A, 트레이스 병렬+직렬.
 - M3b 저격: 대형은 예약 발(틱 4의 배수 200m 밖 1발, 나머지 2 80\~200m 1발)에서만. 중요도는 화면 크기(반경 ÷ 거리).
 
