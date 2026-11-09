@@ -4,7 +4,7 @@
 #   (Engine/Source/Developer/AssetTools/Public/IAssetTools.h:633, BlueprintCallable)
 #
 # AssetHost 프로젝트를 연 엔진의 커맨드렛으로 실행한다. 명령은 Docs/Guides/commands.md "에셋 마이그레이션".
-#   LAB_MIGRATE_SET   minion | orbfx (기본 minion)
+#   LAB_MIGRATE_SET   minion | siege | orbfx (기본 minion)
 #   LAB_MIGRATE_DEST  옮길 대상 Content 폴더(필수)
 #   LAB_MIGRATE_DRY   1이면 의존성 목록과 크기만 출력(기본 1)
 import os
@@ -19,6 +19,15 @@ SETS = {
         ROOT + "/Animations/Melee/NonCombat_JogFwd",  # 걷기
         ROOT + "/Animations/Melee/HitReact_Front",    # 피격
         ROOT + "/Animations/Melee/Death_A",           # 죽기
+    ],
+    # M3b 2종의 대형(시즈 미니언). 스켈레톤이 Minion_Lane_Siege_Skeleton이라 근접과 애니를 나눠 쓰지 못한다.
+    # 걷기 이름이 근접(NonCombat_JogFwd)과 다르다.
+    "siege": [
+        ROOT + "/Meshes/Minion_Lane_Siege_Dawn",
+        ROOT + "/Meshes/Minion_Lane_Siege_Physics",
+        ROOT + "/Animations/Siege/Jog_Fwd_NonCombat",  # 걷기
+        ROOT + "/Animations/Siege/HitReact_Front",     # 피격
+        ROOT + "/Animations/Siege/Death_A",            # 죽기
     ],
     # 오브 자리에 상시로 띄우는 나이아가라 시스템(Niagara Examples Pack). BP_TeslaCoil은 GAS 상태 효과(GE_Status_Parent)와 마네킹까지 끌고 와서, 그 구성(타워 메시, 구체, 시스템 둘)만 옮겨 ALabOrb에서 같은 배치로 만든다.
     "orbfx": [
@@ -49,15 +58,24 @@ while stack:
 
 content = unreal.Paths.project_content_dir()
 total = 0
+new_total = 0
+new_count = 0
 for p in sorted(seen):
     base = os.path.join(content, p[len("/Game/"):])
     sz = sum(os.path.getsize(base + ext) for ext in (".uasset", ".uexp", ".ubulk", ".uptnl") if os.path.exists(base + ext))
     total += sz
-    unreal.log_warning("LABMIG {:>10} {}".format(sz, p))
-unreal.log_warning("LABMIG TOTAL {} packages, {:.1f} MB".format(len(seen), total / 1048576.0))
+    exists = os.path.exists(os.path.join(DEST, p[len("/Game/"):]) + ".uasset")
+    if not exists:
+        new_total += sz
+        new_count += 1
+    unreal.log_warning("LABMIG {:>10} {} {}".format(sz, "have" if exists else "new ", p))
+unreal.log_warning("LABMIG TOTAL {} packages, {:.1f} MB; new {} packages, {:.1f} MB".format(len(seen), total / 1048576.0, new_count, new_total / 1048576.0))
 
 if not DRY:
     mo = unreal.MigrationOptions()
     mo.set_editor_property("prompt", False)
+    # 대상에 이미 있는 패키지(앞 세트가 옮긴 공용 머티리얼·텍스처)는 건너뛴다. 엔진 기본값이 Skip이다
+    # (IAssetTools.h FMigrationOptions, AssetTools.cpp "EAssetMigrationConflict::Skip" → NoAll).
+    unreal.log_warning("LABMIG conflict={}".format(mo.get_editor_property("asset_conflict")))
     unreal.AssetToolsHelpers.get_asset_tools().migrate_packages(SEEDS, DEST, mo)
     unreal.log_warning("LABMIG DONE")

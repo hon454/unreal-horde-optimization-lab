@@ -419,3 +419,19 @@ plan.md "M3b" 146\~158행(2종 구성, 저격 E안, E3 (3c) 화면 크기 중요
 **측정 세션에 요청.** ValidateSet에 `m3sig`를 더해 달라. 2종 실행은 `-Extra "-LabTypes=2"`(러너에 인자를 두려면 `-Types 2` 같은 스위치). `LabTypesAssets=substituted`인 CSV는 비교에 쓰지 않는다.
 
 **에셋 세션에 요청.** 위 표의 에셋을 만들고 `Config/DefaultGame.ini` `[LabUnitAssets]`의 Large 키를 실제 경로로 맞춘 뒤, `-LabTypes=2` 실행 로그에 `lab_types types=2 large_assets=ok`가 찍히는지 본다. 반경을 재면 `LargeBoundRadius`를 바꾼다.
+
+### 2종(에셋)(에셋 세션, STATUS 4b, 2026-11-09)
+
+"2종(코드)" 절의 에셋 표를 채운다. 1단계(에디터 없이)는 시즈 에셋 이전, 2단계(에디터 + MCP)는 AnimBP·피직스·정적 메시·VAT·액터 머티리얼·ini·반경·바닥 띠다.
+
+**1단계: 시즈 이전.** `Scripts/migrate-assets.py`에 `siege` 세트를 더했다(메시 `Minion_Lane_Siege_Dawn`, 피직스 `Minion_Lane_Siege_Physics`, 애니 셋). 실제 애니 이름은 AssetHost `.../Down_Minions/Animations/Siege/`에서 확인했다.
+
+| 용도 | 시즈 애니(실제 이름) | 근접(소형) | ini 키 |
+| --- | --- | --- | --- |
+| 걷기 | `Animations/Siege/Jog_Fwd_NonCombat` | `Animations/Melee/NonCombat_JogFwd` | `LargeWalk`(표의 기대값 `NonCombat_JogFwd`와 다르다. 2단계에서 ini를 이 이름으로 맞춘다) |
+| 피격 | `Animations/Siege/HitReact_Front` | `HitReact_Front` | `LargeHit` |
+| 죽기 | `Animations/Siege/Death_A` | `Death_A` | `LargeDeath` |
+
+- 실행: commands.md "에셋 마이그레이션"의 명령에 `LAB_MIGRATE_SET=siege`. 건식(`LAB_MIGRATE_DRY=1`) 의존성 36개, 원본 기준 149.1MB. 그중 25개(근접 세트가 이미 옮긴 `Characters/Global/` 머티리얼 함수·레이어·텍스처, `M_Dawn_Minion_MASTER`, Super 텍스처 3장)는 대상에 있어 건너뛰었다(엔진 기본 `EAssetMigrationConflict::Skip`, `IAssetTools.h` `FMigrationOptions`. 스크립트가 값을 로그에 찍는다). 이전 전후 `Content/ParagonMinions/` 기존 파일의 md5가 모두 같았다.
+- 새로 온 11개(원본 기준 56.5MB): 애니 3(`Death_A`, `HitReact_Front`, `Jog_Fwd_NonCombat`), 메시 `Minion_Lane_Siege_Dawn`, 피직스 `Minion_Lane_Siege_Physics`, 스켈레톤 `Minion_Lane_Siege_Skeleton`, 그림자 원기둥 `Minion_Lane_Siege_ShadowCyl`(메시 의존성), 머티리얼 `Materials/Siege/M_Dawn_Minion_Siege`, 텍스처 `Textures/Siege/T_Minion_Dawn_Seige_D`·`_MASK01`·`_N`. 옮긴 뒤 `Content/ParagonMinions/` 244 → 292MB. gitignore 대상이라 커밋하지 않았다(`.gitignore:26`).
+- 막힌 것과 대처: 첫 건식 실행이 Python 출력 없이 종료 코드 1로 끝났다. AssetHost 로그에 "The game module 'AssetHost' could not be found". AssetHost의 빈 C++ 모듈(`Source/AssetHost`)이 11-07에 소스 빌드로 컴파일되어(`Binaries/Win64/UnrealEditor.modules` BuildId `4f0f03df…`) 런처 엔진(BuildId `55116800`)이 건너뛰었다. 런처 엔진 `Engine/Build/BatchFiles/Build.bat AssetHostEditor Win64 Development -project=…AssetHost.uproject`로 모듈만 다시 컴파일해(18초, AssetHost의 `Binaries/`만 바뀜) 해결했다. commands.md에 적힌 11-06의 `orbfx` 종료 코드 1도 같은 증상이다. troubleshooting.md에 한 줄 더했다. AssetHost `.uproject`의 `EngineAssociation`은 지금 레지스트리에 없는 GUID `{31E80386…}`이라 탐색기에서 열면 엔진을 묻는다(손대지 않음).
