@@ -40,7 +40,7 @@
 | AnimToTexture 바운드 | Bone 모드는 정적 메시 바운드를 뼈 위치 범위(`BoneMinBBox`/`BoneSizeBBox`)로만 넓히고, Vertex 모드는 모든 프레임의 정점 범위로 넓힌다. 뼈에서 먼 정점(무기 끝)은 Bone 바운드 밖으로 나가 Virtual Shadow Map이 그 페이지를 무효화하지 않는다(죽기 애니 중 칼날 그림자가 남음, 2026-11-08) | `AnimToTextureBPLibrary.cpp:245,290,1108`, `Measurements/M3/shots/vat-shadow/README.md` |
 | 엔진 군중 표현 기본값 | High 고품질 액터, Medium 저품질 액터, Low ISM, Off 없음. 거리(화면 밖) 0/5/10/50m, (화면 안) 0/10/50/100m, 최대 수 10/20/500/무제한. `bKeepLowResActors = true` | `Engine/Plugins/AI/MassCrowd/Source/MassCrowd/Private/MassCrowdVisualizationTrait.cpp:16-38` |
 | ISKM Mass 경로 | `FMassSkinnedMeshInstanceVisualizationMeshDesc`, `UMassConsumeInstancedSkinnedMeshAnimationProcessor`(엔티티 → `FAnimSequenceTrackAutoPlayData` → ISKM 배치 갱신), `FMassInstancedSkinnedMeshComponentSharedData` | `MassRepresentation/Public/MassSkinnedMeshRepresentationTypes.h`, `MassUpdateSkinnedMeshProcessor.h` |
-| ISKM 트랙 풀 누수 | 5.8.4에도 남아 있다. 트랙 해제 경로가 `FMassStaticRepresentationTag`를 요구하는데 동적 처리기는 그 태그를 금지한다. 우회: 사망 시 엔티티를 파괴하지 않고 재활용 | `MassUpdateSkinnedMeshProcessor.cpp`(M5 전에 줄 번호 확인) |
+| ISKM 트랙 풀 누수 | 5.8.4에도 남아 있다. 트랙 할당은 엔티티 키가 트랙 맵에 없을 때, 해제(`DeallocateTrack`)는 `RemoveInstance` 입력에서만이고 그 호출자는 `FMassStaticRepresentationTag`를 요구하는 정적 경로뿐이다. 움직이는 개체를 파괴하면 트랙이 남는다. 우회: 엔티티 풀링(같은 핸들을 다시 쓰면 기존 트랙을 다시 쓴다). 엔진은 `SetAutoPlayData`를 시퀀스 번호가 바뀔 때만 부른다 | `MassRepresentation/Private/MassVisualizationComponent.cpp` 773·864(할당), 1156(해제) |
 | ISKM 블렌딩 | BlendTime 크로스페이드와 BlendSpace 트랙이 있다. 없는 것은 AnimBP다. 계획의 "블렌딩 없음"은 틀렸다 **[계획 수정]** | `InstancedSkinnedMeshComponent.h` |
 | 엔진 기본 `LODMaxCount` | High/Medium/Low 기본 `{50, 100, 500}`. 밴드 거리보다 이 상한이 먼저 걸린다. 프로젝트 값을 명시한다 | `MassLODTrait.h` / `MassRepresentationParameters`(M0에서 줄 번호 확인) |
 

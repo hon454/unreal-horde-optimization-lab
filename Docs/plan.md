@@ -190,21 +190,40 @@ M0\~M5가 필수다. 마일스톤마다 바꾸는 최적화 변수는 하나고,
 
 **바꾸는 변수:** 원거리 표현(VAT ISM → ISKM).
 
-**만드는 것**
-- `FMassSkinnedMeshInstanceVisualizationMeshDesc`, `UMassConsumeInstancedSkinnedMeshAnimationProcessor` 경로. MetaHuman Crowd Sample 설정 참고(복사 금지).
-- **사망 시 엔티티를 파괴하지 않고 재활용한다**(링으로 옮겨 체력 복원). ISKM 트랙 풀 해제 경로가 동적 개체에서 막혀 있다(engine-notes.md). M1부터 재활용으로 짜면 여기서 바꿀 것이 없다.
-- ISKM ↔ 액터 전환 동기화.
+**설계 결정(2026-11-11 사용자, 조사와 근거는 [Worklog/M5.md](Worklog/M5.md) "설계 조사")**
+1. **엔티티 풀링.** 사망한 엔티티를 파괴하지 않고 풀에 두었다가 링에서 다시 꺼낸다(체력·상태 초기화). ISKM 트랙은 파괴된 엔티티마다 하나씩 새기 때문이다(engine-notes.md). 지금 코드는 M1부터 파괴 + 재생성이다(옛 계획의 "M1부터 재사용" 전제는 사실이 아니었다). 인자 `-LabEntityPool=0/1`, M5 단계 기본 1, 다른 단계 기본 0. 같은 묶음의 기준점에도 켠다.
+2. **표현 경로.** 엔진 표현 경로(`UMassMovableVisualizationTrait`, 액터 전환, LOD)는 그대로 두고 VAT 프로세서 자리에 Lab ISKM 프로세서 하나를 둔다. 위치와 트랙을 한 반복에서 쓰고 액터 준비 대기를 처리한다. 엔진 ISKM 프로세서 둘은 쓰지 않는다.
+3. **컴포넌트.** 종류마다 ISKM 하나(2개). 클립은 인스턴스마다 트랙으로 고른다.
+4. **트랙과 위상.** 엔티티마다 트랙 하나. 상태가 바뀌거나 풀에서 다시 나올 때만 트랙 번호로 `SetAutoPlayData`를 부른다(클립, `Position = Now − StateStartTime`). 액터 전환의 걷기 루프 길이는 시퀀스 길이로 감는다.
+5. **블렌딩.** 대표 `BlendTime=0`(VAT와 같이 끊어 바꾸기). 0.25초는 참고 변형 `m5blend`.
+6. **렌더 설정.** 비 Nanite, `AnimationMinScreenSize` -1(항상 재생), 그림자 켬. 엔진 기본 0.1은 참고 변형 `m5minss`.
+7. **에셋.** Python 커맨드렛 `Scripts/create-iskm.py`로 종류마다 ASTPD(걷기·피격·죽기)와 ISKM용 머티리얼 변형(`bUsedWithInstancedSkinnedMesh`, 인스턴스 커스텀 데이터로 사망 색)을 `/Game/Lab/ISKM/Baked/`(gitignore)에 만든다. 클립 목록을 Python으로 못 쓰면 Unreal MCP로 만든다.
+8. **측정 수단.** CSV `RHI/DrawCalls`·`RHI/PrimitivesDrawn`·`GPUMem/LocalUsedMB`에 커스텀 스탯 `Lab/IskmTracks`·`Lab/IskmInstances`를 더한다.
+9. **단계.** `ELabStage::M5`. Simulation LOD는 `m4offmove` 구성(200m 밖 Off 밴드 + Lab 이동 프로세서).
+
+**변형**
+
+| 변형 | 내용 | 용도 |
+| --- | --- | --- |
+| `m4offpool` | `m4offmove` + 엔티티 풀링 | 기준점 |
+| `m5iskm` | M5 대표(ISKM, 블렌딩 0, 항상 재생, 그림자 켬, 엔티티 풀링) | 새 단계 |
+| `m5destroy` | `m5iskm`에서 엔티티 풀링 끔 | E5 (b) 누수 진단 |
+| `m5blend` | `m5iskm` + `BlendTime` 0.25초 | 참고 |
+| `m5minss` | `m5iskm` + 애니메이션 화면 크기 0.1 | 참고 |
+| `m4offmove` | 지난 묶음과 같은 구성(엔티티 풀링 없음) | 엔티티 풀링의 비용 확인(참고) |
 
 **실험 E5**
-- (a) VAT vs ISKM: GPU ms, 메모리, 드로우 콜, 전환 품질.
-- (b) 생성·소멸 10만 회 뒤 GPU 메모리(재활용으로 누수가 막혔는지).
+- (a) VAT vs ISKM(`m4offpool` vs `m5iskm`): 프레임·GPU ms, GPU 메모리, 드로우 콜, 전환 품질(30m 전환, 클립 전환).
+- (b) 자연 사망으로 약 16분(20k P1, 사망 약 110회/초로 10만 회) 동안 `GPUMem/LocalUsedMB`와 `Lab/IskmTracks`. `m5iskm`과 `m5destroy` 한 번씩, 묶음 끝. 측정 인프라는 바꾸지 않는다.
 - 선택: N 100k.
+
+**측정 조건:** `m4offpool`과 `m5iskm`을 P1 N {10k, 20k, 30k}, P2 N 20k에서 3회씩. 참고 변형(`m5blend`, `m5minss`, `m4offmove`)은 20k P1. 묶음 끝에 A/A, 이어서 E5 (b) 두 번.
 
 **완료:** 공통 조건. 이 뒤 최신 빌드에서 전 단계를 한 날 연달아 재서(ADR-0004) README "결과 한눈에 보기"를 확정한다.
 
 ## 리스크
 
-- **ISKM(M5):** 5.8.4에서도 트랙 풀 누수가 남아 있다. 재활용으로 우회하고, 막히면 VAT 결과로 마무리하고 ISKM은 기록만 남긴다.
+- **ISKM(M5):** 5.8.4에서도 트랙 풀 누수가 남아 있다. 엔티티 풀링으로 우회하고, 막히면 VAT 결과로 마무리하고 ISKM은 기록만 남긴다.
 - **Budget + 풀링(M3):** 숨긴 액터가 예산을 계속 쓴다. 풀 반환 시 중요도 0으로. 첫날 확인.
 - **Paragon Minions:** 스켈레톤이 종류별로 다르고 피직스 에셋 기본값으로 늘어진다. 안 되면 UE5 Manny + 리타겟 애니로 대체.
 - **Unreal MCP:** Experimental. 막히면 Python Editor Script, 그다음 사용자.
