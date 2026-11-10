@@ -128,21 +128,30 @@ void ULabApproachProcessor::Execute(FMassEntityManager& EntityManager, FMassExec
 	CSV_CUSTOM_STAT(Lab, SimTickMedium, Ticked[EMassLOD::Medium], ECsvCustomStatOp::Set);
 	CSV_CUSTOM_STAT(Lab, SimTickLow, Ticked[EMassLOD::Low], ECsvCustomStatOp::Set);
 
+	// 밴드별 걷는 개체 수(필터 없는 같은 쿼리, 청크의 개체 수만 읽는다). 실제 틱 주기 = 평균 프레임 시간 × SimBand ÷ SimTick(2026-11-10 사용자 승인, Docs/Worklog/M4.md).
+	int32 Band[5] = {};
+	int32 BandChunks[5] = {};
+	CountQuery.ForEachEntityChunk(Context, [&Band, &BandChunks](FMassExecutionContext& Context)
+	{
+		const int32 Lod = LabChunkLod(Context);
+		Band[Lod] += Context.GetNumEntities();
+		++BandChunks[Lod];
+	});
+	CSV_CUSTOM_STAT(Lab, SimBandHigh, Band[EMassLOD::High], ECsvCustomStatOp::Set);
+	CSV_CUSTOM_STAT(Lab, SimBandMedium, Band[EMassLOD::Medium], ECsvCustomStatOp::Set);
+	CSV_CUSTOM_STAT(Lab, SimBandLow, Band[EMassLOD::Low], ECsvCustomStatOp::Set);
+
 	static const bool bLog = FParse::Param(FCommandLine::Get(), TEXT("LabSimLodLog"));
 	if (!bLog)
 	{
 		return;
 	}
-	CountQuery.ForEachEntityChunk(Context, [this](FMassExecutionContext& Context)
-	{
-		const int32 Lod = LabChunkLod(Context);
-		DiagTotal[Lod] += Context.GetNumEntities();
-		++DiagTotalChunks[Lod];
-	});
 	for (int32 Lod = 0; Lod < 5; ++Lod)
 	{
 		DiagTicked[Lod] += Ticked[Lod];
 		DiagTickedChunks[Lod] += TickedChunks[Lod];
+		DiagTotal[Lod] += Band[Lod];
+		DiagTotalChunks[Lod] += BandChunks[Lod];
 	}
 	++DiagFrames;
 	const double Now = Crowd->GetWorld()->GetTimeSeconds();

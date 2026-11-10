@@ -48,8 +48,8 @@ protected:
 	virtual void Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context) override;
 	FMassEntityQuery EntityQuery;
 	/**
-	 * M4 개발 진단(-LabSimLodLog): 청크 필터 없는 같은 쿼리. LOD별 전체 개체 수를 세어 "이 프레임에 돈 개체 ÷ 전체"를 1초마다 로그에 남긴다.
-	 * 인자가 없으면 순회하지 않는다. 돈 개체 수는 인자와 무관하게 CSV 스탯 Lab/SimTick*로 남긴다.
+	 * M4: 청크 필터 없는 같은 쿼리. 매 프레임 청크의 개체 수만 읽어 LOD별 걷는 개체 수를 CSV 스탯 Lab/SimBand*로 남긴다(돈 개체 수는 Lab/SimTick*).
+	 * -LabSimLodLog를 주면 "이 프레임에 돈 개체 ÷ 전체"를 1초마다 로그에도 남긴다(Development). M3까지는 순회하지 않는다.
 	 */
 	FMassEntityQuery CountQuery;
 	int64 DiagTicked[5] = {};
