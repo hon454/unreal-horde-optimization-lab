@@ -13,7 +13,7 @@ M0\~M3, M3b 완료(태그 `M0`\~`M3`, `M3b`). 다음은 M4([plan.md](plan.md) "M
 - [x] 1\~4. 코드 정비(210bbac·4f6db5b), 측정 방법(af4be11·d761020·spikes.py), 선행 묶음·잡음 진단·코드 A/B(결정 4: 선언 제거, LockObservers 비용 없음), 결정 1 B안(`m3mass` = 15/30m, 5k 캡처 근거), 2종 코드·에셋(ee1a17d·8475be6·245cc35), `-LabBandFloor`(6ad7f7e). 경위·수치는 [Worklog/M3b.md](Worklog/M3b.md)와 해설 페이지 https://claude.ai/artifact/QzpD3b9rV8QC529CR4oZQN.
 - [x] 5. 최종 패키지(6a98c46) 하나로 묶음 1·2를 같은 밤에 돌렸다(2026-11-09 23:28\~11-10 06:03, 294회, 실패 0, 주기 스파이크 0, A/A 차 0.04ms, `Scripts/run-m3b-all.ps1`, 라벨 태그 `fin`). 결과는 [Worklog/M3b.md](Worklog/M3b.md) "묶음 1·2 결과"와 `Measurements/M3b/summary.csv`(final=1 행), 해설 https://claude.ai/artifact/YHpunRXyhdetQGBcKMbZPk. N@16.7ms(p95, P1) 1종 M1 16,963 / M2 14,085 / M3 14,204, 2종 M3 13,513(2종 비용 20k P1 +0.56ms). Budget 변형 m3sig 16.06 vs 기준 19.58(−3.5ms). 결정 1(15/30m)은 옛 30/30m보다 +0.7ms, 결정 4(선언 없음)는 선언 있음보다 −0.7ms.
 - [x] 6. **재측정하지 않고 M3b를 닫았다(2026-11-10 사용자 결정, 같은 날의 결정 A를 대체).** 묶음 5는 게임 창이 뒤에 있어 Game 스레드가 약 2ms(12%) 느리게 찍힌 "뒤 창 묶음"이다(294회 중 7개만 앞 창, Worklog "페이즈 첫 실행 효과"). 묶음 안의 상대 비교는 유효하고, 절댓값(N@16.7ms 등)은 README와 글에 싣지 않는다. 뒤 창 손실은 Mass 20k 한 조건에서만 쟀다(액터 단계에서 같은 크기인지는 추정). 러너는 고쳤다(eb16991: 게임 창을 앞으로 보내고 측정 60초를 검사, 아니면 FAIL 뒤 한 번 재시도, `fgtest` 3회 fg=30/30). 결정 B1: 대표값은 `m3mass` 유지, Budget 채택은 M4 뒤 작은 마일스톤(backlog). 결정 C1: M4부터 2종 기본.
-- [ ] 7. **M4.** (a) 코드 세션이 먼저 코드 기본값을 `-LabTypes=2`로 바꾼다(`-Small` 1종·2종 종료 코드 0 확인). (b) M4 구현([plan.md](plan.md) "M4"). (c) M4 묶음은 고친 러너로 돌고 기준점(`m3mass` 2종)을 같은 묶음에 넣어 잰다. 전 단계 사다리의 앞 창 값은 총괄 묶음에서 만든다. 조건은 P1 N {10k, 20k, 30k}와 P2 N 20k, 약 48회 1.1시간이다([ADR-0006](Decisions/0006-three-measurement-tiers.md)). 묶음 전에 개발 확인으로 10k를 한 번 돌린다.
+- [ ] 7. **M4.** (a)(b) 구현과 묶음 전 확인은 끝났다(코드 세션, 마지막 코드 커밋 adbc4f9, [Worklog/M4.md](Worklog/M4.md)). 청크 필터를 쓰는 프로세서는 접근과 범위 피해 둘이고, 저격과 상태 타이머는 매 프레임 돈다. 대형은 배율 2.0, 짙은 회색이다(measurement.md "2종"). (c) **측정 세션이 할 일:** `run-bench.ps1 -Types 1`이 `-LabTypes=1`을 붙이게 고친다. `summarize.py`가 M4의 새 스탯(`Lab/SimTick*`·`Lab/SimBand*`)과 메타데이터 `LabSimLod`를 다루고 실제 틱 주기를 낸다. Test 패키지를 새로 만든다. 개발 확인으로 10k를 한 번 돌린다. M4 묶음을 돌린다: `m4mass`와 기준점 `m3mass`(2종)를 P1 N {10k, 20k, 30k}와 P2 N 20k에서, 하위 실험(`m4off`, `m4m25l50`, `m4m25l100`, `m4m50l50`, `m4avoid`)을 20k P1에서, 약 48회([ADR-0006](Decisions/0006-three-measurement-tiers.md)). 실행마다 `lab_config`의 `stage=`와 `simlod=`를 확인한다(변형 이름은 라벨이고 단계는 `-LabStage=`가 정한다). 수치는 설정 간격(Medium 0.5초 / Low 1.0초)과 실제 주기를 함께 적는다. (d) 묶음 뒤 코디네이터가 M3와 비교해 여기에 적고 태그 `M4`를 붙인다.
 
 ## 지금 유효한 조건
 
@@ -32,8 +32,8 @@ M2\~M5 공통이고 근거는 [measurement.md](Guides/measurement.md) "확정값
 
 ```bash
 powershell -ExecutionPolicy Bypass -File Scripts/build.ps1
-powershell -ExecutionPolicy Bypass -File Scripts/run-dev.ps1 -Small -Extra "-LabStage=M3"
-powershell -ExecutionPolicy Bypass -File Scripts/run-dev.ps1 -N 2000 -Preset P1 -Duration 13 -ShotAt 10 -Extra "-LabStage=M3"
+powershell -ExecutionPolicy Bypass -File Scripts/run-dev.ps1 -Small -Extra "-LabStage=M4"
+powershell -ExecutionPolicy Bypass -File Scripts/run-dev.ps1 -N 2000 -Preset P1 -Duration 13 -ShotAt 10 -Extra "-LabStage=M4"
 powershell -ExecutionPolicy Bypass -File Scripts/package.ps1
 powershell -ExecutionPolicy Bypass -File Scripts/run-bench.ps1 -Milestone M3 -N 5000 -Preset P1 -Variant mass
 py -3 Scripts/summarize.py --milestone M3
@@ -51,7 +51,7 @@ py -3 Scripts/summarize.py --milestone M3
 
 ## 세션 인계(2026-11-10)
 
-코디네이터 세션을 compact하고 M3b 작업 세션을 모두 보관했다. 다음 세션은 이 파일만 읽고 이어 간다: (1) 코드 세션 새로 시작 → 다음 할 일 7 (a)(b). (2) 측정 세션은 M4 묶음 때 새로 시작한다. (3) Niagara 원거리 표현 논의는 토론 1까지 했고(엔진에 Mass→Niagara 공식 경로 없음, MetaHuman Crowd·City Sample도 Niagara로 개체를 그리지 않음) 토론 2\~4가 남았다. 미푸시 커밋이 쌓여 있다. 푸시는 사용자가 "푸시"라고 할 때.
+코드 세션("M4 Simulation LOD 구현")은 M4 구현과 묶음 전 확인을 끝냈다. 측정 세션이 다음 할 일 7 (c)를 맡는다. 묶음과 별개로 남은 것: 움직이는 화면 검토(피격 멈춤, 30m 전환), 탑뷰 카메라에서 짙은 회색 대형이 그림자와 섞이는 문제, Niagara 원거리 표현 논의(토론 2\~4). 미푸시 커밋이 쌓여 있다. 푸시는 사용자가 "푸시"라고 할 때.
 
 ## 사용자에게 요청한 일
 
