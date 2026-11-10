@@ -38,9 +38,6 @@ ULabVatISMProcessor::ULabVatISMProcessor()
 		// A/B m3order만: 로직 그룹 뒤 선언. 기본은 FLabAnimStateFragment 접근으로 정해지는 순서만 쓴다(결정 4). 엔진의 Representation 뒤 선언은 부모 생성자가 더한다(MassUpdateISMProcessor.cpp:20).
 		ExecutionOrder.ExecuteAfter.Add(LabLogicGroupName);
 	}
-	// M4부터(검증용): 표현 LOD가 이 프로세서보다 먼저 돌아 워커의 이동 프로세서가 변환 청크를 쥐기 전에 끝나게 한다.
-	// 선언이 없으면 탑뷰 병렬에서 VAT ISM이 먼저 뽑혀 표현 LOD가 약 1.8ms 기다렸다(Docs/Worklog/M4.md "탑뷰 대기 원인: 엔진 소스 조사", "VAT ISM 순서 선언(검증용)").
-	LabRunAfterSimLod(ExecutionOrder);
 }
 
 void ULabVatISMProcessor::ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager)

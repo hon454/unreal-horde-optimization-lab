@@ -32,6 +32,20 @@ namespace
 		Query.SetChunkFilter(&FMassSimulationVariableTickChunkFragment::ShouldTickChunkThisFrame);
 	}
 
+	/**
+	 * 가변 틱 청크 필터를 쓰는 프로세서는 그 값을 쓰는 UMassSimulationLODProcessor(LOD 그룹) 뒤에 돌아야 한다(M4부터).
+	 * 순서를 적지 않으면 두 프로세서의 순서가 프레임마다 바뀔 수 있고, "이 프레임에 돈다"는 값은 LOD 프로세서의 한 번과 다음 번 사이에만 참이라
+	 * 그 사이에 읽지 못하면 한 주기를 통째로 건너뛴다(2026-11-10 lab_chunk 진단 로그, Docs/Worklog/M4.md "사망 전환 지연").
+	 * 엔진에서 같은 필터를 쓰는 프로세서도 이렇게 적는다(MassStateTreeProcessors.cpp:165, MassAvoidanceProcessors.cpp:288).
+	 */
+	void LabRunAfterSimLod(FMassProcessorExecutionOrder& Order)
+	{
+		if (FLabConfig::Get().UsesSimLod())
+		{
+			Order.ExecuteAfter.Add(UE::Mass::ProcessorGroupNames::LOD);
+		}
+	}
+
 	/** 청크의 Simulation LOD(0 High ~ 3 Off, 아직 정해지지 않았으면 4). 진단 배열의 색인으로 쓴다 */
 	int32 LabChunkLod(const FMassExecutionContext& Context)
 	{
