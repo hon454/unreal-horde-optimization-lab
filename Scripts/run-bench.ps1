@@ -127,7 +127,7 @@ for ($i = $First; $i -le $Last; $i++) {
         $In = @($Samples | Where-Object { $_.T -ge $Begin -and $_.T -le $End })
         $Non = @($In | Where-Object { $_.Pid -ne $Proc.Id }).Count
         $FgNote = "fg=$($In.Count - $Non)/$($In.Count) $FocusNote"
-        Add-Content -Path $Summary -Value $FgNote
+        Add-Content -Path $Summary -Value ("`n" + $FgNote)
         Write-Host $FgNote
         if ($In.Count -eq 0 -or $Non -gt 0) { $FgFail = $true }
     }

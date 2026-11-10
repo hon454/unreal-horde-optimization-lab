@@ -614,3 +614,13 @@ plan.md "M3b" 146\~158행(2종 구성, 저격 E안, E3 (3c) 화면 크기 중요
 대안: 프로세스 우선순위를 High로 두는 것이 포그라운드와 같은 효과인지는 같은 방식의 시험 2회로 확인할 수 있다.
 
 **환경 메모.** 사용자 터미널 패널의 PowerShell은 `HKCU\Software\Epic Games\Unreal Engine\Builds`에서 UE_5.8.4를 `{31E80386-…}`로 보고, Bash 도구 셸은 `.uproject`의 `{DEC43C63-…}`로 본다. 그래서 터미널 셸에서는 `common.ps1`의 엔진 해석이 실패했다. `common.ps1`에 `LAB_NO_ENGINE=1`이면 엔진 경로를 찾지 않는 분기를 더했다(`run-bench`는 엔진 경로를 쓰지 않는다). `summarize.py`는 태그 `diagbg`·`diagfg`를 별도 조건으로 요약한다.
+
+**러너 수정 검증(`fgtest`, 2026-11-10, 사용자가 PC를 비운 상태).** `run-bench.ps1`에 포커스 지정과 측정 구간 포그라운드 검사를 넣은 뒤(커밋 eb16991), 묶음과 같은 방식(Bash 도구 `run_in_background` 셸)으로 `m3mass` 20k P1 `-LabStage=M3` 3회를 태그 `fgtest`로 한 번 호출(`-Runs 3 -SkipR0`)했다. 실행 전 EpicGamesLauncher·UnrealEditor·HordeOptLab 프로세스 없음. 실패 0.
+
+| 실행 | `focus=` | `fg=` (게임 / 측정 60초 표본) | avg_ms(`summary.txt`) | game p50 | 프레임 p50 | 프레임 p95 |
+| --- | --- | --- | --- | --- | --- | --- |
+| r1 | ok | 30/30 | 16.529 | 15.361 | 16.381 | 18.272 |
+| r2 | ok | 30/30 | 16.192 | 15.086 | 16.069 | 17.967 |
+| r3 | ok | 30/30 | 16.129 | 15.002 | 16.000 | 17.912 |
+
+세 실행 모두 포커스가 `SetForegroundWindow`로 바로 잡혔고(`focus=ok`) 측정 구간 포그라운드가 전부 게임이었다. game p50은 15.00\~15.36으로 통과 기준 14.8\~15.2 수준이고 r1이 상단을 0.16 ms 넘는다. summary의 조건 `m3mass-fgtest`는 `fg_ok=3/3`, `final` 비어 있음. 러너를 쓸 때 알아 둘 것: 검사용 2초 폴링이 러너 프로세스에서 돈다(진단 시험 A와 같은 방식).

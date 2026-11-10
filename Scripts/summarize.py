@@ -76,7 +76,7 @@ def fg_ok(label):
     """패키지 Saved/Lab/<라벨>.summary.txt 끝의 `fg=30/30`(측정 구간 포그라운드가 게임인 표본 수 / 전체 표본 수). 없으면 빈칸(옛 실행)."""
     p = ROOT / "Packaged" / "Test" / "Windows" / "HordeOptLab" / "Saved" / "Lab" / f"{label}.summary.txt"
     try:
-        m = re.search(r"fg=(\d+/\d+)", p.read_text(encoding="utf-8", errors="replace"))
+        m = re.search(r"fg=(\d+/\d+)", p.read_text(encoding="utf-8", errors="replace"))
     except OSError:
         return ""
     return m.group(1) if m else ""
