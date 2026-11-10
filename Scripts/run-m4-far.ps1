@@ -5,7 +5,7 @@ param([switch]$DryRun, [switch]$SkipPreflight, [int]$Ns30 = 1)
 $ErrorActionPreference = "Stop"
 $Root = Split-Path $PSScriptRoot -Parent
 Set-Location $Root
-$Bench = "$PSScriptRootun-bench.ps1"
+$Bench = "$PSScriptRoot\run-bench.ps1"
 $OutCsv = "$Root\Saved\Profiling\CSV"
 $LogDir = "$Root\Saved\Lab"; New-Item -ItemType Directory -Force -Path $LogDir | Out-Null
 $Log = "$LogDir\m4-far.log"
