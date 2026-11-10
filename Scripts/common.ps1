@@ -19,5 +19,8 @@ function Resolve-UERoot {
     throw "Engine '$Association' (EngineAssociation in HordeOptLab.uproject) is not a registered source build on this PC. Right-click HordeOptLab.uproject and choose 'Switch Unreal Engine version'."
 }
 
-$UE_ROOT = (Resolve-UERoot).TrimEnd('\', '/')
-$Editor = "$UE_ROOT\Engine\Binaries\Win64\UnrealEditor.exe"
+# LAB_NO_ENGINE=1이면 엔진 경로를 찾지 않는다(패키지만 실행하는 run-bench용. 사용자 터미널 셸의 HKCU 빌드 GUID가 .uproject와 달라 실패한다, 2026-11-10 진단).
+if (-not $env:LAB_NO_ENGINE) {
+    $UE_ROOT = (Resolve-UERoot).TrimEnd('\', '/')
+    $Editor = "$UE_ROOT\Engine\Binaries\Win64\UnrealEditor.exe"
+}

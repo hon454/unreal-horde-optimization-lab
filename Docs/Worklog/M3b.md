@@ -578,3 +578,39 @@ plan.md "M3b" 146\~158행(2종 구성, 저격 E안, E3 (3c) 화면 크기 중요
 
 `LabTypesAssets=substituted` 행 0개(summary에서 제외).
 
+## 페이즈 첫 실행 효과(진단, 2026-11-10) (측정 세션)
+
+최종 묶음에서 러너 호출(페이즈)마다 첫 실행만 Game 스레드가 10\~20% 빨랐다(코디네이터 발견). 가설: 게임 창이 포그라운드를 받았느냐의 차이. 도구 `Scripts/fg-probe.ps1`(2초마다 포그라운드 창의 프로세스 이름을 `Saved/Lab/fg-probe.log`에 덧붙임, git 밖. 창 제목은 로그에 있으나 여기에 적지 않는다).
+
+**묶음의 페이즈 첫 실행 7개** (game p50, ms. 조건 중앙값 = 같은 조건 r1\~r3 중앙값. trace는 m3mass 20k P1 fin 3회 중앙값과 비교)
+
+| 라벨 | game p50 | 조건 중앙값 | 차 |
+| --- | --- | --- | --- |
+| `M3b-m3mass-N20000-P1startfin-r1` | 14.81 | 16.76 | -1.95 (-12%) |
+| `M3b-m3vis30-N20000-P1fin-r1` | 14.20 | 15.74 | -1.54 (-10%) |
+| `M3b-m0full-N1000-P1fin-r1` | 16.64 | 20.85 | -4.21 (-20%) |
+| `M3b-m3mass-N20000-P1ab2fin-r1` | 14.80 | 16.63 | -1.83 (-11%) |
+| `M3b-m3mass-N20000-P1aafin-r1` | 14.99 | 16.79 | -1.81 (-11%) |
+| `M3b-m3mass-N20000-P1traceparfin-r1` | 15.20 | 16.64 | -1.44 (-9%) |
+| `M3b-m0full-N1000-P1t2fin-r1` | 16.83 | 20.84 | -4.01 (-19%) |
+
+**시험 A** (`diagbg` 태그 `final` 비어 있음, `m3mass` 20k P1 `-LabStage=M3`, 같은 패키지 `6a98c46`, 묶음과 같은 방식인 Bash 도구 `run_in_background` 셸, 콘솔 창 안 보임, 06:14\~06:20, 사용자 입력 없음. `-Runs 4 -SkipR0` 한 번 호출). 포그라운드 = 측정 60초 동안 프로브 표본(2초 간격, 약 30개).
+
+| 실행 | avg_ms(`summary.txt`) | game p50 | 포그라운드 프로세스 표본 |
+| --- | --- | --- | --- |
+| r1 | 18.677 | 17.20 | claude 30/30 |
+| r2 | 15.912 | 14.83 | HordeOptLab-Win64-Test 30/30 |
+| r3 | 16.239 | 15.07 | HordeOptLab-Win64-Test 29/29 |
+| r4 | 15.866 | 14.83 | HordeOptLab-Win64-Test 29/29 |
+
+**결론(한 줄):** 게임 창이 포그라운드이면 Game 스레드가 약 2 ms(약 12%) 빠르고, 묶음의 "페이즈 첫 실행만 빠름"은 그 실행만 포그라운드를 얻었기 때문이다(시험 A에서는 반대로 r1만 포그라운드를 못 얻어 느렸다).
+
+시험 B(`diagfg`, 사용자 터미널에서 실행)는 사용자가 PC를 쓰는 중이어서 포그라운드에 chrome 등이 잡혀 오염됐다. 시험 A로 결론이 나므로 쓰지 않는다. 그 CSV 4개는 `Saved/Profiling/CSV/diag-contaminated/`로 옮겨 summary에 들어가지 않게 했다. 프로브 로그는 `Saved/Lab/fg-probe.log`(git 밖).
+
+**러너 수정안(글로만, 구현은 사용자 결정 뒤).**
+1. `run-bench.ps1`이 `Start-Process` 뒤 게임의 `MainWindowHandle`을 기다렸다가 `SetForegroundWindow`(안 되면 `AppActivate`)로 게임 창을 앞에 둔다.
+2. 프로브를 측정 중 같이 돌려, 측정 60초 동안 포그라운드가 게임이 아닌 표본이 있으면 그 실행을 FAIL로 표시하고 다시 돌린다.
+3. "러너 호출마다 첫 실행을 r0으로 버린다"는 규칙은 필요 없다(원인이 포그라운드로 확인됨).
+대안: 프로세스 우선순위를 High로 두는 것이 포그라운드와 같은 효과인지는 같은 방식의 시험 2회로 확인할 수 있다.
+
+**환경 메모.** 사용자 터미널 패널의 PowerShell은 `HKCU\Software\Epic Games\Unreal Engine\Builds`에서 UE_5.8.4를 `{31E80386-…}`로 보고, Bash 도구 셸은 `.uproject`의 `{DEC43C63-…}`로 본다. 그래서 터미널 셸에서는 `common.ps1`의 엔진 해석이 실패했다. `common.ps1`에 `LAB_NO_ENGINE=1`이면 엔진 경로를 찾지 않는 분기를 더했다(`run-bench`는 엔진 경로를 쓰지 않는다). `summarize.py`는 태그 `diagbg`·`diagfg`를 별도 조건으로 요약한다.

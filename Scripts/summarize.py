@@ -194,7 +194,7 @@ def main():
             continue  # Insights 트레이스 실행은 비교에 쓰지 않는다(runs.csv에는 남는다)
         final = tag.endswith("fin")
         btag = tag[:-3] if final else tag
-        variant = r["variant"] + next((f"-{t}" for t in ("noaff", "aff", "start", "aa", "ab2", "ab", "t2") if btag.startswith(t)), "") + ("-fin" if final else "")  # 묶음 끝 A/A와 선행 A/B(ab)는 기준점과 따로 요약한다
+        variant = r["variant"] + next((f"-{t}" for t in ("noaff", "aff", "diagbg", "diagfg", "start", "aa", "ab2", "ab", "t2") if btag.startswith(t)), "") + ("-fin" if final else "")  # 묶음 끝 A/A와 선행 A/B(ab)는 기준점과 따로 요약한다
         groups.setdefault((variant, int(r["n"]), r["preset"]), []).append(r)
 
     fields = ["variant", "n", "preset", "runs"]
