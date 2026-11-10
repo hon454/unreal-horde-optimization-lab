@@ -67,6 +67,7 @@ public:
 	bool bHasNearest = false;        // 피해 범위 안에서 가장 가까운 개체(테슬라 코일 번개 대상)
 	float NearestDistSq = 0.f;
 	FVector Nearest = FVector::ZeroVector;
+	float NearestHoldUntil = 0.f;    // M4: 이 시각까지는 범위 피해가 돌지 않은 프레임에도 번개 대상을 지우지 않는다(LabMassProcessors.cpp)
 	int32 KillCount = 0;
 	int32 SnipeCount = 0;
 	std::atomic<int64> DamageHits{0}; // E1 (d): 체력에 실제로 적용된 비치명 피해 건수(확인용)

@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "MassEntityTraitBase.h"
 #include "Movement/MassMovementTrait.h"
+#include "MassLODTrait.h"
 #include "LabMassTraits.generated.h"
 
 /**
@@ -28,4 +29,17 @@ class ULabMovementTrait : public UMassMovementTrait
 	GENERATED_BODY()
 public:
 	ULabMovementTrait();
+};
+
+/**
+ * M4 엔진 Simulation LOD Trait. 값이 protected라(MassLODTrait.h:47-57) 하위 클래스에서 FLabSimLod로 채운다.
+ * 가변 틱 켬, 개체 수 상한 무제한, Off 밴드 없음(거리를 맵 밖에 둔다). 새 엔티티는 그래도 첫 프레임에 Off 태그로 시작하므로
+ * (MassLODTrait.cpp:128-133) Off 틱 간격을 0으로 두고, 그 프레임의 위치 스냅은 게임 모듈이 UMassOffLODNavigationProcessor를 꺼서 막는다(HordeOptLab.cpp).
+ */
+UCLASS(meta = (DisplayName = "Lab Simulation LOD"))
+class ULabSimulationLODTrait : public UMassSimulationLODTrait
+{
+	GENERATED_BODY()
+public:
+	ULabSimulationLODTrait();
 };

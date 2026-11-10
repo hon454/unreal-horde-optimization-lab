@@ -243,6 +243,7 @@ void ALabGameMode::TickBench()
 			// M3b 2종: 종류 수와 에셋 상태. substituted(대형 에셋 없음, 소형으로 대체)는 스모크 전용이라 비교에 쓰지 않는다(LabUnitAssets.h).
 			CSV_METADATA(TEXT("LabTypes"), *FString::FromInt(Config.Types));
 			CSV_METADATA(TEXT("LabTypesAssets"), Config.Types == 2 ? (FLabUnitTypes::bLargeSubstituted ? TEXT("substituted") : TEXT("ok")) : TEXT("-"));
+			CSV_METADATA(TEXT("LabSimLod"), *Config.SimLodString()); // M4: 거리와 틱 간격. M3까지는 "-"
 			// 측정 방법 5번(plan.md "M3b"): 빌드 커밋, 고정 CVar 값, GPU 드라이버. summarize.py BUILD_KEYS(labbuild·labcvars·labdriver)와 이름을 맞춘다.
 			CSV_METADATA(TEXT("LabBuild"), TEXT(LAB_BUILD_COMMIT));
 			CSV_METADATA(TEXT("LabCVars"), *LabFixedCVarString());

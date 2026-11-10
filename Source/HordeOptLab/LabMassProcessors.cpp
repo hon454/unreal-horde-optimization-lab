@@ -11,10 +11,33 @@
 #include "MassExecutionContext.h"
 #include "MassMovementFragments.h"
 #include "MassNavigationFragments.h"
+#include "MassSimulationLOD.h"
+#include "HordeOptLab.h"
+#include "ProfilingDebugging/CsvProfiler.h"
+#include "Misc/CommandLine.h"
+#include "Misc/Parse.h"
 #include "Engine/World.h"
+
+CSV_DECLARE_CATEGORY_EXTERN(Lab);
 
 namespace
 {
+	/**
+	 * M4: 이 쿼리를 Simulation LOD의 가변 틱에 맡긴다. 청크 프래그먼트가 "이 프레임에 돈다"고 한 청크만 순회한다(MassSimulationLOD.h:68-72).
+	 * M3까지는 부르지 않아 쿼리가 그대로다.
+	 */
+	void LabUseVariableTick(FMassEntityQuery& Query)
+	{
+		Query.AddChunkRequirement<FMassSimulationVariableTickChunkFragment>(EMassFragmentAccess::ReadOnly, EMassFragmentPresence::Optional);
+		Query.SetChunkFilter(&FMassSimulationVariableTickChunkFragment::ShouldTickChunkThisFrame);
+	}
+
+	/** 청크의 Simulation LOD(0 High ~ 3 Off, 아직 정해지지 않았으면 4). 진단 배열의 색인으로 쓴다 */
+	int32 LabChunkLod(const FMassExecutionContext& Context)
+	{
+		return FMath::Clamp(int32(FMassSimulationVariableTickChunkFragment::GetChunkLOD(Context)), 0, 4);
+	}
+
 	ULabCrowdSubsystem* LabCrowd(FMassExecutionContext& Context)
 	{
 		UWorld* World = Context.GetWorld();
@@ -33,6 +56,7 @@ namespace
 
 ULabApproachProcessor::ULabApproachProcessor()
 	: EntityQuery(*this)
+	, CountQuery(*this)
 {
 	ExecutionFlags = (int32)EProcessorExecutionFlags::AllNetModes;
 	ExecutionOrder.ExecuteInGroup = UE::Mass::ProcessorGroupNames::Tasks; // 엔진 조향은 Tasks 뒤에 돈다(MassSteeringProcessors.cpp:62)
@@ -46,6 +70,16 @@ void ULabApproachProcessor::ConfigureQueries(const TSharedRef<FMassEntityManager
 	EntityQuery.AddTagRequirement<FLabMinionTag>(EMassFragmentPresence::All);
 	EntityQuery.AddTagRequirement<FLabHitTag>(EMassFragmentPresence::None);
 	EntityQuery.AddTagRequirement<FLabDeadTag>(EMassFragmentPresence::None);
+	if (FLabConfig::Get().UsesSimLod())
+	{
+		CountQuery = EntityQuery; // 필터를 걸기 전의 같은 쿼리(진단용, 읽기만 한다)
+		LabUseVariableTick(EntityQuery);
+		CountQuery.AddChunkRequirement<FMassSimulationVariableTickChunkFragment>(EMassFragmentAccess::ReadOnly, EMassFragmentPresence::Optional);
+	}
+	else
+	{
+		CountQuery.AddTagRequirement<FLabMinionTag>(EMassFragmentPresence::All); // 쓰지 않지만 등록된 쿼리는 요구 조건이 있어야 한다
+	}
 }
 
 void ULabApproachProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context)
@@ -56,8 +90,17 @@ void ULabApproachProcessor::Execute(FMassEntityManager& EntityManager, FMassExec
 		return;
 	}
 	const FVector Orb = Crowd->OrbCenter;
-	EntityQuery.ForEachEntityChunk(Context, [Orb](FMassExecutionContext& Context)
+	const bool bSimLod = FLabConfig::Get().UsesSimLod();
+	int32 Ticked[5] = {};
+	int32 TickedChunks[5] = {};
+	EntityQuery.ForEachEntityChunk(Context, [Orb, bSimLod, &Ticked, &TickedChunks](FMassExecutionContext& Context)
 	{
+		if (bSimLod)
+		{
+			const int32 Lod = LabChunkLod(Context);
+			Ticked[Lod] += Context.GetNumEntities();
+			++TickedChunks[Lod];
+		}
 		const TConstArrayView<FTransformFragment> Transforms = Context.GetFragmentView<FTransformFragment>();
 		const TArrayView<FMassMoveTargetFragment> MoveTargets = Context.GetMutableFragmentView<FMassMoveTargetFragment>();
 		const FLabUnitTypeParams& Params = Context.GetConstSharedFragment<FLabUnitTypeParams>();
@@ -75,6 +118,53 @@ void ULabApproachProcessor::Execute(FMassEntityManager& EntityManager, FMassExec
 			Target.IntentAtGoal = EMassMovementAction::Move;
 		}
 	});
+
+	if (!bSimLod)
+	{
+		return;
+	}
+	// M4: 이 프레임에 접근 로직이 돈 개체 수(LOD별). 걷는 개체만 센다(피격·사망은 접근 쿼리 밖).
+	CSV_CUSTOM_STAT(Lab, SimTickHigh, Ticked[EMassLOD::High], ECsvCustomStatOp::Set);
+	CSV_CUSTOM_STAT(Lab, SimTickMedium, Ticked[EMassLOD::Medium], ECsvCustomStatOp::Set);
+	CSV_CUSTOM_STAT(Lab, SimTickLow, Ticked[EMassLOD::Low], ECsvCustomStatOp::Set);
+
+	static const bool bLog = FParse::Param(FCommandLine::Get(), TEXT("LabSimLodLog"));
+	if (!bLog)
+	{
+		return;
+	}
+	CountQuery.ForEachEntityChunk(Context, [this](FMassExecutionContext& Context)
+	{
+		const int32 Lod = LabChunkLod(Context);
+		DiagTotal[Lod] += Context.GetNumEntities();
+		++DiagTotalChunks[Lod];
+	});
+	for (int32 Lod = 0; Lod < 5; ++Lod)
+	{
+		DiagTicked[Lod] += Ticked[Lod];
+		DiagTickedChunks[Lod] += TickedChunks[Lod];
+	}
+	++DiagFrames;
+	const double Now = Crowd->GetWorld()->GetTimeSeconds();
+	if (DiagSince <= 0.)
+	{
+		DiagSince = Now;
+	}
+	else if (Now - DiagSince >= 1.)
+	{
+		// 개체: 1초 동안의 프레임 평균(돈 수 / 전체). 간격: 평균 프레임 시간 × 전체 ÷ 돈 수 = 개체 하나가 실제로 도는 주기(초).
+		const double FrameSec = (Now - DiagSince) / DiagFrames;
+		auto Interval = [&](int32 Lod) { return DiagTicked[Lod] > 0 ? FrameSec * double(DiagTotal[Lod]) / double(DiagTicked[Lod]) : 0.; };
+		UE_LOG(LogLab, Log, TEXT("lab_simlod t=%.1f frames=%d high=%lld/%lld med=%lld/%lld low=%lld/%lld other=%lld/%lld chunks_high=%lld/%lld chunks_med=%lld/%lld chunks_low=%lld/%lld interval_high=%.3f interval_med=%.3f interval_low=%.3f"),
+			Now, DiagFrames,
+			DiagTicked[0] / DiagFrames, DiagTotal[0] / DiagFrames, DiagTicked[1] / DiagFrames, DiagTotal[1] / DiagFrames, DiagTicked[2] / DiagFrames, DiagTotal[2] / DiagFrames,
+			(DiagTicked[3] + DiagTicked[4]) / DiagFrames, (DiagTotal[3] + DiagTotal[4]) / DiagFrames,
+			DiagTickedChunks[0] / DiagFrames, DiagTotalChunks[0] / DiagFrames, DiagTickedChunks[1] / DiagFrames, DiagTotalChunks[1] / DiagFrames, DiagTickedChunks[2] / DiagFrames, DiagTotalChunks[2] / DiagFrames,
+			Interval(0), Interval(1), Interval(2));
+		FMemory::Memzero(DiagTicked); FMemory::Memzero(DiagTotal); FMemory::Memzero(DiagTickedChunks); FMemory::Memzero(DiagTotalChunks);
+		DiagFrames = 0;
+		DiagSince = Now;
+	}
 }
 
 // 범위 피해 ------------------------------------------------------------------
@@ -96,6 +186,12 @@ void ULabOrbContactProcessor::ConfigureQueries(const TSharedRef<FMassEntityManag
 	EntityQuery.AddTagRequirement<FLabMinionTag>(EMassFragmentPresence::All);
 	EntityQuery.AddTagRequirement<FLabHitTag>(EMassFragmentPresence::None);
 	EntityQuery.AddTagRequirement<FLabDeadTag>(EMassFragmentPresence::None);
+	if (FLabConfig::Get().UsesSimLod())
+	{
+		// M4: 건너뛴 시간은 엔진 누적 델타로 보상한다(초당 피해 × 마지막으로 돈 뒤 흐른 시간). 걷는 개체는 상태가 바뀌지 않아 델타에 다른 상태의 시간이 섞이지 않는다.
+		EntityQuery.AddRequirement<FMassSimulationVariableTickFragment>(EMassFragmentAccess::ReadOnly, EMassFragmentPresence::Optional);
+		LabUseVariableTick(EntityQuery);
+	}
 }
 
 void ULabOrbContactProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context)
@@ -105,9 +201,17 @@ void ULabOrbContactProcessor::Execute(FMassEntityManager& EntityManager, FMassEx
 	{
 		return;
 	}
+	const float Now = Crowd->GetWorld()->GetTimeSeconds();
+	const bool bSimLod = FLabConfig::Get().UsesSimLod();
+	const FLabSimLod Sim = FLabConfig::Get().SimLod();
 	{
 		FScopeLock Lock(&Crowd->ResultLock);
-		Crowd->bHasNearest = false;
+		// M4: 피해 범위의 청크가 이 프레임에 돌지 않으면(탑뷰 P2는 오브 주변이 Medium) 번개 대상이 깜박인다. 대상을 찾은 청크의 틱 간격 동안은 지난 값을 둔다.
+		// High(P1의 피해 범위)는 간격이 0이라 M3까지와 같이 매 프레임 지운다.
+		if (!bSimLod || Now >= Crowd->NearestHoldUntil)
+		{
+			Crowd->bHasNearest = false;
+		}
 		Crowd->NearestDistSq = TNumericLimits<float>::Max();
 	}
 	const FVector Center = Crowd->OrbCenter;
@@ -118,7 +222,6 @@ void ULabOrbContactProcessor::Execute(FMassEntityManager& EntityManager, FMassEx
 	}
 	const float ZoneRadiusSq = FMath::Square(FLabScenario::ZoneRadius);
 	const float DeathDuration = Crowd->DeathDuration;
-	const float Now = Crowd->GetWorld()->GetTimeSeconds();
 
 	EntityQuery.ForEachEntityChunk(Context, [&](FMassExecutionContext& Context)
 	{
@@ -126,7 +229,10 @@ void ULabOrbContactProcessor::Execute(FMassEntityManager& EntityManager, FMassEx
 		const TArrayView<FLabHealthFragment> Healths = Context.GetMutableFragmentView<FLabHealthFragment>();
 		const TArrayView<FLabMinionFragment> Minions = Context.GetMutableFragmentView<FLabMinionFragment>();
 		const TArrayView<FLabAnimStateFragment> AnimStates = Context.GetMutableFragmentView<FLabAnimStateFragment>();
-		const float DeltaSeconds = Context.GetDeltaTimeSeconds();
+		const float FrameDelta = Context.GetDeltaTimeSeconds();
+		// M4에서만 있다. 없으면(M3까지) 프레임 델타를 쓴다
+		const TConstArrayView<FMassSimulationVariableTickFragment> VariableTicks = bSimLod ? Context.GetFragmentView<FMassSimulationVariableTickFragment>() : TConstArrayView<FMassSimulationVariableTickFragment>();
+		const bool bAccumulated = VariableTicks.Num() > 0;
 
 		int32 Kills = 0;
 		float NearestSq = TNumericLimits<float>::Max();
@@ -147,6 +253,7 @@ void ULabOrbContactProcessor::Execute(FMassEntityManager& EntityManager, FMassEx
 			// M0 ALabOrb::Tick과 같은 피해: 가장자리 ZoneDpsEdge → 중심 ZoneDpsCenter.
 			const float Closeness = 1.f - FMath::Sqrt(DistSq) / FLabScenario::ZoneRadius;
 			FLabHealthFragment& Health = Healths[It];
+			const float DeltaSeconds = bAccumulated ? VariableTicks[It].DeltaTime : FrameDelta;
 			Health.Health -= FMath::Lerp(FLabScenario::ZoneDpsEdge, FLabScenario::ZoneDpsCenter, Closeness) * DeltaSeconds;
 			if (Health.Health <= 0.f)
 			{
@@ -166,6 +273,11 @@ void ULabOrbContactProcessor::Execute(FMassEntityManager& EntityManager, FMassEx
 			Crowd->NearestDistSq = NearestSq;
 			Crowd->Nearest = Nearest;
 			Crowd->bHasNearest = true;
+			if (bSimLod)
+			{
+				const int32 Lod = LabChunkLod(Context);
+				Crowd->NearestHoldUntil = Now + (Lod == EMassLOD::Medium ? Sim.TickMedium : Lod == EMassLOD::Low ? Sim.TickLow : 0.f) * 1.2f; // 엔진이 간격에 ±10%를 더한다(MassLODTickRateController.h:143)
+			}
 		}
 	});
 }
@@ -291,6 +403,10 @@ void ULabMinionStateProcessor::ConfigureQueries(const TSharedRef<FMassEntityMana
 	EntityQuery.AddTagRequirement<FLabMinionTag>(EMassFragmentPresence::All);
 	EntityQuery.AddTagRequirement<FLabHitTag>(EMassFragmentPresence::Any);
 	EntityQuery.AddTagRequirement<FLabDeadTag>(EMassFragmentPresence::Any);
+	if (FLabConfig::Get().UsesSimLod())
+	{
+		LabUseVariableTick(EntityQuery);
+	}
 }
 
 void ULabMinionStateProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context)
@@ -301,7 +417,9 @@ void ULabMinionStateProcessor::Execute(FMassEntityManager& EntityManager, FMassE
 		return;
 	}
 	const float DeathDuration = Crowd->DeathDuration;
+	const float HitDuration = Crowd->HitDuration;
 	const float Now = Crowd->GetWorld()->GetTimeSeconds();
+	const bool bSimLod = FLabConfig::Get().UsesSimLod();
 	TArray<FMassEntityHandle> Finished;
 	EntityQuery.ForEachEntityChunk(Context, [&](FMassExecutionContext& Context)
 	{
@@ -313,10 +431,26 @@ void ULabMinionStateProcessor::Execute(FMassEntityManager& EntityManager, FMassE
 		for (FMassExecutionContext::FEntityIterator It = Context.CreateEntityIterator(); It; ++It)
 		{
 			FLabMinionFragment& Minion = Minions[It];
-			Minion.StateTimeLeft -= DeltaSeconds;
-			if (Minion.StateTimeLeft > 0.f)
+			float DeadStart = Now; // 피격이 끝나 사망이 시작된 시각
+			if (bSimLod)
 			{
-				continue;
+				// M4부터: 절대 시각으로 판정한다(2026-11-10 사용자 결정). 청크가 늦게 돌아도 상태가 끝난 시각은 "시작 + 길이"로 정확히 안다.
+				// 엔진 누적 델타는 청크를 옮긴 직후 이전 상태의 시간이 섞여(MassLODTickRateController.h:157-171) 타이머에 쓰지 않는다.
+				const float EndTime = AnimStates[It].StateStartTime + (bDead ? DeathDuration : HitDuration);
+				Minion.StateTimeLeft = EndTime - Now;
+				if (Minion.StateTimeLeft > 0.f)
+				{
+					continue;
+				}
+				DeadStart = EndTime; // 늦게 돈 만큼 죽기 클립과 제거 시각을 앞당겨 원래 일정에 맞춘다
+			}
+			else
+			{
+				Minion.StateTimeLeft -= DeltaSeconds;
+				if (Minion.StateTimeLeft > 0.f)
+				{
+					continue;
+				}
 			}
 			const FMassEntityHandle Entity = Context.GetEntity(It);
 			if (bDead)
@@ -330,7 +464,7 @@ void ULabMinionStateProcessor::Execute(FMassEntityManager& EntityManager, FMassE
 			{
 				// 로직 시간과 표현 상태를 같은 자리에서 바꾼다. 표현은 태그가 아니라 AnimStates를 보므로 태그가 다음 플러시에 바뀌어도 한 프레임 튐이 없다(plan.md 코드 정비 3).
 				Minion.StateTimeLeft = DeathDuration;
-				AnimStates[It].Set(ELabMinionState::Dead, Now);
+				AnimStates[It].Set(ELabMinionState::Dead, DeadStart);
 				Context.Defer().RemoveTag<FLabHitTag>(Entity);
 				Context.Defer().AddTag<FLabDeadTag>(Entity);
 			}

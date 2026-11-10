@@ -33,6 +33,7 @@ const FLabConfig& FLabConfig::Get()
 			else if (Stage.Equals(TEXT("M1"), ESearchCase::IgnoreCase)) { C.Stage = ELabStage::M1; }
 			else if (Stage.Equals(TEXT("M2"), ESearchCase::IgnoreCase)) { C.Stage = ELabStage::M2; }
 			else if (Stage.Equals(TEXT("M3"), ESearchCase::IgnoreCase)) { C.Stage = ELabStage::M3; }
+			else if (Stage.Equals(TEXT("M4"), ESearchCase::IgnoreCase)) { C.Stage = ELabStage::M4; }
 			else { C.bStageValid = false; }
 		}
 
@@ -46,7 +47,12 @@ const FLabConfig& FLabConfig::Get()
 			else if (Variant == TEXT("staticpawn")) { C.Variant = ELabVariant::StaticPawn; }
 			else if (Variant == TEXT("m0full")) { C.Variant = ELabVariant::Full; } // M3b 묶음 1 라벨
 			else if (Variant == TEXT("mass") || Variant == TEXT("noanim") || Variant == TEXT("m3base") || Variant == TEXT("m3colbase") || Variant == TEXT("m3hydbase")
-				|| Variant == TEXT("m1mass") || Variant == TEXT("m2mass") || Variant == TEXT("m3mass")) { C.Variant = ELabVariant::Mass; } // noanim: M2 묶음에서 잰 M1, m3base·m3colbase·m3hydbase: E3 하위 실험 묶음(5, 6, 7)에서 다시 잰 M3 대표, m1mass·m2mass·m3mass: M3b 묶음 1. 이름만 다르다
+				|| Variant == TEXT("m1mass") || Variant == TEXT("m2mass") || Variant == TEXT("m3mass") || Variant == TEXT("m4mass")) { C.Variant = ELabVariant::Mass; } // noanim: M2 묶음에서 잰 M1, m3base·m3colbase·m3hydbase: E3 하위 실험 묶음(5, 6, 7)에서 다시 잰 M3 대표, m1mass·m2mass·m3mass: M3b 묶음 1, m4mass: M4 대표. 이름만 다르다
+			else if (Variant == TEXT("m4off")) { C.Variant = ELabVariant::M4Off; }
+			else if (Variant == TEXT("m4m25l50")) { C.Variant = ELabVariant::M4M25L50; }
+			else if (Variant == TEXT("m4m25l100")) { C.Variant = ELabVariant::M4M25L100; }
+			else if (Variant == TEXT("m4m50l50")) { C.Variant = ELabVariant::M4M50L50; }
+			else if (Variant == TEXT("m4avoid")) { C.Variant = ELabVariant::M4Avoid; }
 			else if (Variant == TEXT("m3qold")) { C.Variant = ELabVariant::M3QOld; }
 			else if (Variant == TEXT("m3syncall")) { C.Variant = ELabVariant::M3SyncAll; }
 			else if (Variant == TEXT("m3vis0")) { C.Variant = ELabVariant::M3Vis0; }
@@ -127,6 +133,11 @@ const TCHAR* FLabConfig::VariantName(ELabVariant V)
 	case ELabVariant::M3Lock0: return TEXT("m3lock0");
 	case ELabVariant::M3Order: return TEXT("m3order");
 	case ELabVariant::M3Sig: return TEXT("m3sig");
+	case ELabVariant::M4Off: return TEXT("m4off");
+	case ELabVariant::M4M25L50: return TEXT("m4m25l50");
+	case ELabVariant::M4M25L100: return TEXT("m4m25l100");
+	case ELabVariant::M4M50L50: return TEXT("m4m50l50");
+	case ELabVariant::M4Avoid: return TEXT("m4avoid");
 	default: return TEXT("full");
 	}
 }
@@ -138,13 +149,39 @@ const TCHAR* FLabConfig::StageName(ELabStage S)
 	case ELabStage::M1: return TEXT("M1");
 	case ELabStage::M2: return TEXT("M2");
 	case ELabStage::M3: return TEXT("M3");
+	case ELabStage::M4: return TEXT("M4");
 	case ELabStage::M0:
 	default: return TEXT("M0");
 	}
 }
 
+FLabSimLod FLabConfig::SimLod() const
+{
+	FLabSimLod S; // 대표: Medium 0.5초 / Low 1.0초, 회피 끔
+	switch (Variant)
+	{
+	case ELabVariant::M4Off: S.TickMedium = 0.f; S.TickLow = 0.f; break;
+	case ELabVariant::M4M25L50: S.TickMedium = 0.25f; S.TickLow = 0.5f; break;
+	case ELabVariant::M4M25L100: S.TickMedium = 0.25f; S.TickLow = 1.0f; break;
+	case ELabVariant::M4M50L50: S.TickMedium = 0.5f; S.TickLow = 0.5f; break;
+	case ELabVariant::M4Avoid: S.bAvoidance = true; break;
+	default: break;
+	}
+	return S;
+}
+
+FString FLabConfig::SimLodString() const
+{
+	if (!UsesSimLod())
+	{
+		return TEXT("-");
+	}
+	const FLabSimLod S = SimLod();
+	return FString::Printf(TEXT("%.0f/%.0fm tick=0/%.2f/%.2f avoid=%d"), FLabSimLod::MediumDistance / 100.f, FLabSimLod::LowDistance / 100.f, S.TickMedium, S.TickLow, S.bAvoidance ? 1 : 0);
+}
+
 FString FLabConfig::ToLogString() const
 {
-	return FString::Printf(TEXT("lab_config stage=%s n=%d preset=P%d seed=%d variant=%s bench=%d label=%s duration=%.1f types=%d"),
-		StageName(Stage), N, Preset, Seed, VariantName(Variant), bBench ? 1 : 0, *Label, DurationSec, Types);
+	return FString::Printf(TEXT("lab_config stage=%s n=%d preset=P%d seed=%d variant=%s bench=%d label=%s duration=%.1f types=%d simlod=%s"),
+		StageName(Stage), N, Preset, Seed, VariantName(Variant), bBench ? 1 : 0, *Label, DurationSec, Types, *SimLodString());
 }

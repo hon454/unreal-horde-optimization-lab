@@ -12,6 +12,9 @@
  * 순서: 접근(Tasks 그룹, 엔진 조향 앞) → 엔진 조향·이동 → 그룹 LabLogic(범위 피해 → 저격 → 상태 타이머 → 피해 발생·적용) → 표현(VAT·ActorSync, LabLogic 뒤).
  * M3b 정비(Docs/Worklog/M3b.md "코드 정비", 2026-11-09 사용자 결정): 로직은 상태 전환 때 FLabAnimStateFragment를 쓰고 표현은 그것만 읽는다.
  * 엔진 조향은 Tasks 뒤에 돌아야 하므로 접근만 Tasks 그룹에 남긴다. 그룹 이름 의존성은 솔버가 자식 노드 전부로 펼친다(MassProcessorDependencySolver.cpp:680-719).
+ * M4(Docs/Worklog/M4.md, 2026-11-10 사용자 결정): 접근·범위 피해·상태 셋은 M4부터 청크 필터 ShouldTickChunkThisFrame를 걸어 80m 밖 청크를 틱 간격마다만 돈다.
+ * 범위 피해는 엔진 누적 델타(FMassSimulationVariableTickFragment::DeltaTime)로, 상태 타이머는 절대 시각(지금 − StateStartTime)으로 건너뛴 시간을 보상한다.
+ * 저격은 오브의 이벤트성 질의라 필터를 걸지 않는다. M3까지의 쿼리와 계산은 그대로다.
  */
 
 /** Lab 로직 프로세서 그룹. 표현 프로세서가 ExecuteAfter로 가리킨다. */
@@ -44,6 +47,17 @@ protected:
 	virtual void ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager) override;
 	virtual void Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context) override;
 	FMassEntityQuery EntityQuery;
+	/**
+	 * M4 개발 진단(-LabSimLodLog): 청크 필터 없는 같은 쿼리. LOD별 전체 개체 수를 세어 "이 프레임에 돈 개체 ÷ 전체"를 1초마다 로그에 남긴다.
+	 * 인자가 없으면 순회하지 않는다. 돈 개체 수는 인자와 무관하게 CSV 스탯 Lab/SimTick*로 남긴다.
+	 */
+	FMassEntityQuery CountQuery;
+	int64 DiagTicked[5] = {};
+	int64 DiagTotal[5] = {};
+	int64 DiagTickedChunks[5] = {};
+	int64 DiagTotalChunks[5] = {};
+	int32 DiagFrames = 0;
+	double DiagSince = 0.;
 };
 
 /** 오브 피해 범위. 중심에 가까울수록 센 초당 피해를 주고, 체력이 다하면 사망 상태로 바꾼다. 테슬라 코일 번개 대상(가장 가까운 개체)도 찾는다. */

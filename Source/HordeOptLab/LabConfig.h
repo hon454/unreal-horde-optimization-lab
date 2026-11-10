@@ -47,6 +47,25 @@ enum class ELabVariant : uint8
 	M3Lock0,     // 진단(2026-11-09 D안): 정비 코드 그대로, mass.commands.LockObserversDuringFlushing만 0(ini의 1을 이 변형에서만 덮는다). m3mass가 M3 묶음보다 0.7ms 느린 원인 가르기
 	M3Sig,       // E3 (3c)(2026-11-09 사용자 결정): Budget Allocator, 중요도는 화면 크기(바운드 반경 ÷ 카메라 거리). 비교 상대는 (3a) m3budgetdist. 새 스탯 LargeActorSkips
 	M3Order,     // A/B(결정 4, 2026-11-09): VatISM·ActorSync에 ExecuteAfter(LabLogic)를 선언한 쪽. 기본(m3mass)은 선언 없음(옛 m3noorder 동작). 20k P1 m3noorder 15.52 vs m3mass 16.12ms
+	// M4 E4(-LabStage=M4와 함께, plan.md "M4"). 대표는 Mass(별칭 m4mass): Simulation LOD 80/200m, 로직 틱 Medium 0.5초 / Low 1.0초(2026-11-10 사용자 결정)
+	M4Off,       // E4 (a) 끔: Trait과 LOD 태그는 그대로, 틱 간격만 전부 0(매 프레임). m3mass → m4off는 태그로 아키타입이 늘어난 비용, m4off → m4mass는 틱 간격의 효과
+	M4M25L50,    // E4 (b): Medium 0.25초 / Low 0.5초
+	M4M25L100,   // E4 (b): Medium 0.25초 / Low 1.0초
+	M4M50L50,    // E4 (b): Medium 0.5초 / Low 0.5초
+	M4Avoid,     // E4 (c): 대표 + 엔진 회피 Trait. 회피 프로세서는 High 태그만 처리하므로(MassAvoidanceProcessors.cpp:301-303) 80m 안만 비켜 간다
+};
+
+/**
+ * M4 Simulation LOD 설정(2026-11-10 사용자 결정, Docs/Worklog/M4.md). 거리는 카메라 기준이고 화면 안팎을 가리지 않는다(MassLODLogic.h:42).
+ * Off 밴드는 두지 않는다: 엔진의 Off는 위치를 이동 목표(오브)로 옮기고 이동·조향에서 뺀다(engine-notes.md 5절).
+ */
+struct FLabSimLod
+{
+	static constexpr float MediumDistance = 8000.f;  // High 0~80m
+	static constexpr float LowDistance = 20000.f;    // Medium 80~200m, Low 200m~
+	float TickMedium = 0.5f; // 초. High는 0(매 프레임)
+	float TickLow = 1.0f;
+	bool bAvoidance = false;
 };
 
 /**
@@ -89,7 +108,8 @@ enum class ELabStage : uint8
 	M1, // Mass 코어: 같은 로직을 Fragment·Processor로, 표현은 애니 없는 ISM
 	M2, // Representation LOD: 같은 ISM에 VAT 애니메이션(걷기·피격·죽기). 대표 설정은 모든 거리를 그린다
 	M3, // 액터 하이드레이션: 0~30m는 액터(최대 500), 30~200m VAT 인스턴스, 200m 밖 Off
-	// M3b, M4 Simulation LOD, M5 ISKM을 차례로 더한다.
+	M4, // Simulation LOD: M3 표현 그대로, 로직 프로세서 셋(접근·범위 피해·상태)이 80m 밖에서 틱 간격을 늘린다(FLabSimLod)
+	// M5 ISKM을 더한다.
 };
 
 /** 실행 인자. 프로세스 시작 시 한 번 읽는다. */
@@ -134,6 +154,13 @@ struct FLabConfig
 		FixTintReset = 16, // 풀에 넣을 때 진홍색 지우기
 	};
 	bool HasFix(EHydrateFix F) const { return (HydrateFixMask & F) != 0; }
+
+	/** M4부터 참. Simulation LOD Trait을 붙이고 로직 프로세서 셋이 청크 필터를 건다 */
+	bool UsesSimLod() const { return Stage >= ELabStage::M4; }
+	/** 변형에서 정한 M4 틱 간격과 회피 여부(UsesSimLod일 때만 뜻이 있다) */
+	FLabSimLod SimLod() const;
+	/** 로그와 CSV 메타데이터용. "80/200m tick=0/0.5/1.0 avoid=0" 꼴, M3까지는 "-" */
+	FString SimLodString() const;
 
 	static const FLabConfig& Get();
 	static const TCHAR* VariantName(ELabVariant V);
