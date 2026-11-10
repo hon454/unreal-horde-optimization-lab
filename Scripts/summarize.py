@@ -10,6 +10,7 @@ M3b부터: frame_p95_ms(대표 지표), bottleneck(프레임·Game·Render·GPU 
 기존 runs.csv 행은 건드리지 않고 새 라벨만 더한다. 원본 CSV로 모든 행을 다시 계산하려면 --rebuild.
 M4부터: Simulation LOD 열을 더한다(없으면 빈칸이라 M3 이하는 그대로다). CSV 스탯 Lab/SimTick<High|Medium|Low>(그 프레임에 접근 로직이 돈 개체 수),
 Lab/SimBand<...>(밴드 전체 걷는 개체 수)의 평균과, 메타데이터 LabSimLod(예 `80/200m tick=0/0.50/1.00 avoid=0`)의 설정 간격,
+E4 (d) `m4offmove`(LabSimLod 끝 ` offmove=1`)는 Lab/SimTickOff·SimBandOff·OffMoveCount·OffMove 열도 읽고 실제 틱 주기를 Off 열로 셈한다(sim_offmove, cfg_tick_off, sim_tick_off, sim_band_off, real_period_off, off_move_count, off_move_ms). 태그 e4d/e4dstart/e4daa는 E4 (d) 묶음(조건 이름 <변형>-e4d 등).
 실제 틱 주기(초) = 평균 프레임 시간(초) x 평균 SimBand / 평균 SimTick을 밴드마다 runs.csv·summary.csv의 맨 끝 열에 쓴다(Worklog/M4.md).
 실행: py -3 -I Scripts/summarize.py --milestone M0 [--pc 1] [--rebuild]
 """
@@ -37,6 +38,8 @@ BANDS = ["High", "Medium", "Low"]
 # real_period_* = 실제 틱 주기(초)
 SIM_FIELDS = (["sim_lod"] + [f"cfg_tick_{b.lower()}" for b in BANDS] + [f"sim_tick_{b.lower()}" for b in BANDS]
               + [f"sim_band_{b.lower()}" for b in BANDS] + [f"real_period_{b.lower()}" for b in BANDS])
+# E4 (d) 변형 m4offmove: 200m 밖이 Simulation LOD의 Off 밴드다. 이 변형에만 있는 열(없으면 빈칸). cfg_tick_off는 메타데이터의 Low 간격(코드가 Off 간격을 Low와 같게 둔다)
+SIM_FIELDS += ["sim_offmove", "cfg_tick_off", "sim_tick_off", "sim_band_off", "real_period_off", "off_move_count", "off_move_ms"]
 RUN_FIELDS = ["label", "milestone", "variant", "n", "preset", "seed", "run", "pc", "frames",
               "game_p50_ms", "game_p99_ms", "render_p50_ms", "gpu_p50_ms", "frame_p50_ms", "frame_p95_ms", "frame_p99_ms",
               "hitch_abs", "hitch_rel", "draw_calls_p50", "mem_total_mb", "bottleneck", "build",
@@ -91,6 +94,24 @@ def sim_lod_fields(header, data, meta, frame):
             for b, v in zip(BANDS, m.groups()):
                 out[f"cfg_tick_{b.lower()}"] = float(v)
     frame_s = statistics.fmean(frame) / 1000.0 if frame else None
+    if lod and " offmove=1" in lod:
+        out["sim_offmove"] = 1
+        if out["cfg_tick_low"] != "":
+            out["cfg_tick_off"] = out["cfg_tick_low"]
+        tick_off = column(header, data, ["Lab/SimTickOff"])
+        band_off = column(header, data, ["Lab/SimBandOff"])
+        cnt = column(header, data, ["Lab/OffMoveCount"])
+        ms = column(header, data, ["Lab/OffMove"])
+        if tick_off:
+            out["sim_tick_off"] = round(statistics.fmean(tick_off), 2)
+        if band_off:
+            out["sim_band_off"] = round(statistics.fmean(band_off), 2)
+        if tick_off and band_off and frame_s and statistics.fmean(tick_off) > 0:
+            out["real_period_off"] = round(frame_s * statistics.fmean(band_off) / statistics.fmean(tick_off), 4)
+        if cnt:
+            out["off_move_count"] = round(statistics.fmean(cnt), 2)
+        if ms:
+            out["off_move_ms"] = round(statistics.fmean(ms), 4)
     for b in BANDS:
         tick = column(header, data, [f"Lab/SimTick{b}"])
         band = column(header, data, [f"Lab/SimBand{b}"])
@@ -240,7 +261,7 @@ def main():
         final = tag.endswith("fg") and not tag.startswith("diag")  # 최종 묶음(2026-11-10 재측정)
         legacy = tag.endswith("fin")  # 옛 묶음(final=0, 조건 이름은 -fin 그대로)
         btag = tag[:-2] if final else tag[:-3] if legacy else tag
-        variant = r["variant"] + next((f"-{t}" for t in ("noaff", "aff", "diagbg", "diagfg", "fgtest", "start", "aa", "ab2", "ab", "t2") if btag.startswith(t)), "") + ("-fg" if final else "-fin" if legacy else "")  # 묶음 끝 A/A와 선행 A/B(ab)는 기준점과 따로 요약한다
+        variant = r["variant"] + next((f"-{t}" for t in ("noaff", "aff", "diagbg", "diagfg", "fgtest", "e4dstart", "e4daa", "e4d", "start", "aa", "ab2", "ab", "t2") if btag.startswith(t)), "") + ("-fg" if final else "-fin" if legacy else "")  # 묶음 끝 A/A와 선행 A/B(ab)는 기준점과 따로 요약한다
         groups.setdefault((variant, int(r["n"]), r["preset"]), []).append(r)
 
     fields = ["variant", "n", "preset", "runs"]
