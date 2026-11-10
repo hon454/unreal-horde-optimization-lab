@@ -5,6 +5,10 @@ param(
     [ValidateSet("P1", "P2")][string]$Preset = "P1",
     [int]$Seed = 20261106,
     [ValidateSet("full", "static", "budget", "uro", "pawn", "mass", "massst", "massav", "massdirlo", "massdirhi", "massevtlo", "massevthi", "vatvert", "vatcull", "vatcullvis", "vatdie0", "vatdie1k", "kill0", "kill1k", "m3uro", "m3budgetdist", "m3budgetsig", "m3lowres", "m3colquery", "m3nocol", "m3colbase", "m3hyd15", "m3hyd50", "m3hydbase", "m2off", "m3noactor", "m3base", "m3qold", "m3syncall", "m3lock0", "m3order", "m3vis30", "m3sig", "m3vis0", "m3vis15", "m3hys20", "m0full", "m0static", "staticpawn", "m1mass", "m2mass", "m3mass", "m4mass", "m4off", "m4m25l50", "m4m25l100", "m4m50l50", "m4avoid", "m4offmove")][string]$Variant = "full",
+    # 실행 단계(-LabStage=). 비우면 인자를 붙이지 않는다(코드 기본 M0). m4mass·m4offmove 같은 M4 변형은 M4를 줘야 한다(그리는 거리 스크린샷에서 빠뜨려 M0로 돈 일이 있다).
+    [string]$Stage = "",
+    [int]$ResX = 1280,
+    [int]$ResY = 720,
     [double]$Duration = 0,
     [double]$ShotAt = 0,
     [string[]]$Extra = @(),
@@ -16,9 +20,10 @@ if ($Small) { $N = 100; $Preset = "P1"; if ($Duration -le 0) { $Duration = 20 } 
 
 $LogName = "LabDev-$Variant-N$N-$Preset.log"
 $GameArgs = @(
-    "`"$Project`"", "-game", "-windowed", "-ResX=1280", "-ResY=720", "-log", "-LOG=$LogName", "-nosound", "-DisablePython",
+    "`"$Project`"", "-game", "-windowed", "-ResX=$ResX", "-ResY=$ResY", "-log", "-LOG=$LogName", "-nosound", "-DisablePython",
     "-LabN=$N", "-LabPreset=$($Preset.Substring(1))", "-LabSeed=$Seed", "-LabVariant=$Variant"
 ) + $Extra
+if ($Stage) { $GameArgs += "-LabStage=$Stage" }
 if ($Duration -gt 0) { $GameArgs += "-LabDuration=$Duration" }
 if ($ShotAt -gt 0) { $GameArgs += "-LabShotAt=$ShotAt" }
 
