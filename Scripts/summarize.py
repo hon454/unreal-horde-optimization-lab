@@ -101,7 +101,7 @@ def sim_lod_fields(header, data, meta, frame):
         tick_off = column(header, data, ["Lab/SimTickOff"])
         band_off = column(header, data, ["Lab/SimBandOff"])
         cnt = column(header, data, ["Lab/OffMoveCount"])
-        ms = column(header, data, ["Lab/OffMove"])
+        ms = column(header, data, ["Lab/AllWorkers/OffMove", "Lab/OffMove"])
         if tick_off:
             out["sim_tick_off"] = round(statistics.fmean(tick_off), 2)
         if band_off:
