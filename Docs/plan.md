@@ -180,7 +180,7 @@ M0\~M5가 필수다. 마일스톤마다 바꾸는 최적화 변수는 하나고,
 
 **선택 M4b. StateTree + Signal:** 접근 → 피격 → 사망 전이를 태그 상태(M1 방식) 대신 StateTree로. 피해 적용 프로세서가 Signal로 깨운다. (a) 저격 1회당 깨어나는 엔티티 수 (b) 태그 vs StateTree 비용. 글 하나 분량이면 하고, 아니면 backlog. 강연 근거는 윤준기 21:33뿐이라 "선택" 유지(talk-notes.md).
 
-**측정 조건:** N {1k, 5k, 20k, 30k, 50k}.
+**측정 조건:** M4 대표 설정과 기준점(`m3mass` 2종)을 P1 N {10k, 20k, 30k}, P2 N 20k에서 잰다. 경계 규칙에 따라 5k나 50k를 더한다([ADR-0006](Decisions/0006-three-measurement-tiers.md)). 묶음 전에 개발 확인으로 10k를 한 번 돌린다(잰 적이 없는 점이다).
 
 ## M5. ISKM
 
