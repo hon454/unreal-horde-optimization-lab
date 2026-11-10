@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "MassProcessor.h"
 #include "MassEntityQuery.h"
+#include "MassLODTypes.h" // UE::Mass::ProcessorGroupNames::LOD (정의는 MassLODSubsystem.cpp)
 #include "LabConfig.h"
 #include "LabMassProcessors.generated.h"
 
@@ -34,6 +35,22 @@ inline bool LabUseOldQueries()
 inline bool LabExplicitLogicOrder()
 {
 	return FLabConfig::Get().Variant == ELabVariant::M3Order;
+}
+
+/**
+ * M4부터 이 프로세서를 엔진 LOD 그룹(표현 LOD, Simulation LOD) 뒤에 돌린다. M3까지는 아무것도 더하지 않는다.
+ * 가변 틱 청크 필터를 쓰는 프로세서는 그 값을 쓰는 UMassSimulationLODProcessor(LOD 그룹) 뒤에 돌아야 한다.
+ * 순서를 적지 않으면 두 프로세서의 순서가 프레임마다 바뀔 수 있고, "이 프레임에 돈다"는 값은 LOD 프로세서의 한 번과 다음 번 사이에만 참이라
+ * 그 사이에 읽지 못하면 한 주기를 통째로 건너뛴다(2026-11-10 lab_chunk 진단 로그, Docs/Worklog/M4.md "사망 전환 지연").
+ * 엔진에서 같은 필터를 쓰는 프로세서도 이렇게 적는다(MassStateTreeProcessors.cpp:165, MassAvoidanceProcessors.cpp:288).
+ * 실행 큐는 이름을 ExecuteInGroup과 정확히 같은 그룹으로만 푼다(MassProcessingQueue.cpp:689-692,714-731). 두 LOD 프로세서의 그룹이 정확히 LOD다.
+ */
+inline void LabRunAfterSimLod(FMassProcessorExecutionOrder& Order)
+{
+	if (FLabConfig::Get().UsesSimLod())
+	{
+		Order.ExecuteAfter.Add(UE::Mass::ProcessorGroupNames::LOD);
+	}
 }
 
 /** 살아 있는 개체의 이동 목표를 오브로 둔다. 실제 이동은 엔진 조향(UMassSteerToMoveTargetProcessor)과 이동 프로세서가 한다. */
