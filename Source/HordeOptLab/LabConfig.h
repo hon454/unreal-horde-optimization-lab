@@ -52,12 +52,14 @@ enum class ELabVariant : uint8
 	M4M25L50,    // E4 (b): Medium 0.25초 / Low 0.5초
 	M4M25L100,   // E4 (b): Medium 0.25초 / Low 1.0초
 	M4M50L50,    // E4 (b): Medium 0.5초 / Low 0.5초
+	M4OffMove,   // E4 (d): 200m 밖을 Simulation LOD의 Off로 두어 엔진 이동·조향 넷에서 빼고(넷 모두 FMassOffLODTag를 None으로 요구한다) ULabOffMoveProcessor가 틱이 온 프레임에 흐른 시간만큼 오브로 직진시킨다. Docs/Worklog/M4.md "E4 (d) Low 밴드 이동"
 	M4Avoid,     // E4 (c): 대표 + 엔진 회피 Trait. 회피 프로세서는 High 태그만 처리하므로(MassAvoidanceProcessors.cpp:301-303) 80m 안만 비켜 간다
 };
 
 /**
  * M4 Simulation LOD 설정(2026-11-10 사용자 결정, Docs/Worklog/M4.md). 거리는 카메라 기준이고 화면 안팎을 가리지 않는다(MassLODLogic.h:42).
- * Off 밴드는 두지 않는다: 엔진의 Off는 위치를 이동 목표(오브)로 옮기고 이동·조향에서 뺀다(engine-notes.md 5절).
+ * 기본은 Off 밴드를 두지 않는다: 엔진의 Off는 위치를 이동 목표(오브)로 옮기고 이동·조향에서 뺀다(engine-notes.md 5절).
+ * bOffMove(변형 m4offmove)만 200m 밖을 Off로 둔다. 순간 이동 프로세서는 M4부터 등록하지 않고(HordeOptLab.cpp) Lab 프로세서가 대신 옮긴다.
  */
 struct FLabSimLod
 {
@@ -66,6 +68,7 @@ struct FLabSimLod
 	float TickMedium = 0.5f; // 초. High는 0(매 프레임)
 	float TickLow = 1.0f;
 	bool bAvoidance = false;
+	bool bOffMove = false;   // E4 (d): Low 밴드 대신 Off 밴드(간격은 TickLow), 이동은 ULabOffMoveProcessor
 };
 
 /**

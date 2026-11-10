@@ -37,6 +37,7 @@ protected:
  * 사건 이름: hydrate·shown·dehydrate, snipe_small·snipe_large, die(피격 → 사망), removed. 앞쪽 필드(frame, u, v)는 Scripts/transition-*.py가 읽으므로 바꾸지 않는다.
  * wx·wy는 월드 좌표다. 저격당한 개체는 멈추므로 snipe·die·removed를 이 값으로 잇는다.
  * x는 사건별 덧붙임 값이다(hydrate·shown·dehydrate: 대형이면 1, die: 피격이 끝난 시각보다 늦게 넘어간 초).
+ * m4offmove + -LabSimLodLog: offenter·offleave(Simulation LOD Off 태그가 붙고 떨어질 때, LabMassProcessors.cpp). 카메라 앞의 개체만 남는다.
  */
 inline void LabLogScreenEvent(const TCHAR* What, const FLabSnipeView& View, const FVector& World, float Extra = 0.f)
 {

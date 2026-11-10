@@ -53,6 +53,7 @@ const FLabConfig& FLabConfig::Get()
 			else if (Variant == TEXT("m4m25l100")) { C.Variant = ELabVariant::M4M25L100; }
 			else if (Variant == TEXT("m4m50l50")) { C.Variant = ELabVariant::M4M50L50; }
 			else if (Variant == TEXT("m4avoid")) { C.Variant = ELabVariant::M4Avoid; }
+			else if (Variant == TEXT("m4offmove")) { C.Variant = ELabVariant::M4OffMove; }
 			else if (Variant == TEXT("m3qold")) { C.Variant = ELabVariant::M3QOld; }
 			else if (Variant == TEXT("m3syncall")) { C.Variant = ELabVariant::M3SyncAll; }
 			else if (Variant == TEXT("m3vis0")) { C.Variant = ELabVariant::M3Vis0; }
@@ -138,6 +139,7 @@ const TCHAR* FLabConfig::VariantName(ELabVariant V)
 	case ELabVariant::M4M25L100: return TEXT("m4m25l100");
 	case ELabVariant::M4M50L50: return TEXT("m4m50l50");
 	case ELabVariant::M4Avoid: return TEXT("m4avoid");
+	case ELabVariant::M4OffMove: return TEXT("m4offmove");
 	default: return TEXT("full");
 	}
 }
@@ -165,6 +167,7 @@ FLabSimLod FLabConfig::SimLod() const
 	case ELabVariant::M4M25L100: S.TickMedium = 0.25f; S.TickLow = 1.0f; break;
 	case ELabVariant::M4M50L50: S.TickMedium = 0.5f; S.TickLow = 0.5f; break;
 	case ELabVariant::M4Avoid: S.bAvoidance = true; break;
+	case ELabVariant::M4OffMove: S.bOffMove = true; break;
 	default: break;
 	}
 	return S;
@@ -177,7 +180,9 @@ FString FLabConfig::SimLodString() const
 		return TEXT("-");
 	}
 	const FLabSimLod S = SimLod();
-	return FString::Printf(TEXT("%.0f/%.0fm tick=0/%.2f/%.2f avoid=%d"), FLabSimLod::MediumDistance / 100.f, FLabSimLod::LowDistance / 100.f, S.TickMedium, S.TickLow, S.bAvoidance ? 1 : 0);
+	// offmove는 켠 변형에서만 붙인다. 다른 변형의 문자열(CSV 메타데이터 LabSimLod)은 그대로다.
+	return FString::Printf(TEXT("%.0f/%.0fm tick=0/%.2f/%.2f avoid=%d%s"), FLabSimLod::MediumDistance / 100.f, FLabSimLod::LowDistance / 100.f, S.TickMedium, S.TickLow, S.bAvoidance ? 1 : 0,
+		S.bOffMove ? TEXT(" offmove=1") : TEXT(""));
 }
 
 FString FLabConfig::ToLogString() const

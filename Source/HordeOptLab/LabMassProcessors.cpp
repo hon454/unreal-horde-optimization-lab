@@ -142,6 +142,11 @@ void ULabApproachProcessor::Execute(FMassEntityManager& EntityManager, FMassExec
 	CSV_CUSTOM_STAT(Lab, SimTickHigh, Ticked[EMassLOD::High], ECsvCustomStatOp::Set);
 	CSV_CUSTOM_STAT(Lab, SimTickMedium, Ticked[EMassLOD::Medium], ECsvCustomStatOp::Set);
 	CSV_CUSTOM_STAT(Lab, SimTickLow, Ticked[EMassLOD::Low], ECsvCustomStatOp::Set);
+	const bool bOffMove = FLabConfig::Get().SimLod().bOffMove;
+	if (bOffMove)
+	{
+		CSV_CUSTOM_STAT(Lab, SimTickOff, Ticked[EMassLOD::Off], ECsvCustomStatOp::Set); // m4offmove만: 200m 밖이 Low 대신 Off다. 다른 변형에는 이 열이 없다
+	}
 
 	// 밴드별 걷는 개체 수(필터 없는 같은 쿼리, 청크의 개체 수만 읽는다). 실제 틱 주기 = 평균 프레임 시간 × SimBand ÷ SimTick(2026-11-10 사용자 승인, Docs/Worklog/M4.md).
 	int32 Band[5] = {};
@@ -155,6 +160,10 @@ void ULabApproachProcessor::Execute(FMassEntityManager& EntityManager, FMassExec
 	CSV_CUSTOM_STAT(Lab, SimBandHigh, Band[EMassLOD::High], ECsvCustomStatOp::Set);
 	CSV_CUSTOM_STAT(Lab, SimBandMedium, Band[EMassLOD::Medium], ECsvCustomStatOp::Set);
 	CSV_CUSTOM_STAT(Lab, SimBandLow, Band[EMassLOD::Low], ECsvCustomStatOp::Set);
+	if (bOffMove)
+	{
+		CSV_CUSTOM_STAT(Lab, SimBandOff, Band[EMassLOD::Off], ECsvCustomStatOp::Set);
+	}
 
 	static const bool bLog = FParse::Param(FCommandLine::Get(), TEXT("LabSimLodLog"));
 	if (!bLog)
@@ -189,6 +198,168 @@ void ULabApproachProcessor::Execute(FMassEntityManager& EntityManager, FMassExec
 		DiagFrames = 0;
 		DiagSince = Now;
 	}
+}
+
+// E4 (d) Off 밴드 이동 ---------------------------------------------------------
+
+ULabOffMoveProcessor::ULabOffMoveProcessor()
+	: EntityQuery(*this)
+{
+	bAutoRegisterWithProcessingPhases = false; // m4offmove에서만 게임 모듈이 켠다(HordeOptLab.cpp)
+	ExecutionFlags = (int32)EProcessorExecutionFlags::AllNetModes;
+	ExecutionOrder.ExecuteInGroup = UE::Mass::ProcessorGroupNames::Movement; // 범위 피해(LabLogic)는 Movement 뒤에 돈다
+	LabRunAfterSimLod(ExecutionOrder);
+}
+
+void ULabOffMoveProcessor::ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager)
+{
+	EntityQuery.AddRequirement<FTransformFragment>(EMassFragmentAccess::ReadWrite);
+	EntityQuery.AddRequirement<FMassDesiredMovementFragment>(EMassFragmentAccess::ReadWrite);
+	EntityQuery.AddRequirement<FLabOffMoveFragment>(EMassFragmentAccess::ReadWrite);
+	EntityQuery.AddRequirement<FMassSimulationVariableTickFragment>(EMassFragmentAccess::ReadOnly); // 개발 확인용 비교에만 읽는다
+	EntityQuery.AddConstSharedRequirement<FLabUnitTypeParams>(EMassFragmentPresence::All);
+	EntityQuery.AddTagRequirement<FLabMinionTag>(EMassFragmentPresence::All);
+	EntityQuery.AddTagRequirement<FLabHitTag>(EMassFragmentPresence::None);
+	EntityQuery.AddTagRequirement<FLabDeadTag>(EMassFragmentPresence::None);
+	EntityQuery.AddTagRequirement<FMassOffLODTag>(EMassFragmentPresence::All); // 엔진 이동·조향 넷이 돌지 않는 개체만
+	LabUseVariableTick(EntityQuery);
+}
+
+void ULabOffMoveProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context)
+{
+	CSV_SCOPED_TIMING_STAT(Lab, OffMove);
+	ULabCrowdSubsystem* Crowd = LabCrowd(Context);
+	if (!Crowd)
+	{
+		return;
+	}
+	const FVector Orb = Crowd->OrbCenter;
+	const double Now = Crowd->GetWorld()->GetTimeSeconds();
+	const float FrameDelta = Context.GetDeltaTimeSeconds();
+	int32 Moved = 0;
+	float MaxSeconds = 0.f;
+	double SumSeconds = 0.;
+	double EngineSumSeconds = 0.;
+	EntityQuery.ForEachEntityChunk(Context, [Orb, Now, FrameDelta, &Moved, &MaxSeconds, &SumSeconds, &EngineSumSeconds](FMassExecutionContext& Context)
+	{
+		const TArrayView<FTransformFragment> Transforms = Context.GetMutableFragmentView<FTransformFragment>();
+		const TArrayView<FMassDesiredMovementFragment> Movements = Context.GetMutableFragmentView<FMassDesiredMovementFragment>();
+		const TArrayView<FLabOffMoveFragment> OffMoves = Context.GetMutableFragmentView<FLabOffMoveFragment>();
+		const TConstArrayView<FMassSimulationVariableTickFragment> Ticks = Context.GetFragmentView<FMassSimulationVariableTickFragment>();
+		const float Speed = Context.GetConstSharedFragment<FLabUnitTypeParams>().MoveSpeed;
+		Moved += Context.GetNumEntities();
+		for (FMassExecutionContext::FEntityIterator It = Context.CreateEntityIterator(); It; ++It)
+		{
+			// 옮겨야 할 시간 = 마지막으로 옮긴 뒤 흐른 시간. 새 엔티티(0)는 한 프레임만 옮긴다. Off에 다시 든 개체는 관찰자가 시각을 맞춰 두었다.
+			double& LastMove = OffMoves[It].LastMoveTime;
+			const float Seconds = LastMove > 0. ? float(Now - LastMove) : FrameDelta;
+			LastMove = Now;
+#if !UE_BUILD_TEST
+			// 비교용: 엔진 값으로 셈했을 때의 시간(지금 − LastTickedTime + 한 프레임, MassLODTickRateController.h:157-164)
+			EngineSumSeconds += Ticks[It].LastTickedTime > 0. ? (Now - Ticks[It].LastTickedTime) + FrameDelta : FrameDelta;
+#endif
+			MaxSeconds = FMath::Max(MaxSeconds, Seconds);
+			SumSeconds += Seconds;
+			FTransform& Transform = Transforms[It].GetMutableTransform();
+			FVector ToOrb = Orb - Transform.GetLocation();
+			ToOrb.Z = 0.;
+			const double Distance = ToOrb.Length();
+			if (Distance <= KINDA_SMALL_NUMBER)
+			{
+				Movements[It].DesiredVelocity = FVector::ZeroVector;
+				continue;
+			}
+			const FVector Direction = ToOrb / Distance;
+			Transform.AddToTranslation(Direction * FMath::Min(double(Speed * Seconds), Distance));
+			Movements[It].DesiredVelocity = Direction * Speed; // 200m 안으로 돌아오면 엔진 조향이 이 속도에서 이어 간다
+		}
+	});
+	CSV_CUSTOM_STAT(Lab, OffMoveCount, Moved, ECsvCustomStatOp::Set);
+
+#if !UE_BUILD_TEST
+	// 개발 확인(-LabSimLodLog): 1초마다 옮긴 개체 수(프레임 평균), 한 번에 옮긴 시간의 최대와 평균. 최대 × 걷는 속도가 한 번에 뛰는 거리의 상한이다.
+	static const bool bLog = FParse::Param(FCommandLine::Get(), TEXT("LabSimLodLog"));
+	if (bLog)
+	{
+		static double Since = 0., DiagSum = 0., DiagEngineSum = 0.;
+		static int64 DiagMoved = 0;
+		static int32 DiagFrames = 0;
+		static float DiagMax = 0.f;
+		DiagMoved += Moved; DiagSum += SumSeconds; DiagEngineSum += EngineSumSeconds; DiagMax = FMath::Max(DiagMax, MaxSeconds); ++DiagFrames;
+		if (Since <= 0.)
+		{
+			Since = Now;
+		}
+		else if (Now - Since >= 1.)
+		{
+			UE_LOG(LogLab, Log, TEXT("lab_offmove t=%.1f frames=%d moved_per_frame=%lld max_step_s=%.3f mean_step_s=%.3f sum_s=%.1f engine_sum_s=%.1f"),
+				Now, DiagFrames, DiagMoved / DiagFrames, DiagMax, DiagMoved > 0 ? DiagSum / double(DiagMoved) : 0., DiagSum, DiagEngineSum);
+			Since = Now; DiagSum = 0.; DiagEngineSum = 0.; DiagMoved = 0; DiagFrames = 0; DiagMax = 0.f;
+		}
+	}
+#endif
+}
+
+ULabOffMoveEnterObserver::ULabOffMoveEnterObserver()
+	: EntityQuery(*this)
+{
+	ObservedTypes.Add(FMassOffLODTag::StaticStruct());
+	ObservedOperations = EMassObservedOperationFlags::AddElement; // 새 엔티티는 LastMoveTime 0으로 시작해 따로 다룬다
+	ExecutionFlags = (int32)EProcessorExecutionFlags::AllNetModes;
+	// m4offmove에서만 관찰자로 등록한다. 등록은 CDO의 PostInitProperties에서 일어나고 그때 실행 인자는 이미 읽을 수 있다(FLabConfig::Get).
+	bAutoRegisterWithObserverRegistry = FLabConfig::Get().UsesSimLod() && FLabConfig::Get().SimLod().bOffMove;
+#if !UE_BUILD_TEST
+	// 개발 확인(-LabSimLodLog): Off 태그가 떨어질 때도 불려, 그때의 카메라 거리와 마지막 이동 뒤 흐른 시간을 로그에 남긴다(lab_event offleave).
+	if (FParse::Param(FCommandLine::Get(), TEXT("LabSimLodLog")))
+	{
+		ObservedOperations |= EMassObservedOperationFlags::RemoveElement;
+	}
+#endif
+}
+
+void ULabOffMoveEnterObserver::ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager)
+{
+	EntityQuery.AddRequirement<FLabOffMoveFragment>(EMassFragmentAccess::ReadWrite);
+	EntityQuery.AddRequirement<FTransformFragment>(EMassFragmentAccess::ReadOnly); // 개발 확인 로그에만 읽는다
+}
+
+void ULabOffMoveEnterObserver::Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context)
+{
+	const UWorld* World = Context.GetWorld();
+	if (!World)
+	{
+		return;
+	}
+	const double Now = World->GetTimeSeconds();
+	const FMassObserverExecutionContext* Observed = Context.GetAuxData().GetPtr<const FMassObserverExecutionContext>();
+	const bool bRemoved = Observed && Observed->GetOperationType() == EMassObservedOperation::RemoveElement;
+#if !UE_BUILD_TEST
+	static const bool bLog = FParse::Param(FCommandLine::Get(), TEXT("LabSimLodLog"));
+	const ULabCrowdSubsystem* Crowd = bLog ? World->GetSubsystem<ULabCrowdSubsystem>() : nullptr;
+#endif
+	EntityQuery.ForEachEntityChunk(Context, [&](FMassExecutionContext& Context)
+	{
+		const TArrayView<FLabOffMoveFragment> OffMoves = Context.GetMutableFragmentView<FLabOffMoveFragment>();
+#if !UE_BUILD_TEST
+		const TConstArrayView<FTransformFragment> Transforms = Context.GetFragmentView<FTransformFragment>();
+#endif
+		for (FMassExecutionContext::FEntityIterator It = Context.CreateEntityIterator(); It; ++It)
+		{
+#if !UE_BUILD_TEST
+			if (Crowd)
+			{
+				// offleave의 x: 마지막으로 옮긴 뒤 흐른 초(옮긴 적이 없으면 -1). offenter의 x: 전에 옮긴 적이 있으면 1(Off에 다시 든 개체)
+				const double Last = OffMoves[It].LastMoveTime;
+				LabLogScreenEvent(bRemoved ? TEXT("offleave") : TEXT("offenter"), Crowd->SnipeView, Transforms[It].GetTransform().GetLocation(),
+					bRemoved ? (Last > 0. ? float(Now - Last) : -1.f) : (Last > 0. ? 1.f : 0.f));
+			}
+#endif
+			if (!bRemoved)
+			{
+				OffMoves[It].LastMoveTime = Now;
+			}
+		}
+	});
 }
 
 // 범위 피해 ------------------------------------------------------------------

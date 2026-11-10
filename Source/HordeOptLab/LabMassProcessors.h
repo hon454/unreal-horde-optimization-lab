@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "MassProcessor.h"
 #include "MassEntityQuery.h"
+#include "MassObserverProcessor.h"
 #include "LabConfig.h"
 #include "LabMassProcessors.generated.h"
 
@@ -58,6 +59,41 @@ protected:
 	int64 DiagTotalChunks[5] = {};
 	int32 DiagFrames = 0;
 	double DiagSince = 0.;
+};
+
+/**
+ * E4 (d) 변형 m4offmove만 등록한다(HordeOptLab.cpp). Simulation LOD가 Off인 걷는 개체(카메라에서 200m 밖)를 엔진 이동·조향 넷 대신 옮긴다.
+ * 가변 틱이 온 프레임에만 돌고, 마지막으로 옮긴 뒤 흐른 시간(FLabOffMoveFragment) × 걷는 속도만큼 오브 쪽으로 곧게 옮긴다.
+ * 엔진의 FMassSimulationVariableTickFragment(DeltaTime, LastTickedTime)는 쓰지 않는다. 청크가 돈 다음 갱신에서 엔진이 값을 덮어써 흐른 시간의 약 6%가 빠졌다(Docs/Worklog/M4.md "E4 (d) Low 밴드 이동"). 회전은 엔진의 Off 쿼리가 맞춘다(MassSmoothOrientationProcessors.cpp:36-40,120-133).
+ * 200m 안으로 돌아오면 엔진 조향이 이어받는다. 그때 속도가 0에서 다시 붙지 않게 DesiredVelocity를 방향 × 속도로 적어 둔다.
+ * 피격·사망 중인 개체는 쿼리 밖이라 움직이지 않는다.
+ */
+UCLASS()
+class ULabOffMoveProcessor : public UMassProcessor
+{
+	GENERATED_BODY()
+public:
+	ULabOffMoveProcessor();
+protected:
+	virtual void ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager) override;
+	virtual void Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context) override;
+	FMassEntityQuery EntityQuery;
+};
+
+/**
+ * E4 (d) m4offmove만 등록한다. 개체가 Off 밴드에 들어올 때(FMassOffLODTag가 붙을 때) 마지막 이동 시각을 지금으로 맞춘다.
+ * 그 프레임까지는 엔진 이동 프로세서가 옮겼으므로 ULabOffMoveProcessor는 그 뒤의 시간만 옮긴다. 엔진의 스프링 이동도 Off 태그를 이렇게 본다(MassSpringMovementProcessors.cpp:124-128).
+ */
+UCLASS()
+class ULabOffMoveEnterObserver : public UMassObserverProcessor
+{
+	GENERATED_BODY()
+public:
+	ULabOffMoveEnterObserver();
+protected:
+	virtual void ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager) override;
+	virtual void Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context) override;
+	FMassEntityQuery EntityQuery;
 };
 
 /** 오브 피해 범위. 중심에 가까울수록 센 초당 피해를 주고, 체력이 다하면 사망 상태로 바꾼다. 테슬라 코일 번개 대상(가장 가까운 개체)도 찾는다. */

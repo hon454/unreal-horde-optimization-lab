@@ -44,6 +44,17 @@ struct FLabAnimStateFragment : public FMassFragment
 	void Set(ELabMinionState InState, float Now) { State = InState; StateStartTime = Now; }
 };
 
+/**
+ * E4 (d) 변형 m4offmove에서만 붙는다(LabMassTraits.cpp). ULabOffMoveProcessor가 이 개체를 마지막으로 옮긴 시각(월드 초).
+ * 0이면 아직 옮긴 적이 없다. Off 태그가 붙을 때 ULabOffMoveEnterObserver가 그때 시각으로 맞춘다.
+ */
+USTRUCT()
+struct FLabOffMoveFragment : public FMassFragment
+{
+	GENERATED_BODY()
+	double LastMoveTime = 0.;
+};
+
 USTRUCT()
 struct FLabHealthFragment : public FMassFragment
 {

@@ -19,6 +19,10 @@ void ULabMinionTrait::BuildTemplate(FMassEntityTemplateBuildContext& BuildContex
 	BuildContext.AddFragment<FLabHealthFragment>();
 	BuildContext.AddFragment<FLabAnimStateFragment>(); // M3b: 표현 전용 상태
 	BuildContext.AddTag<FLabMinionTag>();
+	if (FLabConfig::Get().UsesSimLod() && FLabConfig::Get().SimLod().bOffMove)
+	{
+		BuildContext.AddFragment<FLabOffMoveFragment>(); // E4 (d) m4offmove만. 다른 변형의 아키타입은 그대로다
+	}
 
 	FLabUnitTypeParams Params;
 	Params.UnitType = UnitType;
@@ -44,6 +48,14 @@ ULabSimulationLODTrait::ULabSimulationLODTrait()
 	VariableTickParams.TickRates[EMassLOD::Medium] = Sim.TickMedium;
 	VariableTickParams.TickRates[EMassLOD::Low] = Sim.TickLow;
 	VariableTickParams.TickRates[EMassLOD::Off] = 0.f; // 새 엔티티의 첫 프레임만 Off다. 기다리지 않고 바로 LOD를 받게 한다
+	if (Sim.bOffMove)
+	{
+		// E4 (d) m4offmove: 200m 밖을 Low 대신 Off로 둔다. 엔진이 FMassOffLODTag를 붙여 이동·조향 넷이 이 개체를 돌지 않는다(engine-notes.md 5절).
+		// Low와 Off의 거리가 같으면 계산기가 Off를 먼저 고른다(MassLODCalculator.h:867-870). Off → Medium에는 히스테리시스가 없다(:873, 한 단계 차이에만 있다).
+		// 새 엔티티는 청크에 들어가며 청크 수정 번호를 바꾸므로 간격을 기다리지 않고 다음 갱신에 돈다(MassLODTickRateController.h:153).
+		Params.LODDistance[EMassLOD::Off] = FLabSimLod::LowDistance;
+		VariableTickParams.TickRates[EMassLOD::Off] = Sim.TickLow;
+	}
 }
 
 ULabMovementTrait::ULabMovementTrait()
