@@ -4,15 +4,17 @@
 
 ## 단계
 
-M0\~M4, M3b 완료(태그 `M0`\~`M4`, `M3b`). 지금은 M5([plan.md](plan.md) "M5")다. 끝낸 단계의 경위는 `Worklog/M<N>.md`.
+M0\~M5, M3b 완료(태그 `M0`\~`M5`, `M3b`. `M5`는 로컬 태그이고 아직 푸시하지 않았다). 필수 마일스톤이 끝났다. 다음은 [backlog.md](backlog.md)의 순서다. 끝낸 단계의 경위는 `Worklog/M<N>.md`에 있다.
 
 ## 다음 할 일
 
-- [ ] **M5.** 비교 기준은 `m4offmove`다(2026-11-10 사용자 결정, [plan.md](plan.md) "M5"). M5 단계는 `m4offmove`의 구성(200m 밖 Off 밴드 + Lab 이동 프로세서) 위에 원거리 표현만 VAT ISM → ISKM으로 바꾼다. 같은 묶음에서 `m4offmove`를 기준점으로 함께 잰다. 설계 결정 9개(엔티티 풀링, Lab ISKM 프로세서, 변형 여섯)는 plan.md "M5"(2026-11-11 사용자 결정).
+- [ ] **원거리 표현 결정(사용자).** M5 결과를 보면 ISKM은 P1(Game 병목)에서 기준점보다 느리고, P2(GPU 병목)에서는 빠르다(아래 "측정 결과"). 다음 단계와 총괄 묶음의 대표 원거리 표현을 무엇으로 할지 정해야 한다. 추천안은 [Worklog/M5.md](Worklog/M5.md) "코디네이터 판단과 비교".
+- [ ] **M5 Game +0.6ms 원인.** 20k P1 트레이스 한 쌍(`m4offpool`, `m5iskm`)을 잰다. Lab 프로세서 차이는 +0.17ms뿐이다.
+- [x] **M5**(2026-11-11, 묶음 0a7b8bb, 패키지 40fc360). 설계 결정 9개는 [plan.md](plan.md) "M5"에 있다.
   - [x] 에셋 세션 `m5-assets`: `Scripts/create-iskm.py`(c573c0b). Python(A안)으로 끝났다. ISKM용 복제 메시 `SK_…ISKM`(`bOptimizeForInstancing`), ASTPD 2개, 머티리얼 2개. 애니메이션 바운드는 Test 패키지에서 런타임으로 확인한다. [Worklog/M5.md](Worklog/M5.md) "에셋 세션".
   - [x] 측정 러너 `Scripts/run-m5-all.ps1`(8fc271c, 42회, 약 90분). M5 단계는 `Lab/IskmInstances` 중앙값 > 0을 검사한다. Worklog/M5.md "측정 세션".
   - [x] 코드 세션 `m5-code`(dadc490): 엔티티 풀링, Lab ISKM 프로세서, `ELabStage::M5`와 변형 5개, 스탯 `Lab/IskmTracks`·`Lab/IskmInstances`. 풀링 켬과 끔에서 재생성 해시 12줄이 같다. 개발 20k P1에서 ISKM 인스턴스는 7,101개다. 원거리 스크린샷은 `Measurements/M5/shots/m5iskm_20k_p1_dev.jpg`. 벤치에 `-LabDuration`을 주면 측정 구간이 그 길이가 되고, 주지 않으면 60초 그대로다. Worklog/M5.md "코드 세션".
-  - [ ] 그다음: 패키징 → M5 묶음(측정 세션) → 비교 → 태그 `M5`.
+  - [x] 패키징(40fc360) → M5 묶음 42회(재시도 0) → 비교 → 로컬 태그 `M5`.
 - [ ] **움직이는 화면 검토.** 피격 멈춤, 30m 전환, `m4offmove`의 200m 경계 끊김. 탑뷰 카메라에서 짙은 회색 대형이 그림자와 섞이는 문제. Niagara 원거리 표현 논의(토론 2\~4).
 
 ## 앞 단계에서 남은 제약
@@ -50,12 +52,19 @@ py -3 Scripts/summarize.py --milestone M3
 
 ## 측정 결과
 
-60fps를 지키는 최대 N(P1): M0 full 813, M0 static 1,196 → M1 20,577 → M2 20,518(같은 묶음의 M1 21,396) → M3 22,046(같은 묶음의 M2 + 200m 밖 Off 35,763). 이후 묶음의 표는 `Measurements/M<N>/summary.csv`와 `Worklog/M<N>.md`.
+60fps를 지키는 최대 N(P1): M0 full 813, M0 static 1,196 → M1 20,577 → M2 20,518(같은 묶음의 M1 21,396) → M3 22,046(같은 묶음의 M2 + 200m 밖 Off 35,763). 이후 묶음의 표는 `Measurements/M<N>/summary.csv`와 `Worklog/M<N>.md`에 있다.
+
+M5 묶음(2종 P1, N@16.7ms는 프레임 p95 기준): `m4offpool`(VAT, 기준점) 약 17,100, `m5iskm`(ISKM) 약 16,000.
+- 20k P1에서 ISKM은 Render −3.2ms, GPU −3.0ms이지만 Game +0.77ms라 프레임 p50이 +1.7ms다.
+- P2 20k에서는 프레임 p50이 −2.9ms다.
+- E5 (b) 16분 실행: 풀링을 켜면 트랙이 20,050에서 멈춘다. 풀링을 끄면 124,840까지 늘고 GPU 메모리가 약 +1GB 는다.
+- 엔티티 풀링 자체의 비용은 잡음 안이다(+0.06ms).
 
 ## 막힌 것
 
-- 없음. 러너가 게임 창을 앞으로 보내고 검사한다(eb16991). 측정 중에는 PC를 쓰지 않는다. 디스크의 Test 패키지는 2ed86b9다.
+- 없음. 러너가 게임 창을 앞으로 보내고 검사한다(eb16991). 측정 중에는 PC를 쓰지 않는다. 디스크의 Test 패키지는 40fc360(M5)이다.
 
 ## 사용자에게 요청한 일
 
 - 에셋 세션(Unreal MCP)을 시작할 때 에디터를 띄워 달라. 벤치마크·패키징이 도는 동안은 에디터를 켜지 않는다.
+- M5 원거리 표현 결정(위 "다음 할 일" 첫 항목)과 푸시 여부. 로컬 커밋과 태그 `M5`가 푸시되지 않은 채 쌓여 있다.
