@@ -10,7 +10,7 @@ $OutCsv = "$Root\Saved\Profiling\CSV"
 $LogDir = "$Root\Saved\Lab"; New-Item -ItemType Directory -Force -Path $LogDir | Out-Null
 $Log = "$LogDir\m4-far.log"
 $MeasDir = "$Root\Measurements\M4"
-$RunCsv = "$MeasDiratch-runs-far.csv"
+$RunCsv = "$MeasDir\batch-runs-far.csv"
 function Add-Log($Text) { try { $fs = New-Object System.IO.FileStream($Log, [System.IO.FileMode]::Append, [System.IO.FileAccess]::Write, [System.IO.FileShare]::ReadWrite); $w = New-Object System.IO.StreamWriter($fs, (New-Object System.Text.UTF8Encoding($false))); $w.WriteLine($Text); $w.Close() } catch { } }
 function Say($m) { $l = "{0:yyyy-MM-dd HH:mm:ss} {1}" -f (Get-Date), $m; Write-Host $l; if (-not $DryRun) { Add-Log $l } }
 $Runs = New-Object System.Collections.ArrayList
