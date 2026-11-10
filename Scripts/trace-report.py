@@ -12,7 +12,7 @@ import sys
 sys.dont_write_bytecode = True
 
 
-def load(path):
+def load(path, frames_override=None):
     out = {}
     with open(path, newline="", encoding="utf-8", errors="replace") as f:
         for r in csv.DictReader(f):
@@ -21,7 +21,7 @@ def load(path):
             cur["count"] += int(float(r["Count"]))
             cur["incl"] += float(r["Incl"])
             cur["excl"] += float(r["Excl"])
-    frames = out.get("FEngineLoop::Tick", {}).get("count", 0)
+    frames = frames_override or out.get("FEngineLoop::Tick", {}).get("count", 0)
     return out, frames
 
 
@@ -31,11 +31,14 @@ def main():
     ap.add_argument("--top", type=int, default=40)
     ap.add_argument("--sort", default="Incl")
     ap.add_argument("--grep", default="")
+    ap.add_argument("--frames", default="", help="입력 순서대로 프레임 수(쉼표). 게임 스레드가 아닌 스레드의 표는 FEngineLoop::Tick이 없어 필요하다")
+    ap.add_argument("--diff", action="store_true", help="두 입력의 차(둘째 - 첫째)가 큰 순서로 정렬한다")
     args = ap.parse_args()
     data = {}
-    for a in args.inputs:
+    fr = [int(x) for x in args.frames.split(",")] if args.frames else []
+    for i, a in enumerate(args.inputs):
         k, p = a.split("=", 1)
-        data[k] = load(p)
+        data[k] = load(p, fr[i] if i < len(fr) else None)
     key = "incl" if args.sort.lower() == "incl" else "excl"
     first = next(iter(data))
     names = set()
@@ -44,6 +47,14 @@ def main():
     if args.grep:
         names = {n for n in names if re.search(args.grep, n)}
     rows = sorted(names, key=lambda n: -(data[first][0].get(n, {}).get(key, 0) / max(data[first][1], 1)))
+    if args.diff and len(data) >= 2:
+        ks = list(data)
+
+        def dv(n):
+            a, b = data[ks[0]], data[ks[1]]
+            return b[0].get(n, {}).get(key, 0) / max(b[1], 1) - a[0].get(n, {}).get(key, 0) / max(a[1], 1)
+
+        rows = sorted(names, key=lambda n: -abs(dv(n)))
     print("frames:", {k: v[1] for k, v in data.items()})
     print("name | " + " | ".join(f"{k} incl/excl ms, calls/frame" for k in data))
     for n in rows[: args.top]:
