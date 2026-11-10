@@ -11,6 +11,7 @@
 # 실행: [LAB_UNIT=large] UnrealEditor-Cmd.exe HordeOptLab.uproject -run=pythonscript -script=Scripts/bake-vat.py -unattended -nosplash -AllowCommandletRendering -stdout
 #   (-nullrhi면 스켈레탈 메시 정점을 읽지 못한다. make-static-minion.py와 같다)
 import os
+import sys
 import unreal
 
 MINION = "/Game/ParagonMinions/Characters/Minions/Down_Minions"
@@ -34,14 +35,13 @@ else:
     NORMAL = MINION + "/Textures/Melee/T_Minion_Dawn_Melee_N"
 OUT = "/Game/Lab/VAT/Baked"
 A2T = "/AnimToTexture/Materials/MaterialFunctions"
-# 죽기 진홍색(2026-11-08 사용자 확정). VAT·액터 머티리얼이 같은 값을 쓴다. 소형은 (0.6, 0.06, 0.05) 그대로다.
-# 대형은 그 진홍에 0.22를 곱한 더 어두운 진홍 (0.132, 0.0132, 0.011)이다(2026-11-10 사용자 확정: 산 대형 = 짙은 회색, 죽은 소형 = 진홍,
-# 죽은 대형 = 어두운 진홍이 서로 구별되게). 값은 선형이라 화면에서는 배율^(1/2.2)로 보인다: 0.5는 0.73배, 0.35는 0.62배라 차이가 작았고,
-# 0.22가 화면에서 소형 진홍의 절반 밝기다(0.5^2.2). 스크린샷 m4_large_final_c22_*.
-DEAD_SCALE = 0.22 if LARGE else 1.0
-DEAD_COLOR = unreal.LinearColor(0.6 * DEAD_SCALE, 0.06 * DEAD_SCALE, 0.05 * DEAD_SCALE, 1.0)
-# 산 개체 색조. 소형은 흰색(색조 없음), 대형은 짙은 회색(2026-11-10 사용자 확정, 색 후보 스크린샷 m4_large_darkgray_*).
-UNIT_TINT = unreal.LinearColor(0.15, 0.15, 0.18, 1.0) if LARGE else unreal.LinearColor(1.0, 1.0, 1.0, 1.0)
+# 색 값은 Scripts/lab_unit_colors.py 한 곳에 있다(make-static-minion.py와 함께 읽는다). 값의 경위도 그 파일에 적었다.
+# 죽기 색: 소형은 진홍 (0.6, 0.06, 0.05), 대형은 그 진홍 × 0.22. 산 개체 색조: 소형은 흰색(색조 없음), 대형은 짙은 회색.
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import lab_unit_colors as colors
+DEAD_SCALE = colors.LARGE_DEAD_SCALE if LARGE else 1.0
+DEAD_COLOR = unreal.LinearColor(*[c * DEAD_SCALE for c in colors.DEAD_COLOR], 1.0)
+UNIT_TINT = unreal.LinearColor(*(colors.LARGE_TINT if LARGE else colors.SMALL_TINT), 1.0)
 VERTEX_BBOX = []  # Vertex 굽기에서 얻은 모든 프레임의 정점 범위. Bone 메시 바운드에 쓴다(bake())
 
 lib = unreal.AnimToTextureBPLibrary

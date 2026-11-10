@@ -30,10 +30,13 @@ else:
 
 # 대형의 M1 재질(2026-11-10 사용자 결정): 산 대형을 M2~M4와 같은 짙은 회색으로 그린다. Paragon 원본 머티리얼 대신
 # bake-vat.py의 VAT·액터 머티리얼과 같은 식(Diffuse × 색조, Normal, 거칠기 0.6)의 단순 머티리얼을 만들어 슬롯 0에 넣는다.
-# 색조는 파라미터가 아니라 상수다(bake-vat.py UNIT_TINT의 대형 값과 같아야 한다). M1은 인스턴스 커스텀 데이터를 넘기지 않아 사망 색은 없다.
+# 색조는 파라미터가 아니라 상수다. 값은 bake-vat.py와 같은 Scripts/lab_unit_colors.py에서 읽는다. M1은 인스턴스 커스텀 데이터를 넘기지 않아 사망 색은 없다.
 # 소형은 Paragon 원본 머티리얼 그대로다. 이미 있으면 지우고 다시 만든다(값을 바꾼 뒤 다시 돌리면 반영된다).
 if os.environ.get("LAB_UNIT", "small") == "large":
-    LARGE_TINT = unreal.LinearColor(0.15, 0.15, 0.18, 1.0)
+    import sys
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import lab_unit_colors
+    LARGE_TINT = unreal.LinearColor(*lab_unit_colors.LARGE_TINT, 1.0)
     TEX = "/Game/ParagonMinions/Characters/Minions/Down_Minions/Textures/Siege/T_Minion_Dawn_Seige_"  # 팩의 철자 그대로(Seige)
     MAT_DIR, MAT_NAME = "/Game/Lab/Derived", "M_LabMinionLargeStatic"
     mel = unreal.MaterialEditingLibrary
