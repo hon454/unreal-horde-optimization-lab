@@ -1,6 +1,6 @@
 ﻿# M4 마일스톤 묶음 러너(ADR-0006 마일스톤 묶음). 한 번에 순서대로 돈다. 사용자가 "시작"을 정한 뒤에만 띄운다(묶음 동안 PC를 쓰지 않는다).
 # 순서(모두 2종 -Types 2, 라벨 접두사 M4-):
-#   r0      : m4mass 20k P1 버리는 실행 1회(드라이버 PSO 캐시)
+#   r0      : m4mass 20k P1 버리는 실행 1회(드라이버 PSO 캐시), 태그 warm. (첫 시도의 start-r0은 검사 코드 오류로 멈춰 이 라벨을 다시 쓰지 않으려고 태그를 바꿨다)
 #   start   : m4mass 20k P1 3회, 태그 start (시작 A/A. summary 조건 m4mass-start)
 #   main    : 조건 단위, 조건마다 기준점 m3mass(-LabStage=M3) 3회 -> m4mass(-LabStage=M4) 3회.
 #             조건 = P1 10k, P1 30k, P2 20k, P1 20k (20k P1을 마지막에 두어 하위 실험 바로 앞에 둔다)
@@ -38,7 +38,7 @@ function Add-Run($Variant, $N, $Preset, $RunIdx, $RunTag, $Trace = $false, $Extr
     [void]$Runs.Add(@{ Variant = $Variant; N = $N; Preset = $Preset; Stage = $StageOf[$Variant]; Run = $RunIdx; Tag = $RunTag; Trace = $Trace; Extra = $Extra })
 }
 
-Add-Run "m4mass" 20000 "P1" 0 "start"                                   # r0 (버린다)
+Add-Run "m4mass" 20000 "P1" 0 "warm"                                    # r0 (버린다)
 foreach ($R in 1..3) { Add-Run "m4mass" 20000 "P1" $R "start" }
 foreach ($C in @(@(10000, "P1"), @(30000, "P1"), @(20000, "P2"), @(20000, "P1"))) {
     foreach ($V in @("m3mass", "m4mass")) { foreach ($R in 1..3) { Add-Run $V $C[0] $C[1] $R "" } }
@@ -74,7 +74,7 @@ Say "M4 ALL start. package=$Commit head=$(git rev-parse --short HEAD) runs=$($Pl
 function Test-Meta($Label, $Stage) {
     $p = "$OutCsv\$Label.csv"
     if (-not (Test-Path $p)) { return "no csv" }
-    $Text = Get-Content $p -Tail 3 -Raw
+    $Text = (Get-Content $p -Tail 3) -join "`n"
     $Types = [regex]::Match($Text, "\[labtypes\],([^,]*)").Groups[1].Value
     $Lod = [regex]::Match($Text, "\[labsimlod\],([^,]*)").Groups[1].Value
     if ($Types -ne "2") { return "labtypes=$Types (expected 2)" }
