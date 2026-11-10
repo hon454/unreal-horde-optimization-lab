@@ -36,6 +36,7 @@ const FLabConfig& FLabConfig::Get()
 			else if (Stage.Equals(TEXT("M2"), ESearchCase::IgnoreCase)) { C.Stage = ELabStage::M2; }
 			else if (Stage.Equals(TEXT("M3"), ESearchCase::IgnoreCase)) { C.Stage = ELabStage::M3; }
 			else if (Stage.Equals(TEXT("M4"), ESearchCase::IgnoreCase)) { C.Stage = ELabStage::M4; }
+			else if (Stage.Equals(TEXT("M5"), ESearchCase::IgnoreCase)) { C.Stage = ELabStage::M5; }
 			else { C.bStageValid = false; }
 		}
 
@@ -56,6 +57,11 @@ const FLabConfig& FLabConfig::Get()
 			else if (Variant == TEXT("m4m50l50")) { C.Variant = ELabVariant::M4M50L50; }
 			else if (Variant == TEXT("m4avoid")) { C.Variant = ELabVariant::M4Avoid; }
 			else if (Variant == TEXT("m4offmove")) { C.Variant = ELabVariant::M4OffMove; }
+			else if (Variant == TEXT("m4offpool")) { C.Variant = ELabVariant::M4OffPool; }
+			else if (Variant == TEXT("m5iskm") || Variant == TEXT("m5mass")) { C.Variant = ELabVariant::M5Iskm; }
+			else if (Variant == TEXT("m5destroy")) { C.Variant = ELabVariant::M5Destroy; }
+			else if (Variant == TEXT("m5blend")) { C.Variant = ELabVariant::M5Blend; }
+			else if (Variant == TEXT("m5minss")) { C.Variant = ELabVariant::M5MinSS; }
 			else if (Variant == TEXT("m3qold")) { C.Variant = ELabVariant::M3QOld; }
 			else if (Variant == TEXT("m3syncall")) { C.Variant = ELabVariant::M3SyncAll; }
 			else if (Variant == TEXT("m3vis0")) { C.Variant = ELabVariant::M3Vis0; }
@@ -87,6 +93,14 @@ const FLabConfig& FLabConfig::Get()
 			else if (Variant == TEXT("m3nocol")) { C.Variant = ELabVariant::M3NoCol; }
 			else if (Variant == TEXT("m3hyd15")) { C.Variant = ELabVariant::M3Hyd15; }
 			else if (Variant == TEXT("m3hyd50")) { C.Variant = ELabVariant::M3Hyd50; }
+		}
+		// M5 엔티티 풀링 기본값(plan.md "M5" 결정 1): M5 단계는 켜고 다른 단계는 끈다. m4offpool은 어느 단계에서든 켜고, m4offmove·m5destroy는 끈다.
+		C.bEntityPool = C.Variant == ELabVariant::M4OffPool
+			|| (C.Stage == ELabStage::M5 && C.Variant != ELabVariant::M4OffMove && C.Variant != ELabVariant::M5Destroy);
+		int32 Pool = -1;
+		if (FParse::Value(Cmd, TEXT("-LabEntityPool="), Pool) && Pool >= 0)
+		{
+			C.bEntityPool = Pool != 0;
 		}
 		C.N = FMath::Max(C.N, 1);
 		C.Preset = FMath::Clamp(C.Preset, 1, 2);
@@ -142,6 +156,11 @@ const TCHAR* FLabConfig::VariantName(ELabVariant V)
 	case ELabVariant::M4M50L50: return TEXT("m4m50l50");
 	case ELabVariant::M4Avoid: return TEXT("m4avoid");
 	case ELabVariant::M4OffMove: return TEXT("m4offmove");
+	case ELabVariant::M4OffPool: return TEXT("m4offpool");
+	case ELabVariant::M5Iskm: return TEXT("m5iskm");
+	case ELabVariant::M5Destroy: return TEXT("m5destroy");
+	case ELabVariant::M5Blend: return TEXT("m5blend");
+	case ELabVariant::M5MinSS: return TEXT("m5minss");
 	default: return TEXT("full");
 	}
 }
@@ -154,6 +173,7 @@ const TCHAR* FLabConfig::StageName(ELabStage S)
 	case ELabStage::M2: return TEXT("M2");
 	case ELabStage::M3: return TEXT("M3");
 	case ELabStage::M4: return TEXT("M4");
+	case ELabStage::M5: return TEXT("M5");
 	case ELabStage::M0:
 	default: return TEXT("M0");
 	}
@@ -170,9 +190,27 @@ FLabSimLod FLabConfig::SimLod() const
 	case ELabVariant::M4M50L50: S.TickMedium = 0.5f; S.TickLow = 0.5f; break;
 	case ELabVariant::M4Avoid: S.bAvoidance = true; break;
 	case ELabVariant::M4OffMove: S.bOffMove = true; break;
+	case ELabVariant::M4OffPool: S.bOffMove = true; break;
 	default: break;
 	}
+	if (Stage == ELabStage::M5)
+	{
+		S.bOffMove = true; // M5 단계는 모든 변형이 m4offmove 구성 위에 있다(plan.md "M5" 결정 9)
+	}
 	return S;
+}
+
+bool FLabConfig::UsesIskm() const
+{
+	return Stage == ELabStage::M5 && Variant != ELabVariant::M4OffMove && Variant != ELabVariant::M4OffPool;
+}
+
+FLabIskmParams FLabConfig::IskmParams() const
+{
+	FLabIskmParams P; // 대표 m5iskm: BlendTime 0, 항상 재생, 그림자 켬
+	if (Variant == ELabVariant::M5Blend) { P.BlendTime = 0.25f; }
+	if (Variant == ELabVariant::M5MinSS) { P.AnimationMinScreenSize = 0.1f; }
+	return P;
 }
 
 FString FLabConfig::SimLodString() const
@@ -189,8 +227,18 @@ FString FLabConfig::SimLodString() const
 
 FString FLabConfig::ToLogString() const
 {
-	// far는 기본(200)이 아닐 때만 붙인다. 기본 실행의 로그는 그대로다.
-	return FString::Printf(TEXT("lab_config stage=%s n=%d preset=P%d seed=%d variant=%s bench=%d label=%s duration=%.1f types=%d simlod=%s%s"),
+	// far는 기본(200)이 아닐 때만 붙인다. 기본 실행의 로그는 그대로다. pool·far_rep는 M5 단계이거나 풀링을 켰을 때만 붙인다.
+	FString M5;
+	if (Stage == ELabStage::M5 || bEntityPool)
+	{
+		M5 = FString::Printf(TEXT(" pool=%d far_rep=%s"), bEntityPool ? 1 : 0, UsesIskm() ? TEXT("iskm") : TEXT("vat"));
+		if (UsesIskm())
+		{
+			const FLabIskmParams P = IskmParams();
+			M5 += FString::Printf(TEXT(" iskm_blend=%.2f iskm_minss=%.2f iskm_shadow=%d"), P.BlendTime, P.AnimationMinScreenSize, P.bCastShadows ? 1 : 0);
+		}
+	}
+	return FString::Printf(TEXT("lab_config stage=%s n=%d preset=P%d seed=%d variant=%s bench=%d label=%s duration=%.1f types=%d simlod=%s%s%s"),
 		StageName(Stage), N, Preset, Seed, VariantName(Variant), bBench ? 1 : 0, *Label, DurationSec, Types, *SimLodString(),
-		FarM != 200 ? *FString::Printf(TEXT(" far=%d"), FarM) : TEXT(""));
+		FarM != 200 ? *FString::Printf(TEXT(" far=%d"), FarM) : TEXT(""), *M5);
 }

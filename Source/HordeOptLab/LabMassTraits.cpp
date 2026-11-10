@@ -23,6 +23,10 @@ void ULabMinionTrait::BuildTemplate(FMassEntityTemplateBuildContext& BuildContex
 	{
 		BuildContext.AddFragment<FLabOffMoveFragment>(); // E4 (d) m4offmove만. 다른 변형의 아키타입은 그대로다
 	}
+	if (FLabConfig::Get().UsesIskm())
+	{
+		BuildContext.AddFragment<FLabIskmTrackFragment>(); // M5 ISKM만: 트랙에 마지막으로 쓴 상태(ULabIskmProcessor)
+	}
 
 	FLabUnitTypeParams Params;
 	Params.UnitType = UnitType;

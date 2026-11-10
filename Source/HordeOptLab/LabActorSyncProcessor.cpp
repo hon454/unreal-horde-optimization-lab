@@ -158,8 +158,8 @@ void ULabActorSyncProcessor::Execute(FMassEntityManager& EntityManager, FMassExe
 		const TConstArrayView<FMassRepresentationLODFragment> LODs = Context.GetFragmentView<FMassRepresentationLODFragment>();
 		// 종류(2종)는 청크 단위다. VAT 클립 길이(걷기 위상), 바운드 반경(m3sig), 대형 스탯에 쓴다.
 		const FLabUnitTypeParams& TypeParams = Context.GetConstSharedFragment<FLabUnitTypeParams>();
-		const FLabVatClips& Clips = Crowd->VatClipsByType[TypeParams.UnitType];
-		const float WalkLength = float(Clips.Walk.EndFrame - Clips.Walk.StartFrame + 1) / Clips.SampleRate;
+		// 걷기 루프 길이: M2~M4는 VAT 클립 프레임 수 ÷ 샘플 레이트(전과 같은 값), M5 ISKM은 ASTPD 시퀀스 길이(스포너가 채운다, plan.md "M5" 결정 4)
+		const float WalkLength = Crowd->WalkLengthByType[TypeParams.UnitType];
 		const bool bLargeChunk = TypeParams.UnitType == LabUnitLarge;
 		// m3qold: 상태는 아키타입 태그에서. 새 구조: 엔티티마다 표현 프래그먼트에서(아래 루프 안).
 		const bool bHit = bOld && Context.DoesArchetypeHaveTag(*FLabHitTag::StaticStruct());

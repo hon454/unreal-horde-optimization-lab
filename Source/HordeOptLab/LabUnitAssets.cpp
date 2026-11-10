@@ -36,6 +36,8 @@ namespace
 		P.Walk = LabReadPath(Prefix, TEXT("Walk"), bSmall ? *FString::Printf(TEXT("%s/Animations/Melee/NonCombat_JogFwd.NonCombat_JogFwd"), Root) : TEXT(""));
 		P.Hit = LabReadPath(Prefix, TEXT("Hit"), bSmall ? *FString::Printf(TEXT("%s/Animations/Melee/HitReact_Front.HitReact_Front"), Root) : TEXT(""));
 		P.Death = LabReadPath(Prefix, TEXT("Death"), bSmall ? *FString::Printf(TEXT("%s/Animations/Melee/Death_A.Death_A"), Root) : TEXT(""));
+		P.IskmMesh = LabReadPath(Prefix, TEXT("IskmMesh"), TEXT(""));         // M5만 읽는다. 경로는 Config/DefaultGame.ini
+		P.IskmProvider = LabReadPath(Prefix, TEXT("IskmProvider"), TEXT(""));
 		P.StaticMesh = LabReadPath(Prefix, TEXT("StaticMesh"), bSmall ? TEXT("/Game/Lab/Derived/SM_LabMinion.SM_LabMinion") : TEXT(""));
 		P.VatMesh = LabReadPath(Prefix, TEXT("VatMesh"), bSmall ? TEXT("/Game/Lab/VAT/Baked/SM_LabMinionVAT") : TEXT(""));
 		P.VatData = LabReadPath(Prefix, TEXT("VatData"), bSmall ? TEXT("/Game/Lab/VAT/Baked/DA_LabMinionVAT") : TEXT(""));

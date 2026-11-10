@@ -19,6 +19,10 @@
 #include "EngineUtils.h"
 #include "MassVisualizer.h"
 #include "Components/InstancedStaticMeshComponent.h"
+#include "Components/InstancedSkinnedMeshComponent.h"
+#include "Engine/SkeletalMesh.h"
+#include "MassMovementFragments.h"
+#include "MassMovementTypes.h"
 #include "LabMinion.h"
 #include "LabActorSyncProcessor.h"
 #include "Engine/World.h"
@@ -153,6 +157,30 @@ UMassEntityConfigAsset* ULabCrowdSubsystem::BuildEntityConfig(int32 UnitType, US
 		Visual->Params.LODRepresentation[EMassLOD::Medium] = EMassRepresentationType::LowResSpawnedActor;
 	}
 
+	if (FLabConfig::Get().UsesIskm())
+	{
+		// M5(plan.md "M5" 결정 2·3·6): 정적 메시 인스턴스 자리(30~200m)를 ISKM으로 바꾼다. 엔진 표현 경로(LOD, 액터 전환)는 그대로고 종류마다 ISKM 하나다
+		// (컴포넌트는 메시 설명자 해시마다 하나, MassVisualizationComponent.cpp:1299-1312). 정적 메시 설명자는 비워 ISM 컴포넌트를 만들지 않는다.
+		const int32 AssetType = FLabUnitTypes::AssetType(UnitType);
+		const FLabIskmParams IskmParams = FLabConfig::Get().IskmParams();
+		FMassSkinnedMeshInstanceVisualizationMeshDesc& SkinnedDesc = Visual->SkinnedMeshInstanceDesc.Meshes.AddDefaulted_GetRef();
+		SkinnedDesc.Asset = IskmMeshes.IsValidIndex(AssetType) ? IskmMeshes[AssetType].Get() : nullptr;
+		SkinnedDesc.TransformProvider = IskmProviders.IsValidIndex(AssetType) ? IskmProviders[AssetType].Get() : nullptr; // ASTPD면 엔진이 컴포넌트마다 인스턴스를 만든다(:1323-1325)
+		SkinnedDesc.LocalTransform = MeshDesc.LocalTransform; // VAT와 같은 -90도 회전과 종류 배율
+		SkinnedDesc.bCastShadows = IskmParams.bCastShadows;
+		SkinnedDesc.AnimationMinScreenSize = IskmParams.AnimationMinScreenSize; // 컴포넌트에 SetAnimationMinScreenSize로 넘어간다(:1333)
+		Visual->StaticMeshInstanceDesc.Meshes.Reset();
+		for (int32 LOD = 0; LOD < EMassLOD::Max; ++LOD)
+		{
+			if (Visual->Params.LODRepresentation[LOD] == EMassRepresentationType::StaticMeshInstance)
+			{
+				Visual->Params.LODRepresentation[LOD] = EMassRepresentationType::SkinnedMeshInstance;
+			}
+		}
+		UE_LOG(LogLab, Log, TEXT("lab_iskm_config type=%d mesh=%s provider=%s shadow=%d minss=%.2f blend=%.2f"), UnitType, *GetNameSafe(SkinnedDesc.Asset.Get()),
+			*GetNameSafe(SkinnedDesc.TransformProvider.Get()), SkinnedDesc.bCastShadows ? 1 : 0, SkinnedDesc.AnimationMinScreenSize, IskmParams.BlendTime);
+	}
+
 	UE_LOG(LogLab, Log, TEXT("lab_mass_config type=%d traits=%d mesh=%s actor=%s"), UnitType, EntityConfig->GetConfig().GetTraits().Num(), *GetNameSafe(Mesh), *GetNameSafe(Visual->HighResTemplateActor.Get()));
 	return EntityConfig;
 }
@@ -168,7 +196,18 @@ void ULabCrowdSubsystem::SpawnEntities(TConstArrayView<FVector> Locations, TCons
 	for (int32 i = 0; i < Serials.Num(); ++i)
 	{
 		IndicesByType[FMath::Min(FLabUnitTypes::TypeOf(Serials[i]), EntityConfigs.Num() - 1)].Add(i);
+#if !UE_BUILD_TEST
+		// 개발 확인(lab_pool_check): 일련번호 순서의 위치 열. 위치는 스포너 스트림에서 일련번호 순으로 뽑히므로 풀링을 켜든 끄든 같은 일련번호까지의 해시가 같아야 한다.
+		SpawnCheckHash = HashCombineFast(SpawnCheckHash, HashCombineFast(::GetTypeHash(Serials[i]), HashCombineFast(::GetTypeHash(FMath::RoundToInt32(Locations[i].X)), ::GetTypeHash(FMath::RoundToInt32(Locations[i].Y)))));
+		if (Serials[i] > 0 && Serials[i] % 200u == 0u)
+		{
+			UE_LOG(LogLab, Log, TEXT("lab_pool_check serial=%u hash=%08x x=%.0f y=%.0f pool=%d reused=%d created=%d"), Serials[i], SpawnCheckHash, Locations[i].X, Locations[i].Y,
+				FLabConfig::Get().bEntityPool ? 1 : 0, PoolReused, PoolCreated);
+		}
+#endif
 	}
+	const bool bPool = FLabConfig::Get().bEntityPool;
+	TArray<FMassEntityHandle> Reused;
 	for (int32 Type = 0; Type < EntityConfigs.Num(); ++Type)
 	{
 		const TArray<int32>& Indices = IndicesByType[Type];
@@ -176,13 +215,32 @@ void ULabCrowdSubsystem::SpawnEntities(TConstArrayView<FVector> Locations, TCons
 		{
 			continue;
 		}
+		// M5 엔티티 풀링: 같은 종류의 풀 엔티티를 먼저 다시 쓴다(종류마다 아키타입과 표현이 달라 다른 종류는 쓸 수 없다). 위치·일련번호는 새로 만들 때와 같다.
+		const int32 NumReuse = bPool ? FMath::Min(EntityPool[Type].Num(), Indices.Num()) : 0;
+		for (int32 k = 0; k < NumReuse; ++k)
+		{
+			const int32 i = Indices[k];
+			const FMassEntityHandle Entity = EntityPool[Type].Pop(EAllowShrinking::No);
+			ReinitPooledEntity(EntityManager, Entity, Locations[i], Serials[i]);
+			Reused.Add(Entity);
+		}
+		if (bPool)
+		{
+			PoolReused += NumReuse;
+			PoolCreated += Indices.Num() - NumReuse;
+		}
+		AliveCount += NumReuse;
+		if (NumReuse == Indices.Num())
+		{
+			continue;
+		}
 		const FMassEntityTemplate& Template = EntityConfigs[Type]->GetOrCreateEntityTemplate(*World);
 		TArray<FMassEntityHandle> Entities;
-		TSharedPtr<FMassEntityManager::FEntityCreationContext> Creation = SpawnerSubsystem->SpawnEntities(Template, Indices.Num(), Entities);
+		TSharedPtr<FMassEntityManager::FEntityCreationContext> Creation = SpawnerSubsystem->SpawnEntities(Template, Indices.Num() - NumReuse, Entities);
 		// 생성 직후 초기화(생성 컨텍스트 안, 게임 스레드). 처리 중 접근이 아니라 쿼리 밖 접근을 그대로 둔다(Docs/Worklog/M3b.md 표).
 		for (int32 k = 0; k < Entities.Num(); ++k)
 		{
-			const int32 i = Indices[k];
+			const int32 i = Indices[NumReuse + k];
 			const FVector Facing = (OrbCenter - Locations[i]).GetSafeNormal2D();
 			EntityManager.GetFragmentDataChecked<FTransformFragment>(Entities[k]).SetTransform(FTransform(Facing.Rotation(), Locations[i]));
 			EntityManager.GetFragmentDataChecked<FLabMinionFragment>(Entities[k]).Serial = Serials[i];
@@ -191,6 +249,85 @@ void ULabCrowdSubsystem::SpawnEntities(TConstArrayView<FVector> Locations, TCons
 		}
 		Creation.Reset(); // 옵저버(엔진 초기화 프로세서)가 여기서 돈다
 		AliveCount += Entities.Num();
+	}
+	if (Reused.Num() > 0)
+	{
+		// 다시 쓴 엔티티의 태그를 한 번에 바꾼다: 사망·풀 태그를 떼고(피격 태그는 사망 때 이미 떨어졌다) 엔진 이동을 다시 켠다(StopMoving의 반대).
+		FMassTagBitSet ToAdd;
+		ToAdd.Add<FMassCodeDrivenMovementTag>();
+		FMassTagBitSet ToRemove;
+		ToRemove.Add<FLabDeadTag>();
+		ToRemove.Add<FLabPooledTag>();
+		ToRemove.Add<FLabHitTag>();
+		TArray<FMassArchetypeEntityCollection> Collections;
+		UE::Mass::Utils::CreateEntityCollections(EntityManager, Reused, FMassArchetypeEntityCollection::NoDuplicates, Collections);
+		EntityManager.BatchChangeTagsForEntities(Collections, ToAdd, ToRemove);
+	}
+}
+
+namespace
+{
+	/**
+	 * 풀 엔티티를 세워 두는 곳. 카메라(맵 중심 근처)에서 그리는 거리와 Simulation LOD Off 거리보다 훨씬 멀어 표현 LOD가 Off(그리지 않음)다.
+	 * 그러면 엔진 표현 경로가 액터를 풀에 돌려주고 ISM·ISKM 인스턴스를 뗀다(움직이는 인스턴스는 갱신되지 않으면 지워진다, MassVisualizationComponent.cpp:812-827).
+	 * ISKM 트랙은 엔티티 핸들이 키라 남아 있다가 같은 엔티티가 다시 보일 때 다시 쓰인다(:761-770). 로직 프로세서는 사망 태그로 이미 거른다.
+	 */
+	const FVector LabPoolParkLocation(1.0e6, 1.0e6, -1.0e5);
+}
+
+void ULabCrowdSubsystem::ReinitPooledEntity(FMassEntityManager& EntityManager, FMassEntityHandle Entity, const FVector& Location, uint32 Serial) const
+{
+	// SpawnEntities의 새 엔티티 초기화와 같은 값에, 사망 동안 바뀐 이동 상태를 템플릿 기본값으로 되돌린다.
+	const FVector Facing = (OrbCenter - Location).GetSafeNormal2D();
+	EntityManager.GetFragmentDataChecked<FTransformFragment>(Entity).SetTransform(FTransform(Facing.Rotation(), Location));
+	FLabMinionFragment& Minion = EntityManager.GetFragmentDataChecked<FLabMinionFragment>(Entity);
+	Minion.Serial = Serial;
+	Minion.StateTimeLeft = 0.f;
+	EntityManager.GetFragmentDataChecked<FLabHealthFragment>(Entity).Health = FLabScenario::MinionHealth;
+	EntityManager.GetFragmentDataChecked<FLabAnimStateFragment>(Entity).Set(ELabMinionState::Walk, -LabWalkPhase(Serial)); // 재생 시각 = Now + 위상. ISKM 트랙은 이 값이 바뀐 것을 보고 다시 쓴다
+	if (FMassVelocityFragment* Velocity = EntityManager.GetFragmentDataPtr<FMassVelocityFragment>(Entity)) { Velocity->Value = FVector::ZeroVector; }
+	if (FMassForceFragment* Force = EntityManager.GetFragmentDataPtr<FMassForceFragment>(Entity)) { Force->Value = FVector::ZeroVector; }
+	if (FMassDesiredMovementFragment* Desired = EntityManager.GetFragmentDataPtr<FMassDesiredMovementFragment>(Entity)) { Desired->DesiredVelocity = FVector::ZeroVector; }
+	if (FLabOffMoveFragment* OffMove = EntityManager.GetFragmentDataPtr<FLabOffMoveFragment>(Entity)) { OffMove->LastMoveTime = 0.; } // 새 엔티티와 같이 첫 이동은 한 프레임만(LabMassProcessors.cpp)
+}
+
+void ULabCrowdSubsystem::RecycleAndRespawn(TConstArrayView<FMassEntityHandle> Finished)
+{
+	UWorld* World = GetWorld();
+	FMassEntityManager& EntityManager = UE::Mass::Utils::GetEntityManagerChecked(*World);
+	// 1. 종류별 풀 뒤에 넣는다. 재생성이 뒤에서 꺼내므로 같은 종류면 방금 죽은 엔티티가 바로 다시 쓰여 세워 두는 단계를 건너뛴다.
+	const int32 OldNum[LabUnitTypeMax] = { EntityPool[0].Num(), EntityPool[1].Num() };
+	int32 Count = 0;
+	for (const FMassEntityHandle Entity : Finished)
+	{
+		if (!EntityManager.IsEntityActive(Entity))
+		{
+			continue;
+		}
+		const uint32 Serial = EntityManager.GetFragmentDataChecked<FLabMinionFragment>(Entity).Serial;
+		EntityPool[FMath::Min(FLabUnitTypes::TypeOf(Serial), EntityConfigs.Num() - 1)].Add(Entity);
+		++Count;
+	}
+	// 2. 파괴 경로와 같은 재생성(같은 스트림, 같은 일련번호 열). SpawnEntities가 풀을 먼저 쓴다.
+	RequestRespawn(Count);
+	// 3. 다시 쓰이지 않고 남은 이번 엔티티만 세워 두고 풀 태그를 붙인다(종류가 맞지 않아 남은 것).
+	TArray<FMassEntityHandle> Parked;
+	for (int32 Type = 0; Type < LabUnitTypeMax; ++Type)
+	{
+		for (int32 k = OldNum[Type]; k < EntityPool[Type].Num(); ++k)
+		{
+			const FMassEntityHandle Entity = EntityPool[Type][k];
+			EntityManager.GetFragmentDataChecked<FTransformFragment>(Entity).SetTransform(FTransform(LabPoolParkLocation));
+			Parked.Add(Entity);
+		}
+	}
+	if (Parked.Num() > 0)
+	{
+		TArray<FMassArchetypeEntityCollection> Collections;
+		UE::Mass::Utils::CreateEntityCollections(EntityManager, Parked, FMassArchetypeEntityCollection::NoDuplicates, Collections);
+		FMassTagBitSet ToAdd;
+		ToAdd.Add<FLabPooledTag>();
+		EntityManager.BatchChangeTagsForEntities(Collections, ToAdd, FMassTagBitSet());
 	}
 }
 
@@ -209,17 +346,24 @@ void ULabCrowdSubsystem::ExcludeVisualsFromLumen()
 	// 듣지 않았다), 매 틱 컴포넌트를 훑어 아직 설정되지 않은 것만 고친다(비주얼라이저 하나, 컴포넌트 몇 개).
 	for (TActorIterator<AMassVisualizer> It(GetWorld()); It; ++It)
 	{
-		TArray<UInstancedStaticMeshComponent*> Components;
+		// M5: ISKM 컴포넌트도 같은 비주얼라이저 밑에 생긴다(MassVisualizationComponent.cpp:1305). 스켈레탈 메시는 원래 Lumen 장면 밖이지만(engine-notes.md) 같은 설정을 맞춘다.
+		TArray<UPrimitiveComponent*> Components;
 		It->GetComponents(Components);
-		for (UInstancedStaticMeshComponent* Component : Components)
+		for (UPrimitiveComponent* Component : Components)
 		{
+			if (!Component->IsA<UInstancedStaticMeshComponent>() && !Component->IsA<UInstancedSkinnedMeshComponent>())
+			{
+				continue;
+			}
 			const bool bWantAlways = false; // 그림자 캐시 남음은 VAT 메시 바운드로 고쳤다(Scripts/bake-vat.py BOUNDS_MARGIN). Always는 매 프레임 무효화라 비용이 커서 끈다
 			if (!Component->bAffectDynamicIndirectLighting && (!bWantAlways || Component->ShadowCacheInvalidationBehavior == EShadowCacheInvalidationBehavior::Always))
 			{
 				continue; // 이미 고친 컴포넌트
 			}
 			LabExcludeFromLumen(*Component);
-			UE_LOG(LogLab, Log, TEXT("lab_ism_setup %s instances=%d"), *Component->GetName(), Component->GetInstanceCount());
+			const UInstancedStaticMeshComponent* Ism = Cast<UInstancedStaticMeshComponent>(Component);
+			const UInstancedSkinnedMeshComponent* Iskm = Cast<UInstancedSkinnedMeshComponent>(Component);
+			UE_LOG(LogLab, Log, TEXT("lab_ism_setup %s instances=%d"), *Component->GetName(), Ism ? Ism->GetInstanceCount() : Iskm ? Iskm->GetInstanceCount() : 0);
 			if (bWantAlways)
 			{
 				// VAT 인스턴스는 셰이더(WPO)로 모양이 바뀐다. 죽기 애니 중에는 제자리에 멈춰 위치 변화가 없어서 Virtual Shadow Map이

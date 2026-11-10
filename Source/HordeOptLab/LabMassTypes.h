@@ -118,3 +118,26 @@ struct FLabActorTag : public FMassTag
 {
 	GENERATED_BODY()
 };
+
+/**
+ * M5 엔티티 풀링(-LabEntityPool=1, plan.md "M5" 결정 1). 사망이 끝나 풀에서 기다리는 엔티티. FLabDeadTag도 그대로 남아 로직 프로세서는 이미 거른다.
+ * 상태 프로세서만 사망 태그 쿼리에 이 태그를 None으로 더 건다(풀링을 켰을 때만). 위치는 그리는 거리 밖(FLabPool::ParkLocation)에 두어 표현 LOD가 Off다.
+ */
+USTRUCT()
+struct FLabPooledTag : public FMassTag
+{
+	GENERATED_BODY()
+};
+
+/**
+ * M5 ISKM 변형에서만 붙는다(LabMassTraits.cpp). 이 엔티티의 ISKM 트랙에 마지막으로 SetAutoPlayData로 쓴 표현 상태(plan.md "M5" 결정 4).
+ * ULabIskmProcessor는 FLabAnimStateFragment가 이 값과 다를 때만(상태 전환, 풀에서 다시 나옴) 트랙을 다시 쓴다. 평소 프레임에는 트랙을 건드리지 않는다.
+ */
+USTRUCT()
+struct FLabIskmTrackFragment : public FMassFragment
+{
+	GENERATED_BODY()
+
+	int8 AppliedState = -1; // ELabMinionState, -1이면 아직 쓴 적이 없다
+	float AppliedStartTime = 0.f;
+};

@@ -54,6 +54,13 @@ enum class ELabVariant : uint8
 	M4M50L50,    // E4 (b): Medium 0.5초 / Low 0.5초
 	M4OffMove,   // E4 (d): 200m 밖을 Simulation LOD의 Off로 두어 엔진 이동·조향 넷에서 빼고(넷 모두 FMassOffLODTag를 None으로 요구한다) ULabOffMoveProcessor가 틱이 온 프레임에 흐른 시간만큼 오브로 직진시킨다. Docs/Worklog/M4.md "E4 (d) Low 밴드 이동"
 	M4Avoid,     // E4 (c): 대표 + 엔진 회피 Trait. 회피 프로세서는 High 태그만 처리하므로(MassAvoidanceProcessors.cpp:301-303) 80m 안만 비켜 간다
+	// M5 E5(-LabStage=M5와 함께, plan.md "M5", 2026-11-11 사용자 결정). M5 단계의 Simulation LOD는 모두 m4offmove 구성(200m 밖 Off + Lab 이동 프로세서)이다.
+	// 별칭 m5mass = M5Iskm. m4offmove는 M5 단계에서도 지난 묶음과 같은 구성(VAT, 엔티티 풀링 없음)이다.
+	M4OffPool,   // 기준점: m4offmove + 엔티티 풀링(원거리 표현은 VAT)
+	M5Iskm,      // M5 대표: 원거리 표현 ISKM(BlendTime 0, AnimationMinScreenSize -1, 그림자 켬) + 엔티티 풀링
+	M5Destroy,   // E5 (b) 누수 진단: m5iskm에서 엔티티 풀링 끔(사망 개체를 파괴하고 새로 만든다)
+	M5Blend,     // 참고: m5iskm + BlendTime 0.25초
+	M5MinSS,     // 참고: m5iskm + AnimationMinScreenSize 0.1(엔진 r.Skinning.DefaultAnimationMinScreenSize 기본값)
 };
 
 /**
@@ -112,7 +119,15 @@ enum class ELabStage : uint8
 	M2, // Representation LOD: 같은 ISM에 VAT 애니메이션(걷기·피격·죽기). 대표 설정은 모든 거리를 그린다
 	M3, // 액터 하이드레이션: 0~30m는 액터(최대 500), 30~200m VAT 인스턴스, 200m 밖 Off
 	M4, // Simulation LOD: M3 표현 그대로, 로직 프로세서 셋(접근·범위 피해·상태)이 80m 밖에서 틱 간격을 늘린다(FLabSimLod)
-	// M5 ISKM을 더한다.
+	M5, // ISKM: m4offmove 구성 위에서 30~200m 표현을 VAT ISM → ISKM으로 바꾼다(ULabIskmProcessor). 엔티티 풀링 기본 켬(-LabEntityPool)
+};
+
+/** M5 ISKM 렌더·재생 설정(plan.md "M5" 결정 5·6). 변형이 정한다. */
+struct FLabIskmParams
+{
+	float BlendTime = 0.f;               // 클립 전환 크로스페이드(초). 대표 0 = VAT와 같이 끊어 바꾸기
+	float AnimationMinScreenSize = -1.f; // < 0 항상 재생. 0이면 엔진 r.Skinning.DefaultAnimationMinScreenSize(MassSkinnedMeshRepresentationTypes.h:96-101)
+	bool bCastShadows = true;            // 엔진 설명자 기본값은 false(MassSkinnedMeshRepresentationTypes.h:79)
 };
 
 /** 실행 인자. 프로세스 시작 시 한 번 읽는다. */
@@ -127,7 +142,7 @@ struct FLabConfig
 	ELabVariant Variant = ELabVariant::Full;
 	bool bBench = false;       // 벤치마크 러너(M0 7번)
 	FString Label;
-	float DurationSec = 0.f;   // 0보다 크면 그 시간 뒤 종료(개발용 -Small 실행)
+	float DurationSec = 0.f;   // 0보다 크면 그 시간 뒤 종료(개발용 -Small 실행). -LabBench에서는 측정 구간 길이(기본 60초 대신, M5 E5 (b) 960)
 	float ShotAtSec = 0.f;     // 0보다 크면 그 시각에 QHD 스크린샷 한 장(Saved/Screenshots/)
 	/**
 	 * M3 전환(하이드레이션) 대책 단계. 대책을 하나씩 쌓아 온 과정을 같은 장면으로 다시 보이려고 둔다(-LabHydrateFix=, 기본 4 = 전부).
@@ -155,6 +170,14 @@ struct FLabConfig
 	 */
 	int32 FarM = 200;
 	float FarCm() const { return float(FarM) * 100.f; }
+	/**
+	 * M5 엔티티 풀링(-LabEntityPool=0/1, plan.md "M5" 결정 1). 사망 개체를 파괴하지 않고 풀에 두었다가 재생성 때 다시 꺼낸다(ISKM 트랙 누수 우회).
+	 * 기본: M5 단계 1, 다른 단계 0. 변형 m4offpool은 어느 단계에서든 1, m4offmove·m5destroy는 0. 인자를 주면 그 값이 이긴다.
+	 */
+	bool bEntityPool = false;
+	/** M5 단계의 ISKM 변형(m5iskm·m5destroy·m5blend·m5minss, 기본 변형)이면 참. m4offpool·m4offmove는 M5 단계에서도 VAT다 */
+	bool UsesIskm() const;
+	FLabIskmParams IskmParams() const;
 	enum EHydrateFix : int32
 	{
 		FixStartTime = 1,  // 시작 시각 맞추기(AnimBP Start Position)

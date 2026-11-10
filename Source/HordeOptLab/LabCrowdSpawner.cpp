@@ -10,6 +10,7 @@
 #include "Engine/StaticMesh.h"
 #include "Materials/MaterialInterface.h"
 #include "AnimToTextureDataAsset.h"
+#include "Animation/AnimSequenceTransformProviderData.h"
 #include "Engine/World.h"
 
 namespace
@@ -154,8 +155,28 @@ void ALabCrowdSpawner::SpawnInitial()
 				}
 				Clips.SampleRate = VatData->SampleRate;
 				CrowdMeshes[Type] = VatMesh;
+				Crowd->WalkLengthByType[Type] = float(Clips.Walk.EndFrame - Clips.Walk.StartFrame + 1) / Clips.SampleRate; // M2~M4 액터 전환이 쓰던 값 그대로
 				UE_LOG(LogLab, Log, TEXT("lab_vat type=%d mode=%s walk=%d..%d hit=%d..%d death=%d..%d rate=%.0f"), Type, Mode,
 					Clips.Walk.StartFrame, Clips.Walk.EndFrame, Clips.Hit.StartFrame, Clips.Hit.EndFrame, Clips.Death.StartFrame, Clips.Death.EndFrame, Clips.SampleRate);
+			}
+		}
+		if (Config.UsesIskm())
+		{
+			// M5: 30~200m는 ISKM(Scripts/create-iskm.py). 없으면 시작하지 않는다(VAT로 재면 M4와 같아진다). 걷기 루프 길이는 ASTPD의 시퀀스 길이로 바꾼다(plan.md "M5" 결정 4).
+			Crowd->IskmMeshes.SetNum(Types);
+			Crowd->IskmProviders.SetNum(Types);
+			for (int32 Type = 0; Type < Types; ++Type)
+			{
+				const FLabUnitAssetPaths& Paths = FLabUnitAssetPaths::Get(FLabUnitTypes::AssetType(Type));
+				USkeletalMesh* IskmMesh = Paths.IskmMesh.IsEmpty() ? nullptr : LoadObject<USkeletalMesh>(nullptr, *Paths.IskmMesh);
+				UAnimSequenceTransformProviderData* Provider = Paths.IskmProvider.IsEmpty() ? nullptr : LoadObject<UAnimSequenceTransformProviderData>(nullptr, *Paths.IskmProvider);
+				checkf(IskmMesh && Provider && Provider->GetSequences().Num() == 3, TEXT("ISKM assets missing: run Scripts/create-iskm.py (type %d)"), Type);
+				Crowd->IskmMeshes[Type] = IskmMesh;
+				Crowd->IskmProviders[Type] = Provider;
+				Crowd->WalkLengthByType[Type] = Provider->GetSequencePlayLength(0);
+				// bounds: 애니메이션 바운드는 쿡할 때만 저장되고 에디터는 로드 때 비동기로 다시 계산한다(AnimSequenceTransformProviderData.cpp:716-735, 775-778). Test 패키지에서 1이어야 한다
+				UE_LOG(LogLab, Log, TEXT("lab_iskm type=%d mesh=%s provider=%s walk=%.3f hit=%.3f death=%.3f bounds=%d compiling=%d"), Type, *GetNameSafe(IskmMesh), *GetNameSafe(Provider),
+					Provider->GetSequencePlayLength(0), Provider->GetSequencePlayLength(1), Provider->GetSequencePlayLength(2), Provider->HasAnimationBounds() ? 1 : 0, Provider->IsCompiling() ? 1 : 0);
 			}
 		}
 		// 피격·사망 시간(로직)은 종류와 무관하게 소형 애니 길이 하나다(행동은 같다). 대형 VAT 클립 길이가 다르면 ClipFrame이 끝 프레임에서 멈추거나 잘린다.

@@ -266,7 +266,8 @@ void ALabGameMode::TickBench()
 
 	case ELabBenchPhase::Measure:
 		++BenchFrames;
-		if (BenchPhaseTime >= FLabBench::MeasureSec)
+		// E5 (b)(plan.md "M5"): -LabBench에 -LabDuration=초를 주면 측정 구간을 그 길이로 늘린다(16분 누수 진단 960). 주지 않으면 지금까지와 같은 60초다
+		if (BenchPhaseTime >= (Config.DurationSec > 0.f ? Config.DurationSec : FLabBench::MeasureSec))
 		{
 			const int32 Alive = Spawner->GetAliveCount();
 			const bool bOk = Alive == Config.N && BenchFrames > 0;

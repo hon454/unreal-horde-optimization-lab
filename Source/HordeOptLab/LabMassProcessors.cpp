@@ -602,6 +602,10 @@ void ULabMinionStateProcessor::ConfigureQueries(const TSharedRef<FMassEntityMana
 	EntityQuery.AddTagRequirement<FLabMinionTag>(EMassFragmentPresence::All);
 	EntityQuery.AddTagRequirement<FLabHitTag>(EMassFragmentPresence::Any);
 	EntityQuery.AddTagRequirement<FLabDeadTag>(EMassFragmentPresence::Any);
+	if (FLabConfig::Get().bEntityPool)
+	{
+		EntityQuery.AddTagRequirement<FLabPooledTag>(EMassFragmentPresence::None); // M5 엔티티 풀링: 풀에서 기다리는 엔티티(사망 태그가 남아 있다)는 타이머를 돌리지 않는다
+	}
 	// M4에서도 청크 필터를 걸지 않는다(2026-11-10 사용자 결정 "원인 확인 후 수정"). 피격·사망 타이머를 Medium·Low 간격으로 돌리면 피격이 끝난 시각과
 	// 다음 틱 사이만큼 마지막 자세로 멈춘다(피격 0.667초, 틱은 저격 뒤 0.53초와 1.03초라 0.38초. Docs/Worklog/M4.md "사망 전환 지연").
 	// 대상은 저격당한 개체(2초에 5건)와 사망 중인 개체뿐이라 매 프레임 돌려도 수백 개체다. 저격 프로세서에 필터를 걸지 않은 것과 같은 이유다:
@@ -673,7 +677,20 @@ void ULabMinionStateProcessor::Execute(FMassEntityManager& EntityManager, FMassE
 		}
 	});
 
-	if (Finished.Num() > 0)
+	if (Finished.Num() > 0 && FLabConfig::Get().bEntityPool)
+	{
+		// M5 엔티티 풀링(plan.md "M5" 결정 1): 파괴하지 않고 풀에 넣고 재생성한다. 파괴 경로와 같은 커맨드 종류(생성)라 플러시 안에서 같은 차례에 돈다.
+		// 재생성 위치와 일련번호는 파괴 경로와 같은 스포너 스트림에서 나온다(ULabCrowdSubsystem::RecycleAndRespawn).
+		TWeakObjectPtr<ULabCrowdSubsystem> WeakCrowd(Crowd);
+		Context.Defer().PushCommand<FMassDeferredCreateCommand>([WeakCrowd, Finished = MoveTemp(Finished)](FMassEntityManager&)
+		{
+			if (ULabCrowdSubsystem* C = WeakCrowd.Get())
+			{
+				C->RecycleAndRespawn(Finished);
+			}
+		});
+	}
+	else if (Finished.Num() > 0)
 	{
 		// 지연 파괴 + 재생성(plan.md "M1"). 재생성 위치와 일련번호는 M0과 같이 스포너의 시드 스트림에서 나온다.
 		const int32 Count = Finished.Num();

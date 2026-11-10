@@ -10,6 +10,9 @@
 class ALabCrowdSpawner;
 class UMassEntityConfigAsset;
 class UStaticMesh;
+class USkeletalMesh;
+class UTransformProviderData;
+struct FMassEntityManager;
 
 /** VAT 텍스처 안의 클립 하나(프레임 범위, 끝 포함). Scripts/bake-vat.py가 굽는 순서: 걷기, 피격, 죽기. */
 struct FLabVatClip
@@ -44,6 +47,12 @@ public:
 	void SpawnEntities(TConstArrayView<FVector> Locations, TConstArrayView<uint32> Serials);
 	/** 사망 프로세서가 지운 엔티티 수만큼 스포너에 재생성을 맡긴다(게임 스레드, 커맨드 플러시 중). */
 	void RequestRespawn(int32 Count);
+	/**
+	 * M5 엔티티 풀링(-LabEntityPool=1): 사망이 끝난 엔티티를 종류별 풀에 넣고 같은 수만큼 재생성을 맡긴다(게임 스레드, 커맨드 플러시 중).
+	 * 재생성 위치와 일련번호는 파괴 경로(RequestRespawn)와 같은 스포너 스트림에서 나온다. SpawnEntities가 일련번호의 종류에 맞는 풀 엔티티를 먼저 다시 쓰고,
+	 * 모자라면 새로 만든다. 다시 쓰이지 않은 엔티티만 그리는 거리 밖에 세워 두고 FLabPooledTag를 붙인다.
+	 */
+	void RecycleAndRespawn(TConstArrayView<FMassEntityHandle> Finished);
 
 	int32 GetAliveCount() const { return AliveCount; }
 
@@ -60,6 +69,14 @@ public:
 	float HitDuration = 0.5f;
 	float DeathDuration = 1.f;
 	FLabVatClips VatClipsByType[LabUnitTypeMax]; // M2부터, 종류별(2종). Activate 전에 스포너가 채운다. 1종은 [0]만 쓴다
+	/**
+	 * 걷기 루프 길이(초), 종류별. 액터 전환 때 시작 시각을 감는 데 쓴다(LabActorSyncProcessor.cpp). 스포너가 채운다.
+	 * VAT는 클립 프레임 수 ÷ 샘플 레이트(M2~M4와 같은 값), M5 ISKM은 ASTPD의 GetSequencePlayLength(0)이다(plan.md "M5" 결정 4).
+	 */
+	float WalkLengthByType[LabUnitTypeMax] = { 1.f, 1.f };
+	/** M5 ISKM 에셋(종류별). Activate 전에 스포너가 채운다. 메시는 Scripts/create-iskm.py의 복제본(SK_*ISKM), 제공자는 ASTPD(ASTP_*). 클립 0 걷기, 1 피격, 2 죽기 */
+	UPROPERTY() TArray<TObjectPtr<USkeletalMesh>> IskmMeshes;
+	UPROPERTY() TArray<TObjectPtr<UTransformProviderData>> IskmProviders;
 
 	// 프로세서가 쓰고 오브가 읽는다. 청크 단위로 병렬 실행될 수 있어 잠금으로 모은다.
 	FCriticalSection ResultLock;
@@ -74,6 +91,10 @@ public:
 	// E3 (3c) 스탯(2종): 대형 액터가 있었던 액터×프레임 합과 그중 애니 틱을 건너뛴 수. ULabActorSyncProcessor가 더하고 게임 모드가 측정 구간 차이를 CSV 메타데이터로 쓴다
 	mutable std::atomic<int64> LargeActorFrames{0};
 	mutable std::atomic<int64> LargeActorSkips{0};
+	// M5 엔티티 풀링 집계(게임 스레드). 재생성 중 풀에서 다시 쓴 수와 새로 만든 수, 풀에 남은 수는 EntityPool의 Num
+	int32 PoolReused = 0;
+	int32 PoolCreated = 0;
+	int32 GetPooledCount() const { return EntityPool[0].Num() + EntityPool[1].Num(); }
 #if !UE_BUILD_TEST
 	/**
 	 * 개발용 프레임 진단(-LabFrameLog, E3b (8) 화질 캡처 2026-11-09): 화면 안 30m에서 아직 VAT 인스턴스로 그리는 개체 수와 보이는 액터 수를 프레임마다 로그에 남긴다.
@@ -85,6 +106,12 @@ public:
 
 private:
 	UMassEntityConfigAsset* BuildEntityConfig(int32 UnitType, UStaticMesh* Mesh);
+	/** 풀 엔티티를 새 개체로 되살린다(위치·일련번호·체력·상태·이동). 태그는 부른 쪽이 한꺼번에 바꾼다 */
+	void ReinitPooledEntity(FMassEntityManager& EntityManager, FMassEntityHandle Entity, const FVector& Location, uint32 Serial) const;
+	TArray<FMassEntityHandle> EntityPool[LabUnitTypeMax]; // M5 엔티티 풀링: 종류별 대기 엔티티(뒤에서 꺼낸다)
+#if !UE_BUILD_TEST
+	uint32 SpawnCheckHash = 0; // 개발 확인: 재생성 일련번호·위치의 누적 해시(풀링 켬/끔이 같은 열을 만드는지, lab_pool_check)
+#endif
 	UPROPERTY() TArray<TObjectPtr<UMassEntityConfigAsset>> EntityConfigs; // 종류별(LabUnitAssets.h). [0] 소형, [1] 대형(-LabTypes=2)
 	TWeakObjectPtr<ALabCrowdSpawner> Spawner;
 	bool bActive = false;

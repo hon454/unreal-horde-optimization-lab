@@ -31,6 +31,8 @@ struct FLabUnitAssetPaths
 	FString VatMesh;        // "/Game/Lab/VAT/Baked/SM_LabMinionVAT" 꼴. 실제 에셋은 SM_LabMinionVAT_Bone
 	FString VatData;        // UAnimToTextureDataAsset, 같은 꼴
 	FString ActorMaterial;  // 하이드레이션 액터 머티리얼(VAT 인스턴스와 같은 색). 비면 메시 기본 머티리얼
+	FString IskmMesh;       // M5 ISKM 스켈레탈 메시(Scripts/create-iskm.py의 복제본 SK_*ISKM)
+	FString IskmProvider;   // M5 UAnimSequenceTransformProviderData(ASTP_*). 클립 0 걷기, 1 피격, 2 죽기
 	float BoundRadius = 40.f; // FLabUnitTypeParams::BoundRadius. 대형은 ini LargeBoundRadius(47 × LargeScale)
 	/**
 	 * 균일 배율. 소형 1, 대형은 ini [Lab] LargeScale(2026-11-10 사용자 결정 2.0: 1.2배로는 소형과 구별되지 않았다).
