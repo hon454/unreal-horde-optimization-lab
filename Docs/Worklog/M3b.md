@@ -313,9 +313,9 @@ plan.md "M3b" E3b (8)의 화질 쪽. 개발 빌드, `-LabStage=M3 -LabN=20000 -L
 
 - 액터 상한은 두 변형 다 `LODMaxCount[High] = 500`(`LabCrowdSubsystem.cpp` 확정값). `lab_actors`(300프레임마다) `synced`(붙은 액터 수)는 m3vis0 434\~497, mass 488\~497.
 - 1초(60프레임) 구간별 `near_vat` 평균: m3vis0 82\~131, mass 323\~405. 두 변형 모두 60구간 어디서도 0이 되지 않았다.
-- 대표 프레임(`Saved/Screenshots/Lab/`, git 밖): near_vat이 가장 큰 프레임을 "비어 있는 장면", near_actors가 가장 큰 프레임을 "채워진 장면"으로 골랐다.
-  - m3vis0: `E3b-m3vis0-empty-f002076.png`(near_vat 147, near_actors 482), `E3b-m3vis0-filled-f004167.png`(113, 498).
-  - mass: `E3b-mass-empty-f002094.png`(near_vat 415, near_actors 219), `E3b-mass-filled-f002359.png`(359, 240).
+- 대표 프레임(`Measurements/M3b/shots/`): near_vat이 가장 큰 프레임을 "비어 있는 장면", near_actors가 가장 큰 프레임을 "채워진 장면"으로 골랐다.
+  - m3vis0: `E3b-m3vis0-empty-f002076.jpg`(near_vat 147, near_actors 482), `E3b-m3vis0-filled-f004167.jpg`(113, 498).
+  - mass: `E3b-mass-empty-f002094.jpg`(near_vat 415, near_actors 219), `E3b-mass-filled-f002359.jpg`(359, 240).
 - `py -3 Scripts/transition-score.py <캡처 폴더> <로그>`(전환 튐, 문턱 6): m3vis0 사건 4754건, 튐 평균 2.85, 중앙값 1.98, 눈에 띈 전환 15/4754(0%). mass 1726건, 평균 2.80, 중앙값 2.47, 0/1726(0%). 사건 수가 표의 hydrate 수와 다른 것은 스크립트가 화면 가장자리 30px 안과 캡처 범위 끝 프레임의 사건을 빼기 때문이다.
 - 빌드·실행: `Scripts/build.ps1` 성공. `run-dev.ps1 -Small -Variant m3vis0 -Extra "-LabStage=M3"` 종료 코드 0(`respawns=43 kills=8 snipes=39`). `-LabFrameLog`는 run-dev.ps1의 `-Extra`에 두 번째 값으로 주면 PowerShell `-File` 바인딩에서 빠지므로 에디터를 직접 띄워 썼다.
 
@@ -342,13 +342,13 @@ plan.md "M3b" E3b (8)의 화질 쪽. 개발 빌드, `-LabStage=M3 -LabN=20000 -L
 - `mass`: near_vat 최댓값 403 406 407 414 402 430 382 393 368 369 377 433. near_actors 최솟값 169 170 171 186 170 175 178 188 174 179 180 150. 회복(<100) 전부 미달. 회복(직전) 115 미달 22 60 미달 20 1 13 33 2 4 미달.
 - `lab_actors` `synced`: m3vis0 450\~497, m3vis15 487\~496, mass 489\~496(상한 500).
 
-대표 프레임(`Saved/Screenshots/Lab/`, git 밖): k=7 회전이 끝난 뒤 60프레임 창에서 near_vat가 가장 큰 프레임(after)과 그 240프레임(4초) 뒤(settled). 회전 도중 프레임은 모션 블러가 있어 쓰지 않았다.
+대표 프레임(`Measurements/M3b/shots/`): k=7 회전이 끝난 뒤 60프레임 창에서 near_vat가 가장 큰 프레임(after)과 그 240프레임(4초) 뒤(settled). 회전 도중 프레임은 모션 블러가 있어 쓰지 않았다.
 
 | 변형 | after | settled |
 | --- | --- | --- |
-| `m3vis0` | `E3b-turn-m3vis0-after-f002132.png`(near_vat 171, near_actors 442) | `E3b-turn-m3vis0-settled-f002372.png`(107, 487) |
-| `m3vis15` | `E3b-turn-m3vis15-after-f002132.png`(266, 348) | `E3b-turn-m3vis15-settled-f002372.png`(211, 383) |
-| `mass` | `E3b-turn-mass-after-f002131.png`(420, 186) | `E3b-turn-mass-settled-f002371.png`(369, 226) |
+| `m3vis0` | `E3b-turn-m3vis0-after-f002132.jpg`(near_vat 171, near_actors 442) | `E3b-turn-m3vis0-settled-f002372.jpg`(107, 487) |
+| `m3vis15` | `E3b-turn-m3vis15-after-f002132.jpg`(266, 348) | `E3b-turn-m3vis15-settled-f002372.jpg`(211, 383) |
+| `mass` | `E3b-turn-mass-after-f002131.jpg`(420, 186) | `E3b-turn-mass-settled-f002371.jpg`(369, 226) |
 
 `py -3 Scripts/transition-score.py <캡처 폴더> <로그>`(전환 튐, 문턱 6): m3vis0 사건 7500건, 튐 평균 4.27, 중앙값 2.70, 눈에 띈 전환 157/7500(2%). m3vis15 7646건, 3.94, 2.77, 128/7646(2%). mass 3077건, 3.08, 2.69, 19/3077(1%). 1rpm 캡처(위)는 m3vis0 15/4754(0%), mass 0/1726(0%)이었다.
 
@@ -371,12 +371,12 @@ plan.md "M3b" E3b (8)의 화질 쪽. 개발 빌드, `-LabStage=M3 -LabN=20000 -L
 - `m3vis15`: near_vat 최댓값 27 21 20 17 21 21 18 24 27 20 17 24. near_actors 최솟값 124 120 108 124 121 109 104 125 119 119 108 103. 회복(직전) 4 32 2 5 5 29 0 8 3 12 12 2.
 - `lab_actors` `synced`: m3vis0 101\~138, m3vis15 150\~194(상한 500에 닿지 않음).
 
-대표 프레임(`Saved/Screenshots/Lab/`, git 밖): 두 변형 모두 k=11 회전이 끝난 프레임 3331(after, m3vis0은 60프레임 창의 near_vat 최댓값 프레임)과 240프레임 뒤 3571(settled).
+대표 프레임(`Measurements/M3b/shots/`): 두 변형 모두 k=11 회전이 끝난 프레임 3331(after, m3vis0은 60프레임 창의 near_vat 최댓값 프레임)과 240프레임 뒤 3571(settled).
 
 | 변형(5k) | after | settled |
 | --- | --- | --- |
-| `m3vis0` | `E3b-turn-5k-m3vis0-after-f003331.png`(near_vat 44, near_actors 96) | `E3b-turn-5k-m3vis0-settled-f003571.png`(24, 119) |
-| `m3vis15` | `E3b-turn-5k-m3vis15-after-f003331.png`(20, 121) | `E3b-turn-5k-m3vis15-settled-f003571.png`(13, 129) |
+| `m3vis0` | `E3b-turn-5k-m3vis0-after-f003331.jpg`(near_vat 44, near_actors 96) | `E3b-turn-5k-m3vis0-settled-f003571.jpg`(24, 119) |
+| `m3vis15` | `E3b-turn-5k-m3vis15-after-f003331.jpg`(20, 121) | `E3b-turn-5k-m3vis15-settled-f003571.jpg`(13, 129) |
 
 `py -3 Scripts/transition-score.py`(문턱 6): m3vis0 사건 1803건, 튐 평균 3.77, 중앙값 2.42, 눈에 띈 전환 52/1803(3%). m3vis15 1374건, 3.45, 2.16, 44/1374(3%).
 
@@ -472,11 +472,11 @@ plan.md "M3b" 146\~158행(2종 구성, 저격 E안, E3 (3c) 화면 크기 중요
 
 대형 = 40 × 163.81 ÷ 139.74 = 40 × 1.172 = 46.9 → **47**(정수로 반올림, 소형과 같은 자리수). 박스 반폭 비는 1.20 · 1.21 · 1.12라 어느 축으로 재도 1.1\~1.2배다. 구 반지름을 그대로(소형 140 / 대형 164) 쓰면 비는 같고 절대값만 바뀐다. 소형 값을 바꾸는 일이라 하지 않았다. measurement.md 확정값 반영은 코디네이터 몫이다.
 
-**바닥 띠 파라미터(코드 세션에 요청).** `-LabBandFloor`일 때 Floor(`L_Bench` `Floor_0`의 `StaticMeshComponent0`, 지금 머티리얼 `MI_ProcGrid`)에 `M_LabBandFloor`의 MID를 넣고 Vector 파라미터 **`BandCenter`**에 오브 월드 위치(cm, XY만 씀)를 넣는다. 반경은 Scalar **`BandRadius1`·`BandRadius2`·`BandRadius3`**(기본 3000·8000·20000cm = `FLabSnipeBands`)라 넣지 않아도 되고, 넣는다면 같은 상수에서 넣는다. 색은 `ColorNear`·`ColorMid`·`ColorFar`·`ColorOff`·`LineColor`, 선 폭 `LineWidth`(40), 격자 `GridSize`(1000), `BaseGray`(0.35). 확인 캡처(에디터에서 Floor에 잠시 넣고 찍은 뒤 되돌림): `Saved/Screenshots/Lab/m3b_bandfloor_top.png`(탑뷰 260m, 30 : 80 : 200 반지름 비 일치), `m3b_bandfloor_p1.png`(오브 뒤 15m 낮은 시점).
+**바닥 띠 파라미터(코드 세션에 요청).** `-LabBandFloor`일 때 Floor(`L_Bench` `Floor_0`의 `StaticMeshComponent0`, 지금 머티리얼 `MI_ProcGrid`)에 `M_LabBandFloor`의 MID를 넣고 Vector 파라미터 **`BandCenter`**에 오브 월드 위치(cm, XY만 씀)를 넣는다. 반경은 Scalar **`BandRadius1`·`BandRadius2`·`BandRadius3`**(기본 3000·8000·20000cm = `FLabSnipeBands`)라 넣지 않아도 되고, 넣는다면 같은 상수에서 넣는다. 색은 `ColorNear`·`ColorMid`·`ColorFar`·`ColorOff`·`LineColor`, 선 폭 `LineWidth`(40), 격자 `GridSize`(1000), `BaseGray`(0.35). 확인 캡처(에디터에서 Floor에 잠시 넣고 찍은 뒤 되돌림): `Measurements/M3b/shots/m3b_bandfloor_top.jpg`(탑뷰 260m, 30 : 80 : 200 반지름 비 일치), `m3b_bandfloor_p1.jpg`(오브 뒤 15m 낮은 시점).
 
 **에디터 상태 메모.** 확인 때 `L_Bench`의 Floor 머티리얼을 바꿨다가 되돌렸으므로 레벨이 수정됨 표시일 수 있다. 저장해도 내용은 같고, 저장하지 않아도 된다. `HordeOptLab.uproject`의 `EngineAssociation`이 `{31E80386…}`로 바뀌고 끝 개행이 빠져 있다(troubleshooting.md의 그 줄. 에디터를 켜면서 바뀐 것으로 보인다. 이 세션은 고치지 않았다. 에디터를 닫은 뒤 되돌려야 한다).
 
-**확인(에디터를 닫은 뒤, 코드 세션 빌드 6ad7f7e).** `Scripts/run-dev.ps1 -Small -Extra "-LabTypes=2"`(M0 `full`): `lab_types types=2 large_assets=ok large_radius=47 small_radius=40`, `respawns=43 kills=8 snipes=39`, 종료 코드 0. `Scripts/run-dev.ps1 -N 5000 -Preset P1 -Duration 13 -ShotAt 10 -Variant m3mass -Extra "-LabStage=M3 -LabTypes=2"`(두 인자를 한 문자열로 넘기면 PowerShell이 떨어뜨리지 않는다): `large_assets=ok`, `lab_mass_config type=1 … mesh=SM_LabMinionLargeVAT_Bone actor=LabMinionMassActorLarge`, 종료 코드 0. 스크린샷 `Saved/Screenshots/Lab/m3b_types2_m3mass_n5000_p1.png`(2560x1440, 10초, git 밖). 대형은 칼이 없고 몸통이 굵은 시즈 미니언으로 가까운 액터와 먼 VAT 양쪽에 보인다. 크기 차이가 1.17배라 멀리서는 실루엣으로만 구별된다.
+**확인(에디터를 닫은 뒤, 코드 세션 빌드 6ad7f7e).** `Scripts/run-dev.ps1 -Small -Extra "-LabTypes=2"`(M0 `full`): `lab_types types=2 large_assets=ok large_radius=47 small_radius=40`, `respawns=43 kills=8 snipes=39`, 종료 코드 0. `Scripts/run-dev.ps1 -N 5000 -Preset P1 -Duration 13 -ShotAt 10 -Variant m3mass -Extra "-LabStage=M3 -LabTypes=2"`(두 인자를 한 문자열로 넘기면 PowerShell이 떨어뜨리지 않는다): `large_assets=ok`, `lab_mass_config type=1 … mesh=SM_LabMinionLargeVAT_Bone actor=LabMinionMassActorLarge`, 종료 코드 0. 스크린샷 `Measurements/M3b/shots/m3b_types2_m3mass_n5000_p1.jpg`(2560x1440, 10초, git 밖). 대형은 칼이 없고 몸통이 굵은 시즈 미니언으로 가까운 액터와 먼 VAT 양쪽에 보인다. 크기 차이가 1.17배라 멀리서는 실루엣으로만 구별된다.
 
 ### 바닥 띠(코드)(코디네이터 지시, 결정 6, 2026-11-09)
 
@@ -484,7 +484,7 @@ plan.md "M3b" 146\~158행(2종 구성, 저격 E안, E3 (3c) 화면 크기 중요
 
 - 인자 `-LabBandFloor`(`ALabGameMode::StartPlay`·`SetupBandFloor`·`Tick`, `LabGameMode.h/.cpp`). P1이면 CVar `lab.BandFloor`를 1로 두고(새 CVar. `LabFixedCVarString`의 목록에 더해 `lab_build` 로그와 CSV 메타데이터 `LabCVars`에 `lab.BandFloor=1`로 찍힌다. 켜고 잰 실행을 걸러내는 용도), `L_Bench`의 바닥(`Floor*` 이름의 `AStaticMeshActor`. 라벨은 에디터 전용이라 이름 접두사로 찾는다)의 머티리얼 0을 `M_LabBandFloor`의 MID로 바꾼다. `BandRadius1~3`은 `FLabSnipeBands::Edges`(3000/8000/20000cm)에서, `BandCenter`는 오브 월드 위치에서 매 프레임 넣는다. P2(탑뷰)면 `lab_bandfloor on=0 reason=P2`로 끈다. 머티리얼 경로는 `Config/DefaultGame.ini` `[Lab] BandFloorMaterial`(코드에 박지 않음). ini 키·머티리얼·바닥이 없으면 경고만 남기고 기본 바닥으로 돈다.
 - 확인: `Scripts/build.ps1` 성공. `-Small`(M3, N=100, 20초) 종료 코드 0: `m3mass` P1(기본 바닥, `respawns=43 kills=8 snipes=39`), `m3mass` P1 `-LabBandFloor`(`lab_bandfloor on=1 floor=Floor_0 previous=MI_ProcGrid material=M_LabBandFloor radii=3000/8000/20000`, `cvars=…|lab.BandFloor=1`, 같은 43/8/39), `m3mass` P2 `-LabBandFloor`(`lab_bandfloor on=0 reason=P2`, `lab.BandFloor=0`). `run-dev.ps1`은 `-Extra` 두 값을 떨어뜨리므로 뒤 둘은 같은 인자로 에디터를 직접 띄웠다.
-- 캡처는 하지 않았다(지시 범위 밖). 띠가 보이는 확인 캡처는 에셋 세션의 `m3b_bandfloor_top.png`·`m3b_bandfloor_p1.png`(위 절).
+- 캡처는 하지 않았다(지시 범위 밖). 띠가 보이는 확인 캡처는 에셋 세션의 `m3b_bandfloor_top.jpg`·`m3b_bandfloor_p1.jpg`(위 절).
 
 ## 묶음 1·2 결과 (측정 세션, 자동 생성)
 
