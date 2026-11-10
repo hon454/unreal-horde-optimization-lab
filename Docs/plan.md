@@ -159,7 +159,7 @@ M0\~M5가 필수다. 마일스톤마다 바꾸는 최적화 변수는 하나고,
 
 ## M4. Simulation LOD
 
-**목표:** 로직도 거리별로 가볍게. **비교 상대는 M3b 대표점.** 2026-11-09에 엔진 소스로 전제를 확인하고 다시 썼다(사용자 결정 A안 "엔진 LOD + 자체 틱". 사실의 출처는 [engine-notes.md](Reference/engine-notes.md) 5절).
+**목표:** 로직도 거리별로 가볍게. **비교 상대는 M3b 대표점(2종, `m3mass`).** M4부터 기본 시나리오는 2종이다(`-LabTypes=2`가 코드 기본값. M3b 재측정이 끝난 뒤 바꾼다. 2026-11-10 사용자 결정 C1. 2종 비용은 M3 20k P1 +0.56ms, Worklog M3b "묶음 1·2 결과"). 2026-11-09에 엔진 소스로 전제를 확인하고 다시 썼다(사용자 결정 A안 "엔진 LOD + 자체 틱". 사실의 출처는 [engine-notes.md](Reference/engine-notes.md) 5절).
 
 **엔진이 해 주는 것과 해 주지 않는 것.** `UMassSimulationLODTrait`은 거리 등급(High/Medium/Low/Off), LOD 태그, 청크 단위 틱 결정(`ShouldTickChunkThisFrame`), 누적 델타(`FMassSimulationVariableTickFragment::DeltaTime`)를 준다. 그 틀을 읽는 엔진 프로세서는 Off 내비게이션, 부드러운 회전, SimpleMovement뿐이다. 엔진 이동·조향·회피는 Off만 제외하고 매 프레임 프레임 델타로 돈다. 가변 틱과 태그는 기본으로 꺼져 있고, 기본 상한(100/200/300)이면 20k 중 약 19,400이 Off가 되며, **Off 개체는 매 틱 `MoveTarget.Center`로 스냅된다**(우리 Center는 오브라 켜는 순간 전부 순간이동). City Sample도 틱 절약을 엔진에 맡기지 않고 자기 프로세서가 청크 LOD를 읽어 간격을 정한다(`MassZoneGraphAnnotationFragments.cpp:34-48`).
 
