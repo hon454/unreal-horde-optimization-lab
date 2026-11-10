@@ -3,7 +3,7 @@
 # 실행이 하나라도 실패하면 거기서 멈추고 로그에 남긴다(이어서 돌지 않는다). 끝나면 spikes.py와 summarize.py를 돌리고
 # Measurements/M3b/ 에 batch-phases.csv, spikes.txt, batch-report.md 를 쓰고 Docs/Worklog/M3b.md "묶음 1·2 결과" 절을 만든다.
 # 커밋은 하지 않는다. 로그: Saved/Lab/m3b-all.log. -DryRun은 각 페이즈의 -DryRun만 돌려 행 수를 합산한다.
-# 모든 라벨에 태그 fin을 붙인다(옛 M3b 라벨과 겹치지 않게. 예 M3b-m3mass-N20000-P1startfin-r0, ...P1t2fin-r1). summary 조건은 <변형>[-접미사]-fin, runs·summary의 final=1.
+# 모든 라벨에 태그 fg를 붙인다(옛 fin·prelude 라벨과 겹치지 않게. 예 M3b-m3mass-N20000-P1startfg-r0, ...P1t2fg-r1). summary 조건은 <변형>[-접미사]-fg, runs·summary의 final=1. 옛 fin 행은 final=0(2026-11-10, 포그라운드 문제로 대체). run-bench가 포그라운드를 검사하고 run-m3b가 실패 실행을 1회 재시도한다.
 param([switch]$DryRun, [switch]$SkipPreflight)
 $ErrorActionPreference = "Stop"
 $Root = Split-Path $PSScriptRoot -Parent
@@ -24,7 +24,7 @@ function Say($m) { $l = "{0:yyyy-MM-dd HH:mm:ss} {1}" -f (Get-Date), $m; Write-H
 
 # 묶음 1(start r0 포함 1회) -> 묶음 2. 첫 항목만 r0을 둔다.
 $Phases = @(
-    @{ Name = "start"; Args = @("-NoR0") }   # 첫 시도에서 r0(startfin-r0)이 이미 돌았다(2026-11-09 23:27, 같은 패키지). 라벨 재사용 금지라 r0 없이 r1부터,
+    @{ Name = "start"; Args = @() },
     @{ Name = "e3b"; Args = @("-NoR0") },
     @{ Name = "matrix"; Args = @("-NoR0") },
     @{ Name = "ab2"; Args = @("-NoR0") },
@@ -36,7 +36,7 @@ $Phases = @(
 if ($DryRun) {
     $Sum = 0
     foreach ($P in $Phases) {
-        $Out = & powershell -NoProfile -ExecutionPolicy Bypass -File $Runner -Phase $P.Name @($P.Args) -Tag fin -DryRun
+        $Out = & powershell -NoProfile -ExecutionPolicy Bypass -File $Runner -Phase $P.Name @($P.Args) -Tag fg -DryRun
         $Line = $Out | Where-Object { $_ -match "^M3b batch:" } | Select-Object -First 1
         $N = [int]([regex]::Match($Line, "= (\d+),").Groups[1].Value)
         if (-not $N) { $N = [int]([regex]::Match($Line, "= (\d+)").Groups[1].Value) }
@@ -65,7 +65,7 @@ $Failed = $false
 foreach ($P in $Phases) {
     $T0 = Get-Date
     Say "PHASE $($P.Name) start"
-    & powershell -NoProfile -ExecutionPolicy Bypass -File $Runner -Phase $P.Name @($P.Args) -Tag fin 2>&1 | ForEach-Object { Add-Log $_; Write-Host $_ }
+    & powershell -NoProfile -ExecutionPolicy Bypass -File $Runner -Phase $P.Name @($P.Args) -Tag fg 2>&1 | ForEach-Object { Add-Log $_; Write-Host $_ }
     $Code = $LASTEXITCODE
     $T1 = Get-Date
     Add-Content -Path $PhaseCsv -Value ("{0},{1:s},{2:s},{3},{4}" -f $P.Name, $T0, $T1, [int]($T1 - $T0).TotalSeconds, $Code) -Encoding UTF8

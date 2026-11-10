@@ -24,9 +24,51 @@ param(
     # 프로세스 시작 직후 CPU 어피니티 마스크(16진수, 예: FFFF)를 건다. 없으면 걸지 않는다. 잡음 진단용(5950X 두 CCD). 로그와 Saved/Lab/<라벨>.summary.txt에 affinity=0x...를 남긴다.
     [string]$Affinity = "",
     # 개체 종류 수. 2면 -LabTypes=2를 붙인다(M3b 묶음 2). 라벨은 -Tag로 따로 구분한다(예: t2). 1은 인자를 붙이지 않는다.
-    [ValidateSet(1, 2)][int]$Types = 1
+    [ValidateSet(1, 2)][int]$Types = 1,
+    # 포그라운드 검사를 끈다. 기본은 켜짐: 게임 창을 앞에 두고(Start-Process 뒤), 측정 구간 동안 2초마다 포그라운드 창을 기록해
+    # 게임이 아닌 표본이 하나라도 있으면 그 실행을 FAIL(CSV를 Saved/Profiling/CSV/fg-failed/로 옮김)로 한다. 이유: 창이 백그라운드이면 Game 스레드가 약 2ms(12%) 느리다(Docs/Worklog/M3b.md "페이즈 첫 실행 효과").
+    [switch]$NoFgCheck
 )
 . "$PSScriptRoot\common.ps1"
+
+if (-not ('FgWin' -as [type])) {
+    Add-Type @"
+using System;
+using System.Runtime.InteropServices;
+public static class FgWin {
+    [DllImport("user32.dll")] public static extern IntPtr GetForegroundWindow();
+    [DllImport("user32.dll")] public static extern uint GetWindowThreadProcessId(IntPtr h, out uint pid);
+    [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr h);
+    [DllImport("user32.dll")] public static extern void keybd_event(byte vk, byte scan, uint flags, UIntPtr extra);
+}
+"@
+}
+function Get-FgPid {
+    $p = [uint32]0
+    [void][FgWin]::GetWindowThreadProcessId([FgWin]::GetForegroundWindow(), [ref]$p)
+    return [int]$p
+}
+# 게임 창을 앞에 둔다. 1) MainWindowHandle을 최대 30초(0.5초 간격) 기다린다 2) SetForegroundWindow 3) WScript.Shell AppActivate(PID) 4) Alt 키 눌림 뒤 SetForegroundWindow. 결과 문자열을 돌려준다.
+function Set-GameForeground($Proc) {
+    $Deadline = (Get-Date).AddSeconds(30)
+    while ((Get-Date) -lt $Deadline) {
+        $Proc.Refresh()
+        if ($Proc.HasExited) { return "focus=exited" }
+        if ($Proc.MainWindowHandle -ne [IntPtr]::Zero) { break }
+        Start-Sleep -Milliseconds 500
+    }
+    if ($Proc.MainWindowHandle -eq [IntPtr]::Zero) { return "focus=NOWINDOW" }
+    $H = $Proc.MainWindowHandle
+    [void][FgWin]::SetForegroundWindow($H); Start-Sleep -Milliseconds 300
+    if ((Get-FgPid) -eq $Proc.Id) { return "focus=ok" }
+    try { [void](New-Object -ComObject WScript.Shell).AppActivate($Proc.Id) } catch { }
+    Start-Sleep -Milliseconds 300
+    if ((Get-FgPid) -eq $Proc.Id) { return "focus=appactivate" }
+    [FgWin]::keybd_event(0x12, 0, 0, [UIntPtr]::Zero); [FgWin]::keybd_event(0x12, 0, 2, [UIntPtr]::Zero)
+    [void][FgWin]::SetForegroundWindow($H); Start-Sleep -Milliseconds 300
+    if ((Get-FgPid) -eq $Proc.Id) { return "focus=altkey" }
+    return "focus=FAILED"
+}
 
 $Exe = "$ProjectDir\Packaged\Test\Windows\HordeOptLab\Binaries\Win64\HordeOptLab-Win64-Test.exe"
 if (-not (Test-Path $Exe)) { Write-Host "FAIL: no Test package at $Exe. Run Scripts/package.ps1 first."; exit 1 }
@@ -60,11 +102,44 @@ for ($i = $First; $i -le $Last; $i++) {
         try { $Proc.ProcessorAffinity = [IntPtr]$Mask; $AffNote = "affinity=0x{0:X}" -f $Mask } catch { Write-Host "WARN: could not set affinity: $_"; $AffNote = "affinity=FAILED" }
     }
     Write-Host $AffNote
+    $FocusNote = "focus=skipped"
+    $Samples = New-Object System.Collections.ArrayList
+    if (-not $NoFgCheck) {
+        $FocusNote = Set-GameForeground $Proc
+        Write-Host $FocusNote
+        # 2초마다 포그라운드 창의 PID를 기록한다(프로세스가 끝날 때까지). 측정 구간 표본만 아래에서 센다.
+        while (-not $Proc.HasExited) {
+            [void]$Samples.Add(@{ T = (Get-Date); Pid = (Get-FgPid) })
+            Start-Sleep -Milliseconds 2000
+        }
+    }
     $Proc.WaitForExit()
     # Test 구성은 로그 파일을 남기지 않는다(engine-notes.md 6절 NO_LOGGING). 게임이 Saved/Lab/<라벨>.summary.txt에 요약을 쓴다.
     $Summary = "$ProjectDir\Packaged\Test\Windows\HordeOptLab\Saved\Lab\$Label.summary.txt"
     if ($Affinity -and (Test-Path $Summary)) { Add-Content -Path $Summary -Value $AffNote }
+    # 측정 구간 = summary.txt 마지막 기록 시각 - measure_sec. 그 안의 표본 중 게임 PID가 아닌 것을 센다.
+    $FgFail = $false
+    if (-not $NoFgCheck -and (Test-Path $Summary)) {
+        $Text = Get-Content $Summary -Raw
+        $Sec = [double]([regex]::Match($Text, "measure_sec=([0-9.]+)").Groups[1].Value)
+        $End = (Get-Item $Summary).LastWriteTime
+        $Begin = $End.AddSeconds(-$Sec)
+        $In = @($Samples | Where-Object { $_.T -ge $Begin -and $_.T -le $End })
+        $Non = @($In | Where-Object { $_.Pid -ne $Proc.Id }).Count
+        $FgNote = "fg=$($In.Count - $Non)/$($In.Count) $FocusNote"
+        Add-Content -Path $Summary -Value $FgNote
+        Write-Host $FgNote
+        if ($In.Count -eq 0 -or $Non -gt 0) { $FgFail = $true }
+    }
     if (Test-Path $Summary) { Get-Content $Summary }
+    if ($FgFail -and (Test-Path "$PkgCsv\$Label.csv")) {
+        $FailDir = "$OutCsvg-failed"; New-Item -ItemType Directory -Force -Path $FailDir | Out-Null
+        $Stamp = Get-Date -Format "yyyyMMddHHmmss"
+        Move-Item "$PkgCsv\$Label.csv" "$FailDir\$Label-$Stamp.csv"
+        Write-Host "FAIL: $Label foreground not on game during measurement (non-game samples=$Non of $($In.Count)). CSV moved to fg-failed/."
+        $Failed++
+        continue
+    }
     if ($Proc.ExitCode -ne 0 -or -not (Test-Path "$PkgCsv\$Label.csv")) {
         Write-Host "FAIL: $Label exit=$($Proc.ExitCode) csv=$(Test-Path "$PkgCsv\$Label.csv")"
         $Failed++

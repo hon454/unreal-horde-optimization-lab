@@ -41,20 +41,20 @@ def main():
     runs = read_csv(M / "runs.csv")
     log = (ROOT / "Saved" / "Lab" / "m3b-all.log")
     log_text = log.read_text(encoding="utf-8-sig", errors="replace") if log.exists() else ""
-    # 최종 묶음(태그 fin)만 본다. 로그는 마지막 "M3b ALL start" 이후만 본다(앞선 시도의 실패 줄을 세지 않는다).
+    # 최종 묶음(태그 fg)만 본다. 로그는 마지막 "M3b ALL start" 이후만 본다(앞선 시도의 실패 줄을 세지 않는다).
     if "M3b ALL start" in log_text:
         log_text = log_text[log_text.rindex("M3b ALL start"):]
     runs = [r for r in runs if str(r.get("final", "")) == "1"]
     summ = [r for r in summ if str(r.get("final", "")) == "1"]
     csv_dir = ROOT / "Saved" / "Profiling" / "CSV"
-    files = sorted(str(p) for p in csv_dir.glob("M3b-*fin-r*.csv"))
+    files = sorted(str(p) for p in csv_dir.glob("M3b-*fg-r*.csv"))
     spikes = []
     for i in range(0, len(files), 60):
         res = subprocess.run([sys.executable, "-I", str(ROOT / "Scripts" / "spikes.py"), *files[i:i + 60], "--verbose"], capture_output=True, text=True, encoding="utf-8")
         spikes += [l for l in res.stdout.splitlines() if not l.startswith("runs=") and not l.startswith("periodic runs:")]
     n_runs = len(spikes)
     n_per = sum(1 for l in spikes if l.rstrip().endswith("PERIODIC"))
-    spikes = [f"runs={n_runs} periodic={n_per} ({(n_per / n_runs if n_runs else 0):.0%}) factor=2.0x (r0 제외, 최종 묶음 fin 파일만)"] + spikes
+    spikes = [f"runs={n_runs} periodic={n_per} ({(n_per / n_runs if n_runs else 0):.0%}) factor=2.0x (r0 제외, 최종 묶음 fg 파일만)"] + spikes
     (M / "spikes.txt").write_text(chr(10).join(spikes) + chr(10), encoding="utf-8")
 
     out = [HEAD, ""]
@@ -86,12 +86,12 @@ def main():
                 return r
         return None
 
-    a, b = med("m3mass-start-fin"), med("m3mass-aa-fin")
+    a, b = med("m3mass-start-fg"), med("m3mass-aa-fg")
     out.append("**A/A (m3mass 20k P1, 프레임 p50 중앙값, ms)**")
     out.append("")
     out.append("| 구분 | 프레임 p50 | 최소\\~최대 | 프레임 p95 |")
     out.append("| --- | --- | --- | --- |")
-    for name, r in (("시작(-start-fin)", a), ("끝(-aa-fin)", b)):
+    for name, r in (("시작(-start-fg)", a), ("끝(-aa-fg)", b)):
         if r:
             out.append(f"| {name} | {r['frame_p50_ms']} | {r['frame_p50_ms_min']}\\~{r['frame_p50_ms_max']} | {r['frame_p95_ms']} |")
         else:
@@ -123,21 +123,21 @@ def main():
     out.append("")
     out.append("| 조건 | N | 종 | 프레임 p95 | 프레임 p50 | Game p50 | Render p50 | GPU p50 | 병목 | 대형 스킵 비율 |")
     out.append("| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |")
-    for v, n in (("m3mass-fin", "20000"), ("m3vis30-fin", "20000"), ("m3vis15-fin", "20000"), ("m3vis0-fin", "20000"), ("m3hys20-fin", "20000"),
-                 ("m3mass-fin", "5000"), ("m3vis30-fin", "5000"), ("m3vis15-fin", "5000"), ("m3vis0-fin", "5000"), ("m3hys20-fin", "5000"),
-                 ("m3mass-t2-fin", "20000"), ("m3mass-t2-fin", "5000"),
-                 ("m3budgetdist-fin", "20000"), ("m3budgetdist-t2-fin", "20000"), ("m3sig-fin", "20000"), ("m3sig-t2-fin", "20000")):
+    for v, n in (("m3mass-fg", "20000"), ("m3vis30-fg", "20000"), ("m3vis15-fg", "20000"), ("m3vis0-fg", "20000"), ("m3hys20-fg", "20000"),
+                 ("m3mass-fg", "5000"), ("m3vis30-fg", "5000"), ("m3vis15-fg", "5000"), ("m3vis0-fg", "5000"), ("m3hys20-fg", "5000"),
+                 ("m3mass-t2-fg", "20000"), ("m3mass-t2-fg", "5000"),
+                 ("m3budgetdist-fg", "20000"), ("m3budgetdist-t2-fg", "20000"), ("m3sig-fg", "20000"), ("m3sig-t2-fg", "20000")):
         r = row(v, n)
         if r:
             out.append(f"| {v} | {n} | {r.get('types') or '-'} | {rng(r, 'frame_p95_ms')} | {rng(r, 'frame_p50_ms')} | {float(r['game_p50_ms']):.2f} | {float(r['render_p50_ms']):.2f} | {float(r['gpu_p50_ms']):.2f} | {r['bottleneck']} | {r.get('large_skip_ratio') or '-'} |")
         else:
             out.append(f"| {v} | {n} | | (없음) | | | | | | |")
     out.append("")
-    base, m30 = row("m3mass-fin"), row("m3vis30-fin")
+    base, m30 = row("m3mass-fg"), row("m3vis30-fg")
     if base and m30:
-        out.append(f"기준점 대비(20k P1): `m3mass-fin`(기본 15/30 m) − `m3vis30-fin`(옛 M3 값, Base 30 m) = 프레임 p95 {float(base['frame_p95_ms']) - float(m30['frame_p95_ms']):+.2f} ms, p50 {float(base['frame_p50_ms']) - float(m30['frame_p50_ms']):+.2f} ms.")
+        out.append(f"기준점 대비(20k P1): `m3mass-fg`(기본 15/30 m) − `m3vis30-fg`(옛 M3 값, Base 30 m) = 프레임 p95 {float(base['frame_p95_ms']) - float(m30['frame_p95_ms']):+.2f} ms, p50 {float(base['frame_p50_ms']) - float(m30['frame_p50_ms']):+.2f} ms.")
         out.append("")
-    t2r, t1r = row("m3mass-t2-fin"), row("m3mass-fin")
+    t2r, t1r = row("m3mass-t2-fg"), row("m3mass-fg")
     if t2r and t1r:
         out.append(f"2종 − 1종(`m3mass`, 20k P1): 프레임 p95 {float(t2r['frame_p95_ms']) - float(t1r['frame_p95_ms']):+.2f} ms, p50 {float(t2r['frame_p50_ms']) - float(t1r['frame_p50_ms']):+.2f} ms.")
         out.append("")
@@ -146,7 +146,7 @@ def main():
     out.append("")
     out.append("| 조건 | 프레임 p95 | 프레임 p50 | Game p50 |")
     out.append("| --- | --- | --- | --- |")
-    for v in ("m3mass-ab2-fin", "m3lock0-ab2-fin", "m3order-ab2-fin"):
+    for v in ("m3mass-ab2-fg", "m3lock0-ab2-fg", "m3order-ab2-fg"):
         r = row(v)
         if r:
             out.append(f"| {v} | {rng(r, 'frame_p95_ms')} | {rng(r, 'frame_p50_ms')} | {float(r['game_p50_ms']):.2f} |")
@@ -179,7 +179,7 @@ def main():
     out.append("| 단계 | 1종 p95 | 1종 p50 | 2종(t2) p95 | 2종(t2) p50 |")
     out.append("| --- | --- | --- | --- | --- |")
     for name, v in (("M0 full", "m0full"), ("M0 static", "m0static"), ("M1", "m1mass"), ("M2", "m2mass"), ("M3 (m3mass)", "m3mass")):
-        out.append(f"| {name} | {n_at(v + '-fin', 'p95')} | {n_at(v + '-fin', 'p50')} | {n_at(v + '-t2-fin', 'p95')} | {n_at(v + '-t2-fin', 'p50')} |")
+        out.append(f"| {name} | {n_at(v + '-fg', 'p95')} | {n_at(v + '-fg', 'p50')} | {n_at(v + '-t2-fg', 'p95')} | {n_at(v + '-t2-fg', 'p50')} |")
     out.append("")
     out.append("`>`는 측정한 가장 큰 N에서도 16.7ms를 넘지 않았다는 뜻(그 N 이상). N 범위는 M0가 1k\~5k, M1\~M3가 1k\~50k다. `< 1,000`은 최종 묶음의 가장 작은 N(1,000)이 이미 16.7ms를 넘어 보간할 수 없다는 뜻이다(M0 full은 M0 마일스톤 측정의 더 작은 N 값을 쓴다). 2종 M0는 대형 개체 10%를 같은 M0 액터 경로로 돌린 값이다.")
     out.append("")
@@ -189,11 +189,11 @@ def main():
     out.append("| 변형 | 1종 | 2종(t2) |")
     out.append("| --- | --- | --- |")
     for label, v in (("m3mass (기준)", "m3mass"), ("m3budgetdist (3a)", "m3budgetdist"), ("m3sig (3c)", "m3sig")):
-        r1, r2 = row(v + "-fin"), row(v + "-t2-fin")
+        r1, r2 = row(v + "-fg"), row(v + "-t2-fg")
         out.append(f"| {label} | {rng(r1, 'frame_p95_ms') if r1 else '(없음)'} | {rng(r2, 'frame_p95_ms') if r2 else '(없음)'} |")
     out.append("")
 
-    traces = sorted((ROOT / "Saved" / "Traces").glob("M3b-*fin-r*.utrace"))
+    traces = sorted((ROOT / "Saved" / "Traces").glob("M3b-*fg-r*.utrace"))
     out.append("**트레이스 파일 (git 밖, `Saved/Traces/`)**: " + (", ".join(f"`{t.name}`({t.stat().st_size // 1_000_000} MB)" for t in traces) or "(없음)") + ". 트레이스 실행의 수치는 비교에 쓰지 않는다.")
     out.append("")
 

@@ -32,7 +32,7 @@ COLS = {
 RUN_FIELDS = ["label", "milestone", "variant", "n", "preset", "seed", "run", "pc", "frames",
               "game_p50_ms", "game_p99_ms", "render_p50_ms", "gpu_p50_ms", "frame_p50_ms", "frame_p95_ms", "frame_p99_ms",
               "hitch_abs", "hitch_rel", "draw_calls_p50", "mem_total_mb", "bottleneck", "build",
-              "types", "types_assets", "large_actor_frames", "large_actor_skips", "large_skip_ratio", "final"]
+              "types", "types_assets", "large_actor_frames", "large_actor_skips", "large_skip_ratio", "final", "fg_ok"]
 CORE = ["game_p50_ms", "game_p99_ms", "render_p50_ms", "gpu_p50_ms", "frame_p50_ms", "frame_p95_ms", "frame_p99_ms",
         "hitch_abs", "hitch_rel", "draw_calls_p50", "mem_total_mb"]
 # 병목 후보: p50 열 이름 -> 표시 이름 (measurement.md "N@16.7ms": 프레임·Game·Render·GPU p50 중 최댓값)
@@ -70,6 +70,16 @@ def types_fields(meta):
         ratio = ""
     return {"types": meta.get("labtypes", ""), "types_assets": meta.get("labtypesassets", ""),
             "large_actor_frames": fr, "large_actor_skips": sk, "large_skip_ratio": ratio}
+
+
+def fg_ok(label):
+    """패키지 Saved/Lab/<라벨>.summary.txt 끝의 `fg=30/30`(측정 구간 포그라운드가 게임인 표본 수 / 전체 표본 수). 없으면 빈칸(옛 실행)."""
+    p = ROOT / "Packaged" / "Test" / "Windows" / "HordeOptLab" / "Saved" / "Lab" / f"{label}.summary.txt"
+    try:
+        m = re.search(r"fg=(\d+/\d+)", p.read_text(encoding="utf-8", errors="replace"))
+    except OSError:
+        return ""
+    return m.group(1) if m else ""
 
 
 def build_string(meta):
@@ -144,7 +154,8 @@ def summarize_run(path, pc):
     }
     row["bottleneck"] = bottleneck(row)
     row.update(types_fields(meta))
-    row["final"] = 1 if m["tag"].endswith("fin") else ""  # 최종 묶음(묶음 1·2, 2026-11-09)은 라벨 태그가 fin으로 끝난다
+    row["final"] = 1 if (m["tag"].endswith("fg") and not m["tag"].startswith("diag")) else ""  # 최종 묶음은 라벨 태그가 fg로 끝난다(2026-11-10 재측정). 옛 fin 묶음은 final=0
+    row["fg_ok"] = fg_ok(label)
     return row
 
 
@@ -192,15 +203,16 @@ def main():
             continue
         if tag.startswith("trace"):
             continue  # Insights 트레이스 실행은 비교에 쓰지 않는다(runs.csv에는 남는다)
-        final = tag.endswith("fin")
-        btag = tag[:-3] if final else tag
-        variant = r["variant"] + next((f"-{t}" for t in ("noaff", "aff", "diagbg", "diagfg", "start", "aa", "ab2", "ab", "t2") if btag.startswith(t)), "") + ("-fin" if final else "")  # 묶음 끝 A/A와 선행 A/B(ab)는 기준점과 따로 요약한다
+        final = tag.endswith("fg") and not tag.startswith("diag")  # 최종 묶음(2026-11-10 재측정)
+        legacy = tag.endswith("fin")  # 옛 묶음(final=0, 조건 이름은 -fin 그대로)
+        btag = tag[:-2] if final else tag[:-3] if legacy else tag
+        variant = r["variant"] + next((f"-{t}" for t in ("noaff", "aff", "diagbg", "diagfg", "fgtest", "start", "aa", "ab2", "ab", "t2") if btag.startswith(t)), "") + ("-fg" if final else "-fin" if legacy else "")  # 묶음 끝 A/A와 선행 A/B(ab)는 기준점과 따로 요약한다
         groups.setdefault((variant, int(r["n"]), r["preset"]), []).append(r)
 
     fields = ["variant", "n", "preset", "runs"]
     for c in CORE:
         fields += [c, f"{c}_min", f"{c}_max"]
-    fields += ["bottleneck", "build", "types", "types_assets", "large_skip_ratio", "final"]
+    fields += ["bottleneck", "build", "types", "types_assets", "large_skip_ratio", "final", "fg_ok"]
     with open(out_dir / "summary.csv", "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=fields)
         w.writeheader()
@@ -217,6 +229,8 @@ def main():
             out["types"] = "/".join(sorted({str(r.get("types", "")) for r in rs if str(r.get("types", "")) != ""}))
             out["types_assets"] = "/".join(sorted({str(r.get("types_assets", "")) for r in rs if str(r.get("types_assets", "")) != ""}))
             out["final"] = 1 if all(str(r.get("final", "")) == "1" for r in rs) else ""
+            known = [str(r.get("fg_ok", "")) for r in rs if str(r.get("fg_ok", "")) != ""]
+            out["fg_ok"] = f"{sum(1 for k in known if k.split('/')[0] == k.split('/')[1])}/{len(rs)}" if known else ""
             ratios = [float(r["large_skip_ratio"]) for r in rs if str(r.get("large_skip_ratio", "")) != ""]
             out["large_skip_ratio"] = round(statistics.median(ratios), 4) if ratios else ""
             w.writerow(out)

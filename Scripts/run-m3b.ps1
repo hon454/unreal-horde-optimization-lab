@@ -132,7 +132,16 @@ foreach ($R in $Plan) {
     if ($R.Aff) { $Args += @("-Affinity", $R.Aff) }
     if ($R.Types -eq 2) { $Args += @("-Types", 2) }
     & powershell @Args
-    if ($LASTEXITCODE -ne 0) { $Failed += "$($R.Variant) N$($R.N) $($R.Preset)$($R.Tag) r$($R.Run)" }
+    if ($LASTEXITCODE -ne 0) {
+        # 실패(포그라운드 검사 FAIL 등)는 CSV를 fg-failed/로 옮긴 뒤 같은 라벨로 1회만 재시도한다. 두 번째도 실패하면 묶음을 멈춘다.
+        Write-Host "RETRY once: $($R.Variant) N$($R.N) $($R.Preset)$($R.Tag) r$($R.Run)"
+        & powershell @Args
+        if ($LASTEXITCODE -ne 0) {
+            $Failed += "$($R.Variant) N$($R.N) $($R.Preset)$($R.Tag) r$($R.Run)"
+            Write-Host "STOP: retry also failed."
+            break
+        }
+    }
 }
 $Elapsed = (Get-Date) - $Start
 Write-Host ("M3b DONE: {0} runs, {1:hh\:mm\:ss}, failed={2}" -f $Plan.Count, $Elapsed, $Failed.Count)
