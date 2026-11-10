@@ -23,6 +23,8 @@ const FLabConfig& FLabConfig::Get()
 		FParse::Value(Cmd, TEXT("-LabFullyParallel="), C.FullyParallel);
 		FParse::Value(Cmd, TEXT("-LabTypes="), C.Types);
 		C.Types = FMath::Clamp(C.Types, 1, 2);
+		FParse::Value(Cmd, TEXT("-LabFarM="), C.FarM);
+		C.FarM = FMath::Max(C.FarM, 200);
 		C.bBench = FParse::Param(Cmd, TEXT("LabBench"));
 		C.bHud = FParse::Param(Cmd, TEXT("LabHud")) && !C.bBench;
 
@@ -187,6 +189,8 @@ FString FLabConfig::SimLodString() const
 
 FString FLabConfig::ToLogString() const
 {
-	return FString::Printf(TEXT("lab_config stage=%s n=%d preset=P%d seed=%d variant=%s bench=%d label=%s duration=%.1f types=%d simlod=%s"),
-		StageName(Stage), N, Preset, Seed, VariantName(Variant), bBench ? 1 : 0, *Label, DurationSec, Types, *SimLodString());
+	// far는 기본(200)이 아닐 때만 붙인다. 기본 실행의 로그는 그대로다.
+	return FString::Printf(TEXT("lab_config stage=%s n=%d preset=P%d seed=%d variant=%s bench=%d label=%s duration=%.1f types=%d simlod=%s%s"),
+		StageName(Stage), N, Preset, Seed, VariantName(Variant), bBench ? 1 : 0, *Label, DurationSec, Types, *SimLodString(),
+		FarM != 200 ? *FString::Printf(TEXT(" far=%d"), FarM) : TEXT(""));
 }

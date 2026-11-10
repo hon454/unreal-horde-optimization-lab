@@ -53,7 +53,14 @@ ULabSimulationLODTrait::ULabSimulationLODTrait()
 		// E4 (d) m4offmove: 200m 밖을 Low 대신 Off로 둔다. 엔진이 FMassOffLODTag를 붙여 이동·조향 넷이 이 개체를 돌지 않는다(engine-notes.md 5절).
 		// Low와 Off의 거리가 같으면 계산기가 Off를 먼저 고른다(MassLODCalculator.h:867-870). Off → Medium에는 히스테리시스가 없다(:873, 한 단계 차이에만 있다).
 		// 새 엔티티는 청크에 들어가며 청크 수정 번호를 바꾸므로 간격을 기다리지 않고 다음 갱신에 돈다(MassLODTickRateController.h:153).
-		Params.LODDistance[EMassLOD::Off] = FLabSimLod::LowDistance;
+		// -LabFarM=(기본 200m)이 표현 LOD의 Off 거리와 이 거리를 함께 옮긴다. 기본값이면 지금까지와 같이 Low 거리와 같다.
+		// 200m보다 크면 200m~그 거리는 Low 밴드(로직 1.0초, 이동은 엔진)가 된다. 그때 Off → Low는 한 단계라 히스테리시스가 붙어 Lerp(Low, Off, 0.9)에서 넘어간다(MassLODCalculator.h:873-880).
+		// 새 엔티티도 Off에서 시작해(MassLODTrait.cpp:128-133) 같은 히스테리시스를 받는데, 표현 LOD는 PrevLOD가 Max에서 시작해 Off 거리 안이면 바로 그린다(MassRepresentationFragments.h:37).
+		// 그래서 Off를 떠나는 거리(히스테리시스 점)가 그리는 거리 + 10m가 되게 Off 거리를 바깥으로 민다. 10m는 Off 청크의 LOD 재계산이 늦는 거리(최대 4.7m, Docs/Worklog/M4.md)의 두 배다.
+		// 300m면 Off 거리 322m(떠나는 거리 310m), 500m면 544m(510m, 카메라에서 가장 먼 개체가 515m라 Off 밴드가 거의 빈다).
+		const float FarCm = FLabConfig::Get().FarCm();
+		Params.LODDistance[EMassLOD::Off] = FarCm <= FLabSimLod::LowDistance ? FLabSimLod::LowDistance
+			: FLabSimLod::LowDistance + (FarCm + 1000.f - FLabSimLod::LowDistance) / (1.f - Params.BufferHysteresisOnDistancePercentage / 100.f);
 		VariableTickParams.TickRates[EMassLOD::Off] = Sim.TickLow;
 	}
 }

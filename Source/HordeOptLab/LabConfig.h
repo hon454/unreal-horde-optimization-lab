@@ -148,6 +148,13 @@ struct FLabConfig
 	int32 Types = 2;
 	/** -LabFullyParallel=0이면 mass.FullyParallel을 0으로 둔다(직렬 트레이스, run-m3b.ps1 -SerialArgs). -1은 건드리지 않음. massst 변형과 같은 경로 */
 	int32 FullyParallel = -1;
+	/**
+	 * 그리는 거리 실험(-LabFarM=<미터>, 기본 200 = 확정값. 2026-11-11 사용자 결정 "먼저 재고 정한다", Docs/Worklog/M4.md "그리는 거리 인자").
+	 * 표현 LOD의 Off 거리(이 밖은 그리지 않는다)와 m4offmove의 Simulation LOD Off 거리를 함께 옮긴다. 30m·80m 경계, Simulation LOD의 Low 경계(200m), 저격 구간, 밴드 집계 경계는 그대로다.
+	 * 200보다 작은 값은 200으로 올린다(Low 경계보다 안쪽의 Off는 다루지 않는다).
+	 */
+	int32 FarM = 200;
+	float FarCm() const { return float(FarM) * 100.f; }
 	enum EHydrateFix : int32
 	{
 		FixStartTime = 1,  // 시작 시각 맞추기(AnimBP Start Position)

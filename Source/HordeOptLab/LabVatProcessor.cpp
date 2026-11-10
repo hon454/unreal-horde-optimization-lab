@@ -69,6 +69,7 @@ void ULabVatISMProcessor::Execute(FMassEntityManager& EntityManager, FMassExecut
 	const FVector ViewLocation = Crowd->SnipeView.Location;
 	const bool bOld = LabUseOldQueries();
 	int32 BandCounts[4] = { 0, 0, 0, 0 };
+	int32 OffDrawn = 0; // 개발 확인: Simulation LOD가 Off인데 그려진 개체 수(lab_ismband)
 #if !UE_BUILD_TEST
 	// E3b (8) 화질 캡처(-LabFrameLog): 화면 안 30m에서 아직 VAT 인스턴스로 그리는 개체 수(LabCrowdSubsystem::FrameDiag)
 	static const bool bFrameLog = FParse::Param(FCommandLine::Get(), TEXT("LabFrameLog"));
@@ -101,6 +102,9 @@ void ULabVatISMProcessor::Execute(FMassEntityManager& EntityManager, FMassExecut
 		const TConstArrayView<FLabMinionFragment> Minions = bOld ? Context.GetFragmentView<FLabMinionFragment>() : TConstArrayView<FLabMinionFragment>();
 		const bool bHit = bOld && Context.DoesArchetypeHaveTag(*FLabHitTag::StaticStruct());
 		const bool bDead = bOld && Context.DoesArchetypeHaveTag(*FLabDeadTag::StaticStruct());
+#if !UE_BUILD_TEST
+		const bool bSimOff = Context.DoesArchetypeHaveTag(*FMassOffLODTag::StaticStruct());
+#endif
 		const float DeltaSeconds = Context.GetDeltaTimeSeconds();
 		if (bTiming) { CyChunkSetup += FPlatformTime::Cycles64() - C0; }
 
@@ -158,6 +162,7 @@ void ULabVatISMProcessor::Execute(FMassEntityManager& EntityManager, FMassExecut
 					const float Dist = FVector::Dist2D(TransformFragment.GetTransform().GetLocation(), ViewLocation);
 					++BandCounts[Dist < 3000.f ? 0 : Dist < 8000.f ? 1 : Dist < 20000.f ? 2 : 3];
 #if !UE_BUILD_TEST
+					if (bSimOff) { ++OffDrawn; }
 					if (NearVatCounter && Dist < 3000.f && FrameView.Contains(TransformFragment.GetTransform().GetLocation() + FVector(0.f, 0.f, 90.f))) { ++*NearVatCounter; }
 #endif
 				}
@@ -182,4 +187,21 @@ void ULabVatISMProcessor::Execute(FMassEntityManager& EntityManager, FMassExecut
 	CSV_CUSTOM_STAT(Lab, IsmBand1, BandCounts[1], ECsvCustomStatOp::Set);
 	CSV_CUSTOM_STAT(Lab, IsmBand2, BandCounts[2], ECsvCustomStatOp::Set);
 	CSV_CUSTOM_STAT(Lab, IsmBand3, BandCounts[3], ECsvCustomStatOp::Set);
+#if !UE_BUILD_TEST
+	// 개발 확인(-LabSimLodLog): 1초마다 그 프레임에 그린 인스턴스 수를 카메라 거리 구간(30/80/200m)별로 남긴다. off_drawn은 Simulation LOD가 Off인 채 그려진 수다(m4offmove에서 0이어야 한다).
+	static const bool bBandLog = FParse::Param(FCommandLine::Get(), TEXT("LabSimLodLog"));
+	if (bBandLog)
+	{
+		static double Since = 0.;
+		static int32 OffDrawnMax = 0;
+		static int64 OffDrawnSum = 0;
+		OffDrawnMax = FMath::Max(OffDrawnMax, OffDrawn);
+		OffDrawnSum += OffDrawn;
+		if (Now - Since >= 1.)
+		{
+			UE_LOG(LogLab, Log, TEXT("lab_ismband t=%.1f b0=%d b1=%d b2=%d b3=%d off_drawn_max=%d off_drawn_sum=%lld"), Now, BandCounts[0], BandCounts[1], BandCounts[2], BandCounts[3], OffDrawnMax, (long long)OffDrawnSum);
+			Since = Now; OffDrawnMax = 0; OffDrawnSum = 0;
+		}
+	}
+#endif
 }

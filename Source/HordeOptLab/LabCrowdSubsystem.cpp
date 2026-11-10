@@ -115,7 +115,7 @@ UMassEntityConfigAsset* ULabCrowdSubsystem::BuildEntityConfig(int32 UnitType, US
 	{
 		// E3 (7): 하이드레이션 거리(화면 안 Visible)만 바꾼다(대표 30m). 80m·200m 밴드와 상한은 그대로(2026-11-09 사용자 결정 A)
 		const float HydrateCm = Variant == ELabVariant::M3Hyd15 ? 1500.f : Variant == ELabVariant::M3Hyd50 ? 5000.f : 3000.f;
-		const float Bands[EMassLOD::Max] = { 0.f, HydrateCm, 8000.f, 20000.f };
+		const float Bands[EMassLOD::Max] = { 0.f, HydrateCm, 8000.f, FLabConfig::Get().FarCm() }; // Off 거리: 기본 200m, -LabFarM=으로 옮긴다
 		const int32 MaxCounts[EMassLOD::Max] = { 500, 5000, MAX_int32, MAX_int32 }; // 확정값 LODMaxCount
 		for (int32 LOD = 0; LOD < EMassLOD::Max; ++LOD)
 		{
@@ -141,7 +141,7 @@ UMassEntityConfigAsset* ULabCrowdSubsystem::BuildEntityConfig(int32 UnitType, US
 	if (bM3 && Variant == ELabVariant::M3LowRes)
 	{
 		// E3 (5): 0~15m 액터, 15~30m 저품질 액터, 30~200m VAT 인스턴스, 200m 밖 Off. 액터 상한은 대표와 같은 500을 둘이 나눈다.
-		const float Bands[EMassLOD::Max] = { 0.f, 1500.f, 3000.f, 20000.f };
+		const float Bands[EMassLOD::Max] = { 0.f, 1500.f, 3000.f, FLabConfig::Get().FarCm() };
 		const int32 MaxCounts[EMassLOD::Max] = { 250, 250, MAX_int32, MAX_int32 };
 		for (int32 LOD = 0; LOD < EMassLOD::Max; ++LOD)
 		{
