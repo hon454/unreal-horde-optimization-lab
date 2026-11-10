@@ -118,10 +118,11 @@ struct FLabConfig
 	 */
 	int32 HydrateFixMask = 31;
 	/**
-	 * 개체 종류 수(-LabTypes=, 기본 1). 2면 일련번호 10의 배수가 대형이다(소형 90 / 대형 10, plan.md "M3b" 2종). 아키타입·VAT·ISM·액터 풀이 종류별로 갈리고
-	 * 저격은 예약 발에서만 대형을 쏜다(LabSnipe.h E안). 1이면 지금까지의 1종 결과가 그대로다(LabUnitAssets.h).
+	 * 개체 종류 수(-LabTypes=, 기본 2. M4부터 기본 시나리오가 2종이다, 2026-11-10 사용자 결정 C1, plan.md "M4"). 2면 일련번호 10의 배수가 대형이다
+	 * (소형 90 / 대형 10, plan.md "M3b" 2종). 아키타입·VAT·ISM·액터 풀이 종류별로 갈리고 저격은 예약 발에서만 대형을 쏜다(LabSnipe.h E안).
+	 * -LabTypes=1이면 M3b까지의 1종 결과가 그대로다(LabUnitAssets.h).
 	 */
-	int32 Types = 1;
+	int32 Types = 2;
 	/** -LabFullyParallel=0이면 mass.FullyParallel을 0으로 둔다(직렬 트레이스, run-m3b.ps1 -SerialArgs). -1은 건드리지 않음. massst 변형과 같은 경로 */
 	int32 FullyParallel = -1;
 	enum EHydrateFix : int32
