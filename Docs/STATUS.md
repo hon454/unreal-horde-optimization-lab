@@ -55,5 +55,4 @@ py -3 Scripts/summarize.py --milestone M3
 
 ## 사용자에게 요청한 일
 
-- [ADR-0006](Decisions/0006-three-measurement-tiers.md)(측정 세 층) 승인. 방향은 2026-11-10에 정했고 본문 확인이 남았다.
 - 2종 구현 때: 시즈 에셋 이전은 런처 엔진 커맨드렛으로 돌린다(commands.md "에셋 마이그레이션"). AnimBP Start Position 바인딩과 바닥 띠 머티리얼은 Unreal MCP가 필요하다. MCP 서버는 에디터를 켜면 자동으로 뜨므로(2026-11-09 사용자), 에셋 세션을 시작할 때 에디터를 띄워 달라. 선행 묶음(패키징·벤치마크)이 도는 동안은 에디터를 켜지 않는다.
