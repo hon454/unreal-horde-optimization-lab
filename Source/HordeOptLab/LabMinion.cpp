@@ -64,6 +64,10 @@ void ALabMinion::SetupVisual(const FLabMinionAssets& Assets)
 {
 	USkeletalMeshComponent* SkelMesh = GetMesh();
 	SkelMesh->SetSkeletalMesh(Assets.Mesh);
+	if (Assets.ActorMaterial)
+	{
+		SkelMesh->SetMaterial(0, Assets.ActorMaterial); // 대형만: M2~M4와 같은 짙은 회색(LabMinion.h FLabMinionAssets)
+	}
 	if (Assets.AnimClass)
 	{
 		SkelMesh->SetAnimationMode(EAnimationMode::AnimationBlueprint);

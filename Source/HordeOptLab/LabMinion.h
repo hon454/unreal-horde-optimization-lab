@@ -22,6 +22,11 @@ struct FLabMinionAssets
 	UPROPERTY() TObjectPtr<class UAnimSequence> Hit;
 	UPROPERTY() TObjectPtr<class UAnimSequence> Death;
 	UPROPERTY() TObjectPtr<class UStaticMesh> StaticMesh; // static 변형
+	/**
+	 * M0 액터의 슬롯 0에 넣을 머티리얼. 대형만 채운다(M3 하이드레이션 액터와 같은 M_LabMinionLargeActor, 짙은 회색. 2026-11-10 사용자 결정).
+	 * 소형은 비어 있어 Paragon 원본 머티리얼 그대로다. M0는 사망 진행도를 머티리얼에 넘기지 않으므로 사망 색은 나오지 않는다(소형과 같다).
+	 */
+	UPROPERTY() TObjectPtr<class UMaterialInterface> ActorMaterial;
 };
 
 /**

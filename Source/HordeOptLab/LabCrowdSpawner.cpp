@@ -8,6 +8,7 @@
 #include "Animation/AnimSequence.h"
 #include "Engine/SkeletalMesh.h"
 #include "Engine/StaticMesh.h"
+#include "Materials/MaterialInterface.h"
 #include "AnimToTextureDataAsset.h"
 #include "Engine/World.h"
 
@@ -78,6 +79,11 @@ void ALabCrowdSpawner::LoadAssets()
 		{
 			LargeAssets = Assets;
 			UE_LOG(LogLab, Warning, TEXT("lab_types_warning types=2 large_assets_missing=%s substituting=small smoke_only=1 do_not_measure=1"), *LargeMissing);
+		}
+		else if (!Large.ActorMaterial.IsEmpty())
+		{
+			// M0 대형 액터도 M2~M4와 같은 짙은 회색으로 그린다(2026-11-10 사용자 결정). 소형은 Paragon 원본 머티리얼 그대로다.
+			LargeAssets.ActorMaterial = LoadObject<UMaterialInterface>(nullptr, *Large.ActorMaterial, nullptr, LOAD_Quiet | LOAD_NoWarn);
 		}
 		UE_LOG(LogLab, Log, TEXT("lab_types types=2 large_assets=%s large_radius=%.0f small_radius=%.0f"),
 			FLabUnitTypes::bLargeSubstituted ? TEXT("substituted") : TEXT("ok"), Large.BoundRadius, FLabUnitAssetPaths::Get(LabUnitSmall).BoundRadius);
