@@ -40,6 +40,8 @@ SIM_FIELDS = (["sim_lod"] + [f"cfg_tick_{b.lower()}" for b in BANDS] + [f"sim_ti
               + [f"sim_band_{b.lower()}" for b in BANDS] + [f"real_period_{b.lower()}" for b in BANDS])
 # E4 (d) 변형 m4offmove: 200m 밖이 Simulation LOD의 Off 밴드다. 이 변형에만 있는 열(없으면 빈칸). cfg_tick_off는 메타데이터의 Low 간격(코드가 Off 간격을 Low와 같게 둔다)
 SIM_FIELDS += ["sim_offmove", "cfg_tick_off", "sim_tick_off", "sim_band_off", "real_period_off", "off_move_count", "off_move_ms"]
+# 그리는 거리 묶음: far_m = 메타데이터 LabFarM(빈칸 = 옛 행 = 200m), ism_band0~3 = 프레임 평균 그린 VAT 인스턴스 수(0~30 / 30~80 / 80~200 / 200m 밖, 스탯 Lab/IsmBand0~3)
+SIM_FIELDS += ["far_m", "ism_band0", "ism_band1", "ism_band2", "ism_band3"]
 RUN_FIELDS = ["label", "milestone", "variant", "n", "preset", "seed", "run", "pc", "frames",
               "game_p50_ms", "game_p99_ms", "render_p50_ms", "gpu_p50_ms", "frame_p50_ms", "frame_p95_ms", "frame_p99_ms",
               "hitch_abs", "hitch_rel", "draw_calls_p50", "mem_total_mb", "bottleneck", "build",
@@ -112,6 +114,11 @@ def sim_lod_fields(header, data, meta, frame):
             out["off_move_count"] = round(statistics.fmean(cnt), 2)
         if ms:
             out["off_move_ms"] = round(statistics.fmean(ms), 4)
+    out["far_m"] = meta.get("labfarm", "")
+    for i in range(4):
+        v = column(header, data, [f"Lab/IsmBand{i}"])
+        if v:
+            out[f"ism_band{i}"] = round(statistics.fmean(v), 2)
     for b in BANDS:
         tick = column(header, data, [f"Lab/SimTick{b}"])
         band = column(header, data, [f"Lab/SimBand{b}"])
@@ -261,7 +268,7 @@ def main():
         final = tag.endswith("fg") and not tag.startswith("diag")  # 최종 묶음(2026-11-10 재측정)
         legacy = tag.endswith("fin")  # 옛 묶음(final=0, 조건 이름은 -fin 그대로)
         btag = tag[:-2] if final else tag[:-3] if legacy else tag
-        variant = r["variant"] + next((f"-{t}" for t in ("noaff", "aff", "diagbg", "diagfg", "fgtest", "e4dstart", "e4daa", "e4d", "start", "aa", "ab2", "ab", "t2") if btag.startswith(t)), "") + ("-fg" if final else "-fin" if legacy else "")  # 묶음 끝 A/A와 선행 A/B(ab)는 기준점과 따로 요약한다
+        variant = r["variant"] + next((f"-{t}" for t in ("noaff", "aff", "diagbg", "diagfg", "fgtest", "e4dstart", "e4daa", "e4d", "far", "start", "aa", "ab2", "ab", "t2") if btag.startswith(t)), "") + ("-fg" if final else "-fin" if legacy else "")  # 묶음 끝 A/A와 선행 A/B(ab)는 기준점과 따로 요약한다
         groups.setdefault((variant, int(r["n"]), r["preset"]), []).append(r)
 
     fields = ["variant", "n", "preset", "runs"]

@@ -25,6 +25,8 @@ param(
     [string]$Affinity = "",
     # 개체 종류 수. 1이면 -LabTypes=1, 2면 -LabTypes=2를 항상 붙인다(코드 기본값이 M4부터 2라서 1도 명시해야 한다, Worklog/M4.md). 라벨은 -Tag로 따로 구분한다(예: t2). 기본값 1은 M3b까지의 호출과 같은 뜻이다.
     [ValidateSet(1, 2)][int]$Types = 1,
+    # 그리는 거리(m). 0이면 -LabFarM을 붙이지 않는다(코드 기본 200). 200보다 작으면 코드가 200으로 올린다. 라벨은 -Tag로 구분한다(예: far300). Worklog/M4.md "그리는 거리 인자".
+    [int]$FarM = 0,
     # 포그라운드 검사를 끈다. 기본은 켜짐: 게임 창을 앞에 두고(Start-Process 뒤), 측정 구간 동안 2초마다 포그라운드 창을 기록해
     # 게임이 아닌 표본이 하나라도 있으면 그 실행을 FAIL(CSV를 Saved/Profiling/CSV/fg-failed/로 옮김)로 한다. 이유: 창이 백그라운드이면 Game 스레드가 약 2ms(12%) 느리다(Docs/Worklog/M3b.md "페이즈 첫 실행 효과").
     [switch]$NoFgCheck
@@ -92,6 +94,7 @@ for ($i = $First; $i -le $Last; $i++) {
         "-LabBench", "-LabStage=$(if ($Stage) { $Stage } else { $Milestone })", "-LabN=$N", "-LabPreset=$($Preset.Substring(1))", "-LabSeed=$Seed", "-LabVariant=$Variant", "-LabLabel=$Label")
     if ($Trace) { $GameArgs += @("-trace=cpu,gpu,frame,counters,mass", "-tracefile=`"$ProjectDir\Saved\Traces\$Label.utrace`"") }
     $GameArgs += "-LabTypes=$Types"
+    if ($FarM -gt 0) { $GameArgs += "-LabFarM=$FarM" }
     if ($ExtraArgs) { $GameArgs += $ExtraArgs.Split(" ", [StringSplitOptions]::RemoveEmptyEntries) }
     Write-Host "RUN $Label"
     $Proc = Start-Process -FilePath $Exe -ArgumentList $GameArgs -PassThru
