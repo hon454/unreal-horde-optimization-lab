@@ -48,8 +48,12 @@ void ULabActorManagement::TeleportActor(const FTransform& Transform, AActor& Act
 	// 우리 액터의 원점은 캡슐 중심이라 그대로 두면 그 프레임에 88cm 가라앉았다가 다음 프레임 동기화에서 올라온다.
 	// 그 수직 이동이 모션 블러로 세로 줄무늬 잔상을 만들었다(2026-11-08 60fps 연속 캡처). 동기화 프로세서와 같은 높이로 옮긴다.
 	FTransform Lifted = Transform;
-	// 엔티티 변환의 스케일은 1이다. 대형 액터의 스케일(LabUnitAssets.h)이 SetActorTransform으로 지워지지 않게 액터의 값을 넣는다(소형은 1이라 전과 같다).
-	Lifted.SetScale3D(Actor.GetActorScale3D());
+	// 엔티티 변환의 스케일은 1이다. 대형 액터의 스케일(LabUnitAssets.h)이 SetActorTransform으로 지워지지 않게 종류의 배율을 넣는다(소형은 1이라 전과 같다).
+	// 액터의 지금 스케일이 아니라 종류에서 읽는다: 풀에서 막 나온 액터는 엔진이 이미 스케일을 1로 되돌렸을 수 있다(MassActorSpawnerSubsystem.cpp:253).
+	if (const ALabMinion* Minion = Cast<ALabMinion>(&Actor))
+	{
+		Lifted.SetScale3D(FVector(FLabUnitAssetPaths::Get(Minion->GetUnitType()).Scale));
+	}
 	if (const ACharacter* Character = Cast<ACharacter>(&Actor); Character && FLabConfig::Get().HasFix(FLabConfig::FixLift))
 	{
 		Lifted.AddToTranslation(FVector(0.f, 0.f, Character->GetCapsuleComponent()->GetScaledCapsuleHalfHeight())); // 대형은 배율만큼 높다
@@ -335,16 +339,22 @@ void ULabActorSyncProcessor::Execute(FMassEntityManager& EntityManager, FMassExe
 	{
 #if !UE_BUILD_TEST
 		// 남는 액터 진단: 월드의 하이드레이션 액터를 상태별로 센다(보임 / 숨김(풀) / 화면 패스 꺼짐(대기)).
-		int32 Total = 0, Hidden = 0, Visible = 0, Shadow = 0;
+		int32 Total = 0, Hidden = 0, Visible = 0, Shadow = 0, LargeShown = 0, LargeWrongScale = 0;
 		for (TActorIterator<ALabMinionMassActor> AIt(World); AIt; ++AIt)
 		{
 			++Total;
+			if (AIt->GetUnitType() == LabUnitLarge && !AIt->IsHidden())
+			{
+				// 대형 배율 확인(2026-11-10): 풀에서 재사용된 액터의 스케일이 1로 돌아가 있지 않은지 센다
+				++LargeShown;
+				if (!FMath::IsNearlyEqual(float(AIt->GetActorScale3D().X), FLabUnitAssetPaths::Get(LabUnitLarge).Scale, 0.01f)) { ++LargeWrongScale; }
+			}
 			const USkeletalMeshComponent* M = AIt->GetMesh();
 			if (AIt->IsHidden()) { ++Hidden; }
 			else if (M->bRenderInMainPass) { ++Visible; }
 			if (!AIt->IsHidden() && M->CastShadow) { ++Shadow; }
 		}
-		UE_LOG(LogLab, Log, TEXT("lab_actors synced=%d rebinds=%d world_total=%d hidden=%d visible=%d shadow_casting=%d"), Actors, Rebinds, Total, Hidden, Visible, Shadow);
+		UE_LOG(LogLab, Log, TEXT("lab_actors synced=%d rebinds=%d world_total=%d hidden=%d visible=%d shadow_casting=%d large_shown=%d large_wrong_scale=%d"), Actors, Rebinds, Total, Hidden, Visible, Shadow, LargeShown, LargeWrongScale);
 #endif
 	}
 	if (DbgHoles > 0 || DbgOverlaps > 0 || DbgSwitches > 0)

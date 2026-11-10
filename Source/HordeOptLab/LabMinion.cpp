@@ -363,6 +363,13 @@ void ALabMinionMassActor::PrepareForPooling_Implementation()
 
 void ALabMinionMassActor::PrepareForGame_Implementation()
 {
+	// 엔진은 풀에서 꺼낸 액터를 스폰 요청의 변환(엔티티 변환, 스케일 1)으로 SetActorTransform한 바로 다음에 이 함수를 부른다
+	// (MassActorSpawnerSubsystem.cpp:253-255). 재사용된 대형 액터가 소형 크기로 돌아가지 않게 배율을 다시 넣는다(2026-11-10 사용자가 본 증상).
+	// 풀은 클래스가 키라 대형 액터가 소형으로 재사용되는 일은 없다(:239).
+	if (const float Scale = FLabUnitAssetPaths::Get(UnitType).Scale; Scale != 1.f)
+	{
+		SetActorScale3D(FVector(Scale));
+	}
 	GetMesh()->SetComponentTickEnabled(true);
 	// 엔진은 풀에서 꺼낸 액터를 이 함수 바로 앞에서 보이게 한다(MassActorSpawnerSubsystem.cpp:252-255). 포즈를 맞출 때까지 다시 숨긴다.
 	if (FLabConfig::Get().HasFix(FLabConfig::FixWait))
