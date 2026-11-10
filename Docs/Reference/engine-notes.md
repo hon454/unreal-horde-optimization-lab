@@ -63,6 +63,12 @@
 | 회피는 High만 | `UMassMovingAvoidanceProcessor`·장애물 회피 쿼리가 Medium·Low·Off 태그를 제외한다. LOD 태그가 있어야 동작한다 | `MassNavigation/Private/MassAvoidanceProcessors.cpp:301-303,1125-1127`(2026-11-09 확인) |
 | City Sample의 틱 절약 | 엔진에 맡기지 않고 자기 프로세서가 청크 LOD를 읽어 갱신 간격을 정한다(Off면 1.9\~2.1초) | `MassAIBehavior/Private/MassZoneGraphAnnotationFragments.cpp:19-48` |
 | Avoidance 상태 | Experimental | `MassAI.uplugin` |
+| Trait 값을 코드로 넣는 길 | `UMassSimulationLODTrait`의 `Params`·`bEnableVariableTicking`·`VariableTickParams`는 `protected`다. 밖에서 못 쓰므로 자식 클래스를 만들어 채운다. `FMassSimulationLODParameters`는 `LODDistance[4]`·`BufferHysteresisOnDistancePercentage`(10)·`LODMaxCount[4]`·`bSetLODTags`, `FMassSimulationVariableTickParameters`는 `TickRates[4]`·`bSpreadFirstSimulationUpdate`(false) | `MassLOD/Public/MassLODTrait.h:47-57`, `MassSimulationLOD.h:83-120`(2026-11-10 확인) |
+| 새 엔티티는 Off에서 시작 | 가변 틱이나 `bSetLODTags`를 켜면 템플릿이 `LOD = Off`와 `FMassOffLODTag`로 시작한다. LOD 프로세서가 실제 LOD를 계산해 태그 교체를 지연 명령으로 넣으므로, 새로 만든(재생성 포함) 엔티티는 첫 프레임 동안 Off 아키타입에 있다. 그 프레임에 `UMassOffLODNavigationProcessor`가 위치를 `MoveTarget.Center`로 옮기고(청크 프래그먼트의 `bShouldTickThisFrame` 기본값이 true라 필터를 통과한다), 이동·조향은 Off를 제외한다. Off 밴드를 두지 않아도 이 한 프레임은 생긴다 | `MassLODTrait.cpp:128-133`, `MassLODFragments.h:90`, `MassNavigationProcessors.cpp:35-37,61`(2026-11-10 확인) |
+| 청크가 이 프레임에 도는 조건 | `bShouldTickThisFrame = TimeUntilNextTick <= 0 \|\| 청크 수정 번호가 바뀜`. 수정 번호는 그 청크에 엔티티가 들어오거나 나갈 때마다 오른다(`AddMultipleInstances`·`RemoveMultipleInstances`). 그래서 태그가 바뀌어(피격·사망·LOD 전환) 엔티티가 드나든 청크는 틱 간격과 무관하게 다음 프레임에 돈다. 간격에는 ±10% 난수가 붙는다(`FApp::bUseFixedSeed`면 고정) | `MassLODTickRateController.h:127-154`, `MassEntity/Internal/MassArchetypeData.h:276-287`, `MassCommon/Private/MassCommonUtils.cpp:38-41`(2026-11-10 확인) |
+| 누적 델타가 갱신되는 때 | `FMassSimulationVariableTickFragment::DeltaTime`은 청크가 돈 **다음 프레임**에 `Time − LastTickedTime`으로 갱신된다(`bWasChunkTicked`일 때만). 합은 흐른 시간과 같지만 값은 한 주기 늦고, 엔티티가 다른 청크로 옮겨 가면(태그 변경) 옮기기 전의 값을 그대로 들고 간다. 상태가 바뀐 직후의 델타에는 이전 상태에서 흐른 시간이 섞인다 | `MassLODTickRateController.h:157-171` |
+| Simulation LOD는 거리만 본다 | `FMassSimulationLODLogic`은 `FLODDefaultLogic` 그대로다(`bDoVisibilityLogic = false`). 화면 안팎을 가리지 않고 가장 가까운 뷰어까지의 거리로 LOD를 정한다. 표현 LOD(`FMassRepresentationLODLogic`)만 시야를 본다 | `MassLOD/Public/MassLODLogic.h:29-54` |
+| 청크 필터 기본값 | `ShouldTickChunkThisFrame`는 청크 프래그먼트가 없으면 true(항상 돈다), `GetChunkLOD`는 없으면 High | `MassSimulationLOD.h:68-78` |
 
 ## 6. Test 구성 매크로(측정 빌드)
 
