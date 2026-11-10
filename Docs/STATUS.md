@@ -1,6 +1,6 @@
 # 현재 상태
 
-마지막 갱신: 2026-11-09
+마지막 갱신: 2026-11-10
 
 ## 단계
 
@@ -19,7 +19,8 @@ M0\~M3 완료(태그 `M0`\~`M3`). 다음은 M3b 정비 + 새 기준선([plan.md]
 - [x] 3d. 5k 빠른 회전 캡처(코드 세션, 4f6db5b 빌드): `m3vis15` near_vat 최댓값 중앙값 21 / `m3vis0` 40, near_actors 최솟값 중앙값 119 / 99, 미달 0/12 둘 다(Worklog "빠른 회전" 5k). **B안 확정, 구현 끝(7f0236f): `m3mass` 기본값 15/30m(`m3vis15`는 별칭), 옛 30/30m은 `m3vis30`(E3b 24회의 기준점), `m3vis0` 대조군.** M2 이하 코드는 안 닿음, `-Small` 네 변형 종료 코드 0. 결정 4는 4f6db5b(선언 제거 + `m3order`). 측정 스크립트는 기준점 `m3vis30`·A/B `m3order`로 고치는 중(측정 세션).
 - [x] 4a. 2종 코드(코드 세션, ee1a17d): `-LabTypes=2`(일련번호 10의 배수가 대형), 종류별 아키타입·VAT·ISM·액터 풀, 저격 E안, `m3sig` + 대형 틱 건너뜀 스탯. 에셋 경로는 `DefaultGame.ini` `[LabUnitAssets]`. 1종 `-Small` 결과 불변. 대형 에셋이 없으면 소형 대체(`LabTypesAssets=substituted`, 측정 금지). 필요한 에셋 표는 [Worklog/M3b.md](Worklog/M3b.md) "2종(코드)".
 - [x] 4b. 2종 에셋(에셋 세션, 8475be6·245cc35): 시즈 11개 이전, `ABP_LabMinionLarge`, 정적 메시, VAT(86프레임), 액터 머티리얼, ini Large 키, `LargeBoundRadius=47`(measurement.md 확정값), 바닥 띠 `M_LabBandFloor`(파라미터 `BandCenter`, `BandRadius1~3`). 측정 스크립트도 끝(0a47b9f: `m3sig`, `-Types 2`, `-Phase types2`, summarize 열). `-LabBandFloor` 스위치(6ad7f7e, 개발 전용, P2 끔, `lab.BandFloor` 메타데이터). 2종 스모크 `large_assets=ok` 종료 코드 0(ff77de6), 스크린샷 `Saved/Screenshots/Lab/m3b_types2_m3mass_n5000_p1.png`.
-- [ ] 5. 최종 패키지 하나로 묶음 1 전수(+ A/B·A/A·트레이스)와 묶음 2(2종)를 같은 날 돌린다. 기본값은 15/30m(결정 1 B안)·선언 없음(결정 4)이다. **진행 중:** 측정 세션이 Test 패키징과 `-DryRun` 행 수·예상 시간 산출 중. 실행 시작은 사용자가 PC를 비울 시간을 정한 뒤.
+- [x] 5. 최종 패키지(6a98c46) 하나로 묶음 1·2를 같은 밤에 돌렸다(2026-11-09 23:28\~11-10 06:03, 294회, 실패 0, 주기 스파이크 0, A/A 차 0.04ms, `Scripts/run-m3b-all.ps1`, 라벨 태그 `fin`). 결과는 [Worklog/M3b.md](Worklog/M3b.md) "묶음 1·2 결과"와 `Measurements/M3b/summary.csv`(final=1 행), 해설 https://claude.ai/artifact/YHpunRXyhdetQGBcKMbZPk. N@16.7ms(p95, P1) 1종 M1 16,963 / M2 14,085 / M3 14,204, 2종 M3 13,513(2종 비용 20k P1 +0.56ms). Budget 변형 m3sig 16.06 vs 기준 19.58(−3.5ms). 결정 1(15/30m)은 옛 30/30m보다 +0.7ms, 결정 4(선언 없음)는 선언 있음보다 −0.7ms.
+- [ ] 6. **막힌 것 → 결정 대기:** 게임 창이 백그라운드이면 Game 스레드가 약 2ms(12%) 느리다(진단 2026-11-10, Worklog "페이즈 첫 실행 효과"). 묶음 294회 중 페이즈 첫 실행 7개만 포그라운드였고 나머지는 Claude 앱 창이 앞에 있었다. 묶음 안 비교는 유효하나 절대값이 낮다. 사용자 결정: (A) 러너에 포그라운드 보장 + 프로브 검사를 넣고 294회 재측정(추천) / (B) 이대로 태그. 그다음 (B) m3sig 대표값 여부, (C) M4부터 2종 기본 여부. 결정 뒤 STATUS 측정 결과·Worklog·README 갱신과 태그 `M3b`.
 
 ## 지금 유효한 조건
 
@@ -52,7 +53,7 @@ py -3 Scripts/summarize.py --milestone M3
 
 ## 막힌 것
 
-- 없음.
+- 벤치마크 중 게임 창의 포그라운드 여부가 Game 스레드를 약 2ms 바꾼다(다음 할 일 6). 측정 중에는 다른 창을 앞에 두지 않는다. 러너 수정은 사용자 결정 뒤.
 
 ## 사용자에게 요청한 일
 
