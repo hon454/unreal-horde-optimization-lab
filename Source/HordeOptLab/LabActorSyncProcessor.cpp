@@ -264,7 +264,7 @@ void ULabActorSyncProcessor::Execute(FMassEntityManager& EntityManager, FMassExe
 				}
 				++Rebinds;
 #if !UE_BUILD_TEST
-				LabLogScreenEvent(TEXT("hydrate"), Crowd->SnipeView, Xf.GetLocation());
+				LabLogScreenEvent(TEXT("hydrate"), Crowd->SnipeView, Xf.GetLocation(), bLargeChunk ? 1.f : 0.f);
 #endif
 			}
 			else if (!Actor->bPoseReady && Actor->BoundEntity == Entity && --Actor->PendingReadyFrames <= 0)
@@ -273,7 +273,7 @@ void ULabActorSyncProcessor::Execute(FMassEntityManager& EntityManager, FMassExe
 				// 풀에 들어가기 전의 뼈 변환이 이전 프레임으로 남지 않게 몇 프레임 동안 모션 벡터를 지운다(보조 대책).
 				Actor->ClearVelocityFrames = 2;
 #if !UE_BUILD_TEST
-				LabLogScreenEvent(TEXT("shown"), Crowd->SnipeView, Xf.GetLocation());
+				LabLogScreenEvent(TEXT("shown"), Crowd->SnipeView, Xf.GetLocation(), bLargeChunk ? 1.f : 0.f);
 #endif
 			}
 			else if (Anim && Actor->AppliedState != State)

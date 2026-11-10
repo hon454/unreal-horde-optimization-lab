@@ -150,7 +150,8 @@ void ULabVatISMProcessor::Execute(FMassEntityManager& EntityManager, FMassExecut
 #if !UE_BUILD_TEST
 					if (UE::Mass::Representation::IsValidActorRepresentation(Representation.PrevRepresentation) && Representation.CurrentRepresentation == EMassRepresentationType::StaticMeshInstance)
 					{
-						LabLogScreenEvent(TEXT("dehydrate"), Crowd->SnipeView, TransformFragment.GetTransform().GetLocation());
+						LabLogScreenEvent(TEXT("dehydrate"), Crowd->SnipeView, TransformFragment.GetTransform().GetLocation(),
+							Context.GetConstSharedFragment<FLabUnitTypeParams>().UnitType == LabUnitLarge ? 1.f : 0.f);
 					}
 #endif
 					// 표현 축(measurement.md): 거리 밴드별로 그린 개체 수. 밴드 경계는 확정값 30/80/200m

@@ -32,15 +32,20 @@ protected:
 #if !UE_BUILD_TEST
 #include "LabSnipe.h"
 #include "HordeOptLab.h"
-/** 개발용 전환 진단: 사건 하나를 프레임 번호와 화면 좌표(1280x720 창 기준)로 로그에 남긴다. 연속 캡처(-LabShotBurst)와 맞춰 본다. */
-inline void LabLogScreenEvent(const TCHAR* What, const FLabSnipeView& View, const FVector& World)
+/**
+ * 개발용 전환 진단: 사건 하나를 프레임 번호와 화면 좌표(1280x720 창 기준)로 로그에 남긴다. 연속 캡처(-LabShotBurst)와 맞춰 본다.
+ * 사건 이름: hydrate·shown·dehydrate, snipe_small·snipe_large, die(피격 → 사망), removed. 앞쪽 필드(frame, u, v)는 Scripts/transition-*.py가 읽으므로 바꾸지 않는다.
+ * wx·wy는 월드 좌표다. 저격당한 개체는 멈추므로 snipe·die·removed를 이 값으로 잇는다.
+ * x는 사건별 덧붙임 값이다(hydrate·shown·dehydrate: 대형이면 1, die: 피격이 끝난 시각보다 늦게 넘어간 초).
+ */
+inline void LabLogScreenEvent(const TCHAR* What, const FLabSnipeView& View, const FVector& World, float Extra = 0.f)
 {
 	const FVector V = World + FVector(0.f, 0.f, 90.f) - View.Location;
 	const float Depth = FVector::DotProduct(V, View.Forward);
 	if (Depth <= 1.f) { return; }
 	const float X = FVector::DotProduct(V, View.Right) / Depth / View.TanHalfH;
 	const float Y = FVector::DotProduct(V, View.Up) / Depth / (View.TanHalfH * 9.f / 16.f);
-	UE_LOG(LogLab, Log, TEXT("lab_event %s frame=%llu u=%.0f v=%.0f dist=%.0f"), What, (unsigned long long)GFrameCounter, (X + 1.f) * 640.f, (1.f - Y) * 360.f, V.Size2D());
+	UE_LOG(LogLab, Log, TEXT("lab_event %s frame=%llu u=%.0f v=%.0f dist=%.0f wx=%.0f wy=%.0f x=%.3f"), What, (unsigned long long)GFrameCounter, (X + 1.f) * 640.f, (1.f - Y) * 360.f, V.Size2D(), World.X, World.Y, Extra);
 }
 #endif
 

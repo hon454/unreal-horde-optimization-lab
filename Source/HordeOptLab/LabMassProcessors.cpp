@@ -389,6 +389,9 @@ void ULabOrbSnipeProcessor::Execute(FMassEntityManager& EntityManager, FMassExec
 		}
 		Context.Defer().AddTag<FLabHitTag>(Target);
 		StopMoving(Context, Target);
+#if !UE_BUILD_TEST
+		LabLogScreenEvent(Picker.bHasLarge && Pick.Target == Picker.LargeBest.Target ? TEXT("snipe_large") : TEXT("snipe_small"), View, Pick.Location); // 개발용 진단: 피격 멈춤 확인
+#endif
 		Crowd->SnipeTargets.Add(FVector(Pick.Location.X, Pick.Location.Y, LabSnipeAimHeight)); // M0과 같은 몸통 높이
 		++Crowd->SnipeCount;
 	});
@@ -476,6 +479,9 @@ void ULabMinionStateProcessor::Execute(FMassEntityManager& EntityManager, FMassE
 				AnimStates[It].Set(ELabMinionState::Dead, DeadStart);
 				Context.Defer().RemoveTag<FLabHitTag>(Entity);
 				Context.Defer().AddTag<FLabDeadTag>(Entity);
+#if !UE_BUILD_TEST
+				LabLogScreenEvent(TEXT("die"), Crowd->SnipeView, Transforms[It].GetTransform().GetLocation(), Now - DeadStart); // 개발용 진단: 피격이 끝난 시각보다 늦게 넘어간 시간
+#endif
 			}
 		}
 	});
