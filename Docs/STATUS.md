@@ -20,7 +20,7 @@ M0\~M3 완료(태그 `M0`\~`M3`). 다음은 M3b 정비 + 새 기준선([plan.md]
 - [x] 4a. 2종 코드(코드 세션, ee1a17d): `-LabTypes=2`(일련번호 10의 배수가 대형), 종류별 아키타입·VAT·ISM·액터 풀, 저격 E안, `m3sig` + 대형 틱 건너뜀 스탯. 에셋 경로는 `DefaultGame.ini` `[LabUnitAssets]`. 1종 `-Small` 결과 불변. 대형 에셋이 없으면 소형 대체(`LabTypesAssets=substituted`, 측정 금지). 필요한 에셋 표는 [Worklog/M3b.md](Worklog/M3b.md) "2종(코드)".
 - [x] 4b. 2종 에셋(에셋 세션, 8475be6·245cc35): 시즈 11개 이전, `ABP_LabMinionLarge`, 정적 메시, VAT(86프레임), 액터 머티리얼, ini Large 키, `LargeBoundRadius=47`(measurement.md 확정값), 바닥 띠 `M_LabBandFloor`(파라미터 `BandCenter`, `BandRadius1~3`). 측정 스크립트도 끝(0a47b9f: `m3sig`, `-Types 2`, `-Phase types2`, summarize 열). `-LabBandFloor` 스위치(6ad7f7e, 개발 전용, P2 끔, `lab.BandFloor` 메타데이터). 2종 스모크 `large_assets=ok` 종료 코드 0(ff77de6), 스크린샷 `Saved/Screenshots/Lab/m3b_types2_m3mass_n5000_p1.png`.
 - [x] 5. 최종 패키지(6a98c46) 하나로 묶음 1·2를 같은 밤에 돌렸다(2026-11-09 23:28\~11-10 06:03, 294회, 실패 0, 주기 스파이크 0, A/A 차 0.04ms, `Scripts/run-m3b-all.ps1`, 라벨 태그 `fin`). 결과는 [Worklog/M3b.md](Worklog/M3b.md) "묶음 1·2 결과"와 `Measurements/M3b/summary.csv`(final=1 행), 해설 https://claude.ai/artifact/YHpunRXyhdetQGBcKMbZPk. N@16.7ms(p95, P1) 1종 M1 16,963 / M2 14,085 / M3 14,204, 2종 M3 13,513(2종 비용 20k P1 +0.56ms). Budget 변형 m3sig 16.06 vs 기준 19.58(−3.5ms). 결정 1(15/30m)은 옛 30/30m보다 +0.7ms, 결정 4(선언 없음)는 선언 있음보다 −0.7ms.
-- [ ] 6. **결정 A(2026-11-10 사용자): 재측정.** 게임 창이 백그라운드이면 Game 스레드가 약 2ms(12%) 느리다(진단은 Worklog "페이즈 첫 실행 효과"). 묶음 294회 중 7개만 포그라운드였다. 측정 세션이 러너를 고친다: 게임 창을 포그라운드로 보내고(`SetForegroundWindow`) 프로브(`Scripts/fg-probe.ps1`)로 측정 60초를 검사해 아니면 FAIL. 고친 러너를 낮에 3회로 확인한 뒤 오늘 밤 사용자 "시작"에 294회를 새 태그로 다시 돈다. 그동안 빌드·에디터 금지는 밤에만. 결정 B(2026-11-10 사용자): B1, 대표값은 `m3mass` 유지, Budget 채택은 M4 뒤 작은 마일스톤(backlog "미룬 마일스톤"). 결정 C(2026-11-10 사용자): C1, M4부터 2종 기본. 코드 기본값 `-LabTypes=2`는 재측정 뒤 코드 세션이 바꾼다(밤 묶음의 1종 실행이 인자 없이 돌기 때문).
+- [ ] 6. **결정 A(2026-11-10 사용자): 재측정.** 게임 창이 백그라운드이면 Game 스레드가 약 2ms(12%) 느리다(진단은 Worklog "페이즈 첫 실행 효과"). 묶음 294회 중 7개만 포그라운드였다. 측정 세션이 러너를 고친다: 게임 창을 포그라운드로 보내고(`SetForegroundWindow`) 프로브(`Scripts/fg-probe.ps1`)로 측정 60초를 검사해 아니면 FAIL. 러너 수정 eb16991, 검증 통과(2026-11-10 10:26, `fgtest` 3회 모두 fg=30/30 focus=ok, avg 16.1\~16.5ms). **오늘 밤 사용자 "시작"에 `powershell -NoProfile -ExecutionPolicy Bypass -File Scripts/run-m3b-all.ps1`로 294회를 태그 `fg`로 다시 돈다**(시작 전: 런처 종료, 에디터·빌드 없음, git clean, 모니터 켬·절전 없음, 다른 창을 앞에 두지 않음). 실패 실행은 러너가 한 번 재시도한다. 결정 B(2026-11-10 사용자): B1, 대표값은 `m3mass` 유지, Budget 채택은 M4 뒤 작은 마일스톤(backlog "미룬 마일스톤"). 결정 C(2026-11-10 사용자): C1, M4부터 2종 기본. 코드 기본값 `-LabTypes=2`는 재측정 뒤 코드 세션이 바꾼다(밤 묶음의 1종 실행이 인자 없이 돌기 때문).
 - [ ] 7. 재측정 뒤: 코드 기본값 `-LabTypes=2`(코드 세션, `-Small` 1종·2종 종료 코드 0 확인), measurement.md "측정 중 PC 상태"에 포그라운드 조건, STATUS 측정 결과·Worklog·README 갱신, 태그 `M3b`(이력 책갈피), backlog 글 대기열 05를 "대기"로. 글 수치 규칙은 "최신 묶음"으로 바꿨다(AGENTS.md, 2026-11-10).
 
 ## 지금 유효한 조건
@@ -55,6 +55,10 @@ py -3 Scripts/summarize.py --milestone M3
 ## 막힌 것
 
 - 벤치마크 중 게임 창의 포그라운드 여부가 Game 스레드를 약 2ms 바꾼다(다음 할 일 6). 측정 중에는 다른 창을 앞에 두지 않는다.
+
+## 세션 인계(2026-11-10)
+
+코디네이터 세션을 compact하고 M3b 작업 세션(코드·측정·에셋)과 포크를 모두 보관했다. 다음 세션은 이 파일만 읽고 이어 간다: (1) 측정 세션 새로 시작 → 밤 "시작"에 재측정 실행·감시, 끝나면 검증(fg 열, 빌드 1개, substituted 0, spikes, A/A)과 Worklog 결과 절·summary 커밋. (2) 재측정 뒤 코드 세션 새로 시작 → `-LabTypes=2` 기본값(다음 할 일 7). (3) Niagara 원거리 표현 논의는 토론 1까지 했고(엔진에 Mass→Niagara 공식 경로 없음, MetaHuman Crowd·City Sample도 Niagara로 개체를 그리지 않음) 토론 2\~4가 남았다. 미푸시 커밋이 쌓여 있다. 푸시는 사용자가 "푸시"라고 할 때.
 
 ## 사용자에게 요청한 일
 
