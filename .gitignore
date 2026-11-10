@@ -29,6 +29,9 @@ Content/NiagaraExamples/
 # VAT 베이크 산출물(재생성 가능, 수십 MB)
 Content/Lab/VAT/Baked/
 
+# M5 ISKM 산출물(Fab 메시 복제본·ASTPD·머티리얼, Scripts/create-iskm.py로 다시 만든다)
+Content/Lab/ISKM/Baked/
+
 # Fab 에셋에서 만든 파생 에셋(Scripts/make-static-minion.py). 재배포 금지라 커밋하지 않는다.
 Content/Lab/Derived/
 
@@ -44,3 +47,6 @@ Measurements/**/video/
 
 # Claude Code 로컬 설정
 .claude/settings.local.json
+
+# 에디터 Python이 Scripts/ 모듈(lab_unit_colors.py)을 읽을 때 만드는 캐시
+__pycache__/

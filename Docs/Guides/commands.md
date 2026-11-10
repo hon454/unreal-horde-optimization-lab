@@ -85,6 +85,7 @@ LAB_MIGRATE_SET=minion LAB_MIGRATE_DRY=0 LAB_MIGRATE_DEST="G:/Epic Games/UE_5.8.
 
 - `Scripts/make-static-minion.py`: `static` 변형의 `/Game/Lab/Derived/SM_LabMinion`을 만든다(gitignore). 커맨드렛에 `-AllowCommandletRendering`이 필요하다. 새 체크아웃에서는 에셋 이전 뒤 한 번 돌린다.
 - `Scripts/bake-vat.py`: M2 VAT(걷기·피격·죽기)를 Bone·Vertex 모드로 굽고 정적 메시·데이터 에셋·텍스처·머티리얼을 `/Game/Lab/VAT/Baked/`(gitignore)에 만든다. 실행은 `make-static-minion.py`와 같다(`-AllowCommandletRendering`). 새 체크아웃에서 M2 이상을 돌리기 전에 한 번 돌린다.
+- `Scripts/create-iskm.py`: M5 ISKM 에셋(종류마다 `bOptimizeForInstancing`을 켠 스켈레탈 메시 복제본, ASTPD, ISKM 머티리얼)을 `/Game/Lab/ISKM/Baked/`(gitignore)에 만든다. 실행은 `make-static-minion.py`와 같다(`-AllowCommandletRendering`). `LAB_UNIT`을 비우면 두 종류, `small`/`large`면 하나. `LAB_ISKM_VERIFY=1`이면 만들지 않고 저장된 에셋을 새 프로세스에서 읽어 확인만 한다. 새 체크아웃에서 M5를 돌리기 전에 한 번 돌린다. 클립 순서와 커스텀 데이터 번호는 [Worklog/M5.md](../Worklog/M5.md) "에셋 세션".
 - `Scripts/create-bench-map.py`: `L_Bench`를 엔진 Basic 템플릿으로 다시 만든다(바닥을 맵 반경 + 20m로 키우고 VolumetricCloud 삭제). 기존 맵이 있으면 `.umap` 파일을 먼저 지운다(스크립트의 `delete_asset`이 커맨드렛에서 듣지 않았다).
 
 ```bash
