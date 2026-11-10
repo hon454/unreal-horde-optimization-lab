@@ -16,6 +16,7 @@
 #include "Avoidance/MassAvoidanceTrait.h"
 #include "Avoidance/MassNavigationObstacleTrait.h"
 #include "Engine/StaticMesh.h"
+#include "Materials/MaterialInstanceDynamic.h"
 #include "EngineUtils.h"
 #include "MassVisualizer.h"
 #include "Components/InstancedStaticMeshComponent.h"
@@ -77,7 +78,18 @@ UMassEntityConfigAsset* ULabCrowdSubsystem::BuildEntityConfig(int32 UnitType, US
 	UMassMovableVisualizationTrait* Visual = AddLabTrait<UMassMovableVisualizationTrait>(*EntityConfig);
 	FMassStaticMeshInstanceVisualizationMeshDesc& MeshDesc = Visual->StaticMeshInstanceDesc.Meshes.AddDefaulted_GetRef();
 	MeshDesc.Mesh = Mesh;
-	MeshDesc.LocalTransform = FTransform(FRotator(0.f, -90.f, 0.f)); // M0 액터와 같이 메시를 -90도 돌려 진행 방향을 보게 한다(LabMinion.cpp)
+	// M0 액터와 같이 메시를 -90도 돌려 진행 방향을 보게 한다(LabMinion.cpp). 대형은 균일 배율을 곱한다(소형 1, LabUnitAssets.h). 메시 원점이 발밑이라 발은 지면에 남는다.
+	MeshDesc.LocalTransform = FTransform(FRotator(0.f, -90.f, 0.f), FVector::ZeroVector, FVector(FLabUnitAssetPaths::Get(UnitType).Scale));
+	if (FLabConfig::Get().bLargeTint && UnitType == LabUnitLarge && Mesh)
+	{
+		// 개발 전용 색 미리보기(-LabLargeTint). 메시의 머티리얼에 UnitTint 파라미터가 있을 때만 뜻이 있다(VAT 머티리얼, Scripts/bake-vat.py). M1 정적 메시에는 없다.
+		if (UMaterialInterface* Base = Mesh->GetMaterial(0))
+		{
+			UMaterialInstanceDynamic* Tinted = UMaterialInstanceDynamic::Create(Base, EntityConfig);
+			Tinted->SetVectorParameterValue(TEXT("UnitTint"), FLabConfig::Get().LargeTint);
+			MeshDesc.MaterialOverrides.Add(Tinted);
+		}
+	}
 	MeshDesc.bCastShadows = true; // 엔진 기본값은 false(MassRepresentationTypes.h:105). M0 액터와 같이 그림자를 그린다
 	for (int32 LOD = 0; LOD < EMassLOD::Max; ++LOD)
 	{

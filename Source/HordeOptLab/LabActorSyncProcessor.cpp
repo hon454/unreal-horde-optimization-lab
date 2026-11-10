@@ -48,9 +48,11 @@ void ULabActorManagement::TeleportActor(const FTransform& Transform, AActor& Act
 	// 우리 액터의 원점은 캡슐 중심이라 그대로 두면 그 프레임에 88cm 가라앉았다가 다음 프레임 동기화에서 올라온다.
 	// 그 수직 이동이 모션 블러로 세로 줄무늬 잔상을 만들었다(2026-11-08 60fps 연속 캡처). 동기화 프로세서와 같은 높이로 옮긴다.
 	FTransform Lifted = Transform;
+	// 엔티티 변환의 스케일은 1이다. 대형 액터의 스케일(LabUnitAssets.h)이 SetActorTransform으로 지워지지 않게 액터의 값을 넣는다(소형은 1이라 전과 같다).
+	Lifted.SetScale3D(Actor.GetActorScale3D());
 	if (const ACharacter* Character = Cast<ACharacter>(&Actor); Character && FLabConfig::Get().HasFix(FLabConfig::FixLift))
 	{
-		Lifted.AddToTranslation(FVector(0.f, 0.f, Character->GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight()));
+		Lifted.AddToTranslation(FVector(0.f, 0.f, Character->GetCapsuleComponent()->GetScaledCapsuleHalfHeight())); // 대형은 배율만큼 높다
 	}
 	Super::TeleportActor(Lifted, Actor, CommandBuffer);
 }
@@ -226,7 +228,7 @@ void ULabActorSyncProcessor::Execute(FMassEntityManager& EntityManager, FMassExe
 
 			// 위치: 엔티티는 발밑(지면), 액터는 캡슐 중심이다(M0 스포너의 SpawnZ와 같은 관계).
 			const FTransform& Xf = Transforms[It].GetTransform();
-			const float HalfHeight = Actor->GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight();
+			const float HalfHeight = Actor->GetCapsuleComponent()->GetScaledCapsuleHalfHeight(); // 소형은 스케일 1이라 전과 같다. 대형은 배율만큼 높다
 			const uint64 M0 = bTiming ? FPlatformTime::Cycles64() : 0;
 			Actor->SetActorLocationAndRotation(Xf.GetLocation() + FVector(0.f, 0.f, HalfHeight), Xf.GetRotation(), false, nullptr, ETeleportType::TeleportPhysics);
 			if (bTiming) { CyMove += FPlatformTime::Cycles64() - M0; }

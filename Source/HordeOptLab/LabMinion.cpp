@@ -7,6 +7,7 @@
 #include "Animation/AnimInstance.h"
 #include "Engine/SkeletalMesh.h"
 #include "Materials/MaterialInterface.h"
+#include "Materials/MaterialInstanceDynamic.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Misc/CommandLine.h"
@@ -52,6 +53,10 @@ void ALabMinion::InitMinion(ALabCrowdSpawner* InSpawner, const FLabMinionAssets&
 	Serial = InSerial;
 	UnitType = FLabUnitTypes::TypeOf(InSerial); // 2종이면 10의 배수가 대형
 	Health = FLabScenario::MinionHealth;
+	if (const float Scale = FLabUnitAssetPaths::Get(UnitType).Scale; Scale != 1.f)
+	{
+		SetActorScale3D(FVector(Scale)); // 대형: 캡슐과 메시가 함께 커진다. 스포너가 캡슐 중심 높이도 같은 배율로 올린다(LabCrowdSpawner.cpp SpawnAt)
+	}
 	SetupVisual(Assets);
 	EnterState(ELabMinionState::Walk);
 }
@@ -287,6 +292,16 @@ void ALabMinionMassActor::BeginPlay()
 	if (UMaterialInterface* Material = Paths.ActorMaterial.IsEmpty() ? nullptr : LoadObject<UMaterialInterface>(nullptr, *Paths.ActorMaterial, nullptr, LOAD_Quiet | LOAD_NoWarn))
 	{
 		SkelMesh->SetMaterial(0, Material);
+		if (FLabConfig::Get().bLargeTint && UnitType == LabUnitLarge)
+		{
+			// 개발 전용 색 미리보기(-LabLargeTint): VAT 인스턴스와 같은 UnitTint 값을 넣어 30m 전환 때 색이 튀지 않게 한다
+			SkelMesh->CreateDynamicMaterialInstance(0, Material)->SetVectorParameterValue(TEXT("UnitTint"), FLabConfig::Get().LargeTint);
+		}
+	}
+	if (const float Scale = FLabUnitAssetPaths::Get(UnitType).Scale; Scale != 1.f)
+	{
+		// 대형: VAT 인스턴스와 같은 배율. 엔진이 액터를 옮길 때 스케일을 지우지 않게 ULabActorManagement::TeleportActor가 액터 스케일을 유지한다
+		SetActorScale3D(FVector(Scale));
 	}
 	SkelMesh->SetCustomPrimitiveDataFloat(0, 0.f);
 	// E3 (6) 콜리전 줄이기(2026-11-09 사용자 결정 A). 대표(mass)는 캡슐 기본값(Pawn 프로필) 그대로다.

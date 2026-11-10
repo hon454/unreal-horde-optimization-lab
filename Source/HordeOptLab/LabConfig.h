@@ -143,6 +143,12 @@ struct FLabConfig
 	 * -LabTypes=1이면 M3b까지의 1종 결과가 그대로다(LabUnitAssets.h).
 	 */
 	int32 Types = 2;
+	/**
+	 * 개발 전용 색 미리보기(-LabLargeTint=R,G,B, 선형 0~1). 대형 머티리얼(VAT·액터)의 UnitTint 파라미터를 실행 때 바꾼다(Scripts/bake-vat.py).
+	 * 색 후보를 스크린샷으로 비교하려고 둔다(2026-11-10). Test 빌드는 인자를 읽지 않고, 인자가 없으면 머티리얼을 건드리지 않는다. 확정한 색은 머티리얼 기본값으로 굽는다.
+	 */
+	bool bLargeTint = false;
+	FLinearColor LargeTint = FLinearColor::White;
 	/** -LabFullyParallel=0이면 mass.FullyParallel을 0으로 둔다(직렬 트레이스, run-m3b.ps1 -SerialArgs). -1은 건드리지 않음. massst 변형과 같은 경로 */
 	int32 FullyParallel = -1;
 	enum EHydrateFix : int32

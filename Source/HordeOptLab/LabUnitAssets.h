@@ -31,7 +31,12 @@ struct FLabUnitAssetPaths
 	FString VatMesh;        // "/Game/Lab/VAT/Baked/SM_LabMinionVAT" 꼴. 실제 에셋은 SM_LabMinionVAT_Bone
 	FString VatData;        // UAnimToTextureDataAsset, 같은 꼴
 	FString ActorMaterial;  // 하이드레이션 액터 머티리얼(VAT 인스턴스와 같은 색). 비면 메시 기본 머티리얼
-	float BoundRadius = 40.f; // FLabUnitTypeParams::BoundRadius. 대형은 에셋이 오기 전 임시값(ini LargeBoundRadius, 확정 전)
+	float BoundRadius = 40.f; // FLabUnitTypeParams::BoundRadius. 대형은 ini LargeBoundRadius(47 × LargeScale)
+	/**
+	 * 균일 배율. 소형 1, 대형은 ini [Lab] LargeScale(2026-11-10 사용자 결정 2.0: 1.2배로는 소형과 구별되지 않았다).
+	 * 액터(M0, M3 하이드레이션)는 액터 스케일로, ISM(M1 정적 메시, M2부터 VAT)은 인스턴스의 LocalTransform으로 같은 값을 곱한다. 에셋은 다시 굽지 않는다.
+	 */
+	float Scale = 1.f;
 
 	static const FLabUnitAssetPaths& Get(int32 UnitType);
 	FString VatMeshPath(const TCHAR* Mode) const { return WithMode(VatMesh, Mode); }

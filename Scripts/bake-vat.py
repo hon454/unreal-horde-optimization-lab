@@ -35,6 +35,7 @@ else:
 OUT = "/Game/Lab/VAT/Baked"
 A2T = "/AnimToTexture/Materials/MaterialFunctions"
 DEAD_COLOR = unreal.LinearColor(0.6, 0.06, 0.05, 1.0)
+UNIT_TINT = unreal.LinearColor(1.0, 1.0, 1.0, 1.0)  # 산 개체 색조의 기본값(흰색 = 색조 없음). 대형 색을 확정하면 LARGE일 때의 값을 여기서 바꾼다
 VERTEX_BBOX = []  # Vertex 굽기에서 얻은 모든 프레임의 정점 범위. Bone 메시 바운드에 쓴다(bake())  # 죽기 진홍색(2026-11-08 사용자 확정). VAT·액터 머티리얼이 같은 값을 쓴다
 
 lib = unreal.AnimToTextureBPLibrary
@@ -80,6 +81,17 @@ def binary(mat, cls, a, b, x, y, a_out=""):
     return e
 
 
+def unit_tint_param(mat, x, y):
+    """산 개체의 기본 색에 곱하는 색(Vector 파라미터 UnitTint). 기본값 흰색이면 전과 같은 색이다(전에는 흰색 상수였다).
+    죽기 진홍색으로 넘어가는 lerp의 A 자리라, 죽으면 UnitTint에서 DeadColor로 바뀐다. 2종의 대형을 소형과 구별하려고 더했다(2026-11-10 사용자 결정).
+    색을 확정하기 전에는 개발 실행 인자 -LabLargeTint=R,G,B가 대형 머티리얼의 이 값을 실행 때 바꾼다(LabCrowdSubsystem.cpp, LabMinion.cpp).
+    확정한 색은 UNIT_TINT에 적고 다시 굽는다. 소형은 다시 굽기 전까지 이 파라미터가 없다(색은 같다)."""
+    p = mel.create_material_expression(mat, unreal.MaterialExpressionVectorParameter, x, y)
+    p.set_editor_property("parameter_name", "UnitTint")
+    p.set_editor_property("default_value", UNIT_TINT)
+    return p
+
+
 def make_material(mode):
     """Diffuse·Normal → Make Material Attributes → MF_*Animation → 출력. Paragon 마스터 머티리얼의 마스크·발광은 옮기지 않는다."""
     name = "M_" + TOKEN + "VAT_" + mode
@@ -117,13 +129,12 @@ def make_material(mode):
     # 어둡게만 하면 산 미니언과 잘 구별되지 않고, 붉은 기를 섞는 편이 낫다).
     dark = mel.create_material_expression(mat, unreal.MaterialExpressionSaturate, -1100, 600)
     mel.connect_material_expressions(binary(mat, unreal.MaterialExpressionMultiply, t, const(mat, 2.5, -1300, 600), -1200, 600), "", dark, "")
-    white = mel.create_material_expression(mat, unreal.MaterialExpressionConstant3Vector, -1100, 400)
-    white.set_editor_property("constant", unreal.LinearColor(1.0, 1.0, 1.0, 1.0))
+    white = unit_tint_param(mat, -1100, 400)
     dead = mel.create_material_expression(mat, unreal.MaterialExpressionVectorParameter, -1100, 500)
     dead.set_editor_property("parameter_name", "DeadColor")
     dead.set_editor_property("default_value", DEAD_COLOR)
     tint = mel.create_material_expression(mat, unreal.MaterialExpressionLinearInterpolate, -900, 500)
-    mel.connect_material_expressions(white, "", tint, "A")
+    mel.connect_material_expressions(white, "RGB", tint, "A")
     mel.connect_material_expressions(dead, "RGB", tint, "B")
     mel.connect_material_expressions(dark, "", tint, "Alpha")
     mel.connect_material_expressions(binary(mat, unreal.MaterialExpressionMultiply, base, tint, -750, -200, "RGB"), "", make, "BaseColor")
@@ -228,13 +239,12 @@ def make_actor_material():
     dead_amount = scalar_param(mat, "DeadAmount", 0.0, -1100, 600)  # 커스텀 프리미티브 데이터 0번에서 읽는다(MaterialExpressionScalarParameter.h:56-60)
     dead_amount.set_editor_property("use_custom_primitive_data", True)
     dead_amount.set_editor_property("primitive_data_index", 0)
-    white = mel.create_material_expression(mat, unreal.MaterialExpressionConstant3Vector, -1100, 400)
-    white.set_editor_property("constant", unreal.LinearColor(1.0, 1.0, 1.0, 1.0))
+    white = unit_tint_param(mat, -1100, 400)
     dead = mel.create_material_expression(mat, unreal.MaterialExpressionVectorParameter, -1100, 500)
     dead.set_editor_property("parameter_name", "DeadColor")
     dead.set_editor_property("default_value", DEAD_COLOR)
     tint = mel.create_material_expression(mat, unreal.MaterialExpressionLinearInterpolate, -900, 500)
-    mel.connect_material_expressions(white, "", tint, "A")
+    mel.connect_material_expressions(white, "RGB", tint, "A")
     mel.connect_material_expressions(dead, "RGB", tint, "B")
     mel.connect_material_expressions(dead_amount, "", tint, "Alpha")
     mel.connect_material_property(binary(mat, unreal.MaterialExpressionMultiply, base, tint, -700, -200, "RGB"), "", unreal.MaterialProperty.MP_BASE_COLOR)

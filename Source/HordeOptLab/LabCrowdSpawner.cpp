@@ -195,13 +195,14 @@ void ALabCrowdSpawner::RespawnEntities(int32 Count)
 
 ALabMinion* ALabCrowdSpawner::SpawnAt(float Radius, float Angle)
 {
-	const FVector Location(Radius * FMath::Cos(Angle), Radius * FMath::Sin(Angle), SpawnZ);
+	const uint32 Serial = NextSerial++;
+	// 대형은 캡슐이 배율만큼 커지므로 캡슐 중심 높이도 같은 배율로 올린다(소형은 배율 1이라 전과 같다)
+	const FVector Location(Radius * FMath::Cos(Angle), Radius * FMath::Sin(Angle), SpawnZ * FLabUnitAssetPaths::Get(FLabUnitTypes::TypeOf(Serial)).Scale);
 	const FRotator Facing = (OrbLocation - Location).GetSafeNormal2D().Rotation();
 
 	FActorSpawnParameters Params;
 	Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 	ALabMinion* Minion = GetWorld()->SpawnActor<ALabMinion>(MinionClass(), Location, Facing, Params);
-	const uint32 Serial = NextSerial++;
 	Minion->InitMinion(this, FLabUnitTypes::IsLarge(Serial) ? LargeAssets : Assets, Serial); // M0 2종: 대형 에셋(없으면 소형과 같다)
 	Minions.Add(Minion);
 	return Minion;

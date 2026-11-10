@@ -44,6 +44,11 @@ namespace
 		if (GConfig)
 		{
 			GConfig->GetFloat(LabUnitAssetsSection, *FString::Printf(TEXT("%sBoundRadius"), Prefix), P.BoundRadius, GGameIni);
+			if (!bSmall)
+			{
+				GConfig->GetFloat(TEXT("Lab"), TEXT("LargeScale"), P.Scale, GGameIni); // 소형은 늘 1
+				P.Scale = FMath::Max(P.Scale, 0.1f);
+			}
 		}
 		return P;
 	}
