@@ -32,6 +32,20 @@ namespace
 		Query.SetChunkFilter(&FMassSimulationVariableTickChunkFragment::ShouldTickChunkThisFrame);
 	}
 
+	/**
+	 * 가변 틱 청크 필터를 쓰는 프로세서는 그 값을 쓰는 UMassSimulationLODProcessor(LOD 그룹) 뒤에 돌아야 한다(M4부터).
+	 * 순서를 적지 않으면 두 프로세서의 순서가 프레임마다 바뀔 수 있고, "이 프레임에 돈다"는 값은 LOD 프로세서의 한 번과 다음 번 사이에만 참이라
+	 * 그 사이에 읽지 못하면 한 주기를 통째로 건너뛴다(2026-11-10 lab_chunk 진단 로그, Docs/Worklog/M4.md "사망 전환 지연").
+	 * 엔진에서 같은 필터를 쓰는 프로세서도 이렇게 적는다(MassStateTreeProcessors.cpp:165, MassAvoidanceProcessors.cpp:288).
+	 */
+	void LabRunAfterSimLod(FMassProcessorExecutionOrder& Order)
+	{
+		if (FLabConfig::Get().UsesSimLod())
+		{
+			Order.ExecuteAfter.Add(UE::Mass::ProcessorGroupNames::LOD);
+		}
+	}
+
 	/** 청크의 Simulation LOD(0 High ~ 3 Off, 아직 정해지지 않았으면 4). 진단 배열의 색인으로 쓴다 */
 	int32 LabChunkLod(const FMassExecutionContext& Context)
 	{
@@ -60,6 +74,7 @@ ULabApproachProcessor::ULabApproachProcessor()
 {
 	ExecutionFlags = (int32)EProcessorExecutionFlags::AllNetModes;
 	ExecutionOrder.ExecuteInGroup = UE::Mass::ProcessorGroupNames::Tasks; // 엔진 조향은 Tasks 뒤에 돈다(MassSteeringProcessors.cpp:62)
+	LabRunAfterSimLod(ExecutionOrder);
 }
 
 void ULabApproachProcessor::ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager)
@@ -184,6 +199,7 @@ ULabOrbContactProcessor::ULabOrbContactProcessor()
 	ExecutionFlags = (int32)EProcessorExecutionFlags::AllNetModes;
 	ExecutionOrder.ExecuteInGroup = LabLogicGroupName;
 	ExecutionOrder.ExecuteAfter.Add(UE::Mass::ProcessorGroupNames::Movement);
+	LabRunAfterSimLod(ExecutionOrder);
 }
 
 void ULabOrbContactProcessor::ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager)
@@ -415,10 +431,10 @@ void ULabMinionStateProcessor::ConfigureQueries(const TSharedRef<FMassEntityMana
 	EntityQuery.AddTagRequirement<FLabMinionTag>(EMassFragmentPresence::All);
 	EntityQuery.AddTagRequirement<FLabHitTag>(EMassFragmentPresence::Any);
 	EntityQuery.AddTagRequirement<FLabDeadTag>(EMassFragmentPresence::Any);
-	if (FLabConfig::Get().UsesSimLod())
-	{
-		LabUseVariableTick(EntityQuery);
-	}
+	// M4에서도 청크 필터를 걸지 않는다(2026-11-10 사용자 결정 "원인 확인 후 수정"). 피격·사망 타이머를 Medium·Low 간격으로 돌리면 피격이 끝난 시각과
+	// 다음 틱 사이만큼 마지막 자세로 멈춘다(피격 0.667초, 틱은 저격 뒤 0.53초와 1.03초라 0.38초. Docs/Worklog/M4.md "사망 전환 지연").
+	// 대상은 저격당한 개체(2초에 5건)와 사망 중인 개체뿐이라 매 프레임 돌려도 수백 개체다. 저격 프로세서에 필터를 걸지 않은 것과 같은 이유다:
+	// 줄이는 것은 걷는 개체가 스스로 하는 갱신(이동 목표, 범위 피해)이고, 사건으로 시작된 짧은 상태는 줄이지 않는다.
 }
 
 void ULabMinionStateProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context)
