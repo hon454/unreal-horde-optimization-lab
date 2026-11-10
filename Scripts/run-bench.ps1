@@ -23,7 +23,7 @@ param(
     [string]$ExtraArgs = "",
     # 프로세스 시작 직후 CPU 어피니티 마스크(16진수, 예: FFFF)를 건다. 없으면 걸지 않는다. 잡음 진단용(5950X 두 CCD). 로그와 Saved/Lab/<라벨>.summary.txt에 affinity=0x...를 남긴다.
     [string]$Affinity = "",
-    # 개체 종류 수. 2면 -LabTypes=2를 붙인다(M3b 묶음 2). 라벨은 -Tag로 따로 구분한다(예: t2). 1은 인자를 붙이지 않는다.
+    # 개체 종류 수. 1이면 -LabTypes=1, 2면 -LabTypes=2를 항상 붙인다(코드 기본값이 M4부터 2라서 1도 명시해야 한다, Worklog/M4.md). 라벨은 -Tag로 따로 구분한다(예: t2). 기본값 1은 M3b까지의 호출과 같은 뜻이다.
     [ValidateSet(1, 2)][int]$Types = 1,
     # 포그라운드 검사를 끈다. 기본은 켜짐: 게임 창을 앞에 두고(Start-Process 뒤), 측정 구간 동안 2초마다 포그라운드 창을 기록해
     # 게임이 아닌 표본이 하나라도 있으면 그 실행을 FAIL(CSV를 Saved/Profiling/CSV/fg-failed/로 옮김)로 한다. 이유: 창이 백그라운드이면 Game 스레드가 약 2ms(12%) 느리다(Docs/Worklog/M3b.md "페이즈 첫 실행 효과").
@@ -91,7 +91,7 @@ for ($i = $First; $i -le $Last; $i++) {
     $GameArgs = @("-windowed", "-ResX=$ResX", "-ResY=$ResY", "-nosound",
         "-LabBench", "-LabStage=$(if ($Stage) { $Stage } else { $Milestone })", "-LabN=$N", "-LabPreset=$($Preset.Substring(1))", "-LabSeed=$Seed", "-LabVariant=$Variant", "-LabLabel=$Label")
     if ($Trace) { $GameArgs += @("-trace=cpu,gpu,frame,counters,mass", "-tracefile=`"$ProjectDir\Saved\Traces\$Label.utrace`"") }
-    if ($Types -eq 2) { $GameArgs += "-LabTypes=2" }
+    $GameArgs += "-LabTypes=$Types"
     if ($ExtraArgs) { $GameArgs += $ExtraArgs.Split(" ", [StringSplitOptions]::RemoveEmptyEntries) }
     Write-Host "RUN $Label"
     $Proc = Start-Process -FilePath $Exe -ArgumentList $GameArgs -PassThru
@@ -133,7 +133,7 @@ for ($i = $First; $i -le $Last; $i++) {
     }
     if (Test-Path $Summary) { Get-Content $Summary }
     if ($FgFail -and (Test-Path "$PkgCsv\$Label.csv")) {
-        $FailDir = "$OutCsvg-failed"; New-Item -ItemType Directory -Force -Path $FailDir | Out-Null
+        $FailDir = "$OutCsv\fg-failed"; New-Item -ItemType Directory -Force -Path $FailDir | Out-Null
         $Stamp = Get-Date -Format "yyyyMMddHHmmss"
         Move-Item "$PkgCsv\$Label.csv" "$FailDir\$Label-$Stamp.csv"
         Write-Host "FAIL: $Label foreground not on game during measurement (non-game samples=$Non of $($In.Count)). CSV moved to fg-failed/."

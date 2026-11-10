@@ -8,6 +8,9 @@ Measurements/<M>/runs.csv에 실행마다 한 행을 더하고, summary.csv를 �
 
 M3b부터: frame_p95_ms(대표 지표), bottleneck(프레임·Game·Render·GPU p50 중 최댓값의 이름), build(CSV 메타데이터)를 더한다.
 기존 runs.csv 행은 건드리지 않고 새 라벨만 더한다. 원본 CSV로 모든 행을 다시 계산하려면 --rebuild.
+M4부터: Simulation LOD 열을 더한다(없으면 빈칸이라 M3 이하는 그대로다). CSV 스탯 Lab/SimTick<High|Medium|Low>(그 프레임에 접근 로직이 돈 개체 수),
+Lab/SimBand<...>(밴드 전체 걷는 개체 수)의 평균과, 메타데이터 LabSimLod(예 `80/200m tick=0/0.50/1.00 avoid=0`)의 설정 간격,
+실제 틱 주기(초) = 평균 프레임 시간(초) x 평균 SimBand / 평균 SimTick을 밴드마다 runs.csv·summary.csv의 맨 끝 열에 쓴다(Worklog/M4.md).
 실행: py -3 -I Scripts/summarize.py --milestone M0 [--pc 1] [--rebuild]
 """
 import argparse
@@ -29,10 +32,15 @@ COLS = {
     "draw_calls": ["RHI/DrawCalls", "DrawCalls"],
     "mem": ["PhysicalUsedMB", "Memory/PhysicalUsedMB"],
 }
+BANDS = ["High", "Medium", "Low"]
+# M4 Simulation LOD 열(맨 끝에 붙인다). sim_lod = 메타데이터 LabSimLod, cfg_tick_* = 설정 간격(초), sim_tick_*/sim_band_* = 프레임 평균 개체 수,
+# real_period_* = 실제 틱 주기(초)
+SIM_FIELDS = (["sim_lod"] + [f"cfg_tick_{b.lower()}" for b in BANDS] + [f"sim_tick_{b.lower()}" for b in BANDS]
+              + [f"sim_band_{b.lower()}" for b in BANDS] + [f"real_period_{b.lower()}" for b in BANDS])
 RUN_FIELDS = ["label", "milestone", "variant", "n", "preset", "seed", "run", "pc", "frames",
               "game_p50_ms", "game_p99_ms", "render_p50_ms", "gpu_p50_ms", "frame_p50_ms", "frame_p95_ms", "frame_p99_ms",
               "hitch_abs", "hitch_rel", "draw_calls_p50", "mem_total_mb", "bottleneck", "build",
-              "types", "types_assets", "large_actor_frames", "large_actor_skips", "large_skip_ratio", "final", "fg_ok"]
+              "types", "types_assets", "large_actor_frames", "large_actor_skips", "large_skip_ratio", "final", "fg_ok"] + SIM_FIELDS
 CORE = ["game_p50_ms", "game_p99_ms", "render_p50_ms", "gpu_p50_ms", "frame_p50_ms", "frame_p95_ms", "frame_p99_ms",
         "hitch_abs", "hitch_rel", "draw_calls_p50", "mem_total_mb"]
 # 병목 후보: p50 열 이름 -> 표시 이름 (measurement.md "N@16.7ms": 프레임·Game·Render·GPU p50 중 최댓값)
@@ -70,6 +78,31 @@ def types_fields(meta):
         ratio = ""
     return {"types": meta.get("labtypes", ""), "types_assets": meta.get("labtypesassets", ""),
             "large_actor_frames": fr, "large_actor_skips": sk, "large_skip_ratio": ratio}
+
+
+def sim_lod_fields(header, data, meta, frame):
+    """M4 Simulation LOD 열. 스탯 열이나 LabSimLod가 없으면(M3 이하) 모두 빈칸. LabSimLod가 `-`여도 빈칸."""
+    out = {k: "" for k in SIM_FIELDS}
+    lod = meta.get("labsimlod", "")
+    if lod and lod != "-":
+        out["sim_lod"] = lod
+        m = re.search(r"tick=([0-9.]+)/([0-9.]+)/([0-9.]+)", lod)
+        if m:
+            for b, v in zip(BANDS, m.groups()):
+                out[f"cfg_tick_{b.lower()}"] = float(v)
+    frame_s = statistics.fmean(frame) / 1000.0 if frame else None
+    for b in BANDS:
+        tick = column(header, data, [f"Lab/SimTick{b}"])
+        band = column(header, data, [f"Lab/SimBand{b}"])
+        mt = statistics.fmean(tick) if tick else None
+        mb = statistics.fmean(band) if band else None
+        if mt is not None:
+            out[f"sim_tick_{b.lower()}"] = round(mt, 2)
+        if mb is not None:
+            out[f"sim_band_{b.lower()}"] = round(mb, 2)
+        if frame_s and mt and mb:
+            out[f"real_period_{b.lower()}"] = round(frame_s * mb / mt, 4)
+    return out
 
 
 def fg_ok(label):
@@ -154,6 +187,7 @@ def summarize_run(path, pc):
     }
     row["bottleneck"] = bottleneck(row)
     row.update(types_fields(meta))
+    row.update(sim_lod_fields(header, data, meta, frame))
     row["final"] = 1 if (m["tag"].endswith("fg") and not m["tag"].startswith("diag")) else ""  # 최종 묶음은 라벨 태그가 fg로 끝난다(2026-11-10 재측정). 옛 fin 묶음은 final=0
     row["fg_ok"] = fg_ok(label)
     return row
@@ -213,6 +247,7 @@ def main():
     for c in CORE:
         fields += [c, f"{c}_min", f"{c}_max"]
     fields += ["bottleneck", "build", "types", "types_assets", "large_skip_ratio", "final", "fg_ok"]
+    fields += ["sim_lod"] + [f for f in SIM_FIELDS if f != "sim_lod"]
     with open(out_dir / "summary.csv", "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=fields)
         w.writeheader()
@@ -233,6 +268,13 @@ def main():
             out["fg_ok"] = f"{sum(1 for k in known if k.split('/')[0] == k.split('/')[1])}/{len(rs)}" if known else ""
             ratios = [float(r["large_skip_ratio"]) for r in rs if str(r.get("large_skip_ratio", "")) != ""]
             out["large_skip_ratio"] = round(statistics.median(ratios), 4) if ratios else ""
+            lods = sorted({str(r.get("sim_lod", "")) for r in rs if str(r.get("sim_lod", "")) != ""})
+            out["sim_lod"] = " // ".join(lods)
+            for c in SIM_FIELDS:
+                if c == "sim_lod":
+                    continue
+                vals = [float(r[c]) for r in rs if str(r.get(c, "")) != ""]
+                out[c] = round(statistics.median(vals), 4) if vals else ""
             w.writerow(out)
 
     print(f"runs.csv: {len(rows)} rows (+{added}), summary.csv: {len(groups)} conditions -> {out_dir}")
