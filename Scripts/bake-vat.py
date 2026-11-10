@@ -35,9 +35,10 @@ else:
 OUT = "/Game/Lab/VAT/Baked"
 A2T = "/AnimToTexture/Materials/MaterialFunctions"
 # 죽기 진홍색(2026-11-08 사용자 확정). VAT·액터 머티리얼이 같은 값을 쓴다. 소형은 (0.6, 0.06, 0.05) 그대로다.
-# 대형은 그 진홍에 LAB_DEAD_SCALE(기본 0.5)을 곱한 더 어두운 진홍이다(2026-11-10 사용자 결정: 산 대형 = 짙은 회색, 죽은 소형 = 진홍,
-# 죽은 대형 = 어두운 진홍이 서로 구별되게). 0.5와 0.35를 스크린샷으로 비교하려고 환경 변수로 둔다. 확정하면 기본값만 남긴다.
-DEAD_SCALE = float(os.environ.get("LAB_DEAD_SCALE", "0.5")) if LARGE else 1.0
+# 대형은 그 진홍에 LAB_DEAD_SCALE(기본 0.22)을 곱한 더 어두운 진홍이다(2026-11-10 사용자 결정: 산 대형 = 짙은 회색, 죽은 소형 = 진홍,
+# 죽은 대형 = 어두운 진홍이 서로 구별되게). 값은 선형이라 화면에서는 배율^(1/2.2)로 보인다: 0.5는 0.73배, 0.35는 0.62배라 차이가 작았고,
+# 0.22가 화면에서 소형 진홍의 절반 밝기다(0.5^2.2). 후보를 스크린샷으로 비교하려고 환경 변수로 둔다. 확정하면 기본값만 남긴다.
+DEAD_SCALE = float(os.environ.get("LAB_DEAD_SCALE", "0.22")) if LARGE else 1.0
 DEAD_COLOR = unreal.LinearColor(0.6 * DEAD_SCALE, 0.06 * DEAD_SCALE, 0.05 * DEAD_SCALE, 1.0)
 # 산 개체 색조. 소형은 흰색(색조 없음), 대형은 짙은 회색(2026-11-10 사용자 결정, 색 후보 스크린샷 m4_large_darkgray_*).
 UNIT_TINT = unreal.LinearColor(0.15, 0.15, 0.18, 1.0) if LARGE else unreal.LinearColor(1.0, 1.0, 1.0, 1.0)
