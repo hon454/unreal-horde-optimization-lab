@@ -11,7 +11,7 @@ M0\~M4, M3b 완료(태그 `M0`\~`M4`, `M3b`). 지금은 M5([plan.md](plan.md) "M
 - [ ] **M5.** 비교 기준은 `m4offmove`다(2026-11-10 사용자 결정, [plan.md](plan.md) "M5"). M5 단계는 `m4offmove`의 구성(200m 밖 Off 밴드 + Lab 이동 프로세서) 위에 원거리 표현만 VAT ISM → ISKM으로 바꾼다. 같은 묶음에서 `m4offmove`를 기준점으로 함께 잰다. 설계 결정 9개(엔티티 풀링, Lab ISKM 프로세서, 변형 여섯)는 plan.md "M5"(2026-11-11 사용자 결정).
   - [x] 에셋 세션 `m5-assets`: `Scripts/create-iskm.py`(c573c0b). Python(A안)으로 끝났다. ISKM용 복제 메시 `SK_…ISKM`(`bOptimizeForInstancing`), ASTPD 2개, 머티리얼 2개. 애니메이션 바운드는 Test 패키지에서 런타임으로 확인한다. [Worklog/M5.md](Worklog/M5.md) "에셋 세션".
   - [x] 측정 러너 `Scripts/run-m5-all.ps1`(8fc271c, 42회, 약 90분). M5 단계는 `Lab/IskmInstances` 중앙값 > 0을 검사한다. Worklog/M5.md "측정 세션".
-  - [ ] 코드 세션 `m5-code`: 엔티티 풀링, Lab ISKM 프로세서, `ELabStage::M5`와 변형, 스탯. 결과는 Worklog/M5.md "코드 세션".
+  - [x] 코드 세션 `m5-code`(dadc490): 엔티티 풀링, Lab ISKM 프로세서, `ELabStage::M5`와 변형 5개, 스탯 `Lab/IskmTracks`·`Lab/IskmInstances`. 풀링 켬과 끔에서 재생성 해시 12줄이 같다. 개발 20k P1에서 ISKM 인스턴스는 7,101개다. 원거리 스크린샷은 `Measurements/M5/shots/m5iskm_20k_p1_dev.jpg`. 벤치에 `-LabDuration`을 주면 측정 구간이 그 길이가 되고, 주지 않으면 60초 그대로다. Worklog/M5.md "코드 세션".
   - [ ] 그다음: 패키징 → M5 묶음(측정 세션) → 비교 → 태그 `M5`.
 - [ ] **움직이는 화면 검토.** 피격 멈춤, 30m 전환, `m4offmove`의 200m 경계 끊김. 탑뷰 카메라에서 짙은 회색 대형이 그림자와 섞이는 문제. Niagara 원거리 표현 논의(토론 2\~4).
 
