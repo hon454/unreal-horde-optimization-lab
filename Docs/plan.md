@@ -186,7 +186,7 @@ M0\~M5가 필수다. 마일스톤마다 바꾸는 최적화 변수는 하나고,
 
 ## M5. ISKM
 
-**목표:** 원거리 표현을 ISKM + `AnimSequenceTransformProviderData`로 바꿔 VAT와 비교. **비교 상대는 M4.**
+**목표:** 원거리 표현을 ISKM + `AnimSequenceTransformProviderData`로 바꿔 VAT와 비교. **비교 상대는 M4의 `m4offmove`다**(2026-11-10 사용자 결정. E4 (d) 묶음에서 `m4mass`보다 P1 20k 프레임 p50이 1.23ms 짧았다. M5 단계는 `m4offmove`의 Simulation LOD 구성 위에 원거리 표현만 바꾼다. `m4mass`는 M4의 하위 변형으로 남는다).
 
 **바꾸는 변수:** 원거리 표현(VAT ISM → ISKM).
 
