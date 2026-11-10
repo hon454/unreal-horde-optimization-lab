@@ -35,12 +35,12 @@ else:
 OUT = "/Game/Lab/VAT/Baked"
 A2T = "/AnimToTexture/Materials/MaterialFunctions"
 # 죽기 진홍색(2026-11-08 사용자 확정). VAT·액터 머티리얼이 같은 값을 쓴다. 소형은 (0.6, 0.06, 0.05) 그대로다.
-# 대형은 그 진홍에 LAB_DEAD_SCALE(기본 0.22)을 곱한 더 어두운 진홍이다(2026-11-10 사용자 결정: 산 대형 = 짙은 회색, 죽은 소형 = 진홍,
+# 대형은 그 진홍에 0.22를 곱한 더 어두운 진홍 (0.132, 0.0132, 0.011)이다(2026-11-10 사용자 확정: 산 대형 = 짙은 회색, 죽은 소형 = 진홍,
 # 죽은 대형 = 어두운 진홍이 서로 구별되게). 값은 선형이라 화면에서는 배율^(1/2.2)로 보인다: 0.5는 0.73배, 0.35는 0.62배라 차이가 작았고,
-# 0.22가 화면에서 소형 진홍의 절반 밝기다(0.5^2.2). 후보를 스크린샷으로 비교하려고 환경 변수로 둔다. 확정하면 기본값만 남긴다.
-DEAD_SCALE = float(os.environ.get("LAB_DEAD_SCALE", "0.22")) if LARGE else 1.0
+# 0.22가 화면에서 소형 진홍의 절반 밝기다(0.5^2.2). 스크린샷 m4_large_final_c22_*.
+DEAD_SCALE = 0.22 if LARGE else 1.0
 DEAD_COLOR = unreal.LinearColor(0.6 * DEAD_SCALE, 0.06 * DEAD_SCALE, 0.05 * DEAD_SCALE, 1.0)
-# 산 개체 색조. 소형은 흰색(색조 없음), 대형은 짙은 회색(2026-11-10 사용자 결정, 색 후보 스크린샷 m4_large_darkgray_*).
+# 산 개체 색조. 소형은 흰색(색조 없음), 대형은 짙은 회색(2026-11-10 사용자 확정, 색 후보 스크린샷 m4_large_darkgray_*).
 UNIT_TINT = unreal.LinearColor(0.15, 0.15, 0.18, 1.0) if LARGE else unreal.LinearColor(1.0, 1.0, 1.0, 1.0)
 VERTEX_BBOX = []  # Vertex 굽기에서 얻은 모든 프레임의 정점 범위. Bone 메시 바운드에 쓴다(bake())
 
@@ -90,8 +90,7 @@ def binary(mat, cls, a, b, x, y, a_out=""):
 def unit_tint_param(mat, x, y):
     """산 개체의 기본 색에 곱하는 색(Vector 파라미터 UnitTint). 기본값 흰색이면 전과 같은 색이다(전에는 흰색 상수였다).
     죽기 진홍색으로 넘어가는 lerp의 A 자리라, 죽으면 UnitTint에서 DeadColor로 바뀐다. 2종의 대형을 소형과 구별하려고 더했다(2026-11-10 사용자 결정).
-    기본값은 UNIT_TINT(소형 흰색, 대형 짙은 회색)다. 개발 실행 인자 -LabLargeTint=R,G,B가 대형 머티리얼의 이 값을 실행 때 덮는다
-    (LabCrowdSubsystem.cpp, LabMinion.cpp). 소형은 다시 굽기 전까지 이 파라미터가 없다(색은 같다)."""
+    기본값은 UNIT_TINT(소형 흰색, 대형 짙은 회색)다. 소형은 다시 굽기 전까지 이 파라미터가 없다(색은 같다)."""
     p = mel.create_material_expression(mat, unreal.MaterialExpressionVectorParameter, x, y)
     p.set_editor_property("parameter_name", "UnitTint")
     p.set_editor_property("default_value", UNIT_TINT)

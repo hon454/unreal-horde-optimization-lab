@@ -23,15 +23,6 @@ const FLabConfig& FLabConfig::Get()
 		FParse::Value(Cmd, TEXT("-LabFullyParallel="), C.FullyParallel);
 		FParse::Value(Cmd, TEXT("-LabTypes="), C.Types);
 		C.Types = FMath::Clamp(C.Types, 1, 2);
-#if !UE_BUILD_TEST
-		FString Tint;
-		TArray<FString> Parts;
-		if (FParse::Value(Cmd, TEXT("-LabLargeTint="), Tint, /*bShouldStopOnSeparator=*/false) && Tint.ParseIntoArray(Parts, TEXT(",")) == 3)
-		{
-			C.bLargeTint = true;
-			C.LargeTint = FLinearColor(FCString::Atof(*Parts[0]), FCString::Atof(*Parts[1]), FCString::Atof(*Parts[2]), 1.f);
-		}
-#endif
 		C.bBench = FParse::Param(Cmd, TEXT("LabBench"));
 		C.bHud = FParse::Param(Cmd, TEXT("LabHud")) && !C.bBench;
 

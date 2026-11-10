@@ -7,7 +7,6 @@
 #include "Animation/AnimInstance.h"
 #include "Engine/SkeletalMesh.h"
 #include "Materials/MaterialInterface.h"
-#include "Materials/MaterialInstanceDynamic.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Misc/CommandLine.h"
@@ -292,11 +291,6 @@ void ALabMinionMassActor::BeginPlay()
 	if (UMaterialInterface* Material = Paths.ActorMaterial.IsEmpty() ? nullptr : LoadObject<UMaterialInterface>(nullptr, *Paths.ActorMaterial, nullptr, LOAD_Quiet | LOAD_NoWarn))
 	{
 		SkelMesh->SetMaterial(0, Material);
-		if (FLabConfig::Get().bLargeTint && UnitType == LabUnitLarge)
-		{
-			// 개발 전용 색 미리보기(-LabLargeTint): VAT 인스턴스와 같은 UnitTint 값을 넣어 30m 전환 때 색이 튀지 않게 한다
-			SkelMesh->CreateDynamicMaterialInstance(0, Material)->SetVectorParameterValue(TEXT("UnitTint"), FLabConfig::Get().LargeTint);
-		}
 	}
 	if (const float Scale = FLabUnitAssetPaths::Get(UnitType).Scale; Scale != 1.f)
 	{
