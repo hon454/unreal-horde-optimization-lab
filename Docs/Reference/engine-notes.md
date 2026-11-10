@@ -204,3 +204,19 @@
 | ISKM 인스턴스 커스텀 데이터 | 머티리얼 `PerInstanceCustomData` 노드는 ISM과 ISKM 사용처에서만 인스턴스 데이터를 읽는다. 컴포넌트는 `NumCustomDataFloats`·`SetCustomDataValue(FPrimitiveInstanceId, Index, Value)` | `ENG/Private/Materials/HLSLMaterialTranslator.cpp:14829`, `ENG/Classes/Components/InstancedSkinnedMeshComponent.h:72,221` |
 | 스켈레탈 메시 LOD 빌드 설정(Python) | `unreal.SkeletalMeshEditorSubsystem.get_lod_count`, `get_lod_build_settings`, `set_lod_build_settings`(정적 함수, `FScopedSkeletalMeshPostEditChange`로 다시 빌드) | `Editor/SkeletalMeshEditor/Public/SkeletalMeshEditorSubsystem.h:252,306,315`, `Private/SkeletalMeshEditorSubsystem.cpp:1038-1075` |
 | Python 커맨드렛 함정 | `EditorAssetLibrary.delete_asset`은 다른 에셋이 참조하면 거부한다(참조하는 쪽부터 지운다). `get_editor_property`로 받은 구조체 배열의 원소를 제자리에서 고치면 반영되지 않는다(새 배열로 다시 넣는다). `EditorValidatorSubsystem.validate_assets_with_settings`의 출력 인자는 반환값 튜플로 온다 | 2026-11-11 `create-iskm.py` 실행 |
+
+## 15. M5 ISKM 코드 경로(2026-11-11, 코드 세션)
+
+줄임말: **MR** = `Engine/Plugins/Runtime/MassGameplay/Source/MassRepresentation`, **ENG** = `Engine/Source/Runtime/Engine`, **ME** = `Engine/Source/Runtime/MassEntity`.
+
+| 항목 | 내용 | 위치 |
+| --- | --- | --- |
+| ISKM 트랙과 애니 데이터 | `EndVisualChanges`는 갱신 목록의 엔티티마다 트랙 맵을 찾아 없으면 `AllocateTrack` + `SetAutoPlayData`, 있으면 시퀀스 번호가 다를 때만 `SetAutoPlayData`를 부르고, 인스턴스의 애니 번호를 트랙 번호로 둔다. 애니 데이터 배열에 그 엔티티 칸이 없으면 트랙도 애니 번호도 건드리지 않는다(새 인스턴스는 `AddInstance(…, 0)`이라 트랙 0을 그린다). 그래서 위치와 애니 데이터를 매 프레임 같은 순서로 쌓아야 한다. 같은 처리에서 엔티티마다 `ResolvedAnimStates`에도 읽은 값을 쓴다 | `MR/Private/MassVisualizationComponent.cpp:754-800, 832-892` |
+| ISKM 컴포넌트 생성 | 메시 설명자마다 하나. ASTPD면 컴포넌트마다 `UAnimSequenceTransformProviderDataInstance`를 만들어 넣고, `SetAnimationMinScreenSize`·`SetCastShadow`·`SetHasPerInstancePrevTransforms(true)`·`SetCullDistances(0, 1000000)`를 부른 뒤 `AMassVisualizer` 밑에 등록한다. 설명자 생성자가 `InstancedSkinnedMeshComponentClass`를 `UInstancedSkinnedMeshComponent`로 채운다 | `MR/Private/MassVisualizationComponent.cpp:1299-1341`, `MR/Private/MassSkinnedMeshRepresentationTypes.cpp:9-12` |
+| 트랙 번호 직접 쓰기 | 트랙 맵(`FEntityToTrackIdMap`, 엔티티 핸들 → 트랙 번호)은 공유 데이터의 public 접근자로 읽고, 공유 데이터는 범위의 `InstancedSkinnedMeshSharedDataPtr->Find(SkinnedMeshComponentRefs[i])`로 찾는다. 트랙 제공자는 `Component->GetTransformProvider()`를 `UAnimSequenceTransformProviderDataInstance`로 캐스트한다. `SetAutoPlayData(Track, Layer 0, Data)`는 public `ENGINE_API`다 | `MR/Public/MassSkinnedMeshRepresentationTypes.h:317-324, 460-464, 619-624`, `ENG/Classes/Animation/AnimSequenceTransformProviderData.h:1069-1077` |
+| 자동 재생 데이터 | `FAnimSequenceTrackAutoPlayData`: `SequenceIndex`, `Position`(시작 위치, 초), `PlayRate`, `BlendTime`(0이면 바로 바꾼다), `LoopMode`(`Loop`·`Clamp`). 시퀀스 길이는 `UAnimSequenceTransformProviderData::GetSequencePlayLength(int32)`(`ENGINE_API`) | `ENG/Classes/Animation/AnimSequenceTransformProviderData.h:33-40, 104-127, 926` |
+| ISKM 전환과 PrevTransform | 표현 프로세서는 `SkinnedMeshInstance`로 들어가는 프레임에 `PrevTransform`을 현재 위치로 채운다. 액터 준비를 기다리던 중 ISKM으로 돌아오면 액터를 끄고 ISKM으로 둔다 | `MR/Private/MassRepresentationProcessor.cpp:351-366` |
+| 엔진 ISKM 위치 함수 | `UMassUpdateInstancedSkinnedMeshProcessor::UpdateMeshTransform`은 `UE_API` static이라 다른 프로세서가 부를 수 있다(설명자의 변환 오프셋 처리 포함). 엔진 프로세서는 게임 스레드, Representation 그룹, VisualizationProcessing 뒤 | `MR/Public/MassUpdateSkinnedMeshProcessor.h:22`, `MR/Private/MassUpdateSkinnedMeshProcessor.cpp:16-40` |
+| 커맨드 플러시 안의 동기 API | `AddTagToEntity`·`BatchChangeTagsForEntities` 등의 검사(`CHECK_SYNC_API`)는 `IsProcessing()`만 본다. `FlushCommands`는 처리 중이 아닐 때만 돌므로 지연 커맨드 람다 안에서 동기 API로 태그·프래그먼트를 바꿀 수 있다(엔티티 풀링이 쓴다) | `ME/Private/MassEntityManager.cpp:22, 2512-2545` |
+| 청크 표시 프래그먼트 위치 | `FMassVisualizationChunkFragment`(`AreAnyEntitiesVisibleInChunk`)는 MassLOD 모듈이다 | `Engine/Plugins/Runtime/MassGameplay/Source/MassLOD/Public/MassLODFragments.h:136` |
+| ASTPD 바운드(실행) | Development 에디터 `-game` 실행에서 로드 직후 `HasAnimationBounds()` 0, `IsCompiling()` 1(비동기 계산 중). Test 패키지(쿡)에서는 아직 보지 않았다(로그 `lab_iskm … bounds=`) | 2026-11-11 `LabDev-m5iskm-M5-N100-P1.log` |
