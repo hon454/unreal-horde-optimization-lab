@@ -42,6 +42,8 @@ SIM_FIELDS = (["sim_lod"] + [f"cfg_tick_{b.lower()}" for b in BANDS] + [f"sim_ti
 SIM_FIELDS += ["sim_offmove", "cfg_tick_off", "sim_tick_off", "sim_band_off", "real_period_off", "off_move_count", "off_move_ms"]
 # 그리는 거리 묶음: far_m = 메타데이터 LabFarM(빈칸 = 옛 행 = 200m), ism_band0~3 = 프레임 평균 그린 VAT 인스턴스 수(0~30 / 30~80 / 80~200 / 200m 밖, 스탯 Lab/IsmBand0~3)
 SIM_FIELDS += ["far_m", "ism_band0", "ism_band1", "ism_band2", "ism_band3"]
+# M5: GPU 메모리(GPUMem/LocalUsedMB)와 ISKM 스탯(Lab/IskmTracks 트랙 수, Lab/IskmInstances 그린 인스턴스 수). first/last = 측정 앞 10%·뒤 10% 프레임 평균(E5 (b) 누수 추이). 열이 없으면 빈칸
+SIM_FIELDS += ["gpu_mem_p50", "gpu_mem_first", "gpu_mem_last", "iskm_tracks_first", "iskm_tracks_last", "iskm_instances_p50"]
 RUN_FIELDS = ["label", "milestone", "variant", "n", "preset", "seed", "run", "pc", "frames",
               "game_p50_ms", "game_p99_ms", "render_p50_ms", "gpu_p50_ms", "frame_p50_ms", "frame_p95_ms", "frame_p99_ms",
               "hitch_abs", "hitch_rel", "draw_calls_p50", "mem_total_mb", "bottleneck", "build",
@@ -115,6 +117,19 @@ def sim_lod_fields(header, data, meta, frame):
         if ms:
             out["off_move_ms"] = round(statistics.fmean(ms), 4)
     out["far_m"] = meta.get("labfarm", "")
+    def ends(vals):
+        k = max(1, len(vals) // 10)
+        return round(statistics.fmean(vals[:k]), 2), round(statistics.fmean(vals[-k:]), 2)
+    gm = column(header, data, ["GPUMem/LocalUsedMB"])
+    if gm:
+        out["gpu_mem_p50"] = round(percentile(gm, 0.5), 2)
+        out["gpu_mem_first"], out["gpu_mem_last"] = ends(gm)
+    tr = column(header, data, ["Lab/IskmTracks"])
+    if tr:
+        out["iskm_tracks_first"], out["iskm_tracks_last"] = ends(tr)
+    ii = column(header, data, ["Lab/IskmInstances"])
+    if ii:
+        out["iskm_instances_p50"] = round(percentile(ii, 0.5), 2)
     for i in range(4):
         v = column(header, data, [f"Lab/IsmBand{i}"])
         if v:
@@ -268,7 +283,7 @@ def main():
         final = tag.endswith("fg") and not tag.startswith("diag")  # 최종 묶음(2026-11-10 재측정)
         legacy = tag.endswith("fin")  # 옛 묶음(final=0, 조건 이름은 -fin 그대로)
         btag = tag[:-2] if final else tag[:-3] if legacy else tag
-        variant = r["variant"] + next((f"-{t}" for t in ("noaff", "aff", "diagbg", "diagfg", "fgtest", "e4dstart", "e4daa", "e4d", "far200", "far300", "far500", "start", "aa", "ab2", "ab", "t2") if btag.startswith(t)), "") + ("-fg" if final else "-fin" if legacy else "")  # 묶음 끝 A/A와 선행 A/B(ab)는 기준점과 따로 요약한다
+        variant = r["variant"] + next((f"-{t}" for t in ("noaff", "aff", "diagbg", "diagfg", "fgtest", "e4dstart", "e4daa", "e4d", "far200", "far300", "far500", "leak", "start", "aa", "ab2", "ab", "t2") if btag.startswith(t)), "") + ("-fg" if final else "-fin" if legacy else "")  # 묶음 끝 A/A와 선행 A/B(ab)는 기준점과 따로 요약한다
         groups.setdefault((variant, int(r["n"]), r["preset"]), []).append(r)
 
     fields = ["variant", "n", "preset", "runs"]
