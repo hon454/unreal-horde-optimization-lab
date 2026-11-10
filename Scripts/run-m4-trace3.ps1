@@ -1,12 +1,13 @@
 ﻿# (-Tag로 라벨 태그를 바꿀 수 있다. 수정 검증 트레이스는 -Tag traceparfix) M4 병렬 트레이스 2회(Worklog/M4.md "병렬 트레이스 2회(P2)"): P2 m3mass, P2 m4mass. 20k, 2종, 병렬(직렬 인자 없음), 라벨 태그 tracepar.
 # 실패(포그라운드 FAIL 등)하면 라벨을 재사용하지 않고 번호를 올려(r2) 한 번 다시 돈다. 메타데이터 검사는 run-m4-all.ps1과 같다. 요약·커밋은 하지 않는다.
-param([switch]$DryRun, [string]$Tag = "tracepar")
+param([switch]$DryRun, [string]$Tag = "tracepar", [string]$Conditions = "m3mass:P2,m4mass:P2")
 $ErrorActionPreference = "Stop"
 $Root = Split-Path $PSScriptRoot -Parent
 Set-Location $Root
 $Bench = "$PSScriptRoot\run-bench.ps1"
 $OutCsv = "$Root\Saved\Profiling\CSV"
-$Plan = @(@{ V = "m3mass"; S = "M3"; P = "P2" }, @{ V = "m4mass"; S = "M4"; P = "P2" })
+# -Conditions "변형:카메라,..." (변형 이름이 m3로 시작하면 -LabStage=M3, 아니면 M4). 예: m3mass:P2,m4mass:P2,m4off:P2
+$Plan = @($Conditions.Split(",") | ForEach-Object { $c = $_.Split(":"); @{ V = $c[0]; S = $(if ($c[0] -like "m3*") { "M3" } else { "M4" }); P = $c[1] } })
 foreach ($R in $Plan) { Write-Host ("M4-{0}-N20000-{1}{3}-r1 (retry: r2)  stage={2}" -f $R.V, $R.P, $R.S, $Tag) }
 if ($DryRun) { exit 0 }
 if (@(Get-Process -ErrorAction SilentlyContinue | Where-Object { $_.ProcessName -match "^(UnrealEditor|UnrealBuildTool|HordeOptLab)" }).Count -gt 0) { Write-Host "FAIL preflight: editor/build/game running"; exit 2 }
