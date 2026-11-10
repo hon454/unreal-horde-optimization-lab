@@ -34,9 +34,14 @@ else:
     NORMAL = MINION + "/Textures/Melee/T_Minion_Dawn_Melee_N"
 OUT = "/Game/Lab/VAT/Baked"
 A2T = "/AnimToTexture/Materials/MaterialFunctions"
-DEAD_COLOR = unreal.LinearColor(0.6, 0.06, 0.05, 1.0)
-UNIT_TINT = unreal.LinearColor(1.0, 1.0, 1.0, 1.0)  # 산 개체 색조의 기본값(흰색 = 색조 없음). 대형 색을 확정하면 LARGE일 때의 값을 여기서 바꾼다
-VERTEX_BBOX = []  # Vertex 굽기에서 얻은 모든 프레임의 정점 범위. Bone 메시 바운드에 쓴다(bake())  # 죽기 진홍색(2026-11-08 사용자 확정). VAT·액터 머티리얼이 같은 값을 쓴다
+# 죽기 진홍색(2026-11-08 사용자 확정). VAT·액터 머티리얼이 같은 값을 쓴다. 소형은 (0.6, 0.06, 0.05) 그대로다.
+# 대형은 그 진홍에 LAB_DEAD_SCALE(기본 0.5)을 곱한 더 어두운 진홍이다(2026-11-10 사용자 결정: 산 대형 = 짙은 회색, 죽은 소형 = 진홍,
+# 죽은 대형 = 어두운 진홍이 서로 구별되게). 0.5와 0.35를 스크린샷으로 비교하려고 환경 변수로 둔다. 확정하면 기본값만 남긴다.
+DEAD_SCALE = float(os.environ.get("LAB_DEAD_SCALE", "0.5")) if LARGE else 1.0
+DEAD_COLOR = unreal.LinearColor(0.6 * DEAD_SCALE, 0.06 * DEAD_SCALE, 0.05 * DEAD_SCALE, 1.0)
+# 산 개체 색조. 소형은 흰색(색조 없음), 대형은 짙은 회색(2026-11-10 사용자 결정, 색 후보 스크린샷 m4_large_darkgray_*).
+UNIT_TINT = unreal.LinearColor(0.15, 0.15, 0.18, 1.0) if LARGE else unreal.LinearColor(1.0, 1.0, 1.0, 1.0)
+VERTEX_BBOX = []  # Vertex 굽기에서 얻은 모든 프레임의 정점 범위. Bone 메시 바운드에 쓴다(bake())
 
 lib = unreal.AnimToTextureBPLibrary
 mel = unreal.MaterialEditingLibrary
@@ -84,8 +89,8 @@ def binary(mat, cls, a, b, x, y, a_out=""):
 def unit_tint_param(mat, x, y):
     """산 개체의 기본 색에 곱하는 색(Vector 파라미터 UnitTint). 기본값 흰색이면 전과 같은 색이다(전에는 흰색 상수였다).
     죽기 진홍색으로 넘어가는 lerp의 A 자리라, 죽으면 UnitTint에서 DeadColor로 바뀐다. 2종의 대형을 소형과 구별하려고 더했다(2026-11-10 사용자 결정).
-    색을 확정하기 전에는 개발 실행 인자 -LabLargeTint=R,G,B가 대형 머티리얼의 이 값을 실행 때 바꾼다(LabCrowdSubsystem.cpp, LabMinion.cpp).
-    확정한 색은 UNIT_TINT에 적고 다시 굽는다. 소형은 다시 굽기 전까지 이 파라미터가 없다(색은 같다)."""
+    기본값은 UNIT_TINT(소형 흰색, 대형 짙은 회색)다. 개발 실행 인자 -LabLargeTint=R,G,B가 대형 머티리얼의 이 값을 실행 때 덮는다
+    (LabCrowdSubsystem.cpp, LabMinion.cpp). 소형은 다시 굽기 전까지 이 파라미터가 없다(색은 같다)."""
     p = mel.create_material_expression(mat, unreal.MaterialExpressionVectorParameter, x, y)
     p.set_editor_property("parameter_name", "UnitTint")
     p.set_editor_property("default_value", UNIT_TINT)
