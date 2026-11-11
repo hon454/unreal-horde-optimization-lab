@@ -195,6 +195,16 @@ const FLabConfig& FLabConfig::Get()
 		C.HydrateM = FMath::Clamp(C.HydrateM, 1.f, FLabQuality::MaxHydrateM);
 		if (C.ActorCap != DefaultCap) { NoteOverride(FString::Printf(TEXT("actor_cap=%d"), C.ActorCap)); }
 		if (C.HydrateM != DefaultHydrateM) { NoteOverride(FString::Printf(TEXT("hydrate_m=%.0f"), C.HydrateM)); }
+		// Q4b 원거리 그림자: q4final은 끔, 그 밖은 켬(지금까지의 동작). -LabFarShadow=0|1이 이긴다(빼 보기 A8-farshadow = q4final + -LabFarShadow=1)
+		C.bFarShadow = C.Variant != ELabVariant::Q4Final;
+		{
+			int32 FarShadow = -1;
+			if (FParse::Value(Cmd, TEXT("-LabFarShadow="), FarShadow) && FarShadow >= 0)
+			{
+				if ((FarShadow != 0) != C.bFarShadow) { NoteOverride(FString::Printf(TEXT("far_shadow=%d"), FarShadow != 0 ? 1 : 0)); }
+				C.bFarShadow = FarShadow != 0;
+			}
+		}
 		// 시나리오 쪽 인자: 기본값(확정값)과 다르면 적는다
 		if (C.HydrateFixMask != 31) { NoteOverride(FString::Printf(TEXT("fixmask=%d"), C.HydrateFixMask)); }
 		if (C.Types != 2) { NoteOverride(FString::Printf(TEXT("types=%d"), C.Types)); }
@@ -502,7 +512,7 @@ FString FLabConfig::ToLogString() const
 	// Q4 근거리 품질(액터 상한, 화면 안 전환 거리)은 M3 이상 단계에서만 붙인다
 	if (Stage >= ELabStage::M3)
 	{
-		Budget += FString::Printf(TEXT(" actor_cap=%d hydrate_m=%.0f"), ActorCap, HydrateM);
+		Budget += FString::Printf(TEXT(" actor_cap=%d hydrate_m=%.0f far_shadow=%d"), ActorCap, HydrateM, bFarShadow ? 1 : 0); // far_shadow: Q4b
 	}
 	// health_fixed는 디버그 인자를 줬을 때만 붙인다
 	const FString Health = HealthFixed > 0.f ? FString::Printf(TEXT(" health_fixed=%.0f"), HealthFixed) : FString();

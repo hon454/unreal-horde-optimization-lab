@@ -417,6 +417,7 @@ void ALabGameMode::TickBench()
 			// Q4 근거리 품질: 액터 상한(두 종류 합계)과 화면 안 전환 거리(m). M3 미만 단계에서는 쓰이지 않는 값이다
 			CSV_METADATA(TEXT("LabActorCap"), *FString::FromInt(Config.ActorCap));
 			CSV_METADATA(TEXT("LabHydrateM"), *FString::Printf(TEXT("%.0f"), Config.HydrateM));
+			CSV_METADATA(TEXT("LabFarShadow"), Config.FarShadowString()); // Q4b: 표현 LOD Low(80m~) 인스턴스 그림자. M3 미만 "-"
 			for (const FLabConfig::FTech& Tech : Config.TechList())
 			{
 				CSV_METADATA(Tech.MetaKey, *Tech.Value);

@@ -99,7 +99,7 @@ namespace
 			{
 				continue;
 			}
-			// 범위 배열은 보호 멤버라 LOD 값마다 범위를 찾는다(Lab 설명자는 High~Max 한 범위다).
+			// 범위 배열은 보호 멤버라 LOD 값마다 범위를 찾는다(Lab 설명자는 High~Max 한 범위, Q4b 원거리 그림자 끔이면 High~Low·Low~Max 두 범위다).
 			for (int32 Lod = 0; Lod < EMassLOD::Max; ++Lod)
 			{
 				FMassLODInstancedSkinnedMeshSignificanceRange* Range = Info.GetLODSignificanceRange(float(Lod));
@@ -178,6 +178,9 @@ void ULabIskmProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutio
 #if !UE_BUILD_TEST
 	static const bool bFrameLog = FParse::Param(FCommandLine::Get(), TEXT("LabFrameLog"));
 	std::atomic<int32>* NearInstCounter = bFrameLog ? &Crowd->FrameDiag[GFrameCounter & 1].NearVat : nullptr;
+	static const bool bRangeLog = FParse::Param(FCommandLine::Get(), TEXT("LabRangeLog")); // Q4b 범위 경계 확인(lab_range_check)
+	static int32 RangeLogged = 0;
+	static TArray<FMassEntityHandle> RangePending; // 게임 스레드 전용 프로세서라 정적 배열로 둔다
 #endif
 	int32 TrackWrites = 0;  // 이 프로세서가 기존 트랙에 직접 쓴 수(상태 전환, 풀에서 다시 나옴)
 	int32 TrackFirst = 0;    // 트랙이 없어 엔진이 이 프레임에 만들 수
@@ -195,6 +198,11 @@ void ULabIskmProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutio
 		const TConstArrayView<FMassRepresentationLODFragment> RepresentationLODList = Context.GetFragmentView<FMassRepresentationLODFragment>();
 		const TConstArrayView<FLabAnimStateFragment> AnimStates = Context.GetFragmentView<FLabAnimStateFragment>();
 		const TArrayView<FLabIskmTrackFragment> Tracks = Context.GetMutableFragmentView<FLabIskmTrackFragment>();
+#if !UE_BUILD_TEST
+		const int32 ChunkType = Context.GetConstSharedFragment<FLabUnitTypeParams>().UnitType;
+		const UAnimSequenceTransformProviderData* WalkProvider = bRangeLog && Crowd->IskmProviders.IsValidIndex(ChunkType) ? Cast<UAnimSequenceTransformProviderData>(Crowd->IskmProviders[ChunkType]) : nullptr;
+		const float WalkLen = WalkProvider ? FMath::Max(WalkProvider->GetSequencePlayLength(0), KINDA_SMALL_NUMBER) : 1.f; // 클립 0 = 걷기
+#endif
 
 		for (FMassExecutionContext::FEntityIterator EntityIt = Context.CreateEntityIterator(); EntityIt; ++EntityIt)
 		{
@@ -239,13 +247,42 @@ void ULabIskmProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutio
 			Info.AddBatchedCustomData<float>(DeadAmount, LODSignificance, Representation.PrevLODSignificance);
 
 			// 트랙: 표현 상태가 마지막으로 쓴 값과 다를 때만 쓴다(상태 전환, 풀에서 다시 나옴). 평소 프레임에는 엔진의 자동 재생에 맡긴다.
+			// Q4b: 원거리 그림자 끔이면 종류마다 컴포넌트가 둘(LOD 중요도 [High, Low)·[Low, Max))이고 트랙 제공자도 컴포넌트마다 따로다.
+			// 범위를 넘은 프레임에는 새 컴포넌트의 트랙도 다시 쓴다. 엔진은 트랙이 이미 있으면 클립 번호가 다를 때만 쓰므로(MassVisualizationComponent.cpp:763-770, 854-861)
+			// 예전에 그 컴포넌트에 있을 때의 트랙(같은 걷기, 옛 시작 시각)이 남아 위상이 튄다. 트랙이 아직 없으면 엔진이 이번 프레임 애니 데이터로 만든다.
+			const bool bRangeChanged = Info.GetLODSignificanceRangesNum() > 1 && Representation.PrevLODSignificance >= 0.f
+				&& Info.GetLODSignificanceRange(Representation.PrevLODSignificance) != Info.GetLODSignificanceRange(LODSignificance);
 			FLabIskmTrackFragment& Track = Tracks[EntityIt];
-			if (Track.AppliedState != int8(Anim.State) || Track.AppliedStartTime != Anim.StateStartTime)
+			if (bRangeChanged || Track.AppliedState != int8(Anim.State) || Track.AppliedStartTime != Anim.StateStartTime)
 			{
+#if !UE_BUILD_TEST
+				// Q4b 개발 확인(-LabRangeLog): 걷는 개체가 범위를 넘는 프레임에 옛 컴포넌트 트랙의 재생 위치를 읽고, 다음 프레임에 새 컴포넌트 트랙의 위치를 읽어 기대 위치(걷기 루프 시각)와 함께 남긴다
+				if (bRangeLog && bRangeChanged && Anim.State == ELabMinionState::Walk && RangeLogged < 40)
+				{
+					float Pos = -1.f, TrackRate = 0.f;
+					int32 Seq = INDEX_NONE;
+					LabReadTrack(Info, Representation.PrevLODSignificance, Entity, Pos, TrackRate, Seq);
+					UE_LOG(LogLab, Log, TEXT("lab_range_check phase=switch from=%.2f to=%.2f t=%.3f expected=%.3f old_track_pos=%.3f clip_len=%.3f"),
+						Representation.PrevLODSignificance, LODSignificance, T, FMath::Fmod(FMath::Max(T, 0.f), WalkLen), Pos, WalkLen);
+					RangePending.Add(Entity);
+					++RangeLogged;
+				}
+#endif
 				if (LabWriteTrack(Info, LODSignificance, Entity, Data)) { ++TrackWrites; } else { ++TrackFirst; }
 				Track.AppliedState = int8(Anim.State);
 				Track.AppliedStartTime = Anim.StateStartTime;
 			}
+#if !UE_BUILD_TEST
+			else if (bRangeLog && RangePending.Num() > 0 && RangePending.Contains(Entity))
+			{
+				RangePending.Remove(Entity);
+				float Pos = -1.f, TrackRate = 0.f;
+				int32 Seq = INDEX_NONE;
+				LabReadTrack(Info, LODSignificance, Entity, Pos, TrackRate, Seq);
+				UE_LOG(LogLab, Log, TEXT("lab_range_check phase=after sig=%.2f t=%.3f expected=%.3f new_track_pos=%.3f seq=%d"),
+					LODSignificance, T, FMath::Fmod(FMath::Max(T, 0.f), WalkLen), Pos, Seq);
+			}
+#endif
 #if !UE_BUILD_TEST
 			{
 				// Q1b 개발 확인(Q2 3단위): 죽는 동안 사망 시간의 25·50·75·97%를 지나는 프레임에 엔진 트랙의 재생 위치를 찍는다(종류·지점마다 3번까지).

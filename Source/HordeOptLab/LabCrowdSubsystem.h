@@ -117,8 +117,11 @@ public:
 	int32 PoolReused = 0;
 	int32 PoolCreated = 0;
 	int32 GetPooledCount() const { return EntityPool[0].Num() + EntityPool[1].Num(); }
-	/** 고정 바운드가 실제로 들어간 ISKM 컴포넌트 수(인스턴스가 들어온 뒤 바운드가 고정값인 것으로 확인한 수). CSV 메타데이터 LabIskmBounds */
-	int32 GetIskmBoundsApplied() const { return IskmBoundsConfirmed.Num(); }
+	/**
+	 * 고정 바운드가 실제로 들어간 ISKM 메시 종류 수(인스턴스가 들어온 뒤 바운드가 고정값인 것으로 확인한 컴포넌트의 스켈레탈 메시 종류). CSV 메타데이터 LabIskmBounds.
+	 * Q4b 원거리 그림자 끔이면 종류마다 컴포넌트가 둘이라(그림자 켬·끔) 컴포넌트가 아니라 메시 종류를 센다. 2종이면 2이고 P2(Medium이 비어 있다)에서도 같다.
+	 */
+	int32 GetIskmBoundsApplied() const { return IskmBoundsAssets.Num(); }
 #if !UE_BUILD_TEST
 	/**
 	 * 개발용 프레임 진단(-LabFrameLog, E3b (8) 화질 캡처 2026-11-09): 화면 안 30m에서 아직 VAT 인스턴스로 그리는 개체 수와 보이는 액터 수를 프레임마다 로그에 남긴다.
@@ -132,7 +135,8 @@ private:
 	UMassEntityConfigAsset* BuildEntityConfig(int32 UnitType, UStaticMesh* Mesh);
 	/** m5bounds: ISKM 컴포넌트에 고정 바운드를 넣고, 인스턴스가 들어온 뒤 실제로 적용됐는지 한 번 로그에 남긴다 */
 	void ApplyFixedIskmBounds(UInstancedSkinnedMeshComponent& Component);
-	TArray<const UInstancedSkinnedMeshComponent*, TInlineAllocator<LabUnitTypeMax>> IskmBoundsConfirmed; // 비교에만 쓴다(역참조하지 않는다)
+	TArray<const UInstancedSkinnedMeshComponent*, TInlineAllocator<LabUnitTypeMax * 2>> IskmBoundsConfirmed; // 비교에만 쓴다(역참조하지 않는다)
+	TArray<const UObject*, TInlineAllocator<LabUnitTypeMax>> IskmBoundsAssets; // 확인한 컴포넌트의 스켈레탈 메시(비교에만 쓴다)
 	/** 풀 엔티티를 새 개체로 되살린다(위치·일련번호·체력·상태·이동). 태그는 부른 쪽이 한꺼번에 바꾼다 */
 	void ReinitPooledEntity(FMassEntityManager& EntityManager, FMassEntityHandle Entity, const FVector& Location, uint32 Serial) const;
 	TArray<FMassEntityHandle> EntityPool[LabUnitTypeMax]; // M5 엔티티 풀링: 종류별 대기 엔티티(뒤에서 꺼낸다)

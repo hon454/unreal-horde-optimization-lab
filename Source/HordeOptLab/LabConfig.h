@@ -80,7 +80,8 @@ struct FLabQuality
 	static constexpr float MaxHydrateM = 79.f;      // 80m(Medium/Low 경계, 확정값)를 넘지 않는다
 	// Q4 묶음에서 고른 값(Docs/Worklog/Q4.md "최종 구성"): 1만 P1 프레임 p95 11.98ms(13.3ms 안), 액터 평균 709개. 1만에서는 상한이 걸리지 않고 2만에서 1,000개로 막는다
 	static constexpr int32 Q4FinalActorCap = 1000;
-	static constexpr float Q4FinalHydrateM = 79.f;
+	// Q4b 표현 LOD 재편(2026-11-12 사용자 승인, Docs/Worklog/Q4.md "Q4b"): 79m → 40m. Q4 묶음에서 대형 액터의 애니 갱신 건너뜀 비율이 40m 0.03~0.07, 50m 0.25~0.31, 79m 0.66이었다
+	static constexpr float Q4FinalHydrateM = 40.f;
 };
 
 /**
@@ -293,6 +294,14 @@ struct FLabConfig
 	int32 ActorCap = FLabQuality::DefaultActorCap;
 	float HydrateM = FLabQuality::DefaultHydrateM;
 	float HydrateCm() const { return HydrateM * 100.f; }
+	/**
+	 * Q4b 원거리 그림자(-LabFarShadow=0|1). 거짓이면 표현 LOD Low(80m~그리는 끝) 인스턴스가 그림자를 그리지 않는다. M3 이상 단계에서만 뜻이 있다.
+	 * 기본: q4final 거짓(끔), 그 밖 참(지금까지의 동작). 인자가 이긴다. 인스턴스 단위 그림자 플래그가 없어서 메시 설명자를 LOD 중요도 범위로 둘로 나눈다
+	 * (High~Low 그림자 켬, Low~Max 그림자 끔, 엔진이 설명자마다 컴포넌트를 하나씩 만든다). ISKM과 VAT ISM(-LabIskm=0) 모두 같다. CSV 메타데이터 LabFarShadow.
+	 */
+	bool bFarShadow = true;
+	/** CSV 메타데이터 LabFarShadow: "1" 켬, "0" 끔, M3 미만 단계 "-" */
+	const TCHAR* FarShadowString() const { return Stage < ELabStage::M3 ? TEXT("-") : bFarShadow ? TEXT("1") : TEXT("0"); }
 	/**
 	 * 하이드레이션 액터(M3 이상, ALabMinionMassActor 계열)의 캡슐 콜리전. 기본은 끔이다(plan.md M3b "함께 바꾸는 설정", 2026-11-09 사용자 결정, Q5 1b단위에서 코드에 넣었다).
 	 * Off: NoCollision + 오버랩·물리 볼륨 갱신 끔(옛 m3nocol 처리). QueryOnly: 같은 두 갱신 끔 + QueryOnly(m3colquery). On: ACharacter 캡슐의 Pawn 프로필 그대로

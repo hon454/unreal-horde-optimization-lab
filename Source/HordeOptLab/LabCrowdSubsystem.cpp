@@ -160,18 +160,48 @@ UMassEntityConfigAsset* ULabCrowdSubsystem::BuildEntityConfig(int32 UnitType, US
 		Visual->Params.LODRepresentation[EMassLOD::Medium] = EMassRepresentationType::LowResSpawnedActor;
 	}
 
+	// Q4b 원거리 그림자(-LabFarShadow=0, q4final 기본): 인스턴스 단위 그림자 플래그가 없어 메시 설명자를 LOD 중요도 범위로 둘로 나눈다.
+	// 설명자의 Min/MaxLODSignificance(MassRepresentationTypes.h:97-101, MassSkinnedMeshRepresentationTypes.h:69-75)로 [High, Low)는 그림자 켬, [Low, Max)는 끔이다.
+	// 엔진은 설명자 해시(bCastShadows 포함)마다 컴포넌트를 하나 만들고 SetCastShadow를 부르며(MassVisualizationComponent.cpp:1299-1337, ISM은 :259),
+	// 경계 값마다 범위를 만든다(:1371-1419). 중요도는 LOD 정수 + 밴드 안 비율이라 [1, 2)가 Medium(40~80m), [2, 3)이 Low다(MassLODCalculator.h:412-416, 748-753).
+	// 범위가 바뀐 프레임에는 엔진이 새 범위와 옛 범위 컴포넌트 모두에 위치를 넣고(MassSkinnedMeshRepresentationTypes.h:665-680) 다음 프레임 갱신되지 않은 옛 인스턴스를 지운다(MassVisualizationComponent.cpp:812-827).
+	const bool bSplitFarShadow = bM3 && !FLabConfig::Get().bFarShadow;
+	const FTransform MeshLocalTransform = MeshDesc.LocalTransform; // 아래 Add가 배열을 다시 잡을 수 있어 MeshDesc 참조를 더 쓰지 않는다
+	if (bSplitFarShadow && Visual->StaticMeshInstanceDesc.Meshes.Num() == 1)
+	{
+		FMassStaticMeshInstanceVisualizationMeshDesc FarDesc = Visual->StaticMeshInstanceDesc.Meshes[0];
+		Visual->StaticMeshInstanceDesc.Meshes[0].SetSignificanceRange(EMassLOD::High, EMassLOD::Low);
+		FarDesc.SetSignificanceRange(EMassLOD::Low, EMassLOD::Max);
+		FarDesc.bCastShadows = false;
+		Visual->StaticMeshInstanceDesc.Meshes.Add(FarDesc);
+	}
+
 	if (FLabConfig::Get().UsesIskm())
 	{
 		// M5(plan.md "M5" 결정 2·3·6): 정적 메시 인스턴스 자리(30~200m)를 ISKM으로 바꾼다. 엔진 표현 경로(LOD, 액터 전환)는 그대로고 종류마다 ISKM 하나다
 		// (컴포넌트는 메시 설명자 해시마다 하나, MassVisualizationComponent.cpp:1299-1312). 정적 메시 설명자는 비워 ISM 컴포넌트를 만들지 않는다.
 		const int32 AssetType = FLabUnitTypes::AssetType(UnitType);
 		const FLabIskmParams IskmParams = FLabConfig::Get().IskmParams();
-		FMassSkinnedMeshInstanceVisualizationMeshDesc& SkinnedDesc = Visual->SkinnedMeshInstanceDesc.Meshes.AddDefaulted_GetRef();
+		FMassSkinnedMeshInstanceVisualizationMeshDesc SkinnedDesc;
 		SkinnedDesc.Asset = IskmMeshes.IsValidIndex(AssetType) ? IskmMeshes[AssetType].Get() : nullptr;
 		SkinnedDesc.TransformProvider = IskmProviders.IsValidIndex(AssetType) ? IskmProviders[AssetType].Get() : nullptr; // ASTPD면 엔진이 컴포넌트마다 인스턴스를 만든다(:1323-1325)
-		SkinnedDesc.LocalTransform = MeshDesc.LocalTransform; // VAT와 같은 -90도 회전과 종류 배율
+		SkinnedDesc.LocalTransform = MeshLocalTransform; // VAT와 같은 -90도 회전과 종류 배율
 		SkinnedDesc.bCastShadows = IskmParams.bCastShadows;
 		SkinnedDesc.AnimationMinScreenSize = IskmParams.AnimationMinScreenSize; // 컴포넌트에 SetAnimationMinScreenSize로 넘어간다(:1333)
+		if (bSplitFarShadow)
+		{
+			// Q4b: 위 VAT 설명자와 같은 두 범위. 컴포넌트마다 트랙 제공자 인스턴스가 따로라(:1323-1325) 범위를 넘을 때 ULabIskmProcessor가 새 컴포넌트의 트랙을 다시 쓴다
+			FMassSkinnedMeshInstanceVisualizationMeshDesc FarDesc = SkinnedDesc;
+			SkinnedDesc.SetSignificanceRange(EMassLOD::High, EMassLOD::Low);
+			FarDesc.SetSignificanceRange(EMassLOD::Low, EMassLOD::Max);
+			FarDesc.bCastShadows = false;
+			Visual->SkinnedMeshInstanceDesc.Meshes.Add(SkinnedDesc);
+			Visual->SkinnedMeshInstanceDesc.Meshes.Add(FarDesc);
+		}
+		else
+		{
+			Visual->SkinnedMeshInstanceDesc.Meshes.Add(SkinnedDesc);
+		}
 		Visual->StaticMeshInstanceDesc.Meshes.Reset();
 		for (int32 LOD = 0; LOD < EMassLOD::Max; ++LOD)
 		{
@@ -180,8 +210,13 @@ UMassEntityConfigAsset* ULabCrowdSubsystem::BuildEntityConfig(int32 UnitType, US
 				Visual->Params.LODRepresentation[LOD] = EMassRepresentationType::SkinnedMeshInstance;
 			}
 		}
-		UE_LOG(LogLab, Log, TEXT("lab_iskm_config type=%d mesh=%s provider=%s shadow=%d minss=%.2f blend=%.2f"), UnitType, *GetNameSafe(SkinnedDesc.Asset.Get()),
-			*GetNameSafe(SkinnedDesc.TransformProvider.Get()), SkinnedDesc.bCastShadows ? 1 : 0, SkinnedDesc.AnimationMinScreenSize, IskmParams.BlendTime);
+		UE_LOG(LogLab, Log, TEXT("lab_iskm_config type=%d mesh=%s provider=%s shadow=%d far_shadow=%d descs=%d minss=%.2f blend=%.2f"), UnitType, *GetNameSafe(SkinnedDesc.Asset.Get()),
+			*GetNameSafe(SkinnedDesc.TransformProvider.Get()), SkinnedDesc.bCastShadows ? 1 : 0, bSplitFarShadow ? 0 : (SkinnedDesc.bCastShadows ? 1 : 0),
+			Visual->SkinnedMeshInstanceDesc.Meshes.Num(), SkinnedDesc.AnimationMinScreenSize, IskmParams.BlendTime);
+	}
+	else if (bSplitFarShadow)
+	{
+		UE_LOG(LogLab, Log, TEXT("lab_vat_far_shadow type=%d descs=%d far_shadow=0"), UnitType, Visual->StaticMeshInstanceDesc.Meshes.Num());
 	}
 
 	UE_LOG(LogLab, Log, TEXT("lab_mass_config type=%d traits=%d mesh=%s actor=%s"), UnitType, EntityConfig->GetConfig().GetTraits().Num(), *GetNameSafe(Mesh), *GetNameSafe(Visual->HighResTemplateActor.Get()));
@@ -360,8 +395,9 @@ void ULabCrowdSubsystem::ApplyFixedIskmBounds(UInstancedSkinnedMeshComponent& Co
 	if (Component.GetInstanceCount() > 0 && !IskmBoundsConfirmed.Contains(&Component) && Component.Bounds.GetBox().Equals(Fixed, 1.0))
 	{
 		IskmBoundsConfirmed.Add(&Component);
-		UE_LOG(LogLab, Log, TEXT("lab_iskm component=%s bounds_override=1 instances=%d half_xy=%.0f identity=%d"), *Component.GetName(), Component.GetInstanceCount(), HalfXY,
-			Component.GetComponentTransform().Equals(FTransform::Identity) ? 1 : 0);
+		IskmBoundsAssets.AddUnique(Component.GetSkinnedAsset());
+		UE_LOG(LogLab, Log, TEXT("lab_iskm component=%s bounds_override=1 instances=%d half_xy=%.0f identity=%d shadow=%d"), *Component.GetName(), Component.GetInstanceCount(), HalfXY,
+			Component.GetComponentTransform().Equals(FTransform::Identity) ? 1 : 0, Component.CastShadow ? 1 : 0);
 	}
 }
 
