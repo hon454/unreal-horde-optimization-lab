@@ -13,6 +13,11 @@ import sys
 from pathlib import Path
 
 sys.dont_write_bytecode = True
+# 2026-11-11: 다시 돌리지 않는다. 이 스크립트는 final=1 / fg 묶음을 전제로 고쳐졌는데 그 묶음은 돌지 않았다(runs.csv의 final 열이 전부 빈칸).
+# 지금 돌리면 batch-report.md와 spikes.txt가 빈 요약으로 덮이고 Docs/Worklog/M3b.md의 "묶음 1·2 결과" 뒤 절이 지워진다. 꼭 돌려야 하면 --force.
+if "--force" not in sys.argv:
+    sys.exit("m3b-report.py: M3b fin batch only. Re-running overwrites committed records (see header).")
+sys.argv = [a for a in sys.argv if a != "--force"]
 ROOT = Path(__file__).resolve().parent.parent
 M = ROOT / "Measurements" / "M3b"
 WORKLOG = ROOT / "Docs" / "Worklog" / "M3b.md"
