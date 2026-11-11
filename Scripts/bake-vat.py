@@ -104,6 +104,12 @@ def make_material(mode):
     mat.set_editor_property("use_material_attributes", True)
     mat.set_editor_property("tangent_space_normal", True)
     mel.set_material_usage(mat, unreal.MaterialUsage.MATUSAGE_INSTANCED_STATIC_MESHES)
+    # Q2 Niagara 배경 무리(/Game/Lab/FX/NS_LabCrowd)가 이 머티리얼의 자식 MI_LabCrowd*를 메시 입자에 쓴다.
+    # 플래그(bUsedWithNiagaraMeshParticles)가 없으면 쿡된 빌드에서 입자가 기본 머티리얼로 그려진다(Scripts/create-crowd-fx.md).
+    # 다시 구워도 플래그가 남도록 여기서 켜고, 켜졌는지 바로 확인한다.
+    mel.set_material_usage(mat, unreal.MaterialUsage.MATUSAGE_NIAGARA_MESH_PARTICLES)
+    if not mel.has_material_usage(mat, unreal.MaterialUsage.MATUSAGE_NIAGARA_MESH_PARTICLES):
+        raise RuntimeError("LABVAT %s: MATUSAGE_NIAGARA_MESH_PARTICLES not set" % name)
 
     make = mel.create_material_expression(mat, unreal.MaterialExpressionMakeMaterialAttributes, -600, 0)
     base = mel.create_material_expression(mat, unreal.MaterialExpressionTextureSampleParameter2D, -1000, -200)
