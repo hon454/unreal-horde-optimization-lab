@@ -14,6 +14,7 @@
 | [0004](0004-stages-as-run-modes.md) | 최적화 단계를 한 빌드 안의 실행 모드(`-LabStage=`)로 공존시킨다 | 승인됨 |
 | [0005](0005-entity-config-in-code.md) | Mass EntityConfig를 에셋 없이 실행 시 C++로 만든다 | 승인됨 |
 | [0006](0006-three-measurement-tiers.md) | 측정을 세 층(개발 확인 / 마일스톤 묶음 / 총괄 묶음)으로 나누고 단계마다 60fps 경계 둘레만 잰다 | 승인됨 |
+| [0007](0007-keep-default-motion-blur.md) | ISKM 모션 블러 줄무늬가 있어도 모션 블러는 엔진 기본값(켬)으로 두고 측정한다 | 승인됨 |
 
 ## ADR 이전의 결정
 
