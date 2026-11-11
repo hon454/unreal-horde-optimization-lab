@@ -17,6 +17,8 @@
 #include "MassRepresentationFragments.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Animation/AnimationAsset.h"  // FAnimTickRecord(개발 확인)
+#include "Animation/AnimSequenceBase.h"
 #include "ProfilingDebugging/CsvProfiler.h"
 #include "Engine/World.h"
 #include "EngineUtils.h"
@@ -285,6 +287,35 @@ void ULabActorSyncProcessor::Execute(FMassEntityManager& EntityManager, FMassExe
 				Anim->State = State;
 				Actor->AppliedState = State;
 			}
+#if !UE_BUILD_TEST
+			if (Anim && State == ELabMinionState::Dead && Actor->bPoseReady)
+			{
+				// Q1b 개발 확인(Q2 3단위): 죽는 동안 사망 시간의 25·50·75·97%를 지나는 프레임에 AnimBP 시퀀스 플레이어의 실제 재생 시각을 찍는다(종류·지점마다 3번까지).
+				// 값은 지난 애니 갱신의 틱 기록(FAnimTickRecord::TimeAccumulator)에서 읽는다. 고쳐졌다면 재생 시각 ≈ 지점 × 클립 길이다.
+				static int32 Logged[LabUnitTypeMax][4] = {};
+				static const float Marks[4] = { 0.25f, 0.5f, 0.75f, 0.97f };
+				const float Dt = Context.GetDeltaTimeSeconds();
+				const int32 Ty = TypeParams.UnitType;
+				for (int32 M = 0; M < 4; ++M)
+				{
+					const float Mark = Marks[M] * DeathDuration;
+					if (T >= Mark && T - Dt < Mark && Logged[Ty][M] < 3)
+					{
+						for (const FAnimTickRecord& Record : Anim->GetUngroupedActivePlayersRead())
+						{
+							const UAnimSequenceBase* Seq = Cast<UAnimSequenceBase>(Record.SourceAsset);
+							if (Seq && Record.TimeAccumulator && Seq->GetName().Contains(TEXT("Death")))
+							{
+								++Logged[Ty][M];
+								UE_LOG(LogLab, Log, TEXT("lab_death_check path=actor type=%d mark=%.2f t=%.3f anim=%s anim_time=%.3f anim_len=%.3f rate_scale=%.4f budgeted=%d expected_time=%.3f"),
+									Ty, Marks[M], T, *Seq->GetName(), *Record.TimeAccumulator, Seq->GetPlayLength(), SkelMesh->GlobalAnimRateScale, SkelMesh->IsA<USkeletalMeshComponentBudgeted>() ? 1 : 0, T * DeathRate);
+								break;
+							}
+						}
+					}
+				}
+			}
+#endif
 			if (Actor->bPoseReady && Actor->ClearVelocityFrames > 0)
 			{
 				--Actor->ClearVelocityFrames;

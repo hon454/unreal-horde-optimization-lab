@@ -8,6 +8,7 @@ class ALabCameraRig;
 class ALabCrowdSpawner;
 class ALabOrb;
 class UMaterialInstanceDynamic;
+class UNiagaraComponent;
 
 /** 벤치마크 러너 시간. commands.md "벤치마크 러너 인자", measurement.md "벤치마크 조건". */
 struct FLabBench
@@ -54,11 +55,18 @@ protected:
 	 * 켜짐은 CVar lab.BandFloor=1로 CSV 메타데이터 LabCVars에 남아 실수로 켜고 잰 실행을 걸러낸다. Test 빌드에는 코드가 없다.
 	 */
 	void SetupBandFloor();
+	/**
+	 * Q2 Niagara 배경 무리(-LabCrowdFx=1, Docs/Worklog/Q2.md (마)). Config/DefaultGame.ini [Lab] CrowdFxSystem의 시스템을 오브 위치에 놓고
+	 * 사용자 변수(SmallRate·LargeRate·OuterRadius·Lifetime·Speed)를 넣은 뒤 활성화한다. 워밍업(268초)은 활성화 때 돈다.
+	 */
+	void SetupCrowdFx();
 
 	UPROPERTY() TObjectPtr<ALabCrowdSpawner> Spawner;
 	UPROPERTY() TObjectPtr<ALabOrb> Orb;
 	UPROPERTY() TObjectPtr<ALabCameraRig> Camera;
 	UPROPERTY() TObjectPtr<UMaterialInstanceDynamic> BandFloorMID; // -LabBandFloor(개발 전용)일 때만 있다
+	UPROPERTY() TObjectPtr<UNiagaraComponent> CrowdFx;             // -LabCrowdFx=1일 때만 있다
+	float CrowdFxNextLog = 0.f; // 개발 빌드의 입자 수 로그(lab_crowdfx_count) 다음 시각
 
 	float Elapsed = 0.f;
 	uint64 StartFrame = 0; // 개발 실행 요약의 평균 프레임 시간용

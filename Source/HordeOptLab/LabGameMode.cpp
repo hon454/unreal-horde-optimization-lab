@@ -28,6 +28,12 @@
 #include "IAnimationBudgetAllocator.h"
 #include "SignificanceManager.h"
 #include "RHI.h" // GRHIAdapterName, GRHIAdapterUserDriverVersion
+#include "NiagaraComponent.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraSystem.h"
+#include "NiagaraSystemInstance.h"           // 개발 빌드 입자 수 로그
+#include "NiagaraSystemInstanceController.h"
+#include "NiagaraEmitterInstance.h"
 #include "LabBuildVersion.h" // LAB_BUILD_COMMIT. HordeOptLab.Build.cs가 .git/HEAD에서 만든다
 
 namespace
@@ -119,7 +125,8 @@ void ALabGameMode::StartPlay()
 		UE_LOG(LogLab, Log, TEXT("lab_bandfloor on=0 reason=P2"));
 	}
 #endif
-	UE_LOG(LogLab, Log, TEXT("lab_build commit=%s driver=%s %s cvars=%s"), TEXT(LAB_BUILD_COMMIT), *GRHIAdapterName, *GRHIAdapterUserDriverVersion, *LabFixedCVarString());
+	UE_LOG(LogLab, Log, TEXT("lab_build commit=%s driver=%s %s cvars=%s crowdfx=%d crowdfx_particles=%d"), TEXT(LAB_BUILD_COMMIT), *GRHIAdapterName, *GRHIAdapterUserDriverVersion, *LabFixedCVarString(),
+		Config.bCrowdFx ? 1 : 0, Config.CrowdFxParticles());
 	if (Config.bBench)
 	{
 		ApplyBenchCVars();
@@ -135,6 +142,10 @@ void ALabGameMode::StartPlay()
 		SetupBandFloor();
 	}
 #endif
+	if (Config.bCrowdFx)
+	{
+		SetupCrowdFx();
+	}
 	Spawner->SpawnInitial();
 	StartFrame = GFrameCounter;
 
@@ -188,6 +199,47 @@ void ALabGameMode::SetupBandFloor()
 	UE_LOG(LogLab, Log, TEXT("lab_bandfloor on=1 floor=%s previous=%s material=%s radii=%.0f/%.0f/%.0f"), *Floor->GetOwner()->GetName(), *Previous, *Material->GetName(),
 		FLabSnipeBands::Edges[0], FLabSnipeBands::Edges[1], FLabSnipeBands::Edges[2]);
 #endif
+}
+
+void ALabGameMode::SetupCrowdFx()
+{
+	const FLabConfig& Config = FLabConfig::Get();
+	// 시스템 경로는 코드에 박지 않고 Config/DefaultGame.ini [Lab] CrowdFxSystem에서 읽는다(BandFloorMaterial과 같은 방식). 쿡은 DirectoriesToAlwaysCook의 /Game/Lab이 덮는다.
+	FString SystemPath;
+	if (!GConfig || !GConfig->GetString(TEXT("Lab"), TEXT("CrowdFxSystem"), SystemPath, GGameIni) || SystemPath.IsEmpty())
+	{
+		UE_LOG(LogLab, Warning, TEXT("lab_crowdfx on=0 reason=no_ini_key [Lab] CrowdFxSystem"));
+		return;
+	}
+	UNiagaraSystem* System = LoadObject<UNiagaraSystem>(nullptr, *SystemPath, nullptr, LOAD_Quiet | LOAD_NoWarn);
+	if (!System)
+	{
+		UE_LOG(LogLab, Warning, TEXT("lab_crowdfx on=0 reason=system_missing %s"), *SystemPath);
+		return;
+	}
+	const float Lifetime = Config.CrowdFxLifetime();
+	if (Lifetime <= 0.f)
+	{
+		UE_LOG(LogLab, Warning, TEXT("lab_crowdfx on=0 reason=inner_beyond_outer inner=%.0f outer=%.0f"), Config.CrowdFxInnerCm(), FLabCrowdFx::OuterRadius);
+		return;
+	}
+	// 오브에 붙이지 않고 오브 위치에 둔다. 시스템이 로컬 공간이라 부모의 회전을 따라가지 않게 하려는 것이다(오브는 움직이지 않는다).
+	// bPreCullCheck를 끈다: 켜면 스폰 때 시스템의 컬링 거리로 생성 자체를 건너뛸 수 있다. 자동 활성화도 끄고 사용자 변수를 먼저 넣는다(워밍업이 활성화 때 이 값으로 돈다).
+	CrowdFx = UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, System, Orb->GetActorLocation(), FRotator::ZeroRotator, FVector(1.f),
+		/*bAutoDestroy*/ false, /*bAutoActivate*/ false, ENCPoolMethod::None, /*bPreCullCheck*/ false);
+	if (!CrowdFx)
+	{
+		UE_LOG(LogLab, Warning, TEXT("lab_crowdfx on=0 reason=spawn_failed"));
+		return;
+	}
+	CrowdFx->SetVariableFloat(TEXT("User.SmallRate"), Config.CrowdFxSmallRate());
+	CrowdFx->SetVariableFloat(TEXT("User.LargeRate"), Config.CrowdFxLargeRate());
+	CrowdFx->SetVariableFloat(TEXT("User.OuterRadius"), FLabCrowdFx::OuterRadius);
+	CrowdFx->SetVariableFloat(TEXT("User.Lifetime"), Lifetime);
+	CrowdFx->SetVariableFloat(TEXT("User.Speed"), FLabScenario::MoveSpeed);
+	CrowdFx->Activate(true);
+	UE_LOG(LogLab, Log, TEXT("lab_crowdfx on=1 system=%s small_rate=%.2f large_rate=%.2f outer=%.0f inner=%.0f lifetime=%.2f speed=%.0f particles=%d"),
+		*System->GetName(), Config.CrowdFxSmallRate(), Config.CrowdFxLargeRate(), FLabCrowdFx::OuterRadius, Config.CrowdFxInnerCm(), Lifetime, FLabScenario::MoveSpeed, Config.CrowdFxParticles());
 }
 
 void ALabGameMode::ApplyVariantCVars()
@@ -244,6 +296,10 @@ void ALabGameMode::TickBench()
 			CSV_METADATA(TEXT("LabTypesAssets"), Config.Types == 2 ? (FLabUnitTypes::bLargeSubstituted ? TEXT("substituted") : TEXT("ok")) : TEXT("-"));
 			CSV_METADATA(TEXT("LabFarM"), *FString::FromInt(Config.FarM)); // 그리는 거리(표현 LOD Off, m4offmove는 Simulation LOD Off도). 기본 200
 			CSV_METADATA(TEXT("LabSimLod"), *Config.SimLodString()); // M4: 거리와 틱 간격. M3까지는 "-"
+			// Q2 Niagara 배경 무리: 켬 여부와 정상 상태 입자 수 계산값(스폰율 × 수명). 시스템을 못 찾아 켜지 못했으면 LabCrowdFxActive 0
+			CSV_METADATA(TEXT("LabCrowdFx"), Config.bCrowdFx ? TEXT("1") : TEXT("0"));
+			CSV_METADATA(TEXT("LabCrowdFxParticles"), *FString::FromInt(Config.CrowdFxParticles()));
+			CSV_METADATA(TEXT("LabCrowdFxActive"), CrowdFx && CrowdFx->IsActive() ? TEXT("1") : TEXT("0"));
 			// 측정 방법 5번(plan.md "M3b"): 빌드 커밋, 고정 CVar 값, GPU 드라이버. summarize.py BUILD_KEYS(labbuild·labcvars·labdriver)와 이름을 맞춘다.
 			CSV_METADATA(TEXT("LabBuild"), TEXT(LAB_BUILD_COMMIT));
 			CSV_METADATA(TEXT("LabCVars"), *LabFixedCVarString());
@@ -331,6 +387,24 @@ void ALabGameMode::Tick(float DeltaSeconds)
 	if (BandFloorMID && Orb)
 	{
 		BandFloorMID->SetVectorParameterValue(TEXT("BandCenter"), FLinearColor(Orb->GetActorLocation())); // 결정 6: 띠 중심은 오브(맵 중앙 고정이지만 매 프레임 넣는다)
+	}
+	// Q2 배경 무리의 실제 입자 수(5초마다). GPU 이미터는 수 읽기가 몇 프레임 늦다(NiagaraEmitterInstance.cpp:34-48). 진단 로그라 시뮬레이션 틱과의 경합은 무시한다.
+	if (CrowdFx && Elapsed >= CrowdFxNextLog)
+	{
+		CrowdFxNextLog = Elapsed + 5.f;
+		const FNiagaraSystemInstanceControllerPtr Controller = CrowdFx->GetSystemInstanceController();
+		if (const FNiagaraSystemInstance* Instance = Controller.IsValid() ? Controller->GetSystemInstance_Unsafe() : nullptr)
+		{
+			FString Counts;
+			int32 Total = 0;
+			for (const FNiagaraEmitterInstanceRef& Emitter : Instance->GetEmitters())
+			{
+				const int32 Num = Emitter->GetNumParticles();
+				Total += Num;
+				Counts += FString::Printf(TEXT(" %s=%d"), *Emitter->GetEmitterHandle().GetName().ToString(), Num);
+			}
+			UE_LOG(LogLab, Log, TEXT("lab_crowdfx_count t=%.1f total=%d%s expected=%d"), Elapsed, Total, *Counts, FLabConfig::Get().CrowdFxParticles());
+		}
 	}
 	// E3b (8) 화질 캡처(-LabFrameLog): 이전 프레임의 화면 안 30m VAT 인스턴스 수·보이는 액터 수를 남기고 슬롯을 비운다. 프로세서는 이번 프레임 슬롯에 쓴다.
 	static const bool bFrameLog = FParse::Param(FCommandLine::Get(), TEXT("LabFrameLog"));

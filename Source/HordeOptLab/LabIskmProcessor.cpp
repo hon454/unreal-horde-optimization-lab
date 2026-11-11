@@ -51,6 +51,36 @@ namespace
 		return bWrote;
 	}
 
+#if !UE_BUILD_TEST
+	/**
+	 * Q1b 개발 확인(Q2 3단위): 엔티티 트랙의 엔진 쪽 재생 위치·배율·클립 번호를 읽는다. GPU로 가는 것과 같은 묶음 데이터(FAnimSequenceTrackPackedData)에서
+	 * 엔진이 계산한 값이다(AnimSequenceTransformProviderData.cpp:1879-1913 GetPosition, 1816 GetPlayRate).
+	 */
+	bool LabReadTrack(FMassInstancedSkinnedMeshInfo& Info, float LODSignificance, FMassEntityHandle Entity, float& OutPos, float& OutRate, int32& OutSeq)
+	{
+		FMassLODInstancedSkinnedMeshSignificanceRange* Range = Info.GetLODSignificanceRange(LODSignificance);
+		if (!Range || !Range->InstancedSkinnedMeshSharedDataPtr)
+		{
+			return false;
+		}
+		for (const FInstancedSkinnedMeshComponentSharedDataKey& Key : Range->SkinnedMeshComponentRefs)
+		{
+			FMassInstancedSkinnedMeshComponentSharedData* Shared = Range->InstancedSkinnedMeshSharedDataPtr->Find(Key);
+			UInstancedSkinnedMeshComponent* Component = Shared ? Shared->GetMutableInstancedSkinnedMeshComponent() : nullptr;
+			const int32* TrackId = Shared ? Shared->GetEntityToTrackMap().Find(Entity) : nullptr;
+			const UAnimSequenceTransformProviderDataInstance* Provider = Component ? Cast<UAnimSequenceTransformProviderDataInstance>(Component->GetTransformProvider()) : nullptr;
+			if (TrackId && Provider)
+			{
+				OutPos = Provider->GetPosition(*TrackId, 0).TargetPosition;
+				OutRate = Provider->GetPlayRate(*TrackId, 0);
+				OutSeq = Provider->GetSequenceIndex(*TrackId, 0);
+				return true;
+			}
+		}
+		return false;
+	}
+#endif
+
 	/** ISKM 컴포넌트마다 트랙 맵 크기(Lab/IskmTracks)와 인스턴스 수(Lab/IskmInstances)를 더한다. 컴포넌트는 종류마다 하나라 몇 개뿐이다. */
 	void LabCountIskm(UMassRepresentationSubsystem& RepresentationSubsystem, int32& OutTracks, int32& OutInstances)
 	{
@@ -195,6 +225,29 @@ void ULabIskmProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutio
 				Track.AppliedState = int8(Anim.State);
 				Track.AppliedStartTime = Anim.StateStartTime;
 			}
+#if !UE_BUILD_TEST
+			{
+				// Q1b 개발 확인(Q2 3단위): 죽는 동안 사망 시간의 25·50·75·97%를 지나는 프레임에 엔진 트랙의 재생 위치를 찍는다(종류·지점마다 3번까지).
+				// 고쳐졌다면 위치 ≈ 지점 × 클립 길이이고, 고치기 전이었다면 시즈는 30% 지점부터 클립 끝(0.633초)에 붙어 있었다.
+				static int32 Logged[LabUnitTypeMax][4] = {};
+				static const float Marks[4] = { 0.25f, 0.5f, 0.75f, 0.97f };
+				const float Dt = Context.GetDeltaTimeSeconds();
+				const int32 Ty = Context.GetConstSharedFragment<FLabUnitTypeParams>().UnitType;
+				for (int32 M = 0; M < 4 && Anim.State == ELabMinionState::Dead; ++M)
+				{
+					const float Mark = Marks[M] * DeathDuration;
+					float Pos = 0.f, TrackRate = 0.f;
+					int32 Seq = INDEX_NONE;
+					if (T >= Mark && T - Dt < Mark && Logged[Ty][M] < 3 && LabReadTrack(Info, LODSignificance, Entity, Pos, TrackRate, Seq))
+					{
+						++Logged[Ty][M];
+						const UAnimSequenceTransformProviderData* ProviderData = Crowd->IskmProviders.IsValidIndex(Ty) ? Cast<UAnimSequenceTransformProviderData>(Crowd->IskmProviders[Ty]) : nullptr;
+						UE_LOG(LogLab, Log, TEXT("lab_death_check path=iskm type=%d mark=%.2f t=%.3f track_pos=%.3f track_rate=%.4f track_seq=%d clip_len=%.3f expected_pos=%.3f"),
+							Ty, Marks[M], T, Pos, TrackRate, Seq, ProviderData ? ProviderData->GetSequencePlayLength(2) : -1.f, T * Rate);
+					}
+				}
+			}
+#endif
 
 			Representation.PrevTransform = Transform;
 			Representation.PrevLODSignificance = LODSignificance;

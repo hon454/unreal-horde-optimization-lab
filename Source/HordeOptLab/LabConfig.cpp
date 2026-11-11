@@ -64,6 +64,7 @@ const FLabConfig& FLabConfig::Get()
 			else if (Variant == TEXT("m5blend")) { C.Variant = ELabVariant::M5Blend; }
 			else if (Variant == TEXT("m5minss")) { C.Variant = ELabVariant::M5MinSS; }
 			else if (Variant == TEXT("m5bounds")) { C.Variant = ELabVariant::M5Bounds; }
+			else if (Variant == TEXT("q2crowd")) { C.Variant = ELabVariant::Q2Crowd; }
 			else if (Variant == TEXT("m3qold")) { C.Variant = ELabVariant::M3QOld; }
 			else if (Variant == TEXT("m3syncall")) { C.Variant = ELabVariant::M3SyncAll; }
 			else if (Variant == TEXT("m3vis0")) { C.Variant = ELabVariant::M3Vis0; }
@@ -129,6 +130,16 @@ const FLabConfig& FLabConfig::Get()
 		{
 			C.bEntityPool = Pool != 0;
 		}
+		// Q2 Niagara 배경 무리 기본값: 변형 q2crowd만 켠다. run-bench.ps1의 ValidateSet에 q2crowd가 들어가기 전에는 -Variant m5bounds -ExtraArgs "-LabCrowdFx=1"로 같은 구성을 고른다.
+		C.bCrowdFx = C.Variant == ELabVariant::Q2Crowd;
+		int32 CrowdFx = -1;
+		if (FParse::Value(Cmd, TEXT("-LabCrowdFx="), CrowdFx) && CrowdFx >= 0)
+		{
+			C.bCrowdFx = CrowdFx != 0;
+		}
+#if !UE_BUILD_TEST
+		FParse::Value(Cmd, TEXT("-LabCrowdFxInnerM="), C.CrowdFxInnerOverrideM);
+#endif
 		C.N = FMath::Max(C.N, 1);
 		C.Preset = FMath::Clamp(C.Preset, 1, 2);
 		return C;
@@ -189,6 +200,7 @@ const TCHAR* FLabConfig::VariantName(ELabVariant V)
 	case ELabVariant::M5Blend: return TEXT("m5blend");
 	case ELabVariant::M5MinSS: return TEXT("m5minss");
 	case ELabVariant::M5Bounds: return TEXT("m5bounds");
+	case ELabVariant::Q2Crowd: return TEXT("q2crowd");
 	default: return TEXT("full");
 	}
 }
@@ -238,8 +250,44 @@ FLabIskmParams FLabConfig::IskmParams() const
 	FLabIskmParams P; // 대표 m5iskm: BlendTime 0, 항상 재생, 그림자 켬
 	if (Variant == ELabVariant::M5Blend) { P.BlendTime = 0.25f; }
 	if (Variant == ELabVariant::M5MinSS) { P.AnimationMinScreenSize = 0.1f; }
-	if (Variant == ELabVariant::M5Bounds) { P.bFixedBounds = true; }
+	if (Variant == ELabVariant::M5Bounds || Variant == ELabVariant::Q2Crowd) { P.bFixedBounds = true; } // q2crowd = m5bounds + 배경 무리
 	return P;
+}
+
+float FLabConfig::CrowdFxTotalRate() const
+{
+	return float(N) / FLabScenario::MapRadius * FLabScenario::MoveSpeed;
+}
+
+float FLabConfig::CrowdFxLargeRate() const
+{
+	return Types == 2 ? CrowdFxTotalRate() * FLabCrowdFx::LargeShare : 0.f;
+}
+
+float FLabConfig::CrowdFxSmallRate() const
+{
+	return CrowdFxTotalRate() - CrowdFxLargeRate(); // 1종이면 전부 소형
+}
+
+float FLabConfig::CrowdFxInnerCm() const
+{
+	if (CrowdFxInnerOverrideM > 0.f)
+	{
+		return CrowdFxInnerOverrideM * 100.f;
+	}
+	const float EnterCm = FMath::Lerp(FLabCrowdFx::RepLowCm, FarCm(), 1.f - FLabCrowdFx::RepHysteresis);
+	return FMath::Sqrt(FMath::Square(EnterCm) - FMath::Square(FLabScenario::OrbViewHeight)) - FLabScenario::OrbViewBack;
+}
+
+float FLabConfig::CrowdFxLifetime() const
+{
+	return (FLabCrowdFx::OuterRadius - CrowdFxInnerCm()) / FLabScenario::MoveSpeed;
+}
+
+int32 FLabConfig::CrowdFxParticles() const
+{
+	const float Lifetime = CrowdFxLifetime();
+	return bCrowdFx && Lifetime > 0.f ? FMath::RoundToInt(CrowdFxTotalRate() * Lifetime) : 0;
 }
 
 FString FLabConfig::SimLodString() const
@@ -286,7 +334,9 @@ FString FLabConfig::ToLogString() const
 	const FString Budget = (Stage >= ELabStage::M3 || bScreenSigBudget) ? FString::Printf(TEXT(" screensig_budget=%d"), bScreenSigBudget ? 1 : 0) : FString();
 	// health_fixed는 디버그 인자를 줬을 때만 붙인다
 	const FString Health = HealthFixed > 0.f ? FString::Printf(TEXT(" health_fixed=%.0f"), HealthFixed) : FString();
-	return FString::Printf(TEXT("lab_config stage=%s n=%d preset=P%d seed=%d variant=%s bench=%d label=%s duration=%.1f types=%d simlod=%s%s%s%s%s"),
+	// crowdfx는 켰을 때만 붙인다(Q2). 기본 실행의 로그는 그대로다.
+	const FString Crowd = bCrowdFx ? FString::Printf(TEXT(" crowdfx=1 crowdfx_particles=%d crowdfx_inner=%.1f"), CrowdFxParticles(), CrowdFxInnerCm() / 100.f) : FString();
+	return FString::Printf(TEXT("lab_config stage=%s n=%d preset=P%d seed=%d variant=%s bench=%d label=%s duration=%.1f types=%d simlod=%s%s%s%s%s%s"),
 		StageName(Stage), N, Preset, Seed, VariantName(Variant), bBench ? 1 : 0, *Label, DurationSec, Types, *SimLodString(),
-		FarM != 200 ? *FString::Printf(TEXT(" far=%d"), FarM) : TEXT(""), *M5, *Budget, *Health);
+		FarM != 200 ? *FString::Printf(TEXT(" far=%d"), FarM) : TEXT(""), *M5, *Budget, *Health, *Crowd);
 }

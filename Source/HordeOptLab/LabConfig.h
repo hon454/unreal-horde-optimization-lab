@@ -62,6 +62,22 @@ enum class ELabVariant : uint8
 	M5Blend,     // 참고: m5iskm + BlendTime 0.25초
 	M5MinSS,     // 참고: m5iskm + AnimationMinScreenSize 0.1(엔진 r.Skinning.DefaultAnimationMinScreenSize 기본값)
 	M5Bounds,    // 참고: m5iskm + ISKM 컴포넌트 고정 바운드(SetPrimitiveBoundsOverride). 프레임 끝 인스턴스별 CalcBounds 반복이 SendAllEndOfFrameUpdates 증가분의 원인인지 가른다(Docs/Worklog/M5.md "트레이스 검토")
+	// Q2(-LabStage=M5와 함께, plan.md "품질 계획" Q2). 이름은 Q5에서 단계 이름과 함께 바뀔 수 있다.
+	Q2Crowd,     // m5bounds + Niagara 배경 무리(-LabCrowdFx 기본 1). 표현·풀링·Budget은 m5bounds와 같다
+};
+
+/**
+ * Q2 Niagara 배경 무리(/Game/Lab/FX/NS_LabCrowd, Docs/Worklog/Q2.md). 그리는 끝 밖을 실제 미니언과 연결되지 않은 GPU 입자로 채운다.
+ * 입자는 바깥 고리에서 생겨 미니언과 같은 속도로 오브를 향해 걷고, 수명이 끝나는 안쪽 반경에서 사라진다(페이드 없음, 2026-11-12 코디네이터 결정).
+ */
+struct FLabCrowdFx
+{
+	static constexpr float OuterRadius = 100000.f; // 1,000m(2026-11-12 사용자 결정). 바닥 반쪽 길이 1,020m(Scripts/create-bench-map.py)
+	static constexpr float LargeShare = 0.1f;      // 2종의 대형 비율(일련번호 10의 배수가 대형, LabUnitAssets.h). 1종이면 0
+	// 실제 미니언이 Off에서 그려지기 시작하는 카메라 거리 = Lerp(Low 경계 80m, 그리는 끝, 1 − 히스테리시스 10%)(MassLODCalculator.h:864-886, 표현 LOD 기본 히스테리시스 10%,
+	// MassRepresentationFragments.h:309). 그리는 끝 200m면 188m다. 밴드 80m는 LabCrowdSubsystem.cpp의 표현 LOD 밴드와 같은 값이다.
+	static constexpr float RepLowCm = 8000.f;
+	static constexpr float RepHysteresis = 0.1f;
 };
 
 /**
@@ -191,6 +207,27 @@ struct FLabConfig
 	 * M3 하위 실험·진단 변형은 0. 인자를 주면 그 값이 이긴다. M3 이상 단계에서만 뜻이 있다.
 	 */
 	bool bScreenSigBudget = false;
+	/**
+	 * Q2 Niagara 배경 무리(-LabCrowdFx=0/1). 기본: 변형 q2crowd만 1, 그 밖 0(기존 단계·변형의 동작은 그대로). 인자를 주면 그 값이 이긴다.
+	 * 단계와 기본값의 연결은 Q3·Q5에서 단계 이름과 함께 정한다(Docs/Worklog/Q2.md (마)).
+	 */
+	bool bCrowdFx = false;
+	/** 개발용: 입자가 사라지는 안쪽 반경(-LabCrowdFxInnerM=<미터>, 0 = 기본 CrowdFxInnerCm). 200m 경계 비교 촬영에 쓴다. Test 빌드에서는 읽지 않는다 */
+	float CrowdFxInnerOverrideM = 0.f;
+	/** 실제 미니언과 같은 흐름(개/초): N / 맵 반경 × 이동 속도(Docs/Worklog/Q2.md "장면 수치"). N 1만이면 60 */
+	float CrowdFxTotalRate() const;
+	float CrowdFxSmallRate() const;
+	float CrowdFxLargeRate() const;
+	/**
+	 * 입자가 사라지는 안쪽 반경(오브 기준, cm). 수명은 이 값을 따라간다. 기본은 P1 카메라 앞에서 실제 미니언이 나타나는 자리다:
+	 * 카메라 거리 H = Lerp(80m, 그리는 끝, 0.9)를 높이 9m로 수평 거리로 바꾸고 카메라가 오브 뒤 15m인 만큼 뺀다. 그리는 끝 200m면 172.8m(Docs/Worklog/Q2.md "200m 경계의 위치").
+	 * P2에서도 같은 값을 쓴다(P2는 입자가 화면에 없고, 프리셋에 따라 입자 수가 바뀌지 않게 한다).
+	 */
+	float CrowdFxInnerCm() const;
+	/** (바깥 반경 − 안쪽 반경) / 이동 속도. 0 이하면 켜지 않는다(그리는 끝이 1,000m 이상) */
+	float CrowdFxLifetime() const;
+	/** 정상 상태 입자 수 계산값 = 스폰율 × 수명. 꺼져 있으면 0. CSV 메타데이터 LabCrowdFxParticles */
+	int32 CrowdFxParticles() const;
 	/** M5 단계의 ISKM 변형(m5iskm·m5destroy·m5blend·m5minss·m5bounds, 기본 변형)이면 참. m4offpool·m4offmove는 M5 단계에서도 VAT다 */
 	bool UsesIskm() const;
 	FLabIskmParams IskmParams() const;
