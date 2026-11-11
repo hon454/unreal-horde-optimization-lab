@@ -1,6 +1,6 @@
 # Unreal 호드 최적화 실험실
 
-Night of the Dead에서 측정 없이 액터로 했던 좀비 호드 최적화를, UE5 Mass Entity로 다시 지어 거리별로 비용을 덜어내며 단계마다 수치로 확인하는 포트폴리오다. 액터로 멈춘 N에서 Mass로 닿은 N까지를 한 그래프로 보인다. 마일스톤 M0\~M5는 끝났고, 지금은 [plan.md](Docs/plan.md) "게임 장면 계획"의 G1\~G8을 따른다. 엔진 프로젝트는 `HordeOptLab`, 모듈과 클래스·인자·폴더의 접두사는 `Lab`이다.
+Night of the Dead에서 측정 없이 액터로 했던 좀비 호드 최적화를, UE5 Mass Entity로 다시 지어 거리별로 비용을 덜어내며 단계마다 수치로 확인하는 포트폴리오다. 액터로 멈춘 N에서 Mass로 닿은 N까지를 한 그래프로 보인다. 마일스톤 M0\~M5는 끝났고, 지금은 [plan.md](Docs/plan.md) "품질 계획"의 Q1\~Q6을 따른다. 엔진 프로젝트는 `HordeOptLab`, 모듈과 클래스·인자·폴더의 접두사는 `Lab`이다.
 
 ## 세션을 시작하면
 
@@ -14,7 +14,7 @@ Night of the Dead에서 측정 없이 액터로 했던 좀비 호드 최적화�
 | 알고 싶은 것 | 볼 곳 |
 | --- | --- |
 | 현재 마일스톤, 다음 할 일, 매번 쓰는 명령, 진행 중 묶음의 수치, 막힌 것, 사용자에게 요청한 일 | [Docs/STATUS.md](Docs/STATUS.md) |
-| 게임 장면 계획(목표 사양, 게임 조건, 단계, G1\~G8, 측정 목록)과 끝낸 M0\~M5의 목표·실험 | [Docs/plan.md](Docs/plan.md) |
+| 품질 계획(목표 사양, 사다리, 빼 보기 표, Q1\~Q6, 측정 목록)과 끝낸 M0\~M5의 목표·실험 | [Docs/plan.md](Docs/plan.md) |
 | 글 대기열 | [Docs/backlog.md](Docs/backlog.md) |
 | 확정된 결정과 이유, 버린 대안 | [Docs/Decisions/](Docs/Decisions/README.md)(ADR). ADR이 없는 초기 결정은 그 README의 표 |
 | 측정 규약: 시나리오 고정값, 빌드 구성, 벤치마크 절차, 지표 이름, 차이 판정, 한계 | [measurement.md](Docs/Guides/measurement.md) |
@@ -26,7 +26,7 @@ Night of the Dead에서 측정 없이 액터로 했던 좀비 호드 최적화�
 | 영상·문서·샘플·에셋·포럼 스레드 | [references.md](Docs/Reference/references.md) |
 | 강연 두 편(Shabel, 윤준기)의 자막 분석 요약과 타임스탬프 | [talk-notes.md](Docs/Reference/talk-notes.md) |
 | 측정 PC 사양과 엔진 버전 | [pc-specs.md](Docs/Reference/pc-specs.md) |
-| 끝낸 마일스톤의 경위, 실패한 실행 | `Docs/Worklog/M<N>.md`, 게임 장면 계획은 `G<N>.md`. 세션 시작 때 읽지 않고 검색만 한다 |
+| 끝낸 마일스톤의 경위, 실패한 실행 | `Docs/Worklog/M<N>.md`, 품질 계획은 `Q<N>.md`. 세션 시작 때 읽지 않고 검색만 한다 |
 | 글 본문과 이미지 | `Posts/NN-이름/README.md`, `Posts/NN-이름/images/` |
 | 글 수치의 근거(실행 라벨, 세 실행의 값, 계산식, 캡처, 소스 위치) | `Posts/NN-이름/measurements.md` |
 | 마일스톤별 측정 결과 | `Measurements/M<N>/summary.csv`(조건별 중앙값·범위), `runs.csv`(실행별 한 행), `shots/` |
@@ -41,12 +41,13 @@ Night of the Dead에서 측정 없이 액터로 했던 좀비 호드 최적화�
 ### 진행 방식
 
 - **구현 트랙이 마일스톤을 끝낸다. 글과 학습은 뒤따른다.** 마일스톤의 완료 조건은 코드, 자동 측정(`Measurements/M<N>/`), git 태그 `M<N>`(이력 책갈피다. 수치의 기준이 아니다), STATUS 갱신, Worklog 한 절까지다. 글·그래프 해석·영상·트레이스 분석은 완료 조건이 아니다. 마일스톤을 끝내면 [backlog.md](Docs/backlog.md) "글 대기열"에 항목을 더하고 다음 마일스톤으로 간다. 글은 최신 main에서 쓴다. 수치는 가장 최근 전체 묶음의 값이고, `measurements.md`에 그 묶음의 빌드 해시와 실행 라벨을 적는다(2026-11-10 사용자 결정). 배울 개념은 막혔을 때 그 부분만 읽는다. 앞 프로젝트에서 글과 학습이 구현을 막았다(2026-11-06 사용자 결정).
-- **한 마일스톤에서 바꾸는 최적화 변수는 하나다.** 시나리오(스폰 분포, 개체 종류와 비율, 오브 동작, 거리 밴드, 카메라 프리셋)는 M0에서 고정하고 바꾸지 않는다. 바뀐 변수가 둘 이상인 비교는 "참고"로 적고 그래프에 잇지 않는다. 시나리오를 바꿔야 하면 "새 기준선" 마일스톤으로 분리해 이전 단계를 모두 다시 잰다(M3b). 지금의 기준선은 게임 장면이다(plan.md "게임 장면 계획", ADR-0008). 장면·오브 공격·게임 조건은 G1·G2에서 정하고 G7에서 다시 동결한다.
+- **한 마일스톤에서 바꾸는 최적화 변수는 하나다.** 시나리오(스폰 분포, 개체 종류와 비율, 오브 동작, 거리 밴드, 카메라 프리셋)는 M0에서 고정하고 바꾸지 않는다. 바뀐 변수가 둘 이상인 비교는 "참고"로 적고 그래프에 잇지 않는다. 시나리오를 바꿔야 하면 "새 기준선" 마일스톤으로 분리해 이전 단계를 모두 다시 잰다(M3b). 지금의 계획은 옛 평지 시나리오에 개체별 체력 분산 하나를 더한 것이고(plan.md "품질 계획", ADR-0009), 총괄 묶음이 전 단계를 다시 잰다.
 - **수치는 Test 패키지에서만 잰다.** Development 에디터 빌드(`-game`)는 개발, 동작 확인, 디버그 오버레이 스크린샷에 쓰고 그 수치는 비교에 쓰지 않는다([ADR-0001](Docs/Decisions/0001-test-package-for-measurement.md)).
 - **측정 인프라는 M0 끝에 동결한다.** 스포너, 벤치마크 러너, 시드, 카메라 프리셋, CSV 스키마가 대상이다. 바꿔야 하면 그날 모든 단계를 다시 재고 그 사실을 적는다. 측정 조건이 바뀌어 다시 재면 글의 표와 README도 새 묶음의 값으로 고치고, 바뀐 이유를 글의 측정 기록에 한 줄 남긴다(2026-11-10 사용자 결정). 최종 비교표는 마지막에 최신 빌드 하나에서 전 단계를 한 날 연달아 잰다.
 - **단계는 한 빌드 안의 실행 모드다.** 마일스톤의 구현을 지우지 않고 `-LabStage=`로 고르는 새 단계로 더한다. 이전 단계를 재려고 태그를 체크아웃하지 않는다([ADR-0004](Docs/Decisions/0004-stages-as-run-modes.md)).
 - **개발 속도가 최우선이다.** 단위 테스트, CI, PR, 외부 이슈 트래커를 쓰지 않는다. main에 직접 커밋한다.
 - **여러 세션이 한 체크아웃을 쓴다.** 코디네이터 세션이 작업 세션(코드 정비, 측정, 에셋, 벤치마크 실행)을 띄우고, 모두 같은 폴더에서 일한다. 워크트리는 쓰지 않는다(`Binaries/`·`Intermediate/`·DDC를 세션마다 다시 만들게 된다). 그래서 네 가지를 지킨다. (1) 빌드·패키징은 한 번에 한 세션만 한다. 같은 `Binaries/`를 덮어쓴다. (2) Test 패키지 벤치마크가 도는 동안 다른 세션은 빌드·에디터·패키징을 하지 않는다. 주기 스파이크로 측정이 오염된다. (3) 파일 소유를 나눈다. 코드 세션은 `Source/`·`Config/`, 측정 세션은 `Scripts/`·`Measurements/`, 에셋 세션은 `Content/Lab/`·`Scripts/create-*.md`, STATUS.md·plan.md·backlog.md는 코디네이터만 고친다. 커밋은 자기 경로만 `git add`한다. `git add -A`를 쓰지 않는다. (4) 결과는 채팅이 아니라 파일에 남긴다(`Docs/Worklog/M<N>.md`의 절, `Measurements/M<N>/`). 코디네이터에게는 보고의 앞부분만 전달된다. 작업 세션은 턴을 끝낼 때 STATUS.md 대신 자기 Worklog 절을 갱신하고, 코디네이터가 STATUS.md에 옮긴다(2026-11-09 사용자 결정).
+- **작업 세션은 작게 나눠 띄우고 진행을 코디네이터에서 보이게 한다.** (1) 세션 하나는 작업 단위 하나만 맡는다. 작업 단위는 빌드·작은 실행·Worklog 절·커밋으로 끝나는 크기다(기능 하나, 묶음 하나). 다음 단위는 새 세션에 Worklog를 근거로 넘긴다. 한 세션의 맥락이 과하게 차지 않게 하려는 것이다. (2) 작업 세션은 단계(조사, 구현, 빌드, 실행, 커밋)가 끝날 때마다 자기 Worklog 절에 한 줄을 더하고, 턴을 끝낼 때 보고의 첫머리에 지금 단계와 성패를 적는다. (3) 코디네이터는 세션을 띄우면 STATUS.md "진행 중인 세션"에 세션, 작업 단위, 모델과 추론 수준, 상태를 적고, 세션의 보고가 올 때마다 그 줄을 고치고 사용자에게 한 줄로 알린다. (4) 작업 세션의 모델은 Opus나 Sonnet이고 추론 수준을 일에 맞춰 정한다. 설계가 갈리는 코드와 에셋 작업은 Opus high, 정해진 절차를 따르는 일(측정 스크립트, 벤치마크 실행, 문서 맞추기)은 Sonnet medium을 기본으로 한다(2026-11-11 사용자 결정).
 - **STATUS.md에는 지금 유효한 것만 두고 10KB를 넘기지 않는다.** 세션마다 통째로 읽는 파일이다. 끝낸 마일스톤의 경위는 `Docs/Worklog/M<N>.md`로 옮기고, 다음 작업을 제약하는 결과만 한 줄 남긴다. 매번 쓰지 않는 명령은 commands.md에, 확정값은 measurement.md에, 다시 나올 문제는 troubleshooting.md에, 엔진 소스에서 확인한 사실은 engine-notes.md에 둔다.
 - **커밋 메시지는 [Conventional Commits](https://www.conventionalcommits.org/)로 쓴다.** `type(scope): summary` 한 줄, 영어 명령형 소문자. type은 `feat`, `fix`, `docs`, `build`, `refactor`, `chore`, `bench`(측정 결과 추가). 측정 조건이나 설정값을 바꾼 커밋은 본문에 이유를 쓴다.
 - **저장소 용량을 최소로 둔다.** 커밋하는 것은 소스, `Config/`, `.uproject`, 직접 만든 `Content/Lab/`, `Docs/`, `Posts/`, `Scripts/`, `Measurements/`의 `summary.csv`·`runs.csv`·대표 스크린샷이다. Fab 콘텐츠(`Content/ParagonMinions/`), VAT 베이크 산출물, `Saved/`, `Binaries/`, `Intermediate/`, `DerivedDataCache/`, 패키지는 커밋하지 않는다. 프레임 CSV·트레이스·영상은 저장소 밖에 두고 경로나 링크만 적는다. 이미지(`.png`, `.jpg`, `.webp`, `.gif`)와 `.uasset`·`.umap`은 Git LFS다(`.gitattributes`).
@@ -64,7 +65,7 @@ Night of the Dead에서 측정 없이 액터로 했던 좀비 호드 최적화�
 - **에디터 작업은 최대한 줄인다. 금지는 아니다.** 액터·프로세서·설정은 되도록 C++과 ini로 쓰고, 스포너·오브·카메라 프리셋·Mass EntityConfig는 실행 시 코드로 만든다([ADR-0005](Docs/Decisions/0005-entity-config-in-code.md)). 에셋이 더 맞는 일(Fab 에셋 임포트 확인, 피직스 에셋 수정, AnimToTexture 베이크, Niagara 시스템, 글에 보일 에셋 화면)은 에디터 작업을 만든다. 그때는 Unreal MCP(`ModelContextProtocol` + `AllToolsets` 플러그인)를 먼저 쓰고, 만든 순서를 `Scripts/`에 적어 다시 만들 수 있게 한다(예: `Scripts/create-bolt-fx.md`). MCP 툴 호출은 게임 스레드에서 직렬이라 겹쳐 부르지 않고, 대량 변경 전후에 저장한다. 새 `UFUNCTION`은 에디터 재시작이 필요하다. MCP가 막히면 Python Editor Script로 우회하고, 그것도 막히면 사용자에게 에디터 작업을 요청한다. 같은 결과라면 MCP 없이도 진행되는 설계를 고른다.
 - **엔진 소스를 추측하지 않는다.** 기본값, 매크로, 클래스 이름은 소스 빌드의 `Engine/Source`·`Engine/Plugins`에서 확인한 뒤 쓰고, 확인한 것은 engine-notes.md에 적는다. 이미 확인한 것이 engine-notes.md에 있다: Mass 코어 경로, `LODSignificance` 범위(0\~3), `mass.FullyParallel`, Test 구성 매크로, ISKM 트랙 풀 문제.
 - **소스 빌드 엔진만 쓴다.** `.uproject`의 `EngineAssociation`이 가리키는 소스 빌드로만 열고 빌드한다. 런처 설치본과 섞으면 같은 `Binaries/`에 번갈아 빌드하게 된다.
-- **군중 최적화와 무관한 기능을 만들지 않는다.** GAS, 무기·전투, 인벤토리, 메뉴 UI, 네트워크 복제, 세이브, 플레이어 이동, VFX·사운드 제작은 비목표다. 오브의 피해는 체력 프래그먼트 차감과 피격·사망 태그, 그리고 근거리에 더한 둘(0\~30m 트레이스 발의 부위 판정, 근거리 사망 래그돌)까지다. 반경 8m 범위 피해는 부위와 무관하다. 판정과 비용만 다룬다. Niagara 배경 무리는 표현 단계로 다룬다(G5). 오브와 저격 궤적은 구체 하나와 디버그 라인으로 그린다. 새 기능 아이디어는 진행 중인 마일스톤에 넣지 않고 채팅으로 사용자에게 알린다. 받아들여지면 plan.md에 넣는다.
+- **군중 최적화와 무관한 기능을 만들지 않는다.** GAS, 무기·전투, 인벤토리, 메뉴 UI, 네트워크 복제, 세이브, 플레이어 이동, VFX·사운드 제작은 비목표다. 오브의 피해는 체력 프래그먼트 차감과 피격·사망 태그까지다. Niagara 배경 무리는 표현 단계로 다룬다(Q2). 오브와 저격 궤적은 구체 하나와 디버그 라인으로 그린다. 새 기능 아이디어는 진행 중인 마일스톤에 넣지 않고 채팅으로 사용자에게 알린다. 받아들여지면 plan.md에 넣는다.
 - **구조와 이름.** `HordeOptLab.uproject`가 루트에 있고 모듈은 `HordeOptLab` 하나다. 클래스·인자·저장 폴더의 접두사는 `Lab`이다(`ALabOrb`, `ULabApproachProcessor`, `-LabN=`, `Saved/Screenshots/Lab/`). 폴더 이름은 대문자로 시작한다(`Docs/`, `Posts/`, `Scripts/`, `Measurements/`). `Scripts/`의 PowerShell은 UTF-8 BOM으로 저장한다.
 - **참고 프로젝트는 읽기만 한다.** `../unreal-horde-references/`의 코드를 옮기면 출처 주석을 단다. Fab 에셋은 재배포 금지라 커밋하지 않는다. PARAGON 상표를 프로젝트 이름·제목에 쓰지 않는다.
 

@@ -222,3 +222,14 @@
 | 청크 표시 프래그먼트 위치 | `FMassVisualizationChunkFragment`(`AreAnyEntitiesVisibleInChunk`)는 MassLOD 모듈이다 | `Engine/Plugins/Runtime/MassGameplay/Source/MassLOD/Public/MassLODFragments.h:136` |
 | ASTPD 바운드(실행) | Development 에디터 `-game` 실행에서 로드 직후 `HasAnimationBounds()` 0, `IsCompiling()` 1(비동기 계산 중). Test 패키지(쿡)에서는 아직 보지 않았다(로그 `lab_iskm … bounds=`) | 2026-11-11 `LabDev-m5iskm-M5-N100-P1.log` |
 | ISKM 고정 바운드 | `SetPrimitiveBoundsOverride(FBox)`는 값만 저장한다. 값이 유효하면 `CalcBounds`가 인스턴스 반복 없이 이 상자를 돌려주고, `UpdateBounds`로 부르면 월드 좌표 그대로다. 인스턴스 로컬 바운드와 GPU LOD 선택은 이 값을 쓰지 않는다. VSM 빛 반경 검사는 프리미티브 바운드를 쓰지만 방향광은 늘 참이다 | `ENG/Private/Components/InstancedSkinnedMeshComponent.cpp:1249-1253`, `ENG/Public/InstancedSkinnedMeshComponentHelper.h:119-135`, `ENG/Private/InstancedSkinnedMeshSceneProxy.h:139-160`, `Renderer/Private/VirtualShadowMaps/VirtualShadowMapCacheManager.h:165-169` |
+
+## 16. G1 게임 장면에서 확인한 것(2026-11-11, 코드 세션)
+
+줄임말: **MN** = `Engine/Plugins/AI/MassAI/Source/MassNavigation`, **ENG** = `Engine/Source/Runtime/Engine`.
+
+| 항목 | 내용 | 위치 |
+| --- | --- | --- |
+| 엔진 조향의 목표점 | 조향 목표는 `MoveTarget.Center + Forward × Clamp(ForwardOffset + SteerForward, 0, 내다보는 거리)`이고 `ForwardOffset`은 개체 위치를 `Forward`에 내린 값이다. 개체가 `Center` 뒤에 있으면 목표가 `Center` 자체가 된다. 그래서 `Center`를 오브에 두면 `Forward`와 무관하게 오브로 곧게 간다. 방향을 따르게 하려면 `Center`를 개체 앞(방향 쪽)에 둔다. 내다보는 거리는 `LookAheadTime × DesiredSpeed` | `MN/Private/MassSteeringProcessors.cpp:133, 152-163` |
+| 엔진 비켜 가기와 LOD 태그 | 이동 비켜 가기 쿼리는 `FMassNavigationEdgesFragment`를 요구하고 `FMassMediumLODTag`·`FMassLowLODTag`·`FMassOffLODTag`가 없는 개체만 돈다. LOD 태그가 없으면(M1~M3) 전 개체, Simulation LOD Trait이 있으면(M4·M5) High 밴드(카메라 80m 안)만 돈다. 서 있는 비켜 가기 쿼리도 같다 | `MN/Private/MassAvoidanceProcessors.cpp:295-303, 1120-1127` |
+| 엔진 비켜 가기의 벽 | 환경 비켜 가기는 `FMassNavigationEdgesFragment`의 경계선만 본다(보통 ZoneGraph 차선 경계가 채운다). 콜리전 지오메트리는 보지 않는다 | `MN/Private/MassAvoidanceProcessors.cpp:399, 487-495` |
+| CharacterMovement RVO 기본값 | `bUseRVOAvoidance` false, `AvoidanceConsiderationRadius` 500. `AvoidanceWeight`는 생성자에서 정하지 않아 0이다. `SetAvoidanceEnabled(true)`가 `UAvoidanceManager::RegisterMovementComponent`로 등록한다(이동 컴포넌트를 붙일 때 `bUseRVOAvoidance`가 이미 참이어도 등록된다) | `ENG/Private/Components/CharacterMovementComponent.cpp:821-829, 1050-1055, 11750-11771`, `ENG/Classes/GameFramework/CharacterMovementComponent.h:1196` |
