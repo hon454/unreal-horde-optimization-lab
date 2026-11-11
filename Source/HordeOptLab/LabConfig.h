@@ -64,6 +64,22 @@ enum class ELabVariant : uint8
 	M5Bounds,    // 참고: m5iskm + ISKM 컴포넌트 고정 바운드(SetPrimitiveBoundsOverride). 프레임 끝 인스턴스별 CalcBounds 반복이 SendAllEndOfFrameUpdates 증가분의 원인인지 가른다(Docs/Worklog/M5.md "트레이스 검토")
 	// Q2(-LabStage=M5와 함께, plan.md "품질 계획" Q2). 이름은 Q5에서 단계 이름과 함께 바뀔 수 있다.
 	Q2Crowd,     // m5bounds + Niagara 배경 무리(-LabCrowdFx 기본 1). 표현·풀링·Budget은 m5bounds와 같다
+	// Q4(-LabStage=M5와 함께, plan.md "품질 계획" Q4, Docs/Worklog/Q4.md). 사다리 8단계 = 최종 구성 후보
+	Q4Final,     // q2crowd + Q4에서 고른 액터 상한·전환 거리(FLabQuality::Q4FinalActorCap·Q4FinalHydrateM). 나머지는 q2crowd와 같다
+};
+
+/**
+ * 근거리 품질 설정(Q4, Docs/Worklog/Q4.md). 액터 상한 = 표현 LOD High의 LODMaxCount(두 종류의 템플릿이 같은 LOD 파라미터라 한 공유 프래그먼트를 써서 합계 상한이다,
+ * MassVisualizationTrait.cpp:145 GetOrCreateSharedFragment), 전환 거리 = 화면 안 High 경계(VisibleLODDistance[Medium]). 화면 밖 경계(15m, M3b 결정 1)는 그대로다.
+ * High 경계에는 히스테리시스가 없다(엔진은 한 단계 위로 오를 때 그 위 밴드의 경계에만 둔다, MassLODCalculator.h:868-886).
+ */
+struct FLabQuality
+{
+	static constexpr int32 DefaultActorCap = 500;   // 확정값 LODMaxCount High(measurement.md)
+	static constexpr float DefaultHydrateM = 30.f;  // 확정값 거리 밴드 0~30m
+	static constexpr float MaxHydrateM = 79.f;      // 80m(Medium/Low 경계, 확정값)를 넘지 않는다
+	static constexpr int32 Q4FinalActorCap = 500;   // Q4 묶음에서 고른 값(Docs/Worklog/Q4.md "최종 구성")
+	static constexpr float Q4FinalHydrateM = 30.f;
 };
 
 /**
@@ -238,6 +254,13 @@ struct FLabConfig
 	bool bNoIskm = false;        // -LabIskm=0: M5 단계에서도 30~200m를 VAT ISM으로 그린다(m4offpool의 표현)
 	bool bNoFixedBounds = false; // -LabFixedBounds=0: ISKM 컴포넌트 고정 바운드를 넣지 않는다(m5iskm의 바운드)
 	bool bNoFarCull = false;     // -LabFarCull=0: 표현 LOD의 Off(그리지 않음)를 두지 않고 맵 끝까지 그린다. Simulation LOD Off 거리와 배경 무리 안쪽 반경은 그대로
+	/**
+	 * Q4 근거리 품질(FLabQuality). 기본은 변형이 정한다(대부분 500·30m, m3hyd15·m3hyd50은 15·50m, q4final은 Q4에서 고른 값). 인자가 이긴다.
+	 * -LabActorCap=<개수>: 액터 상한(두 종류 합계). -LabHydrateM=<미터>: 화면 안에서 액터로 바뀌는 카메라 거리(1~79m). M3 이상 단계에서만 뜻이 있고 m3lowres는 자기 값을 쓴다.
+	 */
+	int32 ActorCap = FLabQuality::DefaultActorCap;
+	float HydrateM = FLabQuality::DefaultHydrateM;
+	float HydrateCm() const { return HydrateM * 100.f; }
 	/** M3 이상 단계에서 0~30m를 액터로 바꾸는가(하이드레이션). m3noactor와 -LabHydrate=0은 거짓 */
 	bool UsesHydration() const;
 	/** 표현 LOD의 Off(그리는 끝 밖을 그리지 않음)가 있는가. M3 이상 단계와 M2의 vatcull·vatcullvis에서 참, -LabFarCull=0이면 거짓 */

@@ -65,6 +65,7 @@ const FLabConfig& FLabConfig::Get()
 			else if (Variant == TEXT("m5minss")) { C.Variant = ELabVariant::M5MinSS; }
 			else if (Variant == TEXT("m5bounds")) { C.Variant = ELabVariant::M5Bounds; }
 			else if (Variant == TEXT("q2crowd")) { C.Variant = ELabVariant::Q2Crowd; }
+			else if (Variant == TEXT("q4final")) { C.Variant = ELabVariant::Q4Final; }
 			else if (Variant == TEXT("m3qold")) { C.Variant = ELabVariant::M3QOld; }
 			else if (Variant == TEXT("m3syncall")) { C.Variant = ELabVariant::M3SyncAll; }
 			else if (Variant == TEXT("m3vis0")) { C.Variant = ELabVariant::M3Vis0; }
@@ -131,7 +132,7 @@ const FLabConfig& FLabConfig::Get()
 			C.bEntityPool = Pool != 0;
 		}
 		// Q2 Niagara 배경 무리 기본값: 변형 q2crowd만 켠다. run-bench.ps1의 ValidateSet에 q2crowd가 들어가기 전에는 -Variant m5bounds -ExtraArgs "-LabCrowdFx=1"로 같은 구성을 고른다.
-		C.bCrowdFx = C.Variant == ELabVariant::Q2Crowd;
+		C.bCrowdFx = C.Variant == ELabVariant::Q2Crowd || C.Variant == ELabVariant::Q4Final; // q4final = q2crowd + Q4 품질 값
 		int32 CrowdFx = -1;
 		if (FParse::Value(Cmd, TEXT("-LabCrowdFx="), CrowdFx) && CrowdFx >= 0)
 		{
@@ -151,6 +152,14 @@ const FLabConfig& FLabConfig::Get()
 		C.bNoIskm = OffSwitch(TEXT("-LabIskm="));
 		C.bNoFixedBounds = OffSwitch(TEXT("-LabFixedBounds="));
 		C.bNoFarCull = OffSwitch(TEXT("-LabFarCull="));
+		// Q4 근거리 품질: 변형 기본값(m3hyd15·m3hyd50의 전환 거리, q4final의 고른 값), 그다음 인자
+		if (C.Variant == ELabVariant::M3Hyd15) { C.HydrateM = 15.f; }
+		else if (C.Variant == ELabVariant::M3Hyd50) { C.HydrateM = 50.f; }
+		else if (C.Variant == ELabVariant::Q4Final) { C.ActorCap = FLabQuality::Q4FinalActorCap; C.HydrateM = FLabQuality::Q4FinalHydrateM; }
+		FParse::Value(Cmd, TEXT("-LabActorCap="), C.ActorCap);
+		FParse::Value(Cmd, TEXT("-LabHydrateM="), C.HydrateM);
+		C.ActorCap = FMath::Max(C.ActorCap, 0);
+		C.HydrateM = FMath::Clamp(C.HydrateM, 1.f, FLabQuality::MaxHydrateM);
 		C.N = FMath::Max(C.N, 1);
 		C.Preset = FMath::Clamp(C.Preset, 1, 2);
 		return C;
@@ -212,6 +221,7 @@ const TCHAR* FLabConfig::VariantName(ELabVariant V)
 	case ELabVariant::M5MinSS: return TEXT("m5minss");
 	case ELabVariant::M5Bounds: return TEXT("m5bounds");
 	case ELabVariant::Q2Crowd: return TEXT("q2crowd");
+	case ELabVariant::Q4Final: return TEXT("q4final");
 	default: return TEXT("full");
 	}
 }
@@ -261,7 +271,7 @@ FLabIskmParams FLabConfig::IskmParams() const
 	FLabIskmParams P; // 대표 m5iskm: BlendTime 0, 항상 재생, 그림자 켬
 	if (Variant == ELabVariant::M5Blend) { P.BlendTime = 0.25f; }
 	if (Variant == ELabVariant::M5MinSS) { P.AnimationMinScreenSize = 0.1f; }
-	if ((Variant == ELabVariant::M5Bounds || Variant == ELabVariant::Q2Crowd) && !bNoFixedBounds) { P.bFixedBounds = true; } // q2crowd = m5bounds + 배경 무리
+	if ((Variant == ELabVariant::M5Bounds || Variant == ELabVariant::Q2Crowd || Variant == ELabVariant::Q4Final) && !bNoFixedBounds) { P.bFixedBounds = true; } // q2crowd = m5bounds + 배경 무리, q4final = q2crowd + 품질 값
 	return P;
 }
 
@@ -395,7 +405,12 @@ FString FLabConfig::ToLogString() const
 		}
 	}
 	// screensig_budget는 M3 이상 단계이거나 켰을 때만 붙인다. M0~M2 기본 실행의 로그는 그대로다.
-	const FString Budget = (Stage >= ELabStage::M3 || bScreenSigBudget) ? FString::Printf(TEXT(" screensig_budget=%d"), bScreenSigBudget ? 1 : 0) : FString();
+	FString Budget = (Stage >= ELabStage::M3 || bScreenSigBudget) ? FString::Printf(TEXT(" screensig_budget=%d"), bScreenSigBudget ? 1 : 0) : FString();
+	// Q4 근거리 품질(액터 상한, 화면 안 전환 거리)은 M3 이상 단계에서만 붙인다
+	if (Stage >= ELabStage::M3)
+	{
+		Budget += FString::Printf(TEXT(" actor_cap=%d hydrate_m=%.0f"), ActorCap, HydrateM);
+	}
 	// health_fixed는 디버그 인자를 줬을 때만 붙인다
 	const FString Health = HealthFixed > 0.f ? FString::Printf(TEXT(" health_fixed=%.0f"), HealthFixed) : FString();
 	// crowdfx는 켰을 때만 붙인다(Q2). 기본 실행의 로그는 그대로다.

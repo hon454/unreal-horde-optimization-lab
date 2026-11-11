@@ -167,6 +167,12 @@ void ULabIskmProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutio
 	const float BlendTime = FLabConfig::Get().IskmParams().BlendTime;
 	const FVector ViewLocation = Crowd->SnipeView.Location;
 	int32 BandCounts[4] = { 0, 0, 0, 0 };
+	// Q4 품질 지표: 화면 안에서 아직 인스턴스로 그리는 개체(액터 준비 대기 포함) 중 카메라 30m 안·전환 거리 안의 수(3D 거리, 표현 LOD와 같다)
+	const FLabSnipeView QualityView = Crowd->SnipeView;
+	const float Near30Sq = FMath::Square(3000.f);
+	const float NearHydSq = FMath::Square(FLabConfig::Get().HydrateCm());
+	const float NearMaxSq = FMath::Max(Near30Sq, NearHydSq);
+	int32 ViewInst30 = 0, ViewInstHyd = 0;
 	int32 TrackWrites = 0;   // 이 프로세서가 기존 트랙에 직접 쓴 수(상태 전환, 풀에서 다시 나옴)
 	int32 TrackFirst = 0;    // 트랙이 없어 엔진이 이 프레임에 만들 수
 	UMassRepresentationSubsystem* RepresentationSubsystemForStats = nullptr;
@@ -264,9 +270,17 @@ void ULabIskmProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutio
 			// 표현 축(measurement.md): 거리 밴드별로 그린 개체 수. VAT 프로세서와 같은 스탯 이름(Lab/IsmBand*)이라 요약 스크립트가 그대로 읽는다
 			const float Dist = FVector::Dist2D(Transform.GetLocation(), ViewLocation);
 			++BandCounts[Dist < 3000.f ? 0 : Dist < 8000.f ? 1 : Dist < 20000.f ? 2 : 3];
+			const float DistSq = FVector::DistSquared(Transform.GetLocation(), ViewLocation);
+			if (DistSq < NearMaxSq && QualityView.bValid && QualityView.Contains(Transform.GetLocation() + FVector(0.f, 0.f, 90.f)))
+			{
+				if (DistSq < Near30Sq) { ++ViewInst30; }
+				if (DistSq < NearHydSq) { ++ViewInstHyd; }
+			}
 		}
 	});
 
+	CSV_CUSTOM_STAT(Lab, ViewInst30, ViewInst30, ECsvCustomStatOp::Set);   // Q4 (나) 대체 지표의 나머지: 화면 안 30m에서 아직 인스턴스
+	CSV_CUSTOM_STAT(Lab, ViewInstHyd, ViewInstHyd, ECsvCustomStatOp::Set); // Q4: 화면 안 전환 거리 안에서 아직 인스턴스(상한이 막는 정도)
 	CSV_CUSTOM_STAT(Lab, IsmBand0, BandCounts[0], ECsvCustomStatOp::Set);
 	CSV_CUSTOM_STAT(Lab, IsmBand1, BandCounts[1], ECsvCustomStatOp::Set);
 	CSV_CUSTOM_STAT(Lab, IsmBand2, BandCounts[2], ECsvCustomStatOp::Set);

@@ -119,10 +119,11 @@ UMassEntityConfigAsset* ULabCrowdSubsystem::BuildEntityConfig(int32 UnitType, US
 	if (bM3 || Variant == ELabVariant::VatCull || Variant == ELabVariant::VatCullVis)
 	{
 		// E3 (7): 하이드레이션 거리(화면 안 Visible)만 바꾼다(대표 30m). 80m·200m 밴드와 상한은 그대로(2026-11-09 사용자 결정 A)
-		const float HydrateCm = Variant == ELabVariant::M3Hyd15 ? 1500.f : Variant == ELabVariant::M3Hyd50 ? 5000.f : 3000.f;
+		// Q4: 전환 거리와 액터 상한은 FLabConfig가 정한다(기본 30m·500, m3hyd15·m3hyd50은 15·50m, q4final과 -LabHydrateM·-LabActorCap). 80m·200m 밴드와 Medium 상한은 그대로
+		const float HydrateCm = FLabConfig::Get().HydrateCm();
 		// Off 거리: 기본 200m, -LabFarM=으로 옮긴다. Q3 빼 보기 -LabFarCull=0이면 1,000m라 맵 끝까지 그린다(RepOffCm)
 		const float Bands[EMassLOD::Max] = { 0.f, HydrateCm, 8000.f, FLabConfig::Get().RepOffCm() };
-		const int32 MaxCounts[EMassLOD::Max] = { 500, 5000, MAX_int32, MAX_int32 }; // 확정값 LODMaxCount
+		const int32 MaxCounts[EMassLOD::Max] = { FLabConfig::Get().ActorCap, 5000, MAX_int32, MAX_int32 }; // 확정값 LODMaxCount(High는 Q4에서 인자로)
 		for (int32 LOD = 0; LOD < EMassLOD::Max; ++LOD)
 		{
 			Visual->LODParams.BaseLODDistance[LOD] = Bands[LOD];

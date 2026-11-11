@@ -137,6 +137,9 @@ void ULabActorSyncProcessor::Execute(FMassEntityManager& EntityManager, FMassExe
 	const bool bOld = LabUseOldQueries();
 	const bool bActorTag = LabUseActorTag();
 	int32 Actors = 0;
+	// Q4 품질 지표(모든 빌드): 화면 안에 보이는 액터 수와 그중 카메라 30m(3D, 표현 LOD와 같은 거리) 안의 수. 화면 판정은 저격과 같은 시야(몸통 높이 +90cm)
+	const FLabSnipeView QualityView = Crowd->SnipeView;
+	int32 ViewActors = 0, ViewActors30 = 0;
 	int32 Rebinds = 0;
 	int32 TagsRemoved = 0;
 	int32 DbgHoles = 0, DbgOverlaps = 0, DbgSwitches = 0;
@@ -203,6 +206,15 @@ void ULabActorSyncProcessor::Execute(FMassEntityManager& EntityManager, FMassExe
 				continue; // 액터는 아직 붙어 있지만 이번 프레임은 VAT 인스턴스로 그린다(한 프레임 더 두기)
 			}
 			++Actors;
+			if (Actor->bPoseReady && QualityView.bValid)
+			{
+				const FVector Loc = Transforms[It].GetTransform().GetLocation();
+				if (QualityView.Contains(Loc + FVector(0.f, 0.f, 90.f)))
+				{
+					++ViewActors;
+					if (FVector::DistSquared(Loc, QualityView.Location) < FMath::Square(3000.f)) { ++ViewActors30; }
+				}
+			}
 #if !UE_BUILD_TEST
 			if (bFrameLog && Actor->bPoseReady)
 			{
@@ -360,6 +372,8 @@ void ULabActorSyncProcessor::Execute(FMassEntityManager& EntityManager, FMassExe
 
 	CSV_CUSTOM_STAT(Lab, Actors, Actors, ECsvCustomStatOp::Set);
 	CSV_CUSTOM_STAT(Lab, ActorRebinds, Rebinds, ECsvCustomStatOp::Set);
+	CSV_CUSTOM_STAT(Lab, ViewActors, ViewActors, ECsvCustomStatOp::Set);     // Q4 (가) 화면 안 보이는 액터 수
+	CSV_CUSTOM_STAT(Lab, ViewActors30, ViewActors30, ECsvCustomStatOp::Set); // Q4 (나) 대체 지표의 분자: 그중 카메라 30m 안
 	CSV_CUSTOM_STAT(Lab, ActorTagsRemoved, TagsRemoved, ECsvCustomStatOp::Set); // 태그 필터 확인용: 떼어진 액터 수와 맞아야 한다
 	CSV_CUSTOM_STAT(Lab, LargeActors, LargeActors, ECsvCustomStatOp::Set);         // 2종: 이 프레임 동기화한 대형 액터 수
 	CSV_CUSTOM_STAT(Lab, LargeActorSkips, LargeSkips, ECsvCustomStatOp::Set);      // E3 (3c): 그중 애니 틱을 건너뛴 수

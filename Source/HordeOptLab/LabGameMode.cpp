@@ -327,6 +327,9 @@ void ALabGameMode::TickBench()
 				CSV_METADATA(TEXT("LabIskmBounds"), *FString::FromInt(Crowd && Crowd->IsActive() ? Crowd->GetIskmBoundsApplied() : 0));
 			}
 			CSV_METADATA(TEXT("LabHydrateFixMask"), *FString::FromInt(Config.HydrateFixMask));
+			// Q4 근거리 품질: 액터 상한(두 종류 합계)과 화면 안 전환 거리(m). M3 미만 단계에서는 쓰이지 않는 값이다
+			CSV_METADATA(TEXT("LabActorCap"), *FString::FromInt(Config.ActorCap));
+			CSV_METADATA(TEXT("LabHydrateM"), *FString::Printf(TEXT("%.0f"), Config.HydrateM));
 			for (const FLabConfig::FTech& Tech : Config.TechList())
 			{
 				CSV_METADATA(Tech.MetaKey, *Tech.Value);
