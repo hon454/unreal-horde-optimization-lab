@@ -103,6 +103,8 @@ public:
 	int32 PoolReused = 0;
 	int32 PoolCreated = 0;
 	int32 GetPooledCount() const { return EntityPool[0].Num() + EntityPool[1].Num(); }
+	/** 고정 바운드가 실제로 들어간 ISKM 컴포넌트 수(인스턴스가 들어온 뒤 바운드가 고정값인 것으로 확인한 수). CSV 메타데이터 LabIskmBounds */
+	int32 GetIskmBoundsApplied() const { return IskmBoundsConfirmed.Num(); }
 #if !UE_BUILD_TEST
 	/**
 	 * 개발용 프레임 진단(-LabFrameLog, E3b (8) 화질 캡처 2026-11-09): 화면 안 30m에서 아직 VAT 인스턴스로 그리는 개체 수와 보이는 액터 수를 프레임마다 로그에 남긴다.

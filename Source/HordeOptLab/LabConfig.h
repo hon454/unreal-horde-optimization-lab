@@ -228,7 +228,39 @@ struct FLabConfig
 	float CrowdFxLifetime() const;
 	/** 정상 상태 입자 수 계산값 = 스폰율 × 수명. 꺼져 있으면 0. CSV 메타데이터 LabCrowdFxParticles */
 	int32 CrowdFxParticles() const;
-	/** M5 단계의 ISKM 변형(m5iskm·m5destroy·m5blend·m5minss·m5bounds, 기본 변형)이면 참. m4offpool·m4offmove는 M5 단계에서도 VAT다 */
+	/**
+	 * Q3 빼 보기 스위치(plan.md "품질 계획" 빼 보기 표, Docs/Worklog/Q3.md). 변형이 정한 구성에서 기법 하나만 뺀다. 새 인자 다섯은 0을 줄 때만 뜻이 있다(끄기 전용).
+	 * 1이나 다른 값은 변형·단계의 기본 동작 그대로다. 그 단계에 없는 기법을 켜지 않는다. 나머지 네 행은 기존 인자를 쓴다
+	 * (-LabScreenSigBudget=0 애니 예산, -LabHydrateFixMask=0 전환 대책, -LabEntityPool=0 엔티티 풀, -LabCrowdFx=0 배경 무리).
+	 */
+	bool bNoHydrate = false;     // -LabHydrate=0: 0~30m도 인스턴스(M5는 ISKM)로 그린다. 액터 0(m3noactor와 같은 경로)
+	bool bNoSimLod = false;      // -LabSimLod=0: Simulation LOD Trait을 붙이지 않는다. 로직은 매 프레임, 이동은 전 개체가 엔진 이동·조향(M3 단계와 같다)
+	bool bNoIskm = false;        // -LabIskm=0: M5 단계에서도 30~200m를 VAT ISM으로 그린다(m4offpool의 표현)
+	bool bNoFixedBounds = false; // -LabFixedBounds=0: ISKM 컴포넌트 고정 바운드를 넣지 않는다(m5iskm의 바운드)
+	bool bNoFarCull = false;     // -LabFarCull=0: 표현 LOD의 Off(그리지 않음)를 두지 않고 맵 끝까지 그린다. Simulation LOD Off 거리와 배경 무리 안쪽 반경은 그대로
+	/** M3 이상 단계에서 0~30m를 액터로 바꾸는가(하이드레이션). m3noactor와 -LabHydrate=0은 거짓 */
+	bool UsesHydration() const;
+	/** 표현 LOD의 Off(그리는 끝 밖을 그리지 않음)가 있는가. M3 이상 단계와 M2의 vatcull·vatcullvis에서 참, -LabFarCull=0이면 거짓 */
+	bool CullsFar() const;
+	/**
+	 * 표현 LOD의 Off 거리(cm). 지우기를 끄면 맵 반경의 두 배(1,000m)라 맵 안의 개체(카메라에서 최대 515m)는 Off에 들지 않는다.
+	 * 1e7로 두지 않는 것은 풀 엔티티를 세워 두는 자리(약 14km, LabCrowdSubsystem.cpp LabPoolParkLocation)가 Off로 남아야 그리지 않기 때문이다.
+	 */
+	float RepOffCm() const { return bNoFarCull ? FLabScenario::MapRadius * 2.f : FarCm(); }
+	/** 그리는 범위의 반경(cm, 오브 기준). 고정 바운드 크기에 쓴다. 지우기를 끄면 맵 반경 */
+	float DrawExtentCm() const;
+	/** Animation Budget Allocator로 도는 액터 템플릿을 쓰는가(M0 budget, M3 이상의 m3budgetdist·m3budgetsig·화면 크기 Budget) */
+	bool UsesBudgetActors() const;
+	/**
+	 * 빼 보기 아홉 기법의 켬·끔(설정 기준). 메타데이터 키(LabTech*)와 로그 키, 값("1"/"0", 전환 대책 일부만 켜면 "m<마스크>", M4 틱 간격만이면 "tick").
+	 * 기법끼리 딸린 효과(하이드레이션을 끄면 예산을 받을 액터가 없다, ISKM을 끄면 고정 바운드를 넣을 컴포넌트가 없다)는 여기서 지우지 않고
+	 * 실제 적용값 메타데이터(LabBudget, LabIskmBounds)로 본다. 그래서 빼 보기 한 행은 아홉 값 중 하나만 0이다.
+	 */
+	struct FTech { const TCHAR* MetaKey; const TCHAR* LogKey; FString Value; };
+	TArray<FTech> TechList() const;
+	/** "tech=hyd:1,bud:1,..." 꼴(lab_config 로그 끝) */
+	FString TechString() const;
+	/** M5 단계의 ISKM 변형(m5iskm·m5destroy·m5blend·m5minss·m5bounds, 기본 변형)이면 참. m4offpool·m4offmove는 M5 단계에서도 VAT다. -LabIskm=0이면 거짓 */
 	bool UsesIskm() const;
 	FLabIskmParams IskmParams() const;
 	enum EHydrateFix : int32
@@ -241,8 +273,8 @@ struct FLabConfig
 	};
 	bool HasFix(EHydrateFix F) const { return (HydrateFixMask & F) != 0; }
 
-	/** M4부터 참. Simulation LOD Trait을 붙이고 로직 프로세서 둘(접근·범위 피해)이 청크 필터를 건다 */
-	bool UsesSimLod() const { return Stage >= ELabStage::M4; }
+	/** M4부터 참(-LabSimLod=0이면 거짓). Simulation LOD Trait을 붙이고 로직 프로세서 둘(접근·범위 피해)이 청크 필터를 건다 */
+	bool UsesSimLod() const { return Stage >= ELabStage::M4 && !bNoSimLod; }
 	/** 변형에서 정한 M4 틱 간격과 회피 여부(UsesSimLod일 때만 뜻이 있다) */
 	FLabSimLod SimLod() const;
 	/** 로그와 CSV 메타데이터용. "80/200m tick=0/0.5/1.0 avoid=0" 꼴, M3까지는 "-" */

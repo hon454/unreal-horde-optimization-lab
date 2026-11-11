@@ -60,6 +60,10 @@ protected:
 	 * 사용자 변수(SmallRate·LargeRate·OuterRadius·Lifetime·Speed)를 넣은 뒤 활성화한다. 워밍업(268초)은 활성화 때 돈다.
 	 */
 	void SetupCrowdFx();
+	/** Animation Budget Allocator가 실제로 도는가(CVar와 월드 할당기 둘 다). CSV 메타데이터 LabBudget */
+	bool IsBudgetActive() const;
+	/** Q3 lab_applied 로그: 단계와 실제로 적용된 값(Budget, 풀, 고정 바운드 컴포넌트 수, 전환 대책 마스크, 배경 무리 활성), 설정 tech= */
+	FString AppliedString() const;
 
 	UPROPERTY() TObjectPtr<ALabCrowdSpawner> Spawner;
 	UPROPERTY() TObjectPtr<ALabOrb> Orb;

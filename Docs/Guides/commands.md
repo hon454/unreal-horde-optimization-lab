@@ -30,6 +30,46 @@ STATUS.md "명령"에는 매번 쓰는 것만 둔다. 여기에는 스크립트 
 5. `csvprofile stop`. 프레임 수, N, 전환 수 등 요약을 로그 `lab_summary`에 남긴다. 조건이 깨졌으면(N 불일치 등) 종료 코드 1.
 6. `-Trace`면 2\~5 동안 `-trace=cpu,gpu,frame,counters,mass`로 트레이스를 남긴다. 트레이스 실행의 수치는 비교에 쓰지 않는다(이벤트 기록 비용).
 
+## 빼 보기 스위치(Q3)
+
+빼 보기 표([plan.md](../plan.md) "품질 계획")의 행은 "최종 구성 변형 + 인자 하나"다. 최종 구성은 지금 `q2crowd`(`-LabStage=M5`, Q4에서 액터 상한·전환 거리 값이 더해진다). 새 인자 다섯(`-LabHydrate`·`-LabSimLod`·`-LabIskm`·`-LabFixedBounds`·`-LabFarCull`)은 0일 때만 뜻이 있고(끄기 전용), 나머지 넷은 기존 인자다. 경위와 설계 선택은 [Worklog/Q3.md](../Worklog/Q3.md).
+
+| 행 | 빼는 것 → 대신 | 인자 | 메타데이터에서 0이 되는 키 |
+| --- | --- | --- | --- |
+| final | 없음 | 없음 | 없음(`LabTech*` 아홉 모두 1) |
+| hydrate | 하이드레이션 → 전 구간 ISKM(액터 0) | `-LabHydrate=0` | `LabTechHydrate` |
+| budget | 애니 예산 → 예산 없는 액터(`USkeletalMeshComponent`, 매 프레임 애니) | `-LabScreenSigBudget=0` | `LabTechAnimBudget`, `LabBudget` |
+| fix | 전환 대책 다섯 → 모두 끔 | `-LabHydrateFixMask=0` | `LabTechHydrateFix`, `LabHydrateFixMask` |
+| pool | 엔티티 풀 → 매번 생성·파괴 | `-LabEntityPool=0` | `LabTechPool`, `LabPool` |
+| simlod | Simulation LOD → 엔진 이동·매 프레임 로직을 전 개체에 | `-LabSimLod=0` | `LabTechSimLod`(`LabSimLod`는 `-`) |
+| iskm | ISKM → VAT ISM(고정 바운드는 넣을 컴포넌트가 없다) | `-LabIskm=0` | `LabTechIskm`, `LabIskmBounds` |
+| bounds | 고정 바운드 → 기본 바운드 | `-LabFixedBounds=0` | `LabTechFixedBounds`, `LabIskmBounds` |
+| farcull | 200m 밖 지우기 → 맵 끝까지 그리기(배경 무리는 그대로 켬) | `-LabFarCull=0` | `LabTechFarCull` |
+| crowdfx | Niagara 배경 무리 → 빈 수평선 | `-LabCrowdFx=0` | `LabTechCrowdFx`, `LabCrowdFxActive` |
+
+```bash
+# Test 패키지(Q5 뒤, run-bench.ps1의 ValidateSet에 q2crowd가 들어가기 전에는 -Variant m5bounds -ExtraArgs "-LabCrowdFx=1 <인자>")
+powershell -ExecutionPolicy Bypass -File Scripts/run-bench.ps1 -Milestone M5 -Variant m5bounds -N 10000 -Preset P1 -Types 2 -Runs 1 -Tag hydrate -ExtraArgs "-LabCrowdFx=1 -LabHydrate=0"
+# Development 작은 실행 + 메타데이터 대조(라벨에 행 이름을 넣으면 ablation-check.py가 기대값을 고른다)
+powershell -ExecutionPolicy Bypass -File Scripts/run-dev.ps1 -Small -Stage M5 -Variant q2crowd -Extra "-LabHydrate=0 -LabBench -LabLabel=Q3dev-hydrate-N100-P1-r1"
+py -3 -I Scripts/ablation-check.py Saved/Profiling/CSV/Q3dev-hydrate-N100-P1-r1.csv
+```
+
+- `lab_config` 끝의 `tech=hyd:1,bud:1,fix:1,pool:1,sim:1,iskm:1,bnd:1,far:1,fx:1`이 아홉 기법의 설정이다. 단계가 그 기법을 아직 갖지 않으면 0이다(M4 `m4mass`의 Simulation LOD는 틱 간격만이라 `tick`, 전환 대책 일부만 켜면 `m<마스크>`).
+- 실제 적용값은 `lab_applied`(개발 빌드 로그, 벤치마크는 측정 시작 때, 개발 실행은 끝날 때)와 CSV 메타데이터 `LabStage`·`LabBudget`(할당기가 도는가)·`LabPool`·`LabIskmBounds`(고정 바운드가 들어간 ISKM 컴포넌트 수, 2종이면 2)·`LabHydrateFixMask`다.
+- `-LabFarM`(그리는 거리)은 표현 Off와 Simulation LOD Off, 배경 무리 안쪽 반경을 함께 옮기므로 farcull 행에 쓰지 않는다. `-LabFarCull=0`은 표현 Off만 맵 반경의 두 배(1,000m)로 옮긴다.
+
+## 전환 점수(Q3)
+
+`Scripts/transition-score.py`는 60fps 고정 간격 연속 캡처와 그 실행의 개발 로그로 전환 사건마다 화면 튐을 잰다. ISKM과 VAT, 전환 대책 켬·끔은 같은 시드·같은 인자로 찍고 표현만 바꾼다. 캡처는 `Saved/Screenshots/LabBurst/`에 쌓이므로 실행마다 다른 폴더로 옮긴다.
+
+```bash
+powershell -ExecutionPolicy Bypass -File Scripts/run-dev.ps1 -N 10000 -Preset P1 -Duration 21 -ShotAt 10 -Stage M5 -Variant q2crowd -Extra "-LabShotBurst=600 -benchmark -fps=60"
+py -3 Scripts/transition-score.py <캡처 폴더> Saved/Logs/LabDev-q2crowd-N10000-P1.log --event both
+```
+
+`--event`는 `hydrate`(인스턴스 → 액터, 기본), `dehydrate`(액터 → 인스턴스), `both`. VAT 표현은 `-Extra`에 `-LabIskm=0`, 대책 끔은 `-LabHydrateFixMask=0`을 더한다.
+
 ## 측정 절차
 
 1. 측정 전에 잴 조건, 라벨, 걸리는 시간을 채팅에 알리고 답을 받는다.

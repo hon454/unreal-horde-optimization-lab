@@ -7,7 +7,9 @@
 - 눈에 띈 전환: 튐이 THRESH 이상(기본 6)이고 평소의 2배 이상
 Pillow만 쓴다.
 
-실행: py -3 Scripts/transition-score.py <캡처 폴더> <로그 파일> [--thresh 6]
+실행: py -3 Scripts/transition-score.py <캡처 폴더> <로그 파일> [--thresh 6] [--event hydrate|dehydrate|both]
+--event(Q3): hydrate(기본, 인스턴스 → 액터, LabActorSyncProcessor), dehydrate(액터 → 인스턴스, VAT·ISKM 프로세서가 같은 조건으로 남긴다), both.
+ISKM과 VAT를 같은 절차로 비교하려면 같은 시드·고정 간격 캡처를 두 표현으로 찍고 두 사건 모두 잰다(Docs/Worklog/Q3.md "전환 점수").
 """
 import argparse
 import os
@@ -24,12 +26,14 @@ def main():
     ap.add_argument("frames")
     ap.add_argument("log")
     ap.add_argument("--thresh", type=float, default=6.0)
+    ap.add_argument("--event", choices=["hydrate", "dehydrate", "both"], default="hydrate")
     a = ap.parse_args()
 
     files = {int(f[1:7]): os.path.join(a.frames, f) for f in os.listdir(a.frames) if f.startswith("f") and f.endswith(".png")}
     lo, hi = min(files), max(files)
     log = open(a.log, encoding="utf-8", errors="ignore").read()
-    events = [(int(f), int(u), int(v)) for f, u, v in re.findall(r"lab_event hydrate frame=(\d+) u=(-?\d+) v=(-?\d+)", log)]
+    names = "hydrate|dehydrate" if a.event == "both" else a.event
+    events = [(int(f), int(u), int(v)) for f, u, v in re.findall(r"lab_event (?:%s) frame=(\d+) u=(-?\d+) v=(-?\d+)" % names, log)]
     cache = {}
 
     def gray(f):

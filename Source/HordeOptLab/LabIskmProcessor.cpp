@@ -3,6 +3,8 @@
 #include "LabConfig.h"
 #include "LabCrowdSubsystem.h"
 #include "LabMassTypes.h"
+#include "LabVatProcessor.h" // LabLogScreenEvent(개발 빌드 전환 사건 로그)
+#include "MassRepresentationTypes.h" // UE::Mass::Representation::IsValidActorRepresentation
 #include "Animation/AnimSequenceTransformProviderData.h"
 #include "Components/InstancedSkinnedMeshComponent.h"
 #include "MassCommonFragments.h"
@@ -200,6 +202,13 @@ void ULabIskmProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutio
 			const FTransform& Transform = TransformList[EntityIt].GetTransform();
 			const float LODSignificance = RepresentationLODList[EntityIt].LODSignificance;
 			UMassUpdateInstancedSkinnedMeshProcessor::UpdateMeshTransform(Entity, Info, Transform, Representation.PrevTransform, LODSignificance, Representation.PrevLODSignificance);
+#if !UE_BUILD_TEST
+			// Q3 전환 점수: 액터 → ISKM으로 돌아온 첫 프레임. VAT 프로세서의 dehydrate와 같은 조건이라 Scripts/transition-score.py --event dehydrate가 두 표현을 같은 절차로 잰다.
+			if (UE::Mass::Representation::IsValidActorRepresentation(Representation.PrevRepresentation) && Representation.CurrentRepresentation == EMassRepresentationType::SkinnedMeshInstance)
+			{
+				LabLogScreenEvent(TEXT("dehydrate"), Crowd->SnipeView, Transform.GetLocation(), Context.GetConstSharedFragment<FLabUnitTypeParams>().UnitType == LabUnitLarge ? 1.f : 0.f);
+			}
+#endif
 
 			// 애니 데이터. 클립 번호 = 상태(0 걷기, 1 피격, 2 죽기, Scripts/create-iskm.py와 같은 순서). 걷기만 루프, 피격·죽기는 끝 자세에서 멈춘다(VAT ClipFrame과 같다).
 			const FLabAnimStateFragment& Anim = AnimStates[EntityIt];

@@ -140,6 +140,17 @@ const FLabConfig& FLabConfig::Get()
 #if !UE_BUILD_TEST
 		FParse::Value(Cmd, TEXT("-LabCrowdFxInnerM="), C.CrowdFxInnerOverrideM);
 #endif
+		// Q3 빼 보기 스위치(끄기 전용): 0을 줄 때만 그 기법을 뺀다. 다른 값은 변형·단계 기본값 그대로다(LabConfig.h).
+		auto OffSwitch = [Cmd](const TCHAR* Key)
+		{
+			int32 V = -1;
+			return FParse::Value(Cmd, Key, V) && V == 0;
+		};
+		C.bNoHydrate = OffSwitch(TEXT("-LabHydrate="));
+		C.bNoSimLod = OffSwitch(TEXT("-LabSimLod="));
+		C.bNoIskm = OffSwitch(TEXT("-LabIskm="));
+		C.bNoFixedBounds = OffSwitch(TEXT("-LabFixedBounds="));
+		C.bNoFarCull = OffSwitch(TEXT("-LabFarCull="));
 		C.N = FMath::Max(C.N, 1);
 		C.Preset = FMath::Clamp(C.Preset, 1, 2);
 		return C;
@@ -242,7 +253,7 @@ FLabSimLod FLabConfig::SimLod() const
 
 bool FLabConfig::UsesIskm() const
 {
-	return Stage == ELabStage::M5 && Variant != ELabVariant::M4OffMove && Variant != ELabVariant::M4OffPool;
+	return Stage == ELabStage::M5 && Variant != ELabVariant::M4OffMove && Variant != ELabVariant::M4OffPool && !bNoIskm;
 }
 
 FLabIskmParams FLabConfig::IskmParams() const
@@ -250,8 +261,61 @@ FLabIskmParams FLabConfig::IskmParams() const
 	FLabIskmParams P; // 대표 m5iskm: BlendTime 0, 항상 재생, 그림자 켬
 	if (Variant == ELabVariant::M5Blend) { P.BlendTime = 0.25f; }
 	if (Variant == ELabVariant::M5MinSS) { P.AnimationMinScreenSize = 0.1f; }
-	if (Variant == ELabVariant::M5Bounds || Variant == ELabVariant::Q2Crowd) { P.bFixedBounds = true; } // q2crowd = m5bounds + 배경 무리
+	if ((Variant == ELabVariant::M5Bounds || Variant == ELabVariant::Q2Crowd) && !bNoFixedBounds) { P.bFixedBounds = true; } // q2crowd = m5bounds + 배경 무리
 	return P;
+}
+
+bool FLabConfig::UsesHydration() const
+{
+	return Stage >= ELabStage::M3 && Variant != ELabVariant::M3NoActor && !bNoHydrate;
+}
+
+bool FLabConfig::CullsFar() const
+{
+	return (Stage >= ELabStage::M3 || Variant == ELabVariant::VatCull || Variant == ELabVariant::VatCullVis) && !bNoFarCull;
+}
+
+float FLabConfig::DrawExtentCm() const
+{
+	return bNoFarCull ? FLabScenario::MapRadius : FarCm();
+}
+
+bool FLabConfig::UsesBudgetActors() const
+{
+	if (Stage == ELabStage::M0)
+	{
+		return Variant == ELabVariant::Budget;
+	}
+	return Stage >= ELabStage::M3 && (Variant == ELabVariant::M3BudgetDist || Variant == ELabVariant::M3BudgetSig || bScreenSigBudget);
+}
+
+TArray<FLabConfig::FTech> FLabConfig::TechList() const
+{
+	auto B = [](bool b) { return FString(b ? TEXT("1") : TEXT("0")); };
+	const bool bM3 = Stage >= ELabStage::M3;
+	const FString Fix = !bM3 ? TEXT("0") : HydrateFixMask == 31 ? TEXT("1") : HydrateFixMask == 0 ? TEXT("0") : FString::Printf(TEXT("m%d"), HydrateFixMask);
+	const FString Sim = !UsesSimLod() ? TEXT("0") : SimLod().bOffMove ? TEXT("1") : TEXT("tick");
+	return {
+		{ TEXT("LabTechHydrate"), TEXT("hyd"), B(UsesHydration()) },
+		{ TEXT("LabTechAnimBudget"), TEXT("bud"), B(UsesBudgetActors()) },
+		{ TEXT("LabTechHydrateFix"), TEXT("fix"), Fix },
+		{ TEXT("LabTechPool"), TEXT("pool"), B(bEntityPool) },
+		{ TEXT("LabTechSimLod"), TEXT("sim"), Sim },
+		{ TEXT("LabTechIskm"), TEXT("iskm"), B(UsesIskm()) },
+		{ TEXT("LabTechFixedBounds"), TEXT("bnd"), B(IskmParams().bFixedBounds) },
+		{ TEXT("LabTechFarCull"), TEXT("far"), B(CullsFar()) },
+		{ TEXT("LabTechCrowdFx"), TEXT("fx"), B(bCrowdFx) },
+	};
+}
+
+FString FLabConfig::TechString() const
+{
+	TArray<FString> Parts;
+	for (const FTech& T : TechList())
+	{
+		Parts.Add(FString::Printf(TEXT("%s:%s"), T.LogKey, *T.Value));
+	}
+	return TEXT("tech=") + FString::Join(Parts, TEXT(",")); // 한 키로 묶는다(로그의 pool= 등 기존 키와 겹치지 않게)
 }
 
 float FLabConfig::CrowdFxTotalRate() const
@@ -336,7 +400,8 @@ FString FLabConfig::ToLogString() const
 	const FString Health = HealthFixed > 0.f ? FString::Printf(TEXT(" health_fixed=%.0f"), HealthFixed) : FString();
 	// crowdfx는 켰을 때만 붙인다(Q2). 기본 실행의 로그는 그대로다.
 	const FString Crowd = bCrowdFx ? FString::Printf(TEXT(" crowdfx=1 crowdfx_particles=%d crowdfx_inner=%.1f"), CrowdFxParticles(), CrowdFxInnerCm() / 100.f) : FString();
-	return FString::Printf(TEXT("lab_config stage=%s n=%d preset=P%d seed=%d variant=%s bench=%d label=%s duration=%.1f types=%d simlod=%s%s%s%s%s%s"),
+	// tech는 빼 보기 아홉 기법의 켬·끔이다(Q3). 모든 실행에 붙여 러너와 사람이 기대값과 대조한다.
+	return FString::Printf(TEXT("lab_config stage=%s n=%d preset=P%d seed=%d variant=%s bench=%d label=%s duration=%.1f types=%d simlod=%s%s%s%s%s%s %s"),
 		StageName(Stage), N, Preset, Seed, VariantName(Variant), bBench ? 1 : 0, *Label, DurationSec, Types, *SimLodString(),
-		FarM != 200 ? *FString::Printf(TEXT(" far=%d"), FarM) : TEXT(""), *M5, *Budget, *Health, *Crowd);
+		FarM != 200 ? *FString::Printf(TEXT(" far=%d"), FarM) : TEXT(""), *M5, *Budget, *Health, *Crowd, *TechString());
 }

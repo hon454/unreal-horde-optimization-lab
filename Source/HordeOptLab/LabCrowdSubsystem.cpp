@@ -108,7 +108,8 @@ UMassEntityConfigAsset* ULabCrowdSubsystem::BuildEntityConfig(int32 UnitType, US
 		{
 			Visual->HighResTemplateActor = bBudget ? ALabMinionMassActorBudget::StaticClass() : ALabMinionMassActor::StaticClass();
 		}
-		Visual->Params.LODRepresentation[EMassLOD::High] = Variant == ELabVariant::M3NoActor ? EMassRepresentationType::StaticMeshInstance : EMassRepresentationType::HighResSpawnedActor;
+		// m3noactor와 Q3 빼 보기 -LabHydrate=0은 0~30m도 인스턴스다(M5 ISKM이면 아래에서 ISKM으로 바뀐다). 밴드·상한은 그대로 둔다
+		Visual->Params.LODRepresentation[EMassLOD::High] = FLabConfig::Get().UsesHydration() ? EMassRepresentationType::HighResSpawnedActor : EMassRepresentationType::StaticMeshInstance;
 		// 전환 팝핑 대책(2026-11-08 사용자 결정). VAT → 액터: 액터의 포즈가 준비될 때까지 VAT 인스턴스를 그린다.
 		// 액터 → VAT: 액터를 한 프레임 더 남긴다(엔진 군중 기본값도 켠다, MassCrowdVisualizationTrait.cpp:22). bKeepLowResActors가 켜져 있어야 동작한다(MassRepresentationProcessor.h:27-30).
 		Visual->Params.RepresentationActorManagementClass = ULabActorManagement::StaticClass();
@@ -119,7 +120,8 @@ UMassEntityConfigAsset* ULabCrowdSubsystem::BuildEntityConfig(int32 UnitType, US
 	{
 		// E3 (7): 하이드레이션 거리(화면 안 Visible)만 바꾼다(대표 30m). 80m·200m 밴드와 상한은 그대로(2026-11-09 사용자 결정 A)
 		const float HydrateCm = Variant == ELabVariant::M3Hyd15 ? 1500.f : Variant == ELabVariant::M3Hyd50 ? 5000.f : 3000.f;
-		const float Bands[EMassLOD::Max] = { 0.f, HydrateCm, 8000.f, FLabConfig::Get().FarCm() }; // Off 거리: 기본 200m, -LabFarM=으로 옮긴다
+		// Off 거리: 기본 200m, -LabFarM=으로 옮긴다. Q3 빼 보기 -LabFarCull=0이면 1,000m라 맵 끝까지 그린다(RepOffCm)
+		const float Bands[EMassLOD::Max] = { 0.f, HydrateCm, 8000.f, FLabConfig::Get().RepOffCm() };
 		const int32 MaxCounts[EMassLOD::Max] = { 500, 5000, MAX_int32, MAX_int32 }; // 확정값 LODMaxCount
 		for (int32 LOD = 0; LOD < EMassLOD::Max; ++LOD)
 		{
@@ -145,7 +147,7 @@ UMassEntityConfigAsset* ULabCrowdSubsystem::BuildEntityConfig(int32 UnitType, US
 	if (bM3 && Variant == ELabVariant::M3LowRes)
 	{
 		// E3 (5): 0~15m 액터, 15~30m 저품질 액터, 30~200m VAT 인스턴스, 200m 밖 Off. 액터 상한은 대표와 같은 500을 둘이 나눈다.
-		const float Bands[EMassLOD::Max] = { 0.f, 1500.f, 3000.f, FLabConfig::Get().FarCm() };
+		const float Bands[EMassLOD::Max] = { 0.f, 1500.f, 3000.f, FLabConfig::Get().RepOffCm() };
 		const int32 MaxCounts[EMassLOD::Max] = { 250, 250, MAX_int32, MAX_int32 };
 		for (int32 LOD = 0; LOD < EMassLOD::Max; ++LOD)
 		{
@@ -344,7 +346,8 @@ void ULabCrowdSubsystem::ApplyFixedIskmBounds(UInstancedSkinnedMeshComponent& Co
 {
 	// 그리는 끝(히스테리시스 10%, MassRepresentationFragments.h:309) + 카메라가 오브에서 떨어진 거리 + 여유. 오브는 움직이지 않는다. 높이는 대형의 죽기 자세까지 덮는다.
 	// 월드 좌표다: UpdateBounds는 CalcBounds(컴포넌트 변환)을 부르고, 그때 InverseTransformBy(GetComponentTransform().Inverse() * LocalToWorld)가 항등이라 값이 그대로 나온다(InstancedSkinnedMeshComponent.cpp:1249-1253).
-	const float HalfXY = FLabConfig::Get().FarCm() * 1.1f + FLabScenario::OrbViewBack + 1000.f;
+	// Q3 빼 보기 -LabFarCull=0(끝까지 그리기)이면 그리는 범위가 맵 반경이라 상자도 맵을 덮는다(DrawExtentCm).
+	const float HalfXY = FLabConfig::Get().DrawExtentCm() * 1.1f + FLabScenario::OrbViewBack + 1000.f;
 	const FBox Fixed(OrbCenter + FVector(-HalfXY, -HalfXY, -500.f), OrbCenter + FVector(HalfXY, HalfXY, 1500.f));
 	if (!Component.GetPrimitiveBoundsOverride().IsValid)
 	{

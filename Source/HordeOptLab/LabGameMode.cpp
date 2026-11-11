@@ -79,6 +79,23 @@ namespace
 	}
 }
 
+bool ALabGameMode::IsBudgetActive() const
+{
+	// 할당기는 CVar a.Budget.Enabled == 1(bCachedEnabled)과 월드 할당기의 bEnabled가 둘 다 참일 때만 돈다(AnimationBudgetAllocator.cpp:75, 115, 135).
+	const IConsoleVariable* Var = IConsoleManager::Get().FindConsoleVariable(TEXT("a.Budget.Enabled"));
+	const IAnimationBudgetAllocator* Allocator = IAnimationBudgetAllocator::Get(GetWorld());
+	return Var && Var->GetInt() == 1 && Allocator && Allocator->GetEnabled();
+}
+
+FString ALabGameMode::AppliedString() const
+{
+	// Q3: 설정(lab_config tech=)이 아니라 실제로 적용된 값. 빼 보기 러너가 설정과 함께 대조한다.
+	const ULabCrowdSubsystem* Crowd = GetWorld()->GetSubsystem<ULabCrowdSubsystem>();
+	const bool bCrowd = Crowd && Crowd->IsActive();
+	return FString::Printf(TEXT("stage=%s budget=%d pool=%d iskm_bounds=%d fixmask=%d crowdfx_active=%d %s"), FLabConfig::StageName(FLabConfig::Get().Stage), IsBudgetActive() ? 1 : 0,
+		FLabConfig::Get().bEntityPool ? 1 : 0, bCrowd ? Crowd->GetIskmBoundsApplied() : 0, FLabConfig::Get().HydrateFixMask, CrowdFx && CrowdFx->IsActive() ? 1 : 0, *FLabConfig::Get().TechString());
+}
+
 ALabGameMode::ALabGameMode()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -300,6 +317,20 @@ void ALabGameMode::TickBench()
 			CSV_METADATA(TEXT("LabCrowdFx"), Config.bCrowdFx ? TEXT("1") : TEXT("0"));
 			CSV_METADATA(TEXT("LabCrowdFxParticles"), *FString::FromInt(Config.CrowdFxParticles()));
 			CSV_METADATA(TEXT("LabCrowdFxActive"), CrowdFx && CrowdFx->IsActive() ? TEXT("1") : TEXT("0"));
+			// Q3 빼 보기(plan.md "총괄 묶음 러너"): 단계, 실제로 적용된 값(Budget 할당기, 엔티티 풀, 고정 바운드가 들어간 ISKM 컴포넌트 수, 전환 대책 마스크),
+			// 아홉 기법의 설정 켬·끔(LabTech*, FLabConfig::TechList). 러너가 실행마다 기대값과 대조한다.
+			CSV_METADATA(TEXT("LabStage"), FLabConfig::StageName(Config.Stage));
+			CSV_METADATA(TEXT("LabBudget"), IsBudgetActive() ? TEXT("1") : TEXT("0"));
+			CSV_METADATA(TEXT("LabPool"), Config.bEntityPool ? TEXT("1") : TEXT("0"));
+			{
+				const ULabCrowdSubsystem* Crowd = GetWorld()->GetSubsystem<ULabCrowdSubsystem>();
+				CSV_METADATA(TEXT("LabIskmBounds"), *FString::FromInt(Crowd && Crowd->IsActive() ? Crowd->GetIskmBoundsApplied() : 0));
+			}
+			CSV_METADATA(TEXT("LabHydrateFixMask"), *FString::FromInt(Config.HydrateFixMask));
+			for (const FLabConfig::FTech& Tech : Config.TechList())
+			{
+				CSV_METADATA(Tech.MetaKey, *Tech.Value);
+			}
 			// 측정 방법 5번(plan.md "M3b"): 빌드 커밋, 고정 CVar 값, GPU 드라이버. summarize.py BUILD_KEYS(labbuild·labcvars·labdriver)와 이름을 맞춘다.
 			CSV_METADATA(TEXT("LabBuild"), TEXT(LAB_BUILD_COMMIT));
 			CSV_METADATA(TEXT("LabCVars"), *LabFixedCVarString());
@@ -316,6 +347,7 @@ void ALabGameMode::TickBench()
 			BenchPhaseTime = 0.f;
 			BenchFrames = 0;
 			UE_LOG(LogLab, Log, TEXT("lab_measure_start n=%d"), Spawner->GetAliveCount());
+			UE_LOG(LogLab, Log, TEXT("lab_applied %s"), *AppliedString()); // Q3: 메타데이터와 같은 시점의 실제 적용값(개발 빌드만 로그가 남는다)
 		}
 		break;
 
@@ -479,6 +511,7 @@ void ALabGameMode::Tick(float DeltaSeconds)
 		{
 			UE_LOG(LogLab, Log, TEXT("lab_damage hits=%lld per_sec=%.0f"), Crowd->DamageHits.load(), Crowd->DamageHits.load() / FMath::Max(Elapsed, 0.01f));
 		}
+		UE_LOG(LogLab, Log, TEXT("lab_applied %s"), *AppliedString()); // Q3: 개발 실행에서도 실제 적용값을 남긴다(벤치마크는 측정 시작 때)
 		UE_LOG(LogLab, Log, TEXT("lab_summary elapsed=%.1f n=%d respawns=%d kills=%d snipes=%d avg_ms=%.1f"),
 			Elapsed, Spawner->GetAliveCount(), Spawner->GetRespawnCount(), Orb->GetKillCount(), Orb->GetSnipeCount(),
 			1000.f * Elapsed / FMath::Max<uint64>(GFrameCounter - StartFrame, 1));

@@ -33,7 +33,7 @@ $Proc = Start-Process -FilePath $Editor -ArgumentList $GameArgs -PassThru
 $Proc.WaitForExit()
 $Log = "$ProjectDir\Saved\Logs\$LogName"
 if (Test-Path $Log) {
-    Select-String -Path $Log -Pattern "lab_config|lab_assets|lab_spawned|lab_summary" | ForEach-Object { $_.Line }
+    Select-String -Path $Log -Pattern "lab_config|lab_assets|lab_spawned|lab_applied|lab_summary" | ForEach-Object { $_.Line }
 }
 Write-Host "EXIT: $($Proc.ExitCode)"
 exit $Proc.ExitCode
