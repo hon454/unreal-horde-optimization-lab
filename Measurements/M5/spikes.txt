@@ -26,6 +26,8 @@ M5-m5bounds-N20000-P1bnd-r2                events=  2 period=  2.80s within10%=1
 M5-m5bounds-N20000-P1bnd-r3                events=  2 period=  7.01s within10%=100% 
 M5-m5bounds-N20000-P1chr-r1                events=  8 period=  7.00s within10%=71% PERIODIC
 M5-m5bounds-N20000-P1chr-r2                events=  8 period=  6.99s within10%=71% PERIODIC
+M5-m5bounds-N20000-P1nochr-r1              events=  0 period=      - within10%=0% 
+M5-m5bounds-N20000-P1nochr-r2              events=  0 period=      - within10%=0% 
 M5-m5bounds-N20000-P1tracepar-r1           events=  4 period=  6.99s within10%=100% 
 M5-m5bounds-N20000-P1traceser-r1           events=  8 period=  7.00s within10%=100% PERIODIC
 M5-m5destroy-N20000-P1leak-r1              events= 10 period= 49.00s within10%=22% 
@@ -56,5 +58,5 @@ M5-m5iskm-N30000-P1-r3                     events=  0 period=      - within10%=0
 M5-m5minss-N20000-P1-r1                    events=  0 period=      - within10%=0% 
 M5-m5minss-N20000-P1-r2                    events=  0 period=      - within10%=0% 
 M5-m5minss-N20000-P1-r3                    events=  0 period=      - within10%=0% 
-runs=58 periodic=13 (22%) factor=2.0x events/run median=2
+runs=60 periodic=13 (22%) factor=2.0x events/run median=2
 periodic runs: period median=7.00s range=6.99-13.50s
