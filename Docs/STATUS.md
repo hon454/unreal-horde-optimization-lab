@@ -8,7 +8,7 @@ M0\~M5, M3b 완료(태그 `M0`\~`M5`, `M3b`. `M5`는 로컬 태그이고 아직 
 
 ## 다음 할 일
 
-- [ ] **원거리 표현 결정(사용자).** 기본 ISKM(`m5iskm`)은 P1에서 기준점보다 느리지만, 고정 바운드를 준 `m5bounds`는 20k P1에서 기준점보다 빠르다(아래 "측정 결과"). 다음 단계와 총괄 묶음의 대표 원거리 표현을 무엇으로 할지 정해야 한다. 근거는 [Worklog/M5.md](Worklog/M5.md) "고정 바운드 판단".
+- [x] **원거리 표현 결정(2026-11-11 사용자): `m5bounds`.** 다음 단계와 총괄 묶음의 대표 원거리 표현이다. 고정 상자는 오브가 움직이지 않아 가능한 것이라 카메라 추종 상자의 정지 사례로 읽는다(일반화는 backlog "선택 심화"). 근거는 [Worklog/M5.md](Worklog/M5.md) "고정 바운드 판단".
 - [x] **고정 바운드 실험(1f5de2e, 묶음 39c1a0f).** 프레임 끝 `SendAllEndOfFrameUpdates`가 1.9ms에서 0.5ms로 줄었다. `m5bounds`의 N@16.7ms와 P2는 아직 재지 않았다.
 - [x] **M5 Game +0.6ms 원인(트레이스, e09c355).** 엔진 `EndVisualChanges` +0.56\~0.75ms가 Game 증가분이고, 프레임 끝 `SendAllEndOfFrameUpdates` +1.0ms(거의 `ParallelFor.Wait`)가 프레임 − Game 간격과 크기가 맞는다. 하위 원인은 미확인이다. [Worklog/M5.md](Worklog/M5.md) "트레이스 검토".
 - [x] **M5**(2026-11-11, 묶음 0a7b8bb, 패키지 40fc360). 설계 결정 9개는 [plan.md](plan.md) "M5"에 있다.
@@ -31,7 +31,7 @@ M2\~M5 공통이고 근거는 [measurement.md](Guides/measurement.md) "확정값
 
 - 미니언끼리 비켜 가기 끔. 미니언 표현은 Lumen 장면 밖, 그림자 켬.
 - 60fps 판정(N@16.7ms)은 프레임·Game·Render·GPU p50 중 최댓값.
-- 원거리 표현은 Bone VAT ISM(`Scripts/bake-vat.py`). M3부터 200m 밖은 Off(그리지 않음).
+- 원거리 표현은 M5까지 Bone VAT ISM(`Scripts/bake-vat.py`), 이후 대표는 `m5bounds`(ISKM + 고정 바운드)다. M3부터 200m 밖은 Off(그리지 않음).
 - 0\~30m는 액터(상한 500), 전환 대책 다섯 가지 전부 켬(`-LabHydrateFixMask` 기본 31).
 - 비교는 같은 묶음에서 잰 것끼리만 한다. 주기 스파이크는 `Scripts/spikes.py`로 확인한다.
 - 대표 지표는 프레임 p95 N@16.7ms(p50 N·병목 병기), 하위 실험 앵커는 20k P1, Mass 단계 앵커에 30k 추가, 묶음 끝 A/A, 트레이스 병렬+직렬.
@@ -70,4 +70,4 @@ M5 묶음(2종 P1, N@16.7ms는 프레임 p95 기준): `m4offpool`(VAT, 기준점
 ## 사용자에게 요청한 일
 
 - 에셋 세션(Unreal MCP)을 시작할 때 에디터를 띄워 달라. 벤치마크·패키징이 도는 동안은 에디터를 켜지 않는다.
-- M5 원거리 표현 결정(위 "다음 할 일" 첫 항목)과 푸시 여부. 로컬 커밋과 태그 `M5`가 푸시되지 않은 채 쌓여 있다.
+- 푸시 여부. 로컬 커밋과 태그 `M5`가 푸시되지 않은 채 쌓여 있다.
