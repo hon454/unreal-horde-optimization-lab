@@ -340,13 +340,35 @@ void ULabCrowdSubsystem::RequestRespawn(int32 Count)
 	}
 }
 
+void ULabCrowdSubsystem::ApplyFixedIskmBounds(UInstancedSkinnedMeshComponent& Component)
+{
+	// 그리는 끝(히스테리시스 10%, MassRepresentationFragments.h:309) + 카메라가 오브에서 떨어진 거리 + 여유. 오브는 움직이지 않는다. 높이는 대형의 죽기 자세까지 덮는다.
+	// 월드 좌표다: UpdateBounds는 CalcBounds(컴포넌트 변환)을 부르고, 그때 InverseTransformBy(GetComponentTransform().Inverse() * LocalToWorld)가 항등이라 값이 그대로 나온다(InstancedSkinnedMeshComponent.cpp:1249-1253).
+	const float HalfXY = FLabConfig::Get().FarCm() * 1.1f + FLabScenario::OrbViewBack + 1000.f;
+	const FBox Fixed(OrbCenter + FVector(-HalfXY, -HalfXY, -500.f), OrbCenter + FVector(HalfXY, HalfXY, 1500.f));
+	if (!Component.GetPrimitiveBoundsOverride().IsValid)
+	{
+		// 컴포넌트는 ConstructSkinnedMeshComponents에서 늦게 생기므로 찾은 첫 틱에 넣는다. 인스턴스 갱신 때의 UpdateBounds도 이 값을 쓴다(:494-497)
+		Component.SetPrimitiveBoundsOverride(Fixed);
+		Component.UpdateBounds();
+	}
+	// 인스턴스가 들어온 뒤에도 실제 바운드가 고정값인지 컴포넌트마다 한 번 확인해 남긴다.
+	if (Component.GetInstanceCount() > 0 && !IskmBoundsConfirmed.Contains(&Component) && Component.Bounds.GetBox().Equals(Fixed, 1.0))
+	{
+		IskmBoundsConfirmed.Add(&Component);
+		UE_LOG(LogLab, Log, TEXT("lab_iskm component=%s bounds_override=1 instances=%d half_xy=%.0f identity=%d"), *Component.GetName(), Component.GetInstanceCount(), HalfXY,
+			Component.GetComponentTransform().Equals(FTransform::Identity) ? 1 : 0);
+	}
+}
+
 void ULabCrowdSubsystem::ExcludeVisualsFromLumen()
 {
 	// ISM 컴포넌트는 표현 프로세서가 필요할 때 만든다. 처음 한 개만 고치면 뒤에 생긴 컴포넌트가 빠져서(2026-11-08 그림자 캐시 수정이
 	// 듣지 않았다), 매 틱 컴포넌트를 훑어 아직 설정되지 않은 것만 고친다(비주얼라이저 하나, 컴포넌트 몇 개).
 	for (TActorIterator<AMassVisualizer> It(GetWorld()); It; ++It)
 	{
-		// M5: ISKM 컴포넌트도 같은 비주얼라이저 밑에 생긴다(MassVisualizationComponent.cpp:1305). 스켈레탈 메시는 원래 Lumen 장면 밖이지만(engine-notes.md) 같은 설정을 맞춘다.
+		const bool bFixedIskmBounds = FLabConfig::Get().UsesIskm() && FLabConfig::Get().IskmParams().bFixedBounds; // m5bounds만
+	// M5: ISKM 컴포넌트도 같은 비주얼라이저 밑에 생긴다(MassVisualizationComponent.cpp:1305). 스켈레탈 메시는 원래 Lumen 장면 밖이지만(engine-notes.md) 같은 설정을 맞춘다.
 		TArray<UPrimitiveComponent*> Components;
 		It->GetComponents(Components);
 		for (UPrimitiveComponent* Component : Components)
@@ -354,6 +376,13 @@ void ULabCrowdSubsystem::ExcludeVisualsFromLumen()
 			if (!Component->IsA<UInstancedStaticMeshComponent>() && !Component->IsA<UInstancedSkinnedMeshComponent>())
 			{
 				continue;
+			}
+			if (bFixedIskmBounds)
+			{
+				if (UInstancedSkinnedMeshComponent* FixedIskm = Cast<UInstancedSkinnedMeshComponent>(Component))
+				{
+					ApplyFixedIskmBounds(*FixedIskm);
+				}
 			}
 			const bool bWantAlways = false; // 그림자 캐시 남음은 VAT 메시 바운드로 고쳤다(Scripts/bake-vat.py BOUNDS_MARGIN). Always는 매 프레임 무효화라 비용이 커서 끈다
 			if (!Component->bAffectDynamicIndirectLighting && (!bWantAlways || Component->ShadowCacheInvalidationBehavior == EShadowCacheInvalidationBehavior::Always))

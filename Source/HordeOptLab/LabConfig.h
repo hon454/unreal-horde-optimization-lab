@@ -61,6 +61,7 @@ enum class ELabVariant : uint8
 	M5Destroy,   // E5 (b) 누수 진단: m5iskm에서 엔티티 풀링 끔(사망 개체를 파괴하고 새로 만든다)
 	M5Blend,     // 참고: m5iskm + BlendTime 0.25초
 	M5MinSS,     // 참고: m5iskm + AnimationMinScreenSize 0.1(엔진 r.Skinning.DefaultAnimationMinScreenSize 기본값)
+	M5Bounds,    // 참고: m5iskm + ISKM 컴포넌트 고정 바운드(SetPrimitiveBoundsOverride). 프레임 끝 인스턴스별 CalcBounds 반복이 SendAllEndOfFrameUpdates 증가분의 원인인지 가른다(Docs/Worklog/M5.md "트레이스 검토")
 };
 
 /**
@@ -128,6 +129,7 @@ struct FLabIskmParams
 	float BlendTime = 0.f;               // 클립 전환 크로스페이드(초). 대표 0 = VAT와 같이 끊어 바꾸기
 	float AnimationMinScreenSize = -1.f; // < 0 항상 재생. 0이면 엔진 r.Skinning.DefaultAnimationMinScreenSize(MassSkinnedMeshRepresentationTypes.h:96-101)
 	bool bCastShadows = true;            // 엔진 설명자 기본값은 false(MassSkinnedMeshRepresentationTypes.h:79)
+	bool bFixedBounds = false;           // m5bounds: 컴포넌트 바운드를 고정한다(ULabCrowdSubsystem::ExcludeVisualsFromLumen)
 };
 
 /** 실행 인자. 프로세스 시작 시 한 번 읽는다. */

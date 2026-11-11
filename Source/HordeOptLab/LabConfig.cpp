@@ -62,6 +62,7 @@ const FLabConfig& FLabConfig::Get()
 			else if (Variant == TEXT("m5destroy")) { C.Variant = ELabVariant::M5Destroy; }
 			else if (Variant == TEXT("m5blend")) { C.Variant = ELabVariant::M5Blend; }
 			else if (Variant == TEXT("m5minss")) { C.Variant = ELabVariant::M5MinSS; }
+			else if (Variant == TEXT("m5bounds")) { C.Variant = ELabVariant::M5Bounds; }
 			else if (Variant == TEXT("m3qold")) { C.Variant = ELabVariant::M3QOld; }
 			else if (Variant == TEXT("m3syncall")) { C.Variant = ELabVariant::M3SyncAll; }
 			else if (Variant == TEXT("m3vis0")) { C.Variant = ELabVariant::M3Vis0; }
@@ -161,6 +162,7 @@ const TCHAR* FLabConfig::VariantName(ELabVariant V)
 	case ELabVariant::M5Destroy: return TEXT("m5destroy");
 	case ELabVariant::M5Blend: return TEXT("m5blend");
 	case ELabVariant::M5MinSS: return TEXT("m5minss");
+	case ELabVariant::M5Bounds: return TEXT("m5bounds");
 	default: return TEXT("full");
 	}
 }
@@ -210,6 +212,7 @@ FLabIskmParams FLabConfig::IskmParams() const
 	FLabIskmParams P; // 대표 m5iskm: BlendTime 0, 항상 재생, 그림자 켬
 	if (Variant == ELabVariant::M5Blend) { P.BlendTime = 0.25f; }
 	if (Variant == ELabVariant::M5MinSS) { P.AnimationMinScreenSize = 0.1f; }
+	if (Variant == ELabVariant::M5Bounds) { P.bFixedBounds = true; }
 	return P;
 }
 
@@ -235,7 +238,7 @@ FString FLabConfig::ToLogString() const
 		if (UsesIskm())
 		{
 			const FLabIskmParams P = IskmParams();
-			M5 += FString::Printf(TEXT(" iskm_blend=%.2f iskm_minss=%.2f iskm_shadow=%d"), P.BlendTime, P.AnimationMinScreenSize, P.bCastShadows ? 1 : 0);
+			M5 += FString::Printf(TEXT(" iskm_blend=%.2f iskm_minss=%.2f iskm_shadow=%d iskm_bounds=%d"), P.BlendTime, P.AnimationMinScreenSize, P.bCastShadows ? 1 : 0, P.bFixedBounds ? 1 : 0);
 		}
 	}
 	return FString::Printf(TEXT("lab_config stage=%s n=%d preset=P%d seed=%d variant=%s bench=%d label=%s duration=%.1f types=%d simlod=%s%s%s"),

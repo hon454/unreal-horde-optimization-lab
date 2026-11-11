@@ -12,6 +12,7 @@ class UMassEntityConfigAsset;
 class UStaticMesh;
 class USkeletalMesh;
 class UTransformProviderData;
+class UInstancedSkinnedMeshComponent;
 struct FMassEntityManager;
 
 /** VAT 텍스처 안의 클립 하나(프레임 범위, 끝 포함). Scripts/bake-vat.py가 굽는 순서: 걷기, 피격, 죽기. */
@@ -106,6 +107,9 @@ public:
 
 private:
 	UMassEntityConfigAsset* BuildEntityConfig(int32 UnitType, UStaticMesh* Mesh);
+	/** m5bounds: ISKM 컴포넌트에 고정 바운드를 넣고, 인스턴스가 들어온 뒤 실제로 적용됐는지 한 번 로그에 남긴다 */
+	void ApplyFixedIskmBounds(UInstancedSkinnedMeshComponent& Component);
+	TArray<const UInstancedSkinnedMeshComponent*, TInlineAllocator<LabUnitTypeMax>> IskmBoundsConfirmed; // 비교에만 쓴다(역참조하지 않는다)
 	/** 풀 엔티티를 새 개체로 되살린다(위치·일련번호·체력·상태·이동). 태그는 부른 쪽이 한꺼번에 바꾼다 */
 	void ReinitPooledEntity(FMassEntityManager& EntityManager, FMassEntityHandle Entity, const FVector& Location, uint32 Serial) const;
 	TArray<FMassEntityHandle> EntityPool[LabUnitTypeMax]; // M5 엔티티 풀링: 종류별 대기 엔티티(뒤에서 꺼낸다)
