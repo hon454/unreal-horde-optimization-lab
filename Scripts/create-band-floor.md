@@ -1,6 +1,6 @@
 # M_LabBandFloor 만들기 (M3b, 결정 6)
 
-개발 빌드에서 오브 중심 거리 띠(30/80/200m)를 바닥에 그리는 머티리얼 `/Game/Lab/Materials/M_LabBandFloor`를 만든 순서다(2026-11-09). 측정 빌드는 기본 바닥(`MI_ProcGrid`)을 그대로 쓴다. 띠의 이유와 버린 대안은 [backlog.md](../Docs/backlog.md) "바닥 밴드 표시".
+개발 빌드에서 오브 중심 거리 띠(30/80/200m)를 바닥에 그리는 머티리얼 `/Game/Lab/Materials/M_LabBandFloor`를 만든 순서다(2026-11-09). 측정 빌드는 기본 바닥(`MI_ProcGrid`)을 그대로 쓴다. 띠는 오브 중심이다(저격 구간과 같고, 오브가 맵 중앙 고정이라 중심을 한 번만 넣는다). 표현 LOD는 카메라 기준이라 P1에서 XY로 최대 15m 어긋난다. P2(탑뷰)에서는 끈다. 버린 대안: 카메라 중심(띠가 1rpm으로 돈다), `DrawDebugCircle`(가늘고 Test에서 안 나온다), 링 메시(테두리만).
 
 ## 만들기
 
