@@ -72,4 +72,5 @@ py -3 Scripts/summarize.py --milestone M5
 
 ## 사용자에게 요청한 일
 
+- [ADR-0008](Decisions/0008-game-scene-baseline-and-target-spec.md)(게임 장면 새 기준선과 목표 사양)을 승인해 달라.
 - 에셋 세션(Unreal MCP)을 시작할 때 에디터를 띄워 달라. 벤치마크·패키징이 도는 동안은 에디터를 켜지 않는다.
