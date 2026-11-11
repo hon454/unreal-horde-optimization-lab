@@ -6,8 +6,17 @@
 - n-scaling-P1.svg : N에 따른 프레임 p95(실선)와 p50 최댓값(점선) ms, P1, 로그-로그. 16.7ms 선과 p95 교차점이 보이도록.
 - n-at-60fps.csv   : 위 막대의 값(p95 N, p50 N, 병목). 글의 표 재료.
 
-실행: py -3 -I Scripts/plot.py
+실행: py -3 -I Scripts/plot.py                # 마일스톤 묶음(Measurements/M*/)
+      py -3 -I Scripts/plot.py --batch Full1  # 총괄 묶음: Measurements/Full1/만 읽는다(아래 FULL_SERIES 표, Docs/figures/full1/)
+
+총괄 묶음(Docs/Worklog/Q5.md "2단위")이 그리는 것
+- full-ladder-P1.svg, full-ladder-P2.svg : 사다리 8단계의 프레임 p95(굵은 막대)와 p50(가는 막대), 목표 총수. 막대 색은 단계의 성격(출발점, 버는 단계, 품질 단계)이다.
+                                          묶음 끝 A/A(L8 기준점 반복)의 범위를 제목 아래에 적는다. 13.3ms(여유 20%)와 16.7ms 선을 긋는다.
+- full-ablation-P1.svg                    : 빼 보기 아홉 행의 프레임 p95와 최종 구성(L8)의 p95. 막대가 L8보다 길수록 그 기법이 번 것이다.
+- full-maxn-P1.svg                        : N에 따른 프레임 p95, 단계 1~8, P1, 로그-로그(보조 지표).
+- full-ladder.csv, full-ablation.csv, full-n-at-60fps.csv : 글의 표 재료(프레임 p50·p95·p99, 프로세스 메모리, GPU 메모리, 품질 열, 동등성 값, N@16.7ms).
 """
+import argparse
 import csv
 import math
 from pathlib import Path
@@ -114,7 +123,163 @@ def line_chart(sers, title, path, sers50=None):
     path.write_text(svg(W, H, "\n".join(body)), encoding="utf-8")
 
 
+# ---- 총괄 묶음(--batch Full1) ----
+# 그릴 계열: 사다리 단계(plan.md "사다리" 표의 번호, 성격) -> 조건 이름(Scripts/full-conditions.json). 단계마다 대표 조건 하나다.
+# 성격: start 출발점, earn 버는 단계(프레임 시간을 번다), quality 품질 단계(프레임을 쓰고 화면·자세·거리 품질을 얻는다)
+FULL_SERIES = [
+    ("1", "Actor baseline", "L1-full", "start"),
+    ("2", "Logic on Mass", "L2-mass", "earn"),
+    ("3", "ISM + VAT, cull past 200 m", "L3-vatcull", "quality"),
+    ("4", "Near actors + anim budget", "L4-mass", "quality"),
+    ("5", "Simulation LOD + entity pool", "L5-m4offpool", "earn"),
+    ("6", "ISKM + fixed bounds", "L6-m5bounds", "quality"),
+    ("7", "Niagara background crowd", "L7-q2crowd", "quality"),
+    ("8", "Raise quality (actor cap, hydrate dist)", "L8-q4final", "quality"),
+]
+FULL_KIND_COLOR = {"start": "#6b7280", "earn": "#2563eb", "quality": "#ea580c"}
+FULL_KIND_NAME = {"start": "start", "earn": "earns frame time", "quality": "spends it on quality"}
+FULL_BASELINE = "L8-q4final"      # 빼 보기와 A/A의 기준 조건
+FULL_MARGIN_MS = 13.3             # 목표: 16.7ms에서 여유 20%를 뺀 값(plan.md "목표 사양", 잠정)
+FULL_ROW_FIELDS = ["frame_p50_ms", "frame_p95_ms", "frame_p99_ms", "game_p50_ms", "render_p50_ms", "gpu_p50_ms", "mem_total_mb", "gpu_mem_p50",
+                   "actors_mean", "view_actors_mean", "cover30_mean", "large_skip_ratio", "death_rate", "near30_mean"]
+
+
+def full_load(batch):
+    path = ROOT / "Measurements" / batch / "summary.csv"
+    rows = {}
+    with open(path, newline="", encoding="utf-8") as f:
+        for r in csv.DictReader(f):
+            rows[(r["variant"], int(r["n"]), r["preset"])] = r
+    return rows
+
+
+def fnum(r, k):
+    try:
+        return float(r[k])
+    except (KeyError, ValueError, TypeError):
+        return None
+
+
+def write_rows(path, rows, fields):
+    with open(path, "w", newline="", encoding="utf-8") as f:
+        w = csv.DictWriter(f, fieldnames=fields)
+        w.writeheader()
+        w.writerows([{k: r.get(k, "") for k in fields} for r in rows])
+
+
+def hbar_chart(items, title, subtitle, path, lines):
+    """items: (이름, p95, p50 또는 None, 색, 주석). lines: (ms, 색, 이름) 세로선."""
+    W, L, R, T = 900, 290, 150, 70
+    rowh = 38
+    H = T + rowh * len(items) + 40
+    maxv = max([i[1] for i in items] + [l[0] for l in lines]) * 1.12
+    X = lambda v: L + (W - L - R) * v / maxv
+    body = [f'<text x="{W/2}" y="26" text-anchor="middle" font-size="16" font-weight="600">{title}</text>',
+            f'<text x="{W/2}" y="46" text-anchor="middle" font-size="12" fill="#555">{subtitle}</text>']
+    for ms, color, name in lines:
+        body.append(f'<line x1="{X(ms):.1f}" y1="{T-8}" x2="{X(ms):.1f}" y2="{H-30}" stroke="{color}" stroke-dasharray="6 4"/>')
+        body.append(f'<text x="{X(ms)+4:.1f}" y="{T-12}" fill="{color}" font-size="11">{name}</text>')
+    for i, (name, v95, v50, color, note) in enumerate(items):
+        y = T + i * rowh
+        body.append(f'<text x="{L-10}" y="{y+17}" text-anchor="end">{name}</text>')
+        body.append(f'<rect x="{L}" y="{y+2}" width="{X(v95)-L:.1f}" height="20" fill="{color}"/>')
+        if v50 is not None:
+            body.append(f'<rect x="{L}" y="{y+25}" width="{X(v50)-L:.1f}" height="6" fill="{color}" opacity="0.55"/>')
+        body.append(f'<text x="{X(v95)+6:.1f}" y="{y+17}">{v95:.2f}' + (f' ({note})' if note else '') + '</text>')
+    body.append(f'<text x="{L}" y="{H-8}" font-size="11" fill="#555">ms. thick bar = frame p95, thin bar = frame p50 (median of runs)</text>')
+    path.write_text(svg(W, H, "\n".join(body)), encoding="utf-8")
+
+
+def full_main(batch):
+    rows = full_load(batch)
+    out = OUT / batch.lower()
+    out.mkdir(parents=True, exist_ok=True)
+    ns = sorted({n for (_, n, _) in rows})
+    target = max((n for (v, n, p) in rows if v == FULL_BASELINE and p == "P1"), default=None)
+    if target is None:
+        raise SystemExit(f"no {FULL_BASELINE} P1 rows in Measurements/{batch}/summary.csv")
+    aa = rows.get((FULL_BASELINE + "-aa", target, "P1"))
+    base = rows.get((FULL_BASELINE, target, "P1"))
+    aa_note = ""
+    if aa and base and fnum(aa, "frame_p95_ms") is not None:
+        aa_note = (f'A/A ({FULL_BASELINE} again, {aa["runs"]} runs): p95 {fnum(aa, "frame_p95_ms"):.2f} ms '
+                   f'(range {fnum(aa, "frame_p95_ms_min"):.2f}-{fnum(aa, "frame_p95_ms_max"):.2f}) vs {fnum(base, "frame_p95_ms"):.2f}')
+    budget = [(BUDGET_MS, "#b45309", "16.7 ms"), (FULL_MARGIN_MS, "#16a34a", "13.3 ms")]
+
+    ladder_csv = []
+    for preset in ("P1", "P2"):
+        items = []
+        for num, name, cond, kind in FULL_SERIES:
+            r = rows.get((cond, target, preset))
+            if not r or fnum(r, "frame_p95_ms") is None:
+                continue
+            items.append((f"{num}. {name}", fnum(r, "frame_p95_ms"), fnum(r, "frame_p50_ms"), FULL_KIND_COLOR[kind], ""))
+            row = {"step": num, "name": name, "cond": cond, "kind": kind, "n": target, "preset": preset, "runs": r["runs"]}
+            for k in FULL_ROW_FIELDS:
+                row[k] = r.get(k, "")
+            row["frame_p95_ms_min"], row["frame_p95_ms_max"] = r.get("frame_p95_ms_min", ""), r.get("frame_p95_ms_max", "")
+            ladder_csv.append(row)
+        if items:
+            legend = ", ".join(f"{k}: {FULL_KIND_NAME[k]}" for k in FULL_KIND_COLOR)
+            hbar_chart(items, f"Ladder at N={target:,} ({preset})", (aa_note if preset == "P1" and aa_note else legend), out / f"full-ladder-{preset}.svg", budget)
+    write_rows(out / "full-ladder.csv", ladder_csv, ["step", "name", "cond", "kind", "n", "preset", "runs", "frame_p95_ms_min", "frame_p95_ms_max"] + FULL_ROW_FIELDS)
+
+    # 빼 보기: 조건 JSON의 group ablation 전부(summary.csv의 group 열). 막대가 기준(L8)보다 길면 그 기법이 번 것
+    abl_items, abl_csv = [], []
+    if base:
+        b95 = fnum(base, "frame_p95_ms")
+        abl_items.append((f"{FULL_BASELINE} (final)", b95, fnum(base, "frame_p50_ms"), FULL_KIND_COLOR["quality"], ""))
+        for (v, n, p), r in sorted(rows.items()):
+            if p != "P1" or n != target or r.get("group") != "ablation":
+                continue
+            v95 = fnum(r, "frame_p95_ms")
+            if v95 is None:
+                continue
+            delta = v95 - b95
+            abl_items.append((f"without {v.split('-', 1)[1]}", v95, fnum(r, "frame_p50_ms"), FULL_KIND_COLOR["earn"] if delta > 0 else FULL_KIND_COLOR["start"], f"{delta:+.2f}"))
+            row = {"cond": v, "n": n, "delta_p95_ms": round(delta, 3), "runs": r["runs"], "frame_p95_ms_min": r.get("frame_p95_ms_min", ""), "frame_p95_ms_max": r.get("frame_p95_ms_max", "")}
+            for k in FULL_ROW_FIELDS:
+                row[k] = r.get(k, "")
+            abl_csv.append(row)
+        if len(abl_items) > 1:
+            hbar_chart(abl_items, f"Remove one technique from the final configuration (N={target:,}, P1)",
+                       (aa_note or "blue: removing it costs frame time (it earned it), gray: no cost"), out / "full-ablation-P1.svg", budget)
+    write_rows(out / "full-ablation.csv", abl_csv, ["cond", "n", "delta_p95_ms", "runs", "frame_p95_ms_min", "frame_p95_ms_max"] + FULL_ROW_FIELDS)
+
+    # 보조: N 스케일링(P1). 계열 = 사다리 대표 조건(사다리 번호를 앞에 붙인다)
+    p95, p50 = {}, {}
+    for num, name, cond, kind in FULL_SERIES:
+        for n in ns:
+            r = rows.get((cond, n, "P1"))
+            if r and fnum(r, "frame_p95_ms") is not None:
+                p95.setdefault(f"{num} {cond}", []).append((n, fnum(r, "frame_p95_ms")))
+                named = [fnum(r, k) for k in ("frame_p50_ms", "game_p50_ms", "render_p50_ms", "gpu_p50_ms")]
+                p50.setdefault(f"{num} {cond}", []).append((n, max(v for v in named if v is not None)))
+    table = []
+    for name, pts in sorted(p95.items()):
+        if len(pts) < 2:
+            continue
+        n95, note95 = n_at_budget(sorted(pts))
+        n50, note50 = n_at_budget(sorted(p50[name]))
+        table.append({"series": name, "n_p95": round(n95) if n95 else "", "note_p95": note95, "n_p50": round(n50) if n50 else "", "note_p50": note50,
+                      "points": " ".join(f"{n}:{m:.2f}" for n, m in sorted(pts))})
+    write_rows(out / "full-n-at-60fps.csv", table, ["series", "n_p95", "note_p95", "n_p50", "note_p50", "points"])
+    multi = {k: sorted(v) for k, v in p95.items() if len(v) >= 2}
+    if multi:
+        line_chart(multi, f"Frame p95 vs N ({batch}, P1)", out / "full-maxn-P1.svg", {k: sorted(v) for k, v in p50.items() if k in multi})
+    print(f"{batch}: target N={target:,} {aa_note}")
+    for t in table:
+        print(f'{t["series"]}: N@16.7ms p95 = {t["n_p95"]} {t["note_p95"]} | p50 = {t["n_p50"]} {t["note_p50"]}')
+    print(f"wrote {out}")
+
+
 def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--batch", help="총괄 묶음 이름(예: Full1). 주면 Measurements/<묶음>/만 읽어 Docs/figures/<묶음>/에 그린다")
+    args = ap.parse_args()
+    if args.batch:
+        full_main(args.batch)
+        return
     OUT.mkdir(parents=True, exist_ok=True)
     rows = load()
     p95 = series(rows, "P1", "ms95")

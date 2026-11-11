@@ -12,11 +12,15 @@ M4부터: Simulation LOD 열을 더한다(없으면 빈칸이라 M3 이하는 �
 Lab/SimBand<...>(밴드 전체 걷는 개체 수)의 평균과, 메타데이터 LabSimLod(예 `80/200m tick=0/0.50/1.00 avoid=0`)의 설정 간격,
 E4 (d) `m4offmove`(LabSimLod 끝 ` offmove=1`)는 Lab/SimTickOff·SimBandOff·OffMoveCount·OffMove 열도 읽고 실제 틱 주기를 Off 열로 셈한다(sim_offmove, cfg_tick_off, sim_tick_off, sim_band_off, real_period_off, off_move_count, off_move_ms). 태그 e4d/e4dstart/e4daa는 E4 (d) 묶음(조건 이름 <변형>-e4d 등).
 실제 틱 주기(초) = 평균 프레임 시간(초) x 평균 SimBand / 평균 SimTick을 밴드마다 runs.csv·summary.csv의 맨 끝 열에 쓴다(Worklog/M4.md).
+Full<n>부터(총괄 묶음, Docs/Worklog/Q5.md "2단위"): 라벨 Full<n>-<단계>-<변형>-N<N>-<P1|P2>-r<i>를 읽고 조건 이름(L8-q4final)을 variant로 쓴다. 열 cond·group·ladder와 동등성 값(deaths, snipes,
+death_rate, near30_mean, alive_min, alive_max)을 맨 끝에 붙인다. 프로세스 메모리 = mem_total_mb(PhysicalUsedMB p50), GPU 메모리 = gpu_mem_p50, 품질 열은 Q4와 같다. 회차 11 이상은 A/A(<조건>-aa),
+Measurements/<묶음>/failures.csv의 라벨과 r0은 뺀다. 촬영(Full1shot-)·트레이스(Full1trace-)는 접두사가 달라 읽지 않는다.
 Q4부터: 마일스톤 Q<n> 라벨을 읽고(조건 이름 = <variant>-<태그 전체>), 품질 지표 열(QUALITY_FIELDS)을 맨 끝에 붙인다(Docs/Worklog/Q4.md).
-실행: py -3 -I Scripts/summarize.py --milestone M0 [--pc 1] [--rebuild]
+실행: py -3 -I Scripts/summarize.py --milestone M0 [--pc 1] [--rebuild]   (총괄 묶음은 --milestone Full1, --batch도 같은 뜻)
 """
 import argparse
 import csv
+import json
 import re
 import statistics
 from pathlib import Path
@@ -25,6 +29,57 @@ ROOT = Path(__file__).resolve().parent.parent
 CSV_DIR = ROOT / "Saved" / "Profiling" / "CSV"
 # Q4부터 품질 계획 마일스톤(Q<n>)도 읽는다. Q 마일스톤은 태그 전체가 조건 이름에 붙는다(<variant>-<tag>, 예: m5bounds-c750h40). 태그 규칙은 Docs/Worklog/Q4.md
 LABEL_RE = re.compile(r"^(?P<m>M\d+b?|Q\d+)-(?P<variant>[a-z][a-z0-9]*)-N(?P<n>\d+)-(?P<preset>P\d)(?P<tag>[a-z0-9]*)-r(?P<run>\d+)$")
+# 총괄 묶음(Full<n>, 예행 Reh<n>, Docs/Worklog/Q5.md "2단위"): Full1-<단계>-<변형>-N<N>-<P1|P2>-r<i>. 단계·변형 칸은 Scripts/full-conditions.json의 조건 이름이 된다(L8-q4final, A8-hydrate, S1-budget).
+# 촬영(Full1shot-)·트레이스(Full1trace-, Full1traceser-) 라벨은 접두사가 달라 읽지 않는다. 회차 11 이상은 묶음 끝 A/A(요약에서 <조건>-aa), 실패 재측정은 회차 + Runs(4~6, 14~16)라 같은 조건으로 센다.
+FULL_RE = re.compile(r"^(?P<m>[A-Z][a-z]+\d+)-(?P<step>[A-Z]\d+)-(?P<variant>[A-Za-z0-9]+)-N(?P<n>\d+)-(?P<preset>P\d)-r(?P<run>\d+)$")
+BATCH_NAME_RE = re.compile(r"^[A-Z][a-z]+\d+$")  # Full1(총괄 묶음), Reh1(예행). M3b·Q4는 소문자가 없어 걸리지 않는다
+FULL_CONDITIONS = Path(__file__).resolve().parent / "full-conditions.json"
+FULL_AA_MIN_RUN = 10
+# 총괄 묶음에만 붙는 열: 조건 이름, 묶음 종류(ladder·ablation·sub), 사다리 단계(LabLadder), 동등성 값(Docs/Worklog/Q5.md "동등성 통계")
+FULL_TEXT = ["cond", "group", "ladder"]
+FULL_NUM = ["deaths", "snipes", "death_rate", "near30_mean", "alive_min", "alive_max"]
+FULL_FIELDS = FULL_TEXT + FULL_NUM
+
+_full_by_label = None
+
+
+def full_condition(step, variant):
+    """label_step-label_variant로 조건 JSON의 조건을 찾는다. JSON이 없거나 이름이 없으면 None."""
+    global _full_by_label
+    if _full_by_label is None:
+        try:
+            doc = json.loads(FULL_CONDITIONS.read_text(encoding="utf-8"))
+            _full_by_label = {f'{c["label_step"]}-{c["label_variant"]}': c for c in doc["conditions"]}
+        except (OSError, ValueError, KeyError):
+            _full_by_label = {}
+    return _full_by_label.get(f"{step}-{variant}")
+
+
+def parse_label(label):
+    """라벨을 m, variant, n, preset, tag, run 사전으로 푼다. 마일스톤 라벨(LABEL_RE)이면 그 그룹 그대로,
+    총괄 묶음 라벨(FULL_RE)이면 variant가 조건 이름(L8-q4final)이고 tag는 빈칸이며 cond·group·step 키가 더해진다. 아니면 None."""
+    m = LABEL_RE.match(label)
+    if m:
+        return m.groupdict()
+    f = FULL_RE.match(label)
+    if not f:
+        return None
+    c = full_condition(f["step"], f["variant"])
+    d = f.groupdict()
+    d.update({"tag": "", "cond": c["name"] if c else f'{f["step"]}-{f["variant"]}', "group": c["group"] if c else ""})
+    d["variant"] = d["cond"]
+    return d
+
+
+def failed_labels(milestone):
+    """Measurements/<묶음>/failures.csv의 실패 라벨(run-full.ps1이 쓴다). 요약에서 뺀다."""
+    p = ROOT / "Measurements" / milestone / "failures.csv"
+    out = set()
+    if p.exists():
+        with open(p, newline="", encoding="utf-8-sig") as f:
+            for r in csv.DictReader(f):
+                out.add(r.get("label", ""))
+    return out
 
 # 엔진 CSV 열(LaunchEngineLoop.cpp:1518-1525)과 후보 이름
 COLS = {
@@ -248,9 +303,17 @@ def column(header, data, names):
     return []
 
 
+def full_fields(meta, m):
+    """총괄 묶음 열. 동등성 값은 CSV 끝 메타데이터(LabDeaths 등)에서 읽는다. 없으면 빈칸."""
+    out = {"cond": m["cond"], "group": m["group"], "ladder": meta.get("labladder", "")}
+    for k in FULL_NUM:
+        out[k] = meta.get("lab" + k.replace("_", ""), "")
+    return out
+
+
 def summarize_run(path, pc):
     label = path.stem
-    m = LABEL_RE.match(label)
+    m = parse_label(label)
     if not m:
         return None
     header, data, meta = read_profile(path)
@@ -278,12 +341,14 @@ def summarize_run(path, pc):
     row.update(sim_lod_fields(header, data, meta, frame))
     row["final"] = 1 if (m["tag"].endswith("fg") and not m["tag"].startswith("diag")) else ""  # 최종 묶음은 라벨 태그가 fg로 끝난다(2026-11-10 재측정). 옛 fin 묶음은 final=0
     row["fg_ok"] = fg_ok(label)
+    if "cond" in m:
+        row.update(full_fields(meta, m))
     return row
 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--milestone", required=True)
+    ap.add_argument("--milestone", "--batch", dest="milestone", required=True)
     ap.add_argument("--rebuild", action="store_true", help="기존 행도 원본 CSV로 다시 계산한다(CSV가 없는 행은 그대로 둔다)")
     ap.add_argument("--pc", default="1", help="Docs/Reference/pc-specs.md의 행 번호")
     args = ap.parse_args()
@@ -291,15 +356,21 @@ def main():
     out_dir = ROOT / "Measurements" / args.milestone
     out_dir.mkdir(parents=True, exist_ok=True)
     runs_path = out_dir / "runs.csv"
+    full = bool(BATCH_NAME_RE.match(args.milestone))
+    failed = failed_labels(args.milestone) if full else set()
+    run_fields = RUN_FIELDS + (FULL_FIELDS if full else [])
 
     existing = {}
     if runs_path.exists():
         with open(runs_path, newline="", encoding="utf-8") as f:
             for r in csv.DictReader(f):
-                existing[r["label"]] = r
+                if r["label"] not in failed:
+                    existing[r["label"]] = r
 
     added = 0
     for path in sorted(CSV_DIR.glob(f"{args.milestone}-*.csv")):
+        if path.stem in failed:
+            continue  # 실패한 실행(run-full.ps1 failures.csv)은 runs.csv·summary.csv에서 뺀다
         if path.stem in existing and not args.rebuild:
             continue
         row = summarize_run(path, existing[path.stem]["pc"] if path.stem in existing else args.pc)
@@ -309,22 +380,26 @@ def main():
 
     rows = sorted(existing.values(), key=lambda r: (r["variant"], int(r["n"]), r["preset"], int(r["run"])))
     with open(runs_path, "w", newline="", encoding="utf-8") as f:
-        w = csv.DictWriter(f, fieldnames=RUN_FIELDS)
+        w = csv.DictWriter(f, fieldnames=run_fields)
         w.writeheader()
         for r in rows:
             r.setdefault("bottleneck", bottleneck(r))
-            w.writerow({k: r.get(k, "") for k in RUN_FIELDS})
+            w.writerow({k: r.get(k, "") for k in run_fields})
 
     groups = {}
     for r in rows:
         if int(r["run"]) == 0:
             continue
-        tag = LABEL_RE.match(r["label"])["tag"]
+        tag = parse_label(r["label"])["tag"]
         if r.get("types_assets", "") == "substituted":
             print(f"WARNING: {r['label']} LabTypesAssets=substituted (대형 에셋 대체, 스모크 전용) -> summary에서 뺀다")
             continue
         if tag.startswith("trace"):
             continue  # Insights 트레이스 실행은 비교에 쓰지 않는다(runs.csv에는 남는다)
+        if BATCH_NAME_RE.match(r["milestone"]):
+            # 총괄 묶음: 조건 이름(L8-q4final)이 곧 variant. 회차 11 이상은 묶음 끝 A/A라 <조건>-aa로 따로 요약한다
+            groups.setdefault((r["variant"] + ("-aa" if int(r["run"]) > FULL_AA_MIN_RUN else ""), int(r["n"]), r["preset"]), []).append(r)
+            continue
         if r["milestone"].startswith("Q"):
             # 품질 계획 묶음: 태그가 곧 조건이다(구성·격자·A/A를 태그로 가른다, Docs/Worklog/Q4.md)
             groups.setdefault((r["variant"] + (f"-{tag}" if tag else ""), int(r["n"]), r["preset"]), []).append(r)
@@ -340,6 +415,8 @@ def main():
         fields += [c, f"{c}_min", f"{c}_max"]
     fields += ["bottleneck", "build", "types", "types_assets", "large_skip_ratio", "final", "fg_ok"]
     fields += ["sim_lod"] + [f for f in SIM_FIELDS if f != "sim_lod"]
+    if full:
+        fields += FULL_FIELDS
     with open(out_dir / "summary.csv", "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=fields)
         w.writeheader()
@@ -367,6 +444,12 @@ def main():
                     continue
                 vals = [float(r[c]) for r in rs if str(r.get(c, "")) != ""]
                 out[c] = round(statistics.median(vals), 4) if vals else ""
+            if full:
+                for c in FULL_TEXT:
+                    out[c] = next((str(r.get(c, "")) for r in rs if str(r.get(c, "")) != ""), "")
+                for c in FULL_NUM:
+                    vals = [float(r[c]) for r in rs if str(r.get(c, "")) != ""]
+                    out[c] = round(statistics.median(vals), 4) if vals else ""
             w.writerow(out)
 
     print(f"runs.csv: {len(rows)} rows (+{added}), summary.csv: {len(groups)} conditions -> {out_dir}")

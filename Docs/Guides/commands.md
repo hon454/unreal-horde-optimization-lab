@@ -92,13 +92,13 @@ py -3 -I Scripts/turn-fill.py Saved/Logs/LabDev-q4final-N10000-P1.log
 
 ## 총괄 묶음 조건과 HUD(Q5)
 
-총괄 묶음 `Full1`의 조건(사다리 8단계 `L1`\~`L8`, 빼 보기 아홉 행 `A8-*`, 하위 실험 `S1-budget`·`S1-uro`·`S8-nocol`·`S8-h70`·`S8-h50`)은 `Scripts/full-conditions.json`에 인자 줄과 기대 메타데이터로 있다. 표와 경위는 [Worklog/Q5.md](../Worklog/Q5.md).
+총괄 묶음 `Full1`의 조건(사다리 8단계 `L1`\~`L8`, 빼 보기 아홉 행 `A8-*`, 하위 실험 `S1-budget`·`S1-uro`·`S8-col`·`S8-h70`·`S8-h50`)은 `Scripts/full-conditions.json`에 인자 줄과 기대 메타데이터로 있다. 표와 경위는 [Worklog/Q5.md](../Worklog/Q5.md).
 
 | 인자 | 뜻 |
 | --- | --- |
 | `-LabHud` | 상태 오버레이를 켠다. Q5부터 `-LabBench`와 함께 줘도 켜진다(촬영 실행). 메타데이터 `LabHud` |
 | `-LabShotAt=<초>` + `-LabBench` | 게임 시작부터 그 초에 창 해상도 스크린샷 한 장(`Saved/Screenshots/Lab/<라벨>-t<초>.png`, HUD 포함). 메타데이터 `LabShotAt`. 측정 실행은 주지 않는다 |
-| `-LabActorCollision=0` | 하이드레이션 액터의 캡슐 콜리전을 끈다(끄기 전용, `m3nocol`과 같은 처리). 기본은 켬. 메타데이터 `LabActorCollision` |
+| `-LabActorCollision=1` | 하이드레이션 액터의 캡슐 콜리전을 켠다(`Pawn` 프로필 그대로, 하위 실험 `S8-col`). 기본은 끔(`m3nocol`과 같은 처리, Q5 1b단위부터)이고 `=0`은 기본과 같다. `m3colquery`는 QueryOnly, 라벨 `m3colbase`는 켬. M0 액터는 늘 켬이다. 메타데이터 `LabActorCollision`(적용값 `0`·`1`·`query`, 액터가 없으면 `-`) |
 
 동등성 통계: CSV 스탯 `Lab/Alive`(살아 있는 총수, 사망 중 포함), `Lab/Deaths`(누적 사망 = 범위 피해 사망 + 저격), `Lab/Near30`(오브 수평 30m 안 개체 수). 실행 끝 메타데이터 `LabDeaths`·`LabZoneKills`·`LabSnipes`·`LabDeathRate`·`LabNear30Mean`·`LabAliveMin`·`LabAliveMax`, 같은 값이 `Saved/Lab/<라벨>.summary.txt`의 `lab_summary` 줄 끝에 있다. 시작 메타데이터 `LabLadder`(사다리 단계), `LabOverrides`(변형 기본값과 다르게 준 인자, `|`로 잇는다, 없으면 `-`).
 
@@ -184,3 +184,45 @@ LAB_MIGRATE_SET=minion LAB_MIGRATE_DRY=0 LAB_MIGRATE_DEST="G:/Epic Games/UE_5.8.
 ```bash
 curl -s -X POST http://127.0.0.1:8001/mcp -H "Content-Type: application/json" -H "Accept: application/json, text/event-stream" -H "Mcp-Session-Id: <id>" -d '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"list_toolsets","arguments":{}}}'
 ```
+
+## 총괄 묶음(Full1) 러너·검사·요약·촬영
+
+조건과 기대값은 `Scripts/full-conditions.json`이 정한다(조건 이름을 스크립트에 박지 않는다). 러너는 패키지 exe를 직접 부르고(`run-bench.ps1`을 거치지 않는다), 시작할 때 `UnrealEditor`·게임·`chrome.exe`가 떠 있으면 멈춘다. 측정 중에는 PC를 쓰지 않는다. 경위와 설계 선택은 [Worklog/Q5.md](../Worklog/Q5.md) "2단위".
+
+```bash
+# 계획만 본다(게임을 띄우지 않는다): 조건 수, 라벨 목록(실행 순서), 예시 명령, 예상 시간
+powershell -ExecutionPolicy Bypass -File Scripts/run-full.ps1 -DryRun
+# 예행 묶음(짧은 측정 구간, 작은 보조 N): 라벨 Reh1-...
+powershell -ExecutionPolicy Bypass -File Scripts/run-full.ps1 -Batch Reh1 -TargetN 10000 -MaxNList 30000 -ActorNList 2000 -Runs 1 -DurationOverride 10
+# 본 묶음(몇 시간)
+powershell -ExecutionPolicy Bypass -File Scripts/run-full.ps1
+# 끊겼으면 이어 한다(progress.log에 있는 라벨은 건너뛴다)
+powershell -ExecutionPolicy Bypass -File Scripts/run-full.ps1 -Resume
+# 일부만: -Only ladder|ablation|maxn|actor|sub|aa|trace (쉼표로 여러 개)
+powershell -ExecutionPolicy Bypass -File Scripts/run-full.ps1 -Only ladder,ablation -Runs 1
+
+# 묶음 검사와 요약
+py -3 -I Scripts/equivalence-check.py --batch Full1
+py -3 -I Scripts/spikes.py --batch Full1
+py -3 -I Scripts/summarize.py --milestone Full1
+py -3 -I Scripts/plot.py --batch Full1
+
+# 촬영(측정이 끝난 뒤 따로)
+powershell -ExecutionPolicy Bypass -File Scripts/capture-full.ps1 -DryRun
+powershell -ExecutionPolicy Bypass -File Scripts/capture-full.ps1
+```
+
+| 인자(`run-full.ps1`) | 뜻 |
+| --- | --- |
+| `-Batch` | 묶음 이름(기본 `Full1`). 폴더 `Measurements/<Batch>/`, 라벨 접두사. 예행은 `Reh1`처럼 다른 이름 |
+| `-Only` | 묶음 종류만: `ladder`(8단계 x 목표 총수 x P1·P2), `ablation`(빼 보기 9행 x P1), `maxn`(단계 2\~8 x `-MaxNList` x P1), `actor`(단계 1 x `-ActorNList` x P1), `sub`(JSON의 하위 실험 x P1), `aa`(L8 기준점 3회, 회차 11\~13), `trace`(8단계 x 병렬·직렬, `Saved/Traces/`) |
+| `-Runs` | 조건마다 회차 수(기본 3) |
+| `-TargetN`, `-MaxNList`, `-ActorNList` | 목표 총수(기본 10000), 최대 N 보조 목록(기본 `5000,20000,30000`), 액터 보조 목록(기본 `500,1000,2000`) |
+| `-DurationOverride <초>` | 측정 구간을 `-LabDuration`으로 줄인다(예행 전용). 워밍업 15초는 게임 코드 상수라 줄지 않는다 |
+| `-Order round\|cond` | 기본 `round`: 회차가 바깥 루프(r1 전 조건, r2 전 조건 역순, r3 전 조건). `cond`: 같은 조건 연달아 |
+| `-Resume`, `-DryRun`, `-SkipR0`, `-NoFgCheck` | 이어 하기, 계획만, r0 건너뛰기, 앞 창 검사 끄기(측정에는 쓰지 않는다) |
+| `-StartupSec`, `-TimeoutFactor` | 예상 시간 계산용 프로세스 시작 시간(기본 30초), 시간 제한 = 배수(기본 3) x 한 실행 예상 시간 |
+
+러너가 남기는 것(`Measurements/<Batch>/`): `progress.log`(탭 구분: 시각, 라벨, `OK`\|`FAIL`\|`DISCARD`, 프레임 p50, p95, 이유), `failures.csv`(실패 이유), `batch.json`(`Packaged/Test/commit.txt` 첫 줄, 시작·끝, 조건 수, 계획 실행 수, 성공·실패·포기), 끝에서 `equivalence-check.py`가 쓰는 `equivalence.csv`. 성공한 CSV는 `Saved/Profiling/CSV/`, 실패한 것은 `failed/` 또는 `fg-failed/`로 간다(요약이 읽지 않는다). 라벨은 `<Batch>-<단계>-<변형>-N<N>-P<1\|2>-r<i>`, 트레이스는 `<Batch>trace-`·`<Batch>traceser-`, 촬영은 `<Batch>shot-`이다. 실패한 실행은 묶음 끝에서 회차 + `Runs`로 한 번 다시 재고(r1\~r3 -> r4\~r6, A/A는 14\~16) 또 실패하면 포기한다.
+
+`capture-full.ps1`은 사다리 8단계를 `-LabHud -LabShotAt=45 -LabDuration=40`으로 띄워 창이 뜬 24초 뒤부터 10초를 ffmpeg(`gdigrab`)로 녹화하고 960px 15fps GIF(팔레트 2패스)로 만든다. 결과는 git 밖 `Saved/Capture/<Batch>/<라벨>.gif`, 경로는 `Measurements/<Batch>/captures.csv`에 적는다. 인자 `-Steps 8`, `-Seconds`, `-RecordDelaySec`, `-Width`, `-Fps`, `-Run`(같은 라벨을 다시 쓰지 않도록 회차를 바꾼다).
