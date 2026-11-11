@@ -9,7 +9,7 @@ M0\~M5, M3b 완료(태그 `M0`\~`M5`, `M3b`. `M5`는 로컬 태그이고 아직 
 ## 다음 할 일
 
 - [ ] **원거리 표현 결정(사용자).** M5 결과를 보면 ISKM은 P1(Game 병목)에서 기준점보다 느리고, P2(GPU 병목)에서는 빠르다(아래 "측정 결과"). 다음 단계와 총괄 묶음의 대표 원거리 표현을 무엇으로 할지 정해야 한다. 추천안은 [Worklog/M5.md](Worklog/M5.md) "코디네이터 판단과 비교".
-- [ ] **M5 Game +0.6ms 원인.** 20k P1 트레이스 한 쌍(`m4offpool`, `m5iskm`)을 잰다. Lab 프로세서 차이는 +0.17ms뿐이다.
+- [x] **M5 Game +0.6ms 원인(트레이스, e09c355).** 엔진 `EndVisualChanges` +0.56~0.75ms가 Game 증가분이고, 프레임 끝 `SendAllEndOfFrameUpdates` +1.0ms(거의 `ParallelFor.Wait`)가 프레임 − Game 간격과 크기가 맞는다. 하위 원인은 미확인이다. [Worklog/M5.md](Worklog/M5.md) "트레이스 검토".
 - [x] **M5**(2026-11-11, 묶음 0a7b8bb, 패키지 40fc360). 설계 결정 9개는 [plan.md](plan.md) "M5"에 있다.
   - [x] 에셋 세션 `m5-assets`: `Scripts/create-iskm.py`(c573c0b). Python(A안)으로 끝났다. ISKM용 복제 메시 `SK_…ISKM`(`bOptimizeForInstancing`), ASTPD 2개, 머티리얼 2개. 애니메이션 바운드는 Test 패키지에서 런타임으로 확인한다. [Worklog/M5.md](Worklog/M5.md) "에셋 세션".
   - [x] 측정 러너 `Scripts/run-m5-all.ps1`(8fc271c, 42회, 약 90분). M5 단계는 `Lab/IskmInstances` 중앙값 > 0을 검사한다. Worklog/M5.md "측정 세션".
