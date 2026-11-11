@@ -151,6 +151,13 @@ const FLabConfig& FLabConfig::Get()
 			C.bCrowdFxEntity = CrowdFxEntity != 0;
 			if (!C.bCrowdFxEntity && C.bCrowdFx) { NoteOverride(TEXT("crowdfx_entity=0")); }
 		}
+		// Q5b: 바깥 독립 입자(기본 1). 0이면 독립 이미터 스폰율 0(엔티티 구동 입자만 남는다). 배경 무리를 켰을 때만 기본값과 다른 인자로 적는다
+		int32 CrowdFxOuter = -1;
+		if (FParse::Value(Cmd, TEXT("-LabCrowdFxOuter="), CrowdFxOuter) && CrowdFxOuter >= 0)
+		{
+			C.bCrowdFxOuter = CrowdFxOuter != 0;
+			if (!C.bCrowdFxOuter && C.bCrowdFx) { NoteOverride(TEXT("crowdfx_outer=0")); }
+		}
 #if !UE_BUILD_TEST
 		FParse::Value(Cmd, TEXT("-LabCrowdFxInnerM="), C.CrowdFxInnerOverrideM);
 #endif
@@ -428,7 +435,7 @@ FLabConfig::FLadder FLabConfig::Ladder() const
 
 float FLabConfig::CrowdFxTotalRate() const
 {
-	return float(N) / FLabScenario::MapRadius * FLabScenario::MoveSpeed;
+	return bCrowdFxOuter ? float(N) / FLabScenario::MapRadius * FLabScenario::MoveSpeed : 0.f; // Q5b: -LabCrowdFxOuter=0이면 독립 입자 없음
 }
 
 float FLabConfig::CrowdFxLargeRate() const
@@ -517,8 +524,8 @@ FString FLabConfig::ToLogString() const
 	// health_fixed는 디버그 인자를 줬을 때만 붙인다
 	const FString Health = HealthFixed > 0.f ? FString::Printf(TEXT(" health_fixed=%.0f"), HealthFixed) : FString();
 	// crowdfx는 켰을 때만 붙인다(Q2). 기본 실행의 로그는 그대로다.
-	// crowdfx_entity(Q2b)는 그 뒤에 붙인다. crowdfx_particles는 독립 입자만이다(엔티티 구동 입자는 CSV 스탯 Lab/CrowdRecs).
-	const FString Crowd = bCrowdFx ? FString::Printf(TEXT(" crowdfx=1 crowdfx_particles=%d crowdfx_inner=%.1f crowdfx_entity=%d"), CrowdFxParticles(), CrowdFxInnerCm() / 100.f, bCrowdFxEntity ? 1 : 0) : FString();
+	// crowdfx_entity(Q2b), crowdfx_outer(Q5b)는 그 뒤에 붙인다. crowdfx_particles는 독립 입자만이다(엔티티 구동 입자는 CSV 스탯 Lab/CrowdRecs).
+	const FString Crowd = bCrowdFx ? FString::Printf(TEXT(" crowdfx=1 crowdfx_particles=%d crowdfx_inner=%.1f crowdfx_entity=%d crowdfx_outer=%d"), CrowdFxParticles(), CrowdFxInnerCm() / 100.f, bCrowdFxEntity ? 1 : 0, bCrowdFxOuter ? 1 : 0) : FString();
 	// tech는 빼 보기 아홉 기법의 켬·끔이다(Q3). 모든 실행에 붙여 러너와 사람이 기대값과 대조한다.
 	// ladder·overrides·hud·actor_col은 Q5(사다리 단계, 변형 기본값과 다른 인자, HUD 켬, 하이드레이션 액터 캡슐 콜리전). tech 뒤에 늘 붙인다.
 	return FString::Printf(TEXT("lab_config stage=%s n=%d preset=P%d seed=%d variant=%s bench=%d label=%s duration=%.1f types=%d simlod=%s%s%s%s%s%s %s ladder=%s overrides=%s hud=%d actor_col=%s"),

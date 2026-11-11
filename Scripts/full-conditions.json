@@ -1019,6 +1019,91 @@
     "LabTechCrowdFx": "1"
    },
    "note": "옛 최종값 비교: 전환 거리 79m(Q4 최종 구성, Q4b에서 40m로 바꿨다)"
+  },
+  {
+   "name": "S8-fxent",
+   "group": "sub",
+   "label_step": "S8",
+   "label_variant": "fxent",
+   "ladder": "8",
+   "stage": "M5",
+   "variant": "q4final",
+   "args": [
+    "-LabStage=M5",
+    "-LabVariant=q4final",
+    "-LabCrowdFxOuter=0"
+   ],
+   "expect": {
+    "LabStage": "M5",
+    "LabVariant": "q4final",
+    "LabLadder": "8",
+    "LabOverrides": "crowdfx_outer=0",
+    "LabBudget": "1",
+    "LabPool": "1",
+    "LabIskmBounds": "2",
+    "LabCrowdFx": "1",
+    "LabCrowdFxActive": "1",
+    "LabSimLod": "80/200m tick=0/0.50/1.00 avoid=0 offmove=1",
+    "LabActorCap": "1000",
+    "LabHydrateM": "40",
+    "LabFarShadow": "0",
+    "LabActorCollision": "0",
+    "LabTechHydrate": "1",
+    "LabTechAnimBudget": "1",
+    "LabTechHydrateFix": "1",
+    "LabTechPool": "1",
+    "LabTechSimLod": "1",
+    "LabTechIskm": "1",
+    "LabTechFixedBounds": "1",
+    "LabTechFarCull": "1",
+    "LabTechCrowdFx": "1",
+    "LabCrowdFxParticles": "0",
+    "LabCrowdFxEntity": "1"
+   },
+   "note": "Niagara 대 ISKM의 Niagara 쪽: 200m 밖 엔티티를 엔티티 구동 입자로만 그린다(500m 밖 독립 입자 없음, 스폰율 0). 짝은 S8-fariskm이고 둘의 차이가 같은 엔티티를 Niagara로 그리기 대 ISKM으로 그리기다. 남는 차이: 입자는 그림자를 켜고 80m 밖 ISKM은 끈다, 입자는 VAT 정적 메시이고 ISKM은 스켈레탈 인스턴스다, 엔티티 구동 이미터는 카메라 175m 안을 거리 컬링한다, 모으기 프로세서 비용은 이쪽에만 있다(Docs/Worklog/Q5.md \"Q5b 비교 조건\")"
+  },
+  {
+   "name": "S8-fariskm",
+   "group": "sub",
+   "label_step": "S8",
+   "label_variant": "fariskm",
+   "ladder": "8",
+   "stage": "M5",
+   "variant": "q4final",
+   "args": [
+    "-LabStage=M5",
+    "-LabVariant=q4final",
+    "-LabFarCull=0",
+    "-LabCrowdFx=0"
+   ],
+   "expect": {
+    "LabStage": "M5",
+    "LabVariant": "q4final",
+    "LabLadder": "8",
+    "LabOverrides": "crowdfx=0|far_cull=0",
+    "LabBudget": "1",
+    "LabPool": "1",
+    "LabIskmBounds": "2",
+    "LabCrowdFx": "0",
+    "LabCrowdFxActive": "0",
+    "LabSimLod": "80/200m tick=0/0.50/1.00 avoid=0 offmove=1",
+    "LabActorCap": "1000",
+    "LabHydrateM": "40",
+    "LabFarShadow": "0",
+    "LabActorCollision": "0",
+    "LabTechHydrate": "1",
+    "LabTechAnimBudget": "1",
+    "LabTechHydrateFix": "1",
+    "LabTechPool": "1",
+    "LabTechSimLod": "1",
+    "LabTechIskm": "1",
+    "LabTechFixedBounds": "1",
+    "LabTechFarCull": "0",
+    "LabTechCrowdFx": "0",
+    "LabCrowdFxParticles": "0",
+    "LabCrowdFxEntity": "-"
+   },
+   "note": "Niagara 대 ISKM의 ISKM 쪽: 같은 200m 밖 엔티티를 ISKM(표현 LOD Low, 그림자 끔)으로 맵 끝까지 그린다(입자 없음, 500m 밖은 빈다). Simulation LOD와 원거리 그림자 끔은 q4final 그대로다. 짝은 S8-fxent(Docs/Worklog/Q5.md \"Q5b 비교 조건\")"
   }
  ]
 }

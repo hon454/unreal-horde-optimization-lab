@@ -257,9 +257,15 @@ struct FLabConfig
 	 * 0: Q2 3단위의 옛 방식(전부 독립 입자, 안쪽 반경 172.8m, 엔티티 배열을 넣지 않음). bCrowdFx일 때만 뜻이 있다.
 	 */
 	bool bCrowdFxEntity = true;
+	/**
+	 * Q5b(-LabCrowdFxOuter=0/1, 기본 1). 0이면 바깥 독립 이미터(Small·Large)의 스폰율을 0으로 넣어(CrowdFxTotalRate) 입자를 내지 않는다. 에셋은 고치지 않는다.
+	 * 스폰율을 활성화 전에 넣으므로 워밍업도 0으로 돌아 미리 채워지는 입자가 없다. 엔티티 구동 이미터는 스폰율을 읽지 않아 그대로다.
+	 * Niagara 대 ISKM 비교 조건 S8-fxent(Scripts/full-conditions.json, Docs/Worklog/Q5.md "Q5b 비교 조건"). bCrowdFx일 때만 뜻이 있다.
+	 */
+	bool bCrowdFxOuter = true;
 	/** 개발용: 독립 입자가 사라지는 안쪽 반경(-LabCrowdFxInnerM=<미터>, 0 = 기본 CrowdFxInnerCm). 200m 경계 비교 촬영에 쓴다. Test 빌드에서는 읽지 않는다 */
 	float CrowdFxInnerOverrideM = 0.f;
-	/** 실제 미니언과 같은 흐름(개/초): N / 맵 반경 × 이동 속도(Docs/Worklog/Q2.md "장면 수치"). N 1만이면 60 */
+	/** 실제 미니언과 같은 흐름(개/초): N / 맵 반경 × 이동 속도(Docs/Worklog/Q2.md "장면 수치"). N 1만이면 60. -LabCrowdFxOuter=0이면 0 */
 	float CrowdFxTotalRate() const;
 	float CrowdFxSmallRate() const;
 	float CrowdFxLargeRate() const;
