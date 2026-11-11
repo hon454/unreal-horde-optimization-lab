@@ -158,13 +158,24 @@ const FLabConfig& FLabConfig::Get()
 		C.bNoIskm = OffSwitch(TEXT("-LabIskm="));
 		C.bNoFixedBounds = OffSwitch(TEXT("-LabFixedBounds="));
 		C.bNoFarCull = OffSwitch(TEXT("-LabFarCull="));
-		C.bNoActorCollision = OffSwitch(TEXT("-LabActorCollision=")); // Q5 하위 실험(끄기 전용)
 		if (C.bNoHydrate) { NoteOverride(TEXT("hydrate=0")); }
 		if (C.bNoSimLod) { NoteOverride(TEXT("simlod=0")); }
 		if (C.bNoIskm) { NoteOverride(TEXT("iskm=0")); }
 		if (C.bNoFixedBounds) { NoteOverride(TEXT("fixed_bounds=0")); }
 		if (C.bNoFarCull) { NoteOverride(TEXT("far_cull=0")); }
-		if (C.bNoActorCollision) { NoteOverride(TEXT("actor_collision=0")); }
+		// 하이드레이션 액터 캡슐 콜리전(LabConfig.h ActorCollision): 기본 끔, m3colquery는 QueryOnly, 라벨 m3colbase는 켬. -LabActorCollision=1/0이 이긴다(Q5 하위 실험 S8-col)
+		C.ActorCollision = C.Variant == ELabVariant::M3ColQuery ? FLabConfig::EActorCollision::QueryOnly
+			: Variant == TEXT("m3colbase") ? FLabConfig::EActorCollision::On
+			: FLabConfig::EActorCollision::Off;
+		{
+			int32 ActorCol = -1;
+			if (FParse::Value(Cmd, TEXT("-LabActorCollision="), ActorCol) && ActorCol >= 0)
+			{
+				const FLabConfig::EActorCollision Wanted = ActorCol != 0 ? FLabConfig::EActorCollision::On : FLabConfig::EActorCollision::Off;
+				if (Wanted != C.ActorCollision) { NoteOverride(FString::Printf(TEXT("actor_collision=%d"), ActorCol != 0 ? 1 : 0)); }
+				C.ActorCollision = Wanted;
+			}
+		}
 		// Q4 근거리 품질: 변형 기본값(m3hyd15·m3hyd50의 전환 거리, q4final의 고른 값), 그다음 인자
 		if (C.Variant == ELabVariant::M3Hyd15) { C.HydrateM = 15.f; }
 		else if (C.Variant == ELabVariant::M3Hyd50) { C.HydrateM = 50.f; }
@@ -359,11 +370,12 @@ const TCHAR* FLabConfig::ActorCollisionString() const
 	{
 		return TEXT("-"); // 하이드레이션 액터가 없다(M0 액터는 CharacterMovement가 캡슐을 쓰므로 늘 켜져 있고 바꾸지 않는다)
 	}
-	if (Variant == ELabVariant::M3NoCol || bNoActorCollision)
+	switch (ActorCollision)
 	{
-		return TEXT("0");
+	case EActorCollision::On: return TEXT("1");
+	case EActorCollision::QueryOnly: return TEXT("query");
+	default: return TEXT("0");
 	}
-	return Variant == ELabVariant::M3ColQuery ? TEXT("query") : TEXT("1");
 }
 
 FLabConfig::FLadder FLabConfig::Ladder() const

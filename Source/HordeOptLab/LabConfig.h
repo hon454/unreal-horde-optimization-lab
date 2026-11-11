@@ -276,15 +276,18 @@ struct FLabConfig
 	float HydrateM = FLabQuality::DefaultHydrateM;
 	float HydrateCm() const { return HydrateM * 100.f; }
 	/**
-	 * Q5 하위 실험(-LabActorCollision=0, 끄기 전용): 하이드레이션 액터(M3 이상)의 캡슐 콜리전을 끈다(m3nocol과 같은 처리: NoCollision, 오버랩·물리 볼륨 갱신 끔).
-	 * 기본은 켬이다. ACharacter 캡슐의 Pawn 프로필 그대로이고 Mass 액터 풀이 꺼낼 때 SetActorEnableCollision(true)를 부른다(MassActorSpawnerSubsystem.cpp:327).
-	 * M0 액터는 CharacterMovement가 캡슐로 바닥을 찾으므로 건드리지 않는다.
+	 * 하이드레이션 액터(M3 이상, ALabMinionMassActor 계열)의 캡슐 콜리전. 기본은 끔이다(plan.md M3b "함께 바꾸는 설정", 2026-11-09 사용자 결정, Q5 1b단위에서 코드에 넣었다).
+	 * Off: NoCollision + 오버랩·물리 볼륨 갱신 끔(옛 m3nocol 처리). QueryOnly: 같은 두 갱신 끔 + QueryOnly(m3colquery). On: ACharacter 캡슐의 Pawn 프로필 그대로
+	 * (Mass 액터 풀이 꺼낼 때 SetActorEnableCollision(true)를 부른다, MassActorSpawnerSubsystem.cpp:327).
+	 * 변형 기본값: m3colquery는 QueryOnly, 라벨 m3colbase는 On(E3 (6)의 "그대로" 기준점의 뜻을 지킨다), 그 밖은 Off. -LabActorCollision=1이 켜고 =0이 끈다(인자가 이긴다).
+	 * 판정(범위 피해, 저격)은 엔티티 위치의 수평 거리로 하고 캡슐을 쓰지 않는다. M0 액터(ALabMinion, CharacterMovement가 캡슐로 바닥을 찾는다)는 이 값과 무관하게 늘 켬이다.
 	 */
-	bool bNoActorCollision = false;
-	/** 하이드레이션 액터 캡슐 콜리전의 실제 설정. "1" 기본(켬), "query" m3colquery, "0" m3nocol·-LabActorCollision=0. 액터가 없는 단계는 "-". CSV 메타데이터 LabActorCollision */
+	enum class EActorCollision : uint8 { Off, QueryOnly, On };
+	EActorCollision ActorCollision = EActorCollision::Off;
+	/** 하이드레이션 액터 캡슐 콜리전의 실제 적용값. "0" 끔(기본), "1" 켬(-LabActorCollision=1, m3colbase), "query" m3colquery. 액터가 없는 단계는 "-". CSV 메타데이터 LabActorCollision */
 	const TCHAR* ActorCollisionString() const;
 	/**
-	 * 변형이 정한 기본값과 다르게 준 인자(Q5). "hydrate_m=70|actor_collision=0" 꼴(CSV 메타데이터 행이 쉼표로 나뉘어 | 로 잇는다), 없으면 빈 문자열. 사다리 단계를 그대로 고른 실행인지 가리는 데 쓴다.
+	 * 변형이 정한 기본값과 다르게 준 인자(Q5). "hydrate_m=70|actor_collision=1" 꼴(CSV 메타데이터 행이 쉼표로 나뉘어 | 로 잇는다), 없으면 빈 문자열. 사다리 단계를 그대로 고른 실행인지 가리는 데 쓴다.
 	 * CSV 메타데이터 LabOverrides(빈 값이면 "-"), HUD 둘째 줄.
 	 */
 	FString Overrides;

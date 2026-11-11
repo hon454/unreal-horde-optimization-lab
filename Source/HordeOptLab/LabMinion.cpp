@@ -300,16 +300,15 @@ void ALabMinionMassActor::BeginPlay()
 		SetActorScale3D(FVector(Scale));
 	}
 	SkelMesh->SetCustomPrimitiveDataFloat(0, 0.f);
-	// E3 (6) 콜리전 줄이기(2026-11-09 사용자 결정 A). 대표(mass)는 캡슐 기본값(Pawn 프로필) 그대로다.
-	// Q5 하위 실험: -LabActorCollision=0은 어느 변형에서든 m3nocol과 같이 끈다(q4final 위의 한 점, Docs/Worklog/Q5.md "캡슐 콜리전").
-	const ELabVariant Variant = FLabConfig::Get().Variant;
-	const bool bNoCollision = Variant == ELabVariant::M3NoCol || FLabConfig::Get().bNoActorCollision;
-	if (Variant == ELabVariant::M3ColQuery || bNoCollision)
+	// 캡슐 콜리전(FLabConfig::ActorCollision): 기본 끔(plan.md M3b "함께 바꾸는 설정", E3 (6) m3nocol 처리, Docs/Worklog/Q5.md "1b단위").
+	// 켬(-LabActorCollision=1, 라벨 m3colbase)은 캡슐 기본값(Pawn 프로필) 그대로, m3colquery는 QueryOnly. 판정은 캡슐을 쓰지 않는다.
+	const FLabConfig::EActorCollision Collision = FLabConfig::Get().ActorCollision;
+	if (Collision != FLabConfig::EActorCollision::On)
 	{
 		GetCapsuleComponent()->SetShouldUpdatePhysicsVolume(false);
 		GetCapsuleComponent()->SetGenerateOverlapEvents(false);
 		// QueryOnly: 트레이스·스윕은 받고 물리 시뮬레이션 바디는 만들지 않는다. NoCollision: 피직스 씬에서 뺀다
-		GetCapsuleComponent()->SetCollisionEnabled(bNoCollision ? ECollisionEnabled::NoCollision : ECollisionEnabled::QueryOnly);
+		GetCapsuleComponent()->SetCollisionEnabled(Collision == FLabConfig::EActorCollision::Off ? ECollisionEnabled::NoCollision : ECollisionEnabled::QueryOnly);
 	}
 	if (FLabConfig::Get().Variant == ELabVariant::M3Uro)
 	{
