@@ -296,3 +296,15 @@
 | 없는 이름은 부를 때마다 경고 | `UNiagaraFunctionLibrary::GetDataInterface`는 이름이 없거나 형이 다르면 `LogNiagara` Warning을 매번 남긴다(자세한 경고 설정과 무관). 매 프레임 넣는 코드는 이름을 미리 한 번 확인한다 | `NI/Private/NiagaraFunctionLibrary.cpp:702-735` |
 | 사용자 변수 이름 찾기 | 컴포넌트의 덮어쓰기 저장소(`FNiagaraUserRedirectionParameterStore`)는 `User.X`로 저장하고 접두사 없는 `X`를 열쇠로 하는 넘김표를 둔다. `FindParameterOffset`에 `User.X`를 주면 넘김표에서 못 찾고 저장소에서 바로 찾는다. 저장소는 컴포넌트에 시스템을 넣을 때 시스템의 노출 변수로 채워져 활성화 전에도 확인할 수 있다 | `NI/Public/NiagaraUserRedirectionParameterStore.h:35-53`, `NI/Private/NiagaraUserRedirectionParameterStore.cpp:46-69`, `NI/Private/NiagaraComponent.cpp:3892-3900, 4620-4672` |
 | `SetVariableFloat`는 없는 이름에 조용하다 | 인스턴스가 있으면 `SetVariable_Deferred`(다음 틱에 반영), 없으면 덮어쓰기 저장소에 더한다(없는 이름도 더해진다). 경고는 없다. 그래서 이름 확인은 값을 넣기 전에 한다 | `NI/Private/NiagaraComponent.cpp:2864-2878` |
+
+## 22. LOD 중요도 범위로 원거리 그림자 끄기(2026-11-12, Q4b)
+
+줄임말: **MG** = `Engine/Plugins/Runtime/MassGameplay/Source`, **MR** = `MG/MassRepresentation`.
+
+| 항목 | 확인한 것 | 위치 |
+| --- | --- | --- |
+| 그림자는 컴포넌트 단위다 | ISKM·ISM 메시 설명자의 `bCastShadows`는 엔진이 설명자마다 만드는 컴포넌트의 `SetCastShadow`로만 넘어간다. 인스턴스 단위 그림자 플래그는 없다. 컴포넌트는 설명자 해시(`bCastShadows` 포함)로 찾으므로 그림자만 다른 두 설명자는 컴포넌트 둘이 된다 | `MR/Private/MassVisualizationComponent.cpp:1299-1337`(ISKM), `:259`(ISM), `MR/Public/MassSkinnedMeshRepresentationTypes.h:118-137`, `MR/Public/MassRepresentationTypes.h:136` |
+| 설명자의 LOD 중요도 범위 | `FMassSkinnedMeshInstanceVisualizationMeshDesc`와 `FMassStaticMeshInstanceVisualizationMeshDesc`에 `MinLODSignificance`(포함, 기본 High)·`MaxLODSignificance`(제외, 기본 Max)와 `SetSignificanceRange`가 있다. 엔진은 모든 설명자의 경계 값을 모아 범위를 만들고 범위마다 그 범위를 덮는 설명자의 컴포넌트를 넣는다 | `MR/Public/MassSkinnedMeshRepresentationTypes.h:69-75, 140-145`, `MR/Public/MassRepresentationTypes.h:97-101, 150-154`, `MR/Private/MassVisualizationComponent.cpp:1371-1419`(ISKM), `:331`(ISM) |
+| 중요도와 표현 LOD | `LODSignificance` = LOD 정수 + 밴드 안 비율. 개수 집계 경로는 버킷 번호 ÷ 버킷 수라 [LOD, LOD+1)을 넘지 않는다. 그래서 [1, 2)가 Medium, [2, 3)이 Low이고 범위 경계 2.0이 표현 LOD Medium/Low 경계(80m)와 같다 | `MG/MassLOD/Public/MassLODCalculator.h:409-416, 745-753` |
+| 범위를 넘는 프레임 | `AddBatchedTransform`·`AddBatchedAnimationData`·`AddBatchedCustomData`에 이전 중요도를 주면 새 범위와, 새 범위에 없는 옛 범위 컴포넌트 모두에 넣는다. 다음 프레임 옛 컴포넌트에서 갱신되지 않은 움직이는 인스턴스는 지워진다. 그래서 한 프레임 겹쳐 그리고 넘어간다 | `MR/Public/MassSkinnedMeshRepresentationTypes.h:665-726`, `MR/Private/MassVisualizationComponent.cpp:1440-1475, 812-827` |
+| 컴포넌트마다 트랙이 따로다 | ASTPD면 컴포넌트마다 `UAnimSequenceTransformProviderDataInstance`를 만들고 트랙 맵도 공유 데이터(컴포넌트)마다다. 트랙이 이미 있으면 클립 번호가 다를 때만 `SetAutoPlayData`를 부르므로, 예전에 머물던 컴포넌트로 돌아오면 옛 시작 시각의 같은 클립 트랙이 남아 위상이 튈 수 있다. `ULabIskmProcessor`가 범위가 바뀐 프레임에 새 컴포넌트의 트랙을 직접 다시 쓴다 | `MR/Private/MassVisualizationComponent.cpp:1323-1326, 761-775, 852-866` |

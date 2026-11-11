@@ -32,7 +32,7 @@ STATUS.md "명령"에는 매번 쓰는 것만 둔다. 여기에는 스크립트 
 
 ## 빼 보기 스위치(Q3)
 
-빼 보기 표([plan.md](../plan.md) "품질 계획")의 행은 "최종 구성 변형 + 인자 하나"다. 최종 구성은 Q4부터 `q4final`(`-LabStage=M5`, `q2crowd` + 액터 상한 1,000·전환 거리 79m, 아래 "근거리 품질 인자(Q4)")이고 아홉 행 모두 `q4final` 위에서 대조를 통과했다(Worklog/Q4.md). 새 인자 다섯(`-LabHydrate`·`-LabSimLod`·`-LabIskm`·`-LabFixedBounds`·`-LabFarCull`)은 0일 때만 뜻이 있고(끄기 전용), 나머지 넷은 기존 인자다. 경위와 설계 선택은 [Worklog/Q3.md](../Worklog/Q3.md).
+빼 보기 표([plan.md](../plan.md) "품질 계획")의 행은 "최종 구성 변형 + 인자 하나"다. 최종 구성은 Q4부터 `q4final`(`-LabStage=M5`, `q2crowd` + 액터 상한 1,000·전환 거리 40m·80m 밖 그림자 끔, 아래 "근거리 품질 인자(Q4)")이고 아홉 행 모두 `q4final` 위에서 대조를 통과했다(Worklog/Q4.md, 그때 전환 거리는 79m). Q4b에서 열째 행 farshadow를 더했다(조건 표 `A8-farshadow`). 새 인자 다섯(`-LabHydrate`·`-LabSimLod`·`-LabIskm`·`-LabFixedBounds`·`-LabFarCull`)은 0일 때만 뜻이 있고(끄기 전용), 나머지 넷은 기존 인자다. 경위와 설계 선택은 [Worklog/Q3.md](../Worklog/Q3.md).
 
 | 행 | 빼는 것 → 대신 | 인자 | 메타데이터에서 0이 되는 키 |
 | --- | --- | --- | --- |
@@ -46,6 +46,7 @@ STATUS.md "명령"에는 매번 쓰는 것만 둔다. 여기에는 스크립트 
 | bounds | 고정 바운드 → 기본 바운드 | `-LabFixedBounds=0` | `LabTechFixedBounds`, `LabIskmBounds` |
 | farcull | 200m 밖 지우기 → 맵 끝까지 그리기(배경 무리는 그대로 켬) | `-LabFarCull=0` | `LabTechFarCull` |
 | crowdfx | Niagara 배경 무리 → 빈 수평선 | `-LabCrowdFx=0` | `LabTechCrowdFx`, `LabCrowdFxActive` |
+| farshadow | 80m 밖 인스턴스 그림자 끔 → 켬(Q4b) | `-LabFarShadow=1` | `LabFarShadow`가 1이 된다(`LabTech*` 아홉은 그대로) |
 
 ```bash
 # Test 패키지(Q5 뒤, run-bench.ps1의 ValidateSet에 q2crowd가 들어가기 전에는 -Variant m5bounds -ExtraArgs "-LabCrowdFx=1 <인자>")
@@ -56,7 +57,7 @@ py -3 -I Scripts/ablation-check.py Saved/Profiling/CSV/Q3dev-hydrate-N100-P1-r1.
 ```
 
 - `lab_config` 끝의 `tech=hyd:1,bud:1,fix:1,pool:1,sim:1,iskm:1,bnd:1,far:1,fx:1`이 아홉 기법의 설정이다. 단계가 그 기법을 아직 갖지 않으면 0이다(M4 `m4mass`의 Simulation LOD는 틱 간격만이라 `tick`, 전환 대책 일부만 켜면 `m<마스크>`).
-- 실제 적용값은 `lab_applied`(개발 빌드 로그, 벤치마크는 측정 시작 때, 개발 실행은 끝날 때)와 CSV 메타데이터 `LabStage`·`LabBudget`(할당기가 도는가)·`LabPool`·`LabIskmBounds`(고정 바운드가 들어간 ISKM 컴포넌트 수, 2종이면 2)·`LabHydrateFixMask`다.
+- 실제 적용값은 `lab_applied`(개발 빌드 로그, 벤치마크는 측정 시작 때, 개발 실행은 끝날 때)와 CSV 메타데이터 `LabStage`·`LabBudget`(할당기가 도는가)·`LabPool`·`LabIskmBounds`(고정 바운드가 들어간 ISKM 메시 종류 수, 2종이면 2. Q4b부터 컴포넌트가 아니라 메시 종류를 센다)·`LabHydrateFixMask`다.
 - `-LabFarM`(그리는 거리)은 표현 Off와 Simulation LOD Off, 배경 무리 안쪽 반경을 함께 옮기므로 farcull 행에 쓰지 않는다. `-LabFarCull=0`은 표현 Off만 맵 반경의 두 배(1,000m)로 옮긴다.
 
 ## 전환 점수(Q3)
@@ -72,14 +73,15 @@ py -3 Scripts/transition-score.py <캡처 폴더> Saved/Logs/LabDev-q2crowd-N100
 
 ## 근거리 품질 인자(Q4)
 
-최종 구성 변형은 `q4final`(= `q2crowd` + 액터 상한 1,000 + 화면 안 전환 거리 79m, `-LabStage=M5`)이다. 경위는 [Worklog/Q4.md](../Worklog/Q4.md).
+최종 구성 변형은 `q4final`(= `q2crowd` + 액터 상한 1,000 + 화면 안 전환 거리 40m + 80m 밖 인스턴스 그림자 끔, `-LabStage=M5`)이다. Q4 묶음 때는 전환 거리 79m·그림자 켬이었고 Q4b에서 바꿨다. 경위는 [Worklog/Q4.md](../Worklog/Q4.md).
 
 | 인자 | 뜻 | 기본 |
 | --- | --- | --- |
 | `-LabActorCap=<개수>` | 액터 상한(표현 LOD High의 `LODMaxCount`, 두 종류 합계) | 500, `q4final` 1,000 |
-| `-LabHydrateM=<미터>` | 화면 안에서 액터로 바뀌는 카메라 거리(1\~79m). 화면 밖 15m와 80·200m 밴드는 그대로 | 30, `m3hyd15` 15, `m3hyd50` 50, `q4final` 79 |
+| `-LabHydrateM=<미터>` | 화면 안에서 액터로 바뀌는 카메라 거리(1\~79m). 화면 밖 15m와 80·200m 밴드는 그대로 | 30, `m3hyd15` 15, `m3hyd50` 50, `q4final` 40 |
+| `-LabFarShadow=0\|1` | 표현 LOD Low(80m\~그리는 끝) 인스턴스의 그림자. M3 이상 단계에서만 뜻이 있다. ISKM과 VAT ISM 모두 메시 설명자를 LOD 중요도 범위로 둘로 나눠 끈다 | 1, `q4final` 0 |
 
-CSV 메타데이터 `LabActorCap`·`LabHydrateM`, 스탯 `Lab/ViewActors`(화면 안 보이는 액터)·`Lab/ViewActors30`·`Lab/ViewInst30`(화면 안 카메라 30m 안 액터·인스턴스)·`Lab/ViewInstHyd`(전환 거리 안 인스턴스). `summarize.py`가 `view_actors_*`·`cover30_*`·`coverhyd_mean` 열로 낸다.
+CSV 메타데이터 `LabActorCap`·`LabHydrateM`·`LabFarShadow`(M3 미만 `-`), 로그 `lab_config`의 `far_shadow=`, 스탯 `Lab/ViewActors`(화면 안 보이는 액터)·`Lab/ViewActors30`·`Lab/ViewInst30`(화면 안 카메라 30m 안 액터·인스턴스)·`Lab/ViewInstHyd`(전환 거리 안 인스턴스). `summarize.py`가 `view_actors_*`·`cover30_*`·`coverhyd_mean` 열로 낸다.
 
 ```bash
 # Q4 묶음 러너(run-bench.ps1을 조건마다 부른다. "N:프리셋:상한:거리:횟수:태그앞:태그뒤"를 ;로 잇는다)
