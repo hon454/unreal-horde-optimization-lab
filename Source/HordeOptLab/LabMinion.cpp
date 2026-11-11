@@ -9,8 +9,6 @@
 #include "Materials/MaterialInterface.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
-#include "Misc/CommandLine.h"
-#include "Misc/Parse.h"
 #include "Components/StaticMeshComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "SignificanceManager.h"
@@ -75,7 +73,7 @@ void ALabMinion::SetupVisual(const FLabMinionAssets& Assets)
 	}
 	else
 	{
-		// AnimBP가 아직 없을 때의 임시 경로. 측정 전에 AnimBP로 바꾼다(STATUS.md).
+		// AnimBP 에셋을 찾지 못했을 때의 대체 경로(에셋이 빠진 체크아웃). 측정 실행은 AnimBP를 쓴다.
 		bSingleNode = true;
 		SkelMesh->SetAnimationMode(EAnimationMode::AnimationSingleNode);
 	}

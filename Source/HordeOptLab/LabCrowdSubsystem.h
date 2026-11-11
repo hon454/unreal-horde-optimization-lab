@@ -58,7 +58,7 @@ public:
 	int32 GetAliveCount() const { return AliveCount; }
 
 	/**
-	 * 미니언 ISM을 Lumen 장면에서 뺀다. ISM 컴포넌트는 표현 프로세서가 첫 갱신 때 만들므로 오브가 매 틱 부르고, 찾으면 한 번만 적용한다.
+	 * 미니언 ISM을 Lumen 장면에서 뺀다. ISM 컴포넌트는 표현 프로세서가 첫 갱신 때 만들므로 오브가 매 틱 부르고, 이미 적용된 컴포넌트는 건너뛴다.
 	 * 이유: 매 프레임 움직이는 인스턴스 2,000개가 Lumen 장면에 들어가면 GPU가 29ms가 된다(2026-11-07 시험). 스켈레탈 메시 캐릭터는 원래 Lumen 장면 밖이다.
 	 */
 	void ExcludeVisualsFromLumen();
@@ -119,6 +119,5 @@ private:
 	UPROPERTY() TArray<TObjectPtr<UMassEntityConfigAsset>> EntityConfigs; // 종류별(LabUnitAssets.h). [0] 소형, [1] 대형(-LabTypes=2)
 	TWeakObjectPtr<ALabCrowdSpawner> Spawner;
 	bool bActive = false;
-	bool bLumenExcluded = false;
 	int32 AliveCount = 0;
 };

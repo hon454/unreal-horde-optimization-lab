@@ -21,7 +21,7 @@ void ULabMinionTrait::BuildTemplate(FMassEntityTemplateBuildContext& BuildContex
 	BuildContext.AddTag<FLabMinionTag>();
 	if (FLabConfig::Get().UsesSimLod() && FLabConfig::Get().SimLod().bOffMove)
 	{
-		BuildContext.AddFragment<FLabOffMoveFragment>(); // E4 (d) m4offmove만. 다른 변형의 아키타입은 그대로다
+		BuildContext.AddFragment<FLabOffMoveFragment>(); // E4 (d) bOffMove(m4offmove·m4offpool과 M5 단계)만. 다른 변형의 아키타입은 그대로다
 	}
 	if (FLabConfig::Get().UsesIskm())
 	{
@@ -32,7 +32,7 @@ void ULabMinionTrait::BuildTemplate(FMassEntityTemplateBuildContext& BuildContex
 	Params.UnitType = UnitType;
 	Params.MoveSpeed = FLabScenario::MoveSpeed;
 	Params.MaxHealth = FLabScenario::MinionHealth;
-	Params.BoundRadius = FLabUnitAssetPaths::Get(UnitType).BoundRadius; // 소형 40(전과 같다), 대형은 ini LargeBoundRadius(임시값, 확정 전). FAgentRadiusFragment는 둘 다 40(회피가 꺼져 있어 쓰이지 않는다)
+	Params.BoundRadius = FLabUnitAssetPaths::Get(UnitType).BoundRadius; // 소형 40(전과 같다), 대형은 ini LargeBoundRadius(확정값 94). FAgentRadiusFragment는 둘 다 40(회피가 꺼져 있어 쓰이지 않는다)
 	BuildContext.AddConstSharedFragment(EntityManager.GetOrCreateConstSharedFragment(Params));
 }
 

@@ -13,7 +13,7 @@
  * 엔진 것을 끄고 이것을 켠다(HordeOptLab.cpp, plan.md "M2", 2026-11-08 사용자 결정).
  *
  * 애니 상태는 표현 전용 FLabAnimStateFragment(상태, 들어간 시각)에서 읽는다. 재생 시각 = 월드 시각 − 들어간 시각. 걷기는 위상을 음수 시각으로 둔 루프다.
- * 로직 프래그먼트와 태그는 읽지 않는다(M3b 정비 1, Docs/Worklog/M3b.md). 그룹 LabLogic 뒤에 돈다고 선언한다(정비 2).
+ * 로직 프래그먼트와 태그는 읽지 않는다(M3b 정비 1, Docs/Worklog/M3b.md). 그룹 LabLogic 뒤에 돈다는 선언은 변형 m3order에서만 한다(정비 2, LabVatProcessor.cpp).
  * 진단 변형 m3qold는 정비 전처럼 FLabMinionFragment와 태그를 읽고 순서 선언이 없다.
  * 프레임은 여기서 계산해 커스텀 데이터 0 = Frame, 1 = PrevFrame으로 넘긴다(VAT 머티리얼 AutoPlay 끔, Scripts/bake-vat.py).
  * 걷기 루프 끝(End + 0.99)이 다음 클립 첫 행과 섞이지 않는 근거: 머티리얼 함수 BoneIndexUVs가 int(Frame)으로 행을 자르고 텍스처 필터가 Nearest다(engine-notes.md 12절).

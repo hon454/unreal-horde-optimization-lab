@@ -42,7 +42,7 @@ public:
 		// 위치를 MoveTarget.Center(오브)로 옮기므로(MassNavigationProcessors.cpp:35-37,61) M4부터 등록하지 않는다. M3까지는 Off 태그가 없어 대상이 없었다.
 		const bool bSimLod = FLabConfig::Get().UsesSimLod();
 		LabSetAutoRegister(GetMutableDefault<UMassOffLODNavigationProcessor>(), !bSimLod);
-		// E4 (d) m4offmove만: Off 밴드(200m 밖) 이동 프로세서. 다른 변형에서는 등록하지 않아 프로세서 구성이 그대로다.
+		// E4 (d) bOffMove(m4offmove·m4offpool과 M5 단계): Off 밴드(200m 밖) 이동 프로세서. 다른 변형에서는 등록하지 않아 프로세서 구성이 그대로다.
 		const bool bOffMove = bSimLod && FLabConfig::Get().SimLod().bOffMove;
 		LabSetAutoRegister(GetMutableDefault<ULabOffMoveProcessor>(), bOffMove);
 		UE_LOG(LogLab, Log, TEXT("lab_ism_processor %s simlod=%d offmove=%d"), bIskm ? TEXT("iskm") : bVat ? TEXT("vat") : TEXT("engine"), bSimLod ? 1 : 0, bOffMove ? 1 : 0);

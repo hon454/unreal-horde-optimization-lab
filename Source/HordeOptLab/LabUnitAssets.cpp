@@ -42,7 +42,7 @@ namespace
 		P.VatMesh = LabReadPath(Prefix, TEXT("VatMesh"), bSmall ? TEXT("/Game/Lab/VAT/Baked/SM_LabMinionVAT") : TEXT(""));
 		P.VatData = LabReadPath(Prefix, TEXT("VatData"), bSmall ? TEXT("/Game/Lab/VAT/Baked/DA_LabMinionVAT") : TEXT(""));
 		P.ActorMaterial = LabReadPath(Prefix, TEXT("ActorMaterial"), bSmall ? TEXT("/Game/Lab/VAT/Baked/M_LabMinionActor.M_LabMinionActor") : TEXT(""));
-		P.BoundRadius = bSmall ? 40.f : 60.f; // 소형 40은 M1 트레이트의 값(LabMassTraits.cpp). 대형 60은 임시값(확정 전, 메시 바운드로 잰 뒤 ini에 적는다)
+		P.BoundRadius = bSmall ? 40.f : 60.f; // 소형 40은 M1 트레이트의 값(LabMassTraits.cpp). 대형 60은 ini가 없을 때의 값이고 확정값 94는 Config/DefaultGame.ini LargeBoundRadius가 덮어쓴다(measurement.md "확정값")
 		if (GConfig)
 		{
 			GConfig->GetFloat(LabUnitAssetsSection, *FString::Printf(TEXT("%sBoundRadius"), Prefix), P.BoundRadius, GGameIni);

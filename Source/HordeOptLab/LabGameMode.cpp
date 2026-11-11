@@ -23,7 +23,6 @@
 #include "Misc/Paths.h"
 #include "ProfilingDebugging/CsvProfiler.h"
 #include "UnrealClient.h"
-#include "Misc/Paths.h"
 #include "Misc/CommandLine.h"
 #include "Misc/Parse.h"
 #include "IAnimationBudgetAllocator.h"

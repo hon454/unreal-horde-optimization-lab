@@ -24,8 +24,6 @@ class ALabOrb : public AActor
 public:
 	ALabOrb();
 
-	static constexpr float OrbHeight = 200.f;
-
 	void SetSpawner(ALabCrowdSpawner* InSpawner) { Spawner = InSpawner; }
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaSeconds) override;

@@ -11,7 +11,6 @@
 #include "LabMinion.h"
 #include "LabMinionAnimInstance.h"
 #include "MassActorSubsystem.h"
-#include "MassActorSpawnerSubsystem.h"
 #include "MassCommonFragments.h"
 #include "MassCommonTypes.h"
 #include "MassExecutionContext.h"

@@ -10,11 +10,11 @@
 /**
  * M1 Mass 코어의 프로세서. M0 액터(ALabMinion, ALabOrb)의 이동·피해·사망 로직을 그대로 옮긴다. plan.md "M1".
  * 미니언 태그(FLabMinionTag)가 있는 엔티티만 다루므로 M0 실행에서는 대상이 없어 일하지 않는다.
- * 순서: 접근(Tasks 그룹, 엔진 조향 앞) → 엔진 조향·이동 → 그룹 LabLogic(범위 피해 → 저격 → 상태 타이머 → 피해 발생·적용) → 표현(VAT·ActorSync, LabLogic 뒤).
+ * 순서: 접근(Tasks 그룹, 엔진 조향 앞) → 엔진 조향·이동 → 그룹 LabLogic(범위 피해 → 저격 → 상태 타이머 → 피해 발생·적용) → 표현(VAT·ActorSync. 순서 선언은 변형 m3order에서만 하고 기본은 솔버가 정한다).
  * M3b 정비(Docs/Worklog/M3b.md "코드 정비", 2026-11-09 사용자 결정): 로직은 상태 전환 때 FLabAnimStateFragment를 쓰고 표현은 그것만 읽는다.
  * 엔진 조향은 Tasks 뒤에 돌아야 하므로 접근만 Tasks 그룹에 남긴다. 그룹 이름 의존성은 솔버가 자식 노드 전부로 펼친다(MassProcessorDependencySolver.cpp:680-719).
- * M4(Docs/Worklog/M4.md, 2026-11-10 사용자 결정): 접근·범위 피해·상태 셋은 M4부터 청크 필터 ShouldTickChunkThisFrame를 걸어 80m 밖 청크를 틱 간격마다만 돈다.
- * 범위 피해는 엔진 누적 델타(FMassSimulationVariableTickFragment::DeltaTime)로, 상태 타이머는 절대 시각(지금 − StateStartTime)으로 건너뛴 시간을 보상한다.
+ * M4(Docs/Worklog/M4.md, 2026-11-10 사용자 결정): 접근·범위 피해 둘은 M4부터 청크 필터 ShouldTickChunkThisFrame를 걸어 80m 밖 청크를 틱 간격마다만 돈다.
+ * 범위 피해는 엔진 누적 델타(FMassSimulationVariableTickFragment::DeltaTime)로 건너뛴 시간을 보상한다. 상태 타이머는 필터 없이 매 프레임 돈다(LabMassProcessors.cpp의 상태 프로세서 주석).
  * 저격은 오브의 이벤트성 질의라 필터를 걸지 않는다. M3까지의 쿼리와 계산은 그대로다.
  */
 
@@ -62,7 +62,7 @@ protected:
 };
 
 /**
- * E4 (d) 변형 m4offmove만 등록한다(HordeOptLab.cpp). Simulation LOD가 Off인 걷는 개체(카메라에서 200m 밖)를 엔진 이동·조향 넷 대신 옮긴다.
+ * E4 (d) m4offmove·m4offpool과 M5 단계에서 등록한다(FLabSimLod::bOffMove, HordeOptLab.cpp). Simulation LOD가 Off인 걷는 개체(카메라에서 200m 밖)를 엔진 이동·조향 넷 대신 옮긴다.
  * 가변 틱이 온 프레임에만 돌고, 마지막으로 옮긴 뒤 흐른 시간(FLabOffMoveFragment) × 걷는 속도만큼 오브 쪽으로 곧게 옮긴다.
  * 엔진의 FMassSimulationVariableTickFragment(DeltaTime, LastTickedTime)는 쓰지 않는다. 청크가 돈 다음 갱신에서 엔진이 값을 덮어써 흐른 시간의 약 6%가 빠졌다(Docs/Worklog/M4.md "E4 (d) Low 밴드 이동"). 회전은 엔진의 Off 쿼리가 맞춘다(MassSmoothOrientationProcessors.cpp:36-40,120-133).
  * 200m 안으로 돌아오면 엔진 조향이 이어받는다. 그때 속도가 0에서 다시 붙지 않게 DesiredVelocity를 방향 × 속도로 적어 둔다.
@@ -81,7 +81,7 @@ protected:
 };
 
 /**
- * E4 (d) m4offmove만 등록한다. 개체가 Off 밴드에 들어올 때(FMassOffLODTag가 붙을 때) 마지막 이동 시각을 지금으로 맞춘다.
+ * E4 (d) m4offmove·m4offpool과 M5 단계에서 등록한다. 개체가 Off 밴드에 들어올 때(FMassOffLODTag가 붙을 때) 마지막 이동 시각을 지금으로 맞춘다.
  * 그 프레임까지는 엔진 이동 프로세서가 옮겼으므로 ULabOffMoveProcessor는 그 뒤의 시간만 옮긴다. 엔진의 스프링 이동도 Off 태그를 이렇게 본다(MassSpringMovementProcessors.cpp:124-128).
  */
 UCLASS()

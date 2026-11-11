@@ -401,7 +401,6 @@ void ULabCrowdSubsystem::ExcludeVisualsFromLumen()
 				Component->ShadowCacheInvalidationBehavior = EShadowCacheInvalidationBehavior::Always;
 				Component->MarkRenderStateDirty();
 			}
-			bLumenExcluded = true;
 		}
 	}
 }

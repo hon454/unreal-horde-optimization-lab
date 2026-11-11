@@ -205,7 +205,7 @@ void ULabApproachProcessor::Execute(FMassEntityManager& EntityManager, FMassExec
 ULabOffMoveProcessor::ULabOffMoveProcessor()
 	: EntityQuery(*this)
 {
-	bAutoRegisterWithProcessingPhases = false; // m4offmove에서만 게임 모듈이 켠다(HordeOptLab.cpp)
+	bAutoRegisterWithProcessingPhases = false; // bOffMove(m4offmove·m4offpool과 M5 단계)에서만 게임 모듈이 켠다(HordeOptLab.cpp)
 	ExecutionFlags = (int32)EProcessorExecutionFlags::AllNetModes;
 	ExecutionOrder.ExecuteInGroup = UE::Mass::ProcessorGroupNames::Movement; // 범위 피해(LabLogic)는 Movement 뒤에 돈다
 	LabRunAfterSimLod(ExecutionOrder);
@@ -306,7 +306,7 @@ ULabOffMoveEnterObserver::ULabOffMoveEnterObserver()
 	ObservedTypes.Add(FMassOffLODTag::StaticStruct());
 	ObservedOperations = EMassObservedOperationFlags::AddElement; // 새 엔티티는 LastMoveTime 0으로 시작해 따로 다룬다
 	ExecutionFlags = (int32)EProcessorExecutionFlags::AllNetModes;
-	// m4offmove에서만 관찰자로 등록한다. 등록은 CDO의 PostInitProperties에서 일어나고 그때 실행 인자는 이미 읽을 수 있다(FLabConfig::Get).
+	// bOffMove(m4offmove·m4offpool과 M5 단계)에서만 관찰자로 등록한다. 등록은 CDO의 PostInitProperties에서 일어나고 그때 실행 인자는 이미 읽을 수 있다(FLabConfig::Get).
 	bAutoRegisterWithObserverRegistry = FLabConfig::Get().UsesSimLod() && FLabConfig::Get().SimLod().bOffMove;
 #if !UE_BUILD_TEST
 	// 개발 확인(-LabSimLodLog): Off 태그가 떨어질 때도 불려, 그때의 카메라 거리와 마지막 이동 뒤 흐른 시간을 로그에 남긴다(lab_event offleave).

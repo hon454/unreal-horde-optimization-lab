@@ -67,7 +67,7 @@ enum class ELabVariant : uint8
 /**
  * M4 Simulation LOD 설정(2026-11-10 사용자 결정, Docs/Worklog/M4.md). 거리는 카메라 기준이고 화면 안팎을 가리지 않는다(MassLODLogic.h:42).
  * 기본은 Off 밴드를 두지 않는다: 엔진의 Off는 위치를 이동 목표(오브)로 옮기고 이동·조향에서 뺀다(engine-notes.md 5절).
- * bOffMove(변형 m4offmove)만 200m 밖을 Off로 둔다. 순간 이동 프로세서는 M4부터 등록하지 않고(HordeOptLab.cpp) Lab 프로세서가 대신 옮긴다.
+ * bOffMove(m4offmove·m4offpool과 M5 단계)만 200m 밖을 Off로 둔다. 순간 이동 프로세서는 M4부터 등록하지 않고(HordeOptLab.cpp) Lab 프로세서가 대신 옮긴다.
  */
 struct FLabSimLod
 {
@@ -119,7 +119,7 @@ enum class ELabStage : uint8
 	M1, // Mass 코어: 같은 로직을 Fragment·Processor로, 표현은 애니 없는 ISM
 	M2, // Representation LOD: 같은 ISM에 VAT 애니메이션(걷기·피격·죽기). 대표 설정은 모든 거리를 그린다
 	M3, // 액터 하이드레이션: 0~30m는 액터(최대 500), 30~200m VAT 인스턴스, 200m 밖 Off
-	M4, // Simulation LOD: M3 표현 그대로, 로직 프로세서 셋(접근·범위 피해·상태)이 80m 밖에서 틱 간격을 늘린다(FLabSimLod)
+	M4, // Simulation LOD: M3 표현 그대로, 로직 프로세서 둘(접근·범위 피해)이 80m 밖에서 틱 간격을 늘린다(FLabSimLod). 저격과 상태 타이머는 매 프레임 돈다
 	M5, // ISKM: m4offmove 구성 위에서 30~200m 표현을 VAT ISM → ISKM으로 바꾼다(ULabIskmProcessor). 엔티티 풀링 기본 켬(-LabEntityPool)
 };
 
@@ -183,7 +183,7 @@ struct FLabConfig
 	 * M3 하위 실험·진단 변형은 0. 인자를 주면 그 값이 이긴다. M3 이상 단계에서만 뜻이 있다.
 	 */
 	bool bScreenSigBudget = false;
-	/** M5 단계의 ISKM 변형(m5iskm·m5destroy·m5blend·m5minss, 기본 변형)이면 참. m4offpool·m4offmove는 M5 단계에서도 VAT다 */
+	/** M5 단계의 ISKM 변형(m5iskm·m5destroy·m5blend·m5minss·m5bounds, 기본 변형)이면 참. m4offpool·m4offmove는 M5 단계에서도 VAT다 */
 	bool UsesIskm() const;
 	FLabIskmParams IskmParams() const;
 	enum EHydrateFix : int32
@@ -196,7 +196,7 @@ struct FLabConfig
 	};
 	bool HasFix(EHydrateFix F) const { return (HydrateFixMask & F) != 0; }
 
-	/** M4부터 참. Simulation LOD Trait을 붙이고 로직 프로세서 셋이 청크 필터를 건다 */
+	/** M4부터 참. Simulation LOD Trait을 붙이고 로직 프로세서 둘(접근·범위 피해)이 청크 필터를 건다 */
 	bool UsesSimLod() const { return Stage >= ELabStage::M4; }
 	/** 변형에서 정한 M4 틱 간격과 회피 여부(UsesSimLod일 때만 뜻이 있다) */
 	FLabSimLod SimLod() const;

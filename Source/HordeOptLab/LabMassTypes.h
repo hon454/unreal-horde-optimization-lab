@@ -45,7 +45,7 @@ struct FLabAnimStateFragment : public FMassFragment
 };
 
 /**
- * E4 (d) 변형 m4offmove에서만 붙는다(LabMassTraits.cpp). ULabOffMoveProcessor가 이 개체를 마지막으로 옮긴 시각(월드 초).
+ * E4 (d) m4offmove·m4offpool과 M5 단계에서 붙는다(FLabSimLod::bOffMove, LabMassTraits.cpp). ULabOffMoveProcessor가 이 개체를 마지막으로 옮긴 시각(월드 초).
  * 0이면 아직 옮긴 적이 없다. Off 태그가 붙을 때 ULabOffMoveEnterObserver가 그때 시각으로 맞춘다.
  */
 USTRUCT()
