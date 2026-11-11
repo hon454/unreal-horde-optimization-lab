@@ -128,7 +128,7 @@ void ULabActorSyncProcessor::Execute(FMassEntityManager& EntityManager, FMassExe
 	const float HitDuration = Crowd->HitDuration;
 	const float DeathDuration = Crowd->DeathDuration;
 	const bool bSigBudget = FLabConfig::Get().Variant == ELabVariant::M3BudgetSig;
-	const bool bScreenSig = FLabConfig::Get().Variant == ELabVariant::M3Sig; // E3 (3c)
+	const bool bScreenSig = FLabConfig::Get().bScreenSigBudget; // E3 (3c). M3~M5 단계 기본 켬(2026-11-11)
 	const FVector CameraLocation = Crowd->SnipeView.Location;
 	int32 LargeActors = 0, LargeSkips = 0;
 	const bool bFixStartTime = FLabConfig::Get().HasFix(FLabConfig::FixStartTime);

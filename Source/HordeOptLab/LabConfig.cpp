@@ -95,6 +95,31 @@ const FLabConfig& FLabConfig::Get()
 			else if (Variant == TEXT("m3hyd15")) { C.Variant = ELabVariant::M3Hyd15; }
 			else if (Variant == TEXT("m3hyd50")) { C.Variant = ELabVariant::M3Hyd50; }
 		}
+		// Budget Allocator(중요도 = 화면 크기) 기본값(2026-11-11 사용자 결정 A안): M3·M4·M5 단계는 켜고 그 밖은 끈다. 변형 m3sig는 항상 켠다(이름 호환).
+		// 켜지 않는 변형은 비교 상대라 Budget 없이 또는 자기 방식으로 남는다: m3mass·m3base·m3colbase·m3hydbase(M3 Budget 없음 기준 라벨),
+		// m3uro(URO)·m3budgetdist·m3budgetsig(자기 중요도 방식)·m3lowres(저품질 액터가 URO)·m3noactor(액터 없음), M3 하위 실험·진단 변형(그 기준점이 m3mass다).
+		// M0 계열(budget·uro 등)은 M3 이전 단계라 어차피 꺼진다.
+		{
+			const bool bPlainMassLabel = Variant == TEXT("m3mass") || Variant == TEXT("m3base") || Variant == TEXT("m3colbase") || Variant == TEXT("m3hydbase");
+			bool bOptOut = bPlainMassLabel;
+			switch (C.Variant)
+			{
+			case ELabVariant::M3Uro: case ELabVariant::M3BudgetDist: case ELabVariant::M3BudgetSig: case ELabVariant::M3LowRes: case ELabVariant::M3NoActor:
+			case ELabVariant::M3ColQuery: case ELabVariant::M3NoCol: case ELabVariant::M3Hyd15: case ELabVariant::M3Hyd50:
+			case ELabVariant::M3QOld: case ELabVariant::M3SyncAll: case ELabVariant::M3Vis0: case ELabVariant::M3Vis15: case ELabVariant::M3Vis30:
+			case ELabVariant::M3Hys20: case ELabVariant::M3Lock0: case ELabVariant::M3Order:
+				bOptOut = true;
+				break;
+			default:
+				break;
+			}
+			C.bScreenSigBudget = C.Variant == ELabVariant::M3Sig || (C.Stage >= ELabStage::M3 && !bOptOut);
+			int32 ScreenSig = -1;
+			if (FParse::Value(Cmd, TEXT("-LabScreenSigBudget="), ScreenSig) && ScreenSig >= 0)
+			{
+				C.bScreenSigBudget = ScreenSig != 0;
+			}
+		}
 		// M5 엔티티 풀링 기본값(plan.md "M5" 결정 1): M5 단계는 켜고 다른 단계는 끈다. m4offpool은 어느 단계에서든 켜고, m4offmove·m5destroy는 끈다.
 		C.bEntityPool = C.Variant == ELabVariant::M4OffPool
 			|| (C.Stage == ELabStage::M5 && C.Variant != ELabVariant::M4OffMove && C.Variant != ELabVariant::M5Destroy);
@@ -241,7 +266,9 @@ FString FLabConfig::ToLogString() const
 			M5 += FString::Printf(TEXT(" iskm_blend=%.2f iskm_minss=%.2f iskm_shadow=%d iskm_bounds=%d"), P.BlendTime, P.AnimationMinScreenSize, P.bCastShadows ? 1 : 0, P.bFixedBounds ? 1 : 0);
 		}
 	}
-	return FString::Printf(TEXT("lab_config stage=%s n=%d preset=P%d seed=%d variant=%s bench=%d label=%s duration=%.1f types=%d simlod=%s%s%s"),
+	// screensig_budget는 M3 이상 단계이거나 켰을 때만 붙인다. M0~M2 기본 실행의 로그는 그대로다.
+	const FString Budget = (Stage >= ELabStage::M3 || bScreenSigBudget) ? FString::Printf(TEXT(" screensig_budget=%d"), bScreenSigBudget ? 1 : 0) : FString();
+	return FString::Printf(TEXT("lab_config stage=%s n=%d preset=P%d seed=%d variant=%s bench=%d label=%s duration=%.1f types=%d simlod=%s%s%s%s"),
 		StageName(Stage), N, Preset, Seed, VariantName(Variant), bBench ? 1 : 0, *Label, DurationSec, Types, *SimLodString(),
-		FarM != 200 ? *FString::Printf(TEXT(" far=%d"), FarM) : TEXT(""), *M5);
+		FarM != 200 ? *FString::Printf(TEXT(" far=%d"), FarM) : TEXT(""), *M5, *Budget);
 }

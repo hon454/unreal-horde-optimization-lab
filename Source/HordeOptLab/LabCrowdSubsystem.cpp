@@ -98,7 +98,7 @@ UMassEntityConfigAsset* ULabCrowdSubsystem::BuildEntityConfig(int32 UnitType, US
 	const bool bM3 = FLabConfig::Get().Stage >= ELabStage::M3;
 	if (bM3)
 	{
-		const bool bBudget = Variant == ELabVariant::M3BudgetDist || Variant == ELabVariant::M3BudgetSig || Variant == ELabVariant::M3Sig;
+		const bool bBudget = Variant == ELabVariant::M3BudgetDist || Variant == ELabVariant::M3BudgetSig || FLabConfig::Get().bScreenSigBudget;
 		// 종류별 액터 클래스. 엔진 풀은 클래스가 키라(UMassActorSpawnerSubsystem::PooledActors, MassActorSpawnerSubsystem.h:321) 대형은 풀도 따로 생긴다.
 		if (UnitType == LabUnitLarge)
 		{

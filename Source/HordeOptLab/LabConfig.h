@@ -177,6 +177,12 @@ struct FLabConfig
 	 * 기본: M5 단계 1, 다른 단계 0. 변형 m4offpool은 어느 단계에서든 1, m4offmove·m5destroy는 0. 인자를 주면 그 값이 이긴다.
 	 */
 	bool bEntityPool = false;
+	/**
+	 * Budget Allocator, 중요도 = 화면 크기(-LabScreenSigBudget=0/1, 2026-11-11 사용자 결정 A안). 액터를 Budget 템플릿으로 만들고 ActorSync가 화면 크기를 중요도로 넣는다.
+	 * 기본: M3·M4·M5 단계 1, 그 밖 0. 변형 m3sig는 항상 1. 비교 상대인 m3mass(와 m3base·m3colbase·m3hydbase)·m3uro·m3budgetdist·m3budgetsig·m3lowres·m3noactor와
+	 * M3 하위 실험·진단 변형은 0. 인자를 주면 그 값이 이긴다. M3 이상 단계에서만 뜻이 있다.
+	 */
+	bool bScreenSigBudget = false;
 	/** M5 단계의 ISKM 변형(m5iskm·m5destroy·m5blend·m5minss, 기본 변형)이면 참. m4offpool·m4offmove는 M5 단계에서도 VAT다 */
 	bool UsesIskm() const;
 	FLabIskmParams IskmParams() const;

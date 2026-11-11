@@ -194,7 +194,7 @@ void ALabGameMode::SetupBandFloor()
 void ALabGameMode::ApplyVariantCVars()
 {
 	const ELabVariant V = FLabConfig::Get().Variant;
-	if (V != ELabVariant::Budget && V != ELabVariant::M3BudgetDist && V != ELabVariant::M3BudgetSig && V != ELabVariant::M3Sig)
+	if (V != ELabVariant::Budget && V != ELabVariant::M3BudgetDist && V != ELabVariant::M3BudgetSig && !FLabConfig::Get().bScreenSigBudget)
 	{
 		return;
 	}
