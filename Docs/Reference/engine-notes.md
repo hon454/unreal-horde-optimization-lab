@@ -106,6 +106,7 @@
 | --- | --- | --- |
 | 히치 스냅샷 | 콘솔 `snapshothitches -start/-stop/-test`, `TRACE_BOOKMARK("Hitch detected")`, `Saved/Profiling/Hitches/`. 스탯 그룹이 켜져 있어야 동작하므로 Test에서는 확인 필요 | `Engine/Private/ProfilingDebugging/TraceHitches.cpp:26` |
 | Mass 트레이스 채널 | `-trace=…,mass`(MassChannel) | `MassEntity/Public/MassDebugger.h`(M1 전에 확인) |
+| CSV `CPUUsage_Process`·`CPUUsage_Idle` | Shipping이 아니면 CSV 캡처 중 프레임마다 쓴다. Windows에서 `QueryProcessCycleTime`(게임 프로세스 스레드의 사이클)과 `QueryIdleProcessorCycleTime`(코어별 유휴 사이클 합)의 프레임 간 차이를 같은 분모(프레임 시간 × QPC 주파수 × 1000 × 논리 코어 수)로 나눈 값의 100배다. 분모 단위가 CPU 사이클과 달라 절댓값은 %가 아니지만 같은 프레임 안에서 두 값의 비는 의미가 있다. 유휴가 크게 줄었는데 프로세스 값이 늘지 않으면 그 사이클은 다른 프로세스(또는 DPC·인터럽트)가 썼다 | `Runtime/Launch/Private/LaunchEngineLoop.cpp:1456-1470`, `Runtime/Core/Private/Windows/WindowsPlatformProcess.cpp:883-976` |
 
 ## 8. Unreal MCP
 
