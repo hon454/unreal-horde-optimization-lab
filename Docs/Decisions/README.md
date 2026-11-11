@@ -15,7 +15,7 @@
 | [0005](0005-entity-config-in-code.md) | Mass EntityConfig를 에셋 없이 실행 시 C++로 만든다 | 승인됨 |
 | [0006](0006-three-measurement-tiers.md) | 측정을 세 층(개발 확인 / 마일스톤 묶음 / 총괄 묶음)으로 나누고 단계마다 60fps 경계 둘레만 잰다 | 승인됨 |
 | [0007](0007-keep-default-motion-blur.md) | ISKM 모션 블러 줄무늬가 있어도 모션 블러는 엔진 기본값(켬)으로 두고 측정한다 | 승인됨 |
-| [0008](0008-game-scene-baseline-and-target-spec.md) | 게임 장면(건물, 방향장, 비켜 가기, 부위 판정, 래그돌)을 새 기준선으로 삼고 목표 사양(1만, 60fps)에서 프레임을 맞춘다 | 제안됨 |
+| [0008](0008-game-scene-baseline-and-target-spec.md) | 게임 장면(건물, 방향장, 비켜 가기, 부위 판정, 래그돌)을 새 기준선으로 삼고 목표 사양(1만, 60fps)에서 프레임을 맞춘다 | 승인됨 |
 
 ## ADR 이전의 결정
 
@@ -31,8 +31,8 @@
 | 원거리 표현 순서 | ISM + VAT(AnimToTexture)를 먼저, ISKM + `AnimSequenceTransformProviderData`를 M5에서 비교 | VAT는 City Sample이 검증했다. ISKM은 Epic이 권장하는 경로지만 Experimental이고 5.8.4에도 트랙 풀 문제가 남아 있다 |
 | 근거리 구조 | 액터 하이드레이션(`MassRepresentation` HighResActor + 풀) | 업계 표준. "통합 Mass"는 backlog |
 | 에셋 | Paragon: Minions(Fab, Epic 무료). 커밋하지 않는다 | 무료, Epic 유지, 애니 376개, 소형·대형이 한 팩. 대체는 UE5 Manny + 리타겟 애니 |
-| AI 범위 | 태그 상태 + 커스텀 프로세서로 시작. StateTree + Signal은 M4b 선택. ZoneGraph·NavMesh는 쓰지 않는다 | 목표가 고정이라 경로 탐색이 필요 없다. 직진 스티어링 + 회피 |
-| 오브 | 고정 중심 목표. 근접 소멸 + 주기적 원거리 저격(결정적 해시로 대상 선택). 피해는 체력 프래그먼트 차감과 태그까지 | 모든 거리 밴드에서 피격·사망·표현 전환을 예측 가능하게 일으킨다. GAS·전투 시스템 없음 |
+| AI 범위 | 태그 상태 + 커스텀 프로세서로 시작. StateTree + Signal은 M4b 선택. ZoneGraph·NavMesh는 쓰지 않는다. **경로 탐색 부분은 [ADR-0008](0008-game-scene-baseline-and-target-spec.md)로 대체**(방향장) | 목표가 고정이라 경로 탐색이 필요 없다. 직진 스티어링 + 회피 |
+| 오브 | 고정 중심 목표. 근접 소멸 + 주기적 원거리 저격(결정적 해시로 대상 선택). 피해는 체력 프래그먼트 차감과 태그까지. **[ADR-0008](0008-game-scene-baseline-and-target-spec.md)로 대체**(시야 검사 저격, 0\~30m 트레이스 발, 근거리 래그돌) | 모든 거리 밴드에서 피격·사망·표현 전환을 예측 가능하게 일으킨다. GAS·전투 시스템 없음 |
 | 카메라 | 고정 프리셋 3종(궤도 / 탑뷰 / 지상), 역할을 정해 동결. 자유 관전은 개발용. **[ADR-0003](0003-two-camera-presets.md)으로 대체**(오브 시점 / 탑뷰 2종) | 프리셋이 다르면 밴드 분포가 달라 비교할 수 없다 |
 | 초기 스폰 | 정상 상태 분포(밀도 ∝ 1/r)로 미리 놓는다 | 가장자리에서만 생성하면 30초 워밍업으로 중심에 도달하지 못해 액터 티어가 비어 있다 |
 | 시드와 재현성 | 고정 시드는 초기 조건·스폰 위치·저격 순서를 재현한다. 궤적은 비결정적이므로 3회 범위를 함께 보고한다 | 가변 프레임 시간과 Mass 병렬 처리로 같은 시드도 궤적이 다르다 |
