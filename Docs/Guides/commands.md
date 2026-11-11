@@ -1,8 +1,8 @@
 # 명령과 측정 절차
 
-STATUS.md "명령"에는 매번 쓰는 것만 둔다. 여기에는 스크립트 사양, 인자, 측정 절차를 둔다. M0에서 스크립트를 만들면서 실제 명령으로 채운다. 그때까지는 사양이다.
+STATUS.md "명령"에는 매번 쓰는 것만 둔다. 여기에는 스크립트 사양, 인자, 측정 절차를 둔다.
 
-## 스크립트 사양(M0 산출물)
+## 스크립트 사양
 
 모든 스크립트는 `Scripts/common.ps1`을 불러 엔진 경로를 얻는다. 엔진 경로는 저장소에 적지 않고 `.uproject`의 `EngineAssociation`을 레지스트리(`HKCU\Software\Epic Games\Unreal Engine\Builds`)에서 찾는다(DS 실험실 방식).
 
@@ -11,16 +11,14 @@ STATUS.md "명령"에는 매번 쓰는 것만 둔다. 여기에는 스크립트 
 | `build.ps1` | `HordeOptLabEditor Win64 Development` 빌드 | `UnrealEditor` 또는 `HordeOptLab` 프로세스가 떠 있으면 |
 | `run-dev.ps1 -N -Preset -Seed [-Variant] [-Small]` | Development 에디터 빌드를 `-game`으로 실행. 개발·동작 확인·오버레이 스크린샷용. 수치는 쓰지 않는다 | |
 | `package.ps1 [-Config Test]` | `RunUAT BuildCookRun` → `Packaged/<Config>/`. 끝나면 소요 시간을 출력 | 다른 실행이 떠 있으면 |
-| `run-bench.ps1 -Label <라벨> -N <수> -Preset <P1\|P2> [-Variant] [-Seed] [-Runs 3] [-Trace]` | Test 패키지 실행 파일을 `-LabBench` 인자로 띄우고 종료를 기다린다. 실행마다 `Saved/Profiling/CSV/<라벨>-rN.csv`를 확인하고, 없으면 실패 | 같은 라벨의 CSV가 있으면. 다른 실행이 떠 있으면 |
+| `run-bench.ps1 -Milestone <M> -N <수> -Preset <P1\|P2> [-Variant] [-Seed] [-Runs 3] [-Tag x] [-Trace]` | Test 패키지 실행 파일을 `-LabBench` 인자로 띄우고 종료를 기다린다. 라벨은 `<Milestone>-<Variant>-N<수>-<Preset><Tag>`로 만든다. 실행마다 `Saved/Profiling/CSV/<라벨>-rN.csv`를 확인하고, 없으면 실패 | 같은 라벨의 CSV가 있으면. 다른 실행이 떠 있으면 |
 | `summarize.py --milestone M<N>` | `Saved/Profiling/CSV/`의 라벨을 읽어 `Measurements/M<N>/runs.csv`에 행을 더하고 `summary.csv`를 다시 쓴다 | |
-| `plot.py` | `Measurements/*/summary.csv`로 `Docs/figures/`의 그래프를 다시 그린다: 60fps 최대 N(대표), 고정 조건 Game/Render/GPU 스택, N 스케일링, 밴드 분포(M2+), 예산 사용(M3+) | |
+| `plot.py` | `Measurements/*/summary.csv`로 `Docs/figures/`의 그래프를 다시 그린다: 60fps 최대 N(`n-at-60fps.svg`와 `.csv`), N 스케일링(`n-scaling-P1.svg`) | |
 | `summarize.py --milestone M<N> [--rebuild]` (M3b) | 열 추가: `frame_p95_ms`, `bottleneck`(프레임·Game·Render·GPU p50 중 최댓값 이름), `build`(CSV 메타데이터 `LabBuild`·`LabCVars`·`LabDriver`, 없으면 빈칸). `--rebuild`는 기존 행도 원본 CSV로 다시 계산한다. 태그 `aa*` 라벨은 `<변형>-aa` 조건으로 따로 요약, `trace*`는 summary에서 뺀다 | |
 | `spikes.py <라벨 접두사 또는 CSV...> [--factor 2] [--verbose] [--with-r0]` (M3b) | 묶음의 주기적 스파이크 검사: 중앙값 2배 초과 프레임의 사건 간격 중앙값과 ±10% 비율, 실행의 주기성 판정, 묶음 요약. 예: `py -3 -I Scripts/spikes.py M3b-` | 대상 없으면 |
-| `run-m3b.ps1 [-Phase all\|e3b\|matrix\|aa\|trace] [-NoBase] [-Tag x] [-DryRun]` (M3b, 초안) | 묶음 1 러너. E3b (8) 18회를 실행 단위로 섞어 먼저, 전수(M0\~M3, 30k 포함), 묶음 끝 A/A 3회, 20k P1 트레이스 병렬 1 + 직렬 1 순서. `-DryRun`은 목록과 예상 시간만 출력 | 다른 실행이 떠 있으면(run-bench.ps1) |
+| `run-m3b.ps1 [-Phase all\|e3b\|matrix\|aa\|trace\|…] [-NoBase] [-Tag x] [-DryRun]` (M3b) | 묶음 1 러너. E3b (8) 24회를 실행 단위로 섞어 먼저, 전수(M0\~M3, 30k 포함), 묶음 끝 A/A 3회, 20k P1 트레이스 병렬 1 + 직렬 1 순서. `-DryRun`은 목록과 예상 시간만 출력 | 다른 실행이 떠 있으면(run-bench.ps1) |
 | `run-bench.ps1 ... [-RunIndex i] [-Trace] [-ExtraArgs "..."]` (M3b) | `-RunIndex`는 r<i> 하나만(실행 단위 섞기), `-Trace`는 `Saved/Traces/<라벨>.utrace`(`-trace=cpu,gpu,frame,counters,mass`), `-ExtraArgs`는 게임 인자 덧붙임 | |
 | `noise-table.py <라벨 접두사...>` (M3b) | 접두사별 실행의 프레임 p50·p95, Game·Render p50을 표로 내고 중앙값·최소\~최대·표준편차를 붙인다. 잡음 진단용. 예: `py -3 -I Scripts/noise-table.py M3b-m3mass-N20000-P1aff- M3b-m3mass-N20000-P1noaff-` | |
-| `capture-video.ps1` | 화면 녹화. 찍기 전 승인 필요(AGENTS.md) | 측정 실행이 떠 있으면 |
-
 ## 벤치마크 러너 인자(게임 측)
 
 `-LabBench` 가 있으면 다음 순서로 동작하고 끝나면 종료한다.
@@ -36,8 +34,8 @@ STATUS.md "명령"에는 매번 쓰는 것만 둔다. 여기에는 스크립트 
 
 1. 측정 전에 잴 조건, 라벨, 걸리는 시간을 채팅에 알리고 답을 받는다.
 2. `package.ps1`로 그 커밋의 Test 패키지를 만든다. 패키지 폴더에 커밋 해시를 남긴다.
-3. 묶음의 맨 첫 실행 1회만 버린다(`run-bench.ps1`의 첫 조건만 `-r0`, 나머지는 `-SkipR0`). 그 뒤 조건별 3회.
-4. 실행마다 로그의 `lab_config`와 `lab_summary`를 확인한다. N이 유지되지 않았거나 프레임 수가 비정상이면 그 실행을 버리고 라벨을 바꿔 다시 잰다.
+3. 묶음의 맨 첫 실행 1회만 버린다(`run-bench.ps1`은 기본으로 r0을 돌린다. 첫 조건 뒤로는 `-SkipR0`나 `-RunIndex`를 준다). 그 뒤 조건별 3회.
+4. 실행마다 `Saved/Lab/<라벨>.summary.txt`와 CSV 메타데이터를 확인한다(Test 패키지는 로그를 쓰지 않는다. 개발 빌드는 로그의 `lab_config`·`lab_summary`). N이 유지되지 않았거나 프레임 수가 비정상이면 그 실행을 버리고 라벨을 바꿔 다시 잰다.
 5. `summarize.py` → `runs.csv`, `summary.csv`. 차이 판정은 measurement.md.
 6. STATUS.md "측정 결과"에 묶음을 적는다. 마일스톤이 끝나면 Worklog로 옮긴다.
 
@@ -95,7 +93,7 @@ LAB_MIGRATE_SET=minion LAB_MIGRATE_DRY=0 LAB_MIGRATE_DEST="G:/Epic Games/UE_5.8.
 ## 벤치마크 실행(구현됨)
 
 - `package.ps1`이 `Packaged/Test/Windows/`를 만들고 `Packaged/Test/commit.txt`에 커밋 해시(작업 트리가 더러우면 `(dirty)`)를 남긴다. 쿡은 `L_Bench`와, 코드가 경로로 부르는 `/Game/ParagonMinions`·`/Game/NiagaraExamples`·`/Game/Lab` 폴더다(`Config/DefaultGame.ini`).
-- `run-bench.ps1 -Milestone M0 -N <n> -Preset <P1|P2> -Variant <v> [-Runs 3] [-Tag x] [-ResX -ResY]`: r0 + r1\~rRuns. 실행마다 CSV를 패키지 `Saved/Profiling/CSV/`에서 프로젝트 `Saved/Profiling/CSV/`로 옮기고 `Saved/Lab/<라벨>.summary.txt`를 출력한다. 해상도 기본값 1920x1080 창은 M0 8번에서 확정한다.
+- `run-bench.ps1 -Milestone M0 -N <n> -Preset <P1|P2> -Variant <v> [-Runs 3] [-Tag x] [-ResX -ResY]`: r0 + r1\~rRuns. 실행마다 CSV를 패키지 `Saved/Profiling/CSV/`에서 프로젝트 `Saved/Profiling/CSV/`로 옮기고 `Saved/Lab/<라벨>.summary.txt`를 출력한다. 해상도 기본값은 2560x1440 창이다(measurement.md "확정값").
 - `run-e1.ps1 [-Tag x]`: M1 E1 (a) 묶음(mass N {1k, 2k, 5k, 20k, 50k} x P1·P2 x 3회, 첫 조건만 r0). M1부터 변형 이름은 라벨용 `mass`다. 개발 실행은 `run-dev.ps1 -Extra "-LabStage=M1"`.
 - `run-e2.ps1 [-Tag x] [-OnlySub]`: M2 E2 묶음. (a) N {1k, 5k, 20k, 50k} x P1·P2 x 3회로 M1(`noanim`, `run-bench.ps1 -Stage M1`)과 M2(`mass`)를 번갈아, (b)(c)(d) 변형(`vatvert`, `vatcull`, `vatcullvis`, `vatdie0`, `vatdie1k`)은 5k P1 x 3회. 약 90분. (d)는 다시 설계해 `run-bench.ps1 -Milestone M2 -Variant kill0|kill1k -N 5000`으로 쟀다.
 - `run-bench.ps1 -Stage <M>`: 결과 폴더·라벨은 `-Milestone`, 실행 단계만 바꾼다(같은 묶음에서 이전 단계를 잴 때).

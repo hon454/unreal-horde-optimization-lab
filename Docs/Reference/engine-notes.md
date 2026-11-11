@@ -1,6 +1,6 @@
 # 엔진 소스 확인 기록
 
-엔진 소스와 실행에서 확인한 사실만 적는다. 기억이나 문서의 주장은 적지 않는다. 경로는 엔진 루트 기준이고, 줄 번호는 GitHub `5.8.4-release` 태그에서 읽었다(2026-11-06). PC의 소스 빌드 태그가 다르면(5.8.3 가능) 쓰기 전에 그 태그로 확인하고 여기에 적는다. 계획이 틀렸던 항목은 **[계획 수정]**으로 표시했다.
+엔진 소스와 실행에서 확인한 사실만 적는다. 기억이나 문서의 주장은 적지 않는다. 경로는 엔진 루트 기준이고, 줄 번호는 GitHub `5.8.4-release` 태그에서 읽었다(2026-11-06). PC의 소스 빌드도 5.8.4다(pc-specs.md 2.3). 계획이 틀렸던 항목은 **[계획 수정]**으로 표시했다.
 
 ## 1. Mass 모듈 위치(5.8)
 
@@ -21,7 +21,7 @@
 
 | 항목 | 확인한 것 | 위치 |
 | --- | --- | --- |
-| 전체 병렬 | **`mass.FullyParallel`**(기본 `MASS_DO_PARALLEL`). 계획의 `mass.ParallelProcessing`은 없다 **[계획 수정]** | `Engine/Source/Runtime/Mass/MassEngine/Private/MassProcessingPhaseManager.cpp:31,36,576` |
+| 전체 병렬 | **`mass.FullyParallel`**(기본 `MASS_DO_PARALLEL`). 계획의 `mass.ParallelProcessing`은 없다 **[계획 수정]** | `Engine/Source/Runtime/MassEntity/Private/MassProcessingPhaseManager.cpp:31,36,576` |
 | 보조 | `mass.UseProcessingQueue`, `mass.MakePrePhysicsTickFunctionHighPriority` | 같은 파일 |
 
 ## 3. Representation LOD와 중요도

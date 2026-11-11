@@ -3,7 +3,7 @@
 Night of the Dead에서 측정 없이 액터로 했던 좀비 호드 최적화를, Unreal Engine 5.8 Mass Entity로 다시 지어 거리별로 비용을 덜어내며 단계마다 수치로 확인한 기록이다. 액터 군중에서 시작해 Mass 로직, ISM + VAT, 액터 하이드레이션과 애니메이션 예산, Simulation LOD, ISKM을 한 번에 하나씩 적용하고, 같은 시나리오를 같은 방법으로 다시 잰다.
 
 - **대상**: 클라이언트 한 대에서 그리고 움직이는 군중의 비용. Game Thread, Render Thread, GPU, 메모리.
-- **최적화**: Mass Entity(Fragment·Processor), Representation LOD(액터 / ISM+VAT / ISKM / 없음), 액터 하이드레이션과 풀링, Significance Manager → Animation Budget Allocator, URO, Simulation LOD(청크 단위 가변 틱), StateTree + Signal.
+- **최적화**: Mass Entity(Fragment·Processor), Representation LOD(액터 / ISM+VAT / ISKM / 없음), 액터 하이드레이션과 풀링, Significance Manager → Animation Budget Allocator, URO, Simulation LOD(청크 단위 가변 틱).
 - **측정 도구**: Test 구성 패키지에서 `csvprofile`과 Unreal Insights.
 
 형제 프로젝트 [UE5 Dedicated Server 최적화 실험실](https://github.com/hon454/ue-dedicated-server-optimization-lab)이 서버가 보내는 비용을 다루고, 이 프로젝트는 클라이언트가 그리고 움직이는 비용을 다룬다.
@@ -39,9 +39,9 @@ Night of the Dead에서 측정 없이 액터로 했던 좀비 호드 최적화�
 | M1 Mass 코어 | 이동·피해·사망 로직을 Fragment와 Processor로. 표현은 애니 없는 ISM | `M1` |
 | M2 ISM + VAT | 먼 개체를 AnimToTexture로 구운 애니메이션이 있는 ISM으로 | `M2` |
 | M3 하이드레이션 + 예산 | 가까운 개체에 액터를 붙이고, 그 애니메이션 비용을 URO / Budget Allocator로 제한 | `M3` |
-| M3b 새 기준선 | 큰 개체(시즈 미니언) 10%를 더하고 M0\~M3를 다시 잰다. 크기 보정 중요도 | |
-| M4 Simulation LOD | 먼 개체의 로직 틱 간격을 청크 단위로 늘린다 | |
-| M5 ISKM | 먼 개체 표현을 ISKM + AnimSequenceTransformProvider로 바꿔 VAT와 비교 | |
+| M3b 새 기준선 | 큰 개체(시즈 미니언) 10%를 더하고 M0\~M3를 다시 잰다. 크기 보정 중요도 | `M3b` |
+| M4 Simulation LOD | 먼 개체의 로직 틱 간격을 청크 단위로 늘린다 | `M4` |
+| M5 ISKM | 먼 개체 표현을 ISKM + AnimSequenceTransformProvider로 바꿔 VAT와 비교 | `M5` |
 
 ## 글
 
@@ -67,7 +67,7 @@ Night of the Dead에서 측정 없이 액터로 했던 좀비 호드 최적화�
 
 ## 실행
 
-단계는 한 빌드 안의 실행 모드다(`-LabStage=M0|M1`). Test 패키지를 만들고 묶음 스크립트로 잰다.
+단계는 한 빌드 안의 실행 모드다(`-LabStage=M0`\~`M5`). Test 패키지를 만들고 묶음 스크립트로 잰다.
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File Scripts/package.ps1

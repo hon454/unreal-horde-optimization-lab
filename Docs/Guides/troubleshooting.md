@@ -11,3 +11,5 @@
 | Paragon 미니언이 배치 직후 래그돌처럼 늘어진다 | 피직스 에셋의 바디 Physics Type을 Default로 바꾼다 | [references.md](../Reference/references.md) 포럼 스레드 |
 | Test 패키지에서 `stat anim`, `ProfileGPU`, `a.Budget.Debug`가 동작하지 않는다 | 정상이다. Test에서는 컴파일되지 않는다. Development(`run-dev.ps1`)로 찍는다 | [ADR-0001](../Decisions/0001-test-package-for-measurement.md) |
 | Mass 하이드레이션 액터가 풀에 돌아간 뒤에도 애니메이션 예산을 쓴다 | `IMassActorPoolableInterface` 구현에서 중요도 0, 틱 끔을 확인한다 | [engine-notes.md](../Reference/engine-notes.md) "액터 풀링" |
+| `run-dev.ps1 -Extra`에 준 인자 일부가 빠지거나 듣지 않는다 | 게임 인자 여럿은 한 문자열로 넘긴다: `-Extra "-LabStage=M3 -LabTypes=2"` | [Worklog/M3b.md](../Worklog/M3b.md) "2종(에셋)" |
+| 개발 실행이 M0 액터로 돈다 | `-LabStage=`를 빠뜨렸다. 코드 기본값이 M0다. `-Extra "-LabStage=M<N>"`을 붙인다 | `Source/HordeOptLab/LabConfig.cpp` |
