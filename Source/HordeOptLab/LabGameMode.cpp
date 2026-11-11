@@ -302,6 +302,14 @@ void ALabGameMode::SetupCrowdFx()
 		UE_LOG(LogLab, Warning, TEXT("lab_crowdfx on=0 reason=spawn_failed"));
 		return;
 	}
+	// Q2c 입자 그림자: 엔티티 구동 입자의 그림자를 원거리 그림자 스위치(-LabFarShadow)에 묶는다. 시스템 bOverrideCastShadow가 꺼져 있어 컴포넌트 CastShadow가
+	// 그대로 쓰이고(NiagaraComponent.cpp:4678), 메시 배치 그림자는 프록시 CastsDynamicShadow && 렌더러 bCastShadows && 섹션 값의 곱이다(NiagaraRendererMeshes.cpp:1290).
+	// 그래서 컴포넌트를 끄면 모든 이미터가 꺼지고, 켜도 렌더러에서 꺼 둔 바깥 독립 이미터(Small·Large)는 켜지지 않는다. 옛 방식(엔티티 구동 끔)은 건드리지 않는다.
+	const bool bFxShadowSpawn = CrowdFx->CastShadow;
+	if (Config.bCrowdFxEntity)
+	{
+		CrowdFx->SetCastShadow(Config.bFarShadow);
+	}
 	CrowdFx->SetVariableFloat(TEXT("User.SmallRate"), Config.CrowdFxSmallRate());
 	CrowdFx->SetVariableFloat(TEXT("User.LargeRate"), Config.CrowdFxLargeRate());
 	CrowdFx->SetVariableFloat(TEXT("User.OuterRadius"), FLabCrowdFx::OuterRadius);
@@ -339,9 +347,9 @@ void ALabGameMode::SetupCrowdFx()
 	}
 
 	CrowdFx->Activate(true);
-	UE_LOG(LogLab, Log, TEXT("lab_crowdfx on=1 system=%s small_rate=%.2f large_rate=%.2f outer=%.0f inner=%.0f lifetime=%.2f speed=%.0f particles=%d entity=%d%s"),
+	UE_LOG(LogLab, Log, TEXT("lab_crowdfx on=1 system=%s small_rate=%.2f large_rate=%.2f outer=%.0f inner=%.0f lifetime=%.2f speed=%.0f particles=%d entity=%d fx_shadow=%d fx_shadow_spawn=%d%s"),
 		*System->GetName(), Config.CrowdFxSmallRate(), Config.CrowdFxLargeRate(), FLabCrowdFx::OuterRadius, Config.CrowdFxInnerCm(), Lifetime, FLabScenario::MoveSpeed, Config.CrowdFxParticles(),
-		Config.bCrowdFxEntity ? 1 : 0, *EntityParams);
+		Config.bCrowdFxEntity ? 1 : 0, CrowdFx->CastShadow ? 1 : 0, bFxShadowSpawn ? 1 : 0, *EntityParams);
 }
 
 void ALabGameMode::ApplyVariantCVars()

@@ -308,3 +308,14 @@
 | 중요도와 표현 LOD | `LODSignificance` = LOD 정수 + 밴드 안 비율. 개수 집계 경로는 버킷 번호 ÷ 버킷 수라 [LOD, LOD+1)을 넘지 않는다. 그래서 [1, 2)가 Medium, [2, 3)이 Low이고 범위 경계 2.0이 표현 LOD Medium/Low 경계(80m)와 같다 | `MG/MassLOD/Public/MassLODCalculator.h:409-416, 745-753` |
 | 범위를 넘는 프레임 | `AddBatchedTransform`·`AddBatchedAnimationData`·`AddBatchedCustomData`에 이전 중요도를 주면 새 범위와, 새 범위에 없는 옛 범위 컴포넌트 모두에 넣는다. 다음 프레임 옛 컴포넌트에서 갱신되지 않은 움직이는 인스턴스는 지워진다. 그래서 한 프레임 겹쳐 그리고 넘어간다 | `MR/Public/MassSkinnedMeshRepresentationTypes.h:665-726`, `MR/Private/MassVisualizationComponent.cpp:1440-1475, 812-827` |
 | 컴포넌트마다 트랙이 따로다 | ASTPD면 컴포넌트마다 `UAnimSequenceTransformProviderDataInstance`를 만들고 트랙 맵도 공유 데이터(컴포넌트)마다다. 트랙이 이미 있으면 클립 번호가 다를 때만 `SetAutoPlayData`를 부르므로, 예전에 머물던 컴포넌트로 돌아오면 옛 시작 시각의 같은 클립 트랙이 남아 위상이 튈 수 있다. `ULabIskmProcessor`가 범위가 바뀐 프레임에 새 컴포넌트의 트랙을 직접 다시 쓴다 | `MR/Private/MassVisualizationComponent.cpp:1323-1326, 761-775, 852-866` |
+
+## 23. Niagara 컴포넌트 그림자와 렌더러 그림자(2026-11-12, Q2c 코드 세션)
+
+줄임말: **NI** = `Engine/Plugins/FX/Niagara/Source/Niagara`.
+
+| 항목 | 확인한 것 | 위치 |
+| --- | --- | --- |
+| 메시 배치 그림자는 곱이다 | Niagara 메시 렌더러의 `MeshBatch.CastShadow`(레이 트레이싱 그림자도 같다)는 `SceneProxy.CastsDynamicShadow() && bCastShadows(렌더러 속성) && Section.bCastShadow`다. 스프라이트 렌더러도 `CastsDynamicShadow() && bCastShadows`다. 그래서 컴포넌트를 끄면 모든 이미터가 꺼지고, 컴포넌트를 켜도 렌더러에서 끈 이미터는 켜지지 않는다 | `NI/Private/NiagaraRendererMeshes.cpp:124, 1290-1292`, `NI/Private/NiagaraRendererSprites.cpp:106, 912-914` |
+| 프록시 값 | 프록시 설명에 `CastShadow(CastsDynamicShadow())`를 넘기고, 엔진 프록시는 `bCastDynamicShadow && CastShadow`로 정한다 | `NI/Private/NiagaraComponent.cpp:479`, `Engine/Source/Runtime/Engine/Private/PrimitiveSceneProxy.cpp:355` |
+| 컴포넌트 기본값은 끔 | `UPrimitiveComponent` 생성자가 `CastShadow = false`(`bCastDynamicShadow = true`)로 두고 `UNiagaraComponent` 생성자는 바꾸지 않는다. 시스템 `bOverrideCastShadow`가 꺼져 있으면 `SetAsset`이 컴포넌트 값을 그대로 둔다. 그래서 `SpawnSystemAtLocation`으로 만든 컴포넌트는 렌더러 그림자를 켜도 그림자가 없다(실행 로그 `fx_shadow_spawn=0`). 풀로 돌려받는 컴포넌트도 `SetCastShadow(false)`가 된다 | `Engine/Source/Runtime/Engine/Private/Components/PrimitiveComponent.cpp:341-343`, `NI/Private/NiagaraComponent.cpp:4678`, `NI/Private/NiagaraComponentPool.cpp:138` |
+| 실행 중 바꾸기 | `SetCastShadow`는 값이 바뀌면 `MarkRenderStateDirty`로 프록시를 다시 만든다 | `PrimitiveComponent.cpp:2212-2219` |
