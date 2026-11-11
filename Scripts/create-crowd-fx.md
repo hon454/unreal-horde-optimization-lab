@@ -52,3 +52,28 @@ MCP에 Python 실행 툴이 없어, 스크립트를 파일로 쓰고 SlateInspec
 4. 끝나면 `bThrottleCPUWhenNotForeground`를 true로 되돌리고, 임시 액터를 둔 맵은 저장하지 않고 버린다. `SceneTools.remove_from_scene`로 지워도 맵이 "수정됨"으로 남으므로, Python `EditorLoadingAndSavingUtils.new_blank_map(False)`(저장 확인 없음) 뒤 `load_map("/Game/Lab/Maps/L_Bench")`로 디스크에서 다시 연다. `get_dirty_map_packages()`가 빈 목록인지 본다.
 
 바닥: `L_Bench`의 바닥은 반쪽 길이 1,020m(입자 바깥 반경 1,000m + 20m)다(`Scripts/create-bench-map.py`, Q2 2단위). 1단위 스크린샷은 바닥이 520m일 때 찍었다.
+
+## 5. 엔티티 구동 이미터(Q2b)
+
+그려지지 않는 엔티티(표현 None)의 위치를 코드(`ULabCrowdFxGatherProcessor`)가 매 프레임 배열로 넣고, 이미터는 그 배열 길이만큼 입자를 그 프레임에만 그린다. 위 3절의 `Small`·`Large`는 500m 밖 독립 이미터로 그대로 둔다(안쪽 반경은 코드가 `User.Lifetime`으로 정한다). 계약은 [Docs/Worklog/Q2.md](../Docs/Worklog/Q2.md) "Q2b"의 "에셋 단위에 넘길 것", 경위는 같은 절의 "에셋 단위 진행". 2026-11-12에 이 순서로 만들었다.
+
+1. 사용자 변수. `AddUserVariables`로 `LabNow`(float 0), `LabOrbPos`(`/Script/Niagara.NiagaraPosition`, 0). `Vector`(`/Script/CoreUObject.Vector`)로 넣으면 다른 Vec3(`Vector3f`)와 형이 다르니 Position을 쓴다. 코드의 `SetVariableVec3`가 Position 변수면 Position으로 넣는다. 배열 변수 `LabSmallRecs`·`LabLargeRecs`(Vector 4 Array)는 `AddUserVariables`로 만들 수 없다(오류 없이 아무것도 생기지 않는다. 엔진 `FNiagaraParameterStore::SetParameter_InternalUseOnly`가 DI를 받지 않는다). 아래 5-4에서 다이내믹 입력의 배열 입력을 `User.LabSmallRecs`에 `Linked`로 연결하면 그 이름의 사용자 변수가 DI 인스턴스와 함께 생긴다. `Lifetime` 기본값은 166.6667(= (100,000 − 50,000) / 300)로 바꿨다(코드가 실행 때 넣는다).
+2. 시스템 `SetSystemData`: `bOverrideCastShadow` false(켜 두면 컴포넌트가 시스템 값으로 그림자를 정해 이미터별로 가를 수 없다). 나머지는 3절 그대로다(워밍업 268초는 독립 이미터의 새 수명 166.67초를 덮는다).
+3. 이미터마다(이름 `SmallEnt`, `LargeEnt`) 아래를 한다. 괄호 안이 대형 값이다.
+   1. `AddEmitter`: 템플릿 `/Niagara/DefaultAssets/Templates/Emitters/Minimal`.
+   2. `SetEmitterData`: `SimTarget` GPUComputeSim, `bLocalSpace` false(월드 공간, 원소가 월드 좌표다), `CalculateBoundsMode` Fixed, `FixedBounds` 3절과 같음, `bDeterminism` true, `RandomSeed` 3(4), `AllocationMode` ManualEstimate, `PreAllocationCount` 12000(1500)(1만에서 원소 약 5,600·620, 2만 기준), **`InterpolatedSpawnMode` NoInterpolation**. 보간 스폰을 끄면 새 입자는 첫 프레임에 업데이트를 돌지 않는다. 그래서 수명 0.001초 입자가 스폰된 프레임에 그려지고 다음 프레임의 `ParticleState`에서 죽는다.
+   3. 스프라이트 렌더러를 `RemoveRenderer`(인덱스 0)로 지우고 메시 렌더러를 `AddRenderer`. `SetRendererData`: 메시·회전·스케일·머티리얼은 3절과 같음(`SM_LabMinionVAT_Bone` + `MI_LabCrowdSmall`, 대형 `SM_LabMinionLargeVAT_Bone` 스케일 2 + `MI_LabCrowdLarge`, yaw −90), `FacingMode` Velocity, **`bCastShadows` true**, **`bEnableCameraDistanceCulling` true, `MinCameraDistance` 17500, `MaxCameraDistance` 200000**, **`MotionVectorSetting` Approximate**(이 입자는 업데이트를 돌지 않아 `Particles.Previous.Position`이 채워지지 않는다. Approximate는 이전 위치를 위치 − 속도 × 델타로 만든다).
+   4. 이미터 업데이트: `AddModule` `/Niagara/Modules/Emitter/SpawnPerFrame`. `SetStackInputData` `["Spawn Count"]` = 다이내믹 입력 `/Niagara/DynamicInputs/Math/GetVector4ArrayCount`, `["Spawn Count", "Vector 4 Array"]` = `Linked` `User.LabSmallRecs`(`User.LabLargeRecs`), 형 `/Script/Niagara.NiagaraDataInterfaceArrayFloat4`.
+   5. 입자 스폰(실행 순서대로):
+      - `InitializeParticle.Lifetime` = 0.001.
+      - `AddSetParametersModule`: `Particles.LabRec`(`/Script/CoreUObject.Vector4f`). `["Particles.LabRec"]` = 다이내믹 입력 `/Niagara/DynamicInputs/Arrays/SelectVector4_FromArray`, 그 아래 `Array Sampling Mode` = `ENiagaraArraySamplingMode` NewEnumerator1(Direct Set), `Direct Array Mode` = `ENiagara_WrapClamp` NewEnumerator0(Clamp), `Direct Array Index` = 다이내믹 입력 `/Niagara/DynamicInputs/Execution/ReturnExecIndex`(GPU 스폰에서 이번 프레임 스폰 순번), `Vector4 Selection Array` = `Linked` `User.LabSmallRecs`(`User.LabLargeRecs`).
+      - `AddSetParametersModule`: `Particles.Position`(`/Script/Niagara.NiagaraPosition`)과 `Particles.Velocity`(`/Script/CoreUObject.Vector3f`). 값은 HLSL 식(rvalue 하나):
+        - Position: `float3(Particles.LabRec.xy + normalize(User.LabOrbPos.xy - Particles.LabRec.xy) * User.Speed * max(User.LabNow - Particles.LabRec.z, 0.0), 0.0)`
+        - Velocity: `float3(normalize(User.LabOrbPos.xy - Particles.LabRec.xy) * User.Speed, 0.0)`
+      - `AddModule` `/Niagara/Modules/Update/Material/DynamicMaterialParameters`: `Write Parameter Index 0` = `/Niagara/Enums/Utility/ENiagara_DynamicMaterialParametersInputMode` NewEnumerator0(Off), `Write Parameter Index 1` = NewEnumerator1(Float), `Index 1 Param 1` = HLSL 식 `Particles.LabRec.w`(TimeOffset = 걷기 위상 W), `Index 1 Param 2` 1, `Index 1 Param 3` 0, `Index 1 Param 4` 61(40).
+   6. 입자 업데이트는 템플릿의 `ParticleState` 그대로다(수명이 지나면 죽인다).
+4. `GetSystemCompileState` 오류·경고 0, `GetStackIssues` 정보만(`SpawnPerFrame` 실험단계 표시, 보간 스폰 끔 안내, `ParticleState` 버전 노트)인지 보고 `AssetTools.save_assets`로 저장한다.
+
+MCP로 만들 때 남는 것: MCP `SetEmitterData`는 `PostEditChange`를 부르지 않아 `InterpolatedSpawnMode`를 바꿔도 스폰 스크립트의 용도(템플릿의 `ParticleSpawnScriptInterpolated`)가 바뀌지 않는다. 그래서 로드할 때마다 `LogNiagara: Disabling interpolated spawn because emitter flag and script type don't match` 경고가 이미터마다 한 줄 나오고 엔진이 메모리에서 용도를 고친다(`NiagaraEmitter.cpp:861-878`). GPU 계산 스크립트는 이미터 값(NoInterpolation)으로 컴파일되므로 동작은 같다(`NiagaraScript.cpp:1187-1193`). 경고를 없애려면 에디터에서 두 이미터의 Interpolated Spawn Mode를 UI로 한 번 바꿨다가 NoInterpolation으로 되돌리고 저장한다. 에디터에서 손으로 만들면 UI가 용도를 바꾸므로 이 문제가 없다.
+
+확인: 배열은 실행 때 코드가 넣으므로 에디터 뷰포트에는 엔티티 구동 입자가 없다. `run-dev.ps1 -N 10000 -Preset P1 -Duration 25 -ShotAt 20 -Stage M5 -Variant q4final`의 로그에 `lab_crowdfx ... small_recs=1 large_recs=1 now=1 orb_pos=1`이 있고 `lab_crowdfx_param missing=`이 없어야 한다. 독립 이미터를 잠시 끄고(`SetEmitterData` `bIsEnabled` false, 확인 뒤 되돌려 저장) 같은 실행을 하면 500m 밖이 비고 188\~500m가 엔티티 구동 입자로 찬다.
