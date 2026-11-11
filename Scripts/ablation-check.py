@@ -110,7 +110,9 @@ def main():
                 bad += 1
                 print(f"  CHECK {cond_name}: FAIL unknown condition (Scripts/full-conditions.json)")
                 continue
-            exp = expected_cond(doc, conds[cond_name], label if m else None, m["n"] if m else None, m["preset"] if m else None, a.shot, a.serial)
+            # 라벨이 Full 형식이 아니면(--cond) N은 메타데이터의 LabN을 믿고 살아 있는 총수만 그 값과 대조한다
+            n = m["n"] if m else meta.get("labn")
+            exp = expected_cond(doc, conds[cond_name], label if m else None, n, m["preset"] if m else None, a.shot, a.serial)
             if a.shot and meta.get("labshotat", "0") in ("0", ""):
                 exp["labshotat"] = "> 0"
             check = cond_name
