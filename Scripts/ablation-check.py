@@ -1,7 +1,7 @@
 """측정 실행의 CSV 메타데이터를 기대값과 대조하고 프레임 지표와 동등성 통계를 한 줄로 보인다.
 
 두 가지 기대값 출처가 있다.
-1. 총괄 묶음 조건(Q5): Scripts/full-conditions.json. 사다리 8단계(L1~L8), 빼 보기 아홉 행(A8-*), 하위 실험(S1-*, S8-*)의
+1. 총괄 묶음 조건(Q5): Scripts/full-conditions.json. 사다리 8단계(L1~L8), 빼 보기 행(A8-*, Q4b부터 farshadow를 더해 열 행), 하위 실험(S1-*, S8-*)의
    인자와 기대 메타데이터. 라벨이 Full<n>-<label_step>-<label_variant>-N<N>-<P1|P2>-r<i>이면 그 조건을 고른다. --cond로 직접 고를 수도 있다.
    기대값 = common_expect + 조건의 expect + 실행값(LabN, LabPreset, LabLabel, LabAlive·LabAliveMin·LabAliveMax = N).
    --shot이면 촬영 실행이라 LabHud 1, LabShotAt > 0을 기대한다. --serial이면 LabOverrides 끝에 fully_parallel=0이 붙는다.
