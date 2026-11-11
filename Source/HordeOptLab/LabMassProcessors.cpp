@@ -584,6 +584,46 @@ void ULabOrbSnipeProcessor::Execute(FMassEntityManager& EntityManager, FMassExec
 	});
 }
 
+// 동등성 통계: 오브 30m 안 개체 수(Q5) ---------------------------------------
+
+ULabNearOrbCountProcessor::ULabNearOrbCountProcessor()
+	: EntityQuery(*this)
+{
+	ExecutionFlags = (int32)EProcessorExecutionFlags::AllNetModes;
+	// 그룹과 순서를 선언하지 않는다. 읽기 전용 순회라 솔버가 트랜스폼을 쓰는 프로세서와 겹치지 않게만 둔다. 값은 이번 프레임 이동 앞이든 뒤든 같은 뜻이다
+}
+
+void ULabNearOrbCountProcessor::ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager)
+{
+	EntityQuery.AddRequirement<FTransformFragment>(EMassFragmentAccess::ReadOnly);
+	EntityQuery.AddTagRequirement<FLabMinionTag>(EMassFragmentPresence::All);
+	EntityQuery.AddTagRequirement<FLabPooledTag>(EMassFragmentPresence::None); // 풀 엔티티는 맵 밖에 서 있어 어차피 세지 않지만 뜻을 분명히 한다
+}
+
+void ULabNearOrbCountProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context)
+{
+	ULabCrowdSubsystem* Crowd = LabCrowd(Context);
+	if (!Crowd)
+	{
+		return;
+	}
+	const FVector Center = Crowd->OrbCenter;
+	const double RadiusSq = FMath::Square(double(FLabEquivalence::NearOrbCm));
+	int32 Count = 0;
+	EntityQuery.ForEachEntityChunk(Context, [Center, RadiusSq, &Count](FMassExecutionContext& Context)
+	{
+		const TConstArrayView<FTransformFragment> Transforms = Context.GetFragmentView<FTransformFragment>();
+		for (FMassExecutionContext::FEntityIterator It = Context.CreateEntityIterator(); It; ++It)
+		{
+			if (FVector::DistSquared2D(Transforms[It].GetTransform().GetLocation(), Center) <= RadiusSq)
+			{
+				++Count;
+			}
+		}
+	});
+	Crowd->Near30.store(Count);
+}
+
 // 상태 타이머 ----------------------------------------------------------------
 
 ULabMinionStateProcessor::ULabMinionStateProcessor()

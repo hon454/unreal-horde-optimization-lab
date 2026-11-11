@@ -99,6 +99,10 @@ public:
 	// E3 (3c) 스탯(2종): 대형 액터가 있었던 액터×프레임 합과 그중 애니 틱을 건너뛴 수. ULabActorSyncProcessor가 더하고 게임 모드가 측정 구간 차이를 CSV 메타데이터로 쓴다
 	mutable std::atomic<int64> LargeActorFrames{0};
 	mutable std::atomic<int64> LargeActorSkips{0};
+	/** Q5 동등성 통계: 오브 수평 30m 안 엔티티 수(ULabNearOrbCountProcessor가 매 프레임 쓴다, FLabEquivalence). 게임 모드가 CSV 스탯 Lab/Near30으로 남긴다 */
+	mutable std::atomic<int32> Near30{0};
+	/** Q5 HUD: 이 프레임 동기화한 하이드레이션 액터 수(CSV 스탯 Lab/Actors와 같은 값, ULabActorSyncProcessor가 쓴다) */
+	mutable std::atomic<int32> ActorCount{0};
 	// M5 엔티티 풀링 집계(게임 스레드). 재생성 중 풀에서 다시 쓴 수와 새로 만든 수, 풀에 남은 수는 EntityPool의 Num
 	int32 PoolReused = 0;
 	int32 PoolCreated = 0;

@@ -379,6 +379,7 @@ void ULabActorSyncProcessor::Execute(FMassEntityManager& EntityManager, FMassExe
 	CSV_CUSTOM_STAT(Lab, LargeActorSkips, LargeSkips, ECsvCustomStatOp::Set);      // E3 (3c): 그중 애니 틱을 건너뛴 수
 	Crowd->LargeActorFrames += LargeActors;
 	Crowd->LargeActorSkips += LargeSkips;
+	Crowd->ActorCount.store(Actors); // Q5 HUD
 	if (bTiming)
 	{
 		CSV_CUSTOM_STAT(Lab, ActorMoveMs, float(FPlatformTime::ToMilliseconds64(CyMove)), ECsvCustomStatOp::Set);

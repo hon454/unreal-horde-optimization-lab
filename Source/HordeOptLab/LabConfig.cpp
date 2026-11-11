@@ -27,7 +27,7 @@ const FLabConfig& FLabConfig::Get()
 		FParse::Value(Cmd, TEXT("-LabFarM="), C.FarM);
 		C.FarM = FMath::Max(C.FarM, 200);
 		C.bBench = FParse::Param(Cmd, TEXT("LabBench"));
-		C.bHud = FParse::Param(Cmd, TEXT("LabHud")) && !C.bBench;
+		C.bHud = FParse::Param(Cmd, TEXT("LabHud")); // Q5: -LabBench와 함께여도 켠다(촬영 실행). CSV 메타데이터 LabHud로 남는다
 
 		FString Stage;
 		if (FParse::Value(Cmd, TEXT("-LabStage="), Stage))
@@ -102,6 +102,9 @@ const FLabConfig& FLabConfig::Get()
 		// 켜지 않는 변형은 비교 상대라 Budget 없이 또는 자기 방식으로 남는다: m3mass·m3base·m3colbase·m3hydbase(M3 Budget 없음 기준 라벨),
 		// m3uro(URO)·m3budgetdist·m3budgetsig(자기 중요도 방식)·m3lowres(저품질 액터가 URO)·m3noactor(액터 없음), M3 하위 실험·진단 변형(그 기준점이 m3mass다).
 		// M0 계열(budget·uro 등)은 M3 이전 단계라 어차피 꺼진다.
+		// Q5: 변형 기본값과 다르게 준 인자를 모은다(LabOverrides, HUD). 기본값과 같은 값을 준 인자는 넣지 않는다.
+		TArray<FString> Overrides;
+		auto NoteOverride = [&Overrides](const FString& What) { Overrides.Add(What); };
 		{
 			const bool bPlainMassLabel = Variant == TEXT("m3mass") || Variant == TEXT("m3base") || Variant == TEXT("m3colbase") || Variant == TEXT("m3hydbase");
 			bool bOptOut = bPlainMassLabel;
@@ -120,6 +123,7 @@ const FLabConfig& FLabConfig::Get()
 			int32 ScreenSig = -1;
 			if (FParse::Value(Cmd, TEXT("-LabScreenSigBudget="), ScreenSig) && ScreenSig >= 0)
 			{
+				if ((ScreenSig != 0) != C.bScreenSigBudget) { NoteOverride(FString::Printf(TEXT("screensig_budget=%d"), ScreenSig != 0 ? 1 : 0)); }
 				C.bScreenSigBudget = ScreenSig != 0;
 			}
 		}
@@ -129,6 +133,7 @@ const FLabConfig& FLabConfig::Get()
 		int32 Pool = -1;
 		if (FParse::Value(Cmd, TEXT("-LabEntityPool="), Pool) && Pool >= 0)
 		{
+			if ((Pool != 0) != C.bEntityPool) { NoteOverride(FString::Printf(TEXT("pool=%d"), Pool != 0 ? 1 : 0)); }
 			C.bEntityPool = Pool != 0;
 		}
 		// Q2 Niagara 배경 무리 기본값: 변형 q2crowd만 켠다. run-bench.ps1의 ValidateSet에 q2crowd가 들어가기 전에는 -Variant m5bounds -ExtraArgs "-LabCrowdFx=1"로 같은 구성을 고른다.
@@ -136,6 +141,7 @@ const FLabConfig& FLabConfig::Get()
 		int32 CrowdFx = -1;
 		if (FParse::Value(Cmd, TEXT("-LabCrowdFx="), CrowdFx) && CrowdFx >= 0)
 		{
+			if ((CrowdFx != 0) != C.bCrowdFx) { NoteOverride(FString::Printf(TEXT("crowdfx=%d"), CrowdFx != 0 ? 1 : 0)); }
 			C.bCrowdFx = CrowdFx != 0;
 		}
 #if !UE_BUILD_TEST
@@ -152,14 +158,33 @@ const FLabConfig& FLabConfig::Get()
 		C.bNoIskm = OffSwitch(TEXT("-LabIskm="));
 		C.bNoFixedBounds = OffSwitch(TEXT("-LabFixedBounds="));
 		C.bNoFarCull = OffSwitch(TEXT("-LabFarCull="));
+		C.bNoActorCollision = OffSwitch(TEXT("-LabActorCollision=")); // Q5 하위 실험(끄기 전용)
+		if (C.bNoHydrate) { NoteOverride(TEXT("hydrate=0")); }
+		if (C.bNoSimLod) { NoteOverride(TEXT("simlod=0")); }
+		if (C.bNoIskm) { NoteOverride(TEXT("iskm=0")); }
+		if (C.bNoFixedBounds) { NoteOverride(TEXT("fixed_bounds=0")); }
+		if (C.bNoFarCull) { NoteOverride(TEXT("far_cull=0")); }
+		if (C.bNoActorCollision) { NoteOverride(TEXT("actor_collision=0")); }
 		// Q4 근거리 품질: 변형 기본값(m3hyd15·m3hyd50의 전환 거리, q4final의 고른 값), 그다음 인자
 		if (C.Variant == ELabVariant::M3Hyd15) { C.HydrateM = 15.f; }
 		else if (C.Variant == ELabVariant::M3Hyd50) { C.HydrateM = 50.f; }
 		else if (C.Variant == ELabVariant::Q4Final) { C.ActorCap = FLabQuality::Q4FinalActorCap; C.HydrateM = FLabQuality::Q4FinalHydrateM; }
+		const int32 DefaultCap = C.ActorCap;
+		const float DefaultHydrateM = C.HydrateM;
 		FParse::Value(Cmd, TEXT("-LabActorCap="), C.ActorCap);
 		FParse::Value(Cmd, TEXT("-LabHydrateM="), C.HydrateM);
 		C.ActorCap = FMath::Max(C.ActorCap, 0);
 		C.HydrateM = FMath::Clamp(C.HydrateM, 1.f, FLabQuality::MaxHydrateM);
+		if (C.ActorCap != DefaultCap) { NoteOverride(FString::Printf(TEXT("actor_cap=%d"), C.ActorCap)); }
+		if (C.HydrateM != DefaultHydrateM) { NoteOverride(FString::Printf(TEXT("hydrate_m=%.0f"), C.HydrateM)); }
+		// 시나리오 쪽 인자: 기본값(확정값)과 다르면 적는다
+		if (C.HydrateFixMask != 31) { NoteOverride(FString::Printf(TEXT("fixmask=%d"), C.HydrateFixMask)); }
+		if (C.Types != 2) { NoteOverride(FString::Printf(TEXT("types=%d"), C.Types)); }
+		if (C.FarM != 200) { NoteOverride(FString::Printf(TEXT("far=%d"), C.FarM)); }
+		if (C.Seed != 20261106) { NoteOverride(FString::Printf(TEXT("seed=%d"), C.Seed)); }
+		if (C.HealthFixed > 0.f) { NoteOverride(FString::Printf(TEXT("health_fixed=%.0f"), C.HealthFixed)); }
+		if (C.FullyParallel == 0) { NoteOverride(TEXT("fully_parallel=0")); }
+		C.Overrides = FString::Join(Overrides, TEXT("|")); // CSV 메타데이터 행은 쉼표로 나뉘므로 | 로 잇는다(LabCVars와 같다)
 		C.N = FMath::Max(C.N, 1);
 		C.Preset = FMath::Clamp(C.Preset, 1, 2);
 		return C;
@@ -328,6 +353,50 @@ FString FLabConfig::TechString() const
 	return TEXT("tech=") + FString::Join(Parts, TEXT(",")); // 한 키로 묶는다(로그의 pool= 등 기존 키와 겹치지 않게)
 }
 
+const TCHAR* FLabConfig::ActorCollisionString() const
+{
+	if (!UsesHydration())
+	{
+		return TEXT("-"); // 하이드레이션 액터가 없다(M0 액터는 CharacterMovement가 캡슐을 쓰므로 늘 켜져 있고 바꾸지 않는다)
+	}
+	if (Variant == ELabVariant::M3NoCol || bNoActorCollision)
+	{
+		return TEXT("0");
+	}
+	return Variant == ELabVariant::M3ColQuery ? TEXT("query") : TEXT("1");
+}
+
+FLabConfig::FLadder FLabConfig::Ladder() const
+{
+	// plan.md "품질 계획" 사다리 표. 이름은 HUD(영어, 엔진 글꼴)에 쓴다. 4단계는 화면 크기 Budget이 켜진 mass다(m3mass 라벨은 Budget을 끈다).
+	switch (Stage)
+	{
+	case ELabStage::M0:
+		if (Variant == ELabVariant::Full) { return { TEXT("1"), TEXT("Actor baseline") }; }
+		if (Variant == ELabVariant::Budget) { return { TEXT("1b"), TEXT("Actors + Budget Allocator") }; }
+		if (Variant == ELabVariant::Uro) { return { TEXT("1c"), TEXT("Actors + URO") }; }
+		break;
+	case ELabStage::M1:
+		if (Variant == ELabVariant::Mass) { return { TEXT("2"), TEXT("Logic in Mass") }; }
+		break;
+	case ELabStage::M2:
+		if (Variant == ELabVariant::VatCull) { return { TEXT("3"), TEXT("ISM + VAT, cull past 200 m") }; }
+		break;
+	case ELabStage::M3:
+		if (Variant == ELabVariant::Mass && bScreenSigBudget) { return { TEXT("4"), TEXT("Near actors + anim budget") }; }
+		break;
+	case ELabStage::M5:
+		if (Variant == ELabVariant::M4OffPool) { return { TEXT("5"), TEXT("Simulation LOD + entity pool") }; }
+		if (Variant == ELabVariant::M5Bounds) { return { TEXT("6"), TEXT("ISKM + fixed bounds") }; }
+		if (Variant == ELabVariant::Q2Crowd) { return { TEXT("7"), TEXT("Niagara horizon crowd") }; }
+		if (Variant == ELabVariant::Q4Final) { return { TEXT("8"), FString::Printf(TEXT("Actor cap %d, hydrate %.0f m"), ActorCap, HydrateM) }; } // 실제 값(이웃 점 -LabHydrateM=70이면 70)
+		break;
+	default:
+		break;
+	}
+	return { TEXT("-"), FString() };
+}
+
 float FLabConfig::CrowdFxTotalRate() const
 {
 	return float(N) / FLabScenario::MapRadius * FLabScenario::MoveSpeed;
@@ -416,7 +485,9 @@ FString FLabConfig::ToLogString() const
 	// crowdfx는 켰을 때만 붙인다(Q2). 기본 실행의 로그는 그대로다.
 	const FString Crowd = bCrowdFx ? FString::Printf(TEXT(" crowdfx=1 crowdfx_particles=%d crowdfx_inner=%.1f"), CrowdFxParticles(), CrowdFxInnerCm() / 100.f) : FString();
 	// tech는 빼 보기 아홉 기법의 켬·끔이다(Q3). 모든 실행에 붙여 러너와 사람이 기대값과 대조한다.
-	return FString::Printf(TEXT("lab_config stage=%s n=%d preset=P%d seed=%d variant=%s bench=%d label=%s duration=%.1f types=%d simlod=%s%s%s%s%s%s %s"),
+	// ladder·overrides·hud·actor_col은 Q5(사다리 단계, 변형 기본값과 다른 인자, HUD 켬, 하이드레이션 액터 캡슐 콜리전). tech 뒤에 늘 붙인다.
+	return FString::Printf(TEXT("lab_config stage=%s n=%d preset=P%d seed=%d variant=%s bench=%d label=%s duration=%.1f types=%d simlod=%s%s%s%s%s%s %s ladder=%s overrides=%s hud=%d actor_col=%s"),
 		StageName(Stage), N, Preset, Seed, VariantName(Variant), bBench ? 1 : 0, *Label, DurationSec, Types, *SimLodString(),
-		FarM != 200 ? *FString::Printf(TEXT(" far=%d"), FarM) : TEXT(""), *M5, *Budget, *Health, *Crowd, *TechString());
+		FarM != 200 ? *FString::Printf(TEXT(" far=%d"), FarM) : TEXT(""), *M5, *Budget, *Health, *Crowd, *TechString(),
+		*Ladder().Id, Overrides.IsEmpty() ? TEXT("-") : *Overrides, bHud ? 1 : 0, ActorCollisionString());
 }

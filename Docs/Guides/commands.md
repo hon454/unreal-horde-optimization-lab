@@ -90,6 +90,24 @@ powershell -ExecutionPolicy Bypass -File Scripts/run-dev.ps1 -N 10000 -Preset P1
 py -3 -I Scripts/turn-fill.py Saved/Logs/LabDev-q4final-N10000-P1.log
 ```
 
+## 총괄 묶음 조건과 HUD(Q5)
+
+총괄 묶음 `Full1`의 조건(사다리 8단계 `L1`\~`L8`, 빼 보기 아홉 행 `A8-*`, 하위 실험 `S1-budget`·`S1-uro`·`S8-nocol`·`S8-h70`·`S8-h50`)은 `Scripts/full-conditions.json`에 인자 줄과 기대 메타데이터로 있다. 표와 경위는 [Worklog/Q5.md](../Worklog/Q5.md).
+
+| 인자 | 뜻 |
+| --- | --- |
+| `-LabHud` | 상태 오버레이를 켠다. Q5부터 `-LabBench`와 함께 줘도 켜진다(촬영 실행). 메타데이터 `LabHud` |
+| `-LabShotAt=<초>` + `-LabBench` | 게임 시작부터 그 초에 창 해상도 스크린샷 한 장(`Saved/Screenshots/Lab/<라벨>-t<초>.png`, HUD 포함). 메타데이터 `LabShotAt`. 측정 실행은 주지 않는다 |
+| `-LabActorCollision=0` | 하이드레이션 액터의 캡슐 콜리전을 끈다(끄기 전용, `m3nocol`과 같은 처리). 기본은 켬. 메타데이터 `LabActorCollision` |
+
+동등성 통계: CSV 스탯 `Lab/Alive`(살아 있는 총수, 사망 중 포함), `Lab/Deaths`(누적 사망 = 범위 피해 사망 + 저격), `Lab/Near30`(오브 수평 30m 안 개체 수). 실행 끝 메타데이터 `LabDeaths`·`LabZoneKills`·`LabSnipes`·`LabDeathRate`·`LabNear30Mean`·`LabAliveMin`·`LabAliveMax`, 같은 값이 `Saved/Lab/<라벨>.summary.txt`의 `lab_summary` 줄 끝에 있다. 시작 메타데이터 `LabLadder`(사다리 단계), `LabOverrides`(변형 기본값과 다르게 준 인자, `|`로 잇는다, 없으면 `-`).
+
+```bash
+# 메타데이터 대조. 라벨이 Full<n>-<단계>-<변형>-N<N>-<P1|P2>-r<i>면 조건을 라벨에서 고른다. 아니면 --cond
+py -3 -I Scripts/ablation-check.py Saved/Profiling/CSV/Full1-L8-q4final-N10000-P1-r1.csv
+py -3 -I Scripts/ablation-check.py <CSV> --cond L8-q4final --shot
+```
+
 ## 측정 절차
 
 1. 측정 전에 잴 조건, 라벨, 걸리는 시간을 채팅에 알리고 답을 받는다.
@@ -102,7 +120,7 @@ py -3 -I Scripts/turn-fill.py Saved/Logs/LabDev-q4final-N10000-P1.log
 ## 스크린샷·영상 실행
 
 - 오버레이 스크린샷(`stat unit`, `a.Budget.Debug.Enabled 1`, 밴드 색 디버그 뷰)은 `run-dev.ps1`로 Development에서 찍는다. 그 실행의 수치는 쓰지 않는다.
-- Test 패키지 스크린샷은 `stat unit`만 가능하다.
+- Test 패키지 스크린샷은 `stat unit`만 가능하다. Q5부터는 `-LabHud`가 단계 이름, 프레임·Game·Render·GPU 시간(1초 평균), 미니언·액터 수, 프레임 시간 그래프를 그린다(위 "총괄 묶음 조건과 HUD(Q5)").
 - 영상은 수치 실행에서 찍지 않는다. 라벨 `visualN`으로 따로 돌린다.
 
 ## 측정 PC 사양 읽기

@@ -84,6 +84,15 @@ struct FLabQuality
 };
 
 /**
+ * Q5 단계 사이 동등성 통계(Docs/Worklog/Q5.md "동등성 통계"). 모든 단계에서 같은 뜻으로 CSV에 남긴다.
+ * 오브 30m 안 개체 수 = 오브 중심에서 수평 거리 30m 안의 개체(걷기·피격·사망 모두, 풀에서 기다리는 엔티티 제외). 카메라와 무관하다.
+ */
+struct FLabEquivalence
+{
+	static constexpr float NearOrbCm = 3000.f; // 30m(확정값 거리 밴드의 첫 경계와 같은 값, 기준은 카메라가 아니라 오브)
+};
+
+/**
  * Q2 Niagara 배경 무리(/Game/Lab/FX/NS_LabCrowd, Docs/Worklog/Q2.md). 그리는 끝 밖을 실제 미니언과 연결되지 않은 GPU 입자로 채운다.
  * 입자는 바깥 고리에서 생겨 미니언과 같은 속도로 오브를 향해 걷고, 수명이 끝나는 안쪽 반경에서 사라진다(페이드 없음, 2026-11-12 코디네이터 결정).
  */
@@ -172,7 +181,11 @@ struct FLabConfig
 {
 	ELabStage Stage = ELabStage::M0;
 	bool bStageValid = true;   // 아직 없는 단계를 고르면 false. 게임 모드가 종료 코드 2로 끝낸다
-	bool bHud = false;         // -LabHud: 상태 오버레이를 켠 채 시작(F1로도 토글). -LabBench에서는 무시
+	/**
+	 * -LabHud: 상태 오버레이를 켠 채 시작(F1로도 토글). Q5부터 -LabBench와 함께 줘도 켜진다(촬영 실행 = 측정과 같은 조건 + HUD).
+	 * 측정 실행은 주지 않는다. 켜졌는지는 CSV 메타데이터 LabHud로 남아 러너가 거른다(Docs/Worklog/Q5.md "HUD").
+	 */
+	bool bHud = false;
 	int32 N = 500;
 	int32 Preset = 1;          // 1 오브 시점, 2 탑뷰(P3는 2026-11-07에 뺐다)
 	int32 Seed = 20261106;
@@ -262,6 +275,25 @@ struct FLabConfig
 	int32 ActorCap = FLabQuality::DefaultActorCap;
 	float HydrateM = FLabQuality::DefaultHydrateM;
 	float HydrateCm() const { return HydrateM * 100.f; }
+	/**
+	 * Q5 하위 실험(-LabActorCollision=0, 끄기 전용): 하이드레이션 액터(M3 이상)의 캡슐 콜리전을 끈다(m3nocol과 같은 처리: NoCollision, 오버랩·물리 볼륨 갱신 끔).
+	 * 기본은 켬이다. ACharacter 캡슐의 Pawn 프로필 그대로이고 Mass 액터 풀이 꺼낼 때 SetActorEnableCollision(true)를 부른다(MassActorSpawnerSubsystem.cpp:327).
+	 * M0 액터는 CharacterMovement가 캡슐로 바닥을 찾으므로 건드리지 않는다.
+	 */
+	bool bNoActorCollision = false;
+	/** 하이드레이션 액터 캡슐 콜리전의 실제 설정. "1" 기본(켬), "query" m3colquery, "0" m3nocol·-LabActorCollision=0. 액터가 없는 단계는 "-". CSV 메타데이터 LabActorCollision */
+	const TCHAR* ActorCollisionString() const;
+	/**
+	 * 변형이 정한 기본값과 다르게 준 인자(Q5). "hydrate_m=70|actor_collision=0" 꼴(CSV 메타데이터 행이 쉼표로 나뉘어 | 로 잇는다), 없으면 빈 문자열. 사다리 단계를 그대로 고른 실행인지 가리는 데 쓴다.
+	 * CSV 메타데이터 LabOverrides(빈 값이면 "-"), HUD 둘째 줄.
+	 */
+	FString Overrides;
+	/**
+	 * 사다리(plan.md "품질 계획") 단계. Id는 "1"~"8", 하위 변형 "1b"(M0 budget)·"1c"(M0 uro), 사다리 밖이면 "-". Name은 HUD에 쓰는 영어 이름.
+	 * 변형과 단계만 본다. 인자로 바꾼 것은 Overrides에 따로 있다. CSV 메타데이터 LabLadder.
+	 */
+	struct FLadder { FString Id; FString Name; };
+	FLadder Ladder() const;
 	/** M3 이상 단계에서 0~30m를 액터로 바꾸는가(하이드레이션). m3noactor와 -LabHydrate=0은 거짓 */
 	bool UsesHydration() const;
 	/** 표현 LOD의 Off(그리는 끝 밖을 그리지 않음)가 있는가. M3 이상 단계와 M2의 vatcull·vatcullvis에서 참, -LabFarCull=0이면 거짓 */

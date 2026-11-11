@@ -271,3 +271,16 @@
 | 표현 LOD 상한은 종류 합계다 | 표현 Trait은 LOD 파라미터 값으로 공유 프래그먼트를 `GetOrCreateSharedFragment`하므로 파라미터가 같은 두 종류(소형·대형 템플릿)는 공유 프래그먼트 하나, LOD 계산기 하나를 쓴다. 표현 LOD 프로세서는 공유 프래그먼트마다 `PrepareExecution`·`AdjustDistancesFromCount`를 부른다. 그래서 `LODMaxCount[High]` 500은 두 종류를 합친 액터 수 상한이다 | `MG/MassRepresentation/Private/MassVisualizationTrait.cpp:145`, `MassVisualizationLODProcessor.cpp:70-110` |
 | 상한이 거리를 줄이는 방식 | `AdjustDistancesFromCountForRuntimeData`는 LOD마다 거리 구간(LOD당 250개, `MaxBucketsPerLOD`)을 가까운 것부터 세어 상한을 넘는 구간에서 다음 LOD의 거리를 당긴다. 구간마다 화면 안 개체를 먼저 센다. 그래서 상한이 걸리면 가까운 개체부터, 같은 거리면 화면 안 개체부터 액터가 된다 | `MG/MassLOD/Public/MassLODCalculator.h:534-642`, `MassLODTypes.h:23` |
 | High 경계에는 히스테리시스가 없다 | `ComputeLODFromSettings`는 Off부터 내려오며 거리를 비교하고, 히스테리시스는 "한 단계 위로 오를 때" 그 LOD 거리와 다음 LOD 거리 사이(`Lerp(D[i], D[i+1], 1 − 10%)`)에만 둔다. 반복이 `LODDistIdx > 0`에서 멈추므로 High(0)로 들어갈 때와 High에서 나올 때 모두 검사하지 않는다. 그래서 액터 ↔ 인스턴스 전환은 화면 안 30m(화면 밖 15m) 한 거리에서 일어난다. Low → Medium 진입은 `H + 0.9 × (80m − H)`라 전환 거리 H를 바꾸면 함께 움직인다(30m면 75m, 50m면 77m) | `MG/MassLOD/Public/MassLODCalculator.h:862-886` |
+
+## 20. Test 패키지 HUD와 스크린샷, 액터 캡슐(2026-11-12, Q5)
+
+줄임말: **E** = `Engine/Source/Runtime/Engine`, **MG** = `Engine/Plugins/Runtime/MassGameplay/Source`.
+
+| 항목 | 확인한 것 | 위치 |
+| --- | --- | --- |
+| `AHUD::DrawHUD`는 Test에서도 불린다 | `AHUD::PostRender`는 빌드 구성 조건 없이 `bShowHUD && FApp::CanEverRender()`이면 `DrawHUD()`를 부른다. 빌드 조건이 걸린 것은 디버그 그리기(`ENABLE_DRAW_DEBUG`, Test에서 0, 6절)뿐이다. 게임 뷰포트가 플레이어마다 HUD의 `PostRender`를 부른다 | `E/Private/HUD.cpp:151-177`, `E/Private/GameViewportClient.cpp:2150-2181` |
+| HUD의 시간 값 출처 | `GGameThreadTime`(대기를 뺀 게임 스레드 시간)은 `FViewport::Draw`가, `GRenderThreadTime`은 Slate RHI 렌더러가 매 프레임 쓰고 `RHIGetGPUFrameCycles()`는 GPU 프로파일러가 쓴다. 셋 다 `STATS` 없이 쓰이고 CSV `GameThreadTime`·`RenderThreadTime`·`GPUTime`이 같은 값을 읽는다. 그래서 HUD 숫자와 CSV 열은 같은 정의다(HUD는 1초 평균) | `E/Private/UnrealClient.cpp:1831-1845`, `SlateRHIRenderer/Private/SlateRHIRenderer.cpp:1359`, `RHI/Private/GPUProfiler.cpp:2265-2284`, `Launch/Private/LaunchEngineLoop.cpp:1518-1520` |
+| 글꼴을 선명하게 | `FCanvasTextItem`을 `FSlateFontInfo`(엔진 Roboto, 포인트 크기)로 만들면 런타임 글꼴 캐시가 그 크기로 래스터화한다. `UFont`와 배율로 그리면 `LegacyFontSize × DPIScale`로 래스터화한 뒤 배율만큼 늘려 흐려진다. 런타임 글꼴은 알파 전용 텍스처라 블렌드가 반투명 계열로 강제된다. 엔진 Roboto 합성 글꼴의 서체 이름은 `Regular`·`Bold`·`Italic`·`Light`(에셋 문자열) | `E/Private/UserInterface/CanvasItem.cpp:972-1000, 1193-1195`, `E/Public/CanvasItem.h:448-454` |
+| 글자 폭 재기 | `FEngineFontServices::Get().GetFontMeasure()->Measure(문자열, FSlateFontInfo)`. 캔버스 텍스트 아이템의 `GetTextSize`는 protected다 | `E/Public/EngineFontServices.h:29-33`, `SlateCore/Public/Fonts/FontMeasure.h:29` |
+| HUD가 찍히는 스크린샷 | `FScreenshotRequest::RequestScreenshot(경로, bShowUI=false, …)`는 뷰포트가 `Draw`(HUD 포함)와 캔버스 플러시를 마친 뒤 `ProcessScreenShots`에서 뷰포트 렌더 타깃을 읽으므로 HUD가 함께 찍힌다. `HighResShot`은 더미 뷰포트에 다시 그리고 모션 블러 쇼 플래그를 끈다 | `E/Private/UnrealClient.cpp:1862-1872`(일반), `:1711-1721`(HighResShot), `E/Private/GameViewportClient.cpp:2369-2433` |
+| 하이드레이션 액터의 캡슐 콜리전은 켜져 있다 | `ALabMinion`(`ACharacter`)의 캡슐은 `Pawn` 프로필 그대로이고(코드는 Pawn 채널 응답만 무시로 둔다), Mass 액터 스포너가 풀에서 액터를 꺼낼 때 `SetActorEnableCollision(true)`를 부른다. `m3colquery`·`m3nocol`·`-LabActorCollision=0`만 컴포넌트 콜리전을 바꾼다 | `Source/HordeOptLab/LabMinion.cpp:24-26, 303-312`, `MG/MassActors/Private/MassActorSpawnerSubsystem.cpp:327` |

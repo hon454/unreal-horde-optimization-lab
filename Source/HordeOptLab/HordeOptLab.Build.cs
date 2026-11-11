@@ -16,6 +16,7 @@ public class HordeOptLab : ModuleRules
 			"InputCore",
 			"RenderCore",               // 상태 오버레이: GGameThreadTime, GRenderThreadTime
 			"RHI",                      // 상태 오버레이: RHIGetGPUFrameCycles. CSV 메타데이터: GPU 드라이버 버전
+			"SlateCore",                // Q5 상태 오버레이: FSlateFontInfo(글꼴을 화면 높이에 맞는 크기로 래스터화해 QHD·720p 모두 선명하게)
 			"AnimationBudgetAllocator", // M0 budget 변형: USkeletalMeshComponentBudgeted
 			"SignificanceManager",      // M0 budget 변형: 거리 단계 중요도
 			"Niagara",                  // 오브 이펙트(테슬라 코일, 피해 범위)

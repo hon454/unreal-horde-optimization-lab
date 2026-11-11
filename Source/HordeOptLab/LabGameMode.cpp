@@ -36,6 +36,8 @@
 #include "NiagaraEmitterInstance.h"
 #include "LabBuildVersion.h" // LAB_BUILD_COMMIT. HordeOptLab.Build.cs가 .git/HEAD에서 만든다
 
+CSV_DECLARE_CATEGORY_EXTERN(Lab); // Q5 동등성 통계 Lab/Alive·Deaths·Near30(카테고리는 LabVatProcessor.cpp가 정의한다)
+
 namespace
 {
 	/** 결정 6 바닥 띠가 켜져 있는가(개발 전용 -LabBandFloor가 1로 둔다). 측정 CSV 메타데이터 LabCVars에 찍혀 켜고 잰 실행을 걸러낸다. Test 빌드에서는 늘 0. */
@@ -94,6 +96,56 @@ FString ALabGameMode::AppliedString() const
 	const bool bCrowd = Crowd && Crowd->IsActive();
 	return FString::Printf(TEXT("stage=%s budget=%d pool=%d iskm_bounds=%d fixmask=%d crowdfx_active=%d %s"), FLabConfig::StageName(FLabConfig::Get().Stage), IsBudgetActive() ? 1 : 0,
 		FLabConfig::Get().bEntityPool ? 1 : 0, bCrowd ? Crowd->GetIskmBoundsApplied() : 0, FLabConfig::Get().HydrateFixMask, CrowdFx && CrowdFx->IsActive() ? 1 : 0, *FLabConfig::Get().TechString());
+}
+
+int32 ALabGameMode::ComputeNear30() const
+{
+	if (const ULabCrowdSubsystem* Crowd = GetWorld()->GetSubsystem<ULabCrowdSubsystem>(); Crowd && Crowd->IsActive())
+	{
+		return Crowd->Near30.load();
+	}
+	if (!Spawner || !Orb)
+	{
+		return 0;
+	}
+	// M0: ULabNearOrbCountProcessor와 같은 정의. 액터 위치는 캡슐 중심이라 높이를 빼고 수평 거리로 잰다
+	const FVector Center = Orb->GetActorLocation();
+	const double RadiusSq = FMath::Square(double(FLabEquivalence::NearOrbCm));
+	int32 Count = 0;
+	for (const ALabMinion* Minion : Spawner->GetMinions())
+	{
+		if (Minion && FVector::DistSquared2D(Minion->GetActorLocation(), Center) <= RadiusSq)
+		{
+			++Count;
+		}
+	}
+	return Count;
+}
+
+int32 ALabGameMode::GetDeathCount() const
+{
+	return Orb ? Orb->GetKillCount() + Orb->GetSnipeCount() : 0;
+}
+
+bool ALabGameMode::IsHudShown() const
+{
+	const APlayerController* PC = GetWorld()->GetFirstPlayerController();
+	const ALabHud* Hud = PC ? Cast<ALabHud>(PC->GetHUD()) : nullptr;
+	return Hud && Hud->IsShown();
+}
+
+int32 ALabGameMode::GetHudMinions() const
+{
+	return Spawner ? Spawner->GetAliveCount() : 0;
+}
+
+int32 ALabGameMode::GetHudActors() const
+{
+	if (const ULabCrowdSubsystem* Crowd = GetWorld()->GetSubsystem<ULabCrowdSubsystem>(); Crowd && Crowd->IsActive())
+	{
+		return FLabConfig::Get().Stage >= ELabStage::M3 ? Crowd->ActorCount.load() : 0;
+	}
+	return Spawner ? Spawner->GetMinions().Num() : 0; // M0: 모든 개체가 액터다
 }
 
 ALabGameMode::ALabGameMode()
@@ -334,6 +386,13 @@ void ALabGameMode::TickBench()
 			{
 				CSV_METADATA(Tech.MetaKey, *Tech.Value);
 			}
+			// Q5: 사다리 단계(FLabConfig::Ladder), 변형 기본값과 다르게 준 인자, 하이드레이션 액터 캡슐 콜리전, HUD 켬(촬영 실행), 촬영 시각.
+			// 측정 실행은 LabHud 0·LabShotAt 0이어야 한다. 러너가 대조한다(Docs/Worklog/Q5.md).
+			CSV_METADATA(TEXT("LabLadder"), *Config.Ladder().Id);
+			CSV_METADATA(TEXT("LabOverrides"), Config.Overrides.IsEmpty() ? TEXT("-") : *Config.Overrides);
+			CSV_METADATA(TEXT("LabActorCollision"), Config.ActorCollisionString());
+			CSV_METADATA(TEXT("LabHud"), IsHudShown() ? TEXT("1") : TEXT("0"));
+			CSV_METADATA(TEXT("LabShotAt"), *FString::Printf(TEXT("%.0f"), Config.ShotAtSec));
 			// 측정 방법 5번(plan.md "M3b"): 빌드 커밋, 고정 CVar 값, GPU 드라이버. summarize.py BUILD_KEYS(labbuild·labcvars·labdriver)와 이름을 맞춘다.
 			CSV_METADATA(TEXT("LabBuild"), TEXT(LAB_BUILD_COMMIT));
 			CSV_METADATA(TEXT("LabCVars"), *LabFixedCVarString());
@@ -341,6 +400,11 @@ void ALabGameMode::TickBench()
 			FCsvProfiler::Get()->BeginCapture(-1, FString(), Config.Label);
 #endif
 			RespawnsAtStart = Spawner->GetRespawnCount();
+			KillsAtStart = Orb->GetKillCount();
+			SnipesAtStart = Orb->GetSnipeCount();
+			Near30Sum = 0;
+			AliveMin = TNumericLimits<int32>::Max();
+			AliveMax = 0;
 			if (ULabCrowdSubsystem* Crowd = GetWorld()->GetSubsystem<ULabCrowdSubsystem>(); Crowd && Crowd->IsActive())
 			{
 				LargeActorFramesAtStart = Crowd->LargeActorFrames.load();
@@ -356,18 +420,35 @@ void ALabGameMode::TickBench()
 
 	case ELabBenchPhase::Measure:
 		++BenchFrames;
+		// Q5 동등성 통계의 측정 구간 집계(Tick이 이번 프레임 값을 먼저 구한다)
+		Near30Sum += LastNear30;
+		AliveMin = FMath::Min(AliveMin, LastAlive);
+		AliveMax = FMath::Max(AliveMax, LastAlive);
 		// E5 (b)(plan.md "M5"): -LabBench에 -LabDuration=초를 주면 측정 구간을 그 길이로 늘린다(16분 누수 진단 960). 주지 않으면 지금까지와 같은 60초다
 		if (BenchPhaseTime >= (Config.DurationSec > 0.f ? Config.DurationSec : FLabBench::MeasureSec))
 		{
 			const int32 Alive = Spawner->GetAliveCount();
 			const bool bOk = Alive == Config.N && BenchFrames > 0;
-			const FString Summary = FString::Printf(TEXT("lab_summary label=%s measure_sec=%.2f frames=%d avg_ms=%.3f n=%d respawns=%d ok=%d"),
+			// Q5: 측정 구간의 사망 수(범위 피해 + 저격), 초당 사망 수, 오브 30m 안 개체 수 평균, 살아 있는 총수의 최소·최대. 키는 기존 키 뒤에 붙인다(run-bench.ps1의 정규식과 겹치지 않는다)
+			const int32 ZoneKills = Orb->GetKillCount() - KillsAtStart;
+			const int32 Snipes = Orb->GetSnipeCount() - SnipesAtStart;
+			const int32 Deaths = ZoneKills + Snipes;
+			const float DeathRate = Deaths / FMath::Max(BenchPhaseTime, 0.001f);
+			const float Near30Mean = float(double(Near30Sum) / FMath::Max(BenchFrames, 1));
+			const FString Summary = FString::Printf(TEXT("lab_summary label=%s measure_sec=%.2f frames=%d avg_ms=%.3f n=%d respawns=%d ok=%d deaths=%d zone_kills=%d snipes=%d death_rate=%.3f near30_mean=%.2f alive_min=%d alive_max=%d"),
 				*Config.Label, BenchPhaseTime, BenchFrames, BenchPhaseTime * 1000.f / FMath::Max(BenchFrames, 1),
-				Alive, Spawner->GetRespawnCount() - RespawnsAtStart, bOk ? 1 : 0);
+				Alive, Spawner->GetRespawnCount() - RespawnsAtStart, bOk ? 1 : 0, Deaths, ZoneKills, Snipes, DeathRate, Near30Mean, AliveMin, AliveMax);
 #if CSV_PROFILER
 			CSV_METADATA(TEXT("LabAlive"), *FString::FromInt(Alive));
 			CSV_METADATA(TEXT("LabRespawns"), *FString::FromInt(Spawner->GetRespawnCount() - RespawnsAtStart));
 			CSV_METADATA(TEXT("LabOk"), bOk ? TEXT("1") : TEXT("0"));
+			CSV_METADATA(TEXT("LabDeaths"), *FString::FromInt(Deaths));
+			CSV_METADATA(TEXT("LabZoneKills"), *FString::FromInt(ZoneKills));
+			CSV_METADATA(TEXT("LabSnipes"), *FString::FromInt(Snipes));
+			CSV_METADATA(TEXT("LabDeathRate"), *FString::Printf(TEXT("%.3f"), DeathRate));
+			CSV_METADATA(TEXT("LabNear30Mean"), *FString::Printf(TEXT("%.2f"), Near30Mean));
+			CSV_METADATA(TEXT("LabAliveMin"), *FString::FromInt(AliveMin));
+			CSV_METADATA(TEXT("LabAliveMax"), *FString::FromInt(AliveMax));
 			if (ULabCrowdSubsystem* Crowd = GetWorld()->GetSubsystem<ULabCrowdSubsystem>(); Crowd && Crowd->IsActive())
 			{
 				// E3 (3c) 지표: 측정 구간에서 대형 액터가 있었던 프레임 합(액터×프레임)과 그중 애니 틱을 건너뛴 수(ULabActorSyncProcessor). 비율 = Skips / Frames
@@ -475,13 +556,30 @@ void ALabGameMode::Tick(float DeltaSeconds)
 		}
 	}
 
+	// Q5 동등성 통계(모든 단계, 같은 뜻, Docs/Worklog/Q5.md "동등성 통계"): 살아 있는 총수(사망 중 포함, 늘 N이어야 한다), 누적 사망 수, 오브 30m 안 개체 수.
+	// 초당 사망 수는 Lab/Deaths의 측정 구간 증가분 ÷ 측정 시간이다(실행 끝 메타데이터 LabDeathRate에도 있다).
+	LastAlive = Spawner->GetAliveCount();
+	LastNear30 = ComputeNear30();
+	CSV_CUSTOM_STAT(Lab, Alive, LastAlive, ECsvCustomStatOp::Set);
+	CSV_CUSTOM_STAT(Lab, Deaths, GetDeathCount(), ECsvCustomStatOp::Set);
+	CSV_CUSTOM_STAT(Lab, Near30, LastNear30, ECsvCustomStatOp::Set);
+
+	const float ShotAt = FLabConfig::Get().ShotAtSec;
 	if (FLabConfig::Get().bBench)
 	{
+		// Q5 촬영 실행(-LabBench -LabHud -LabShotAt=초): 측정과 같은 조건에서 창 해상도 스크린샷 한 장. 화면 버퍼를 그대로 읽어 HUD(캔버스)가 함께 찍힌다
+		// (UnrealClient.cpp:1866-1872 Draw → Canvas Flush → ProcessScreenShots, GameViewportClient.cpp:2419-2426). HighResShot은 다시 그리므로 쓰지 않는다.
+		// 측정 중 한 프레임이 길어지므로 측정 실행은 -LabShotAt을 주지 않는다(메타데이터 LabShotAt).
+		if (ShotAt > 0.f && !bShotTaken && Elapsed >= ShotAt)
+		{
+			bShotTaken = true;
+			const FString Path = FPaths::ProjectSavedDir() / TEXT("Screenshots/Lab") / FString::Printf(TEXT("%s-t%.0f.png"), FLabConfig::Get().Label.IsEmpty() ? TEXT("bench") : *FLabConfig::Get().Label, ShotAt);
+			FScreenshotRequest::RequestScreenshot(Path, /*bShowUI*/ false, /*bAddFilenameSuffix*/ false);
+		}
 		TickBench();
 		return;
 	}
 
-	const float ShotAt = FLabConfig::Get().ShotAtSec;
 #if !UE_BUILD_TEST
 	// 개발용 연속 캡처(-LabShotBurst=N): ShotAt부터 N프레임을 창 해상도로 한 장씩 남긴다. 전환 깜빡임 진단용(2026-11-08).
 	static int32 BurstLeft = -1;
@@ -515,9 +613,9 @@ void ALabGameMode::Tick(float DeltaSeconds)
 			UE_LOG(LogLab, Log, TEXT("lab_damage hits=%lld per_sec=%.0f"), Crowd->DamageHits.load(), Crowd->DamageHits.load() / FMath::Max(Elapsed, 0.01f));
 		}
 		UE_LOG(LogLab, Log, TEXT("lab_applied %s"), *AppliedString()); // Q3: 개발 실행에서도 실제 적용값을 남긴다(벤치마크는 측정 시작 때)
-		UE_LOG(LogLab, Log, TEXT("lab_summary elapsed=%.1f n=%d respawns=%d kills=%d snipes=%d avg_ms=%.1f"),
+		UE_LOG(LogLab, Log, TEXT("lab_summary elapsed=%.1f n=%d respawns=%d kills=%d snipes=%d avg_ms=%.1f deaths=%d near30=%d actors=%d"),
 			Elapsed, Spawner->GetAliveCount(), Spawner->GetRespawnCount(), Orb->GetKillCount(), Orb->GetSnipeCount(),
-			1000.f * Elapsed / FMath::Max<uint64>(GFrameCounter - StartFrame, 1));
+			1000.f * Elapsed / FMath::Max<uint64>(GFrameCounter - StartFrame, 1), GetDeathCount(), LastNear30, GetHudActors()); // Q5: 누적 사망, 오브 30m 안(마지막 프레임), 액터
 		FPlatformMisc::RequestExit(false, TEXT("LabDuration"));
 	}
 }

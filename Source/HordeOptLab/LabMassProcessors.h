@@ -153,6 +153,22 @@ protected:
 	FMassEntityQuery HealthQuery; // 미니언 체력에 쓴다는 것을 의존성 해석기에 알리려고 등록만 한다
 };
 
+/**
+ * Q5 동등성 통계(Docs/Worklog/Q5.md): 오브 중심에서 수평 30m(FLabEquivalence::NearOrbCm) 안의 미니언 엔티티 수를 매 프레임 센다. 걷기·피격·사망 모두 세고 풀에서 기다리는 엔티티는 뺀다.
+ * M0 액터 단계는 게임 모드가 같은 정의로 액터를 센다. 청크 필터를 걸지 않아 Simulation LOD 틱 간격과 무관하게 전 개체를 본다(읽기만 한다).
+ */
+UCLASS()
+class ULabNearOrbCountProcessor : public UMassProcessor
+{
+	GENERATED_BODY()
+public:
+	ULabNearOrbCountProcessor();
+protected:
+	virtual void ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager) override;
+	virtual void Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context) override;
+	FMassEntityQuery EntityQuery;
+};
+
 /** 피격·사망 상태의 남은 시간. 피격이 끝나면 사망, 사망이 끝나면 엔티티를 지우고 가장자리 링에서 새로 만든다. */
 UCLASS()
 class ULabMinionStateProcessor : public UMassProcessor

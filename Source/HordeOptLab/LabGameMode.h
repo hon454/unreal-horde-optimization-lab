@@ -44,6 +44,9 @@ public:
 
 	/** 상태 오버레이(ALabHud)의 군중 줄. */
 	FString GetHudCrowdLine() const;
+	/** Q5 HUD: 미니언 총수(단계와 무관, 사망 중 포함)와 액터 수(M0은 전부, M3 이상은 하이드레이션 액터, M1·M2는 0) */
+	int32 GetHudMinions() const;
+	int32 GetHudActors() const;
 
 protected:
 	void ApplyVariantCVars();
@@ -64,6 +67,15 @@ protected:
 	bool IsBudgetActive() const;
 	/** Q3 lab_applied 로그: 단계와 실제로 적용된 값(Budget, 풀, 고정 바운드 컴포넌트 수, 전환 대책 마스크, 배경 무리 활성), 설정 tech= */
 	FString AppliedString() const;
+	/**
+	 * Q5 동등성 통계: 오브 수평 30m 안 개체 수(FLabEquivalence). M1부터는 ULabNearOrbCountProcessor가 센 값, M0은 액터를 같은 정의(액터 위치의 수평 거리,
+	 * 걷기·피격·사망 모두)로 센다.
+	 */
+	int32 ComputeNear30() const;
+	/** Q5: 누적 사망 수 = 범위 피해 사망 + 저격(저격은 피격 뒤 반드시 죽는다). 액터 단계와 Mass 단계의 두 카운터가 같은 사건을 센다(Docs/Worklog/Q5.md) */
+	int32 GetDeathCount() const;
+	/** 상태 오버레이가 지금 보이는가(CSV 메타데이터 LabHud) */
+	bool IsHudShown() const;
 
 	UPROPERTY() TObjectPtr<ALabCrowdSpawner> Spawner;
 	UPROPERTY() TObjectPtr<ALabOrb> Orb;
@@ -84,4 +96,12 @@ protected:
 	int64 LargeActorFramesAtStart = 0; // E3 (3c) 스탯의 측정 시작 값(ULabCrowdSubsystem::LargeActorFrames·Skips)
 	int64 LargeActorSkipsAtStart = 0;
 	int32 BenchExitCode = 0;
+	// Q5 동등성 통계: 이번 프레임 값과 측정 구간 집계
+	int32 LastAlive = 0;
+	int32 LastNear30 = 0;
+	int32 KillsAtStart = 0;
+	int32 SnipesAtStart = 0;
+	int64 Near30Sum = 0;
+	int32 AliveMin = 0;
+	int32 AliveMax = 0;
 };
