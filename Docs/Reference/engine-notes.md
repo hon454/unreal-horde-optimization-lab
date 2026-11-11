@@ -261,3 +261,13 @@
 | --- | --- | --- |
 | Budget Allocator가 실제로 도는 조건 | 할당기는 CVar `a.Budget.Enabled`(`GAnimationBudgetEnabled`, 기본 0)를 `bCachedEnabled`에 담고, 틱·등록 경로가 `bCachedEnabled && bEnabled`일 때만 돈다. `bEnabled`는 월드 할당기의 `SetEnabled`/`GetEnabled`다. 그래서 "적용됨"은 둘 다 참인지로 본다(CSV 메타데이터 `LabBudget`) | `Plugins/Runtime/AnimationBudgetAllocator/Source/AnimationBudgetAllocator/Private/AnimationBudgetAllocatorCVars.cpp:7`, `Private/AnimationBudgetAllocator.cpp:75,115,135,1328-1337`, `Public/IAnimationBudgetAllocator.h:73-76` |
 | 액터 표현 판정 함수 | `UE::Mass::Representation::IsValidActorRepresentation(EMassRepresentationType)`는 `MassRepresentationTypes.h`에 있다. VAT 프로세서의 `dehydrate` 조건(이전 표현이 액터, 지금 인스턴스)을 ISKM 프로세서에도 같은 함수로 넣었다 | `Plugins/Runtime/MassGameplay/Source/MassRepresentation/Public/MassRepresentationTypes.h:52` |
+
+## 19. 액터 상한과 전환 거리(2026-11-12, Q4)
+
+줄임말: **MG** = `Engine/Plugins/Runtime/MassGameplay/Source`.
+
+| 항목 | 확인한 것 | 위치 |
+| --- | --- | --- |
+| 표현 LOD 상한은 종류 합계다 | 표현 Trait은 LOD 파라미터 값으로 공유 프래그먼트를 `GetOrCreateSharedFragment`하므로 파라미터가 같은 두 종류(소형·대형 템플릿)는 공유 프래그먼트 하나, LOD 계산기 하나를 쓴다. 표현 LOD 프로세서는 공유 프래그먼트마다 `PrepareExecution`·`AdjustDistancesFromCount`를 부른다. 그래서 `LODMaxCount[High]` 500은 두 종류를 합친 액터 수 상한이다 | `MG/MassRepresentation/Private/MassVisualizationTrait.cpp:145`, `MassVisualizationLODProcessor.cpp:70-110` |
+| 상한이 거리를 줄이는 방식 | `AdjustDistancesFromCountForRuntimeData`는 LOD마다 거리 구간(LOD당 250개, `MaxBucketsPerLOD`)을 가까운 것부터 세어 상한을 넘는 구간에서 다음 LOD의 거리를 당긴다. 구간마다 화면 안 개체를 먼저 센다. 그래서 상한이 걸리면 가까운 개체부터, 같은 거리면 화면 안 개체부터 액터가 된다 | `MG/MassLOD/Public/MassLODCalculator.h:534-642`, `MassLODTypes.h:23` |
+| High 경계에는 히스테리시스가 없다 | `ComputeLODFromSettings`는 Off부터 내려오며 거리를 비교하고, 히스테리시스는 "한 단계 위로 오를 때" 그 LOD 거리와 다음 LOD 거리 사이(`Lerp(D[i], D[i+1], 1 − 10%)`)에만 둔다. 반복이 `LODDistIdx > 0`에서 멈추므로 High(0)로 들어갈 때와 High에서 나올 때 모두 검사하지 않는다. 그래서 액터 ↔ 인스턴스 전환은 화면 안 30m(화면 밖 15m) 한 거리에서 일어난다. Low → Medium 진입은 `H + 0.9 × (80m − H)`라 전환 거리 H를 바꾸면 함께 움직인다(30m면 75m, 50m면 77m) | `MG/MassLOD/Public/MassLODCalculator.h:862-886` |

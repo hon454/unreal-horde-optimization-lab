@@ -12,6 +12,7 @@ M4부터: Simulation LOD 열을 더한다(없으면 빈칸이라 M3 이하는 �
 Lab/SimBand<...>(밴드 전체 걷는 개체 수)의 평균과, 메타데이터 LabSimLod(예 `80/200m tick=0/0.50/1.00 avoid=0`)의 설정 간격,
 E4 (d) `m4offmove`(LabSimLod 끝 ` offmove=1`)는 Lab/SimTickOff·SimBandOff·OffMoveCount·OffMove 열도 읽고 실제 틱 주기를 Off 열로 셈한다(sim_offmove, cfg_tick_off, sim_tick_off, sim_band_off, real_period_off, off_move_count, off_move_ms). 태그 e4d/e4dstart/e4daa는 E4 (d) 묶음(조건 이름 <변형>-e4d 등).
 실제 틱 주기(초) = 평균 프레임 시간(초) x 평균 SimBand / 평균 SimTick을 밴드마다 runs.csv·summary.csv의 맨 끝 열에 쓴다(Worklog/M4.md).
+Q4부터: 마일스톤 Q<n> 라벨을 읽고(조건 이름 = <variant>-<태그 전체>), 품질 지표 열(QUALITY_FIELDS)을 맨 끝에 붙인다(Docs/Worklog/Q4.md).
 실행: py -3 -I Scripts/summarize.py --milestone M0 [--pc 1] [--rebuild]
 """
 import argparse
@@ -22,7 +23,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 CSV_DIR = ROOT / "Saved" / "Profiling" / "CSV"
-LABEL_RE = re.compile(r"^(?P<m>M\d+b?)-(?P<variant>[a-z][a-z0-9]*)-N(?P<n>\d+)-(?P<preset>P\d)(?P<tag>[a-z0-9]*)-r(?P<run>\d+)$")
+# Q4부터 품질 계획 마일스톤(Q<n>)도 읽는다. Q 마일스톤은 태그 전체가 조건 이름에 붙는다(<variant>-<tag>, 예: m5bounds-c750h40). 태그 규칙은 Docs/Worklog/Q4.md
+LABEL_RE = re.compile(r"^(?P<m>M\d+b?|Q\d+)-(?P<variant>[a-z][a-z0-9]*)-N(?P<n>\d+)-(?P<preset>P\d)(?P<tag>[a-z0-9]*)-r(?P<run>\d+)$")
 
 # 엔진 CSV 열(LaunchEngineLoop.cpp:1518-1525)과 후보 이름
 COLS = {
@@ -44,6 +46,11 @@ SIM_FIELDS += ["sim_offmove", "cfg_tick_off", "sim_tick_off", "sim_band_off", "r
 SIM_FIELDS += ["far_m", "ism_band0", "ism_band1", "ism_band2", "ism_band3"]
 # M5: GPU 메모리(GPUMem/LocalUsedMB)와 ISKM 스탯(Lab/IskmTracks 트랙 수, Lab/IskmInstances 그린 인스턴스 수). first/last = 측정 앞 10%·뒤 10% 프레임 평균(E5 (b) 누수 추이). 열이 없으면 빈칸
 SIM_FIELDS += ["gpu_mem_p50", "gpu_mem_first", "gpu_mem_last", "iskm_tracks_first", "iskm_tracks_last", "iskm_instances_p50"]
+# Q4 품질 지표(Docs/Worklog/Q4.md "품질 지표"). actor_cap·hydrate_m = 메타데이터 LabActorCap·LabHydrateM, actors_mean = Lab/Actors 평균(화면 밖 포함 붙은 액터),
+# view_actors_mean·_p05 = Lab/ViewActors(화면 안 보이는 액터) 평균·5백분위, cover30_* = 프레임마다 ViewActors30 / (ViewActors30 + ViewInst30)(화면 안 카메라 30m 안 개체 중 보이는 액터 비율)의
+# 평균·최솟값·5백분위, coverhyd_mean = 같은 비율을 전환 거리 안으로(ViewActors / (ViewActors + ViewInstHyd)). 열이 없으면 빈칸
+QUALITY_FIELDS = ["actor_cap", "hydrate_m", "actors_mean", "view_actors_mean", "view_actors_p05", "cover30_mean", "cover30_min", "cover30_p05", "coverhyd_mean"]
+SIM_FIELDS += QUALITY_FIELDS
 RUN_FIELDS = ["label", "milestone", "variant", "n", "preset", "seed", "run", "pc", "frames",
               "game_p50_ms", "game_p99_ms", "render_p50_ms", "gpu_p50_ms", "frame_p50_ms", "frame_p95_ms", "frame_p99_ms",
               "hitch_abs", "hitch_rel", "draw_calls_p50", "mem_total_mb", "bottleneck", "build",
@@ -134,6 +141,7 @@ def sim_lod_fields(header, data, meta, frame):
         v = column(header, data, [f"Lab/IsmBand{i}"])
         if v:
             out[f"ism_band{i}"] = round(statistics.fmean(v), 2)
+    out.update(quality_fields(header, data, meta))
     for b in BANDS:
         tick = column(header, data, [f"Lab/SimTick{b}"])
         band = column(header, data, [f"Lab/SimBand{b}"])
@@ -145,6 +153,43 @@ def sim_lod_fields(header, data, meta, frame):
             out[f"sim_band_{b.lower()}"] = round(mb, 2)
         if frame_s and mt and mb:
             out[f"real_period_{b.lower()}"] = round(frame_s * mb / mt, 4)
+    return out
+
+
+def paired(header, data, a, b):
+    """두 스탯 열을 같은 프레임끼리 묶는다(둘 다 숫자인 프레임만)."""
+    if a not in header or b not in header:
+        return []
+    ia, ib = header.index(a), header.index(b)
+    out = []
+    for r in data:
+        try:
+            out.append((float(r[ia]), float(r[ib])))
+        except ValueError:
+            pass
+    return out
+
+
+def quality_fields(header, data, meta):
+    """Q4 품질 지표. 스탯이 없으면(Q4 전 CSV, 액터 없는 단계) 빈칸."""
+    out = {k: "" for k in QUALITY_FIELDS}
+    out["actor_cap"] = meta.get("labactorcap", "")
+    out["hydrate_m"] = meta.get("labhydratem", "")
+    act = column(header, data, ["Lab/Actors"])
+    if act:
+        out["actors_mean"] = round(statistics.fmean(act), 2)
+    va = column(header, data, ["Lab/ViewActors"])
+    if va:
+        out["view_actors_mean"] = round(statistics.fmean(va), 2)
+        out["view_actors_p05"] = percentile(va, 0.05)
+    cov = [x / (x + y) for x, y in paired(header, data, "Lab/ViewActors30", "Lab/ViewInst30") if x + y > 0]
+    if cov:
+        out["cover30_mean"] = round(statistics.fmean(cov), 4)
+        out["cover30_min"] = round(min(cov), 4)
+        out["cover30_p05"] = round(percentile(cov, 0.05), 4)
+    covh = [x / (x + y) for x, y in paired(header, data, "Lab/ViewActors", "Lab/ViewInstHyd") if x + y > 0]
+    if covh:
+        out["coverhyd_mean"] = round(statistics.fmean(covh), 4)
     return out
 
 
@@ -280,6 +325,10 @@ def main():
             continue
         if tag.startswith("trace"):
             continue  # Insights 트레이스 실행은 비교에 쓰지 않는다(runs.csv에는 남는다)
+        if r["milestone"].startswith("Q"):
+            # 품질 계획 묶음: 태그가 곧 조건이다(구성·격자·A/A를 태그로 가른다, Docs/Worklog/Q4.md)
+            groups.setdefault((r["variant"] + (f"-{tag}" if tag else ""), int(r["n"]), r["preset"]), []).append(r)
+            continue
         final = tag.endswith("fg") and not tag.startswith("diag")  # 최종 묶음(2026-11-10 재측정)
         legacy = tag.endswith("fin")  # 옛 묶음(final=0, 조건 이름은 -fin 그대로)
         btag = tag[:-2] if final else tag[:-3] if legacy else tag

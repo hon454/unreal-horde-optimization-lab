@@ -17,6 +17,8 @@
 #include "MassUpdateSkinnedMeshProcessor.h"
 #include "ProfilingDebugging/CsvProfiler.h"
 #include "Engine/World.h"
+#include "Misc/CommandLine.h"
+#include "Misc/Parse.h"
 
 CSV_DECLARE_CATEGORY_EXTERN(Lab);
 
@@ -173,7 +175,11 @@ void ULabIskmProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutio
 	const float NearHydSq = FMath::Square(FLabConfig::Get().HydrateCm());
 	const float NearMaxSq = FMath::Max(Near30Sq, NearHydSq);
 	int32 ViewInst30 = 0, ViewInstHyd = 0;
-	int32 TrackWrites = 0;   // 이 프로세서가 기존 트랙에 직접 쓴 수(상태 전환, 풀에서 다시 나옴)
+#if !UE_BUILD_TEST
+	static const bool bFrameLog = FParse::Param(FCommandLine::Get(), TEXT("LabFrameLog"));
+	std::atomic<int32>* NearInstCounter = bFrameLog ? &Crowd->FrameDiag[GFrameCounter & 1].NearVat : nullptr;
+#endif
+	int32 TrackWrites = 0;  // 이 프로세서가 기존 트랙에 직접 쓴 수(상태 전환, 풀에서 다시 나옴)
 	int32 TrackFirst = 0;    // 트랙이 없어 엔진이 이 프레임에 만들 수
 	UMassRepresentationSubsystem* RepresentationSubsystemForStats = nullptr;
 
@@ -276,6 +282,10 @@ void ULabIskmProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutio
 				if (DistSq < Near30Sq) { ++ViewInst30; }
 				if (DistSq < NearHydSq) { ++ViewInstHyd; }
 			}
+#if !UE_BUILD_TEST
+			// E3b (8) 화질 캡처(-LabFrameLog)의 near_vat를 ISKM에서도 센다(Q4, VAT 프로세서와 같은 정의: 화면 안 수평 30m에서 아직 인스턴스). M5 단계는 VAT 프로세서가 돌지 않아 0으로 찍혔다
+			if (NearInstCounter && Dist < 3000.f && QualityView.Contains(Transform.GetLocation() + FVector(0.f, 0.f, 90.f))) { ++*NearInstCounter; }
+#endif
 		}
 	});
 

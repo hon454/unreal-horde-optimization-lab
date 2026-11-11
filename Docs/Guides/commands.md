@@ -32,7 +32,7 @@ STATUS.md "명령"에는 매번 쓰는 것만 둔다. 여기에는 스크립트 
 
 ## 빼 보기 스위치(Q3)
 
-빼 보기 표([plan.md](../plan.md) "품질 계획")의 행은 "최종 구성 변형 + 인자 하나"다. 최종 구성은 지금 `q2crowd`(`-LabStage=M5`, Q4에서 액터 상한·전환 거리 값이 더해진다). 새 인자 다섯(`-LabHydrate`·`-LabSimLod`·`-LabIskm`·`-LabFixedBounds`·`-LabFarCull`)은 0일 때만 뜻이 있고(끄기 전용), 나머지 넷은 기존 인자다. 경위와 설계 선택은 [Worklog/Q3.md](../Worklog/Q3.md).
+빼 보기 표([plan.md](../plan.md) "품질 계획")의 행은 "최종 구성 변형 + 인자 하나"다. 최종 구성은 Q4부터 `q4final`(`-LabStage=M5`, `q2crowd` + 액터 상한 1,000·전환 거리 79m, 아래 "근거리 품질 인자(Q4)")이고 아홉 행 모두 `q4final` 위에서 대조를 통과했다(Worklog/Q4.md). 새 인자 다섯(`-LabHydrate`·`-LabSimLod`·`-LabIskm`·`-LabFixedBounds`·`-LabFarCull`)은 0일 때만 뜻이 있고(끄기 전용), 나머지 넷은 기존 인자다. 경위와 설계 선택은 [Worklog/Q3.md](../Worklog/Q3.md).
 
 | 행 | 빼는 것 → 대신 | 인자 | 메타데이터에서 0이 되는 키 |
 | --- | --- | --- | --- |
@@ -69,6 +69,26 @@ py -3 Scripts/transition-score.py <캡처 폴더> Saved/Logs/LabDev-q2crowd-N100
 ```
 
 `--event`는 `hydrate`(인스턴스 → 액터, 기본), `dehydrate`(액터 → 인스턴스), `both`. VAT 표현은 `-Extra`에 `-LabIskm=0`, 대책 끔은 `-LabHydrateFixMask=0`을 더한다.
+
+## 근거리 품질 인자(Q4)
+
+최종 구성 변형은 `q4final`(= `q2crowd` + 액터 상한 1,000 + 화면 안 전환 거리 79m, `-LabStage=M5`)이다. 경위는 [Worklog/Q4.md](../Worklog/Q4.md).
+
+| 인자 | 뜻 | 기본 |
+| --- | --- | --- |
+| `-LabActorCap=<개수>` | 액터 상한(표현 LOD High의 `LODMaxCount`, 두 종류 합계) | 500, `q4final` 1,000 |
+| `-LabHydrateM=<미터>` | 화면 안에서 액터로 바뀌는 카메라 거리(1\~79m). 화면 밖 15m와 80·200m 밴드는 그대로 | 30, `m3hyd15` 15, `m3hyd50` 50, `q4final` 79 |
+
+CSV 메타데이터 `LabActorCap`·`LabHydrateM`, 스탯 `Lab/ViewActors`(화면 안 보이는 액터)·`Lab/ViewActors30`·`Lab/ViewInst30`(화면 안 카메라 30m 안 액터·인스턴스)·`Lab/ViewInstHyd`(전환 거리 안 인스턴스). `summarize.py`가 `view_actors_*`·`cover30_*`·`coverhyd_mean` 열로 낸다.
+
+```bash
+# Q4 묶음 러너(run-bench.ps1을 조건마다 부른다. "N:프리셋:상한:거리:횟수:태그앞:태그뒤"를 ;로 잇는다)
+powershell -ExecutionPolicy Bypass -File Scripts/run-q4.ps1 -Jobs "10000:P1:1000:79:3::;10000:P2:1000:79:3::" -FirstWithR0
+py -3 -I Scripts/summarize.py --milestone Q4
+# 빠른 회전 뒤 채워지는 시간(개발 빌드 참고, -LabCamTurn -LabFrameLog 로그)
+powershell -ExecutionPolicy Bypass -File Scripts/run-dev.ps1 -N 10000 -Preset P1 -Stage M5 -Variant q4final -Duration 71 -Extra "-LabCamTurn -LabFrameLog -benchmark -fps=60"
+py -3 -I Scripts/turn-fill.py Saved/Logs/LabDev-q4final-N10000-P1.log
+```
 
 ## 측정 절차
 

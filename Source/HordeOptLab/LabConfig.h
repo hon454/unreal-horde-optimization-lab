@@ -78,8 +78,9 @@ struct FLabQuality
 	static constexpr int32 DefaultActorCap = 500;   // 확정값 LODMaxCount High(measurement.md)
 	static constexpr float DefaultHydrateM = 30.f;  // 확정값 거리 밴드 0~30m
 	static constexpr float MaxHydrateM = 79.f;      // 80m(Medium/Low 경계, 확정값)를 넘지 않는다
-	static constexpr int32 Q4FinalActorCap = 500;   // Q4 묶음에서 고른 값(Docs/Worklog/Q4.md "최종 구성")
-	static constexpr float Q4FinalHydrateM = 30.f;
+	// Q4 묶음에서 고른 값(Docs/Worklog/Q4.md "최종 구성"): 1만 P1 프레임 p95 11.98ms(13.3ms 안), 액터 평균 709개. 1만에서는 상한이 걸리지 않고 2만에서 1,000개로 막는다
+	static constexpr int32 Q4FinalActorCap = 1000;
+	static constexpr float Q4FinalHydrateM = 79.f;
 };
 
 /**
