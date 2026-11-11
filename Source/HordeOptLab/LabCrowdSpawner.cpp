@@ -180,6 +180,32 @@ void ALabCrowdSpawner::SpawnInitial()
 			}
 		}
 		// 피격·사망 시간(로직)은 종류와 무관하게 소형 애니 길이 하나다(행동은 같다). 대형 VAT 클립 길이가 다르면 ClipFrame이 끝 프레임에서 멈추거나 잘린다.
+		// Q1b: 시즈 사망 클립을 늘려 재생해 소형 사망 길이가 끝날 때 모션도 끝나게 한다. 배율 = 그 종류 클립 길이 ÷ 소형 클립 길이(경로마다 자기 클립 길이로 계산).
+		{
+			const float SmallActor = Assets.Death ? Assets.Death->GetPlayLength() : 0.f;
+			const float LargeActor = LargeAssets.Death ? LargeAssets.Death->GetPlayLength() : 0.f;
+			if (Types > 1 && SmallActor > 0.f && LargeActor > 0.f) { Crowd->DeathRateActor[1] = LargeActor / SmallActor; }
+			if (Config.Stage >= ELabStage::M2)
+			{
+				const FLabVatClips& Small = Crowd->VatClipsByType[0];
+				const int32 SmallFrames = Small.Death.EndFrame - Small.Death.StartFrame + 1;
+				for (int32 Type = 1; Type < Types; ++Type)
+				{
+					const FLabVatClips& C = Crowd->VatClipsByType[Type];
+					Crowd->DeathRateVat[Type] = float(C.Death.EndFrame - C.Death.StartFrame + 1) / float(FMath::Max(SmallFrames, 1)) * (Small.SampleRate / FMath::Max(C.SampleRate, 1.f));
+				}
+			}
+			if (Config.UsesIskm())
+			{
+				const float SmallIskm = Crowd->IskmProviders[0] ? Cast<UAnimSequenceTransformProviderData>(Crowd->IskmProviders[0])->GetSequencePlayLength(2) : 0.f;
+				for (int32 Type = 1; Type < Types && SmallIskm > 0.f; ++Type)
+				{
+					Crowd->DeathRateIskm[Type] = Cast<UAnimSequenceTransformProviderData>(Crowd->IskmProviders[Type])->GetSequencePlayLength(2) / SmallIskm;
+				}
+			}
+			UE_LOG(LogLab, Log, TEXT("lab_death_rate types=%d actor=%.4f vat=%.4f iskm=%.4f (death_duration=%.3f)"), Types,
+				Crowd->DeathRateActor[Types > 1 ? 1 : 0], Crowd->DeathRateVat[Types > 1 ? 1 : 0], Crowd->DeathRateIskm[Types > 1 ? 1 : 0], Assets.Death ? Assets.Death->GetPlayLength() : 1.f);
+		}
 		Crowd->Activate(this, MakeArrayView(CrowdMeshes, Types),
 			Assets.Hit ? Assets.Hit->GetPlayLength() : 0.5f, Assets.Death ? Assets.Death->GetPlayLength() : 1.f);
 		SpawnEntitiesAt(RadiusAngles);

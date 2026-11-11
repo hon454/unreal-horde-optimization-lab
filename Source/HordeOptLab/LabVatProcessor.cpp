@@ -145,8 +145,22 @@ void ULabVatISMProcessor::Execute(FMassEntityManager& EntityManager, FMassExecut
 					const FLabVatClip& Clip = State == ELabMinionState::Dead ? Clips.Death : State == ELabMinionState::Hit ? Clips.Hit : Clips.Walk;
 					const bool bLoop = State == ELabMinionState::Walk;
 					FLabVatFrameData Data;
-					Data.Frame = ClipFrame(Clip, T, Clips.SampleRate, bLoop);
-					Data.PrevFrame = ClipFrame(Clip, T - DeltaSeconds, Clips.SampleRate, bLoop);
+					// Q1b: 사망 클립이 DeathDuration에 맞춰 끝나도록 클립 시각에 배율을 곱한다(시즈 < 1)
+						const float Rate = State == ELabMinionState::Dead ? Crowd->DeathRateVat[Context.GetConstSharedFragment<FLabUnitTypeParams>().UnitType] : 1.f;
+						Data.Frame = ClipFrame(Clip, T * Rate, Clips.SampleRate, bLoop);
+					Data.PrevFrame = ClipFrame(Clip, (T - DeltaSeconds) * Rate, Clips.SampleRate, bLoop);
+#if !UE_BUILD_TEST
+						{
+							// Q1b 개발 확인: 종류마다 죽는 동안 클립 프레임이 끝 프레임에 처음 닿는 시각(초)을 한 번씩 찍는다. 이 시각이 DeathDuration과 같아야 한다.
+							static bool bLogged[LabUnitTypeMax] = {};
+							const int32 Ty = Context.GetConstSharedFragment<FLabUnitTypeParams>().UnitType;
+							if (State == ELabMinionState::Dead && !bLogged[Ty] && Data.Frame >= float(Clip.EndFrame) - 0.01f)
+							{
+								bLogged[Ty] = true;
+								UE_LOG(LogLab, Log, TEXT("lab_death_check path=vat type=%d reached_end_at=%.3f death_duration=%.3f rate=%.4f"), Ty, T, DeathDuration, Rate);
+							}
+						}
+#endif
 					const uint64 D0 = bTiming ? FPlatformTime::Cycles64() : 0;
 					ISMInfo[ISMInfoIndex].AddBatchedCustomData<FLabVatFrameData>(Data, RepresentationLOD.LODSignificance, Representation.PrevLODSignificance);
 					if (bTiming) { CyCustom += FPlatformTime::Cycles64() - D0; }

@@ -229,6 +229,9 @@ void ULabActorSyncProcessor::Execute(FMassEntityManager& EntityManager, FMassExe
 				if (State == ELabMinionState::Walk) { T = FMath::Fmod(T, WalkLength); }
 			}
 
+			// Q1b: 사망 클립이 DeathDuration에 맞춰 끝나도록 애니 재생 배율을 건다(시즈 < 1). 풀의 액터가 다시 살아 나올 때 1로 되돌린다.
+			const float DeathRate = State == ELabMinionState::Dead ? Crowd->DeathRateActor[TypeParams.UnitType] : 1.f;
+
 			// 위치: 엔티티는 발밑(지면), 액터는 캡슐 중심이다(M0 스포너의 SpawnZ와 같은 관계).
 			const FTransform& Xf = Transforms[It].GetTransform();
 			const float HalfHeight = Actor->GetCapsuleComponent()->GetScaledCapsuleHalfHeight(); // 소형은 스케일 1이라 전과 같다. 대형은 배율만큼 높다
@@ -237,6 +240,7 @@ void ULabActorSyncProcessor::Execute(FMassEntityManager& EntityManager, FMassExe
 			if (bTiming) { CyMove += FPlatformTime::Cycles64() - M0; }
 
 			USkeletalMeshComponent* SkelMesh = Actor->GetMesh();
+			SkelMesh->GlobalAnimRateScale = DeathRate; // SkeletalMeshComponent.cpp:1779 UpdateAnimation(DeltaTime * GlobalAnimRateScale)
 			ULabMinionAnimInstance* Anim = Cast<ULabMinionAnimInstance>(SkelMesh->GetAnimInstance());
 			if (Anim && Actor->BoundEntity != Entity)
 			{
@@ -244,7 +248,7 @@ void ULabActorSyncProcessor::Execute(FMassEntityManager& EntityManager, FMassExe
 				Anim->State = State;
 				if (bFixStartTime)
 				{
-					Anim->StartTime = FMath::Max(T, 0.f);
+					Anim->StartTime = FMath::Max(T * DeathRate, 0.f);
 					Anim->InitializeAnimation(); // 시퀀스 플레이어가 StartTime부터 다시 시작한다(AnimNode_SequencePlayer.cpp:61)
 				}
 				Actor->BoundEntity = Entity;

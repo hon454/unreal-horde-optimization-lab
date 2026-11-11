@@ -176,8 +176,10 @@ void ULabIskmProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutio
 			const float T = Now - Anim.StateStartTime;
 			FAnimSequenceTrackAutoPlayData Data;
 			Data.SequenceIndex = int32(Anim.State);
-			Data.Position = FMath::Max(T, 0.f);
-			Data.PlayRate = 1.f;
+			// Q1b: 사망 클립은 DeathDuration에 맞춰 끝나도록 배율로 재생한다(시즈 < 1). 위치는 클립 시각이라 배율을 곱한다.
+			const float Rate = Anim.State == ELabMinionState::Dead ? Crowd->DeathRateIskm[Context.GetConstSharedFragment<FLabUnitTypeParams>().UnitType] : 1.f;
+			Data.Position = FMath::Max(T, 0.f) * Rate;
+			Data.PlayRate = Rate;
 			Data.BlendTime = BlendTime;
 			Data.LoopMode = Anim.State == ELabMinionState::Walk ? EAnimSequenceTrackLoopMode::Loop : EAnimSequenceTrackLoopMode::Clamp;
 			Info.AddBatchedAnimationData(Entity, Data, LODSignificance, Representation.PrevLODSignificance);

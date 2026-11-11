@@ -75,6 +75,13 @@ public:
 	 * VAT는 클립 프레임 수 ÷ 샘플 레이트(M2~M4와 같은 값), M5 ISKM은 ASTPD의 GetSequencePlayLength(0)이다(plan.md "M5" 결정 4).
 	 */
 	float WalkLengthByType[LabUnitTypeMax] = { 1.f, 1.f };
+	/**
+	 * 사망 클립 재생 배율, 종류별(Q1b). 사망 유지 시간(DeathDuration)은 소형 사망 클립 길이 하나라서 더 짧은 시즈 클립은 늘려 재생해야 그 시간에 맞춰 끝난다.
+	 * 배율 = (그 종류의 사망 클립 길이) ÷ (소형 사망 클립 길이). 표현 경로마다 클립 길이의 출처가 달라(VAT 프레임 수, ISKM 시퀀스, 액터 애니 에셋) 배열도 셋이다. 스포너가 채운다. 소형은 1.
+	 */
+	float DeathRateVat[LabUnitTypeMax] = { 1.f, 1.f };
+	float DeathRateIskm[LabUnitTypeMax] = { 1.f, 1.f };
+	float DeathRateActor[LabUnitTypeMax] = { 1.f, 1.f };
 	/** M5 ISKM 에셋(종류별). Activate 전에 스포너가 채운다. 메시는 Scripts/create-iskm.py의 복제본(SK_*ISKM), 제공자는 ASTPD(ASTP_*). 클립 0 걷기, 1 피격, 2 죽기 */
 	UPROPERTY() TArray<TObjectPtr<USkeletalMesh>> IskmMeshes;
 	UPROPERTY() TArray<TObjectPtr<UTransformProviderData>> IskmProviders;
