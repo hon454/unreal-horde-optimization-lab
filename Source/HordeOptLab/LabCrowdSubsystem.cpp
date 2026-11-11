@@ -244,7 +244,7 @@ void ULabCrowdSubsystem::SpawnEntities(TConstArrayView<FVector> Locations, TCons
 			const FVector Facing = (OrbCenter - Locations[i]).GetSafeNormal2D();
 			EntityManager.GetFragmentDataChecked<FTransformFragment>(Entities[k]).SetTransform(FTransform(Facing.Rotation(), Locations[i]));
 			EntityManager.GetFragmentDataChecked<FLabMinionFragment>(Entities[k]).Serial = Serials[i];
-			EntityManager.GetFragmentDataChecked<FLabHealthFragment>(Entities[k]).Health = FLabScenario::MinionHealth;
+			EntityManager.GetFragmentDataChecked<FLabHealthFragment>(Entities[k]).Health = FLabConfig::Get().HealthFor(Serials[i]);
 			EntityManager.GetFragmentDataChecked<FLabAnimStateFragment>(Entities[k]).Set(ELabMinionState::Walk, -LabWalkPhase(Serials[i])); // 재생 시각 = Now + 위상
 		}
 		Creation.Reset(); // 옵저버(엔진 초기화 프로세서)가 여기서 돈다
@@ -283,7 +283,7 @@ void ULabCrowdSubsystem::ReinitPooledEntity(FMassEntityManager& EntityManager, F
 	FLabMinionFragment& Minion = EntityManager.GetFragmentDataChecked<FLabMinionFragment>(Entity);
 	Minion.Serial = Serial;
 	Minion.StateTimeLeft = 0.f;
-	EntityManager.GetFragmentDataChecked<FLabHealthFragment>(Entity).Health = FLabScenario::MinionHealth;
+	EntityManager.GetFragmentDataChecked<FLabHealthFragment>(Entity).Health = FLabConfig::Get().HealthFor(Serial); // 풀에서 다시 쓰는 엔티티도 새 일련번호로 다시 받는다
 	EntityManager.GetFragmentDataChecked<FLabAnimStateFragment>(Entity).Set(ELabMinionState::Walk, -LabWalkPhase(Serial)); // 재생 시각 = Now + 위상. ISKM 트랙은 이 값이 바뀐 것을 보고 다시 쓴다
 	if (FMassVelocityFragment* Velocity = EntityManager.GetFragmentDataPtr<FMassVelocityFragment>(Entity)) { Velocity->Value = FVector::ZeroVector; }
 	if (FMassForceFragment* Force = EntityManager.GetFragmentDataPtr<FMassForceFragment>(Entity)) { Force->Value = FVector::ZeroVector; }

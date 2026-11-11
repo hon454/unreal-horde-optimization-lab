@@ -11,6 +11,7 @@ const FLabConfig& FLabConfig::Get()
 		FParse::Value(Cmd, TEXT("-LabN="), C.N);
 		FParse::Value(Cmd, TEXT("-LabPreset="), C.Preset);
 		FParse::Value(Cmd, TEXT("-LabSeed="), C.Seed);
+		FParse::Value(Cmd, TEXT("-LabHealthFixed="), C.HealthFixed);
 		FParse::Value(Cmd, TEXT("-LabLabel="), C.Label);
 		FParse::Value(Cmd, TEXT("-LabDuration="), C.DurationSec);
 		FParse::Value(Cmd, TEXT("-LabShotAt="), C.ShotAtSec);
@@ -253,6 +254,21 @@ FString FLabConfig::SimLodString() const
 		S.bOffMove ? TEXT(" offmove=1") : TEXT(""));
 }
 
+float FLabConfig::HealthFor(uint32 Serial) const
+{
+	if (HealthFixed > 0.f)
+	{
+		return HealthFixed;
+	}
+	// murmur3 마무리 혼합. 시드와 일련번호만 입력이라 같은 실행 조건이면 같은 값이다.
+	uint32 H = uint32(Seed) ^ (Serial * 0x9E3779B1u);
+	H ^= H >> 16; H *= 0x85EBCA6Bu;
+	H ^= H >> 13; H *= 0xC2B2AE35u;
+	H ^= H >> 16;
+	const float U = float(H >> 8) * (1.f / 16777216.f); // [0, 1)
+	return FLabScenario::HealthMin + U * (FLabScenario::HealthMax - FLabScenario::HealthMin);
+}
+
 FString FLabConfig::ToLogString() const
 {
 	// far는 기본(200)이 아닐 때만 붙인다. 기본 실행의 로그는 그대로다. pool·far_rep는 M5 단계이거나 풀링을 켰을 때만 붙인다.
@@ -268,7 +284,9 @@ FString FLabConfig::ToLogString() const
 	}
 	// screensig_budget는 M3 이상 단계이거나 켰을 때만 붙인다. M0~M2 기본 실행의 로그는 그대로다.
 	const FString Budget = (Stage >= ELabStage::M3 || bScreenSigBudget) ? FString::Printf(TEXT(" screensig_budget=%d"), bScreenSigBudget ? 1 : 0) : FString();
-	return FString::Printf(TEXT("lab_config stage=%s n=%d preset=P%d seed=%d variant=%s bench=%d label=%s duration=%.1f types=%d simlod=%s%s%s%s"),
+	// health_fixed는 디버그 인자를 줬을 때만 붙인다
+	const FString Health = HealthFixed > 0.f ? FString::Printf(TEXT(" health_fixed=%.0f"), HealthFixed) : FString();
+	return FString::Printf(TEXT("lab_config stage=%s n=%d preset=P%d seed=%d variant=%s bench=%d label=%s duration=%.1f types=%d simlod=%s%s%s%s%s"),
 		StageName(Stage), N, Preset, Seed, VariantName(Variant), bBench ? 1 : 0, *Label, DurationSec, Types, *SimLodString(),
-		FarM != 200 ? *FString::Printf(TEXT(" far=%d"), FarM) : TEXT(""), *M5, *Budget);
+		FarM != 200 ? *FString::Printf(TEXT(" far=%d"), FarM) : TEXT(""), *M5, *Budget, *Health);
 }

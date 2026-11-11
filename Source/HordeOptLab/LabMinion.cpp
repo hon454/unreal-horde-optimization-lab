@@ -49,7 +49,7 @@ void ALabMinion::InitMinion(ALabCrowdSpawner* InSpawner, const FLabMinionAssets&
 	AssetsRef = &Assets;
 	Serial = InSerial;
 	UnitType = FLabUnitTypes::TypeOf(InSerial); // 2종이면 10의 배수가 대형
-	Health = FLabScenario::MinionHealth;
+	Health = FLabConfig::Get().HealthFor(InSerial);
 	if (const float Scale = FLabUnitAssetPaths::Get(UnitType).Scale; Scale != 1.f)
 	{
 		SetActorScale3D(FVector(Scale)); // 대형: 캡슐과 메시가 함께 커진다. 스포너가 캡슐 중심 높이도 같은 배율로 올린다(LabCrowdSpawner.cpp SpawnAt)

@@ -90,7 +90,9 @@ struct FLabScenario
 	static constexpr float ZoneRadius = 800.f;       // 오브 피해 범위 8m(보라색 원기둥). 10m는 컸고 6m는 작았다(2026-11-06~07 사용자 의견)
 	static constexpr float ZoneDpsEdge = 100.f;      // 범위 가장자리 초당 피해. 체력 100이면 1초
 	static constexpr float ZoneDpsCenter = 300.f;    // 중심 초당 피해. 안으로 갈수록 선형으로 세진다
-	static constexpr float MinionHealth = 100.f;
+	static constexpr float MinionHealth = 100.f;     // 공칭값. Q1부터 개체 체력은 FLabConfig::HealthFor가 정한다(MaxHealth 공유 조각에만 남아 있고 쓰이지 않는다)
+	static constexpr float HealthMin = 60.f;         // Q1 체력 분산 범위(균등). 한 곳의 상수(ADR-0009, measurement.md "품질 계획에서 바뀌는 값")
+	static constexpr float HealthMax = 240.f;
 	static constexpr float MoveSpeed = 300.f;        // 이동 속도 3m/s
 	static constexpr float SnipeInterval = 2.f;      // 저격 간격(0.5초 10발은 화면에서 너무 잦았다, 2026-11-06 사용자 확인)
 	static constexpr int32 SnipeCount = 5;           // 저격당 대상 수 K
@@ -141,6 +143,12 @@ struct FLabConfig
 	int32 N = 500;
 	int32 Preset = 1;          // 1 오브 시점, 2 탑뷰(P3는 2026-11-07에 뺐다)
 	int32 Seed = 20261106;
+	/**
+	 * Q1 개체 체력 고정(-LabHealthFixed=<값>, 기본 0 = 분산). 0보다 크면 모든 개체 체력이 그 값이다(분산 전 상태 재현용 디버그 인자, 예: 100).
+	 */
+	float HealthFixed = 0.f;
+	/** Q1 개체 체력: 시드와 스폰 일련번호의 결정적 해시로 [HealthMin, HealthMax] 균등. 초기 배치·재생성·풀 재사용·액터 단계 모두 이 함수 하나를 쓴다 */
+	float HealthFor(uint32 Serial) const;
 	ELabVariant Variant = ELabVariant::Full;
 	bool bBench = false;       // 벤치마크 러너(M0 7번)
 	FString Label;
