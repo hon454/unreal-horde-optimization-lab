@@ -283,7 +283,7 @@ def main():
         final = tag.endswith("fg") and not tag.startswith("diag")  # 최종 묶음(2026-11-10 재측정)
         legacy = tag.endswith("fin")  # 옛 묶음(final=0, 조건 이름은 -fin 그대로)
         btag = tag[:-2] if final else tag[:-3] if legacy else tag
-        variant = r["variant"] + next((f"-{t}" for t in ("noaff", "aff", "diagbg", "diagfg", "fgtest", "e4dstart", "e4daa", "e4d", "far200", "far300", "far500", "leak", "start", "aa", "ab2", "ab", "t2") if btag.startswith(t)), "") + ("-fg" if final else "-fin" if legacy else "")  # 묶음 끝 A/A와 선행 A/B(ab)는 기준점과 따로 요약한다
+        variant = r["variant"] + next((f"-{t}" for t in ("noaff", "aff", "diagbg", "diagfg", "fgtest", "e4dstart", "e4daa", "e4d", "far200", "far300", "far500", "leak", "bnd", "start", "aa", "ab2", "ab", "t2") if btag.startswith(t)), "") + ("-fg" if final else "-fin" if legacy else "")  # 묶음 끝 A/A와 선행 A/B(ab)는 기준점과 따로 요약한다
         groups.setdefault((variant, int(r["n"]), r["preset"]), []).append(r)
 
     fields = ["variant", "n", "preset", "runs"]
