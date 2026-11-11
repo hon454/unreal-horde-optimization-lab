@@ -61,6 +61,8 @@ protected:
 	/**
 	 * Q2 Niagara 배경 무리(-LabCrowdFx=1, Docs/Worklog/Q2.md (마)). Config/DefaultGame.ini [Lab] CrowdFxSystem의 시스템을 오브 위치에 놓고
 	 * 사용자 변수(SmallRate·LargeRate·OuterRadius·Lifetime·Speed)를 넣은 뒤 활성화한다. 워밍업(268초)은 활성화 때 돈다.
+	 * Q2b(-LabCrowdFxEntity=1, 기본): 엔티티 구동 변수(LabSmallRecs·LabLargeRecs·LabNow·LabOrbPos, FLabCrowdFx)가 에셋에 있는지 보고 컴포넌트를 Mass 서브시스템에 넘긴다.
+	 * 배열은 ULabCrowdFxGatherProcessor가 매 프레임 넣는다. 독립 입자의 수명은 안쪽 반경 500m 기준이다(FLabConfig::CrowdFxInnerCm).
 	 */
 	void SetupCrowdFx();
 	/** Animation Budget Allocator가 실제로 도는가(CVar와 월드 할당기 둘 다). CSV 메타데이터 LabBudget */

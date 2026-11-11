@@ -144,6 +144,13 @@ const FLabConfig& FLabConfig::Get()
 			if ((CrowdFx != 0) != C.bCrowdFx) { NoteOverride(FString::Printf(TEXT("crowdfx=%d"), CrowdFx != 0 ? 1 : 0)); }
 			C.bCrowdFx = CrowdFx != 0;
 		}
+		// Q2b: 엔티티 구동 입자(기본 1). 0이면 Q2 3단위의 옛 방식. 배경 무리를 켰을 때만 기본값과 다른 인자로 적는다
+		int32 CrowdFxEntity = -1;
+		if (FParse::Value(Cmd, TEXT("-LabCrowdFxEntity="), CrowdFxEntity) && CrowdFxEntity >= 0)
+		{
+			C.bCrowdFxEntity = CrowdFxEntity != 0;
+			if (!C.bCrowdFxEntity && C.bCrowdFx) { NoteOverride(TEXT("crowdfx_entity=0")); }
+		}
 #if !UE_BUILD_TEST
 		FParse::Value(Cmd, TEXT("-LabCrowdFxInnerM="), C.CrowdFxInnerOverrideM);
 #endif
@@ -430,6 +437,11 @@ float FLabConfig::CrowdFxInnerCm() const
 	{
 		return CrowdFxInnerOverrideM * 100.f;
 	}
+	if (bCrowdFxEntity)
+	{
+		// Q2b: 엔티티는 맵 반경 안에만 있다(초기 배치 [8m, 500m], 재생성 링 [490m, 500m], LabCrowdSpawner.cpp). 그 밖만 독립 입자로 채운다
+		return FLabScenario::MapRadius;
+	}
 	const float EnterCm = FMath::Lerp(FLabCrowdFx::RepLowCm, FarCm(), 1.f - FLabCrowdFx::RepHysteresis);
 	return FMath::Sqrt(FMath::Square(EnterCm) - FMath::Square(FLabScenario::OrbViewHeight)) - FLabScenario::OrbViewBack;
 }
@@ -495,7 +507,8 @@ FString FLabConfig::ToLogString() const
 	// health_fixed는 디버그 인자를 줬을 때만 붙인다
 	const FString Health = HealthFixed > 0.f ? FString::Printf(TEXT(" health_fixed=%.0f"), HealthFixed) : FString();
 	// crowdfx는 켰을 때만 붙인다(Q2). 기본 실행의 로그는 그대로다.
-	const FString Crowd = bCrowdFx ? FString::Printf(TEXT(" crowdfx=1 crowdfx_particles=%d crowdfx_inner=%.1f"), CrowdFxParticles(), CrowdFxInnerCm() / 100.f) : FString();
+	// crowdfx_entity(Q2b)는 그 뒤에 붙인다. crowdfx_particles는 독립 입자만이다(엔티티 구동 입자는 CSV 스탯 Lab/CrowdRecs).
+	const FString Crowd = bCrowdFx ? FString::Printf(TEXT(" crowdfx=1 crowdfx_particles=%d crowdfx_inner=%.1f crowdfx_entity=%d"), CrowdFxParticles(), CrowdFxInnerCm() / 100.f, bCrowdFxEntity ? 1 : 0) : FString();
 	// tech는 빼 보기 아홉 기법의 켬·끔이다(Q3). 모든 실행에 붙여 러너와 사람이 기대값과 대조한다.
 	// ladder·overrides·hud·actor_col은 Q5(사다리 단계, 변형 기본값과 다른 인자, HUD 켬, 하이드레이션 액터 캡슐 콜리전). tech 뒤에 늘 붙인다.
 	return FString::Printf(TEXT("lab_config stage=%s n=%d preset=P%d seed=%d variant=%s bench=%d label=%s duration=%.1f types=%d simlod=%s%s%s%s%s%s %s ladder=%s overrides=%s hud=%d actor_col=%s"),

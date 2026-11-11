@@ -103,6 +103,16 @@ public:
 	mutable std::atomic<int32> Near30{0};
 	/** Q5 HUD: 이 프레임 동기화한 하이드레이션 액터 수(CSV 스탯 Lab/Actors와 같은 값, ULabActorSyncProcessor가 쓴다) */
 	mutable std::atomic<int32> ActorCount{0};
+	/**
+	 * Q2b 엔티티 구동 입자(-LabCrowdFx=1, -LabCrowdFxEntity=1). 게임 모드가 배경 무리 컴포넌트를 켠 뒤 넣고, ULabCrowdFxGatherProcessor(게임 스레드)가 매 프레임 배열과 시각을 넣는다.
+	 * bCrowdFx*는 에셋에 그 사용자 변수가 있는지(게임 모드가 활성화 전에 한 번 확인한다). 없는 값은 넣지 않는다(없는 이름은 Niagara가 부를 때마다 경고를 남긴다).
+	 */
+	TWeakObjectPtr<class UNiagaraComponent> CrowdFx;
+	bool bCrowdFxSmallRecs = false;
+	bool bCrowdFxLargeRecs = false;
+	bool bCrowdFxNow = false;
+	/** 지난 프레임에 넣은 엔티티 구동 원소 수(소형 + 대형). 게임 모드의 개발 로그 lab_crowdfx_count가 읽는다 */
+	int32 CrowdRecsLast = 0;
 	// M5 엔티티 풀링 집계(게임 스레드). 재생성 중 풀에서 다시 쓴 수와 새로 만든 수, 풀에 남은 수는 EntityPool의 Num
 	int32 PoolReused = 0;
 	int32 PoolCreated = 0;

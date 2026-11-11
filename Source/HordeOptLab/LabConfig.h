@@ -104,6 +104,15 @@ struct FLabCrowdFx
 	// MassRepresentationFragments.h:309). 그리는 끝 200m면 188m다. 밴드 80m는 LabCrowdSubsystem.cpp의 표현 LOD 밴드와 같은 값이다.
 	static constexpr float RepLowCm = 8000.f;
 	static constexpr float RepHysteresis = 0.1f;
+	/**
+	 * Q2b 엔티티 구동 입자(-LabCrowdFxEntity, 기본 1, Docs/Worklog/Q2.md "Q2b"). 그려지지 않는 걷는 엔티티(표현 None)의 위치를 매 프레임 종류별 Niagara 배열로 넘긴다(ULabCrowdFxGatherProcessor).
+	 * 원소 = (X, Y, T0, 위상): 월드 좌표(cm), 그 위치에 있던 월드 시각(초), 걷기 위상(초, = −StateStartTime). 에셋은 P = P0 + 오브 방향 × Speed × max(LabNow − T0, 0)로 외삽한다.
+	 * 이름은 에셋 단위와의 약속이다. 에셋에 없으면 경고 한 번 남기고 그 값만 넣지 않는다.
+	 */
+	static constexpr const TCHAR* SmallRecsParam = TEXT("User.LabSmallRecs"); // Niagara Array Float4
+	static constexpr const TCHAR* LargeRecsParam = TEXT("User.LabLargeRecs"); // Niagara Array Float4
+	static constexpr const TCHAR* NowParam = TEXT("User.LabNow");             // float, 월드 초(매 프레임)
+	static constexpr const TCHAR* OrbPosParam = TEXT("User.LabOrbPos");       // Vector(또는 Position), 오브 월드 위치(활성화 전 한 번)
 };
 
 /**
@@ -242,22 +251,31 @@ struct FLabConfig
 	 * 단계와 기본값의 연결은 Q3·Q5에서 단계 이름과 함께 정한다(Docs/Worklog/Q2.md (마)).
 	 */
 	bool bCrowdFx = false;
-	/** 개발용: 입자가 사라지는 안쪽 반경(-LabCrowdFxInnerM=<미터>, 0 = 기본 CrowdFxInnerCm). 200m 경계 비교 촬영에 쓴다. Test 빌드에서는 읽지 않는다 */
+	/**
+	 * Q2b(-LabCrowdFxEntity=0/1, 기본 1). 1: 그려지지 않는 엔티티 자리에 입자를 그리고(엔티티 구동 이미터), 독립 입자는 맵 밖(500~1,000m)만 채운다.
+	 * 0: Q2 3단위의 옛 방식(전부 독립 입자, 안쪽 반경 172.8m, 엔티티 배열을 넣지 않음). bCrowdFx일 때만 뜻이 있다.
+	 */
+	bool bCrowdFxEntity = true;
+	/** 개발용: 독립 입자가 사라지는 안쪽 반경(-LabCrowdFxInnerM=<미터>, 0 = 기본 CrowdFxInnerCm). 200m 경계 비교 촬영에 쓴다. Test 빌드에서는 읽지 않는다 */
 	float CrowdFxInnerOverrideM = 0.f;
 	/** 실제 미니언과 같은 흐름(개/초): N / 맵 반경 × 이동 속도(Docs/Worklog/Q2.md "장면 수치"). N 1만이면 60 */
 	float CrowdFxTotalRate() const;
 	float CrowdFxSmallRate() const;
 	float CrowdFxLargeRate() const;
 	/**
-	 * 입자가 사라지는 안쪽 반경(오브 기준, cm). 수명은 이 값을 따라간다. 기본은 P1 카메라 앞에서 실제 미니언이 나타나는 자리다:
+	 * 독립 입자가 사라지는 안쪽 반경(오브 기준, cm). 수명은 이 값을 따라간다.
+	 * 엔티티 구동(bCrowdFxEntity, 기본)이면 맵 반경 500m다. 그 안은 엔티티가 있고 그려지지 않는 엔티티는 엔티티 구동 이미터가 그린다(2026-11-12 코디네이터 결정).
+	 * 옛 방식(-LabCrowdFxEntity=0)은 P1 카메라 앞에서 실제 미니언이 나타나는 자리다:
 	 * 카메라 거리 H = Lerp(80m, 그리는 끝, 0.9)를 높이 9m로 수평 거리로 바꾸고 카메라가 오브 뒤 15m인 만큼 뺀다. 그리는 끝 200m면 172.8m(Docs/Worklog/Q2.md "200m 경계의 위치").
 	 * P2에서도 같은 값을 쓴다(P2는 입자가 화면에 없고, 프리셋에 따라 입자 수가 바뀌지 않게 한다).
 	 */
 	float CrowdFxInnerCm() const;
 	/** (바깥 반경 − 안쪽 반경) / 이동 속도. 0 이하면 켜지 않는다(그리는 끝이 1,000m 이상) */
 	float CrowdFxLifetime() const;
-	/** 정상 상태 입자 수 계산값 = 스폰율 × 수명. 꺼져 있으면 0. CSV 메타데이터 LabCrowdFxParticles */
+	/** 독립 입자의 정상 상태 수 계산값 = 스폰율 × 수명. 꺼져 있으면 0. CSV 메타데이터 LabCrowdFxParticles. 엔티티 구동 입자 수는 CSV 스탯 Lab/CrowdRecs다 */
 	int32 CrowdFxParticles() const;
+	/** 엔티티 구동 입자를 쓰는가(bCrowdFx && bCrowdFxEntity). ULabCrowdFxGatherProcessor 등록 조건(HordeOptLab.cpp) */
+	bool UsesCrowdFxEntity() const { return bCrowdFx && bCrowdFxEntity; }
 	/**
 	 * Q3 빼 보기 스위치(plan.md "품질 계획" 빼 보기 표, Docs/Worklog/Q3.md). 변형이 정한 구성에서 기법 하나만 뺀다. 새 인자 다섯은 0을 줄 때만 뜻이 있다(끄기 전용).
 	 * 1이나 다른 값은 변형·단계의 기본 동작 그대로다. 그 단계에 없는 기법을 켜지 않는다. 나머지 네 행은 기존 인자를 쓴다

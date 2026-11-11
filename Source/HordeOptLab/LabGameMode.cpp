@@ -34,6 +34,7 @@
 #include "NiagaraSystemInstance.h"           // 개발 빌드 입자 수 로그
 #include "NiagaraSystemInstanceController.h"
 #include "NiagaraEmitterInstance.h"
+#include "NiagaraDataInterfaceArrayFloat.h"  // Q2b: 엔티티 배열 사용자 변수의 형 확인(UNiagaraDataInterfaceArrayFloat4)
 #include "LabBuildVersion.h" // LAB_BUILD_COMMIT. HordeOptLab.Build.cs가 .git/HEAD에서 만든다
 
 CSV_DECLARE_CATEGORY_EXTERN(Lab); // Q5 동등성 통계 Lab/Alive·Deaths·Near30(카테고리는 LabVatProcessor.cpp가 정의한다)
@@ -306,9 +307,41 @@ void ALabGameMode::SetupCrowdFx()
 	CrowdFx->SetVariableFloat(TEXT("User.OuterRadius"), FLabCrowdFx::OuterRadius);
 	CrowdFx->SetVariableFloat(TEXT("User.Lifetime"), Lifetime);
 	CrowdFx->SetVariableFloat(TEXT("User.Speed"), FLabScenario::MoveSpeed);
+
+	// Q2b 엔티티 구동 입자: 에셋에 약속한 사용자 변수가 있는지 활성화 전에 한 번 본다(값을 넣으면 없는 이름도 덮어쓰기 저장소에 더해지므로 넣기 전에 본다).
+	// 없는 변수는 프로세서가 넣지 않는다. Niagara의 배열 함수는 없는 이름에 부를 때마다 경고를 남긴다(NiagaraFunctionLibrary.cpp:716-719).
+	FString EntityParams;
+	if (Config.bCrowdFxEntity)
+	{
+		const FNiagaraParameterStore& Params = CrowdFx->GetOverrideParameters();
+		auto Has = [&Params](const TCHAR* Name) { return Params.FindParameterOffset(FNiagaraVariableBase(FNiagaraTypeDefinition::GetFloatDef(), FName(Name)), /*IgnoreType*/ true) != nullptr; };
+		auto HasArray4 = [this](const TCHAR* Name) { return UNiagaraFunctionLibrary::GetDataInterface<UNiagaraDataInterfaceArrayFloat4>(CrowdFx, FName(Name)) != nullptr; };
+		ULabCrowdSubsystem* Crowd = GetWorld()->GetSubsystem<ULabCrowdSubsystem>();
+		Crowd->bCrowdFxSmallRecs = Has(FLabCrowdFx::SmallRecsParam) && HasArray4(FLabCrowdFx::SmallRecsParam); // 이름이 있을 때만 형을 본다(없는 이름은 Niagara 경고가 한 줄 더 나온다)
+		Crowd->bCrowdFxLargeRecs = Has(FLabCrowdFx::LargeRecsParam) && HasArray4(FLabCrowdFx::LargeRecsParam);
+		Crowd->bCrowdFxNow = Has(FLabCrowdFx::NowParam);
+		const bool bOrbPos = Has(FLabCrowdFx::OrbPosParam);
+		if (bOrbPos)
+		{
+			CrowdFx->SetVariableVec3(FLabCrowdFx::OrbPosParam, Orb->GetActorLocation()); // Position 형이면 엔진이 Position으로 넣는다(NiagaraComponent.cpp SetVariableVec3)
+		}
+		const TCHAR* Names[4] = { FLabCrowdFx::SmallRecsParam, FLabCrowdFx::LargeRecsParam, FLabCrowdFx::NowParam, FLabCrowdFx::OrbPosParam };
+		const bool bOk[4] = { Crowd->bCrowdFxSmallRecs, Crowd->bCrowdFxLargeRecs, Crowd->bCrowdFxNow, bOrbPos };
+		for (int32 i = 0; i < 4; ++i)
+		{
+			if (!bOk[i])
+			{
+				UE_LOG(LogLab, Warning, TEXT("lab_crowdfx_param missing=%s system=%s (entity-driven particles skip this value until the asset has it)"), Names[i], *System->GetName());
+			}
+		}
+		Crowd->CrowdFx = CrowdFx;
+		EntityParams = FString::Printf(TEXT(" small_recs=%d large_recs=%d now=%d orb_pos=%d"), bOk[0] ? 1 : 0, bOk[1] ? 1 : 0, bOk[2] ? 1 : 0, bOk[3] ? 1 : 0);
+	}
+
 	CrowdFx->Activate(true);
-	UE_LOG(LogLab, Log, TEXT("lab_crowdfx on=1 system=%s small_rate=%.2f large_rate=%.2f outer=%.0f inner=%.0f lifetime=%.2f speed=%.0f particles=%d"),
-		*System->GetName(), Config.CrowdFxSmallRate(), Config.CrowdFxLargeRate(), FLabCrowdFx::OuterRadius, Config.CrowdFxInnerCm(), Lifetime, FLabScenario::MoveSpeed, Config.CrowdFxParticles());
+	UE_LOG(LogLab, Log, TEXT("lab_crowdfx on=1 system=%s small_rate=%.2f large_rate=%.2f outer=%.0f inner=%.0f lifetime=%.2f speed=%.0f particles=%d entity=%d%s"),
+		*System->GetName(), Config.CrowdFxSmallRate(), Config.CrowdFxLargeRate(), FLabCrowdFx::OuterRadius, Config.CrowdFxInnerCm(), Lifetime, FLabScenario::MoveSpeed, Config.CrowdFxParticles(),
+		Config.bCrowdFxEntity ? 1 : 0, *EntityParams);
 }
 
 void ALabGameMode::ApplyVariantCVars()
@@ -369,6 +402,8 @@ void ALabGameMode::TickBench()
 			CSV_METADATA(TEXT("LabCrowdFx"), Config.bCrowdFx ? TEXT("1") : TEXT("0"));
 			CSV_METADATA(TEXT("LabCrowdFxParticles"), *FString::FromInt(Config.CrowdFxParticles()));
 			CSV_METADATA(TEXT("LabCrowdFxActive"), CrowdFx && CrowdFx->IsActive() ? TEXT("1") : TEXT("0"));
+			// Q2b: 엔티티 구동 입자(1) / 옛 방식 전부 독립 입자(0) / 배경 무리 끔(-). 엔티티 구동 입자 수는 CSV 스탯 Lab/CrowdRecs, 모으기 시간은 Lab/CrowdFxGather
+			CSV_METADATA(TEXT("LabCrowdFxEntity"), !Config.bCrowdFx ? TEXT("-") : Config.bCrowdFxEntity ? TEXT("1") : TEXT("0"));
 			// Q3 빼 보기(plan.md "총괄 묶음 러너"): 단계, 실제로 적용된 값(Budget 할당기, 엔티티 풀, 고정 바운드가 들어간 ISKM 컴포넌트 수, 전환 대책 마스크),
 			// 아홉 기법의 설정 켬·끔(LabTech*, FLabConfig::TechList). 러너가 실행마다 기대값과 대조한다.
 			CSV_METADATA(TEXT("LabStage"), FLabConfig::StageName(Config.Stage));
@@ -519,7 +554,9 @@ void ALabGameMode::Tick(float DeltaSeconds)
 				Total += Num;
 				Counts += FString::Printf(TEXT(" %s=%d"), *Emitter->GetEmitterHandle().GetName().ToString(), Num);
 			}
-			UE_LOG(LogLab, Log, TEXT("lab_crowdfx_count t=%.1f total=%d%s expected=%d"), Elapsed, Total, *Counts, FLabConfig::Get().CrowdFxParticles());
+			// expected = 독립 입자 계산값, recs = 지난 프레임에 넣은 엔티티 구동 원소 수(Q2b, 옛 방식이면 0)
+			const ULabCrowdSubsystem* Crowd = GetWorld()->GetSubsystem<ULabCrowdSubsystem>();
+			UE_LOG(LogLab, Log, TEXT("lab_crowdfx_count t=%.1f total=%d%s expected=%d recs=%d"), Elapsed, Total, *Counts, FLabConfig::Get().CrowdFxParticles(), Crowd ? Crowd->CrowdRecsLast : 0);
 		}
 	}
 	// E3b (8) 화질 캡처(-LabFrameLog): 이전 프레임의 화면 안 30m VAT 인스턴스 수·보이는 액터 수를 남기고 슬롯을 비운다. 프로세서는 이번 프레임 슬롯에 쓴다.
