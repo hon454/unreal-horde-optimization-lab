@@ -580,3 +580,61 @@
 - engine-notes.md: 3·4·5·7·11·15절에 엔진 소스를 열어 확인한 행 22개를 더하고 3절 "ISKM 블렌딩" 행의 위치를 `AnimSequenceTransformProviderData.h`로 고쳤다. 03번 글이 적은 "`AnimToTextureBPLibrary.cpp:33`이 두 호출을 감싼다"는 맞지 않아 더하지 않았다(실제 호출은 `:245`, `:290`이고 3절에 이미 있다).
 - 열 편의 README에 묶음 이름·조건 라벨·마일스톤 이름은 링크 주소·이미지 경로 밖에 없다. 코드 스팬 밖 `~`는 모두 `\~`이고 본문 Markdown 표는 없다. 상대 링크 407개 가운데 깨진 것은 없다(07번의 `insights-gpu-passes.jpg`는 주석 안의 예약 자리다).
 - 남긴 판단거리: 06번이 지적한 11절 "스플라인" 행, 루트 README의 "두세 배", `ablation.svg`의 두 자리 값과 STATUS.md.
+
+## 한눈에 보는 사이트(2026-11-13)
+
+하위 에이전트(Opus)가 `Site/`와 `Scripts/build-site.py`를 만든다. 요구는 backlog.md "사이트" 행이다. 에디터, 빌드, 패키징, 게임은 띄우지 않았다. 배포는 하지 않았다.
+
+### 진행(사이트)
+
+- 조사 끝(성공). 참고 페이지는 WebFetch로 구성만 읽었다. 단계를 고르면 지도·카운터·카드가 바뀌는 한 페이지 구성이다. 코드와 문구는 쓰지 않았다. 다음은 스크립트.
+- 스크립트 끝(성공). `build-site.py`가 `summary.csv`(P1 전 호드 총수), `full-n-at-60fps.csv`, `Pool1/timeline.csv`, `full-conditions.json`, 글 README의 제목과 "한 문장으로" 첫 문단에서 `Site/data.js`를 만들고 WebP 여덟 개를 `Site/assets/stepN.webp`로 복사한다. 두 번 돌려 `data.js`와 WebP의 sha256이 같았다. 다음은 페이지.
+- 페이지 끝(성공). `index.html`, `site.css`, `site.js`. 다음은 확인.
+- 확인 끝(성공). Edge 헤드리스로 데스크톱 1280폭, 모바일 390폭, 밝은/어두운 바탕, `#step=1`\~`8`과 `&n=5000`·`30000`을 PNG로 찍어 보고 고쳤다. 렌더링된 글자를 DevTools 프로토콜로 뽑아 `summary.csv`·`full-n-at-60fps.csv`·`timeline.csv`와 600곳 대조했다(불일치 0). 금지어(묶음 이름, 조건 라벨, 마일스톤 이름, PARAGON, 형제 프로젝트 이름, 변형 이름)는 보이는 글자에 없다. 다음은 커밋.
+
+### 결정(사이트)
+
+- **데이터는 `data.js`(전역 변수 `window.SITE_DATA`).** file://로 열어도 동작한다. 버린 대안: `data.json`과 `fetch`(file://에서 막힌다), 수치를 `index.html`에 굽는 템플릿(스크립트가 HTML을 통째로 다시 써야 해 손으로 고치기 어렵다).
+- **그림은 페이지 안에서 데이터로 그렸다.** 사다리, 최대 개체 수, 빼 보기는 HTML 막대, 엔티티 풀은 폭에 맞춰 다시 그리는 SVG다. 버린 대안: `Docs/figures/readme/*.svg` 복사(흰 바탕이 고정이라 어두운 바탕에서 튀고, 800px 고정 글자가 모바일에서 작아진다). 그래서 `Site/assets/`에는 WebP만 복사한다.
+- **사다리의 축척 차이는 잘린 막대로 풀었다.** 축은 0\~18ms이고 1단계 막대는 끝을 끊고 "축척 밖 · 26.4배"를 적었다. 버린 대안: 로그 축(차이의 크기를 읽기 어렵다), 두 패널(`ladder.svg`와 같은 방식이지만 한 줄 선택과 함께 쓰기 어렵다). 막대에 느린 쪽 5% 경계를 옅은 연장으로 겹쳤다. 60fps 판정 기준이 그 값이라서다.
+- **단계 패널의 "바꾼 것"은 스크립트의 문장이고, "알게 된 것"은 각 글의 "한 문장으로" 첫 문단을 그대로 읽는다.** 거리·상한(30m, 40m, 500, 1,000, 200m)은 `summary.csv`의 `hydrate_m`·`actor_cap`·`far_m`에서 넣는다. 2ms 예산과 80m는 설정값이라 문장에 둔다.
+- **호드 총수 선택은 7개(500\~3만)이고, 그 단계가 재지 않은 값은 비활성이다.** 화면은 늘 1만이라 캡션에 적는다. 캡션에는 `capture-full.ps1`의 주석대로 "녹화 부하로 HUD의 프레임 시간이 측정값보다 높을 수 있다"를 적었다.
+- **앞 단계 대비 변화는 세 실행 범위 규칙으로 판정한다.** 범위 안이면 "세 번 잰 범위 안", 밖이면 백분율을 붙인다. 앞 단계가 그 호드 총수를 재지 않았으면 그렇게 적는다.
+- **빼 보기는 `ablation.svg`와 같은 열 행이다.** `S8-col`은 기법을 뺀 행이 아니라 넣지 않았다. 아래 문장 다섯 개의 수치는 스크립트가 만들고, 문장의 주장(가장 큰 증가, 병목 전환, GPU만 증가)은 스크립트가 `assert`로 데이터와 맞춰 본다.
+- **반올림.** `plot-readme.py`의 `fmt`(세 자리)와 같다. 차이는 CSV의 소수 셋째 자리로 먼저 반올림한다. 그래서 `A8-farcull` 게임 스레드는 4.24다(07번 글과 같다). 정수는 반올림 올림이다(GPU 메모리 5,063MB, README와 같다).
+- **기본 단계는 1단계.** 화면 파일이 1.1MB로 가장 작아 첫 로드가 가볍다. 고른 단계의 WebP만 `src`를 넣고, 움직임 줄이기 설정이면 버튼을 눌러야 받는다.
+- **실행 총수(178회)는 페이지에 쓰지 않았다.** `Full2/runs.csv`는 163행이라 STATUS.md의 178회와 어떻게 맞는지 확인하지 않았다.
+- **용량.** `Site/assets/`(WebP 여덟 개, 약 51MB)는 main에 커밋하지 않는다. `build-site.py`가 다시 만든다. 같은 파일이 이미 `Docs/figures/steps/`에 LFS로 있어 두 번 넣게 되고, AGENTS.md는 저장소 용량을 최소로 두라고 한다. main에는 `index.html`, `site.css`, `site.js`, `data.js`(44KB)만 커밋했다.
+
+### 확인하지 못한 것(사이트)
+
+- 실제 휴대폰. 입력은 DevTools 프로토콜로만 확인했다: 좌우 화살표(문서와 탭 목록), Home/End, 터치 밀기(390폭 터치 에뮬레이션), 마우스 끌기, 호드 총수 버튼, 사다리 줄 누르기가 모두 `#step=`·`&n=`을 바꿨다.
+- GitHub Pages에서의 동작. 배포하지 않았다.
+- 움직이는 WebP의 재생. 헤드리스 PNG는 첫 프레임만 찍힌다.
+- 빼 보기와 엔티티 풀의 SVG가 아닌 HTML 막대를 화면 읽기 프로그램으로 읽어 보지 않았다.
+
+### 코디네이터용(사이트)
+
+- `.gitignore`에 한 줄을 더한다: `Site/assets/`. 지금은 `git status`에 미추적으로 남는다.
+- 배포(gh-pages 고아 브랜치, LFS 없이). 레포 루트에서 PowerShell로:
+
+  ```powershell
+  py -3 -I Scripts/build-site.py
+  $d = Join-Path $env:TEMP "horde-site-deploy"
+  if (Test-Path $d) { Remove-Item -Recurse -Force $d }
+  New-Item -ItemType Directory $d | Out-Null
+  Copy-Item -Recurse Site\* $d
+  New-Item -ItemType File (Join-Path $d ".nojekyll") | Out-Null
+  Set-Content -Encoding ascii (Join-Path $d ".gitattributes") "* -filter -diff -merge"
+  git -C $d init -b gh-pages
+  git -C $d add -A
+  git -C $d commit -m "deploy: results site"
+  git -C $d push --force https://github.com/hon454/unreal-horde-optimization-lab.git gh-pages
+  gh api -X POST repos/hon454/unreal-horde-optimization-lab/pages -f "source[branch]=gh-pages" -f "source[path]=/"
+  ```
+
+  - 새 임시 저장소라 LFS 훅이 없고, `.gitattributes`가 전역 LFS 필터를 끈다. 그래서 WebP가 일반 blob으로 들어가 Pages가 그대로 낸다. 파일마다 100MB 한도 안이다(가장 큰 것 7.6MB).
+  - 다시 배포할 때도 같은 명령이다. `--force`로 이전 배포 커밋을 버리므로 레포에 남는 사이트 사본은 하나다. Pages가 이미 켜져 있으면 마지막 `gh api` 줄은 409로 실패하니 건너뛴다.
+  - 주소는 `https://hon454.github.io/unreal-horde-optimization-lab/`가 된다.
+- 루트 README와 backlog.md "사이트" 행에 사이트 주소를 넣는다(배포 뒤).
+- 글이나 CSV가 바뀌면 `build-site.py`를 다시 돌리고 `Site/data.js`를 커밋한 뒤 다시 배포한다.
