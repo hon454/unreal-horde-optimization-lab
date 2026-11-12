@@ -18,7 +18,7 @@ Night of the Dead에서 측정 없이 액터로 했던 좀비 호드 최적화�
 
 ![사다리 여덟 단계: 목표 총수 1만의 프레임 시간](Docs/figures/full1/full-ladder-P1.svg)
 
-총괄 묶음 `Full1`(Test 패키지 730ff18)의 값이다. 호드 총수 1만, 오브 시점(P1), 2560x1440 Epic, 3회 중앙값, 단위 ms다(`Measurements/Full1/summary.csv`). 사다리는 단계마다 기술 하나를 더한다. 병목은 L1·L4\~L6이 Game, L2·L3·L7·L8이 GPU다.
+최종 측정의 값이다. 여덟 단계와 빼 보기 조건을 Test 패키지 하나(730ff18)에서 하루에 연달아 쟀다(2026-11-12). 호드 총수 1만, 오브 시점(P1), 2560x1440 Epic, 3회 중앙값, 단위 ms다(`Measurements/Full1/summary.csv`). 사다리는 단계마다 기술 하나를 더한다. 병목은 L1·L4\~L6이 Game, L2·L3·L7·L8이 GPU다.
 
 | 단계 | 도입한 기술 | 프레임 p50 | 프레임 p95 | Game p50 | GPU p50 | N@16.7ms |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -31,7 +31,7 @@ Night of the Dead에서 측정 없이 액터로 했던 좀비 호드 최적화�
 | L7 | Niagara 배경 무리(200m 밖, 엔티티 위치 구동 입자) | 12.51 | 13.03 | 7.88 | 12.11 | 13,808 |
 | L8 | 품질 올리기: 액터 0\~40m(상한 1,000), 80m 밖 그림자 끔 | 11.12 | 11.64 | 7.82 | 10.71 | 16,826 |
 
-N@16.7ms는 프레임 p95가 16.7ms 이하인 최대 개체 수다(`Docs/figures/full1/full-n-at-60fps.csv`의 보간값). L3·L5·L6은 3만에서도 16.7ms 안이라 값을 적지 않았다. L2의 2만 P1은 세 회차가 17.98 / 14.63 / 15.71ms로 범위가 3.35ms다(다른 조건은 0.4ms 안). 첫 회차에서 렌더 스레드의 `PrepareDistanceFieldScene`이 6.5ms 길었기 때문이고, L2의 N@16.7ms는 이 흔들림을 안고 있다([Worklog/Q6.md](Docs/Worklog/Q6.md) "Full1 후속 분석").
+N@16.7ms는 프레임 p95가 16.7ms 이하인 최대 개체 수다(`Docs/figures/full1/full-n-at-60fps.csv`의 보간값). L3·L5·L6은 3만에서도 16.7ms 안이라 값을 적지 않았다. L2의 2만 P1은 세 회차가 17.98 / 14.63 / 15.71ms로 범위가 3.35ms다(다른 조건은 0.4ms 안). 첫 회차에서 렌더 스레드의 `PrepareDistanceFieldScene`이 6.5ms 길었기 때문이고, L2의 N@16.7ms는 이 흔들림을 안고 있다([Worklog/Q6.md](Docs/Worklog/Q6.md)의 후속 분석 절).
 
 L7·L8은 앞 단계에서 번 프레임 시간을 배경 무리와 액터 수·전환 거리에 쓰는 품질 단계다. L8의 프레임 p95 11.64ms는 여유 기준 13.3ms(16.7ms의 80%) 안이다.
 
