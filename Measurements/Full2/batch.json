@@ -1,0 +1,21 @@
+﻿{
+    "batch":  "Full2",
+    "state":  "done",
+    "commit":  "08e45f24a5e5cd0296715f61b41911efa22002b3 (dirty)",
+    "started":  "2026-11-12 20:34:56",
+    "ended":  "2026-11-13 00:39:43",
+    "resumes":  0,
+    "order":  "round",
+    "runs_per_condition":  3,
+    "target_n":  10000,
+    "duration_override":  0,
+    "only":  "",
+    "conditions":  70,
+    "planned_runs":  178,
+    "planned_runs_ok":  178,
+    "planned_runs_missing":  0,
+    "failed_runs":  0,
+    "giveups":  [
+
+                ]
+}

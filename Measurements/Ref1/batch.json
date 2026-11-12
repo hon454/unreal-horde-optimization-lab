@@ -1,0 +1,21 @@
+﻿{
+    "batch":  "Ref1",
+    "state":  "done",
+    "commit":  "08e45f24a5e5cd0296715f61b41911efa22002b3 (dirty)",
+    "started":  "2026-11-13 01:18:07",
+    "ended":  "2026-11-13 02:05:19",
+    "resumes":  0,
+    "order":  "round",
+    "runs_per_condition":  3,
+    "target_n":  10000,
+    "duration_override":  0,
+    "only":  "ablation,aa",
+    "conditions":  11,
+    "planned_runs":  33,
+    "planned_runs_ok":  33,
+    "planned_runs_missing":  0,
+    "failed_runs":  1,
+    "giveups":  [
+
+                ]
+}
