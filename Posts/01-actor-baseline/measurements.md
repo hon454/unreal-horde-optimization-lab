@@ -66,10 +66,10 @@
 | 애니메이션을 지워도 남는 약 403ms | 403.41 | 계산 | 446.43 − 43.02. 트레이스 한 회에서 뺀 어림이다 | |
 | (그림) 나머지 81.2ms · 18% | 81.21 | 계산 | 446.43 − 322.20 − 27.31 − 15.71. 18.19% | |
 | 개체당 CharacterMovement 32.2µs | 32.22 | 계산 | 322.20 ms ÷ 10000. 실제 호출은 프레임당 9,968회(1,116,437 ÷ 112)라 호출당은 32.3µs | |
-| 스크린샷의 프레임 하나 448ms | 447.88 | 병렬 트레이스 `Full1trace-L1-full-N10000-P1-r1`, 렌더링 프레임 109(56.56초 시작) | Timing 뷰의 선택 구간 길이(GameThread `FEngineLoop::Tick`은 447.4ms) | 한 프레임 |
-| 스크린샷의 CharacterMovement 322ms | 321.66 | 같음 | Timers 패널 `UCharacterMovementComponent_TickComponent` Incl(Excl 320.37) | 한 프레임 |
-| 스크린샷의 호출 수 10,048회 | 10,048 | 같음 | Timers 패널 Count | 한 프레임 |
-| 71.8% | 71.82% | 계산 | 321.66 ÷ 447.88 | |
+| 스크린샷의 프레임 하나 449ms | 448.71 | 병렬 트레이스 `Full2trace-L1-full-N10000-P1-r1`, 약 56초 지점의 프레임 하나 | Timing 뷰의 선택 구간 길이 | 한 프레임 |
+| 스크린샷의 CharacterMovement 323ms | 322.94 | 같음 | Timers 패널 `UCharacterMovementComponent_TickComponent` Incl(Excl 321.72) | 한 프레임 |
+| 스크린샷의 호출 수 10,052회 | 10,052 | 같음 | Timers 패널 Count | 한 프레임 |
+| 72.0% | 71.97% | 계산 | 322.94 ÷ 448.71 | |
 | 하위 스텝 1회 / 8회 | | 계산 | 아래 "엔진 소스". 프레임 50ms 미만이면 1회. 1만은 델타가 0.4초로 잘려 0.4 ÷ 0.05 = 8회(일곱 번째까지 `Min(0.05, 남은 시간 × 0.5)` = 0.05, 여덟 번째는 남은 0.05초를 모두 쓴다) | |
 | 60ms면 30ms씩 두 번 | | 계산 | `Min(0.05, 0.06 × 0.5)` = 0.03, 남은 0.03은 50ms 이하라 그대로 쓴다 | |
 | 기본값 0.05초, 8회 | | 엔진 소스 | 아래 "엔진 소스" | |
@@ -82,7 +82,8 @@
 ## 측정 기록의 변경
 
 - 2026-11-13: 측정값을 Test 패키지 730ff18의 측정에서 08e45f2의 최종 측정으로 바꿨다. 200m 밖 입자 메시를 원본 LOD4로 바꿔(bf1a4c8) 측정 조건이 달라졌고, 규약대로 전 조건을 다시 쟀기 때문이다.
-- 2026-11-13: 트레이스 값(446.43 / 322.20 / 27.31 / 15.71)은 최종 측정 빌드(08e45f2)의 트레이스 `Full2traceser-L1-full-N10000-P1-r1`에서 다시 뽑았다. 처음 쓴 값은 730ff18의 트레이스 `Full1traceser-L1-full-*`에서 읽은 446.43 / 323.49 / 27.24 / 14.70이었다(같은 방법으로 옛 트레이스를 다시 계산하면 옛 값과 일치했다). 값을 뽑는 `Scripts/trace-export.ps1`은 `UnrealInsights.exe -NoUI` 명령줄 내보내기다. 스크린샷(448 / 322ms, 10,048회)은 옛 트레이스 `Full1trace-L1-full-N10000-P1-r1`의 Insights 화면에서 읽은 값이고 아직 새 트레이스(`Full2trace-L1-full-N10000-P1-r1`)로 다시 찍지 않았다. 두 빌드 사이에 `Source/`와 `Config/`는 같고, 바뀐 것은 `Content/Lab/FX/`의 배경 무리 에셋 셋뿐이다(`git diff --stat 730ff18 08e45f2`). 1단계는 배경 무리를 쓰지 않는다.
+- 2026-11-13: Insights 스크린샷과 그 캡션의 값(449 / 323ms / 10,052회)을 최종 측정 빌드(08e45f2)의 병렬 트레이스 `Full2trace-L1-full-N10000-P1-r1`에서 다시 찍었다. 처음 값은 730ff18의 트레이스에서 찍은 448 / 322ms / 10,048회였다.
+- 2026-11-13: 트레이스 값(446.43 / 322.20 / 27.31 / 15.71)은 최종 측정 빌드(08e45f2)의 트레이스 `Full2traceser-L1-full-N10000-P1-r1`에서 다시 뽑았다. 처음 쓴 값은 730ff18의 트레이스 `Full1traceser-L1-full-*`에서 읽은 446.43 / 323.49 / 27.24 / 14.70이었다(같은 방법으로 옛 트레이스를 다시 계산하면 옛 값과 일치했다). 값을 뽑는 `Scripts/trace-export.ps1`은 `UnrealInsights.exe -NoUI` 명령줄 내보내기다. 두 빌드 사이에 `Source/`와 `Config/`는 같고, 바뀐 것은 `Content/Lab/FX/`의 배경 무리 에셋 셋뿐이다(`git diff --stat 730ff18 08e45f2`). 1단계는 배경 무리를 쓰지 않는다.
 
 ## 화면의 HUD와 표의 차이
 
@@ -95,9 +96,9 @@
 | 쓰인 곳 | 트레이스 | 구간 | 값 |
 | --- | --- | --- | --- |
 | 그림 `actor-frame-flow.svg`의 막대, 본문 446 / 322 / 43.0ms | 직렬 실행 `Full2traceser-L1-full-N10000-P1-r1`(`mass.FullyParallel` 끔) | 25\~75초, 112프레임의 프레임당 평균 | `FEngineLoop::Tick` 446.43, CharacterMovement 322.20 |
-| 스크린샷, 캡션, 스크린샷 아래 문장 448 / 322ms / 10,048회 | 병렬 실행 `Full1trace-L1-full-N10000-P1-r1` | 렌더링 프레임 109 하나 | 선택 구간 447.88, CharacterMovement 321.66 |
+| 스크린샷, 캡션, 스크린샷 아래 문장 449 / 323ms / 10,052회 | 병렬 실행 `Full2trace-L1-full-N10000-P1-r1` | 약 56초 지점의 프레임 하나 | 선택 구간 448.71, CharacterMovement 322.94 |
 
-새 병렬 트레이스 `Full2trace-L1-full-N10000-P1-r1`의 같은 25\~75초 구간 평균(111프레임)은 `FEngineLoop::Tick` 450.45, CharacterMovement 323.90ms다(`%TEMP%\horde-trace\F2-trace-L1-full-GT.csv`). 직렬 트레이스와 4.0ms, 1.7ms 차이다. 1단계는 Mass 프로세서가 거의 돌지 않아(`PrePhysics` 0.08ms) 직렬·병렬 설정이 액터 비용에 닿지 않고, 차이는 실행 사이의 흔들림이다. 그래서 스크린샷을 직렬 트레이스로 다시 찍지 않았다. 스크린샷의 한 프레임 값(447.88, 321.66)은 옛 병렬 트레이스의 값이다.
+새 병렬 트레이스 `Full2trace-L1-full-N10000-P1-r1`의 같은 25\~75초 구간 평균(111프레임)은 `FEngineLoop::Tick` 450.45, CharacterMovement 323.90ms다(`%TEMP%\horde-trace\F2-trace-L1-full-GT.csv`). 직렬 트레이스와 4.0ms, 1.7ms 차이다. 1단계는 Mass 프로세서가 거의 돌지 않아(`PrePhysics` 0.08ms) 직렬·병렬 설정이 액터 비용에 닿지 않고, 차이는 실행 사이의 흔들림이다. 그래서 스크린샷을 직렬 트레이스로 다시 찍지 않았다. 스크린샷의 한 프레임 값(448.71, 322.94)은 이 병렬 트레이스의 값이다.
 
 ## 그림
 
@@ -107,7 +108,7 @@
 | `images/actor-anim-techniques.svg` | 결과 그림. URO와 Budget이 줄인 프레임·게임 스레드 시간, 덧댄 뒤의 프레임 시간, 비교용 애니메이션 쪽 두 타이머의 합 43.02(점선) | 위 변화 행, 트레이스 행 |
 | `images/actor-frame-flow.svg` | 한 개체가 한 프레임에 하는 일 네 칸(이동 컴포넌트 틱, 스켈레탈 메시 틱과 AnimBP 갱신, 애니메이션 평가 마무리, 프레임 끝 렌더 갱신)과 칸마다 엔진 타이머 이름. 오른쪽 막대 길이가 1만의 프레임당 시간(322.20, 27.31, 15.71). 네 번째 칸 `UWorld_SendAllEndOfFrameUpdates`의 값은 따로 읽지 않아, 나머지 81.21ms(이 칸과 그 밖의 일)를 점선 막대로 보였다. 맨 아래 16.7ms 막대는 같은 축척 | 위 트레이스 행 |
 | `images/actor-frame-vs-n.svg` | 위: 프레임 시간 중앙값·느린 쪽 5% 경계(로그-로그), 16.7ms 선, 50ms 선, 60fps를 지키는 최대 개체 수 774. 아래: 개체당 게임 스레드 시간(µs)과 하위 스텝 횟수, 예상선(1천의 17.04µs로 일정) | 위 `L1-full` 행 |
-| `images/insights-gamethread.jpg` | Unreal Insights. 왼쪽은 Timing 뷰에서 렌더링 프레임 109(56.56초 시작, 447.88ms, 빨간 상자)를 고른 화면이고 GameThread 트랙에 `FEngineLoop::Tick` 447.4ms, `UWorld_Tick` 442.18ms, `TickCompletionEvents` 404.97ms가 보인다. 오른쪽은 그 구간을 Timers 패널에서 "CharacterMovement"로 거른 행(빨간 상자)이다. 코디네이터가 찍었다(2560x749) | `Saved/Traces/Full1trace-L1-full-N10000-P1-r1.utrace`(병렬 실행, 1만 P1) |
+| `images/insights-gamethread.jpg` | Unreal Insights에서 `Full2trace-L1-full-N10000-P1-r1`을 연 화면이다. 왼쪽 빨간 상자는 Timing 뷰에서 고른 프레임 하나(약 56초 지점, 448.71ms)다. 오른쪽 빨간 상자는 Timers 패널을 "CharacterMovement"로 거른 결과다(`UCharacterMovementComponent_TickComponent` Count 10,052, Incl 322.94ms, Excl 321.72ms). 화면 캡처 둘(왼쪽 절반, 오른쪽 절반)을 이어 붙이고 빨간 상자를 그렸다. 2026-11-13에 다시 찍었다 |
 | `../../Docs/figures/steps/step1-L1-full.webp` | 1단계 화면(HUD 켬). HUD 값은 위 "화면의 HUD와 표의 차이" | 촬영 경위는 [Worklog/Q6.md](../../Docs/Worklog/Q6.md) "촬영 준비" |
 
 SVG 네 개는 [make-figures.py](make-figures.py)가 만든다(저장소 루트에서 `py Posts/01-actor-baseline/make-figures.py`). 측정값은 `summary.csv`와 `full-n-at-60fps.csv`에서 읽고, 트레이스 값 네 개(446.43 / 322.20 / 27.31 / 15.71)는 스크립트의 상수다. 폭 800 기준으로 글자는 16px 이상이고, 자기 흰 배경을 가져 GitHub의 밝은·어두운 테마 모두에서 같은 색으로 보인다. 처음 글의 `actor-gamethread-breakdown.svg`(같은 네 값의 가로 막대)는 `actor-frame-flow.svg`에 합쳐 지웠다.

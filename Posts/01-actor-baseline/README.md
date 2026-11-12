@@ -98,9 +98,9 @@ float AWorldSettings::FixupDeltaSeconds(float DeltaSeconds, float RealDeltaSecon
 
 Unreal Insights에서 프레임 하나만 골라도 비율은 같다. 아래 스크린샷은 1만 실행의 트레이스에서 프레임 하나를 고르고, Timers 창을 CharacterMovement로 거른 화면이다.
 
-![Unreal Insights, 프레임 하나: 448ms 중 322ms가 CharacterMovement 틱이다](images/insights-gamethread.jpg)
+![Unreal Insights, 프레임 하나: 449ms 중 323ms가 CharacterMovement 틱이다](images/insights-gamethread.jpg)
 
-왼쪽 빨간 상자가 고른 프레임이고, 길이는 448ms다. 오른쪽 빨간 상자에서 그 프레임의 CharacterMovement 틱은 합쳐 322ms(71.8%)다. 같은 타이머는 그 프레임에 10,048번 불렸다. 개체마다 거의 한 번씩 부른 셈이다.
+왼쪽 빨간 상자가 고른 프레임이고, 길이는 449ms다. 오른쪽 빨간 상자에서 그 프레임의 CharacterMovement 틱은 합쳐 323ms(72.0%)다. 같은 타이머는 그 프레임에 10,052번 불렸다. 개체마다 거의 한 번씩 부른 셈이다.
 
 ## 결과: 액터 군중은 774에서 막히고, URO와 Budget은 벽을 옮기지 못한다
 
