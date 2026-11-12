@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="556" viewBox="0 0 800 556" font-family="Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Segoe UI, sans-serif" font-size="16" fill="#111827">
+<rect x="0.5" y="0.5" width="799" height="555" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+<text x="32" y="46" font-size="22" font-weight="700">VAT 인스턴스가 액터로 바뀌는 네 프레임</text>
+<text x="32" y="74" font-size="16" fill="#4b5563">전환 대책을 모두 켠 상태. 칸 하나가 한 프레임이다</text>
+<text x="279.8" y="108" text-anchor="middle" font-size="16" font-weight="700">액터가 붙는다</text>
+<text x="419.2" y="108" text-anchor="middle" font-size="16" font-weight="700">메시 틱 1</text>
+<text x="558.8" y="108" text-anchor="middle" font-size="16" font-weight="700">메시 틱 2</text>
+<text x="698.2" y="108" text-anchor="middle" font-size="16" font-weight="700">액터가 보인다</text>
+<text x="32" y="154" font-size="17" font-weight="700">VAT 인스턴스</text>
+<rect x="214.0" y="124" width="131.5" height="44" rx="5" fill="#2563eb"/>
+<text x="279.8" y="152" text-anchor="middle" font-size="16" font-weight="700" fill="white">그린다</text>
+<rect x="353.5" y="124" width="131.5" height="44" rx="5" fill="#2563eb"/>
+<text x="419.2" y="152" text-anchor="middle" font-size="16" font-weight="700" fill="white">그린다</text>
+<rect x="493.0" y="124" width="131.5" height="44" rx="5" fill="#2563eb"/>
+<text x="558.8" y="152" text-anchor="middle" font-size="16" font-weight="700" fill="white">그린다</text>
+<rect x="632.5" y="124" width="131.5" height="44" rx="5" fill="white" stroke="#9ca3af" stroke-dasharray="5 4"/>
+<text x="698.2" y="152" text-anchor="middle" font-size="16" font-weight="700" fill="#4b5563">뗀다</text>
+<text x="32" y="210" font-size="17" font-weight="700">액터</text>
+<rect x="214.0" y="180" width="131.5" height="44" rx="5" fill="#9ca3af"/>
+<text x="279.8" y="208" text-anchor="middle" font-size="16" font-weight="700" fill="white">패스에서 뺌</text>
+<rect x="353.5" y="180" width="131.5" height="44" rx="5" fill="#9ca3af"/>
+<text x="419.2" y="208" text-anchor="middle" font-size="16" font-weight="700" fill="white">패스에서 뺌</text>
+<rect x="493.0" y="180" width="131.5" height="44" rx="5" fill="#9ca3af"/>
+<text x="558.8" y="208" text-anchor="middle" font-size="16" font-weight="700" fill="white">패스에서 뺌</text>
+<rect x="632.5" y="180" width="131.5" height="44" rx="5" fill="#dc2626"/>
+<text x="698.2" y="208" text-anchor="middle" font-size="16" font-weight="700" fill="white">그린다</text>
+<text x="32" y="250" font-size="16" fill="#4b5563">화면에는 늘 둘 중 하나만 보인다. 액터는 VAT가 재생하던 시각부터 걷는다.</text>
+<text x="32" y="286" font-size="18" font-weight="700">전환 대책 다섯 가지</text>
+<circle cx="46" cy="317" r="13" fill="#9333ea"/>
+<text x="46" y="323" text-anchor="middle" font-size="16" font-weight="700" fill="white">1</text>
+<text x="70" y="323" font-size="17" font-weight="700">높이 보정</text>
+<text x="190" y="323" font-size="17">엔진이 액터를 발밑으로 옮길 때 캡슐 반높이를 더한다</text>
+<circle cx="46" cy="351" r="13" fill="#9333ea"/>
+<text x="46" y="357" text-anchor="middle" font-size="16" font-weight="700" fill="white">2</text>
+<text x="70" y="357" font-size="17" font-weight="700">준비 대기</text>
+<text x="190" y="357" font-size="17">메시가 두 번 틱할 때까지 VAT 인스턴스를 남긴다</text>
+<text x="190" y="391" font-size="17">되돌아갈 때는 액터를 한 프레임 더 남긴다</text>
+<circle cx="46" cy="419" r="13" fill="#9333ea"/>
+<text x="46" y="425" text-anchor="middle" font-size="16" font-weight="700" fill="white">3</text>
+<text x="70" y="425" font-size="17" font-weight="700">시작 시각</text>
+<text x="190" y="425" font-size="17">AnimBP를 VAT가 재생하던 시각부터 시작한다</text>
+<circle cx="46" cy="453" r="13" fill="#9333ea"/>
+<text x="46" y="459" text-anchor="middle" font-size="16" font-weight="700" fill="white">4</text>
+<text x="70" y="459" font-size="17" font-weight="700">패스 숨김</text>
+<text x="190" y="459" font-size="17">기다리는 액터를 숨기지 않고 화면 패스에서만 뺀다</text>
+<circle cx="46" cy="487" r="13" fill="#9333ea"/>
+<text x="46" y="493" text-anchor="middle" font-size="16" font-weight="700" fill="white">5</text>
+<text x="70" y="493" font-size="17" font-weight="700">진홍 지우기</text>
+<text x="190" y="493" font-size="17">풀에 넣을 때 사망 색을 지운다</text>
+<line x1="32" y1="506" x2="768" y2="506" stroke="#e5e7eb"/>
+<text x="32" y="530" font-size="16" fill="#4b5563">하나만 켜서는 화면의 튐이 거의 줄지 않았다. 한 전환에 문제가 여럿 겹쳐 있었다.</text>
+</svg>

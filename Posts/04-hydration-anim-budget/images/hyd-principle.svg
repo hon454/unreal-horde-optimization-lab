@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="766" viewBox="0 0 800 766" font-family="Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Segoe UI, sans-serif" font-size="16" fill="#111827">
+<rect x="0.5" y="0.5" width="799" height="765" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+<text x="32" y="46" font-size="22" font-weight="700">4단계가 바꾼 것: 가까운 개체를 액터로 그린다</text>
+<text x="32" y="74" font-size="16" fill="#4b5563">위: 거리에 따라 무엇으로 그리나. 아래: 액터 하나가 한 프레임에 게임 스레드에서 하는 일</text>
+<text x="32" y="137" font-size="17" font-weight="700">3단계</text>
+<rect x="120.0" y="112" width="259.2" height="38" rx="4" fill="#2563eb"/>
+<text x="249.6" y="137" text-anchor="middle" font-size="16" font-weight="700" fill="white">VAT 인스턴스</text>
+<rect x="379.2" y="112" width="388.8" height="38" rx="4" fill="white" stroke="#9ca3af" stroke-dasharray="5 4"/>
+<text x="573.6" y="137" text-anchor="middle" font-size="16" font-weight="700" fill="#4b5563">그리지 않는다</text>
+<text x="32" y="187" font-size="17" font-weight="700">4단계</text>
+<rect x="120.0" y="162" width="38.9" height="38" rx="4" fill="#dc2626"/>
+<rect x="158.9" y="162" width="220.3" height="38" rx="4" fill="#2563eb"/>
+<text x="269.0" y="187" text-anchor="middle" font-size="16" font-weight="700" fill="white">VAT 인스턴스</text>
+<rect x="379.2" y="162" width="388.8" height="38" rx="4" fill="white" stroke="#9ca3af" stroke-dasharray="5 4"/>
+<text x="573.6" y="187" text-anchor="middle" font-size="16" font-weight="700" fill="#4b5563">그리지 않는다</text>
+<path d="M139.4 202 L139.4 216" stroke="#dc2626" stroke-width="2"/>
+<line x1="120.0" y1="204" x2="120.0" y2="212" stroke="#4b5563"/>
+<line x1="158.9" y1="204" x2="158.9" y2="212" stroke="#4b5563"/>
+<line x1="223.7" y1="204" x2="223.7" y2="212" stroke="#4b5563"/>
+<text x="223.7" y="232" text-anchor="middle" font-size="16" fill="#4b5563">80m</text>
+<line x1="379.2" y1="204" x2="379.2" y2="212" stroke="#4b5563"/>
+<text x="379.2" y="232" text-anchor="middle" font-size="16" fill="#4b5563">200m</text>
+<line x1="768.0" y1="204" x2="768.0" y2="212" stroke="#4b5563"/>
+<text x="768.0" y="232" text-anchor="end" font-size="16" fill="#4b5563">500m</text>
+<text x="162.9" y="232" font-size="16" fill="#4b5563">30m</text>
+<text x="32" y="256" font-size="16" font-weight="700" fill="#dc2626">빨강 = 액터. 화면 안 30m, 화면 밖 15m 안. 두 종류를 합쳐 500개까지</text>
+<rect x="32" y="288" width="736" height="118" rx="10" fill="#f8fafc" stroke="#e5e7eb"/>
+<rect x="32" y="288" width="6" height="118" rx="3" fill="#9333ea"/>
+<text x="56" y="320" font-size="18" font-weight="700" fill="#9333ea">엔진 표현 프로세서</text>
+<text x="750" y="320" text-anchor="end" font-family="Consolas, SFMono-Regular, Menlo, monospace" font-size="16" fill="#4b5563">UMassVisualizationProcessor</text>
+<text x="56" y="352" font-size="17">거리 구간이 바뀐 개체에 액터를 붙이고 뗀다</text>
+<text x="56" y="380" font-size="17">뗀 액터는 풀에 넣었다가 다음 개체에 다시 쓴다</text>
+<path d="M400.0 409 L400.0 423" stroke="#4b5563" stroke-width="2"/>
+<path d="M394.0 417 L400.0 425 L406.0 417" fill="none" stroke="#4b5563" stroke-width="2"/>
+<rect x="32" y="428" width="736" height="118" rx="10" fill="#f8fafc" stroke="#e5e7eb"/>
+<rect x="32" y="428" width="6" height="118" rx="3" fill="#2563eb"/>
+<text x="56" y="460" font-size="18" font-weight="700" fill="#2563eb">액터 동기화(이 프로젝트)</text>
+<text x="750" y="460" text-anchor="end" font-family="Consolas, SFMono-Regular, Menlo, monospace" font-size="16" fill="#4b5563">ULabActorSyncProcessor</text>
+<text x="56" y="492" font-size="17">엔티티의 위치·상태·사망 색을 액터에 넣는다</text>
+<text x="56" y="520" font-size="17">화면 크기(바운드 반경 ÷ 거리)를 중요도로 넘긴다</text>
+<path d="M400.0 549 L400.0 563" stroke="#4b5563" stroke-width="2"/>
+<path d="M394.0 557 L400.0 565 L406.0 557" fill="none" stroke="#4b5563" stroke-width="2"/>
+<rect x="32" y="568" width="736" height="118" rx="10" fill="#f8fafc" stroke="#e5e7eb"/>
+<rect x="32" y="568" width="6" height="118" rx="3" fill="#dc2626"/>
+<text x="56" y="600" font-size="18" font-weight="700" fill="#dc2626">스켈레탈 메시 틱과 애니메이션 평가</text>
+<text x="750" y="600" text-anchor="end" font-family="Consolas, SFMono-Regular, Menlo, monospace" font-size="16" fill="#4b5563">USkeletalMeshComponentBudgeted</text>
+<text x="56" y="632" font-size="17">Animation Budget Allocator가 2ms 예산을 나눈다</text>
+<text x="56" y="660" font-size="17">중요도 큰 순으로 매 프레임, 나머지는 간격을 늘린다</text>
+<text x="32" y="716" font-size="16" fill="#4b5563">액터는 액터 틱과 이동 컴포넌트를 쓰지 않는다. 위치는 엔티티가 정한다.</text>
+<text x="32" y="740" font-size="16" fill="#4b5563">캡슐 콜리전도 끈다. 판정은 엔티티의 위치와 반경으로 한다.</text>
+</svg>

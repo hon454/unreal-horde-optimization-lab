@@ -279,3 +279,40 @@
 - 루트 README "글" 표에 03번 행을 더한다(코디네이터 몫).
 - backlog.md "글에 넣을 것"의 Lumen 항목은 02번 글이 맡는다고 적어 두면 좋다. 03번 글은 다루지 않는다(위 결정).
 - engine-notes.md에 더할 것: `MassRepresentationFragments.h:309` `BufferHysteresisOnDistancePercentage = 10.0f`(표현 LOD 경계 히스테리시스 기본값), `MassVisualizationComponent.cpp:566-571`(커스텀 데이터 개수 검사, 3절에 있으나 줄 범위만), `AnimToTextureBPLibrary.cpp:33`(`AnimationToTexture`가 두 `SetBoundsExtensions` 호출을 감싼다).
+
+## 04 액터 하이드레이션과 애니메이션 예산(2026-11-13)
+
+`Posts/04-hydration-anim-budget/`를 쓴다. 수치는 최종 측정(Test 패키지 08e45f2)의 `L3-vatcull`·`L4-mass`·`L8-q4final`·`A8-hydrate`·`A8-budget`·`A8-fix`·`S8-col` 행과 `full-n-at-60fps.csv`에서만 만든다. 에디터, 빌드, 패키징, 게임, 브라우저, Insights는 띄우지 않았다.
+
+### 진행(04)
+
+- 조사 끝(성공). 읽은 것: STATUS.md, posting.md, ADR-0014, backlog.md, post-review.md "핵심 인사이트"·"04 액터 하이드레이션", post-material.md "04", measurement.md "지표"·"확정값"·"품질 계획에서 바뀌는 값", engine-notes.md 3·4·18·19·20절, references.md, code-tour.md, 01·03번 글과 03번 측정 기록·make-figures.py, `full-conditions.json` `L4`·`L8`·`A8-hydrate`·`A8-budget`·`A8-fix`·`S8-col`, Worklog Q6.md 트레이스 절. 소스: LabCrowdSubsystem.cpp `BuildEntityConfig`, LabActorSyncProcessor.cpp/.h, LabMinion.cpp(하이드레이션 액터), LabConfig.h(전환 대책 비트, 상한·거리), LabGameMode.cpp `ApplyVariantCVars`. 엔진: `AnimationBudgetAllocator.cpp:327-342,558-561`, `AnimationBudgetAllocatorParameters.h:19`, `AnimationBudgetAllocatorCVars.cpp:7,195`, `MassActorSpawnerSubsystem.cpp:252-255,327-328`, `MassRepresentationActorManagement.cpp:30-56`, `MassRepresentationProcessor.cpp:272,428`, `MassRepresentationFragments.h:200-211`. 다음은 초안.
+- 그림 끝(성공). `make-figures.py`가 SVG 여섯 개를 만든다(요약, 원리 도식, 전환 도식, 예상과 실제, 최대 개체 수, 빼 보기). 값은 `summary.csv`·`full-n-at-60fps.csv`에서 읽고, 트레이스 값은 쓰지 않았다. SVG의 숫자 글자를 출력해 측정 기록 표와 대조했다. 다음은 초안.
+- 초안 끝(성공). `README.md`: 요약, 시나리오 카드, 배경 지식(하이드레이션, 화면 크기 중요도, 표현 전환의 준비 대기, 611자), 문제, 원리(예상 포함), 바꾼 것, 결과(빼 보기 소절 포함), 한 문장으로. 본문은 표·코드·그림·제목·코드 위 파일 줄과 배경 지식을 빼고 약 3,840자다. Insights 이미지 자리는 주석으로 두었다. 다음은 측정 기록.
+- 측정 기록 끝(성공). `measurements.md`: 빌드와 묶음, 4단계 구현 위치(파일:줄), 본문 수치 표(1만 3·4단계, 여유·예상·실제, 호드 총수별, 빼 보기, 설정값), 전환 대책의 경위, 코디네이터가 찍을 Insights 화면, HUD 차이, 그림, 엔진 소스, 발췌 줄, 확인하지 않은 것. 다음은 확인.
+- 확인 끝(성공). 두 파일의 상대 링크가 모두 실제 파일을 가리킨다(주석 속 `images/insights-actor-tick.jpg`만 아직 없다). 코드 스팬 밖 `~`는 없다. 독자용 문장에 묶음 이름·조건 라벨·마일스톤 이름은 없다(이미지 경로와 측정 기록에만 있다). 본문 수치는 모두 측정 기록 표에 있다. 엔진 코드 발췌는 14줄이다. 확인 중 "하이드레이션 액터는 이동 컴포넌트를 쓰지 않는다"를 소스로 다시 봤다(부모 `ALabMinionPawn`이 CharacterMovement 틱을 끈다, `LabMinion.cpp:199-212`). 다음은 커밋.
+
+### 결정(04)
+
+- **4단계를 "품질을 사는 단계"로 쓰고, 프레임 +0.249ms 뒤의 게임 스레드 +4.66ms를 핵심 그림으로 둔다.** 프레임 시간만 보면 거의 공짜로 보이지만 병목이 옮겨 가고 최대 개체 수가 3만 넘음에서 25,636으로 준다. 요약 그림(네 막대)과 예상·실제 그림(여유 4.33 대 실제 4.66)으로 보였다. 버린 대안: 프레임 시간 막대만 두기(병목 이동이 안 보인다).
+- **예상은 "3단계 게임 스레드의 여유 ÷ 1단계 액터 단가"로 세운다.** 4단계 액터만의 단가를 미리 알 근거가 최종 측정에 없다. 1단계 1천(17.0µs)은 이동 컴포넌트가 든 상한이라 "상한"으로만 읽게 측정 기록에 적었다. 버린 대안: 옛 M3 묶음의 액터당 µs(묶음이 달라 규칙 위반), 트레이스 단가(옛 패키지).
+- **예산·콜리전·전환 대책의 몫은 최종 구성의 빼 보기(`A8-budget`, `S8-col`, `A8-fix`, `A8-hydrate`)로 보이고, 바탕이 다르다는 것을 본문과 한계에 밝힌다.** 최종 측정에 4단계 위에서 하나만 끈 조건이 없다. 4단계가 한 단계에 표현과 딸린 설정 셋을 함께 넣은 것은 "바꾼 것" 첫 문단에 적었다. 버린 대안: 옛 M3 묶음의 E3 값(묶음이 다르다).
+- **전환 대책 이야기는 수치 없이 "바꾼 것"에 넣고, 엔진 동작 둘(풀이 바로 보이게 함, 엔티티 변환으로 옮김)은 엔진 발췌 + 이 레포의 해결 코드로 보인다.** 공개 이슈는 찾지 못해 그렇게 적었다. 대책별 점수(M3 개발 빌드)와 Full1 `transition-dev` 점수는 묶음이 달라 쓰지 않고 측정 기록의 "전환 대책의 경위"에서 가리킨다. 전환 도식(`hyd-transition.svg`)을 새로 그렸다. 버린 대안: `Measurements/M3/shots/transition/`의 띠 이미지를 본문에 넣기(옛 빌드·옛 조건의 화면이라 "지난 구성의 화면은 최신 빌드에서" 규칙에 맞지 않는다).
+- **대형 액터 건너뜀 비율은 1만(1.29%)과 2만(49.5%)만 쓴다.** 3만은 회차가 0.088\~0.427로 갈려 본문에 쓰지 않았다. 대형만 센다는 것을 본문("대형 액터의 애니메이션 갱신 가운데")과 측정 기록에 적었다.
+- **GPU가 준 원인(−0.597ms)은 짐작을 본문에 쓰지 않고 "가르지 않았다"로 둔다.** 새 트레이스를 읽을 수 없고, 옛 트레이스 값은 금지다.
+- **Lumen 항목과 저품질 액터 단계, 래그돌·정밀 판정 일반론은 다루지 않는다.** post-review.md가 "하"로 둔 재료이고 최종 측정에 대응 조건이 없다.
+- **다음 글은 링크 없이 예고한다.** `../05-simulation-lod-entity-pool/`이 아직 없다.
+
+### 확인하지 못한 것(04)
+
+- SVG와 움직이는 WebP를 화면에 그려 보지 않았다(브라우저 금지). 글자 겹침은 좌표와 글자 수로만 확인했다. 원리 도식의 0\~30m 빨간 칸은 폭이 39px로 좁아 글자를 아래 줄에 따로 적었다.
+- 4단계 화면에서 액터의 AnimBP 동작과 전환이 보이는지. 이미지 설명은 "액터다"까지만 적었다.
+- 4단계 GPU −0.597ms의 원인, 액터 하나 12.5µs의 내역, `S8-col`에서 프레임(+2.01)이 게임 스레드(+1.54)보다 더 는 이유, `A8-budget` +1.75ms의 출처.
+- 최종 측정 빌드의 트레이스(`Full2traceser-L4-mass-*`)로 읽은 값.
+
+### 코디네이터용(04)
+
+- Insights 화면을 찍는다: `Full2traceser-L4-mass-N10000-P1-r1.utrace`(비교 `Full2traceser-L3-vatcull-*`), 25\~75초, GameThread, 타이머 `USkinnedMeshComponent_TickComponent`, `USkeletalMeshComponent_CompleteParallelAnimationEvaluation`, `LabActorSyncProcessor`, `Sync_RenderingThread`. 읽을 값과 고칠 곳은 `Posts/04-hydration-anim-budget/measurements.md` "코디네이터가 찍을 Insights 화면"에 있다. 찍으면 README의 주석을 풀고 캡션의 ○○를 채운다.
+- 05번 글이 생기면 04번 README 끝 문단("다음 글에서는…")에 `../05-simulation-lod-entity-pool/README.md` 링크를 단다. 08번 글이 생기면 "최종 구성은 … (08번 글)"에도 링크를 단다.
+- 루트 README "글" 표에 04번 행을 더한다(코디네이터 몫).
+- engine-notes.md에 더할 것: `AnimationBudgetAllocator.cpp:558,561,566`(예산 ÷ 평균 갱신 시간, 넘는 몫이 있을 때만 줄임), `:339`(정렬, 3절의 `:327`은 주석 줄), `AnimationBudgetAllocatorParameters.h:19` `BudgetInMs = 1.0f`(CVar 도움말도 Default 1.0), `MassActorSpawnerSubsystem.cpp:252-255`(풀에서 꺼내자마자 보이게 함, 4절에 줄 번호가 없다), `MassRepresentationActorManagement.cpp:47-56`(`TeleportActor` 기본 구현), `:58-61`(준비됨 기본 참), `MassRepresentationProcessor.cpp:275-298`(준비 대기 조건), `MassRepresentationFragments.h:202,211`(두 플래그 기본 거짓), `Character.cpp:78`(캡슐 34 × 88).
