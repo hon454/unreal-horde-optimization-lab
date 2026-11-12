@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="630" viewBox="0 0 800 630" font-family="Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Segoe UI, sans-serif" font-size="16" fill="#111827">
+<rect x="0.5" y="0.5" width="799" height="629" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+<text x="32" y="46" font-size="22" font-weight="700">5단계가 거리에 따라 개체를 다루는 방식</text>
+<text x="32" y="74" font-size="16" fill="#4b5563">거리는 카메라에서 잰다. 칸의 폭은 거리에 비례하지 않는다</text>
+<text x="214.0" y="114" text-anchor="start" font-size="16" fill="#4b5563">0m</text>
+<line x1="214.0" y1="120" x2="214.0" y2="128" stroke="#4b5563"/>
+<text x="352.5" y="114" text-anchor="middle" font-size="16" fill="#4b5563">30m</text>
+<line x1="352.5" y1="120" x2="352.5" y2="128" stroke="#4b5563"/>
+<text x="491.0" y="114" text-anchor="middle" font-size="16" fill="#4b5563">80m</text>
+<line x1="491.0" y1="120" x2="491.0" y2="128" stroke="#4b5563"/>
+<text x="629.5" y="114" text-anchor="middle" font-size="16" fill="#4b5563">200m</text>
+<line x1="629.5" y1="120" x2="629.5" y2="128" stroke="#4b5563"/>
+<text x="768.0" y="114" text-anchor="end" font-size="16" fill="#4b5563">500m</text>
+<line x1="768.0" y1="120" x2="768.0" y2="128" stroke="#4b5563"/>
+<text x="32" y="153" font-size="17" font-weight="700">무엇으로 그리나</text>
+<text x="32" y="173" font-size="16" fill="#4b5563">Representation LOD</text>
+<rect x="216.0" y="134" width="134.5" height="36" rx="4" fill="#dc2626"/>
+<text x="283.2" y="158" text-anchor="middle" font-size="16" font-weight="700" fill="white">액터</text>
+<rect x="354.5" y="134" width="273.0" height="36" rx="4" fill="#2563eb"/>
+<text x="491.0" y="158" text-anchor="middle" font-size="16" font-weight="700" fill="white">VAT 인스턴스</text>
+<rect x="631.5" y="134" width="134.5" height="36" rx="4" fill="white" stroke="#9ca3af" stroke-dasharray="5 4"/>
+<text x="698.8" y="158" text-anchor="middle" font-size="16" font-weight="700" fill="#4b5563">그리지 않는다</text>
+<text x="32" y="205" font-size="17" font-weight="700">Simulation LOD</text>
+<text x="32" y="225" font-size="16" fill="#4b5563">로직을 얼마나 자주</text>
+<rect x="216.0" y="186" width="273.0" height="36" rx="4" fill="#374151"/>
+<text x="352.5" y="210" text-anchor="middle" font-size="16" font-weight="700" fill="white">High · 매 프레임</text>
+<rect x="493.0" y="186" width="134.5" height="36" rx="4" fill="#9333ea"/>
+<text x="560.2" y="210" text-anchor="middle" font-size="16" font-weight="700" fill="white">Medium</text>
+<rect x="631.5" y="186" width="134.5" height="36" rx="4" fill="#b45309"/>
+<text x="698.8" y="210" text-anchor="middle" font-size="16" font-weight="700" fill="white">Off</text>
+<text x="32" y="257" font-size="17" font-weight="700">Lab 접근·범위 피해</text>
+<text x="32" y="277" font-size="16" fill="#4b5563">청크 필터를 건다</text>
+<rect x="216.0" y="238" width="273.0" height="36" rx="4" fill="#374151"/>
+<text x="352.5" y="262" text-anchor="middle" font-size="16" font-weight="700" fill="white">매 프레임</text>
+<rect x="493.0" y="238" width="134.5" height="36" rx="4" fill="#9333ea"/>
+<text x="560.2" y="262" text-anchor="middle" font-size="16" font-weight="700" fill="white">0.5초 간격</text>
+<rect x="631.5" y="238" width="134.5" height="36" rx="4" fill="#b45309"/>
+<text x="698.8" y="262" text-anchor="middle" font-size="16" font-weight="700" fill="white">1초 간격</text>
+<text x="32" y="309" font-size="17" font-weight="700">엔진 이동·조향 넷</text>
+<text x="32" y="329" font-size="16" fill="#4b5563">Off 개체를 빼는 쿼리</text>
+<rect x="216.0" y="290" width="411.5" height="36" rx="4" fill="#9ca3af"/>
+<text x="421.8" y="314" text-anchor="middle" font-size="16" font-weight="700" fill="white">매 프레임 돈다</text>
+<rect x="631.5" y="290" width="134.5" height="36" rx="4" fill="white" stroke="#9ca3af" stroke-dasharray="5 4"/>
+<text x="698.8" y="314" text-anchor="middle" font-size="16" font-weight="700" fill="#4b5563">돌지 않는다</text>
+<text x="32" y="361" font-size="17" font-weight="700">Lab Off 이동</text>
+<text x="32" y="381" font-size="16" fill="#4b5563">ULabOffMoveProcessor</text>
+<rect x="216.0" y="342" width="411.5" height="36" rx="4" fill="white" stroke="#9ca3af" stroke-dasharray="5 4"/>
+<text x="421.8" y="366" text-anchor="middle" font-size="16" font-weight="700" fill="#4b5563">없음</text>
+<rect x="631.5" y="342" width="134.5" height="36" rx="4" fill="#15803d"/>
+<text x="698.8" y="366" text-anchor="middle" font-size="16" font-weight="700" fill="white">1초 간격</text>
+<text x="214" y="404" font-size="16" fill="#4b5563">호드 총수 1만에서 실제 주기: Medium 0.11초, Off 0.32초</text>
+<text x="214" y="428" font-size="16" fill="#4b5563">걷는 개체: High 1,458, Medium 2,411, Off 5,997(프레임 평균)</text>
+<line x1="32" y1="450" x2="768" y2="450" stroke="#e5e7eb"/>
+<text x="32" y="476" font-size="18" font-weight="700">죽은 개체의 엔티티</text>
+<text x="32" y="519" font-size="17" font-weight="700">4단계</text>
+<rect x="120" y="494" width="170" height="38" rx="6" fill="#f8fafc" stroke="#9ca3af" stroke-width="2"/>
+<text x="205.0" y="519" text-anchor="middle" font-size="16">사망이 끝난다</text>
+<path d="M294 513 L316 513" stroke="#4b5563" stroke-width="2"/>
+<path d="M310 507 L318 513 L310 519" fill="none" stroke="#4b5563" stroke-width="2"/>
+<rect x="322" y="494" width="170" height="38" rx="6" fill="#f8fafc" stroke="#9ca3af" stroke-width="2"/>
+<text x="407.0" y="519" text-anchor="middle" font-size="16">엔티티를 파괴한다</text>
+<path d="M496 513 L518 513" stroke="#4b5563" stroke-width="2"/>
+<path d="M512 507 L520 513 L512 519" fill="none" stroke="#4b5563" stroke-width="2"/>
+<rect x="524" y="494" width="170" height="38" rx="6" fill="#f8fafc" stroke="#9ca3af" stroke-width="2"/>
+<text x="609.0" y="519" text-anchor="middle" font-size="16">새 엔티티를 만든다</text>
+<text x="32" y="569" font-size="17" font-weight="700">5단계</text>
+<rect x="120" y="544" width="170" height="38" rx="6" fill="#f8fafc" stroke="#2563eb" stroke-width="2"/>
+<text x="205.0" y="569" text-anchor="middle" font-size="16">사망이 끝난다</text>
+<path d="M294 563 L316 563" stroke="#4b5563" stroke-width="2"/>
+<path d="M310 557 L318 563 L310 569" fill="none" stroke="#4b5563" stroke-width="2"/>
+<rect x="322" y="544" width="170" height="38" rx="6" fill="#f8fafc" stroke="#2563eb" stroke-width="2"/>
+<text x="407.0" y="569" text-anchor="middle" font-size="16">풀에 넣는다</text>
+<path d="M496 563 L518 563" stroke="#4b5563" stroke-width="2"/>
+<path d="M512 557 L520 563 L512 569" fill="none" stroke="#4b5563" stroke-width="2"/>
+<rect x="524" y="544" width="170" height="38" rx="6" fill="#f8fafc" stroke="#2563eb" stroke-width="2"/>
+<text x="609.0" y="569" text-anchor="middle" font-size="16">같은 엔티티를 다시 쓴다</text>
+<text x="120" y="604" font-size="16" fill="#4b5563">두 경우 모두 새 위치는 맵 가장자리 고리(490–500m)이고 일련번호도 같다.</text>
+</svg>

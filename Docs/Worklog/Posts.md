@@ -333,6 +333,39 @@
 ### 진행(05)
 
 - 조사 끝(성공). 읽은 것: AGENTS.md, STATUS.md, posting.md, backlog.md, post-review.md(핵심 인사이트 4·9, 06 Simulation LOD 사실 확인), post-material.md "06 Simulation LOD", measurement.md("확정값", "총괄 묶음 규약", "엔티티 풀 묶음 규약"), engine-notes.md 3·5절, references.md, code-tour.md, plan.md M4·M5, Q6.md "Full2 재측정"·"Pre6 촬영과 풀 끔 떨림 확인", 03번 글 세 파일, `full-conditions.json`(`L4`·`L5`·`A8-simlod`·`A8-pool`). 소스: HordeOptLab.cpp, LabConfig.h/.cpp(`SimLod`, `UsesSimLod`, `bEntityPool`), LabMassProcessors.cpp(접근·Off 이동·관찰자·상태 프로세서), LabCrowdSubsystem.cpp(`SpawnEntities`, `RecycleAndRespawn`, `ReinitPooledEntity`). 엔진: `MassVisualizationComponent.cpp:754-775,812-827,849-866,1126-1158,1537-1547`, `MassSkinnedMeshRepresentationTypes.h:700-706`, ISKM `RemoveInstance` 호출자 검색(정지 표현 프로세서뿐). 다음은 초안.
+- 그림 끝(성공). `make-figures.py`가 `summary.csv`·`full-n-at-60fps.csv`에서 SVG 다섯 개(`simlod-summary`, `-problem`, `-principle`, `-result`, `-ablation`)를 만든다. 상수 없음. 글자 16px 이상, 흰 배경. 그림 속 글자를 CSV 값과 대조했다(밴드 개수 5,996.5는 반올림을 반올림-위로 고쳐 5,997). 엔티티 풀 그림은 README의 `entity-pool.svg`를 상대 경로로 쓴다.
+- 초안 끝(성공). README.md: 요약, 시나리오 카드, 배경 지식 셋(Simulation LOD, 가변 틱과 청크 필터, 엔티티 풀), 문제, 원리(+예상), 바꾼 것, 결과(+엔티티 풀 소절), 틀렸던 가설, 한 문장으로. 본문(배경 지식·코드·그림·제목 제외) 약 4,300자(공백 포함). 엔진 코드 발췌 22줄.
+- 측정 기록 끝(성공). measurements.md: 본문·그림의 모든 수치에 조건·열·세 회차, 계산식, 16분 실행의 행 라벨과 열, 엔진 소스 위치, 발췌 줄 표, 코디네이터가 찍을 Insights 화면, 확인하지 않은 것.
+- 확인 끝(성공). README·measurements의 상대 링크가 모두 실제 파일을 가리킨다(주석 속 Insights 자리 제외). 코드 스팬 밖 `~`는 모두 `\~`다. 독자용 문장에 묶음 이름·조건 라벨·마일스톤 이름이 없다(링크 주소에만 있다). 04·06번 README가 있어 링크했다. 엔진 발췌 22줄, 레포 발췌는 블록마다 15줄 이하.
+
+### 결정(05)
+
+- **엔티티 풀 그림은 README 그림을 다시 쓴다.** 대안: `timeline.csv`에서 이 글 전용 그림을 만든다. 근거: README 그림이 같은 세 지표(트랙, GPU 메모리, 프레임)를 같은 조건 문장과 함께 이미 보이고, 같은 값의 그림이 두 벌이면 다시 잴 때 둘을 고쳐야 한다. 단점: 그림의 GPU 메모리 5,062(5,062.5를 반올림-짝수로)와 본문 5.06GB의 자릿수가 다르다. 측정 기록에 적었다.
+- **5단계에서 풀이 하는 일과 최종 구성에서 필요한 이유를 나눠 썼다.** 5단계의 30\~200m는 VAT라 트랙이 없어 풀이 막을 누수가 없다고 적고, 풀을 넣은 이유는 "다음 단계에서 표현 하나만 바꾸기"(plan.md M5 결정 1, `m4offpool` 기준점)로 적었다. 16분 실행이 최종 구성(ISKM)이라는 것을 본문에 밝혔다.
+- **공개 이슈 링크는 넣지 않았다.** references.md에 포럼 스레드 제목("Mass crowds using SkinnedMeshInstance leak GPU memory")만 있고 주소가 없다. 본문은 "공개 이슈의 주소는 확인하지 못했다"와 엔진 소스 발췌로 대신했다. 대안: 제목을 본문에 적는다. 버린 이유: 주소 없이 제목만 적으면 독자가 확인할 수 없다.
+- **예상은 개체 수로만 세웠다.** 엔진 이동·조향이 처리하는 걷는 개체가 39%로 준다(5단계에서 센 밴드 개수). ms 예상은 트레이스 값이 필요하고, 옛 트레이스(`Full1*`) 값은 쓰지 않는 규칙이라 Insights 자리만 주석으로 두었다.
+- **4 → 5단계 차이에 엔티티 풀이 섞인 것을 밝히고, 빼 보기 두 행으로 보완했다.** 풀만 뺀 5단계는 최종 측정에 없다. `A8-simlod`(+1.04ms)와 `A8-pool`(범위 안)을 한 그림에 두었다. 다른 구성(최종)이라 사다리 그림과 잇지 않았다.
+- **문제 그림은 선 대신 막대로 그렸다.** 5천에서 세 값(4.53, 3.48, 5.73)이 가까워 선 그림의 값 글자가 겹친다. 막대는 값을 막대 끝에 적어 겹치지 않는다.
+- **탑뷰의 게임 스레드 증가(+0.454ms)를 한계에 한 줄로 적었다.** 최종 측정의 5단계 결과라 빼면 유리한 값만 고른 것이 된다. 원인은 모른다고 적었다.
+- **본문에 쓰지 않은 것:** 관찰자 `ULabOffMoveEnterObserver`, 저격·상태 타이머에 필터를 걸지 않은 이유의 사례, 풀 켬의 0.265ms 증가, 트랙이 두 배에서 멈추는 이유의 추정(컴포넌트 둘), 풀 끔 떨림. 측정 기록에만 있다.
+
+### 확인하지 못한 것(05)
+
+- 엔진 이동·조향 넷이 실제로 39% 근처로 줄었는지(최종 측정 빌드의 트레이스를 내보내지 않았다).
+- 5단계에서 엔티티 풀만의 몫.
+- 풀 켬 트랙이 약 2만에서 멈추는 이유, 풀 끔 13분째 GPU 메모리 계단의 원인, 풀 끔의 시간에 따른 프레임 변동(느린 쪽).
+- 탑뷰에서 5단계 게임 스레드가 는 원인, 1만 P1 GPU +0.036ms의 원인.
+- 4·5단계 WebP와 SVG를 화면에 그려 보지 않았다(브라우저 금지). 글자 겹침은 좌표와 글자 수로만 확인했다.
+- 공개 이슈의 주소.
+
+### 코디네이터용(05)
+
+- Insights 화면: `Full2traceser-L4-mass-N10000-P1-r1.utrace`와 `Full2traceser-L5-m4offpool-N10000-P1-r1.utrace`, 25\~75초, 게임 스레드, 엔진 이동·조향 넷(`UMassApplyForceProcessor`, `UMassApplyMovementProcessor`, `UMassSteerToMoveTargetProcessor`, `UMassSmoothOrientationProcessor`)의 프레임당 합과 `LabOffMoveProcessor`. 찍어서 `Posts/05-simulation-lod-entity-pool/images/insights-movement-l4-l5.jpg`로 넣고, README "결과"의 주석을 풀어 캡션의 X.XX를 채운다. 값은 measurements.md "코디네이터가 찍을 Insights 화면"에 행으로 더한다.
+- 공개 이슈: references.md의 포럼 스레드 "Mass crowds using SkinnedMeshInstance leak GPU memory"의 주소를 찾으면 references.md에 적고, 05번(그리고 06번) 글의 "공개 이슈의 주소는 확인하지 못했다" 문장을 링크로 바꾼다.
+- 06번 글의 폴더가 아직 커밋되지 않았다(이 커밋 때 파일은 있다). 이름이 바뀌면 05번 README의 링크 둘(`../06-iskm/README.md`)을 고친다.
+- 루트 README "글" 표에 05번 행을 더한다.
+- `Docs/figures/readme/entity-pool.svg`를 바꾸면 05번 measurements.md "16분 실행"의 그림 값 문장도 고친다.
+- engine-notes.md에 더할 것: ISKM 트랙 해제 입력(`EntitiesRequiringRemoval`)을 채우는 경로가 `MassStationaryISMSwitcherProcessor.cpp:127`뿐이고 그 쿼리가 `FMassStaticRepresentationTag`를 요구한다(`:30`). `DeallocateTrack` 호출은 MassGameplay 전체에서 `MassVisualizationComponent.cpp:1156` 하나다. 3절 행에 줄 번호를 보탤 수 있다. 엔진 조향 프로세서의 Off 쿼리 줄은 `MassSteeringProcessors.cpp:86`이다(5절은 85-87로 적었다, 같은 범위).
 
 ## 01·03 트레이스 값 재추출(2026-11-13)
 
