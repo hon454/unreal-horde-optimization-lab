@@ -46,7 +46,7 @@
 
 - "AnimBank & InstancedSkinnedMeshComponent" (2025-12, Epic 답변: 5.8 목표는 VAT 기능 동등, 트랙 할당 API)
 - "AnimBank and Instanced Skinned Mesh Component" (2026-06, Epic: 5.8부터 Mass + ISKM + AnimSequenceTransformProvider 권장)
-- "Mass crowds using SkinnedMeshInstance leak GPU memory" (2026-06 — 5.8.4 소스에서도 미수정. engine-notes.md 3절)
+- ["Mass crowds using SkinnedMeshInstance leak GPU memory"](https://forums.unrealengine.com/t/mass-crowds-using-skinnedmeshinstance-leak-gpu-memory-every-wave-of-spawned-and-killed-entities-permanently-grows-the-animation-track-pool-5-8/2742508) (2026-06 — 5.8.4 소스에서도 미수정. engine-notes.md 3절)
 - "Paragon Minions Ragdoll Immediately", "Paragon Minion animation assets cannot be changed"
 
 ## 도구

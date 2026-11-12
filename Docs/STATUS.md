@@ -15,7 +15,7 @@
 
 순서대로 한다.
 
-1. **01번과 03번 글의 트레이스 값을 새 트레이스에서 다시 뽑는다.** 코디네이터가 한다. 글 01, 02, 04, 06, 07의 Insights 화면도 찍는다.
+1. **01번 글의 Insights 화면을 새 트레이스로 다시 찍는다.** 코디네이터가 한다. 다른 글은 내보낸 값을 쓴다([D31](Worklog/autonomous-decisions.md)).
 2. **글 00\~09를 쓴다.** 대기열은 [backlog.md](backlog.md)에 있다. 나누는 법은 [D27](Worklog/autonomous-decisions.md)에 있다.
    - 시범 글 01은 [Posts/01-actor-baseline](../Posts/01-actor-baseline/README.md)에 있다.
    - 글 규칙은 [posting.md](Guides/posting.md), [ADR-0014](Decisions/0014-post-format.md), [ADR-0015](Decisions/0015-readme-figures.md)에 있다.
@@ -27,9 +27,9 @@
 
 ## 진행 중인 세션
 
-- 글 04, 05, 06: 코디네이터의 하위 에이전트 셋이 쓴다. Opus high. 진행 중. 세션 대신 하위 에이전트를 쓰는 이유는 [D28](Worklog/autonomous-decisions.md)에 있다.
-- 글 00, 02, 03은 초안이 커밋됐다(2eb698f, bed7b5c, dbbdb71).
-- 촬영은 끝났다(edc6eb0). 에디터, 빌드, Chrome의 제한은 없다.
+- 글 07, 08, 09: 코디네이터의 하위 에이전트 셋이 쓴다. Opus high. 진행 중.
+- 글 02, 04, 05, 06의 트레이스 값 채우기: 하위 에이전트 하나. Sonnet medium. 진행 중.
+- 글 00\~06은 초안이 커밋됐다. 세션 대신 하위 에이전트를 쓰는 이유는 [D28](Worklog/autonomous-decisions.md)에 있다.
 
 코디네이터는 세션을 띄우면 여기에 적는다. 끝난 세션은 결과를 확인하고 보관한 뒤 지운다.
 
