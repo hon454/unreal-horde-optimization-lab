@@ -49,3 +49,8 @@
 - 요약에는 `game_p95_ms`, `gpu_p95_ms`(과 `_min`·`_max`)를 맨 끝 열로 더했다(2026-11-12 사용자 결정). `Measurements/Full1/summary.csv`는 54행, `runs.csv`는 163행(r0 포함)이다.
 - 조건 표 21개로 읽을 수 있는 것: 사다리 8단계, 빼 보기 열 행, 하위 실험 `S1-budget`·`S1-uro`·`S8-col`. "왜 40m인가"는 `large_skip_ratio`(`L8` 1만 0.003, 2만 0.637)로 읽는다([ADR-0010](0010-final-representation-bands.md) 결과). Niagara 대 ISKM은 `L8` 대 `A8-farcull`이다([ADR-0011](0011-entity-driven-crowd-particles.md) 결과).
 - 하위 실험 `S1-budget`·`S1-uro`는 1만 P1 프레임 p50이 400.77ms, 422.24ms로 `L1-full`(441.46ms)보다 낮다. 세 값 모두 병목이 Game이다.
+
+### `Full2` 실행 결과(2026-11-13)
+
+- 200m 밖 입자 메시를 LOD4로 바꾼 뒤(bf1a4c8) 같은 러너와 같은 조건 표로 `Full2`를 쟀다. Test 패키지 08e45f2, 계획 178회 모두 성공, 실패 0, 동등성 54조건 통과, 주기 스파이크 0건이다([Worklog/Q6.md](../Worklog/Q6.md) "Full2 재측정").
+- 규약 절의 이름이 [measurement.md](../Guides/measurement.md) "총괄 묶음 규약"으로 바뀌었다. 위 결과 둘째 줄의 "총괄 묶음 `Full1` 규약"은 이 절이다.
