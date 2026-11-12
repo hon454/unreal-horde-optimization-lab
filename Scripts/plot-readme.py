@@ -1,10 +1,11 @@
 # Makes the SVG figures of the root README in Docs/figures/readme/.
 # Run from anywhere: py -3 -I Scripts/plot-readme.py
-# Every value comes from the final measurement:
-#   Measurements/Full1/summary.csv               ladder, resources and ablation (10000, P1)
-#   Measurements/Full1/runs.csv                  run ranges of the resource figure
-#   Docs/figures/full1/full-n-at-60fps.csv       max entities at 60 fps (n_p95)
-#   Measurements/Full1/transition-dev/runs.csv   transition pop (mean_excess, noticeable/events)
+# Every value comes from the latest full batch (Full2), except the transition figure:
+#   Measurements/Full2/summary.csv               ladder, resources and ablation (10000, P1)
+#   Measurements/Full2/runs.csv                  run ranges of the resource figure
+#   Docs/figures/full2/full-n-at-60fps.csv       max entities at 60 fps (n_p95)
+#   Measurements/Pool1/timeline.csv              entity pool on/off over 16 minutes (one run each, 1-minute bins)
+#   Measurements/Full1/transition-dev/runs.csv   transition pop (Development reference, not re-measured with Full2)
 # Colours and fonts follow Posts/01-actor-baseline/make-figures.py.
 import csv, os, statistics
 
@@ -12,6 +13,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.normpath(os.path.join(HERE, ".."))
 OUT = os.path.join(ROOT, "Docs", "figures", "readme")
 N, PRESET = 10000, "P1"
+BATCH = "Full2"
 
 FONT = "Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Segoe UI, sans-serif"
 INK, SUB, LINE, BG, CARD = "#111827", "#4b5563", "#e5e7eb", "#ffffff", "#f8fafc"
@@ -74,7 +76,7 @@ PURPLE = "#7c3aed"
 
 def load_summary():
     rows = {}
-    with open(os.path.join(ROOT, "Measurements", "Full1", "summary.csv"), encoding="utf-8") as f:
+    with open(os.path.join(ROOT, "Measurements", BATCH, "summary.csv"), encoding="utf-8") as f:
         for r in csv.DictReader(f):
             if int(r["n"]) == N and r["preset"] == PRESET:
                 rows[r["variant"]] = r
@@ -247,7 +249,7 @@ def run_values(cond, col):
     """Per-run values behind a summary row: r1..r10 (r0 and the A/A runs r11+ are left out, as in summarize.py)."""
     import re
     out = []
-    with open(os.path.join(ROOT, "Measurements", "Full1", "runs.csv"), encoding="utf-8") as f:
+    with open(os.path.join(ROOT, "Measurements", BATCH, "runs.csv"), encoding="utf-8") as f:
         for r in csv.DictReader(f):
             m = re.search(r"-r(\d+)$", r["label"])
             if (r["variant"] == cond and int(r["n"]) == N and r["preset"] == PRESET
@@ -325,7 +327,7 @@ def resources():
 # ---------- 2. max entities at 60 fps ----------
 def max_entities():
     data = {}
-    with open(os.path.join(ROOT, "Docs", "figures", "full1", "full-n-at-60fps.csv"), encoding="utf-8") as f:
+    with open(os.path.join(ROOT, "Docs", "figures", BATCH.lower(), "full-n-at-60fps.csv"), encoding="utf-8") as f:
         for r in csv.DictReader(f):
             data[r["series"].split(" ", 1)[1]] = (int(r["n_p95"]), r["note_p95"] == "above range")
     o = [HATCH]
@@ -371,9 +373,12 @@ def ablation():
     mets = [("프레임 시간", "frame_p50_ms", DARK), ("게임 스레드", "game_p50_ms", BLUE), ("GPU", "gpu_p50_ms", PINK)]
     o = []
     base = {col: val(BASE, col) for _, col, _ in mets}
+    base_bot = S[BASE]["bottleneck"]
+    bot_name = {"game": "게임 스레드", "gpu": "GPU", "render": "렌더 스레드"}
     y = title(o, "최종 구성(8단계)에서 기법 하나를 뺐을 때의 변화",
               ["호드 총수 1만, 오브 시점 카메라, 세 번 잰 중앙값의 차이(ms)",
-               f"0은 최종 구성: 프레임 시간 {fmt(base['frame_p50_ms'])}, 게임 스레드 {fmt(base['game_p50_ms'])}, GPU {fmt(base['gpu_p50_ms'])}"])
+               f"0은 최종 구성: 프레임 시간 {fmt(base['frame_p50_ms'])}, 게임 스레드 {fmt(base['game_p50_ms'])}, GPU {fmt(base['gpu_p50_ms'])}",
+               f"최종 구성의 병목은 {bot_name[base_bot]}다. 위에서부터 프레임 시간이 많이 느려지는 순"])
     y += 34
     legend(o, y, [(m[0], m[2]) for m in mets])
     y += 22
@@ -385,16 +390,26 @@ def ablation():
     o.append(f'<text x="{ZX + 10}" y="{y}" font-size="16" fill="{SUB}">느려짐 →</text>')
     y += 16
     top = y
-    for cond, name, lines in ABLATIONS:
+    rows = sorted(ABLATIONS, key=lambda a: -(val(a[0], "frame_p50_ms") - base["frame_p50_ms"]))
+    for cond, name, lines in rows:
         diffs = {}
         for _, col, _ in mets:
             d = val(cond, col) - base[col]
             diffs[col] = (d, abs(d) > max(rng(cond, col), rng(BASE, col)))
-        only_game = (not diffs["frame_p50_ms"][1]) and diffs["game_p50_ms"][1]
-        sub = list(lines) + (["프레임은 그대로, 게임 스레드만"] if only_game else [])
+        fd, freal = diffs["frame_p50_ms"]
+        gd, greal = diffs["gpu_p50_ms"]
+        tags = []
+        if S[cond]["bottleneck"] != base_bot:  # e.g. without hydrated actors the GPU becomes the bottleneck
+            tags.append(f"병목이 {bot_name[S[cond]['bottleneck']]}로 바뀜")
+        if not freal and diffs["game_p50_ms"][1] and not greal:
+            tags.append("프레임은 그대로, 게임 스레드만")
+        elif greal and (not freal or (fd > 0) != (gd > 0)):
+            tags.append("GPU 차이가 프레임에 드러나지 않음")
+        sub = list(lines) + tags
         label(o, LX, y + 15, name, sub)
-        if only_game:  # recolour the tag line
-            o[-1] = o[-1].replace(f'fill="{SUB}"', f'fill="{BLUE}" font-weight="700"')
+        for k in range(len(tags)):  # recolour the tag lines
+            i = len(o) - 1 - k
+            o[i] = o[i].replace(f'fill="{SUB}"', f'fill="{BLUE}" font-weight="700"')
         by = y + 1
         for _, col, c in mets:
             d, real = diffs[col]
@@ -456,6 +471,77 @@ def transition():
     y += 50
     o.append(f'<text x="32" y="{y}" font-size="16" fill="{SUB}">점: 세 시드의 중앙값. 막대와 아래 숫자: 시드 사이 범위. 가로축은 4에서 시작한다.</text>')
     write("transition.svg", svg(y + 26, o))
+
+
+# ---------- 4b. entity pool over a long run ----------
+# Measurements/Pool1/timeline.csv: one 960 s run each (Scripts/run-pool.ps1), 1-minute bins (Scripts/pool-timeline.py).
+# Pool on = L8-q4final arguments, pool off = A8-pool arguments (-LabEntityPool=0). One run each, so no run range.
+POOL_RUNS = [("L8-q4final", "풀 켬(최종 구성)", BLUE, ""), ("A8-pool", "풀 끔", PINK, "6 4")]
+POOL_PANELS = [("iskm_tracks_end", "ISKM 트랙 수", "개", 40000),
+               ("gpu_mem_mean", "GPU 메모리", "MB", 1000),
+               ("frame_p50", "프레임 시간 중앙값", "ms", 1)]
+
+
+def pool():
+    data = {}
+    with open(os.path.join(ROOT, "Measurements", "Pool1", "timeline.csv"), encoding="utf-8") as f:
+        for r in csv.DictReader(f):
+            for cond, *_ in POOL_RUNS:
+                if f"-{cond}-N{N}-{PRESET}-" in r["label"]:
+                    data.setdefault(cond, []).append(r)
+    for cond in data:
+        data[cond].sort(key=lambda r: int(r["minute"]))
+    minutes = [int(r["minute"]) for r in data[POOL_RUNS[0][0]]]
+    m0, m1 = minutes[0], minutes[-1]
+    o = []
+    y = title(o, "엔티티 풀을 끄면 오래 돌수록 느려진다",
+              [f"최종 구성, 호드 총수 1만, 오브 시점 카메라, {m1}분 실행 한 번씩",
+               "1분 구간마다의 값. 실행이 한 번이라 범위는 없다"])
+    y += 34
+    legend(o, y, [(name, c) for _, name, c, _ in POOL_RUNS])
+    PX0, PX1, PH, GAP = 120, W - 150, 110, 64
+    sx = (PX1 - PX0) / (m1 - m0)
+    y += 40
+    for col, name, unit, step in POOL_PANELS:
+        vals = [float(r[col]) for cond, *_ in POOL_RUNS for r in data[cond]]
+        hi = max(vals)
+        lo = 0.0 if col == "iskm_tracks_end" else min(vals) * 0.9
+        lo = step * int(lo // step)
+        top = step * (int(hi // step) + 1)
+        sy = PH / (top - lo)
+        o.append(f'<text x="32" y="{y}" font-size="17" font-weight="700">{esc(name)}</text>'
+                 f'<text x="{32 + len(name) * 17 + 10}" y="{y}" font-size="16" fill="{SUB}">({unit})</text>')
+        y0 = y + 16
+        base = y0 + PH
+        t = lo
+        while t <= top + 1e-9:
+            ty = base - (t - lo) * sy
+            o.append(f'<line x1="{PX0}" y1="{ty:.1f}" x2="{PX1}" y2="{ty:.1f}" stroke="{LINE}"/>')
+            lab = f"{t / 10000:g}만" if col == "iskm_tracks_end" and t else f"{t:,.0f}"
+            o.append(f'<text x="{PX0 - 8}" y="{ty + 5:.1f}" text-anchor="end" font-size="16" fill="{SUB}">{lab}</text>')
+            t += step
+        for cond, rname, c, dash in POOL_RUNS:
+            pts = " ".join(f"{PX0 + (int(r['minute']) - m0) * sx:.1f},{base - (float(r[col]) - lo) * sy:.1f}" for r in data[cond])
+            da = f' stroke-dasharray="{dash}"' if dash else ""
+            o.append(f'<polyline points="{pts}" fill="none" stroke="{c}" stroke-width="2.5"{da}/>')
+            last = float(data[cond][-1][col])
+            ly = base - (last - lo) * sy
+            txt = f"{last:,.0f}" if col != "frame_p50" else f"{last:.2f}"
+            o.append(f'<circle cx="{PX1:.1f}" cy="{ly:.1f}" r="4" fill="{c}"/>')
+            o.append(f'<text x="{PX1 + 10}" y="{ly + 5:.1f}" font-size="16" font-weight="700" fill="{c}">{txt}</text>')
+        y = base + GAP
+    # minute axis under the last panel
+    ay = y - GAP + 24
+    for mm in range(m0, m1 + 1):
+        if mm in (m0, m1) or mm % 4 == 0:
+            o.append(f'<text x="{PX0 + (mm - m0) * sx:.1f}" y="{ay}" text-anchor="middle" font-size="16" fill="{SUB}">{mm}분</text>')
+    y = ay + 32
+    o.append(f'<line x1="32" y1="{y - 14}" x2="{W - 32}" y2="{y - 14}" stroke="{LINE}"/>')
+    off0, off1 = data["A8-pool"][0], data["A8-pool"][-1]
+    o.append(f'<text x="32" y="{y + 12}" font-size="16" fill="{SUB}">오른쪽 숫자: {m1}분째 값. 풀 끔의 1분째는 트랙 {float(off0["iskm_tracks_end"]):,.0f}, '
+             f'GPU 메모리 {float(off0["gpu_mem_mean"]):,.0f}MB, 프레임 {float(off0["frame_p50"]):.2f}ms</text>')
+    o.append(f'<text x="32" y="{y + 36}" font-size="16" fill="{SUB}">60초 측정에서는 풀 켬과 풀 끔이 구별되지 않았다.</text>')
+    write("entity-pool.svg", svg(y + 60, o))
 
 
 # ---------- 5. scenario (top-down sketch) ----------
@@ -626,4 +712,5 @@ if __name__ == "__main__":
     max_entities()
     ablation()
     transition()
+    pool()
     print("wrote", ", ".join(sorted(os.listdir(OUT))), "to", os.path.relpath(OUT, ROOT))

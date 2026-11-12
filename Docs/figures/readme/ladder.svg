@@ -15,101 +15,101 @@
 <text x="32" y="178" font-size="16" fill="#4b5563">축척 A: 0–450ms</text>
 <text x="32" y="206" font-size="17" font-weight="700">1단계 액터 군중</text>
 <text x="32" y="227" font-size="16" fill="#4b5563">ACharacter + AnimBP</text>
-<rect x="330.0" y="192" width="343.4" height="17" rx="3" fill="#374151"/>
-<text x="680.4" y="206" font-size="16"><tspan font-weight="700" fill="#374151">441</tspan></text>
-<rect x="330.0" y="213" width="332.1" height="17" rx="3" fill="#2563eb"/>
-<text x="669.1" y="227" font-size="16"><tspan font-weight="700" fill="#2563eb">427</tspan><tspan font-weight="700" fill="#b45309"> 병목</tspan></text>
-<rect x="330.0" y="234" width="23.5" height="17" rx="3" fill="#0d9488"/>
-<text x="360.5" y="248" font-size="16"><tspan font-weight="700" fill="#0d9488">30.3</tspan></text>
-<rect x="330.0" y="255" width="39.3" height="17" rx="3" fill="#db2777"/>
-<text x="376.3" y="269" font-size="16"><tspan font-weight="700" fill="#db2777">50.5</tspan></text>
+<rect x="330.0" y="192" width="342.2" height="17" rx="3" fill="#374151"/>
+<text x="679.2" y="206" font-size="16"><tspan font-weight="700" fill="#374151">440</tspan></text>
+<rect x="330.0" y="213" width="330.5" height="17" rx="3" fill="#2563eb"/>
+<text x="667.5" y="227" font-size="16"><tspan font-weight="700" fill="#2563eb">425</tspan><tspan font-weight="700" fill="#b45309"> 병목</tspan></text>
+<rect x="330.0" y="234" width="23.6" height="17" rx="3" fill="#0d9488"/>
+<text x="360.6" y="248" font-size="16"><tspan font-weight="700" fill="#0d9488">30.4</tspan></text>
+<rect x="330.0" y="255" width="39.1" height="17" rx="3" fill="#db2777"/>
+<text x="376.1" y="269" font-size="16"><tspan font-weight="700" fill="#db2777">50.2</tspan></text>
 <line x1="343.0" y1="164" x2="343.0" y2="282" stroke="#b45309" stroke-width="2" stroke-dasharray="5 4"/>
 <text x="337.0" y="168" text-anchor="end" font-size="16" font-weight="700" fill="#b45309">16.7ms</text>
 <line x1="32" y1="292" x2="768" y2="292" stroke="#e5e7eb"/>
 <text x="32" y="322" font-size="16" fill="#4b5563">축척 B: 0–17ms(축척 A의 약 26배)</text>
 <text x="32" y="350" font-size="17" font-weight="700">2단계 Mass 로직</text>
 <text x="32" y="371" font-size="16" fill="#4b5563">애니메이션 없는 ISM</text>
-<rect x="330.0" y="336" width="238.3" height="17" rx="3" fill="#374151"/>
-<text x="575.3" y="350" font-size="16"><tspan font-weight="700" fill="#374151">9.69</tspan></text>
-<rect x="330.0" y="357" width="149.5" height="17" rx="3" fill="#2563eb"/>
-<text x="486.5" y="371" font-size="16"><tspan font-weight="700" fill="#2563eb">6.08</tspan></text>
-<rect x="330.0" y="378" width="154.4" height="17" rx="3" fill="#0d9488"/>
-<text x="491.4" y="392" font-size="16"><tspan font-weight="700" fill="#0d9488">6.28</tspan></text>
-<rect x="330.0" y="399" width="231.6" height="17" rx="3" fill="#db2777"/>
-<text x="568.6" y="413" font-size="16"><tspan font-weight="700" fill="#db2777">9.41</tspan><tspan font-weight="700" fill="#b45309"> 병목</tspan></text>
+<rect x="330.0" y="336" width="253.6" height="17" rx="3" fill="#374151"/>
+<text x="590.6" y="350" font-size="16"><tspan font-weight="700" fill="#374151">10.3</tspan></text>
+<rect x="330.0" y="357" width="155.1" height="17" rx="3" fill="#2563eb"/>
+<text x="492.1" y="371" font-size="16"><tspan font-weight="700" fill="#2563eb">6.30</tspan></text>
+<rect x="330.0" y="378" width="159.4" height="17" rx="3" fill="#0d9488"/>
+<text x="496.4" y="392" font-size="16"><tspan font-weight="700" fill="#0d9488">6.48</tspan></text>
+<rect x="330.0" y="399" width="246.5" height="17" rx="3" fill="#db2777"/>
+<text x="583.5" y="413" font-size="16"><tspan font-weight="700" fill="#db2777">10.0</tspan><tspan font-weight="700" fill="#b45309"> 병목</tspan></text>
 <text x="32" y="452" font-size="17" font-weight="700">3단계 ISM + VAT</text>
 <text x="32" y="473" font-size="16" fill="#4b5563">200m 밖은 그리지 않음</text>
-<rect x="330.0" y="438" width="189.7" height="17" rx="3" fill="#374151"/>
-<text x="526.7" y="452" font-size="16"><tspan font-weight="700" fill="#374151">7.71</tspan></text>
-<rect x="330.0" y="459" width="71.5" height="17" rx="3" fill="#2563eb"/>
-<text x="408.5" y="473" font-size="16"><tspan font-weight="700" fill="#2563eb">2.91</tspan></text>
-<rect x="330.0" y="480" width="100.1" height="17" rx="3" fill="#0d9488"/>
-<text x="437.1" y="494" font-size="16"><tspan font-weight="700" fill="#0d9488">4.07</tspan></text>
-<rect x="330.0" y="501" width="181.3" height="17" rx="3" fill="#db2777"/>
-<text x="518.3" y="515" font-size="16"><tspan font-weight="700" fill="#db2777">7.37</tspan><tspan font-weight="700" fill="#b45309"> 병목</tspan></text>
+<rect x="330.0" y="438" width="194.7" height="17" rx="3" fill="#374151"/>
+<text x="531.7" y="452" font-size="16"><tspan font-weight="700" fill="#374151">7.91</tspan></text>
+<rect x="330.0" y="459" width="78.9" height="17" rx="3" fill="#2563eb"/>
+<text x="415.9" y="473" font-size="16"><tspan font-weight="700" fill="#2563eb">3.21</tspan></text>
+<rect x="330.0" y="480" width="101.4" height="17" rx="3" fill="#0d9488"/>
+<text x="438.4" y="494" font-size="16"><tspan font-weight="700" fill="#0d9488">4.12</tspan></text>
+<rect x="330.0" y="501" width="185.4" height="17" rx="3" fill="#db2777"/>
+<text x="522.4" y="515" font-size="16"><tspan font-weight="700" fill="#db2777">7.54</tspan><tspan font-weight="700" fill="#b45309"> 병목</tspan></text>
 <text x="32" y="554" font-size="17" font-weight="700">4단계 액터 하이드레이션</text>
 <text x="32" y="575" font-size="16" fill="#4b5563">30m 안 액터(상한 500)</text>
 <text x="32" y="596" font-size="16" fill="#4b5563">+ 애니메이션 예산</text>
-<rect x="330.0" y="540" width="198.6" height="17" rx="3" fill="#374151"/>
-<text x="535.6" y="554" font-size="16"><tspan font-weight="700" fill="#374151">8.07</tspan></text>
-<rect x="330.0" y="561" width="191.1" height="17" rx="3" fill="#2563eb"/>
-<text x="528.1" y="575" font-size="16"><tspan font-weight="700" fill="#2563eb">7.77</tspan><tspan font-weight="700" fill="#b45309"> 병목</tspan></text>
-<rect x="330.0" y="582" width="113.4" height="17" rx="3" fill="#0d9488"/>
-<text x="450.4" y="596" font-size="16"><tspan font-weight="700" fill="#0d9488">4.61</tspan></text>
-<rect x="330.0" y="603" width="167.6" height="17" rx="3" fill="#db2777"/>
-<text x="504.6" y="617" font-size="16"><tspan font-weight="700" fill="#db2777">6.81</tspan></text>
+<rect x="330.0" y="540" width="200.8" height="17" rx="3" fill="#374151"/>
+<text x="537.8" y="554" font-size="16"><tspan font-weight="700" fill="#374151">8.16</tspan></text>
+<rect x="330.0" y="561" width="193.6" height="17" rx="3" fill="#2563eb"/>
+<text x="530.6" y="575" font-size="16"><tspan font-weight="700" fill="#2563eb">7.87</tspan><tspan font-weight="700" fill="#b45309"> 병목</tspan></text>
+<rect x="330.0" y="582" width="115.5" height="17" rx="3" fill="#0d9488"/>
+<text x="452.5" y="596" font-size="16"><tspan font-weight="700" fill="#0d9488">4.69</tspan></text>
+<rect x="330.0" y="603" width="170.7" height="17" rx="3" fill="#db2777"/>
+<text x="507.7" y="617" font-size="16"><tspan font-weight="700" fill="#db2777">6.94</tspan></text>
 <text x="32" y="656" font-size="17" font-weight="700">5단계 Simulation LOD</text>
 <text x="32" y="677" font-size="16" fill="#4b5563">+ 엔티티 풀</text>
-<rect x="330.0" y="642" width="184.8" height="17" rx="3" fill="#374151"/>
-<text x="521.8" y="656" font-size="16"><tspan font-weight="700" fill="#374151">7.51</tspan></text>
-<rect x="330.0" y="663" width="177.0" height="17" rx="3" fill="#2563eb"/>
-<text x="514.0" y="677" font-size="16"><tspan font-weight="700" fill="#2563eb">7.20</tspan><tspan font-weight="700" fill="#b45309"> 병목</tspan></text>
-<rect x="330.0" y="684" width="109.7" height="17" rx="3" fill="#0d9488"/>
-<text x="446.7" y="698" font-size="16"><tspan font-weight="700" fill="#0d9488">4.46</tspan></text>
-<rect x="330.0" y="705" width="168.1" height="17" rx="3" fill="#db2777"/>
-<text x="505.1" y="719" font-size="16"><tspan font-weight="700" fill="#db2777">6.83</tspan></text>
+<rect x="330.0" y="642" width="188.3" height="17" rx="3" fill="#374151"/>
+<text x="525.3" y="656" font-size="16"><tspan font-weight="700" fill="#374151">7.65</tspan></text>
+<rect x="330.0" y="663" width="180.4" height="17" rx="3" fill="#2563eb"/>
+<text x="517.4" y="677" font-size="16"><tspan font-weight="700" fill="#2563eb">7.33</tspan><tspan font-weight="700" fill="#b45309"> 병목</tspan></text>
+<rect x="330.0" y="684" width="113.2" height="17" rx="3" fill="#0d9488"/>
+<text x="450.2" y="698" font-size="16"><tspan font-weight="700" fill="#0d9488">4.60</tspan></text>
+<rect x="330.0" y="705" width="171.6" height="17" rx="3" fill="#db2777"/>
+<text x="508.6" y="719" font-size="16"><tspan font-weight="700" fill="#db2777">6.97</tspan></text>
 <text x="32" y="758" font-size="17" font-weight="700">6단계 ISKM</text>
 <text x="32" y="779" font-size="16" fill="#4b5563">+ 고정 바운드</text>
-<rect x="330.0" y="744" width="181.4" height="17" rx="3" fill="#374151"/>
-<text x="518.4" y="758" font-size="16"><tspan font-weight="700" fill="#374151">7.38</tspan></text>
-<rect x="330.0" y="765" width="177.1" height="17" rx="3" fill="#2563eb"/>
-<text x="514.1" y="779" font-size="16"><tspan font-weight="700" fill="#2563eb">7.20</tspan><tspan font-weight="700" fill="#b45309"> 병목</tspan></text>
-<rect x="330.0" y="786" width="77.3" height="17" rx="3" fill="#0d9488"/>
-<text x="414.3" y="800" font-size="16"><tspan font-weight="700" fill="#0d9488">3.14</tspan></text>
-<rect x="330.0" y="807" width="129.9" height="17" rx="3" fill="#db2777"/>
-<text x="466.9" y="821" font-size="16"><tspan font-weight="700" fill="#db2777">5.28</tspan></text>
+<rect x="330.0" y="744" width="184.6" height="17" rx="3" fill="#374151"/>
+<text x="521.6" y="758" font-size="16"><tspan font-weight="700" fill="#374151">7.51</tspan></text>
+<rect x="330.0" y="765" width="180.7" height="17" rx="3" fill="#2563eb"/>
+<text x="517.7" y="779" font-size="16"><tspan font-weight="700" fill="#2563eb">7.34</tspan><tspan font-weight="700" fill="#b45309"> 병목</tspan></text>
+<rect x="330.0" y="786" width="79.9" height="17" rx="3" fill="#0d9488"/>
+<text x="416.9" y="800" font-size="16"><tspan font-weight="700" fill="#0d9488">3.25</tspan></text>
+<rect x="330.0" y="807" width="131.8" height="17" rx="3" fill="#db2777"/>
+<text x="468.8" y="821" font-size="16"><tspan font-weight="700" fill="#db2777">5.36</tspan></text>
 <line x1="32" y1="846" x2="768" y2="846" stroke="#4b5563" stroke-width="1.5"/>
 <text x="32" y="866" font-size="16" font-weight="700" fill="#4b5563">7·8단계 · 번 시간을 품질에 쓰는 단계</text>
 <text x="32" y="896" font-size="17" font-weight="700">7단계 Niagara 배경 무리</text>
 <text x="32" y="917" font-size="16" fill="#4b5563">200m 밖, 엔티티 위치로</text>
 <text x="32" y="938" font-size="16" fill="#4b5563">움직이는 입자</text>
-<rect x="330.0" y="882" width="307.6" height="17" rx="3" fill="#374151"/>
-<rect x="330.0" y="882" width="307.6" height="17" rx="3" fill="url(#spend)"/>
-<text x="644.6" y="896" font-size="16"><tspan font-weight="700" fill="#374151">12.5</tspan></text>
-<rect x="330.0" y="903" width="193.8" height="17" rx="3" fill="#2563eb"/>
-<rect x="330.0" y="903" width="193.8" height="17" rx="3" fill="url(#spend)"/>
-<text x="530.8" y="917" font-size="16"><tspan font-weight="700" fill="#2563eb">7.88</tspan></text>
-<rect x="330.0" y="924" width="82.8" height="17" rx="3" fill="#0d9488"/>
-<rect x="330.0" y="924" width="82.8" height="17" rx="3" fill="url(#spend)"/>
-<text x="419.8" y="938" font-size="16"><tspan font-weight="700" fill="#0d9488">3.36</tspan></text>
-<rect x="330.0" y="945" width="297.9" height="17" rx="3" fill="#db2777"/>
-<rect x="330.0" y="945" width="297.9" height="17" rx="3" fill="url(#spend)"/>
-<text x="634.9" y="959" font-size="16"><tspan font-weight="700" fill="#db2777">12.1</tspan><tspan font-weight="700" fill="#b45309"> 병목</tspan></text>
+<rect x="330.0" y="882" width="191.5" height="17" rx="3" fill="#374151"/>
+<rect x="330.0" y="882" width="191.5" height="17" rx="3" fill="url(#spend)"/>
+<text x="528.5" y="896" font-size="16"><tspan font-weight="700" fill="#374151">7.79</tspan></text>
+<rect x="330.0" y="903" width="187.6" height="17" rx="3" fill="#2563eb"/>
+<rect x="330.0" y="903" width="187.6" height="17" rx="3" fill="url(#spend)"/>
+<text x="524.6" y="917" font-size="16"><tspan font-weight="700" fill="#2563eb">7.63</tspan><tspan font-weight="700" fill="#b45309"> 병목</tspan></text>
+<rect x="330.0" y="924" width="82.7" height="17" rx="3" fill="#0d9488"/>
+<rect x="330.0" y="924" width="82.7" height="17" rx="3" fill="url(#spend)"/>
+<text x="419.7" y="938" font-size="16"><tspan font-weight="700" fill="#0d9488">3.36</tspan></text>
+<rect x="330.0" y="945" width="150.0" height="17" rx="3" fill="#db2777"/>
+<rect x="330.0" y="945" width="150.0" height="17" rx="3" fill="url(#spend)"/>
+<text x="487.0" y="959" font-size="16"><tspan font-weight="700" fill="#db2777">6.10</tspan></text>
 <text x="32" y="998" font-size="17" font-weight="700">8단계 품질 올리기</text>
 <text x="32" y="1019" font-size="16" fill="#4b5563">액터 0~40m(상한 1,000)</text>
 <text x="32" y="1040" font-size="16" fill="#4b5563">80m 밖 그림자 끔</text>
-<rect x="330.0" y="984" width="273.6" height="17" rx="3" fill="#374151"/>
-<rect x="330.0" y="984" width="273.6" height="17" rx="3" fill="url(#spend)"/>
-<text x="610.6" y="998" font-size="16"><tspan font-weight="700" fill="#374151">11.1</tspan></text>
-<rect x="330.0" y="1005" width="192.3" height="17" rx="3" fill="#2563eb"/>
-<rect x="330.0" y="1005" width="192.3" height="17" rx="3" fill="url(#spend)"/>
-<text x="529.3" y="1019" font-size="16"><tspan font-weight="700" fill="#2563eb">7.82</tspan></text>
-<rect x="330.0" y="1026" width="84.8" height="17" rx="3" fill="#0d9488"/>
-<rect x="330.0" y="1026" width="84.8" height="17" rx="3" fill="url(#spend)"/>
-<text x="421.8" y="1040" font-size="16"><tspan font-weight="700" fill="#0d9488">3.45</tspan></text>
-<rect x="330.0" y="1047" width="263.5" height="17" rx="3" fill="#db2777"/>
-<rect x="330.0" y="1047" width="263.5" height="17" rx="3" fill="url(#spend)"/>
-<text x="600.5" y="1061" font-size="16"><tspan font-weight="700" fill="#db2777">10.7</tspan><tspan font-weight="700" fill="#b45309"> 병목</tspan></text>
+<rect x="330.0" y="984" width="191.5" height="17" rx="3" fill="#374151"/>
+<rect x="330.0" y="984" width="191.5" height="17" rx="3" fill="url(#spend)"/>
+<text x="528.5" y="998" font-size="16"><tspan font-weight="700" fill="#374151">7.78</tspan></text>
+<rect x="330.0" y="1005" width="188.1" height="17" rx="3" fill="#2563eb"/>
+<rect x="330.0" y="1005" width="188.1" height="17" rx="3" fill="url(#spend)"/>
+<text x="525.1" y="1019" font-size="16"><tspan font-weight="700" fill="#2563eb">7.65</tspan><tspan font-weight="700" fill="#b45309"> 병목</tspan></text>
+<rect x="330.0" y="1026" width="87.0" height="17" rx="3" fill="#0d9488"/>
+<rect x="330.0" y="1026" width="87.0" height="17" rx="3" fill="url(#spend)"/>
+<text x="424.0" y="1040" font-size="16"><tspan font-weight="700" fill="#0d9488">3.54</tspan></text>
+<rect x="330.0" y="1047" width="140.7" height="17" rx="3" fill="#db2777"/>
+<rect x="330.0" y="1047" width="140.7" height="17" rx="3" fill="url(#spend)"/>
+<text x="477.7" y="1061" font-size="16"><tspan font-weight="700" fill="#db2777">5.72</tspan></text>
 <line x1="740.0" y1="308" x2="740.0" y2="1074" stroke="#b45309" stroke-width="2" stroke-dasharray="5 4"/>
 <text x="734.0" y="312" text-anchor="end" font-size="16" font-weight="700" fill="#b45309">16.7ms</text>
 <line x1="32" y1="1076" x2="768" y2="1076" stroke="#e5e7eb"/>

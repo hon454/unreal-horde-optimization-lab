@@ -1,93 +1,93 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="800" height="998" viewBox="0 0 800 998" font-family="Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Segoe UI, sans-serif" font-size="16" fill="#111827">
-<rect x="0.5" y="0.5" width="799" height="997" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="1020" viewBox="0 0 800 1020" font-family="Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Segoe UI, sans-serif" font-size="16" fill="#111827">
+<rect x="0.5" y="0.5" width="799" height="1019" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
 <text x="32" y="46" font-size="22" font-weight="700">최종 구성(8단계)에서 기법 하나를 뺐을 때의 변화</text>
 <text x="32" y="74" font-size="16" fill="#4b5563">호드 총수 1만, 오브 시점 카메라, 세 번 잰 중앙값의 차이(ms)</text>
-<text x="32" y="96" font-size="16" fill="#4b5563">0은 최종 구성: 프레임 시간 11.1, 게임 스레드 7.82, GPU 10.7</text>
-<rect x="32" y="117" width="16" height="16" rx="3" fill="#374151"/>
-<text x="54" y="130" font-size="16">프레임 시간</text>
-<rect x="178" y="117" width="16" height="16" rx="3" fill="#2563eb"/>
-<text x="200" y="130" font-size="16">게임 스레드</text>
-<rect x="324" y="117" width="16" height="16" rx="3" fill="#db2777"/>
-<text x="346" y="130" font-size="16">GPU</text>
-<text x="32" y="152" font-size="16" fill="#4b5563">흐린 막대: 세 번 잰 범위보다 작은 차이(구별되지 않음)</text>
-<text x="530" y="192" text-anchor="end" font-size="16" fill="#4b5563">← 빨라짐</text>
-<text x="550" y="192" font-size="16" fill="#4b5563">느려짐 →</text>
-<text x="32" y="223" font-size="17" font-weight="700">액터 하이드레이션</text>
-<text x="32" y="244" font-size="16" fill="#2563eb" font-weight="700">프레임은 그대로, 게임 스레드만</text>
-<rect x="538.8" y="209" width="1.5" height="17" rx="2" fill="#374151" fill-opacity="0.3"/>
-<text x="532.8" y="223" text-anchor="end" font-size="16" fill="#4b5563">−0.04</text>
-<rect x="417.8" y="230" width="122.2" height="17" rx="2" fill="#2563eb" fill-opacity="1"/>
-<text x="411.8" y="244" text-anchor="end" font-size="16" font-weight="700" fill="#2563eb">−4.07</text>
-<rect x="540.0" y="251" width="1.5" height="17" rx="2" fill="#db2777" fill-opacity="0.3"/>
-<text x="546.9" y="265" text-anchor="start" font-size="16" fill="#4b5563">+0.03</text>
-<text x="32" y="301" font-size="17" font-weight="700">애니메이션 예산</text>
-<text x="32" y="322" font-size="16" fill="#2563eb" font-weight="700">프레임은 그대로, 게임 스레드만</text>
-<rect x="540.0" y="287" width="1.5" height="17" rx="2" fill="#374151" fill-opacity="0.3"/>
-<text x="547.4" y="301" text-anchor="start" font-size="16" fill="#4b5563">+0.04</text>
-<rect x="540.0" y="308" width="24.6" height="17" rx="2" fill="#2563eb" fill-opacity="1"/>
-<text x="570.6" y="322" text-anchor="start" font-size="16" font-weight="700" fill="#2563eb">+0.82</text>
-<rect x="540.0" y="329" width="1.5" height="17" rx="2" fill="#db2777" fill-opacity="0.3"/>
-<text x="547.0" y="343" text-anchor="start" font-size="16" fill="#4b5563">+0.04</text>
-<text x="32" y="379" font-size="17" font-weight="700">Simulation LOD</text>
-<text x="32" y="400" font-size="16" fill="#2563eb" font-weight="700">프레임은 그대로, 게임 스레드만</text>
-<rect x="540.0" y="365" width="1.5" height="17" rx="2" fill="#374151" fill-opacity="0.3"/>
-<text x="546.9" y="379" text-anchor="start" font-size="16" fill="#4b5563">+0.03</text>
-<rect x="540.0" y="386" width="19.1" height="17" rx="2" fill="#2563eb" fill-opacity="1"/>
-<text x="565.1" y="400" text-anchor="start" font-size="16" font-weight="700" fill="#2563eb">+0.64</text>
-<rect x="540.0" y="407" width="1.5" height="17" rx="2" fill="#db2777" fill-opacity="0.3"/>
-<text x="546.5" y="421" text-anchor="start" font-size="16" fill="#4b5563">+0.02</text>
-<text x="32" y="457" font-size="17" font-weight="700">고정 바운드</text>
-<text x="32" y="478" font-size="16" fill="#2563eb" font-weight="700">프레임은 그대로, 게임 스레드만</text>
-<rect x="540.0" y="443" width="1.5" height="17" rx="2" fill="#374151" fill-opacity="0.3"/>
-<text x="546.2" y="457" text-anchor="start" font-size="16" fill="#4b5563">+0.01</text>
-<rect x="540.0" y="464" width="5.2" height="17" rx="2" fill="#2563eb" fill-opacity="1"/>
-<text x="551.2" y="478" text-anchor="start" font-size="16" font-weight="700" fill="#2563eb">+0.17</text>
-<rect x="539.9" y="485" width="1.5" height="17" rx="2" fill="#db2777" fill-opacity="0.3"/>
-<text x="533.9" y="499" text-anchor="end" font-size="16" fill="#4b5563">0.00</text>
-<text x="32" y="535" font-size="17" font-weight="700">전환 대책</text>
-<rect x="540.0" y="521" width="1.5" height="17" rx="2" fill="#374151" fill-opacity="0.3"/>
-<text x="546.8" y="535" text-anchor="start" font-size="16" fill="#4b5563">+0.03</text>
-<rect x="539.0" y="542" width="1.5" height="17" rx="2" fill="#2563eb" fill-opacity="0.3"/>
-<text x="533.0" y="556" text-anchor="end" font-size="16" fill="#4b5563">−0.03</text>
-<rect x="540.0" y="563" width="1.5" height="17" rx="2" fill="#db2777" fill-opacity="0.3"/>
-<text x="546.3" y="577" text-anchor="start" font-size="16" fill="#4b5563">+0.01</text>
-<text x="32" y="613" font-size="17" font-weight="700">엔티티 풀</text>
-<rect x="540.0" y="599" width="1.5" height="17" rx="2" fill="#374151" fill-opacity="0.3"/>
-<text x="546.7" y="613" text-anchor="start" font-size="16" fill="#4b5563">+0.02</text>
-<rect x="539.7" y="620" width="1.5" height="17" rx="2" fill="#2563eb" fill-opacity="0.3"/>
-<text x="533.7" y="634" text-anchor="end" font-size="16" fill="#4b5563">−0.01</text>
-<rect x="540.0" y="641" width="1.5" height="17" rx="2" fill="#db2777" fill-opacity="0.3"/>
-<text x="546.1" y="655" text-anchor="start" font-size="16" fill="#4b5563">0.00</text>
-<text x="32" y="691" font-size="17" font-weight="700">ISKM</text>
-<text x="32" y="712" font-size="16" fill="#4b5563">(VAT로 되돌림)</text>
-<rect x="540.0" y="677" width="38.5" height="17" rx="2" fill="#374151" fill-opacity="1"/>
-<text x="584.5" y="691" text-anchor="start" font-size="16" font-weight="700" fill="#374151">+1.28</text>
-<rect x="539.3" y="698" width="1.5" height="17" rx="2" fill="#2563eb" fill-opacity="0.3"/>
-<text x="533.3" y="712" text-anchor="end" font-size="16" fill="#4b5563">−0.02</text>
-<rect x="540.0" y="719" width="38.6" height="17" rx="2" fill="#db2777" fill-opacity="1"/>
-<text x="584.6" y="733" text-anchor="start" font-size="16" font-weight="700" fill="#db2777">+1.29</text>
-<text x="32" y="769" font-size="17" font-weight="700">80m 밖 그림자 끔</text>
-<text x="32" y="790" font-size="16" fill="#4b5563">(되돌려 그림자 켬)</text>
-<rect x="540.0" y="755" width="41.9" height="17" rx="2" fill="#374151" fill-opacity="1"/>
-<text x="587.9" y="769" text-anchor="start" font-size="16" font-weight="700" fill="#374151">+1.40</text>
-<rect x="540.0" y="776" width="7.8" height="17" rx="2" fill="#2563eb" fill-opacity="1"/>
-<text x="553.8" y="790" text-anchor="start" font-size="16" font-weight="700" fill="#2563eb">+0.26</text>
-<rect x="540.0" y="797" width="42.2" height="17" rx="2" fill="#db2777" fill-opacity="1"/>
-<text x="588.2" y="811" text-anchor="start" font-size="16" font-weight="700" fill="#db2777">+1.41</text>
-<text x="32" y="847" font-size="17" font-weight="700">200m 밖을 입자 대신</text>
-<text x="32" y="868" font-size="16" fill="#4b5563">ISKM으로 그림</text>
-<rect x="540.0" y="833" width="21.1" height="17" rx="2" fill="#374151" fill-opacity="1"/>
-<text x="567.1" y="847" text-anchor="start" font-size="16" font-weight="700" fill="#374151">+0.70</text>
-<rect x="540.0" y="854" width="113.4" height="17" rx="2" fill="#2563eb" fill-opacity="1"/>
-<text x="659.4" y="868" text-anchor="start" font-size="16" font-weight="700" fill="#2563eb">+3.78</text>
-<rect x="449.6" y="875" width="90.4" height="17" rx="2" fill="#db2777" fill-opacity="1"/>
-<text x="443.6" y="889" text-anchor="end" font-size="16" font-weight="700" fill="#db2777">−3.01</text>
-<text x="32" y="925" font-size="17" font-weight="700">Niagara 배경 무리</text>
-<rect x="430.3" y="911" width="109.7" height="17" rx="2" fill="#374151" fill-opacity="1"/>
-<text x="424.3" y="925" text-anchor="end" font-size="16" font-weight="700" fill="#374151">−3.66</text>
-<rect x="525.2" y="932" width="14.8" height="17" rx="2" fill="#2563eb" fill-opacity="1"/>
-<text x="519.2" y="946" text-anchor="end" font-size="16" font-weight="700" fill="#2563eb">−0.49</text>
-<rect x="374.2" y="953" width="165.8" height="17" rx="2" fill="#db2777" fill-opacity="1"/>
-<text x="368.2" y="967" text-anchor="end" font-size="16" font-weight="700" fill="#db2777">−5.53</text>
-<line x1="540" y1="202" x2="540" y2="978" stroke="#111827" stroke-width="1.5"/>
+<text x="32" y="96" font-size="16" fill="#4b5563">0은 최종 구성: 프레임 시간 7.78, 게임 스레드 7.65, GPU 5.72</text>
+<text x="32" y="118" font-size="16" fill="#4b5563">최종 구성의 병목은 게임 스레드다. 위에서부터 프레임 시간이 많이 느려지는 순</text>
+<rect x="32" y="139" width="16" height="16" rx="3" fill="#374151"/>
+<text x="54" y="152" font-size="16">프레임 시간</text>
+<rect x="178" y="139" width="16" height="16" rx="3" fill="#2563eb"/>
+<text x="200" y="152" font-size="16">게임 스레드</text>
+<rect x="324" y="139" width="16" height="16" rx="3" fill="#db2777"/>
+<text x="346" y="152" font-size="16">GPU</text>
+<text x="32" y="174" font-size="16" fill="#4b5563">흐린 막대: 세 번 잰 범위보다 작은 차이(구별되지 않음)</text>
+<text x="530" y="214" text-anchor="end" font-size="16" fill="#4b5563">← 빨라짐</text>
+<text x="550" y="214" font-size="16" fill="#4b5563">느려짐 →</text>
+<text x="32" y="245" font-size="17" font-weight="700">200m 밖을 입자 대신</text>
+<text x="32" y="266" font-size="16" fill="#4b5563">ISKM으로 그림</text>
+<rect x="540.0" y="231" width="129.1" height="17" rx="2" fill="#374151" fill-opacity="1"/>
+<text x="675.1" y="245" text-anchor="start" font-size="16" font-weight="700" fill="#374151">+4.30</text>
+<rect x="540.0" y="252" width="127.0" height="17" rx="2" fill="#2563eb" fill-opacity="1"/>
+<text x="673.0" y="266" text-anchor="start" font-size="16" font-weight="700" fill="#2563eb">+4.23</text>
+<rect x="540.0" y="273" width="1.5" height="17" rx="2" fill="#db2777" fill-opacity="1"/>
+<text x="547.1" y="287" text-anchor="start" font-size="16" font-weight="700" fill="#db2777">+0.04</text>
+<text x="32" y="323" font-size="17" font-weight="700">애니메이션 예산</text>
+<rect x="540.0" y="309" width="52.5" height="17" rx="2" fill="#374151" fill-opacity="1"/>
+<text x="598.5" y="323" text-anchor="start" font-size="16" font-weight="700" fill="#374151">+1.75</text>
+<rect x="540.0" y="330" width="52.4" height="17" rx="2" fill="#2563eb" fill-opacity="1"/>
+<text x="598.4" y="344" text-anchor="start" font-size="16" font-weight="700" fill="#2563eb">+1.75</text>
+<rect x="540.0" y="351" width="1.5" height="17" rx="2" fill="#db2777" fill-opacity="1"/>
+<text x="547.4" y="365" text-anchor="start" font-size="16" font-weight="700" fill="#db2777">+0.05</text>
+<text x="32" y="401" font-size="17" font-weight="700">Simulation LOD</text>
+<rect x="540.0" y="387" width="31.3" height="17" rx="2" fill="#374151" fill-opacity="1"/>
+<text x="577.3" y="401" text-anchor="start" font-size="16" font-weight="700" fill="#374151">+1.04</text>
+<rect x="540.0" y="408" width="31.1" height="17" rx="2" fill="#2563eb" fill-opacity="1"/>
+<text x="577.1" y="422" text-anchor="start" font-size="16" font-weight="700" fill="#2563eb">+1.04</text>
+<rect x="540.0" y="429" width="1.5" height="17" rx="2" fill="#db2777" fill-opacity="0.3"/>
+<text x="546.6" y="443" text-anchor="start" font-size="16" fill="#4b5563">+0.02</text>
+<text x="32" y="479" font-size="17" font-weight="700">고정 바운드</text>
+<rect x="540.0" y="465" width="23.1" height="17" rx="2" fill="#374151" fill-opacity="1"/>
+<text x="569.1" y="479" text-anchor="start" font-size="16" font-weight="700" fill="#374151">+0.77</text>
+<rect x="540.0" y="486" width="9.0" height="17" rx="2" fill="#2563eb" fill-opacity="1"/>
+<text x="555.0" y="500" text-anchor="start" font-size="16" font-weight="700" fill="#2563eb">+0.30</text>
+<rect x="540.0" y="507" width="1.5" height="17" rx="2" fill="#db2777" fill-opacity="1"/>
+<text x="546.5" y="521" text-anchor="start" font-size="16" font-weight="700" fill="#db2777">+0.02</text>
+<text x="32" y="557" font-size="17" font-weight="700">80m 밖 그림자 끔</text>
+<text x="32" y="578" font-size="16" fill="#4b5563">(되돌려 그림자 켬)</text>
+<text x="32" y="599" font-size="16" fill="#2563eb" font-weight="700">GPU 차이가 프레임에 드러나지 않음</text>
+<rect x="540.0" y="543" width="1.7" height="17" rx="2" fill="#374151" fill-opacity="0.3"/>
+<text x="547.7" y="557" text-anchor="start" font-size="16" fill="#4b5563">+0.06</text>
+<rect x="540.0" y="564" width="1.5" height="17" rx="2" fill="#2563eb" fill-opacity="0.3"/>
+<text x="546.9" y="578" text-anchor="start" font-size="16" fill="#4b5563">+0.03</text>
+<rect x="540.0" y="585" width="11.6" height="17" rx="2" fill="#db2777" fill-opacity="1"/>
+<text x="557.6" y="599" text-anchor="start" font-size="16" font-weight="700" fill="#db2777">+0.39</text>
+<text x="32" y="635" font-size="17" font-weight="700">엔티티 풀</text>
+<rect x="540.0" y="621" width="1.6" height="17" rx="2" fill="#374151" fill-opacity="0.3"/>
+<text x="547.6" y="635" text-anchor="start" font-size="16" fill="#4b5563">+0.05</text>
+<rect x="540.0" y="642" width="1.7" height="17" rx="2" fill="#2563eb" fill-opacity="0.3"/>
+<text x="547.7" y="656" text-anchor="start" font-size="16" fill="#4b5563">+0.06</text>
+<rect x="540.0" y="663" width="1.5" height="17" rx="2" fill="#db2777" fill-opacity="0.3"/>
+<text x="546.3" y="677" text-anchor="start" font-size="16" fill="#4b5563">+0.01</text>
+<text x="32" y="713" font-size="17" font-weight="700">전환 대책</text>
+<rect x="539.5" y="699" width="1.5" height="17" rx="2" fill="#374151" fill-opacity="0.3"/>
+<text x="533.5" y="713" text-anchor="end" font-size="16" fill="#4b5563">−0.02</text>
+<rect x="539.6" y="720" width="1.5" height="17" rx="2" fill="#2563eb" fill-opacity="0.3"/>
+<text x="533.6" y="734" text-anchor="end" font-size="16" fill="#4b5563">−0.01</text>
+<rect x="540.0" y="741" width="1.5" height="17" rx="2" fill="#db2777" fill-opacity="0.3"/>
+<text x="546.4" y="755" text-anchor="start" font-size="16" fill="#4b5563">+0.01</text>
+<text x="32" y="791" font-size="17" font-weight="700">ISKM</text>
+<text x="32" y="812" font-size="16" fill="#4b5563">(VAT로 되돌림)</text>
+<text x="32" y="833" font-size="16" fill="#2563eb" font-weight="700">GPU 차이가 프레임에 드러나지 않음</text>
+<rect x="533.8" y="777" width="6.2" height="17" rx="2" fill="#374151" fill-opacity="1"/>
+<text x="527.8" y="791" text-anchor="end" font-size="16" font-weight="700" fill="#374151">−0.21</text>
+<rect x="530.2" y="798" width="9.8" height="17" rx="2" fill="#2563eb" fill-opacity="1"/>
+<text x="524.2" y="812" text-anchor="end" font-size="16" font-weight="700" fill="#2563eb">−0.33</text>
+<rect x="540.0" y="819" width="37.0" height="17" rx="2" fill="#db2777" fill-opacity="1"/>
+<text x="583.0" y="833" text-anchor="start" font-size="16" font-weight="700" fill="#db2777">+1.23</text>
+<text x="32" y="869" font-size="17" font-weight="700">Niagara 배경 무리</text>
+<rect x="532.0" y="855" width="8.0" height="17" rx="2" fill="#374151" fill-opacity="1"/>
+<text x="526.0" y="869" text-anchor="end" font-size="16" font-weight="700" fill="#374151">−0.27</text>
+<rect x="531.9" y="876" width="8.1" height="17" rx="2" fill="#2563eb" fill-opacity="1"/>
+<text x="525.9" y="890" text-anchor="end" font-size="16" font-weight="700" fill="#2563eb">−0.27</text>
+<rect x="526.0" y="897" width="14.0" height="17" rx="2" fill="#db2777" fill-opacity="1"/>
+<text x="520.0" y="911" text-anchor="end" font-size="16" font-weight="700" fill="#db2777">−0.47</text>
+<text x="32" y="947" font-size="17" font-weight="700">액터 하이드레이션</text>
+<text x="32" y="968" font-size="16" fill="#2563eb" font-weight="700">병목이 GPU로 바뀜</text>
+<rect x="492.2" y="933" width="47.8" height="17" rx="2" fill="#374151" fill-opacity="1"/>
+<text x="486.2" y="947" text-anchor="end" font-size="16" font-weight="700" fill="#374151">−1.59</text>
+<rect x="424.4" y="954" width="115.6" height="17" rx="2" fill="#2563eb" fill-opacity="1"/>
+<text x="418.4" y="968" text-anchor="end" font-size="16" font-weight="700" fill="#2563eb">−3.85</text>
+<rect x="540.0" y="975" width="1.5" height="17" rx="2" fill="#db2777" fill-opacity="0.3"/>
+<text x="547.1" y="989" text-anchor="start" font-size="16" fill="#4b5563">+0.04</text>
+<line x1="540" y1="224" x2="540" y2="1000" stroke="#111827" stroke-width="1.5"/>
 </svg>
