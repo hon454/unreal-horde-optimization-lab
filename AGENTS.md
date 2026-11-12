@@ -20,6 +20,7 @@
 | 확정된 결정과 이유, 버린 대안 | [Docs/Decisions/](Docs/Decisions/README.md)(ADR). ADR이 없는 결정은 그 README의 표 |
 | 측정 규약: 시나리오 고정값, 빌드 구성, 절차, 지표 이름, 차이 판정, 한계 | [measurement.md](Docs/Guides/measurement.md) |
 | 빌드·패키징·벤치마크·그래프 명령과 인자 | [commands.md](Docs/Guides/commands.md). 매번 쓰는 것만 STATUS.md "명령"에 둔다 |
+| 클론에서 측정까지: 엔진 등록, Fab 두 팩, 에셋 복구(`Scripts/restore-assets.ps1`), 빌드, 패키징 | [setup.md](Docs/Guides/setup.md) |
 | 최종 구성에서 한 프레임에 도는 코드, 프로세서 순서, 엔티티 구성 | [code-tour.md](Docs/Guides/code-tour.md). 흐름 그림은 `Scripts/plot-code-tour.py`가 만든다 |
 | 빌드나 실행이 실패했을 때의 증상별 대처 | [troubleshooting.md](Docs/Guides/troubleshooting.md). 문제가 생겼을 때만 연다 |
 | 글과 README의 독자, 틀, 문장 규칙, 그림 규칙 | [posting.md](Docs/Guides/posting.md) |
@@ -29,7 +30,7 @@
 | 영상·문서·샘플·에셋·포럼 스레드 | [references.md](Docs/Reference/references.md) |
 | 강연 두 편(Shabel, 윤준기)의 요약과 타임스탬프 | [talk-notes.md](Docs/Reference/talk-notes.md) |
 | 측정 PC 사양과 엔진 버전 | [pc-specs.md](Docs/Reference/pc-specs.md) |
-| 끝낸 작업의 경위와 실패한 실행 | `Docs/Worklog/M<N>.md`, `Q<N>.md`, 글과 README는 `Posts.md`(목록은 [Worklog/README.md](Docs/Worklog/README.md)). 세션 시작 때 읽지 않고 검색만 한다 |
+| 끝낸 작업의 경위와 실패한 실행 | `Docs/Worklog/M<N>.md`, `Q<N>.md`, 글과 README는 `Posts.md`, 에셋 복구는 `Setup.md`(목록은 [Worklog/README.md](Docs/Worklog/README.md)). 세션 시작 때 읽지 않고 검색만 한다 |
 | 코디네이터가 묻지 않고 내린 결정과 사용자 판단이 필요한 항목 | [autonomous-decisions.md](Docs/Worklog/autonomous-decisions.md) |
 | 총괄 묶음의 조건 표와 스크립트 목록 | `Scripts/full-conditions.json`, [Scripts/README.md](Scripts/README.md) |
 | 글 본문과 이미지 | `Posts/NN-이름/README.md`, `Posts/NN-이름/images/` |
