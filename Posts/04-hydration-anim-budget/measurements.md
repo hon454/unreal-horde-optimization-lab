@@ -14,7 +14,7 @@
 | 기대 메타데이터 | `Scripts/full-conditions.json`. `L4-mass`는 `LabTechHydrate=1`, `LabTechAnimBudget=1`, `LabTechHydrateFix=1`, `LabActorCap=500`, `LabHydrateM=30`, `LabActorCollision=0`, `LabBudget=1` |
 | 요약 파일 | [최종 측정의 요약 표](../../Measurements/Full2/summary.csv)(세 회차 중앙값과 범위), [실행별 값](../../Measurements/Full2/runs.csv)(회차별 한 행), [빼 보기 표](../../Docs/figures/full2/full-ablation.csv) |
 | 60fps를 지키는 최대 개체 수(`N@16.7ms`) | [최대 개체 수 CSV](../../Docs/figures/full2/full-n-at-60fps.csv)(`Scripts/plot.py`가 측정 N 사이를 로그 보간) |
-| 트레이스 | 본문과 그림에 트레이스 값을 쓰지 않았다. 아래 "코디네이터가 찍을 Insights 화면" |
+| 트레이스 | 본문 "결과"의 트레이스 문단 값은 아래 "트레이스 값"이다. 최종 측정 빌드의 직렬 트레이스 한 회씩이다 |
 
 ## 4단계의 구현(3단계와 다른 곳)
 
@@ -135,20 +135,30 @@
 - 최종 구성에서 대책을 끈 개발 빌드 점수는 옛 총괄 묶음 때의 참고값이다(`Measurements/Full1/transition-dev/runs.csv`). 본문에는 쓰지 않았다.
 - 글 재료의 사실 확인: `Docs/post-review.md` "04 액터 하이드레이션"(글을 다 쓰면 지우는 문서라, 지운 뒤에는 git 이력에서 본다). 거기서 지적한 "새로 스폰한 액터는 `:328`이 아니라 기존 액터 재사용 경로" 문제는 본문에서 풀 경로(`:252`)만 인용해 피했다.
 
-## 코디네이터가 찍을 Insights 화면
+## 트레이스 값
 
-본문 "결과"의 주석 처리한 이미지 자리(`images/insights-actor-tick.jpg`)에 넣는다. 값은 아직 읽지 않았다.
+본문 "결과"의 트레이스 문단 값이다. Insights 화면은 찍지 않고 명령줄 내보내기로 뽑았다.
 
-| 항목 | 내용 |
+| 항목 | 값 |
 | --- | --- |
-| 트레이스 | `Saved/Traces/Full2traceser-L4-mass-N10000-P1-r1.utrace`(직렬, 게임 스레드). 비교로 `Full2traceser-L3-vatcull-N10000-P1-r1.utrace` |
-| 구간 | 25\~75초 창 안에서 프레임 하나. 창 평균도 함께 읽는다(`Scripts/trace-export.ps1 -Command TimerStatistics -Extra "-threads=GameThread -startTime=25 -endTime=75 -columns=*"`) |
-| 타이머 | `USkinnedMeshComponent_TickComponent`(스켈레탈 메시 틱), `USkeletalMeshComponent_CompleteParallelAnimationEvaluation`(애니메이션 평가 완료), `LabActorSyncProcessor`(액터 동기화), `Sync_RenderingThread`(렌더 스레드 대기) |
-| 읽을 값 | 세 타이머의 프레임당 ms와 호출 수(호출 수가 액터 수 373 근처인지), 4단계의 `Sync_RenderingThread`가 0인지와 3단계의 값, `Tick_Engine` 3단계 → 4단계 |
-| 스크린샷 | 프레임 하나를 고르고 Timers 창을 위 타이머로 거른 화면. 읽을 곳 하나에 빨간 상자. jpg로 `images/`에 둔다 |
-| 고칠 곳 | 본문 주석을 풀고 캡션의 ○○를 읽은 값으로 채운다. 이 표 아래에 트레이스 파일, 프레임 번호, 값을 적는다 |
+| 트레이스 | `Saved/Traces/Full2traceser-L4-mass-N10000-P1-r1.utrace`(4단계), `Full2traceser-L3-vatcull-N10000-P1-r1.utrace`(3단계). 둘 다 직렬(`mass.FullyParallel` 끔), 저장소 밖 |
+| 내보낸 표 | `%TEMP%\horde-trace\F2-traceser-L4-mass-GT.csv`, `F2-traceser-L3-vatcull-GT.csv`(`Scripts/trace-export.ps1 -Command TimerStatistics`, 스레드 `GameThread`, 구간 25\~75초, 저장소 밖) |
+| 프레임 수 | 4단계 5,674, 3단계 6,412(`FEngineLoop::Tick` 횟수) |
+| 식 | 타이머의 합(초) × 1000 ÷ 프레임 수 = 프레임당 ms. 구간 안 평균이다 |
+| 주의 | 직렬 실행이라 게임 스레드 값이 병렬 측정과 다르다. 본문은 "견주지 않는다"고 적었다 |
 
-옛 패키지의 트레이스에서 같은 타이머 이름이 4단계에 처음 나타났다([Worklog/Q6.md](../../Docs/Worklog/Q6.md) "트레이스 16개"). 그 값은 옛 패키지라 이 글에 쓰지 않았다.
+| 본문 값 | 정밀한 값 | 타이머 | 합(초) / 횟수 |
+| --- | --- | --- | --- |
+| 스켈레탈 메시 틱 1.05ms, 257번 | 1.0543ms, 프레임당 257.1번 | `USkinnedMeshComponent_TickComponent` Incl(4단계) | 5.981948 / 1,458,570 |
+| 애니메이션 평가 완료 0.83ms | 0.8279 | `USkeletalMeshComponent_CompleteParallelAnimationEvaluation` Incl | 4.697633 / 1,451,822 |
+| 액터 동기화 0.51ms | 0.5098 | `LabActorSyncProcessor_2147482256` Incl(Excl 2.854808) | 2.892495 / 5,672 |
+| `Sync_RenderingThread` 3단계 2.75ms | 2.7488 | 3단계 Incl | 17.625474 / 6,412 |
+| `Sync_RenderingThread` 4단계 0.005ms | 0.0045 | 4단계 Incl | 0.025783 / 5,673 |
+| `Tick_Engine` 4.68 → 8.37ms | 4.6766 → 8.3672 | 3단계 29.986314초 → 4단계 47.475477초 | |
+
+참고(본문에 쓰지 않았다): `USkeletalMeshComponent_TickAnimation` 0.4894ms(1,205,457번), 프레임 평균 `FEngineLoop::Tick` 3단계 7.7976 → 4단계 8.8117ms. 3단계 표에는 위 세 타이머(스켈레탈 메시 틱, 평가 완료, 액터 동기화)가 없다.
+
+스켈레탈 메시 틱의 호출 수는 프레임당 257번으로, 액터 프레임 평균 373(`actors_mean`)보다 작다. 이 차이의 원인은 보지 않았다(트레이스 한 회, `actors_mean`은 측정 실행의 값). 본문은 "액터 수와 같다"고 쓰지 않았다.
 
 ## 화면의 HUD와 표의 차이
 
@@ -209,7 +219,7 @@ SVG 여섯 개는 [make-figures.py](make-figures.py)가 만든다(저장소 루�
 ## 확인하지 않은 것
 
 - 4단계에서 GPU가 0.597ms 준 원인. 가까운 VAT 인스턴스가 액터로 바뀐 몫으로 짐작하지만, 패스별 값을 새 트레이스로 가르지 않았다.
-- 액터 하나 12.5µs의 내역(메시 틱, 애니메이션 평가, 동기화, Mass 대기). 트레이스가 필요하다.
+- 액터 하나 12.5µs의 내역. 직렬 트레이스에서 메시 틱 1.05, 평가 완료 0.83, 동기화 0.51ms(프레임당)를 읽었지만 병렬 측정과 직접 맞춰 합치지 않았다. 호출 수 257이 `actors_mean` 373과 다른 이유도 보지 않았다.
 - `S8-col`에서 프레임 시간(+2.01)이 게임 스레드(+1.54)보다 더 는 이유.
 - `A8-budget`의 +1.75ms가 무엇에서 나는지. 예산을 빼면 액터 클래스가 `ALabMinionMassActor`(일반 스켈레탈 메시)로 바뀐다(`LabCrowdSubsystem.cpp:101,109`). 4단계에서 예산만 끈 측정은 최종 측정에 없다.
 - 소형 액터의 애니메이션 건너뜀 비율. 대형만 센다.
