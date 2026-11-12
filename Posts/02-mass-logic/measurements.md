@@ -13,7 +13,7 @@
 | 잰 호드 총수 | 1단계 500 / 1천 / 2천 / 1만, 2단계 5천 / 1만 / 2만 / 3만. 두 단계가 함께 잰 점은 1만뿐이다 |
 | 요약 파일 | [최종 측정의 요약 표](../../Measurements/Full2/summary.csv)(세 회차 중앙값과 범위), [실행별 값](../../Measurements/Full2/runs.csv)(회차별 한 행), [동등성 검사](../../Measurements/Full2/equivalence.csv) |
 | 60fps를 지키는 최대 개체 수(`N@16.7ms`) | [최대 개체 수 CSV](../../Docs/figures/full2/full-n-at-60fps.csv)(`Scripts/plot.py` `n_at_budget`: 프레임 p95가 16.7을 넘는 두 측정점 사이에서 ms는 선형, N은 로그로 보간) |
-| 트레이스 | 본문에 트레이스 값은 없다. Insights 화면은 아래 "코디네이터가 찍을 Insights 화면" |
+| 트레이스 | 본문 "결과" 끝 문단의 값은 아래 "트레이스 값"이다. 최종 측정 빌드의 직렬 트레이스 한 회다 |
 
 실행 라벨은 `Full2-L1-full-N<N>-P1-r<i>`, `Full2-L2-mass-N<N>-P1-r<i>`다. `L1-full` 1만 P1에는 버리는 첫 실행 `r0`이 `runs.csv`에 있고 요약은 r1\~r3만 쓴다. `L2-mass`에는 `r0`이 없다.
 
@@ -94,18 +94,29 @@
 
 SVG 넷은 [make-figures.py](make-figures.py)가 만든다(저장소 루트에서 `py -3 -I Posts/02-mass-logic/make-figures.py`). 측정값은 `summary.csv`와 `full-n-at-60fps.csv`에서 읽고 상수로 넣은 측정값은 없다. 스크립트는 끝에 계산값(배율, 개체당 시간, 기울기)을 출력한다. 폭 800 기준으로 글자는 16px 이상이고, 자기 흰 배경을 가진다. 색은 01번 글과 같다(1단계 빨강, 2단계 파랑, 16.7ms 호박색).
 
-## 코디네이터가 찍을 Insights 화면
+## 트레이스 값
 
-본문 "결과"의 주석 자리에 `images/insights-mass-processors.jpg`로 넣는다. 찍은 뒤 캡션의 OO를 채우고 이 표에 행을 더한다.
+본문 "결과" 끝 문단의 값이다. Insights 화면은 찍지 않고 명령줄 내보내기로 뽑았다.
 
-| 항목 | 지시 |
+| 항목 | 값 |
 | --- | --- |
-| 트레이스 | `Saved/Traces/Full2traceser-L2-mass-N10000-P1-r1.utrace`(직렬, `mass.FullyParallel` 끔). 직렬이면 Processor가 모두 GameThread 트랙에 차례로 놓여 한 화면에서 읽힌다. 병렬 트레이스 `Full2trace-L2-mass-N10000-P1-r1.utrace`는 Processor가 워커 스레드로 흩어진다(measurement.md "산출물" 트레이스 행) |
-| 구간 | 25\~75초 안의 보통 프레임 하나(프레임 길이가 구간 평균에 가까운 것). 01번 글처럼 Timing 뷰에서 프레임 하나를 고른다 |
-| 왼쪽 빨간 상자 | 고른 프레임. GameThread 트랙을 펼쳐 `FEngineLoop::Tick` 아래 Mass PrePhysics 처리 단계와 그 안의 Processor 타이머(`MassSteerToMoveTargetProcessor`, `MassApplyMovementProcessor`, `MassSmoothOrientationProcessor`, `LabApproachProcessor`, `LabOrbContactProcessor`, `LabMinionStateProcessor`, `MassUpdateISMProcessor` 등)가 보이게 한다. PostPhysics의 `MassVisualizationComponent EndVisualChanges`(ISM 위치 올리기)와, 있으면 렌더 스레드 대기 `Sync_RenderingThread`가 같은 화면에 들게 한다 |
-| 오른쪽 빨간 상자 | 같은 프레임을 고른 채 Timers 창을 "Processor"로 거르고 Incl 내림차순으로 둔 행 |
-| 읽을 값 | 프레임 길이, Mass PrePhysics 단계 Incl, `EndVisualChanges` Incl, 가장 긴 Processor의 이름과 Incl. `UCharacterMovementComponent_TickComponent`가 없음을 Timers 창 검색으로 확인한다 |
-| 주의 | 직렬 실행은 게임 스레드 값이 병렬 측정과 다르다. 캡션과 이 표에 "직렬 트레이스 한 프레임"이라고 적고 본문의 측정값과 견주지 않는다 |
+| 트레이스 | `Saved/Traces/Full2traceser-L2-mass-N10000-P1-r1.utrace`(직렬, `mass.FullyParallel` 끔, 저장소 밖) |
+| 내보낸 표 | `%TEMP%\horde-trace\F2-traceser-L2-mass-GT.csv`(`Scripts/trace-export.ps1 -Command TimerStatistics`, 스레드 `GameThread`, 구간 25\~75초, 저장소 밖) |
+| 프레임 수 | 5,038(`FEngineLoop::Tick` 횟수). `FEngineLoop::Tick` Incl 49.998456초 |
+| 식 | 타이머의 합(초) × 1000 ÷ 5,038 = 프레임당 ms. 모두 게임 스레드, 구간 안 평균이다. 화면에서 고른 프레임 하나가 아니다 |
+| 주의 | 직렬 실행이라 게임 스레드 값이 병렬 측정(6.30ms)과 다르다. 본문과 이 표는 "직렬 트레이스"로만 적고 측정값과 견주지 않는다 |
+
+| 본문 값 | 정밀한 값 | 타이머 | 합(초) |
+| --- | --- | --- | --- |
+| 프레임 평균 9.92ms | 9.9244 | `FEngineLoop::Tick` Incl | 49.998456 |
+| Mass 처리 단계 3.01ms | 3.0122 | `FMassProcessingPhase::ExecuteTick EMassProcessingPhase::PrePhysics` Incl(횟수 5,037) | 15.175215 |
+| `EndVisualChanges` 2.52ms | 2.5152 | `MassVisualizationComponent EndVisualChanges` Incl = Excl | 12.671333 |
+| 가장 긴 Processor 0.93ms | 0.9251 | `MassSmoothOrientationProcessor_2147482251` Incl = Excl | 4.660537 |
+| 그다음 0.44ms | 0.4398 | `MassSteerToMoveTargetProcessor_2147482252` Incl = Excl | 2.215693 |
+| `UMassUpdateISMProcessor` 0.57ms | 0.5729 | `MassUpdateISMProcessor_2147482256` Incl = Excl | 2.886137 |
+| `UCharacterMovementComponent_TickComponent` 없음 | 표에 행 없음(`Character`로 찾은 행은 `FActorComponentTickFunction::ExecuteTick`뿐) | 304행 전체 | |
+
+참고(본문에 쓰지 않았다): `Sync_RenderingThread` 2.7704ms(13.957100초), `MassApplyMovementProcessor` 0.1506, `LabApproachProcessor` 0.1297, `MassApplyForceProcessor` 0.1077ms. 타이머 이름 끝의 숫자는 Processor 인스턴스 번호다.
 
 ## 엔진 소스
 
@@ -148,9 +159,9 @@ SVG 넷은 [make-figures.py](make-figures.py)가 만든다(저장소 루트에�
 ## 확인하지 않은 것
 
 - 로직과 표현 가운데 어느 쪽이 얼마를 줄였는지. 최종 측정에 둘을 따로 바꾼 조건이 없다.
-- GPU 50.2ms가 어느 패스에서 나는지와 2단계에서 무엇이 줄었는지. 프레임 CSV에는 패스별 값이 없고, 최종 측정의 트레이스는 열지 않았다. 본문은 드로우 콜이 개체 수를 따라간다는 측정만 적고 GPU 시간의 원인으로 적지 않았다.
+- GPU 50.2ms가 어느 패스에서 나는지와 2단계에서 무엇이 줄었는지. 프레임 CSV에는 패스별 값이 없고, 트레이스에서는 게임 스레드 값만 뽑았다(GPU 패스는 보지 않았다). 본문은 드로우 콜이 개체 수를 따라간다는 측정만 적고 GPU 시간의 원인으로 적지 않았다.
 - "1단계는 액터마다 메시 컴포넌트를 따로 그린다"는 드로우 콜 ÷ 호드 총수가 1.03\~1.15인 측정과 스켈레탈 메시 컴포넌트의 구조로 판단했다. 드로우 콜의 내역(그림자, 속도 패스)은 세지 않았다.
-- 게임 스레드 6.30ms의 내역. 본문은 남는 일의 종류(Processor 순회, ISM 위치 올리기)만 적었다. 값은 코디네이터의 Insights 화면에서 읽는다.
+- 게임 스레드 6.30ms의 내역. 본문은 남는 일의 종류(Processor 순회, ISM 위치 올리기)만 적었다. 내역은 위 "트레이스 값"에 있다(직렬 트레이스라 측정값 6.30ms와 견주지 않는다).
 - 병렬 처리가 번 몫. 최종 측정은 모두 `mass.FullyParallel=true`다.
 - 이동 상한(0.1초)이 2단계에서 실제로 걸리지 않는다는 것은 프레임 p99와 50ms 넘는 프레임 수로 판단했다. 엔티티의 이동 거리를 직접 세지 않았다.
 - 화면: 1·2단계 WebP를 재생해 보지 않았다(브라우저를 띄우지 않는다). "걷는 동작 없이 한 자세로 움직인다", "피격·사망 때 멈춰 섰다가 사라진다"는 코드(`UMassUpdateISMProcessor`는 위치만 쓰고, 피격·사망은 이동 태그를 뗀다)에서 판단했다.

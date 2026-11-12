@@ -426,3 +426,8 @@
 ### 진행(08)
 
 - 조사 끝(성공). `L7`→`L8`은 `LabActorCap` 500→1000, `LabHydrateM` 30→40, `LabFarShadow` 1→0 세 값이 다르다. 80m 밖 그림자 스위치는 80\~200m ISKM과 200m 밖 엔티티 구동 입자를 함께 끈다(`LabCrowdSubsystem.cpp:168-200`, `LabGameMode.cpp:311`). 탑뷰(높이 100m)에는 40m 안 개체가 없어 `L7`→`L8` 차이가 그림자 하나다. 다음은 그림과 초안.
+- 자료 확인 끝(성공). `L7`→`L8` 1만 P1: 프레임 p50 7.785→7.783(범위 안), Game 7.628→7.648(범위 안), GPU 6.096→5.720, 액터 373.79→458.13, 대형 건너뜀 0.0065→0.2073. 탑뷰 프레임 5.260→4.918(GPU 병목). `Ref1` `A8-hydrate` −3.732ms. 다음은 그림.
+
+## 02·04·05·06 트레이스 값 채우기(2026-11-13)
+
+- 02번 끝(성공). 직렬 `Full2traceser-L2-mass`의 게임 스레드(구간 25\~75초, 프레임 5,038): 프레임 9.92ms, Mass PrePhysics 3.01, `EndVisualChanges` 2.52, 가장 긴 Processor `MassSmoothOrientationProcessor` 0.93, `MassUpdateISMProcessor` 0.57ms. `UCharacterMovementComponent_TickComponent`는 없다. README의 주석 자리를 값 문장으로 바꿨다. 본문 주장은 그대로다.

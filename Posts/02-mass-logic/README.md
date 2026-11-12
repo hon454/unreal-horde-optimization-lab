@@ -162,11 +162,7 @@ Lab Fragment는 [`LabMassTypes.h`](../../Source/HordeOptLab/LabMassTypes.h)에 �
 
 게임 스레드에는 Processor의 순회와, 쌓아 둔 ISM 위치를 컴포넌트에 올리는 일이 남는다.
 
-<!-- 코디네이터가 찍어 넣는다(측정 기록 "코디네이터가 찍을 Insights 화면"). 넣은 뒤 주석을 풀고 OO 자리에 화면에서 읽은 값을 채운다. 값은 측정 기록 "본문의 수치와 출처"에 행으로 더한다.
-![Unreal Insights, 2단계 호드 총수 1만의 한 프레임: 게임 스레드의 Mass 처리 단계 안에서 Processor가 차례로 돈다](images/insights-mass-processors.jpg)
-
-왼쪽 빨간 상자가 고른 프레임이고, 길이는 OOms다. 그 프레임에서 Mass 처리 단계는 OOms, ISM 위치를 컴포넌트에 올리는 일은 OOms다. 오른쪽 빨간 상자는 Timers 창을 "Processor"로 거른 행이다. 가장 긴 Processor는 OO이고 OOms다.
--->
+Processor를 한 스레드에 차례로 돌린 트레이스(Unreal Insights, 호드 총수 1만)에서 게임 스레드의 프레임 평균을 읽었다. 이 트레이스는 병렬 처리를 끈 실행이라 위의 6.30ms와 견주지 않는다. 게임 스레드의 한 프레임은 평균 9.92ms이고, 그 안에서 Mass 처리 단계(PrePhysics)가 3.01ms, ISM 위치를 컴포넌트에 올리는 `EndVisualChanges`가 2.52ms다. Processor 가운데 가장 긴 것은 `UMassSmoothOrientationProcessor`로 0.93ms이고, 그다음이 `UMassSteerToMoveTargetProcessor`의 0.44ms다. ISM 위치를 쌓는 `UMassUpdateISMProcessor`는 0.57ms다. 캐릭터 이동 컴포넌트의 틱 타이머(`UCharacterMovementComponent_TickComponent`)는 이 트레이스에 없다.
 
 화면에서는 품질을 잃었다. 개체는 걷는 동작 없이 한 자세로 움직인다. 피격과 사망 때는 그 자리에 멈춰 섰다가 사라진다. 이 단계는 이 품질을 내주고 시간을 벌었다.
 
