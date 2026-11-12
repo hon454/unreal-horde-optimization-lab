@@ -1,14 +1,10 @@
 # restore-assets.ps1이 끝에 대조하는 git 밖 에셋 목록(Content/ 기준 상대 경로).
-# 2026-11-12 작성자 PC의 Content/에서 뽑았다. migrate-assets.py는 시드 에셋의 의존성을 따라 옮기므로 팩 판이 바뀌면 [migrate] 줄이 달라질 수 있다.
+# 2026-11-12 작성자 PC의 Content/에서 뽑고, 팩까지 다시 옮긴 검증 실행 결과에 맞췄다(어느 에셋도 참조하지 않는 예전 이전의 남은 파일 7개를 뺐다). migrate-assets.py는 시드 에셋의 의존성을 따라 옮기므로 팩 판이 바뀌면 [migrate] 줄이 달라질 수 있다.
 # 줄 앞의 [단계]는 그 파일을 만드는 restore-assets.ps1 단계다.
-[migrate] NiagaraExamples/EffectTypes/NET_Gameplay_Burst.uasset
 [migrate] NiagaraExamples/EffectTypes/NET_Gameplay_Looping.uasset
 [migrate] NiagaraExamples/FX_Misc/NS_Boundary_Cylinder.uasset
 [migrate] NiagaraExamples/FX_Ribbons/Emitters/NE_Arc.uasset
 [migrate] NiagaraExamples/FX_Ribbons/NS_TeslaCoil.uasset
-[migrate] NiagaraExamples/FX_Sparks/Emitters/NE_SecondarySparks.uasset
-[migrate] NiagaraExamples/FX_Sparks/Emitters/NE_Sparks.uasset
-[migrate] NiagaraExamples/FX_Sparks/NS_Spark_Burst.uasset
 [migrate] NiagaraExamples/Gallery/Materials/MI_ProcGrid.uasset
 [migrate] NiagaraExamples/Gallery/Materials/M_ProcGrid.uasset
 [migrate] NiagaraExamples/Gallery/Materials/M_Target_Metal.uasset
@@ -21,10 +17,8 @@
 [migrate] NiagaraExamples/Materials/MI_Flare.uasset
 [migrate] NiagaraExamples/Materials/MI_Flare_TeslaCoil.uasset
 [migrate] NiagaraExamples/Materials/MI_Mesh_Overlay_TeslaCoil.uasset
-[migrate] NiagaraExamples/Materials/MI_SmokePuffLight_8x8.uasset
 [migrate] NiagaraExamples/Materials/MI_SmokePuffLight_8x8_Emissive_Tesla.uasset
 [migrate] NiagaraExamples/Materials/MI_Sparks.uasset
-[migrate] NiagaraExamples/Materials/MasterMaterials/M_BrightCore.uasset
 [migrate] NiagaraExamples/Materials/MasterMaterials/M_Decal_Boundary.uasset
 [migrate] NiagaraExamples/Materials/MasterMaterials/M_Decal_Glow.uasset
 [migrate] NiagaraExamples/Materials/MasterMaterials/M_Flare.uasset
@@ -36,7 +30,6 @@
 [migrate] NiagaraExamples/Materials/MaterialFunctions/MF_ExposureCompensation.uasset
 [migrate] NiagaraExamples/Materials/MaterialFunctions/MF_FastSphereNormal.uasset
 [migrate] NiagaraExamples/Materials/MaterialFunctions/MF_MotionStretchSpark.uasset
-[migrate] NiagaraExamples/NPC_NiagaraExamples.uasset
 [migrate] NiagaraExamples/StaticMesh/SM_Cylinder_1Unit.uasset
 [migrate] NiagaraExamples/Textures/ColorCurves/Atlas_FXColorCurves.uasset
 [migrate] NiagaraExamples/Textures/ColorCurves/EmissiveColorCurve.uasset

@@ -254,9 +254,9 @@ $MissReq = New-Object System.Collections.Generic.List[string]
 $MissOther = New-Object System.Collections.Generic.List[string]
 $Count = 0
 foreach ($L in $Lines) {
-    $Rel = ($L -replace '^\[[a-z]+\]\s+', '') -replace '/', '\'
+    $Rel = ($L -replace '^\[[a-z0-9-]+\]\s+', '') -replace '/', '\'
     $Count++
-    if (-not (Test-Path "$Content\$Rel")) {
+    if (-not (Test-Path -LiteralPath "$Content\$Rel")) {
         if ($Required -contains ($Rel -replace '\.uasset$', '')) { $MissReq.Add($Rel) } else { $MissOther.Add($Rel) }
     }
 }

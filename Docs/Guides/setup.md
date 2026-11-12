@@ -56,7 +56,7 @@ powershell -ExecutionPolicy Bypass -File Scripts/restore-assets.ps1 -DryRun -Ass
 powershell -ExecutionPolicy Bypass -File Scripts/restore-assets.ps1 -AssetHost "D:/UE/LabAssetHost/LabAssetHost.uproject"
 ```
 
-스크립트는 아래 단계를 차례로 부른다. 단계마다 `OK   <단계> (<초>s)`를 찍고, 산출물이 이미 있는 단계는 `SKIP`으로 건너뛴다.
+스크립트는 아래 단계를 차례로 부른다. 단계마다 `OK   <단계> (<초>s)`를 찍고, 산출물이 이미 있는 단계는 `SKIP`으로 건너뛴다. 작성자 PC에서 처음부터 돌리면 열한 단계가 단계마다 16\~21초, 모두 약 3분 30초 걸렸다.
 
 | 단계 | 스크립트(엔진) | 만드는 것 |
 | --- | --- | --- |
@@ -66,7 +66,7 @@ powershell -ExecutionPolicy Bypass -File Scripts/restore-assets.ps1 -AssetHost "
 | `vat-lod4-small`, `vat-lod4-large` | `bake-vat.py` `LAB_VAT_LOD=4`(소스 빌드) | 200m 밖 입자가 쓰는 저폴리 VAT 메시(원본 스켈레탈 LOD4, 이름 끝 `_Bone_Lod4`) |
 | `iskm`, `iskm-verify` | `create-iskm.py`(소스 빌드) | `Content/Lab/ISKM/Baked/`의 ISKM 메시·애니 제공자·머티리얼, 그리고 새 프로세스에서 다시 읽어 확인 |
 
-끝에서 `Scripts/restore-assets.manifest.txt`의 파일 목록과 실제 파일을 대조한다. 성공하면 `Manifest: 157 files, missing 0 (required 0)`과 `DONE: assets restored.`가 찍히고 종료 코드가 0이다. 게임이 경로로 읽는 필수 파일이 빠지면 `MISSING (required)`와 함께 종료 코드 1로 끝난다. 의존성 파일만 빠지면 `missing (dependency)`로 알리고 성공으로 끝난다. 팩 판이 바뀌면 의존성 파일의 이름과 위치가 달라질 수 있다.
+끝에서 `Scripts/restore-assets.manifest.txt`의 파일 목록과 실제 파일을 대조한다. 성공하면 `Manifest: 150 files, missing 0 (required 0)`과 `DONE: assets restored.`가 찍히고 종료 코드가 0이다. 게임이 경로로 읽는 필수 파일이 빠지면 `MISSING (required)`와 함께 종료 코드 1로 끝난다. 의존성 파일만 빠지면 `missing (dependency)`로 알리고 성공으로 끝난다. 팩 판이 바뀌면 의존성 파일의 이름과 위치가 달라질 수 있다.
 
 - 로그는 `Saved/Logs/Restore/<단계>.log`다. 단계가 실패하면 그 로그의 `LAB…`·`Error:` 줄을 화면에 찍고 멈춘다. 고친 뒤 같은 명령을 다시 치면 끝난 단계는 건너뛴다.
 - `-HostEngineRoot <런처 엔진 폴더>`는 호스트 엔진을 찾지 못한다고 할 때 준다.
