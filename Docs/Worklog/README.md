@@ -5,3 +5,4 @@
 제목 형식: `## YYYY-MM-DD 한 일 (실행 라벨)`
 - [Posts.md](Posts.md): 글 작업 기록(글마다 한 절).
 - [CodeTour.md](CodeTour.md): 최종 구성 코드 투어(`Docs/Guides/code-tour.md`)를 쓴 기록.
+- [Setup.md](Setup.md): 클론 뒤 에셋 복구 스크립트(`Scripts/restore-assets.ps1`)와 준비 가이드(`Docs/Guides/setup.md`)를 만든 기록.

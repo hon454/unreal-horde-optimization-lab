@@ -22,6 +22,7 @@
 
 | 파일 | 역할 |
 | --- | --- |
+| `restore-assets.ps1`, `restore-assets.manifest.txt` | 클론 뒤 한 번: 아래 스크립트를 순서대로 불러 git 밖 에셋을 복구하고 목록과 대조한다(`-DryRun`, `-Force`, `-AssetHost`). 순서는 [Docs/Guides/setup.md](../Docs/Guides/setup.md) |
 | `migrate-assets.py` | Fab 원본 팩에서 쓰는 에셋만 옮긴다 |
 | `make-static-minion.py`, `lab_unit_colors.py` | `static` 변형과 M1의 정적 메시, 미니언 색 값 |
 | `bake-vat.py` | VAT 베이크(M2\~M4 원거리 표현, 액터 머티리얼) |

@@ -147,16 +147,7 @@ py -3 -I Scripts/ablation-check.py <CSV> --cond L8-q4final --shot
 
 ## 처음 준비
 
-클론한 저장소에서 Test 패키지를 만들기 전에 한 번 한다. `Content/Lab/`에는 AnimBP, Niagara 시스템, 바닥 머티리얼, 맵 `L_Bench`만 커밋돼 있다. Fab 콘텐츠와 거기서 만든 파생 에셋(`Content/ParagonMinions/`, `Content/NiagaraExamples/`, `Content/Lab/Derived/`, `Content/Lab/VAT/Baked/`, `Content/Lab/ISKM/Baked/`)은 gitignore라 직접 만든다.
-
-1. 엔진: `HordeOptLab.uproject`의 `EngineAssociation`이 가리키는 UE 5.8.4 소스 빌드를 갖춘다. 스크립트는 `HKCU\Software\Epic Games\Unreal Engine\Builds`에 등록된 소스 빌드만 쓴다(`Scripts/common.ps1`). `.uproject`를 우클릭해 "Switch Unreal Engine version"으로 맞춘다.
-2. 에셋 받기: Fab의 Paragon: Minions([references.md](../Reference/references.md) "에셋")를 받는다. 소스 빌드는 Fab 에셋을 직접 추가하지 못하므로 런처 5.8 엔진의 빈 프로젝트에 받는다.
-3. 에셋 옮기기: 아래 "에셋 마이그레이션"의 `migrate-assets.py`를 세트 `minion`, `siege`, `orbfx` 순으로 돌린다. `orbfx`는 Niagara Examples Pack에서 오브의 타워·번개 에셋을 옮긴다.
-4. 파생 에셋 만들기: 아래 "파생 에셋과 맵"의 스크립트를 이 순서로 돌린다. 앞의 둘은 소형(기본)과 `LAB_UNIT=large` 대형을 각각 돌린다.
-   1. `make-static-minion.py`
-   2. `bake-vat.py`
-   3. `create-iskm.py` (`LAB_UNIT`을 비우면 두 종류를 한 번에 만든다)
-5. 그다음 `build.ps1`, `package.ps1`로 이어 간다.
+클론에서 측정까지의 순서(엔진 등록, Fab 두 팩, `Scripts/restore-assets.ps1`로 에셋 복구, 빌드, 작은 실행, 패키징)는 [setup.md](setup.md)에 있다. 아래 두 절은 복구 스크립트가 부르는 스크립트를 하나씩 돌릴 때 본다.
 
 ## 에셋 마이그레이션
 

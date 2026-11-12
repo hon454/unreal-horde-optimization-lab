@@ -84,11 +84,11 @@
 
 ## 실행
 
-먼저 갖출 것이 세 가지 있다. 순서와 명령은 [Docs/Guides/commands.md](Docs/Guides/commands.md)의 "처음 준비"에 있다.
+먼저 갖출 것이 세 가지 있다. 순서와 명령은 [Docs/Guides/setup.md](Docs/Guides/setup.md)에 있다.
 
 1. UE 5.8.4 소스 빌드 엔진. `Scripts/common.ps1`이 `HordeOptLab.uproject`의 `EngineAssociation`으로 이 PC에 등록된 소스 빌드를 찾는다.
-2. Fab의 Paragon: Minions 팩. 재배포가 금지돼 저장소에 없다.
-3. 팩에서 쓰는 에셋을 옮기고(`Scripts/migrate-assets.py`) 파생 에셋을 만드는(`Scripts/bake-vat.py`) 한 번의 작업. 결과물은 git 밖에 둔다.
+2. Fab의 [Paragon: Minions](https://www.fab.com/listings/039ea035-9360-4e76-ad06-5d3a92da6f65)와 [Niagara Examples Pack](https://www.fab.com/listings/0e188eca-4e54-4fb2-a9ed-d8b8a565e600). 런처 엔진의 빈 프로젝트에 받는다.
+3. `Scripts/restore-assets.ps1` 한 번. 두 팩에서 쓰는 에셋을 옮기고 VAT·ISKM 같은 파생 에셋을 만든다.
 
 단계는 한 빌드 안의 실행 모드다(`-LabStage=M0`\~`M5`). Test 패키지를 만들고 묶음 스크립트로 잰다.
 
