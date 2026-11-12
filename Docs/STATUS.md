@@ -14,7 +14,7 @@ M0\~M5, M3b 완료(태그 `M0`\~`M5`, `M3b`). 품질 계획 Q1\~Q5 완료, Q6은
   - 문서는 `Full1` 값으로 맞췄다(README, ADR 0010\~0013 "결과", autonomous-decisions 요약, measurement.md, post-material "08". 9be3056). 표는 프레임 시간 옆에 Game p50, GPU p50을 두고 조건은 늘리지 않는다(2026-11-12 사용자 결정). [post-material.md](post-material.md)의 옛 묶음 값은 글을 쓸 때 그 절만 바꾼다. 글 재료는 그대로 쓸 수 없어 글 쓰기 전에 한 번 정리한다(2026-11-12 사용자 결정). README와 글 본문에는 `Full1` 같은 묶음 이름을 쓰지 않는다(같은 날).
   - Development 전환 점수 묶음도 끝났다(아래 "측정 결과").
   - 사다리 여덟 단계의 움직이는 WebP를 `Docs/figures/steps/step<N>-<조건>.webp`에 넣었다(촬영 `Pre5`, 약 51MB, Git LFS. 2026-11-12 사용자가 보고 여덟 개 모두 넣기로 결정). README와 글에는 아직 잇지 않았다. 다시 찍으면 `Pre6`부터 쓴다.
-- [ ] **글 00\~09.** [backlog.md](backlog.md) "글 대기열". 수치는 `Full1`에서만 만든다.
+- [ ] **글 00\~09.** [backlog.md](backlog.md) "글 대기열". 수치는 `Full1`에서만 만든다. 글 재료 46개 항목의 사실 확인과 선별, 핵심 인사이트 열 개는 [post-review.md](post-review.md)에 있다(2026-11-12). 재료의 측정값은 거의 전부 옛 묶음 값이고, 경위의 비교 여럿은 `Full1`에 대응 조건이 없다. 이것을 어떻게 다룰지 사용자 결정을 기다린다.
 
 ## 진행 중인 세션
 
