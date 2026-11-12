@@ -16,20 +16,16 @@
 순서대로 한다.
 
 1. **01번 글의 Insights 화면을 새 트레이스로 다시 찍는다.** 코디네이터가 한다. 다른 글은 내보낸 값을 쓴다([D31](Worklog/autonomous-decisions.md)).
-2. **글 00\~09를 쓴다.** 대기열은 [backlog.md](backlog.md)에 있다. 나누는 법은 [D27](Worklog/autonomous-decisions.md)에 있다.
-   - 시범 글 01은 [Posts/01-actor-baseline](../Posts/01-actor-baseline/README.md)에 있다.
-   - 글 규칙은 [posting.md](Guides/posting.md), [ADR-0014](Decisions/0014-post-format.md), [ADR-0015](Decisions/0015-readme-figures.md)에 있다.
-   - 글 재료의 사실 확인 결과는 [post-review.md](post-review.md)에 있다. 재료의 측정값은 옛 묶음의 값이다. 경위는 수치 없이 방향만 쓴다.
-   - 엔진 문제를 쓸 때는 이슈 링크와 이 레포의 해결 코드 블록을 함께 보인다.
-   - 독자용 문장은 묶음 이름 대신 "최종 측정"이라고 쓴다.
-   - 글을 다 쓰면 한눈에 보는 사이트를 만든다.
-3. **푸시한다.** 사용자가 2026-11-12에 푸시를 승인했다. 코디네이터는 단계가 끝날 때마다 푸시한다.
+2. **글 열 편의 초안을 마무리한다.** 글 00\~09의 초안은 커밋됐다. 남은 것은 글 사이 링크, README "글" 표, 그림의 화면 확인이다.
+3. **한눈에 보는 사이트를 만든다.** GitHub Pages다. 요구는 [backlog.md](backlog.md) "사이트" 행에 있다.
+4. **최종 보고를 한다.** 코디네이터가 [autonomous-decisions.md](Worklog/autonomous-decisions.md) D20 뒤의 결정을 사용자에게 보고한다.
+5. **푸시한다.** 사용자가 2026-11-12에 푸시를 승인했다. 코디네이터는 단계가 끝날 때마다 푸시한다.
 
 ## 진행 중인 세션
 
-- 글 07, 08, 09: 코디네이터의 하위 에이전트 셋이 쓴다. Opus high. 진행 중.
-- 글 02, 04, 05, 06의 트레이스 값 채우기: 하위 에이전트 하나. Sonnet medium. 진행 중.
-- 글 00\~06은 초안이 커밋됐다. 세션 대신 하위 에이전트를 쓰는 이유는 [D28](Worklog/autonomous-decisions.md)에 있다.
+- 글 사이 링크와 표기 정리: 하위 에이전트 하나. Sonnet medium. 진행 중.
+- 글 그림의 화면 확인과 겹침 수정: 하위 에이전트 하나. Sonnet high. 진행 중.
+- 세션 대신 하위 에이전트를 쓰는 이유는 [D28](Worklog/autonomous-decisions.md)에 있다.
 
 코디네이터는 세션을 띄우면 여기에 적는다. 끝난 세션은 결과를 확인하고 보관한 뒤 지운다.
 
@@ -125,5 +121,5 @@ Development 전환 점수는 `Full1` 때의 참고값이다(`Measurements/Full1/
 
 ## 사용자에게 요청한 일
 
-- **01번 글의 두 번째 검토.**
+- **글 00\~09 초안의 검토.** 글은 `Posts/`에 있다. 01번 글은 두 번째 검토다.
 - **[autonomous-decisions.md](Worklog/autonomous-decisions.md)의 D20 뒤 결정과 "사용자 판단 필요" 항목 검토.**
