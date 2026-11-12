@@ -230,7 +230,7 @@
 | 항목 | 내용 | 위치 |
 | --- | --- | --- |
 | 엔진 조향의 목표점 | 조향 목표는 `MoveTarget.Center + Forward × Clamp(ForwardOffset + SteerForward, 0, 내다보는 거리)`이고 `ForwardOffset`은 개체 위치를 `Forward`에 내린 값이다. 개체가 `Center` 뒤에 있으면 목표가 `Center` 자체가 된다. 그래서 `Center`를 오브에 두면 `Forward`와 무관하게 오브로 곧게 간다. 방향을 따르게 하려면 `Center`를 개체 앞(방향 쪽)에 둔다. 내다보는 거리는 `LookAheadTime × DesiredSpeed` | `MN/Private/MassSteeringProcessors.cpp:133, 152-163` |
-| 엔진 비켜 가기와 LOD 태그 | 이동 비켜 가기 쿼리는 `FMassNavigationEdgesFragment`를 요구하고 `FMassMediumLODTag`·`FMassLowLODTag`·`FMassOffLODTag`가 없는 개체만 돈다. LOD 태그가 없으면(M1~M3) 전 개체, Simulation LOD Trait이 있으면(M4·M5) High 밴드(카메라 80m 안)만 돈다. 서 있는 비켜 가기 쿼리도 같다 | `MN/Private/MassAvoidanceProcessors.cpp:295-303, 1120-1127` |
+| 엔진 비켜 가기와 LOD 태그 | 이동 비켜 가기 쿼리는 `FMassNavigationEdgesFragment`를 요구하고 `FMassMediumLODTag`·`FMassLowLODTag`·`FMassOffLODTag`가 없는 개체만 돈다. LOD 태그가 없으면(M1\~M3) 전 개체, Simulation LOD Trait이 있으면(M4·M5) High 밴드(카메라 80m 안)만 돈다. 서 있는 비켜 가기 쿼리도 같다 | `MN/Private/MassAvoidanceProcessors.cpp:295-303, 1120-1127` |
 | 엔진 비켜 가기의 벽 | 환경 비켜 가기는 `FMassNavigationEdgesFragment`의 경계선만 본다(보통 ZoneGraph 차선 경계가 채운다). 콜리전 지오메트리는 보지 않는다 | `MN/Private/MassAvoidanceProcessors.cpp:399, 487-495` |
 | CharacterMovement RVO 기본값 | `bUseRVOAvoidance` false, `AvoidanceConsiderationRadius` 500. `AvoidanceWeight`는 생성자에서 정하지 않아 0이다. `SetAvoidanceEnabled(true)`가 `UAvoidanceManager::RegisterMovementComponent`로 등록한다(이동 컴포넌트를 붙일 때 `bUseRVOAvoidance`가 이미 참이어도 등록된다) | `ENG/Private/Components/CharacterMovementComponent.cpp:821-829, 1050-1055, 11750-11771`, `ENG/Classes/GameFramework/CharacterMovementComponent.h:1196` |
 
@@ -319,3 +319,16 @@
 | 프록시 값 | 프록시 설명에 `CastShadow(CastsDynamicShadow())`를 넘기고, 엔진 프록시는 `bCastDynamicShadow && CastShadow`로 정한다 | `NI/Private/NiagaraComponent.cpp:479`, `Engine/Source/Runtime/Engine/Private/PrimitiveSceneProxy.cpp:355` |
 | 컴포넌트 기본값은 끔 | `UPrimitiveComponent` 생성자가 `CastShadow = false`(`bCastDynamicShadow = true`)로 두고 `UNiagaraComponent` 생성자는 바꾸지 않는다. 시스템 `bOverrideCastShadow`가 꺼져 있으면 `SetAsset`이 컴포넌트 값을 그대로 둔다. 그래서 `SpawnSystemAtLocation`으로 만든 컴포넌트는 렌더러 그림자를 켜도 그림자가 없다(실행 로그 `fx_shadow_spawn=0`). 풀로 돌려받는 컴포넌트도 `SetCastShadow(false)`가 된다 | `Engine/Source/Runtime/Engine/Private/Components/PrimitiveComponent.cpp:341-343`, `NI/Private/NiagaraComponent.cpp:4678`, `NI/Private/NiagaraComponentPool.cpp:138` |
 | 실행 중 바꾸기 | `SetCastShadow`는 값이 바뀌면 `MarkRenderStateDirty`로 프록시를 다시 만든다 | `PrimitiveComponent.cpp:2212-2219` |
+
+## 24. Niagara 입자 스폰, 배열 DI, MCP 한계(2026-11-12, Q2b 에셋 세션 기록을 이 문서로 옮김)
+
+줄임말: **NI** = `Engine/Plugins/FX/Niagara/Source/Niagara`. 아래 위치는 Q2 Worklog가 적은 것이고 문서 점검 때 소스에서 다시 확인했다(`ExecIndex` 행 제외).
+
+| 항목 | 확인한 것 | 위치 |
+| --- | --- | --- |
+| 보간 스폰 끔(`NoInterpolation`) | 새 입자가 스폰된 프레임에 업데이트 스크립트를 돌지 않는다. 그래서 수명을 프레임보다 아주 짧게 두면 프레임 N에 스폰된 입자가 N에 그려지고 N+1의 업데이트에서 죽는다(엔티티 구동 입자의 근거) | `NI/Public/NiagaraCommon.h:230-243` |
+| 배열 DI의 GPU 동기 기본값 | `GpuSyncMode`가 `SyncCpuToGpu`다. 이미터 스크립트(CPU)의 개수 읽기와 입자 스크립트(GPU)의 원소 읽기가 같은 배열에서 온다 | `NI/Classes/NiagaraDataInterfaceArray.h:141-143` |
+| GPU 스폰의 `ExecIndex` | 스폰 그룹 안의 순번이다(`GGPUExecIndex = GLinearThreadId − GSpawnStartInstance − GroupSpawnStartIndex`). 소스는 이 점검에서 다시 열지 않았다 | `NiagaraEmitterInstanceShader.usf:162-191`(Q2.md 인용) |
+| 컴포넌트에서 워밍업을 덮어쓸 수 없다 | `bOverrideWarmupSettings`·`WarmupTickCount`·`WarmupTickDelta`가 `private:` 구역(88줄부터)에 있고 설정 함수가 없다. 워밍업을 바꾸려면 시스템 에셋을 고친다 | `NI/Classes/NiagaraComponent.h:88, 138-148` |
+| MCP로 배열(DI) 사용자 변수를 만들 수 없다 | `FNiagaraParameterStore::SetParameter_InternalUseOnly`가 데이터 인터페이스 키를 받으면 오류 로그만 남기고 돌아온다. MCP `AddUserVariables`로 배열 변수를 만들면 오류 없이 아무것도 생기지 않은 까닭이다. 대신 다이내믹 입력의 배열 입력을 사용자 변수에 연결하면(`SetStackInputData`) DI 인스턴스와 변수가 함께 생긴다 | `NI/Private/NiagaraParameterStore.cpp:1457-1461` |
+| 이미터 로드 때 보간 스폰 불일치 경고 | 로드 때 이미터의 `InterpolatedSpawnMode`와 스폰 스크립트 종류가 다르면 엔진이 메모리에서 `NoInterpolation`으로 맞추고 "Disabling interpolated spawn…" 경고를 남긴다. MCP `SetEmitterData`는 `PostEditChange`를 부르지 않아 스폰 스크립트 용도가 템플릿 값으로 저장돼 이 경고가 생겼다. 동작은 같고, 에디터에서 한 번 다시 저장하면 없어진다고 Q2 세션이 적었다(쿡된 빌드에서의 경고 여부는 보지 않았다) | `NI/Private/NiagaraEmitter.cpp:859-879`(Q2.md는 861-878로 적었다) |

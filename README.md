@@ -3,20 +3,22 @@
 Night of the Dead에서 측정 없이 액터로 했던 좀비 호드 최적화를, Unreal Engine 5.8 Mass Entity로 다시 지어 거리별로 비용을 덜어내며 단계마다 수치로 확인한 기록이다. 액터 군중에서 시작해 Mass 로직, ISM + VAT, 액터 하이드레이션과 애니메이션 예산, Simulation LOD, ISKM을 한 번에 하나씩 적용하고, 같은 시나리오를 같은 방법으로 다시 잰다.
 
 - **대상**: 클라이언트 한 대에서 그리고 움직이는 군중의 비용. Game Thread, Render Thread, GPU, 메모리.
-- **최적화**: Mass Entity(Fragment·Processor), Representation LOD(액터 / ISM+VAT / ISKM / 없음), 액터 하이드레이션과 풀링, Significance Manager → Animation Budget Allocator, URO, Simulation LOD(청크 단위 가변 틱).
+- **최적화**: Mass Entity(Fragment·Processor), Representation LOD(액터 / ISM+VAT / ISKM / 없음), 액터 하이드레이션과 풀링, Significance Manager → Animation Budget Allocator, URO, Simulation LOD(청크 단위 가변 틱), Niagara 배경 무리(엔티티 구동 입자).
 - **측정 도구**: Test 구성 패키지에서 `csvprofile`과 Unreal Insights.
+
+마일스톤 M0\~M5로 단계를 쌓은 뒤, 지금은 목표 사양(호드 총수 1만, 60fps) 안에서 거리별 품질을 확보하는 품질 계획 Q1\~Q6을 따른다. 가까이는 액터 하이드레이션, 멀리는 ISKM, 그리는 끝(200m) 밖은 Niagara 배경 무리로 그리고, 그렇게 번 프레임 시간을 액터 수와 전환 거리에 쓴다. 최종 구성의 기법은 모두 단계별 사다리와 "기법 하나를 뺀" 표에서 이점이 보여야 한다. 글과 이 문서의 수치는 총괄 묶음 `Full1`에서 다시 만든다.
 
 형제 프로젝트 [UE5 Dedicated Server 최적화 실험실](https://github.com/hon454/ue-dedicated-server-optimization-lab)이 서버가 보내는 비용을 다루고, 이 프로젝트는 클라이언트가 그리고 움직이는 비용을 다룬다.
 
 ## 시나리오
 
-플레이어는 움직이지 않는다. 맵 중앙의 오브를 향해 개체가 사방에서 걸어오고, 오브는 가까운 개체를 지우고 먼 개체를 주기적으로 쏜다. 모든 거리에서 생성·피격·사망·표현 전환이 계속 일어나게 하는 벤치마크 장치다. 개체는 Epic의 무료 에셋 Paragon: Minions의 근접 미니언 한 종류다. 카메라는 고정 프리셋 두 개(오브 뒤에서 바깥을 보며 도는 오브 시점, 탑뷰)로 잰다.
+플레이어는 움직이지 않는다. 맵 중앙의 오브를 향해 개체가 사방에서 걸어오고, 오브는 가까운 개체를 지우고 먼 개체를 주기적으로 쏜다. 모든 거리에서 생성·피격·사망·표현 전환이 계속 일어나게 하는 벤치마크 장치다. 개체는 Epic의 무료 에셋 Paragon: Minions의 근접 미니언(소형 90%)과 시즈 미니언(대형 10%) 두 종류이고, 체력은 개체마다 60\~240 사이에서 시드로 정한다. 카메라는 고정 프리셋 두 개(오브 뒤에서 바깥을 보며 도는 오브 시점, 탑뷰)로 잰다.
 
 ## 결과 한눈에 보기
 
 ![60fps를 지키는 최대 N](Docs/figures/n-at-60fps.svg)
 
-60fps(프레임·Game·Render·GPU 중 가장 느린 것의 p50이 16.7ms 이하)를 지키는 최대 개체 수다. 오브 시점, 2560x1440 Epic, Test 패키지, 3회 중앙값(`Measurements/M<N>/summary.csv`). 줄마다 잰 묶음이 다르다. 같은 M1이 묶음에 따라 20k 16.0 / 15.2ms로 달랐으므로, 단계 사이 비교는 같은 묶음에서 잰 짝(M2 줄의 M1, M3 줄의 M2 + 200m 밖 Off)으로 한다.
+60fps(프레임·Game·Render·GPU 중 가장 느린 것의 p50이 16.7ms 이하)를 지키는 최대 개체 수다. 오브 시점, 2560x1440 Epic, Test 패키지, 3회 중앙값(`Measurements/M<N>/summary.csv`). 아래 표는 마일스톤 묶음의 값이며 총괄 묶음 `Full1` 뒤에 다시 만든다. 줄마다 잰 묶음이 다르다. 같은 M1이 묶음에 따라 20k 16.0 / 15.2ms로 달랐으므로, 단계 사이 비교는 같은 묶음에서 잰 짝(M2 줄의 M1, M3 줄의 M2 + 200m 밖 Off)으로 한다.
 
 | 단계 · 변형 | 1k | 2k | 5k | 20k | 50k | 60fps 최대 N |
 | --- | --- | --- | --- | --- | --- | --- |
@@ -53,7 +55,7 @@ Night of the Dead에서 측정 없이 액터로 했던 좀비 호드 최적화�
 
 - 측정 PC는 Ryzen 9 5950X, RTX 4090, 64GB, Windows 11, UE 5.8.4 소스 빌드다. 자세한 값은 [Docs/Reference/pc-specs.md](Docs/Reference/pc-specs.md)에 있다.
 - 고정 시드로 초기 조건을 재현한다. 개체는 정상 상태 분포(밀도 ∝ 1/r)로 미리 놓고 15초 뒤 60초를 잰다. 궤적은 비결정적이라 3회 실행의 중앙값과 범위를 함께 적는다.
-- 개체 수 N은 1k와 5k를 모든 단계에서 재고, 단계마다 범위를 넓힌다.
+- 마일스톤 묶음에서는 개체 수 N 1k와 5k를 모든 단계에서 재고 단계마다 범위를 넓혔다. 총괄 묶음은 목표 총수 1만에서 사다리 전 단계(오브 시점·탑뷰)와 빼 보기 표를 재고, 보조로 단계별 최대 N을 잰다.
 - 수치는 Test 구성 패키지에서 `csvprofile`로 얻는다. Development 빌드의 수치는 비교에 쓰지 않는다.
 - 중앙값의 차이가 두 구성의 범위 중 큰 쪽보다 작으면 "구별되지 않았다"고 적는다.
 
@@ -71,6 +73,7 @@ Night of the Dead에서 측정 없이 액터로 했던 좀비 호드 최적화�
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File Scripts/package.ps1
+powershell -ExecutionPolicy Bypass -File Scripts/run-full.ps1 -DryRun
 powershell -ExecutionPolicy Bypass -File Scripts/run-e0.ps1
 powershell -ExecutionPolicy Bypass -File Scripts/run-e1.ps1
 py -3 Scripts/summarize.py --milestone M0

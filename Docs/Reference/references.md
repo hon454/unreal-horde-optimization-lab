@@ -53,6 +53,8 @@
 
 - **Unreal Engine Skills for Claude Code** — Epic 저장소 `epicgames/unreal-engine-skills-for-claude-code-plugin`. 30+ 툴셋, UE 관례 주입.
 - Unreal Insights, Mass Debugger(에디터, Development), Gameplay Debugger, Visual Logger.
+- **Niagara**(Q2 배경 무리): 별도 문서를 쓰지 않고 엔진 소스와 엔진 콘텐츠(`/Niagara/Modules`, `/Niagara/DynamicInputs`)에서 확인했다. 확인한 것은 [engine-notes.md](engine-notes.md) 17·21·23·24절.
+- **ffmpeg** — 총괄 묶음 촬영이 게임 창을 녹화해 GIF로 만들 때 쓴다([plan.md](../plan.md) "HUD와 촬영").
 
 ## 형제 프로젝트
 
