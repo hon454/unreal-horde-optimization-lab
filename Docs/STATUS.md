@@ -25,10 +25,11 @@ M0\~M5, M3b 완료(태그 `M0`\~`M5`, `M3b`). 필수 마일스톤이 끝났다. 
 ## 진행 중인 세션
 
 - 예행 묶음 `Reh2`: 끝났다(Q5.md). 검사는 통과했다. 액터 1만 조건 여섯은 10초 구간에서 프레임 수 검사(100 이상)에 걸렸다(60초는 미확인, 첫 실행으로 확인). 40m의 대형 액터 애니 건너뜀 비율은 0.055다.
-- Q2b(엔티티 구동 입자)와 Q4b(표현 LOD 재편)는 끝났다(dc73479, 0a37e91, c026d53, 67d7d29). Test 패키지에서는 재지 않았다.
+- Q2b(엔티티 구동 입자)와 Q4b(표현 LOD 재편)는 끝났다(dc73479, 0a37e91, c026d53, 67d7d29).
 - Q2c(입자 그림자를 `-LabFarShadow`에 묶기, 33a752a)가 끝났다. 조건 표는 21개로 줄였다(보고서 D19). 예행 산출물은 `Saved/Rehearsal/`에 있다.
 - `full-postfix`(Sonnet medium): `capture-full.ps1` 촬영 잘림, `plot.py --batch` 목표 총수 수정. 진행 중.
-- `docs-check`(Sonnet medium): 문서 점검([Worklog/Q6.md](Worklog/Q6.md)). 진행 중. 둘이 끝나면 `Full1`을 시작한다.
+- `docs-check`(Sonnet medium): 문서 점검([Worklog/Q6.md](Worklog/Q6.md)). 진행 중.
+- `hud-reader`(Opus high): 독자용 HUD(Worklog/Q5-hud.md). 진행 중. 셋이 끝나면 재패키징, 짧은 예행, `Full1` 순이다.
 
 세션을 띄우면 세션, 작업 단위, 모델과 추론 수준, 상태를 여기에 적고, 끝나서 확인한 세션은 보관 처리하고 지운다(AGENTS.md "작업 세션은 작게 나눠 띄우고").
 
@@ -79,9 +80,9 @@ py -3 Scripts/summarize.py --milestone M5
 
 ## 막힌 것
 
-- 러너가 게임 창을 앞으로 보내고 검사한다. 측정 중에는 PC를 쓰지 않는다. 디스크의 Test 패키지는 a817827이다(이후 커밋은 문서뿐). 코드나 조건 표를 고치면 `Full1` 전에 다시 패키징한다.
+- 러너가 게임 창을 앞으로 보내고 검사한다. 측정 중에는 PC를 쓰지 않는다. 디스크의 Test 패키지는 a817827이다. HUD 수정 뒤 다시 패키징한다.
 
 ## 사용자에게 요청한 일
 
-- `Full1`은 사용자가 승인했다(2026-11-12, 위 두 세션 뒤).
+- `Full1`은 사용자가 승인했다(2026-11-12, 위 세션들과 재패키징 뒤).
 - 돌아오면 [Worklog/autonomous-decisions.md](Worklog/autonomous-decisions.md)를 검토해 달라(맨 위 요약, "사용자 판단 필요" 항목).
