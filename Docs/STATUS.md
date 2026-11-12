@@ -18,7 +18,7 @@ M0\~M5, M3b 완료(태그 `M0`\~`M5`, `M3b`). 품질 계획 Q1\~Q5 완료, Q6은
 
 ## 진행 중인 세션
 
-없음.
+- `readme-scenario-fig`: README "시나리오" 절을 위에서 내려다본 SVG 그림으로 바꾼다(`Docs/figures/readme/scenario.svg`). Opus high. 진행 중(2026-11-12).
 
 세션을 띄우면 세션, 작업 단위, 모델과 추론 수준, 상태를 여기에 적고, 끝나서 확인한 세션은 보관 처리하고 지운다(AGENTS.md "작업 세션은 작게 나눠 띄우고").
 
