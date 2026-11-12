@@ -17,6 +17,10 @@
 | [0007](0007-keep-default-motion-blur.md) | ISKM 모션 블러 줄무늬가 있어도 모션 블러는 엔진 기본값(켬)으로 두고 측정한다 | 승인됨 |
 | [0008](0008-game-scene-baseline-and-target-spec.md) | 게임 장면(건물, 방향장, 비켜 가기, 부위 판정, 래그돌)을 새 기준선으로 삼고 목표 사양(1만, 60fps)에서 프레임을 맞춘다 | 대체됨(0009) |
 | [0009](0009-flat-scenario-quality-by-distance.md) | 평지 시나리오로 돌아가 목표 사양 안에서 거리별 품질을 확보한다(하이드레이션, ISKM, Niagara 배경 무리). 사다리와 빼 보기 표로 이점을 보인다 | 승인됨 |
+| [0010](0010-final-representation-bands.md) | 최종 구성의 표현을 거리 네 구간으로 나눈다: 액터 0\~40m(상한 1,000), ISKM 40\~80m 그림자 켬, ISKM 80\~200m 그림자 끔, 200m 밖 입자 | 제안됨 |
+| [0011](0011-entity-driven-crowd-particles.md) | 200m 밖 배경 무리를 두 겹으로 만든다: 200\~500m는 실제 엔티티 자리에 그리는 입자, 500\~1,000m는 독립 입자 | 제안됨 |
+| [0012](0012-ablation-switches-and-quality-metrics.md) | 빼 보기 행은 끄는 인자 하나로 고른다. 전환 점수와 빠른 회전 지표는 Development 참고값으로 낸다 | 제안됨 |
+| [0013](0013-full-batch-runner-and-condition-table.md) | 총괄 묶음은 새 러너 `run-full.ps1`로 돌리고 조건 표 21개에는 단계별 기술과 성능 변화만 둔다 | 제안됨 |
 
 ## ADR 이전의 결정
 

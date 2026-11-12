@@ -26,10 +26,13 @@ Night of the Dead에서 측정 없이 액터로 했던 좀비 호드 최적화�
 | 영상·문서·샘플·에셋·포럼 스레드 | [references.md](Docs/Reference/references.md) |
 | 강연 두 편(Shabel, 윤준기)의 자막 분석 요약과 타임스탬프 | [talk-notes.md](Docs/Reference/talk-notes.md) |
 | 측정 PC 사양과 엔진 버전 | [pc-specs.md](Docs/Reference/pc-specs.md) |
-| 끝낸 마일스톤의 경위, 실패한 실행 | `Docs/Worklog/M<N>.md`, 품질 계획은 `Q<N>.md`. 세션 시작 때 읽지 않고 검색만 한다 |
+| 끝낸 마일스톤의 경위, 실패한 실행 | `Docs/Worklog/M<N>.md`, 품질 계획은 `Q<N>.md`(목록은 [Worklog/README.md](Docs/Worklog/README.md)). 세션 시작 때 읽지 않고 검색만 한다 |
+| 코디네이터가 묻지 않고 내린 결정(D1\~D19)과 사용자 판단이 필요한 항목 | [autonomous-decisions.md](Docs/Worklog/autonomous-decisions.md). ADR로 옮긴 것은 그 머리말에 있다 |
+| 총괄 묶음의 조건 표(사다리, 빼 보기, 하위 실험의 인자 줄과 기대 메타데이터)와 스크립트 목록 | `Scripts/full-conditions.json`, [Scripts/README.md](Scripts/README.md) |
 | 글 본문과 이미지 | `Posts/NN-이름/README.md`, `Posts/NN-이름/images/` |
 | 글 수치의 근거(실행 라벨, 세 실행의 값, 계산식, 캡처, 소스 위치) | `Posts/NN-이름/measurements.md` |
-| 마일스톤별 측정 결과 | `Measurements/M<N>/summary.csv`(조건별 중앙값·범위), `runs.csv`(실행별 한 행), `shots/` |
+| 묶음별 측정 결과 | `Measurements/M<N>/`, 품질 계획은 `Measurements/Q<N>/`, 총괄 묶음은 `Measurements/Full1/`. 안에 `summary.csv`(조건별 중앙값·범위), `runs.csv`(실행별 한 행), `shots/` |
+| 그래프(SVG)와 그 수치(CSV) | `Docs/figures/`. `Scripts/plot.py`가 만든다 |
 | 공개 소개, 결과 한눈에 보기, 글 표 | [README.md](README.md) |
 | 참고 프로젝트(City Sample, MetaHuman Crowd Sample, Fab 원본 팩) | 형제 디렉터리 `../unreal-horde-references/`(git 밖, 읽기 전용). 위치는 references.md |
 | 실행 산출물(git 밖) | 프레임 CSV `Saved/Profiling/CSV/`, 트레이스 `Saved/Traces/`, 스크린샷 `Saved/Screenshots/Lab/`, 패키지 `Packaged/` |
