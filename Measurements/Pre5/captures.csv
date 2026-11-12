@@ -1,0 +1,9 @@
+﻿time,label,status,file,size_kb,record_sec,note
+2026-11-12 16:32:46,Pre5shot-L1-full-N10000-P1-r1,OK,G:\Epic Games\UE_5.8.4\Games\unreal-horde-optimization-lab\Saved\Capture\Pre5\Pre5shot-L1-full-N10000-P1-r1.webp,1094,8,region 3840x2160@0 0;
+2026-11-12 16:33:47,Pre5shot-L2-mass-N10000-P1-r1,OK,G:\Epic Games\UE_5.8.4\Games\unreal-horde-optimization-lab\Saved\Capture\Pre5\Pre5shot-L2-mass-N10000-P1-r1.webp,7389,8,region 3840x2160@0 0;
+2026-11-12 16:34:47,Pre5shot-L3-vatcull-N10000-P1-r1,OK,G:\Epic Games\UE_5.8.4\Games\unreal-horde-optimization-lab\Saved\Capture\Pre5\Pre5shot-L3-vatcull-N10000-P1-r1.webp,7266,8,region 3840x2160@0 0;
+2026-11-12 16:35:48,Pre5shot-L4-mass-N10000-P1-r1,OK,G:\Epic Games\UE_5.8.4\Games\unreal-horde-optimization-lab\Saved\Capture\Pre5\Pre5shot-L4-mass-N10000-P1-r1.webp,7141,8,region 3840x2160@0 0;
+2026-11-12 16:36:48,Pre5shot-L5-m4offpool-N10000-P1-r1,OK,G:\Epic Games\UE_5.8.4\Games\unreal-horde-optimization-lab\Saved\Capture\Pre5\Pre5shot-L5-m4offpool-N10000-P1-r1.webp,7015,8,region 3840x2160@0 0;
+2026-11-12 16:37:49,Pre5shot-L6-m5bounds-N10000-P1-r1,OK,G:\Epic Games\UE_5.8.4\Games\unreal-horde-optimization-lab\Saved\Capture\Pre5\Pre5shot-L6-m5bounds-N10000-P1-r1.webp,7251,8,region 3840x2160@0 0;
+2026-11-12 16:38:50,Pre5shot-L7-q2crowd-N10000-P1-r1,OK,G:\Epic Games\UE_5.8.4\Games\unreal-horde-optimization-lab\Saved\Capture\Pre5\Pre5shot-L7-q2crowd-N10000-P1-r1.webp,7754,8,region 3840x2160@0 0;
+2026-11-12 16:39:50,Pre5shot-L8-q4final-N10000-P1-r1,OK,G:\Epic Games\UE_5.8.4\Games\unreal-horde-optimization-lab\Saved\Capture\Pre5\Pre5shot-L8-q4final-N10000-P1-r1.webp,7434,8,region 3840x2160@0 0;
