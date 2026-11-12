@@ -11,7 +11,7 @@ M0\~M5, M3b 완료(태그 `M0`\~`M5`, `M3b`). 품질 계획 Q1\~Q5 완료, Q6은
 ## 다음 할 일
 
 - [ ] **Q6 마무리.** 측정·검사·요약·그래프는 끝났다([Worklog/Q6.md](Worklog/Q6.md) "총괄 묶음 Full1").
-  - 문서는 `Full1` 값으로 맞췄다(README, ADR 0010\~0013 "결과", autonomous-decisions 요약, measurement.md, post-material "08". 9be3056). 표는 프레임 시간 옆에 Game p50, GPU p50을 두고 조건은 늘리지 않는다(2026-11-12 사용자 결정). 남은 것: [post-material.md](post-material.md) 01\~07절의 옛 묶음 값, 08절 "4K" 표기 확인(실행은 2560x1440).
+  - 문서는 `Full1` 값으로 맞췄다(README, ADR 0010\~0013 "결과", autonomous-decisions 요약, measurement.md, post-material "08". 9be3056). 표는 프레임 시간 옆에 Game p50, GPU p50을 두고 조건은 늘리지 않는다(2026-11-12 사용자 결정). [post-material.md](post-material.md)의 옛 묶음 값은 글을 쓸 때 그 절만 바꾼다. 글 재료는 그대로 쓸 수 없어 글 쓰기 전에 한 번 정리한다(2026-11-12 사용자 결정). README와 글 본문에는 `Full1` 같은 묶음 이름을 쓰지 않는다(같은 날).
   - Development 전환 점수 묶음([ADR-0012](Decisions/0012-ablation-switches-and-quality-metrics.md)).
   - GIF 촬영(아래 "막힌 것"의 둘을 먼저 고친다).
 - [ ] **글 00\~09.** [backlog.md](backlog.md) "글 대기열". 수치는 `Full1`에서만 만든다.
