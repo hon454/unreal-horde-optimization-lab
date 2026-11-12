@@ -16,15 +16,14 @@
 순서대로 한다.
 
 1. **01번과 03번 글의 트레이스 값을 새 트레이스에서 다시 뽑는다.** 코디네이터가 한다. 글 01, 02, 04, 06, 07의 Insights 화면도 찍는다.
-2. **Test 패키지를 GitHub Releases에 올린다.** 패키지는 08e45f2다. 라이선스 판단은 [D25](Worklog/autonomous-decisions.md)에 있다.
-3. **글 00\~09를 쓴다.** 대기열은 [backlog.md](backlog.md)에 있다. 나누는 법은 [D27](Worklog/autonomous-decisions.md)에 있다.
+2. **글 00\~09를 쓴다.** 대기열은 [backlog.md](backlog.md)에 있다. 나누는 법은 [D27](Worklog/autonomous-decisions.md)에 있다.
    - 시범 글 01은 [Posts/01-actor-baseline](../Posts/01-actor-baseline/README.md)에 있다.
    - 글 규칙은 [posting.md](Guides/posting.md), [ADR-0014](Decisions/0014-post-format.md), [ADR-0015](Decisions/0015-readme-figures.md)에 있다.
    - 글 재료의 사실 확인 결과는 [post-review.md](post-review.md)에 있다. 재료의 측정값은 옛 묶음의 값이다. 경위는 수치 없이 방향만 쓴다.
    - 엔진 문제를 쓸 때는 이슈 링크와 이 레포의 해결 코드 블록을 함께 보인다.
    - 독자용 문장은 묶음 이름 대신 "최종 측정"이라고 쓴다.
    - 글을 다 쓰면 한눈에 보는 사이트를 만든다.
-4. **푸시한다.** 사용자가 2026-11-12에 푸시를 승인했다. 코디네이터는 단계가 끝날 때마다 푸시한다.
+3. **푸시한다.** 사용자가 2026-11-12에 푸시를 승인했다. 코디네이터는 단계가 끝날 때마다 푸시한다.
 
 ## 진행 중인 세션
 
@@ -53,6 +52,7 @@
 - 조건이 바뀌거나 묶음이 오염되면 전 조건을 새 묶음으로 다시 잰다. 같은 라벨과 묶음 이름은 다시 쓰지 않는다.
 - README와 글 본문에는 묶음 이름을 쓰지 않는다.
 - 단계별 화면은 움직이는 WebP다(960폭, 15fps, 8초). 촬영 러너는 `Scripts/capture-full.ps1`이다. Chrome이 떠 있으면 러너가 거부한다.
+- Test 패키지 08e45f2는 Releases에 있다(태그 `test-package-08e45f2`, [D30](Worklog/autonomous-decisions.md)).
 - 새 체크아웃은 `Scripts/restore-assets.ps1`로 에셋을 복구한다([setup.md](Guides/setup.md)).
 
 ## 명령

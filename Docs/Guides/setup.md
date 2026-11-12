@@ -2,6 +2,8 @@
 
 이 저장소를 클론한 PC에서 에셋을 갖추고, 빌드하고, 작은 실행으로 확인하고, Test 패키지로 재는 순서다. 명령은 저장소 루트에서 PowerShell로 친다. 스크립트 인자의 자세한 뜻은 [commands.md](commands.md), 실패했을 때는 [troubleshooting.md](troubleshooting.md)를 본다.
 
+빌드 없이 실행만 하려면 [Releases의 Test 패키지](https://github.com/hon454/unreal-horde-optimization-lab/releases/tag/test-package-08e45f2)를 받는다. 압축을 풀고 `run-final.bat`을 실행한다. 인자는 압축 파일 안의 `README.txt`에 있다. 아래 순서는 필요 없다.
+
 ## 필요한 것
 
 | 무엇 | 쓰는 곳 | 비고 |

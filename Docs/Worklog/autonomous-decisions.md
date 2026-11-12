@@ -318,3 +318,13 @@
 - **추정(확인하지 않았다).** 트랙이 10만 개를 넘으면서 프레임 시간이 흔들려 화면이 떨려 보였을 수 있다.
 - **사용자가 볼 것.** 떨림의 원인을 알고 싶으면 16분 60fps 촬영을 요청해 달라.
 - **7·8단계 화면.** 모션 블러는 기본값 그대로 찍었다. 줄무늬가 거슬리지 않았다. README 캡션은 고치지 않는다.
+
+### D30. Releases에 올린 것(2026-11-13)
+
+- **올린 것.** 태그 `test-package-08e45f2`(커밋 08e45f2), 파일 `HordeOptLab-Test-Win64-08e45f2.zip`(474MB). 주소는 <https://github.com/hon454/unreal-horde-optimization-lab/releases/tag/test-package-08e45f2>다.
+- **압축 파일의 내용.** `Packaged/Test/Windows/`에서 `HordeOptLab/Saved/`와 매니페스트 둘을 뺀 것이다. 더한 파일은 `NOTICE.txt`(D25의 고지문), `README.txt`(실행 인자), `run-final.bat`(최종 구성 1만, HUD, 10분), `run-actor-baseline.bat`(1단계 1만, 2분)이다.
+- **확인.** 스테이징한 패키지를 15초 돌렸다. 종료 코드 0이고 CSV가 남았다.
+- **결정.** 태그 이름에 패키지 커밋을 넣었다. 실행 파일은 1920×1080 창으로 띄운다(측정은 2560×1440이지만 받는 사람의 모니터가 작을 수 있다). 설명에 그 차이를 적었다.
+- **버린 대안.** 태그 `v1.0`(마일스톤 태그 `M0`\~`M5`와 섞이고, 버전을 매기는 프로젝트가 아니다). `-LabBench` 없이 무한 실행(Test 패키지에서 확인한 적이 없다).
+- **스테이징 폴더.** `Packaged/Release/`에 남아 있다(git 밖, 약 1.7GB). 삭제 명령이 권한 검사에서 거부됐다. 사용자가 지워도 된다.
+- **바꾸려면.** `gh release delete test-package-08e45f2 --cleanup-tag`.
