@@ -20,6 +20,7 @@ M0\~M5, M3b 완료(태그 `M0`\~`M5`, `M3b`). 품질 계획 Q1\~Q5 완료, Q6은
 
 ## 진행 중인 세션
 
+- `asset-restore-guide`: 클론 뒤 Fab 두 팩(ParagonMinions, NiagaraExamples)을 받고 `Scripts/restore-assets.ps1` 하나로 git 밖 에셋을 복구하는 구성과 가이드 `Docs/Guides/setup.md`를 만든다(2026-11-12 사용자 결정). 에디터를 띄우는 검증은 코디네이터에 묻고 기다린다. Opus high. 진행 중.
 - `code-tour`: 최종 구성의 한 프레임을 순서대로 적는 `Docs/Guides/code-tour.md`와 흐름 그림을 만들고 README "구조"에서 링크한다(평가 7번, 2026-11-12 사용자 결정). 코드는 고치지 않는다. Opus high. 진행 중.
 - `crowdfx-gpu-cause`: 최종 구성에서 200m 밖 입자의 GPU 비용 원인을 Development에서 가린다(조사만, 수정·재측정 없음. 2026-11-12 사용자 결정). 결과는 [Worklog/Q6.md](Worklog/Q6.md) "입자 GPU 비용 조사". Opus high. 조사 단계 끝, Development 트레이스 실행 중(시험 스위치와 `Content/LabTmp/`는 임시이고 끝나면 지운다). 이 세션이 Development 빌드와 `-game` 실행을 쓴다.
 
@@ -67,4 +68,5 @@ py -3 -I Scripts/plot.py --batch Full1
 
 ## 사용자에게 요청한 일
 
+- Test 패키지를 최소 구성의 zip으로 GitHub Releases에 올린다(2026-11-12 사용자 결정). 입자 조사와 재측정 여부가 정해진 뒤에 하고, 올리기 전에 Epic 콘텐츠 라이선스 원문을 확인하고 파일 목록과 태그 이름을 사용자에게 보여 OK를 받는다.
 - [autonomous-decisions.md](Worklog/autonomous-decisions.md)의 "사용자 판단 필요" 항목 검토(ADR 0010\~0013으로 옮긴 것은 승인됐다).
