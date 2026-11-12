@@ -22,6 +22,7 @@ Night of the Dead에서 측정 없이 액터로 했던 좀비 호드 최적화�
 | 빌드나 실행이 실패했을 때의 증상별 대처 | [troubleshooting.md](Docs/Guides/troubleshooting.md). 문제가 생겼을 때만 연다 |
 | 글의 독자, 분량, 틀, 문장 규칙, 본문과 측정 기록의 구분 | [posting.md](Docs/Guides/posting.md) |
 | 글 재료: 작업 중 질답에서 나온, 독자에게 설명이 필요한 부분 | [post-material.md](Docs/post-material.md). 사용자가 원인을 물어 답한 것은 여기에 더한다 |
+| 글 준비: 핵심 인사이트, 글별 재료 선별, 글 재료 46개 항목의 사실 확인 결과 | [post-review.md](Docs/post-review.md). 글 재료를 쓰기 전에 그 항목의 확인 결과를 먼저 본다. 글을 다 쓰면 지운다 |
 | 엔진 소스에서 확인한 사실(경로, 기본값, 매크로, 알려진 문제) | [engine-notes.md](Docs/Reference/engine-notes.md). 소스 위치가 필요하면 먼저 여기를 본다 |
 | 영상·문서·샘플·에셋·포럼 스레드 | [references.md](Docs/Reference/references.md) |
 | 강연 두 편(Shabel, 윤준기)의 자막 분석 요약과 타임스탬프 | [talk-notes.md](Docs/Reference/talk-notes.md) |
