@@ -4,22 +4,21 @@
 
 ## 단계
 
-- 마일스톤 M0\~M5와 M3b는 끝났다. 태그는 `M0`\~`M5`, `M3b`다.
-- 품질 계획 Q1\~Q5는 끝났다. Q6은 총괄 묶음 `Full2`의 측정까지 끝났다.
-- 글 열 편의 초안, Releases, 사이트까지 끝났다. 지금은 사용자 검토를 기다린다.
+- 마일스톤 M0\~M5, M3b와 품질 계획 Q1\~Q6은 끝났다. 총괄 묶음은 `Full2`다.
+- 글 00\~09의 초안, Releases, 사이트는 끝났다. 경위는 [Worklog/Posts.md](Worklog/Posts.md)에 있다.
+- 지금은 사용자 검토에서 나온 수정을 한다.
 - 방향은 목표 사양(호드 총수 1만, 60fps) 안에서 거리별 품질을 확보하는 것이다([ADR-0009](Decisions/0009-flat-scenario-quality-by-distance.md)).
 - 계획은 [plan.md](plan.md) "품질 계획"에 있다. 경위는 `Worklog/M<N>.md`와 `Worklog/Q<N>.md`에 있다.
-- 사용자는 2026-11-12에 남은 작업을 코디네이터에게 맡겼다. 코디네이터는 결정을 [autonomous-decisions.md](Worklog/autonomous-decisions.md) D20부터 적는다.
+- 코디네이터가 묻지 않고 내린 결정은 [autonomous-decisions.md](Worklog/autonomous-decisions.md) D20\~D32에 있다.
 
 ## 다음 할 일
 
-코디네이터가 맡은 작업은 끝났다. 남은 일은 사용자 몫이다("사용자에게 요청한 일").
+1. 코디네이터가 트레이스 값을 쓰는 글(02\~07)에 Unreal Insights 스크린샷을 넣는다(2026-11-13 사용자 지시).
+2. 사용자가 여유 기준 13.3ms의 처리를 정한다. 코디네이터는 그 뒤에 08번과 09번 글을 고친다.
+3. 사용자가 GitHub Pages를 켜면 코디네이터가 README와 backlog.md에 사이트 주소를 넣는다.
+4. 사용자가 글 검토를 끝내면 코디네이터가 `Docs/post-review.md`를 지운다.
 
-- 글 00\~09의 초안은 `Posts/`에 있다. 글 사이 링크, README "글" 표, 그림의 화면 확인이 끝났다.
-- Test 패키지는 Releases에 있다([D30](Worklog/autonomous-decisions.md)).
-- 사이트는 `Site/`에 있고 `gh-pages` 브랜치에 올라가 있다([D32](Worklog/autonomous-decisions.md)).
-- 사용자가 검토를 끝내면 코디네이터는 `Docs/post-review.md`를 지운다.
-- 글이나 CSV가 바뀌면 `py -3 -I Scripts/build-site.py`를 다시 돌리고 `gh-pages`에 다시 올린다.
+글이나 CSV가 바뀌면 `py -3 -I Scripts/build-site.py`를 다시 돌리고 `gh-pages` 브랜치에 다시 올린다.
 
 ## 진행 중인 세션
 
@@ -119,8 +118,8 @@ Development 전환 점수는 `Full1` 때의 참고값이다(`Measurements/Full1/
 
 ## 사용자에게 요청한 일
 
-- **GitHub Pages 켜기.** 레포 Settings → Pages에서 Source를 "Deploy from a branch", 브랜치 `gh-pages`, 폴더 `/`로 고른다. 주소는 `https://hon454.github.io/unreal-horde-optimization-lab/`가 된다.
-- **글 00\~09 초안의 검토.** 글은 `Posts/`에 있다. 01번 글은 두 번째 검토다.
-- **사이트의 구성과 문구 검토.** `Site/index.html`을 브라우저로 열면 보인다.
+- **여유 기준 13.3ms의 처리 결정.** 코디네이터가 채팅에 수정안을 냈다(2026-11-13).
+- **GitHub Pages 켜기.** 레포 Settings → Pages에서 Source를 "Deploy from a branch", 브랜치 `gh-pages`, 폴더 `/`로 고른다.
+- **글 00\~09 초안과 사이트의 검토.** 글은 `Posts/`에 있다. 사이트는 `Site/index.html`이다.
 - **[autonomous-decisions.md](Worklog/autonomous-decisions.md)의 D20\~D32 검토.** "사용자가 볼 것" 줄이 판단이 필요한 곳이다.
-- **`Packaged/Release/` 삭제.** 릴리스 스테이징 폴더다(약 1.7GB, git 밖). 삭제 명령이 권한 검사에서 거부됐다.
+- **`Packaged/Release/` 삭제의 허락.** 릴리스 스테이징 폴더다(약 1.7GB, git 밖). 코디네이터가 작업을 모두 끝낸 뒤에 묻는다.
