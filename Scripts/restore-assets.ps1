@@ -147,7 +147,9 @@ function VatLodOutputs($Token, $Lod) {
 }
 $IskmOutputs = foreach ($T in "LabMinion", "LabMinionLarge") { "Lab\ISKM\Baked\ASTP_$T", "Lab\ISKM\Baked\M_${T}ISKM", "Lab\ISKM\Baked\SK_${T}ISKM" }
 
-$ScriptDir = $PSScriptRoot
+# -script 경로는 슬래시로 넘긴다. 역슬래시면 "Games\UE_5.8.4"의 "\UE"가 사라져 파일을 못 찾는다
+# (2026-11-12 검증 실행 로그: Could not load Python file 'G:/Epic Games_5.8.4/...').
+$ScriptDir = $PSScriptRoot -replace '\\', '/'
 $Steps = @()
 foreach ($Set in $Seeds.Keys) {
     $Steps += @{ Name = "migrate-$Set"; Exe = $HostCmd; ProjectFile = $AssetHost; Script = "migrate-assets.py"
@@ -179,7 +181,7 @@ function Has-All($List) { foreach ($P in $List) { if (-not (Test-Path "$Content\
 
 function Command-Line($S, $Log) {
     $EnvText = ($S.Env.GetEnumerator() | Sort-Object Name | ForEach-Object { "$($_.Name)=$($_.Value)" }) -join " "
-    $ArgText = "`"$($S.ProjectFile)`" -run=pythonscript -script=`"$ScriptDir\$($S.Script)`" -unattended -nosplash $($S.Flags -join ' ') -abslog=`"$Log`""
+    $ArgText = "`"$($S.ProjectFile)`" -run=pythonscript -script=`"$ScriptDir/$($S.Script)`" -unattended -nosplash $($S.Flags -join ' ') -abslog=`"$Log`""
     return "[$EnvText] `"$($S.Exe)`" $ArgText"
 }
 
@@ -215,7 +217,7 @@ foreach ($S in $Steps) {
     foreach ($K in $S.Env.Keys) { $Saved[$K] = [Environment]::GetEnvironmentVariable($K); [Environment]::SetEnvironmentVariable($K, $(if ($S.Env[$K]) { $S.Env[$K] } else { $null })) }
     $Started = Get-Date
     try {
-        $ArgList = @("`"$($S.ProjectFile)`"", "-run=pythonscript", "-script=`"$ScriptDir\$($S.Script)`"", "-unattended", "-nosplash") + $S.Flags + @("-abslog=`"$Log`"")
+        $ArgList = @("`"$($S.ProjectFile)`"", "-run=pythonscript", "-script=`"$ScriptDir/$($S.Script)`"", "-unattended", "-nosplash") + $S.Flags + @("-abslog=`"$Log`"")
         $P = Start-Process -FilePath $S.Exe -ArgumentList $ArgList -NoNewWindow -Wait -PassThru -RedirectStandardOutput "$Log.stdout.txt" -RedirectStandardError "$Log.stderr.txt"
         $Code = $P.ExitCode
     } finally {
@@ -247,7 +249,7 @@ if ($DryRun) {
 Say ""
 Say "== Verify against Scripts\restore-assets.manifest.txt"
 $Required = @($Steps | ForEach-Object { $_.Outputs }) | Sort-Object -Unique
-$Lines = Get-Content "$ScriptDir\restore-assets.manifest.txt" -Encoding UTF8 | Where-Object { $_ -match '^\[' }
+$Lines = Get-Content "$PSScriptRoot\restore-assets.manifest.txt" -Encoding UTF8 | Where-Object { $_ -match '^\[' }
 $MissReq = New-Object System.Collections.Generic.List[string]
 $MissOther = New-Object System.Collections.Generic.List[string]
 $Count = 0
