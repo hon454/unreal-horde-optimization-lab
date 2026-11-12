@@ -60,14 +60,26 @@
 | 애니메이션을 지워도 남는 약 404ms | 404.49 | 계산 | 446.43 − 41.94. 트레이스 한 회에서 뺀 어림이다 | |
 | 그림의 나머지 81.0ms(18%) | 81.00 | 계산 | 446.43 − 323.49 − 27.24 − 14.70 | |
 | 개체당 CharacterMovement 32.3µs | 32.35 | 계산 | 323.49 ms ÷ 10000. 실제 호출은 프레임당 9,920회(1,111,002 ÷ 112)라 호출당은 32.6µs | |
-| Insights 한 프레임 447ms | 447.4 | 스크린샷 | `FEngineLoop::Tick` 막대(선택 구간 447.88ms) | |
-| Insights CharacterMovement 322ms, 10,048회 | 321.66 | 스크린샷 | Timers 창 Incl, Count | |
-| Insights 71.9% | 71.90% | 계산 | 321.66 ÷ 447.4 | |
+| 스크린샷의 프레임 하나 447.88ms | 447.88 | 병렬 트레이스 `Full1trace-L1-full-N10000-P1-r1`, 렌더링 프레임 109(56.56초 시작) | Timing 뷰의 선택 구간 길이(GameThread `FEngineLoop::Tick`은 447.4ms) | 한 프레임 |
+| 스크린샷의 CharacterMovement 321.66ms | 321.66 | 같음 | Timers 패널 `UCharacterMovementComponent_TickComponent` Incl(Count 10,048, Excl 320.37) | 한 프레임 |
+| 71.8% | 71.82% | 계산 | 321.66 ÷ 447.88 | |
+| 두 값의 차이는 2ms 안쪽 | 1.45, 1.83 | 계산 | 447.88 − 446.43, 323.49 − 321.66 | |
 | 하위 스텝 1회 / 8회 | | 계산 | 아래 "엔진 소스". 프레임 50ms 미만이면 1회. 1만은 델타가 0.4초로 잘려 0.4 ÷ 0.05 = 8회 | |
 | 60ms면 30ms씩 두 번 | | 계산 | `Min(0.05, 0.06 × 0.5)` = 0.03 | |
 | 예산 2ms, 거리 단계 | 2.0 | 코드 | `LabConfig.h:162`, `BudgetTiers` `:161` | |
 
 `L1-full` 10000 P1에는 버리는 첫 실행 `Full1-L1-full-N10000-P1-r0`(프레임 p50 441.156)이 `runs.csv`에 있다. 요약은 r1\~r3만 쓴다.
+
+## 두 트레이스
+
+본문은 출처가 다른 트레이스 값 두 가지를 쓴다.
+
+| 쓰인 곳 | 트레이스 | 구간 | 값 |
+| --- | --- | --- | --- |
+| 그림 `actor-gamethread-breakdown.svg`, 스크린샷 옆 표, 본문 446 / 323 / 27.2 / 14.7ms | 직렬 실행 `Full1traceser-L1-full-*`(`mass.FullyParallel` 끔) | 25\~75초, 112프레임의 프레임당 평균 | `FEngineLoop::Tick` 446.43, CharacterMovement 323.49 |
+| 스크린샷과 캡션, 본문 447.88 / 321.66ms | 병렬 실행 `Full1trace-L1-full-N10000-P1-r1` | 렌더링 프레임 109 하나 | 선택 구간 447.88, CharacterMovement 321.66 |
+
+병렬 트레이스의 같은 25\~75초 구간 평균은 `FEngineLoop::Tick` 446.43, CharacterMovement 323.06ms다(`%TEMP%\horde-trace\F1-trace-L1-full-GT.csv`). 1단계는 Mass 프로세서가 거의 돌지 않아(`PrePhysics` 0.05ms) 직렬·병렬 설정이 액터 비용에 닿지 않는다. 그래서 스크린샷을 직렬 트레이스로 다시 찍지 않았다. 한 프레임과 구간 평균의 차이(1.45ms, 1.83ms)는 프레임 사이의 흔들림이다.
 
 ## 그림
 
@@ -75,7 +87,7 @@
 | --- | --- | --- |
 | `images/actor-gamethread-breakdown.svg` | 446.43ms를 CharacterMovement 323.49, 스켈레탈 메시 틱 27.24, 애니 평가 마무리 14.70, 나머지 81.00으로 나눈 가로 막대. 16.7ms 막대를 같은 축척으로 | 위 트레이스 행 |
 | `images/actor-frame-vs-n.svg` | 왼쪽: 프레임 p50·p95(로그-로그), 16.7ms 선, 50ms 선, N@16.7ms 797. 오른쪽: 개체당 Game µs와 하위 스텝 횟수 | 위 `L1-full` 행 |
-| `images/insights-gamethread.jpg` | Unreal Insights Timing 창. 게임 스레드 한 프레임(`Csv 69`, 56.5\~57.0초 부근)을 선택하고 Timers 창에서 `CharacterMovement`로 거른 화면. 코디네이터가 찍었다 | 트레이스 파일 이름과 병렬·직렬 구분은 코디네이터 확인이 필요하다 |
+| `images/insights-gamethread.jpg` | Unreal Insights. 왼쪽은 Timing 뷰에서 렌더링 프레임 109(56.56초 시작, 447.88ms, 빨간 상자)를 고른 화면이고 GameThread 트랙에 `FEngineLoop::Tick` 447.4ms, `UWorld_Tick` 442.18ms, `TickCompletionEvents` 404.97ms가 보인다. 오른쪽은 그 구간을 Timers 패널에서 "CharacterMovement"로 거른 행(빨간 상자)이다. 코디네이터가 찍었다(2560x749) | `Saved/Traces/Full1trace-L1-full-N10000-P1-r1.utrace`(병렬 실행, 1만 P1) |
 | `../../Docs/figures/steps/step1-L1-full.webp` | 1단계 화면(HUD 켬, 녹화 부하가 섞여 HUD 프레임 시간이 측정값보다 높다) | 촬영 경위는 [Worklog/Q6.md](../../Docs/Worklog/Q6.md) "촬영 준비" |
 
 SVG 두 개는 표준 라이브러리 Python으로 값을 넣어 쓴 정적 파일이다(생성 스크립트는 저장소에 두지 않았다). 배경은 흰색이라 GitHub의 밝은·어두운 테마 모두에서 같은 색으로 보인다.
@@ -111,4 +123,3 @@ SVG 두 개는 표준 라이브러리 Python으로 값을 넣어 쓴 정적 파�
 - `S1-budget` r3의 GPU p50이 112.456ms로 다른 두 회차(50.246, 48.787)와 다르다. 프레임 p50(400.772)은 다른 회차와 같아 본문 값에 영향이 없고, 원인은 보지 않았다.
 - 트레이스는 직렬(`mass.FullyParallel` 끔) 실행이다. 1단계는 Mass 프로세서가 거의 돌지 않아(`PrePhysics` 0.05ms) 병렬 트레이스와 값이 같다(병렬 `F1-trace-L1-full-GT.csv`: `FEngineLoop::Tick` 446.43, CharacterMovement 323.06).
 - 도식의 "AnimBP 갱신이 스켈레탈 메시 틱 안에 있다"는 Incl − Excl(27.24 − 11.33 = 15.91)이 `USkeletalMeshComponent_TickAnimation` 14.90과 맞는 것으로 판단했다. 트레이스에서 부모 관계를 직접 펼쳐 보지는 않았다.
-- Insights 스크린샷이 어느 트레이스 파일인지(병렬·직렬).

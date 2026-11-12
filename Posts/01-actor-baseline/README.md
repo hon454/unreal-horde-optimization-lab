@@ -51,18 +51,18 @@ flowchart TD
 
 ![게임 스레드 한 프레임 446ms의 구성: CharacterMovement 323ms가 72%를 차지한다](images/actor-gamethread-breakdown.svg)
 
-Unreal Insights에서 한 프레임만 골라도 같은 비율이 나온다. 아래 스크린샷은 게임 스레드의 한 프레임을 선택하고 Timers 창에서 CharacterMovement를 찾은 화면이다.
+Unreal Insights에서 한 프레임만 골라도 거의 같은 비율이 나온다. 아래 스크린샷은 프레임 하나를 선택하고 Timers 창에서 CharacterMovement로 거른 화면이다. 프레임 하나 447.88ms 중 321.66ms가 CharacterMovement 틱이다(71.8%).
 
-![Unreal Insights: 액터 1만 실행에서 게임 스레드 한 프레임을 고르고 CharacterMovement 틱을 찾은 화면](images/insights-gamethread.jpg)
+![Unreal Insights, 프레임 하나: 447.88ms 중 321.66ms가 CharacterMovement 틱이다](images/insights-gamethread.jpg)
 
-| 읽은 곳 | 스크린샷의 한 프레임 | 구간 평균(프레임당) |
-| --- | --- | --- |
-| `FEngineLoop::Tick`(한 프레임 전체) | 447ms | 446ms |
-| `UCharacterMovementComponent_TickComponent` | 322ms | 323ms |
-| 그 틱의 호출 수 | 10,048회 | |
-| 프레임에서 차지하는 비율 | 71.9% | 72.5% |
-| `USkinnedMeshComponent_TickComponent` | | 27.2ms |
-| `USkeletalMeshComponent_CompleteParallelAnimationEvaluation` | | 14.7ms |
+그림과 아래 표의 값은 이 한 프레임이 아니라 다른 트레이스의 구간 평균이다. 두 값의 차이는 2ms 안쪽이다.
+
+| 타이머(구간 평균, 직렬 실행 트레이스, 프레임당) | 시간 |
+| --- | --- |
+| `FEngineLoop::Tick`(한 프레임 전체) | 446ms |
+| `UCharacterMovementComponent_TickComponent` | 323ms |
+| `USkinnedMeshComponent_TickComponent` | 27.2ms |
+| `USkeletalMeshComponent_CompleteParallelAnimationEvaluation` | 14.7ms |
 
 개체 하나로 나누면 CharacterMovement가 한 프레임에 32.3µs를 쓴다. 개체당 Game 시간도 같은 방향을 보인다. 프레임이 50ms 안인 500\~2천에서는 17µs 안팎으로 평평하다. 하위 스텝이 여덟 번인 1만에서는 42.7µs다. 2천에서 1만으로 개체 수는 5배인데 Game 시간은 12.3배다.
 
