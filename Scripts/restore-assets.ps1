@@ -148,20 +148,23 @@ foreach ($Set in $Seeds.Keys) {
                  Env = @{ LAB_MIGRATE_SET = $Set; LAB_MIGRATE_DRY = "0"; LAB_MIGRATE_DEST = $Content }
                  Flags = @("-nullrhi"); Outputs = $Seeds[$Set] }
 }
+# 프로젝트 엔진으로 도는 굽기·파생 단계는 이 표 한 곳에 모은다. 순서대로 돈다(앞 단계 산출물을 뒤 단계가 읽는다).
+# 칸: 이름, 스크립트, 환경 변수, 산출물(있으면 건너뜀), [로그 성공 표시], [앞 단계 이름: 그 단계가 돌았을 때만 돈다].
+# 새 굽기(예: 입자 전용 저폴리 VAT)는 해당 줄 뒤에 한 줄을 더하고, 산출물을 Scripts/restore-assets.manifest.txt에도 더한다.
+$BakeSteps = @(
+    @{ Name = "static-small"; Script = "make-static-minion.py"; Env = @{ LAB_UNIT = "small" }; Outputs = @("Lab\Derived\SM_LabMinion") }
+    @{ Name = "static-large"; Script = "make-static-minion.py"; Env = @{ LAB_UNIT = "large" }; Outputs = @("Lab\Derived\SM_LabMinionLarge", "Lab\Derived\M_LabMinionLargeStatic") }
+    @{ Name = "vat-small";    Script = "bake-vat.py";           Env = @{ LAB_UNIT = "small" }; Outputs = (VatOutputs "LabMinion") }
+    @{ Name = "vat-large";    Script = "bake-vat.py";           Env = @{ LAB_UNIT = "large" }; Outputs = (VatOutputs "LabMinionLarge") }
+    # create-iskm.py는 종류별 실패를 잡아 로그 "LABISKM result failed=none"으로만 알린다. 그 줄을 성공 표시로 본다.
+    @{ Name = "iskm";         Script = "create-iskm.py";        Env = @{ LAB_UNIT = "" }; Outputs = $IskmOutputs; LogMarker = "LABISKM result failed=none" }
+    @{ Name = "iskm-verify";  Script = "create-iskm.py";        Env = @{ LAB_UNIT = ""; LAB_ISKM_VERIFY = "1" }; Outputs = @(); LogMarker = "LABISKM result failed=none"; After = "iskm" }
+)
 $Render = @("-AllowCommandletRendering")  # 스켈레탈 메시 렌더 데이터를 읽는다(-nullrhi면 실패, 각 스크립트 헤더)
-$Steps += @{ Name = "static-small"; Exe = $ProjectCmd; ProjectFile = $Project; Script = "make-static-minion.py"; Env = @{ LAB_UNIT = "small" }; Flags = $Render
-             Outputs = @("Lab\Derived\SM_LabMinion") }
-$Steps += @{ Name = "static-large"; Exe = $ProjectCmd; ProjectFile = $Project; Script = "make-static-minion.py"; Env = @{ LAB_UNIT = "large" }; Flags = $Render
-             Outputs = @("Lab\Derived\SM_LabMinionLarge", "Lab\Derived\M_LabMinionLargeStatic") }
-$Steps += @{ Name = "vat-small"; Exe = $ProjectCmd; ProjectFile = $Project; Script = "bake-vat.py"; Env = @{ LAB_UNIT = "small" }; Flags = $Render
-             Outputs = (VatOutputs "LabMinion") }
-$Steps += @{ Name = "vat-large"; Exe = $ProjectCmd; ProjectFile = $Project; Script = "bake-vat.py"; Env = @{ LAB_UNIT = "large" }; Flags = $Render
-             Outputs = (VatOutputs "LabMinionLarge") }
-# create-iskm.py는 종류별 실패를 잡아 로그 "LABISKM result failed=none"으로만 알린다. 그 줄을 성공 표시로 본다.
-$Steps += @{ Name = "iskm"; Exe = $ProjectCmd; ProjectFile = $Project; Script = "create-iskm.py"; Env = @{ LAB_UNIT = "" }; Flags = $Render
-             Outputs = $IskmOutputs; LogMarker = "LABISKM result failed=none" }
-$Steps += @{ Name = "iskm-verify"; Exe = $ProjectCmd; ProjectFile = $Project; Script = "create-iskm.py"; Env = @{ LAB_UNIT = ""; LAB_ISKM_VERIFY = "1" }; Flags = $Render
-             Outputs = @(); LogMarker = "LABISKM result failed=none"; After = "iskm" }
+foreach ($B in $BakeSteps) {
+    $B.Exe = $ProjectCmd; $B.ProjectFile = $Project; $B.Flags = $Render
+    $Steps += $B
+}
 
 function Has-All($List) { foreach ($P in $List) { if (-not (Test-Path "$Content\$P.uasset")) { return $false } }; return $true }
 

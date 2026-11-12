@@ -23,3 +23,4 @@
 - 코디네이터용: Releases에서 패키지를 받아 실행만 하는 길은 가이드에 아직 넣지 않았다. 릴리스를 올린 뒤 `setup.md` 제목 아래 첫 문단 다음에 한 줄("빌드 없이 실행만 하려면 GitHub Releases의 Test 패키지 zip을 받아 …")과 링크를 넣는다.
 - README·스크립트 목록 끝(성공). README "실행" 절의 전제 2·3번과 첫 문장의 링크만 고쳤다(두 팩과 확인된 링크, `restore-assets.ps1`, `setup.md`). `Scripts/README.md` "에셋을 다시 만드는 것" 맨 위에 한 줄.
 - 남은 일: 작업 중 다른 세션이 `bake-vat.py`에 입자 전용 저폴리 굽기(`LAB_VAT_LOD=N`, 산출물 `*_Lod<N>`)를 더하고 있다(커밋 전). `NS_LabCrowd`가 그 산출물을 쓰게 되면 `restore-assets.ps1`에 `vat-lod-small`·`vat-lod-large` 단계(LOD0 굽기 뒤)와 대조 목록 줄을 더해야 한다.
+- 굽기 표 정리 끝(성공, 코디네이터 지시). `restore-assets.ps1`의 프로젝트 엔진 단계(정적 메시, VAT, ISKM, ISKM 확인)를 표 `$BakeSteps` 한 곳에 모았다. 입자 전용 저폴리 굽기는 `vat-small`·`vat-large` 뒤에 한 줄씩 더하고 산출물을 대조 목록에 더하면 된다. 이 체크아웃과 가짜 클론의 `-DryRun` 결과는 바꾸기 전과 같다(9단계 SKIP / 9단계 RUN, 종료 코드 0). 실제 복구 실행은 검증하지 않았다. 입자 메시 작업(`crowdfx-lowpoly`)이 끝난 뒤 코디네이터가 알리면 한다. 팩 폴더까지 옮기는 검증은 사용자 OK를 받은 뒤에 한다.
