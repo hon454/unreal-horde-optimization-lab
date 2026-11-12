@@ -71,3 +71,22 @@
 - 그림에 넣지 않은 것: 표현 밴드(액터 / ISKM / 입자, 단계마다 다름, 지시대로), 카메라 피치 −12도(위에서 본 그림에 드러나지 않음, 높이만 적음), 대형 저격 예약 발 규칙(90 / 10 비율을 지키는 장치라 독자에게는 비율로 충분), 사망 애니와 재활용(표현 쪽 동작), 조명. 체력 60\~240은 그림 범례에, 시드로 정한다는 것과 장치의 목적은 README 글에 남겼다.
 - README 끝(성공). "시나리오" 절을 그림(alt 텍스트에 맵·개체·피해·저격·재생성·카메라 요약)과 두 문장(장치의 목적, 에셋과 고정 시드가 정하는 것)으로 바꿨다. 다른 절은 건드리지 않았다(작업 중 다른 세션이 4391b31로 README의 다른 절을 고쳤다).
 - 확인 끝(성공). Edge 헤드리스로 흰 배경과 GitHub 어두운 배경(#0d1117) 위에 800px 폭으로 렌더링해 겹침·잘림이 없음을 눈으로 확인했다(저격 범례 줄이 오른쪽 여백을 넘던 것을 두 줄로 나눴고, "맵 전체" 제목을 부제에서 띄웠다). 확인용 PNG는 저장소 밖 `C:/Users/hon45/AppData/Local/Temp/claude/596429fce533a335/e67e3e1e-d1b7-4a5d-97de-65edca98024b/scratchpad/png/final-{light,dark}.png`다.
+
+## README 자원 그림(2026-11-12)
+
+- 조사 끝(성공). 값은 `Measurements/Full1/summary.csv`(1만, 오브 시점, `L1-full`\~`L8-q4final`)의 `mem_total_mb`, `gpu_mem_p50`, `draw_calls_p50`이다. 셋 다 실행마다 프레임 값의 중앙값을 내고(`Scripts/summarize.py`), summary는 세 실행(r1\~r3, r0과 A/A r11\~ 제외)의 중앙값이다. `gpu_mem_p50`은 summary에 최소·최대 열이 없어 범위를 `runs.csv`의 같은 세 실행에서 셌다. 뜻은 엔진 소스로 확인했다. `mem_total_mb` = CSV `PhysicalUsedMB`(`Core/Private/ProfilingDebugging/CsvProfiler.cpp:4189`, `MemoryStats.UsedPhysical`) = 프로세스 작업 집합(`Core/Private/Windows/WindowsPlatformMemory.cpp:342` `WorkingSetSize`), MB. `gpu_mem_p50` = CSV `GPUMem/LocalUsedMB`(`RHI/Private/RHIStats.cpp:91`) = DXGI `QueryVideoMemoryInfo`의 로컬(VRAM) `CurrentUsage`(`RHICore/Private/DXGIUtilities.cpp:111`), 이 프로세스가 쓰는 VRAM, MB. `draw_calls_p50` = CSV `RHI/DrawCalls`(`RHI/Private/GPUProfiler.cpp:2107`), 프레임당 드로우 콜 수(GPU 전체 합). 평가의 값은 CSV와 맞다: 프로세스 메모리 3,083.0 → 1,936.4MB, GPU 메모리 8,642.8 → 3,355.3MB, 드로우 콜 10,269.5 → 1,713(반올림해 평가의 3,083→1,936, 8,643→3,355, 10,270→1,713).
+
+## README 실행 전제(2026-11-12)
+
+- 조사·편집 끝(성공). README "실행" 절 첫머리에 전제 세 줄을 넣고, 순서는 `Docs/Guides/commands.md`에 "처음 준비" 절을 새로 써서 모았다. 스크립트는 읽기만 했고 실행하지 않았다.
+- 확인한 사실과 출처:
+  - 엔진: `HordeOptLab.uproject` `EngineAssociation`(GUID)을 `Scripts/common.ps1`이 `HKCU\Software\Epic Games\Unreal Engine\Builds`에서 찾고, 없으면 오류로 멈춘다. 버전 UE 5.8.4 소스 빌드는 `Docs/Reference/pc-specs.md` 2.3.
+  - 에셋: `.gitignore`가 `Content/ParagonMinions/`, `Content/NiagaraExamples/`, `Content/Lab/Derived/`, `Content/Lab/VAT/Baked/`, `Content/Lab/ISKM/Baked/`를 제외한다. 커밋된 `Content/Lab/`은 `git ls-files` 기준 AnimBP 2, FX 4, 맵 `L_Bench`, `M_LabBandFloor`뿐이다. Paragon: Minions는 `Docs/Reference/references.md`에 Fab, 무료, 재배포 금지로 적혀 있다.
+  - 순서: `migrate-assets.py` 헤더(세트 `minion`/`siege`/`orbfx`), `make-static-minion.py`·`bake-vat.py` 헤더("미니언 이전 뒤"), `create-iskm.py` 헤더("bake-vat.py 뒤"), `Scripts/create-crowd-fx.md`("bake-vat.py를 소형·대형 둘 다"). `LabOrb.cpp`가 `/Game/NiagaraExamples/...`를 읽는다.
+  - 단계 이름: `LabConfig.cpp`의 `-LabStage=` 파싱이 M0\~M5를 받는다. README 표기가 맞아 고치지 않았다.
+- 확인 못 함:
+  - 깨끗한 클론에서 처음부터 끝까지 돌려 본 적이 없다(스크립트 실행 금지). 순서는 스크립트 헤더와 문서에서 읽은 것이다.
+  - `make-static-minion.py`를 대형으로도 돌려야 하는지는 헤더의 `LAB_UNIT=large` 분기만 보고 적었다. 소형만으로 충분한 단계가 있는지는 모른다.
+  - `orbfx`의 원본인 Niagara Examples Pack을 어디서 받는지(Fab 여부)는 저장소에 없다. README와 commands.md는 받는 곳을 적지 않았다.
+  - `create-anim-bp.py`와 `create-band-floor.py`, `create-bench-map.py`는 산출물이 이미 커밋돼 있어 전제에 넣지 않았다.
+  - 마이그레이션 명령의 경로는 작성자 PC의 것이다. 다른 PC에서는 바꿔야 한다.
