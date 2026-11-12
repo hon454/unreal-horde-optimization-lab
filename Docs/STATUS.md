@@ -29,7 +29,9 @@
 
 ## 진행 중인 세션
 
-없다.
+- `docs-full2`: README 그림과 문장, measurement.md, 01번 글, ADR-0011 "결과"를 `Full2` 값으로 고친다. Opus high. 진행 중.
+- `pre6-capture`: 7·8단계 화면을 `Pre6`으로 다시 찍는다. 풀 끔 실행의 40\~80m 떨림을 화면으로 확인한다. Sonnet medium. 진행 중.
+- 촬영이 끝날 때까지 다른 세션과 사용자는 에디터, 빌드, Chrome을 띄우지 않는다.
 
 코디네이터는 세션을 띄우면 여기에 적는다. 끝난 세션은 결과를 확인하고 보관한 뒤 지운다.
 
@@ -120,10 +122,9 @@ Development 전환 점수는 `Full1` 때의 참고값이다(`Measurements/Full1/
 
 ## 막힌 것
 
-- 코디네이터는 복구 백업 `Saved/RestoreBackup/`을 지우지 못했다. 권한 검사가 삭제 명령을 거부했다.
+없다.
 
 ## 사용자에게 요청한 일
 
-- **복구 백업 삭제.** 사용자가 `Saved/RestoreBackup/` 폴더를 직접 지운다(약 336MB, git 밖).
 - **01번 글의 두 번째 검토.**
 - **[autonomous-decisions.md](Worklog/autonomous-decisions.md)의 D20 뒤 결정과 "사용자 판단 필요" 항목 검토.**
