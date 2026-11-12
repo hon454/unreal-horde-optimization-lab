@@ -52,3 +52,7 @@
 3. 원본을 되돌린다: `Saved/RestoreBackup/<시각>/ParagonMinions`·`NiagaraExamples` → `Content/`, `Saved/RestoreBackup/<스크립트 시각>/Lab/...` → `Content/Lab/...`.
 4. `before.csv`와 다시 맞춰 경로·크기가 같은지 보고, `run-dev.ps1 -Small -Stage M5 -Variant q4final`이 `EXIT: 0`인지 본다.
 5. 실패 로그(`Saved/Logs/Restore/<단계>.log`)의 원인을 이 절에 적고 코디네이터에 알린다.
+
+### 팩까지 포함한 복구 검증(2026-11-12)
+
+- 입자 LOD4 단계 끝(성공). 코디네이터의 "시작"(입자 메시 커밋 77b597b·bf1a4c8·e21eed4·7f6d128 뒤)에 따라 `$BakeSteps`에 `vat-lod4-small`·`vat-lod4-large`(`LAB_VAT_LOD=4`, LOD0 굽기 뒤)를 더하고 대조 목록에 `*_Bone_Lod4` 12개를 더했다(157개). 커밋된 `NS_LabCrowd`·`MI_LabCrowd*`가 참조하는 것은 LOD4뿐이다(바이너리 문자열 검사). 로컬의 `*_Bone_Lod3` 12개는 비교 때 남은 것이라 복구 대상이 아니다. `-DryRun -Force` 11단계 RUN, 검사 통과.

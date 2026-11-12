@@ -9,6 +9,7 @@
 #                                  (대상에 이미 있는 패키지는 건너뛴다, 덮어쓰지 않는다)
 #   2. static-small/large          Scripts/make-static-minion.py   -> Content/Lab/Derived/
 #   3. vat-small/large             Scripts/bake-vat.py             -> Content/Lab/VAT/Baked/
+#      vat-lod4-small/large        Scripts/bake-vat.py LAB_VAT_LOD=4 (입자 전용 저폴리 메시, *_Bone_Lod4)
 #   4. iskm, iskm-verify           Scripts/create-iskm.py          -> Content/Lab/ISKM/Baked/
 #   5. Scripts/restore-assets.manifest.txt와 실제 파일을 대조해 빠진 것을 보고한다.
 #   2~4는 프로젝트 엔진(Scripts/common.ps1이 찾는 소스 빌드)의 커맨드렛이다. AnimBP·Niagara 시스템·맵·바닥 머티리얼은 커밋돼 있어 만들지 않는다.
@@ -139,6 +140,11 @@ function VatOutputs($Token) {
              "T_${Token}VAT_Vertex_VertexNormal", "T_${Token}VAT_Vertex_VertexPosition"
     return $List | ForEach-Object { "Lab\VAT\Baked\$_" }
 }
+# 입자 전용 저폴리 굽기(bake-vat.py LAB_VAT_LOD=N): Bone 모드 한 벌, 이름 끝 _Lod<N>. NS_LabCrowd와 MI_LabCrowd*가 LOD4를 쓴다(create-crowd-fx.md 6절).
+function VatLodOutputs($Token, $Lod) {
+    $B = "${Token}VAT_Bone_Lod$Lod"
+    return @("SM_$B", "DA_$B", "MI_$B", "T_${B}_BonePosition", "T_${B}_BoneRotation", "T_${B}_BoneWeight") | ForEach-Object { "Lab\VAT\Baked\$_" }
+}
 $IskmOutputs = foreach ($T in "LabMinion", "LabMinionLarge") { "Lab\ISKM\Baked\ASTP_$T", "Lab\ISKM\Baked\M_${T}ISKM", "Lab\ISKM\Baked\SK_${T}ISKM" }
 
 $ScriptDir = $PSScriptRoot
@@ -156,6 +162,9 @@ $BakeSteps = @(
     @{ Name = "static-large"; Script = "make-static-minion.py"; Env = @{ LAB_UNIT = "large" }; Outputs = @("Lab\Derived\SM_LabMinionLarge", "Lab\Derived\M_LabMinionLargeStatic") }
     @{ Name = "vat-small";    Script = "bake-vat.py";           Env = @{ LAB_UNIT = "small" }; Outputs = (VatOutputs "LabMinion") }
     @{ Name = "vat-large";    Script = "bake-vat.py";           Env = @{ LAB_UNIT = "large" }; Outputs = (VatOutputs "LabMinionLarge") }
+    # LOD0 굽기의 M_<TOKEN>VAT_Bone을 부모로 쓰므로 vat-small·vat-large 뒤에 돈다.
+    @{ Name = "vat-lod4-small"; Script = "bake-vat.py";         Env = @{ LAB_UNIT = "small"; LAB_VAT_LOD = "4" }; Outputs = (VatLodOutputs "LabMinion" 4) }
+    @{ Name = "vat-lod4-large"; Script = "bake-vat.py";         Env = @{ LAB_UNIT = "large"; LAB_VAT_LOD = "4" }; Outputs = (VatLodOutputs "LabMinionLarge" 4) }
     # create-iskm.py는 종류별 실패를 잡아 로그 "LABISKM result failed=none"으로만 알린다. 그 줄을 성공 표시로 본다.
     @{ Name = "iskm";         Script = "create-iskm.py";        Env = @{ LAB_UNIT = "" }; Outputs = $IskmOutputs; LogMarker = "LABISKM result failed=none" }
     @{ Name = "iskm-verify";  Script = "create-iskm.py";        Env = @{ LAB_UNIT = ""; LAB_ISKM_VERIFY = "1" }; Outputs = @(); LogMarker = "LABISKM result failed=none"; After = "iskm" }

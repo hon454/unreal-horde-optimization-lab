@@ -63,9 +63,10 @@ powershell -ExecutionPolicy Bypass -File Scripts/restore-assets.ps1 -AssetHost "
 | `migrate-minion`, `migrate-siege`, `migrate-orbfx` | `migrate-assets.py`(에셋 호스트의 런처 엔진) | 두 팩에서 쓰는 에셋과 그 의존성을 `Content/ParagonMinions/`, `Content/NiagaraExamples/`로 옮긴다 |
 | `static-small`, `static-large` | `make-static-minion.py`(소스 빌드) | `Content/Lab/Derived/`의 정적 메시 |
 | `vat-small`, `vat-large` | `bake-vat.py`(소스 빌드) | `Content/Lab/VAT/Baked/`의 VAT 텍스처·메시·머티리얼 |
+| `vat-lod4-small`, `vat-lod4-large` | `bake-vat.py` `LAB_VAT_LOD=4`(소스 빌드) | 200m 밖 입자가 쓰는 저폴리 VAT 메시(원본 스켈레탈 LOD4, 이름 끝 `_Bone_Lod4`) |
 | `iskm`, `iskm-verify` | `create-iskm.py`(소스 빌드) | `Content/Lab/ISKM/Baked/`의 ISKM 메시·애니 제공자·머티리얼, 그리고 새 프로세스에서 다시 읽어 확인 |
 
-끝에서 `Scripts/restore-assets.manifest.txt`의 파일 목록과 실제 파일을 대조한다. 성공하면 `Manifest: 145 files, missing 0 (required 0)`과 `DONE: assets restored.`가 찍히고 종료 코드가 0이다. 게임이 경로로 읽는 필수 파일이 빠지면 `MISSING (required)`와 함께 종료 코드 1로 끝난다. 의존성 파일만 빠지면 `missing (dependency)`로 알리고 성공으로 끝난다. 팩 판이 바뀌면 의존성 파일의 이름과 위치가 달라질 수 있다.
+끝에서 `Scripts/restore-assets.manifest.txt`의 파일 목록과 실제 파일을 대조한다. 성공하면 `Manifest: 157 files, missing 0 (required 0)`과 `DONE: assets restored.`가 찍히고 종료 코드가 0이다. 게임이 경로로 읽는 필수 파일이 빠지면 `MISSING (required)`와 함께 종료 코드 1로 끝난다. 의존성 파일만 빠지면 `missing (dependency)`로 알리고 성공으로 끝난다. 팩 판이 바뀌면 의존성 파일의 이름과 위치가 달라질 수 있다.
 
 - 로그는 `Saved/Logs/Restore/<단계>.log`다. 단계가 실패하면 그 로그의 `LAB…`·`Error:` 줄을 화면에 찍고 멈춘다. 고친 뒤 같은 명령을 다시 치면 끝난 단계는 건너뛴다.
 - `-HostEngineRoot <런처 엔진 폴더>`는 호스트 엔진을 찾지 못한다고 할 때 준다.
