@@ -1,51 +1,53 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="800" height="664" viewBox="0 0 800 664" font-family="Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Segoe UI, sans-serif" font-size="15" fill="#111827">
-<rect width="800" height="664" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
-<text x="32" y="44" font-size="22" font-weight="700">액터 한 개체가 한 프레임에 하는 일</text>
-<text x="32" y="70" font-size="15" fill="#4b5563">게임 스레드에서 위에서 아래 순서로 돈다. 막대는 호드 총수 1만에서 프레임당 시간</text>
-<text x="492" y="104" font-size="14" fill="#4b5563">프레임당 시간(ms, 같은 축척)</text>
-<rect x="32" y="118" width="440" height="92" rx="10" fill="#f8fafc" stroke="#e5e7eb"/>
-<rect x="32" y="118" width="6" height="92" rx="3" fill="#2563eb"/>
-<circle cx="66" cy="148" r="14" fill="#2563eb"/>
-<text x="66" y="153" text-anchor="middle" font-size="15" font-weight="700" fill="white">1</text>
-<text x="92" y="154" font-size="18" font-weight="700">개체를 걷게 하고 벽과 바닥을 검사한다</text>
-<text x="92" y="180" font-family="Consolas, SFMono-Regular, Menlo, monospace" font-size="14" fill="#4b5563">UCharacterMovementComponent_TickComponent</text>
-<rect x="492" y="140" width="276.0" height="44" rx="4" fill="#2563eb"/>
-<text x="504" y="168" font-size="17" font-weight="700" fill="white">323ms · 72%</text>
-<path d="M66 213 L66 227" stroke="#4b5563" stroke-width="2"/>
-<path d="M61 222 L66 229 L71 222" fill="none" stroke="#4b5563" stroke-width="2"/>
-<rect x="32" y="232" width="440" height="92" rx="10" fill="#f8fafc" stroke="#e5e7eb"/>
-<rect x="32" y="232" width="6" height="92" rx="3" fill="#9333ea"/>
-<circle cx="66" cy="262" r="14" fill="#9333ea"/>
-<text x="66" y="267" text-anchor="middle" font-size="15" font-weight="700" fill="white">2</text>
-<text x="92" y="268" font-size="18" font-weight="700">AnimBP로 애니메이션 상태를 갱신한다</text>
-<text x="92" y="294" font-family="Consolas, SFMono-Regular, Menlo, monospace" font-size="14" fill="#4b5563">USkinnedMeshComponent_TickComponent</text>
-<rect x="492" y="254" width="23.2" height="44" rx="4" fill="#9333ea"/>
-<text x="525.2" y="282" font-size="16" font-weight="700" fill="#9333ea">27.2ms · 6%</text>
-<path d="M66 327 L66 341" stroke="#4b5563" stroke-width="2"/>
-<path d="M61 336 L66 343 L71 336" fill="none" stroke="#4b5563" stroke-width="2"/>
-<rect x="32" y="346" width="440" height="92" rx="10" fill="#f8fafc" stroke="#e5e7eb"/>
-<rect x="32" y="346" width="6" height="92" rx="3" fill="#c084fc"/>
-<circle cx="66" cy="376" r="14" fill="#c084fc"/>
-<text x="66" y="381" text-anchor="middle" font-size="15" font-weight="700" fill="white">3</text>
-<text x="92" y="382" font-size="18" font-weight="700">병렬로 계산한 포즈를 메시에 반영한다</text>
-<text x="92" y="408" font-family="Consolas, SFMono-Regular, Menlo, monospace" font-size="14" fill="#4b5563">USkeletalMeshComponent_</text>
-<text x="92" y="426" font-family="Consolas, SFMono-Regular, Menlo, monospace" font-size="14" fill="#4b5563">CompleteParallelAnimationEvaluation</text>
-<rect x="492" y="368" width="12.5" height="44" rx="4" fill="#c084fc"/>
-<text x="514.5" y="396" font-size="16" font-weight="700" fill="#9333ea">14.7ms · 3%</text>
-<path d="M66 441 L66 455" stroke="#4b5563" stroke-width="2"/>
-<path d="M61 450 L66 457 L71 450" fill="none" stroke="#4b5563" stroke-width="2"/>
-<rect x="32" y="460" width="440" height="92" rx="10" fill="#f8fafc" stroke="#e5e7eb"/>
-<rect x="32" y="460" width="6" height="92" rx="3" fill="#9ca3af"/>
-<circle cx="66" cy="490" r="14" fill="#9ca3af"/>
-<text x="66" y="495" text-anchor="middle" font-size="15" font-weight="700" fill="white">4</text>
-<text x="92" y="496" font-size="18" font-weight="700">바뀐 상태를 렌더 스레드로 보낸다</text>
-<text x="92" y="522" font-family="Consolas, SFMono-Regular, Menlo, monospace" font-size="14" fill="#4b5563">UWorld_SendAllEndOfFrameUpdates</text>
-<rect x="492" y="482" width="69.1" height="44" rx="4" fill="#9ca3af" fill-opacity="0.35" stroke="#9ca3af" stroke-dasharray="4 3"/>
-<text x="571.1" y="502" font-size="16" font-weight="700" fill="#4b5563">나머지 81.0ms · 18%</text>
-<text x="571.1" y="522" font-size="14" fill="#4b5563">이 칸과 그 밖의 일</text>
-<line x1="32" y1="580" x2="768" y2="580" stroke="#e5e7eb"/>
-<text x="32" y="610" font-size="16" font-weight="700">게임 스레드 한 프레임 446ms</text>
-<rect x="492" y="594" width="14.2" height="20" rx="3" fill="#b45309"/>
-<text x="516.2" y="610" font-size="16" font-weight="700" fill="#b45309">16.7ms = 60fps의 한 프레임</text>
-<text x="32" y="636" font-size="14" fill="#4b5563">오브 시점 카메라, 최종 측정 때 뜬 트레이스 한 회, 25–75초 구간 평균</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="700" viewBox="0 0 800 700" font-family="Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Segoe UI, sans-serif" font-size="16" fill="#111827">
+<rect x="0.5" y="0.5" width="799" height="699" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+<text x="32" y="46" font-size="22" font-weight="700">액터 한 개체가 한 프레임에 하는 일</text>
+<text x="32" y="74" font-size="16" fill="#4b5563">게임 스레드에서 위에서 아래 순서로 돈다. 막대는 호드 총수 1만의 프레임당 시간</text>
+<text x="500" y="110" font-size="16" fill="#4b5563">프레임당 시간(같은 축척)</text>
+<rect x="32" y="124" width="448" height="100" rx="10" fill="#f8fafc" stroke="#e5e7eb"/>
+<rect x="32" y="124" width="6" height="100" rx="3" fill="#2563eb"/>
+<circle cx="66" cy="154" r="15" fill="#2563eb"/>
+<text x="66" y="160" text-anchor="middle" font-size="16" font-weight="700" fill="white">1</text>
+<text x="94" y="161" font-size="18" font-weight="700">개체를 걷게 하고 벽과 바닥을 검사한다</text>
+<text x="94" y="188" font-family="Consolas, SFMono-Regular, Menlo, monospace" font-size="16" fill="#4b5563">UCharacterMovementComponent_</text>
+<text x="94" y="208" font-family="Consolas, SFMono-Regular, Menlo, monospace" font-size="16" fill="#4b5563">TickComponent</text>
+<rect x="500" y="152" width="268.0" height="44" rx="4" fill="#2563eb"/>
+<text x="512" y="181" font-size="18" font-weight="700" fill="white">323ms · 72%</text>
+<path d="M66 227 L66 241" stroke="#4b5563" stroke-width="2"/>
+<path d="M61 236 L66 243 L71 236" fill="none" stroke="#4b5563" stroke-width="2"/>
+<rect x="32" y="246" width="448" height="100" rx="10" fill="#f8fafc" stroke="#e5e7eb"/>
+<rect x="32" y="246" width="6" height="100" rx="3" fill="#9333ea"/>
+<circle cx="66" cy="276" r="15" fill="#9333ea"/>
+<text x="66" y="282" text-anchor="middle" font-size="16" font-weight="700" fill="white">2</text>
+<text x="94" y="283" font-size="18" font-weight="700">AnimBP로 애니메이션 상태를 갱신한다</text>
+<text x="94" y="310" font-family="Consolas, SFMono-Regular, Menlo, monospace" font-size="16" fill="#4b5563">USkinnedMeshComponent_</text>
+<text x="94" y="330" font-family="Consolas, SFMono-Regular, Menlo, monospace" font-size="16" fill="#4b5563">TickComponent</text>
+<rect x="500" y="274" width="22.6" height="44" rx="4" fill="#9333ea"/>
+<text x="532.6" y="303" font-size="17" font-weight="700" fill="#9333ea">27.2ms · 6%</text>
+<path d="M66 349 L66 363" stroke="#4b5563" stroke-width="2"/>
+<path d="M61 358 L66 365 L71 358" fill="none" stroke="#4b5563" stroke-width="2"/>
+<rect x="32" y="368" width="448" height="100" rx="10" fill="#f8fafc" stroke="#e5e7eb"/>
+<rect x="32" y="368" width="6" height="100" rx="3" fill="#c084fc"/>
+<circle cx="66" cy="398" r="15" fill="#c084fc"/>
+<text x="66" y="404" text-anchor="middle" font-size="16" font-weight="700" fill="white">3</text>
+<text x="94" y="405" font-size="18" font-weight="700">병렬로 계산한 포즈를 메시에 반영한다</text>
+<text x="94" y="432" font-family="Consolas, SFMono-Regular, Menlo, monospace" font-size="16" fill="#4b5563">USkeletalMeshComponent_</text>
+<text x="94" y="452" font-family="Consolas, SFMono-Regular, Menlo, monospace" font-size="16" fill="#4b5563">CompleteParallelAnimationEvaluation</text>
+<rect x="500" y="396" width="12.2" height="44" rx="4" fill="#c084fc"/>
+<text x="522.2" y="425" font-size="17" font-weight="700" fill="#9333ea">14.7ms · 3%</text>
+<path d="M66 471 L66 485" stroke="#4b5563" stroke-width="2"/>
+<path d="M61 480 L66 487 L71 480" fill="none" stroke="#4b5563" stroke-width="2"/>
+<rect x="32" y="490" width="448" height="100" rx="10" fill="#f8fafc" stroke="#e5e7eb"/>
+<rect x="32" y="490" width="6" height="100" rx="3" fill="#9ca3af"/>
+<circle cx="66" cy="520" r="15" fill="#9ca3af"/>
+<text x="66" y="526" text-anchor="middle" font-size="16" font-weight="700" fill="white">4</text>
+<text x="94" y="527" font-size="18" font-weight="700">바뀐 상태를 렌더 스레드로 보낸다</text>
+<text x="94" y="554" font-family="Consolas, SFMono-Regular, Menlo, monospace" font-size="16" fill="#4b5563">UWorld_SendAllEndOfFrameUpdates</text>
+<rect x="500" y="518" width="67.1" height="44" rx="4" fill="#9ca3af" fill-opacity="0.35" stroke="#9ca3af" stroke-dasharray="4 3"/>
+<text x="577.1" y="536" font-size="17" font-weight="700" fill="#4b5563">나머지 81.0ms · 18%</text>
+<text x="577.1" y="558" font-size="16" fill="#4b5563">이 칸과 그 밖의 일</text>
+<line x1="32" y1="616" x2="768" y2="616" stroke="#e5e7eb"/>
+<text x="32" y="648" font-size="17" font-weight="700">게임 스레드 한 프레임 446ms</text>
+<rect x="500" y="632" width="13.8" height="20" rx="3" fill="#b45309"/>
+<text x="523.8" y="648" font-size="17" font-weight="700" fill="#b45309">16.7ms = 60fps</text>
+<text x="32" y="676" font-size="16" fill="#4b5563">오브 시점 카메라, 최종 측정 때 뜬 트레이스 한 회, 25–75초 구간 평균</text>
 </svg>

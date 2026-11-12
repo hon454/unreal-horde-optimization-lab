@@ -92,7 +92,7 @@
 | 쓰인 곳 | 트레이스 | 구간 | 값 |
 | --- | --- | --- | --- |
 | 그림 `actor-frame-flow.svg`의 막대, 본문 446 / 323 / 41.9ms | 직렬 실행 `Full1traceser-L1-full-*`(`mass.FullyParallel` 끔) | 25\~75초, 112프레임의 프레임당 평균 | `FEngineLoop::Tick` 446.43, CharacterMovement 323.49 |
-| 스크린샷, 캡션, 옆 표 448 / 322ms / 10,048회 | 병렬 실행 `Full1trace-L1-full-N10000-P1-r1` | 렌더링 프레임 109 하나 | 선택 구간 447.88, CharacterMovement 321.66 |
+| 스크린샷, 캡션, 스크린샷 아래 문장 448 / 322ms / 10,048회 | 병렬 실행 `Full1trace-L1-full-N10000-P1-r1` | 렌더링 프레임 109 하나 | 선택 구간 447.88, CharacterMovement 321.66 |
 
 병렬 트레이스의 같은 25\~75초 구간 평균은 `FEngineLoop::Tick` 446.43, CharacterMovement 323.06ms다(`%TEMP%\horde-trace\F1-trace-L1-full-GT.csv`). 1단계는 Mass 프로세서가 거의 돌지 않아(`PrePhysics` 0.05ms) 직렬·병렬 설정이 액터 비용에 닿지 않는다. 그래서 스크린샷을 직렬 트레이스로 다시 찍지 않았다. 한 프레임과 구간 평균의 차이(1.45ms, 1.83ms)는 프레임 사이의 흔들림이다.
 
@@ -100,12 +100,14 @@
 
 | 파일 | 내용 | 값의 출처 |
 | --- | --- | --- |
+| `images/actor-summary.svg` | 요약 그림. 세 구성(액터 군중, + URO, + Budget)의 프레임·게임 스레드·렌더 스레드·GPU 시간 막대(1만 P1, 같은 축척)와 16.7ms 선 | 위 1만 P1 행 열두 개 |
+| `images/actor-anim-techniques.svg` | 결과 그림. URO와 Budget이 줄인 프레임·게임 스레드 시간, 덧댄 뒤의 프레임 시간, 비교용 애니메이션 쪽 두 타이머의 합 41.94(점선) | 위 변화 행, 트레이스 행 |
 | `images/actor-frame-flow.svg` | 한 개체가 한 프레임에 하는 일 네 칸(이동 컴포넌트 틱, 스켈레탈 메시 틱과 AnimBP 갱신, 애니메이션 평가 마무리, 프레임 끝 렌더 갱신)과 칸마다 엔진 타이머 이름. 오른쪽 막대 길이가 1만의 프레임당 시간(323.49, 27.24, 14.70). 네 번째 칸 `UWorld_SendAllEndOfFrameUpdates`의 값은 따로 읽지 않아, 나머지 81.00ms(이 칸과 그 밖의 일)를 점선 막대로 보였다. 맨 아래 16.7ms 막대는 같은 축척 | 위 트레이스 행 |
-| `images/actor-frame-vs-n.svg` | 위: 프레임 시간 중앙값·느린 쪽 5% 경계(로그-로그), 16.7ms 선, 50ms 선, 60fps를 지키는 최대 개체 수 797. 아래: 개체당 게임 스레드 시간(µs)과 하위 스텝 횟수 | 위 `L1-full` 행 |
+| `images/actor-frame-vs-n.svg` | 위: 프레임 시간 중앙값·느린 쪽 5% 경계(로그-로그), 16.7ms 선, 50ms 선, 60fps를 지키는 최대 개체 수 797. 아래: 개체당 게임 스레드 시간(µs)과 하위 스텝 횟수, 예상선(1천의 16.62µs로 일정) | 위 `L1-full` 행 |
 | `images/insights-gamethread.jpg` | Unreal Insights. 왼쪽은 Timing 뷰에서 렌더링 프레임 109(56.56초 시작, 447.88ms, 빨간 상자)를 고른 화면이고 GameThread 트랙에 `FEngineLoop::Tick` 447.4ms, `UWorld_Tick` 442.18ms, `TickCompletionEvents` 404.97ms가 보인다. 오른쪽은 그 구간을 Timers 패널에서 "CharacterMovement"로 거른 행(빨간 상자)이다. 코디네이터가 찍었다(2560x749) | `Saved/Traces/Full1trace-L1-full-N10000-P1-r1.utrace`(병렬 실행, 1만 P1) |
 | `../../Docs/figures/steps/step1-L1-full.webp` | 1단계 화면(HUD 켬). HUD 값은 위 "화면의 HUD와 표의 차이" | 촬영 경위는 [Worklog/Q6.md](../../Docs/Worklog/Q6.md) "촬영 준비" |
 
-SVG 두 개는 표준 라이브러리 Python으로 값을 넣어 쓴 정적 파일이다(생성 스크립트는 저장소에 두지 않았다). 폭 800 기준으로 글자는 14px 이상이고, 자기 흰 배경을 가져 GitHub의 밝은·어두운 테마 모두에서 같은 색으로 보인다. 처음 글의 `actor-gamethread-breakdown.svg`(같은 네 값의 가로 막대)는 `actor-frame-flow.svg`에 합쳐 지웠다.
+SVG 네 개는 [make-figures.py](make-figures.py)가 만든다(저장소 루트에서 `py Posts/01-actor-baseline/make-figures.py`). 측정값은 `summary.csv`와 `full-n-at-60fps.csv`에서 읽고, 트레이스 값 네 개(446.43 / 323.49 / 27.24 / 14.70)는 스크립트의 상수다. 폭 800 기준으로 글자는 16px 이상이고, 자기 흰 배경을 가져 GitHub의 밝은·어두운 테마 모두에서 같은 색으로 보인다. 처음 글의 `actor-gamethread-breakdown.svg`(같은 네 값의 가로 막대)는 `actor-frame-flow.svg`에 합쳐 지웠다.
 
 ## 엔진 소스
 
