@@ -3,17 +3,17 @@
 <text x="32" y="46" font-size="22" font-weight="700">애니메이션 기법을 덧대 줄어든 시간</text>
 <text x="32" y="74" font-size="16" fill="#4b5563">호드 총수 1만, 오브 시점 카메라, 세 번 잰 중앙값을 액터 군중과 비교(ms)</text>
 <text x="40" y="120" font-size="17" font-weight="700">URO</text>
-<rect x="40" y="132" width="222.1" height="22" rx="3" fill="#374151"/>
-<text x="270.1" y="149" font-size="16"><tspan font-weight="700" fill="#374151">−19.2 (−4.35%)</tspan><tspan fill="#4b5563"> 프레임 시간</tspan></text>
-<rect x="40" y="160" width="222.7" height="22" rx="3" fill="#2563eb"/>
-<text x="270.7" y="177" font-size="16"><tspan font-weight="700" fill="#2563eb">−19.3</tspan><tspan fill="#4b5563"> 게임 스레드</tspan></text>
-<text x="40" y="202" font-size="16" fill="#4b5563">덧댄 뒤의 프레임 시간 422ms</text>
+<rect x="40" y="132" width="194.5" height="22" rx="3" fill="#374151"/>
+<text x="242.5" y="149" font-size="16"><tspan font-weight="700" fill="#374151">−16.8 (−3.83%)</tspan><tspan fill="#4b5563"> 프레임 시간</tspan></text>
+<rect x="40" y="160" width="194.3" height="22" rx="3" fill="#2563eb"/>
+<text x="242.3" y="177" font-size="16"><tspan font-weight="700" fill="#2563eb">−16.8</tspan><tspan fill="#4b5563"> 게임 스레드</tspan></text>
+<text x="40" y="202" font-size="16" fill="#4b5563">덧댄 뒤의 프레임 시간 423ms</text>
 <text x="40" y="238" font-size="17" font-weight="700">Animation Budget Allocator(예산 2ms)</text>
-<rect x="40" y="250" width="470.2" height="22" rx="3" fill="#374151"/>
-<text x="518.2" y="267" font-size="16"><tspan font-weight="700" fill="#374151">−40.7 (−9.22%)</tspan><tspan fill="#4b5563"> 프레임 시간</tspan></text>
-<rect x="40" y="278" width="478.3" height="22" rx="3" fill="#2563eb"/>
-<text x="526.3" y="295" font-size="16"><tspan font-weight="700" fill="#2563eb">−41.4</tspan><tspan fill="#4b5563"> 게임 스레드</tspan></text>
-<text x="40" y="320" font-size="16" fill="#4b5563">덧댄 뒤의 프레임 시간 401ms</text>
+<rect x="40" y="250" width="457.1" height="22" rx="3" fill="#374151"/>
+<text x="505.1" y="267" font-size="16"><tspan font-weight="700" fill="#374151">−39.6 (−8.99%)</tspan><tspan fill="#4b5563"> 프레임 시간</tspan></text>
+<rect x="40" y="278" width="462.0" height="22" rx="3" fill="#2563eb"/>
+<text x="510.0" y="295" font-size="16"><tspan font-weight="700" fill="#2563eb">−40.0</tspan><tspan fill="#4b5563"> 게임 스레드</tspan></text>
+<text x="40" y="320" font-size="16" fill="#4b5563">덧댄 뒤의 프레임 시간 400ms</text>
 <line x1="32" y1="336" x2="768" y2="336" stroke="#e5e7eb"/>
 <text x="40" y="364" font-size="17" font-weight="700">비교: 애니메이션 쪽 두 타이머의 합</text>
 <rect x="40" y="376" width="484.6" height="22" rx="3" fill="#9333ea" fill-opacity="0.25" stroke="#9333ea" stroke-dasharray="4 3"/>

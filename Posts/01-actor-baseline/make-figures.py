@@ -1,6 +1,6 @@
 # Makes the SVG figures of post 01 in images/.
 # Run from the repository root: py Posts/01-actor-baseline/make-figures.py
-# Measured values come from Measurements/Full1/summary.csv and Docs/figures/full1/full-n-at-60fps.csv.
+# Measured values come from Measurements/Full2/summary.csv and Docs/figures/full2/full-n-at-60fps.csv.
 # Trace values (one serial trace, 25-75 s window) are constants below; their source is in measurements.md.
 import csv, math, os
 
@@ -9,17 +9,17 @@ ROOT = os.path.normpath(os.path.join(HERE, "..", ".."))
 OUT = os.path.join(HERE, "images")
 
 rows = {}
-with open(os.path.join(ROOT, "Measurements", "Full1", "summary.csv"), encoding="utf-8") as f:
+with open(os.path.join(ROOT, "Measurements", "Full2", "summary.csv"), encoding="utf-8") as f:
     for r in csv.DictReader(f):
         rows[(r["variant"], int(r["n"]), r["preset"])] = r
 
 def v(variant, n, col):
     return float(rows[(variant, n, "P1")][col])
 
-with open(os.path.join(ROOT, "Docs", "figures", "full1", "full-n-at-60fps.csv"), encoding="utf-8") as f:
+with open(os.path.join(ROOT, "Docs", "figures", "full2", "full-n-at-60fps.csv"), encoding="utf-8") as f:
     N_AT_60 = int(next(r for r in csv.DictReader(f) if r["series"] == "1 L1-full")["n_p95"])
 
-# Serial trace Full1traceser-L1-full, 10000 P1, 25-75 s, per frame (ms). measurements.md "두 트레이스".
+# Serial trace Full1traceser-L1-full (build 730ff18, kept: the Full2 traces are not exported), 10000 P1, 25-75 s, per frame (ms). measurements.md "두 트레이스".
 T_FRAME, T_CMC, T_SKIN, T_ANIMEVAL = 446.43, 323.49, 27.24, 14.70
 T_REST = T_FRAME - T_CMC - T_SKIN - T_ANIMEVAL
 
@@ -141,7 +141,7 @@ def flow():
     o.append(f'<rect x="{BX}" y="{y - 16}" width="{w167:.1f}" height="20" rx="3" fill="{AMBER}"/>')
     o.append(f'<text x="{BX + w167 + 10:.1f}" y="{y}" font-size="17" font-weight="700" fill="{AMBER}">16.7ms = 60fps</text>')
     y += 28
-    o.append(f'<text x="32" y="{y}" font-size="16" fill="{SUB}">오브 시점 카메라, 최종 측정 때 뜬 트레이스 한 회, 25–75초 구간 평균</text>')
+    o.append(f'<text x="32" y="{y}" font-size="16" fill="{SUB}">오브 시점 카메라, 따로 뜬 트레이스 한 회, 25–75초 구간 평균</text>')
     write("actor-frame-flow.svg", svg(y + 24, o))
 
 
