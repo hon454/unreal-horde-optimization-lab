@@ -37,7 +37,7 @@
 
 ## 지금 유효한 조건
 
-근거는 [measurement.md](Guides/measurement.md) "확정값"과 "총괄 묶음 `Full1` 규약"이다.
+근거는 [measurement.md](Guides/measurement.md) "확정값"과 "총괄 묶음 규약"이다.
 
 - 조건 표는 `Scripts/full-conditions.json`의 21개다. 사다리 `L1`\~`L8`, 빼 보기 `A8-*` 열 행, 하위 실험 셋이다([ADR-0013](Decisions/0013-full-batch-runner-and-condition-table.md)).
 - 총괄 묶음의 조건 표에는 조건을 더하지 않는다. 참고 묶음은 따로 둔다.
