@@ -10,14 +10,36 @@
 # 결과는 Fab 에셋에서 나온 것이라 /Game/Lab/VAT/Baked/(gitignore)에 둔다. 새 체크아웃에서는 미니언 이전 뒤 한 번 돌린다.
 # 실행: [LAB_UNIT=large] UnrealEditor-Cmd.exe HordeOptLab.uproject -run=pythonscript -script=Scripts/bake-vat.py -unattended -nosplash -AllowCommandletRendering -stdout
 #   (-nullrhi면 스켈레탈 메시 정점을 읽지 못한다. make-static-minion.py와 같다)
+#
+# 입자 전용 저폴리 굽기(--lod N 또는 LAB_VAT_LOD=N, 2026-11-12 입자 GPU 비용 수정): 원본 스켈레탈 메시의 LOD N을 스태틱 메시로 바꿔 Bone 모드로만 굽는다.
+#   200m 밖 Niagara 배경 무리(NS_LabCrowd)의 메시 렌더러가 쓴다. 근거리 VAT 인스턴스용 LOD0 산출물(위 이름들)은 건드리지 않는다.
+#   산출물은 같은 폴더에 접미사 _Lod<N>을 붙인다: SM_/DA_/MI_<TOKEN>VAT_Bone_Lod<N>, T_<TOKEN>VAT_Bone_Lod<N>_Bone{Position,Rotation,Weight}.
+#   부모 머티리얼은 LOD0 굽기의 M_<TOKEN>VAT_Bone을 그대로 쓴다(그래서 LOD0 굽기를 먼저 돌려야 한다). 텍스처와 머티리얼 인스턴스는 LOD마다 따로다.
+#   BoneWeight 텍스처는 스태틱 메시 정점마다 한 칸이고 그 위치를 UV 채널 1에 쓰므로 정점이 다른 LOD끼리 나눌 수 없다
+#   (AnimToTextureBPLibrary.cpp:296-343, FindBestResolution(2, NumVertices) → CreateUVChannel). 인스턴스는 그 텍스처와 BoneWeightRowsPerFrame을 넣는다(같은 파일 674-677).
+#   BonePosition·BoneRotation은 참조 스켈레톤 전체 뼈 수(GetRawBoneNum, AnimToTextureSkeletalMesh.cpp:292-298) × 프레임이라 LOD와 무관하게 LOD0과 같은 내용이 된다.
+#   ConvertSkeletalMeshToStaticMesh(..., N)은 고른 LOD 하나를 스태틱 LOD0에 넣는다(AnimToTextureBPLibrary.cpp:850-868). 그래서 SkeletalLODIndex = N, StaticLODIndex = 0이다.
+#   에디터 콘솔: py "<경로>/Scripts/bake-vat.py" --lod 3 [--unit large]. 커맨들릿: LAB_VAT_LOD=3 [LAB_UNIT=large] UnrealEditor-Cmd.exe ... (위 실행 줄과 같다)
 import os
 import sys
 import unreal
 
+
+def _arg(name):
+    """에디터 콘솔 py는 파일 뒤 인자를 sys.argv로 넘긴다. --name 값 꼴만 읽는다."""
+    if name in sys.argv:
+        i = sys.argv.index(name)
+        if i + 1 < len(sys.argv):
+            return sys.argv[i + 1]
+    return None
+
+
 MINION = "/Game/ParagonMinions/Characters/Minions/Down_Minions"
 # LAB_UNIT=large: M3b 2종의 대형(시즈 미니언)을 같은 방식으로 굽는다. 이름의 LabMinion이 LabMinionLarge가 된다
 # (SM_LabMinionLargeVAT_Bone, DA_LabMinionLargeVAT_Bone, M_LabMinionLargeActor. Config/DefaultGame.ini [LabUnitAssets] Large 키).
-LARGE = os.environ.get("LAB_UNIT", "small") == "large"
+LARGE = (_arg("--unit") or os.environ.get("LAB_UNIT", "small")) == "large"
+_lod = _arg("--lod") or os.environ.get("LAB_VAT_LOD")
+LOD = int(_lod) if _lod not in (None, "") else None  # None이면 전과 같이 LOD0으로 Vertex·Bone·액터 머티리얼을 굽는다
 TOKEN = "LabMinionLarge" if LARGE else "LabMinion"
 if LARGE:
     SKEL = MINION + "/Meshes/Minion_Lane_Siege_Dawn"
@@ -266,12 +288,93 @@ def make_actor_material():
     log("actor material saved")
 
 
-for m in ["Vertex", "Bone"]:  # Vertex를 먼저 구워 정점 범위를 Bone 메시 바운드에 쓴다
+def bake_lod(lod):
+    """입자 전용: 원본 스켈레탈 LOD lod를 Bone 모드로 굽는다(맨 위 "입자 전용 저폴리 굽기"). 이름 끝이 _Lod<lod>다."""
+    suffix = "_Lod%d" % lod
+    base = TOKEN + "VAT_Bone" + suffix
+    parent_path = OUT + "/M_" + TOKEN + "VAT_Bone"
+    vertex_da_path = OUT + "/DA_" + TOKEN + "VAT_Vertex"
+    if not eal.does_asset_exist(parent_path) or not eal.does_asset_exist(vertex_da_path):
+        raise RuntimeError("LOD0 bake first (%s, %s missing)" % (parent_path, vertex_da_path))
+    skel = unreal.load_asset(SKEL)
+    sm_path = OUT + "/SM_" + base
+    fresh(sm_path)
+    sm = lib.convert_skeletal_mesh_to_static_mesh(skel, sm_path, lod)
+    if not sm:
+        raise RuntimeError("convert failed (LOD %d)" % lod)
+    lib.set_light_map_index(sm, 0, 2, False)  # bake()와 같다. VAT용 UV 채널 1과 겹치지 않게
+
+    da = new_asset("DA_" + base, unreal.AnimToTextureDataAsset, unreal.DataAssetFactory())
+    da.set_editor_property("skeletal_mesh", skel)
+    da.set_editor_property("skeletal_lod_index", lod)
+    da.set_editor_property("static_mesh", sm)
+    da.set_editor_property("static_lod_index", 0)
+    da.set_editor_property("uv_channel", 1)
+    da.set_editor_property("sample_rate", 30.0)
+    da.set_editor_property("auto_play", False)
+    da.set_editor_property("mode", unreal.AnimToTextureMode.BONE)
+    seqs = []
+    for p in ANIMS:
+        info = unreal.AnimToTextureAnimSequenceInfo()
+        info.set_editor_property("enabled", True)
+        info.set_editor_property("anim_sequence", unreal.load_asset(p))
+        seqs.append(info)
+    da.set_editor_property("anim_sequences", seqs)
+    tex_names = ["BonePosition", "BoneRotation", "BoneWeight"]
+    props = {"BonePosition": "bone_position_texture", "BoneRotation": "bone_rotation_texture", "BoneWeight": "bone_weight_texture"}
+    texs = []
+    for t in tex_names:
+        tex = new_asset("T_%s_%s" % (base, t), unreal.Texture2D, unreal.Texture2DFactoryNew())
+        da.set_editor_property(props[t], tex)
+        texs.append(tex)
+    if not lib.animation_to_texture(da):
+        raise RuntimeError("AnimationToTexture failed (see LogAnimToTextureEditor)")
+
+    mi = new_asset("MI_" + base, unreal.MaterialInstanceConstant, unreal.MaterialInstanceConstantFactoryNew())
+    mel.set_material_instance_parent(mi, unreal.load_asset(parent_path))
+    lib.update_material_instance_from_data_asset(da, mi)
+    death = da.get_editor_property("animations")[2]  # ANIMS 순서: 걷기, 피격, 죽기
+    mel.set_material_instance_scalar_parameter_value(mi, "DeathStartFrame", float(death.start_frame))
+    mel.set_material_instance_scalar_parameter_value(mi, "DeathEndFrame", float(death.end_frame))
+    mel.update_material_instance(mi)
+    for i in range(len(sm.get_editor_property("static_materials"))):  # 원본 LOD의 슬롯 수가 LOD0과 다를 수 있다. 모든 슬롯에 같은 인스턴스를 넣는다
+        sm.set_material(i, mi)
+
+    # 바운드: bake()의 Bone 경로와 같은 계산. LOD0 Vertex 굽기의 모든 프레임 정점 범위로 넓힌다(LOD 메시의 정점은 그 안에 든다)
+    vda = unreal.load_asset(vertex_da_path)
+    vmin, vsize = vda.get_editor_property("vertex_min_b_box"), vda.get_editor_property("vertex_size_b_box")
+    pos = sm.get_editor_property("positive_bounds_extension")
+    neg = sm.get_editor_property("negative_bounds_extension")
+    bb = sm.get_bounding_box()
+    base_max = unreal.Vector(bb.max.x - pos.x, bb.max.y - pos.y, bb.max.z - pos.z)
+    base_min = unreal.Vector(bb.min.x + neg.x, bb.min.y + neg.y, bb.min.z + neg.z)
+    new_max = unreal.Vector(max(base_max.x, vmin.x + vsize.x), max(base_max.y, vmin.y + vsize.y), max(base_max.z, vmin.z + vsize.z))
+    new_min = unreal.Vector(min(base_min.x, vmin.x), min(base_min.y, vmin.y), min(base_min.z, vmin.z))
+    sm.set_editor_property("positive_bounds_extension", unreal.Vector(new_max.x - base_max.x, new_max.y - base_max.y, new_max.z - base_max.z))
+    sm.set_editor_property("negative_bounds_extension", unreal.Vector(base_min.x - new_min.x, base_min.y - new_min.y, base_min.z - new_min.z))
+
+    for a in [sm, da, mi] + texs:
+        eal.save_loaded_asset(a)
+    anims = ", ".join("%d..%d" % (a.start_frame, a.end_frame) for a in da.get_editor_property("animations"))
+    sizes = ", ".join("%s %dx%d" % (t, x.blueprint_get_size_x(), x.blueprint_get_size_y()) for t, x in zip(tex_names, texs))
+    b = sm.get_bounding_box()
+    log("Bone%s frames=%d bones=%d anims=[%s] textures=[%s] verts=%d tris=%d slots=%d bounds %s .. %s" % (
+        suffix, da.get_editor_property("num_frames"), da.get_editor_property("num_bones"), anims, sizes,
+        unreal.EditorStaticMeshLibrary.get_number_verts(sm, 0), sm.get_num_triangles(0), len(sm.get_editor_property("static_materials")), b.min, b.max))
+
+
+if LOD is not None:
     try:
-        bake(m)
+        bake_lod(LOD)
     except Exception as e:
-        unreal.log_error("LABVAT %s failed: %s" % (m, e))
-try:
-    make_actor_material()
-except Exception as e:
-    unreal.log_error("LABVAT actor material failed: %s" % e)
+        unreal.log_error("LABVAT Bone_Lod%d failed: %s" % (LOD, e))
+else:
+    for m in ["Vertex", "Bone"]:  # Vertex를 먼저 구워 정점 범위를 Bone 메시 바운드에 쓴다
+        try:
+            bake(m)
+        except Exception as e:
+            unreal.log_error("LABVAT %s failed: %s" % (m, e))
+    try:
+        make_actor_material()
+    except Exception as e:
+        unreal.log_error("LABVAT actor material failed: %s" % e)

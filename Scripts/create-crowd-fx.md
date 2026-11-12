@@ -1,6 +1,6 @@
 # NS_LabCrowd 만들기
 
-Q2 Niagara 배경 무리 `/Game/Lab/FX/NS_LabCrowd`와 머티리얼 인스턴스 `MI_LabCrowdSmall`·`MI_LabCrowdLarge`는 엔진 Niagara 템플릿과 굽기 산출물로 만든 에셋이라 커밋한다(Fab 콘텐츠가 아니다). 부모 머티리얼과 메시는 `Scripts/bake-vat.py`의 산출물(`/Game/Lab/VAT/Baked/`, gitignore)이므로 새 체크아웃에서는 먼저 `bake-vat.py`를 소형·대형 둘 다 돌린다. 설계와 값의 근거는 [Docs/Worklog/Q2.md](../Docs/Worklog/Q2.md).
+Q2 Niagara 배경 무리 `/Game/Lab/FX/NS_LabCrowd`와 머티리얼 인스턴스 `MI_LabCrowdSmall`·`MI_LabCrowdLarge`는 엔진 Niagara 템플릿과 굽기 산출물로 만든 에셋이라 커밋한다(Fab 콘텐츠가 아니다). 부모 머티리얼과 메시는 `Scripts/bake-vat.py`의 산출물(`/Game/Lab/VAT/Baked/`, gitignore)이므로 새 체크아웃에서는 먼저 `bake-vat.py`를 소형·대형 둘 다 돌리고, 이어서 입자 전용 LOD4 굽기(`--lod 4`, 소형·대형)를 돌린다(6절). 설계와 값의 근거는 [Docs/Worklog/Q2.md](../Docs/Worklog/Q2.md).
 
 다시 만들어야 하면 Unreal MCP로 아래 순서를 밟는다(2026-11-12에 이 순서로 만들었다). 에디터에서 손으로 해도 같다. 툴세트 이름은 `NiagaraToolsets.NiagaraToolset_System`(아래 "NS"), `editor_toolset.toolsets.material_instance.MaterialInstanceTools`(아래 "MIT")다. 여러 호출은 `editor_toolset.toolsets.programmatic.ProgrammaticToolset.execute_tool_script`로 묶으면 왕복이 준다.
 
@@ -12,7 +12,7 @@ Q2 Niagara 배경 무리 `/Game/Lab/FX/NS_LabCrowd`와 머티리얼 인스턴스
 
 ## 2. 머티리얼 인스턴스
 
-1. MIT `create`: 폴더 `/Game/Lab/FX`, 이름 `MI_LabCrowdSmall`, 부모 `/Game/Lab/VAT/Baked/MI_LabMinionVAT_Bone`. 대형은 `MI_LabCrowdLarge`, 부모 `MI_LabMinionLargeVAT_Bone`.
+1. MIT `create`: 폴더 `/Game/Lab/FX`, 이름 `MI_LabCrowdSmall`, 부모 `/Game/Lab/VAT/Baked/MI_LabMinionVAT_Bone_Lod4`. 대형은 `MI_LabCrowdLarge`, 부모 `MI_LabMinionLargeVAT_Bone_Lod4`. 2026-11-12 전에는 LOD0 굽기의 `MI_LabMinionVAT_Bone`·`MI_LabMinionLargeVAT_Bone`이 부모였다(6절).
 2. MIT `set_static_switch_parameter`로 두 인스턴스 모두 `AutoPlay` = true, `UseDynamicParameters` = true. 엔진 `GetFrameSwitch`가 프레임을 Dynamic Material Parameter 1번(TimeOffset, Playrate, StartFrame, EndFrame)에서 읽게 된다. Niagara 메시 렌더러는 인스턴스 커스텀 데이터 0번에 입자 인덱스를 쓰므로 커스텀 데이터 경로는 쓸 수 없다(`Docs/Reference/engine-notes.md` 17절).
 
 ## 3. 시스템과 이미터
@@ -25,7 +25,7 @@ Q2 Niagara 배경 무리 `/Game/Lab/FX/NS_LabCrowd`와 머티리얼 인스턴스
    1. `AddEmitter`: 템플릿 `/Niagara/DefaultAssets/Templates/Emitters/Minimal`.
    2. `SetEmitterData`: `SimTarget` GPUComputeSim, `bLocalSpace` true, `CalculateBoundsMode` Fixed, `FixedBounds` 위와 같음, `bDeterminism` true, `RandomSeed` 1(2), `AllocationMode` ManualEstimate, `PreAllocationCount` 16000(2000).
    3. 스프라이트 렌더러를 `RemoveRenderer`(인덱스 0)로 지우고 `AddRenderer`로 `/Script/Niagara.NiagaraMeshRendererProperties`를 더한다.
-   4. `SetRendererData`: `Meshes[0].mesh` `/Game/Lab/VAT/Baked/SM_LabMinionVAT_Bone`(`SM_LabMinionLargeVAT_Bone`), `Meshes[0].rotation` yaw −90, `Meshes[0].scale` 1(2), `bOverrideMaterials` true, `OverrideMaterials` [`MI_LabCrowdSmall`(`MI_LabCrowdLarge`)], `bCastShadows` false, `FacingMode` Velocity.
+   4. `SetRendererData`: `Meshes[0].mesh` `/Game/Lab/VAT/Baked/SM_LabMinionVAT_Bone_Lod4`(`SM_LabMinionLargeVAT_Bone_Lod4`), `Meshes[0].rotation` yaw −90, `Meshes[0].scale` 1(2), `bOverrideMaterials` true, `OverrideMaterials` [`MI_LabCrowdSmall`(`MI_LabCrowdLarge`)], `bCastShadows` false, `FacingMode` Velocity.
    5. `AddModule`: EmitterUpdateScript에 `/Niagara/Modules/Emitter/SpawnRate`, ParticleSpawnScript에 `/Niagara/Modules/Spawn/Location/V2/ShapeLocation`, `/Niagara/Modules/Spawn/Velocity/AddVelocityFromPoint`, `/Niagara/Modules/Update/Material/DynamicMaterialParameters`, ParticleUpdateScript에 `/Niagara/Modules/Solvers/SolveForcesAndVelocity`. (MCP의 `AddModule`이 결과를 만들고 나서 `_StrictDict.get()` 오류를 낼 수 있다. 모듈은 더해져 있다.)
    6. `SetStackInputData`:
       - `SpawnRate.SpawnRate` = 연결 `User.SmallRate`(`User.LargeRate`).
@@ -62,7 +62,7 @@ MCP에 Python 실행 툴이 없어, 스크립트를 파일로 쓰고 SlateInspec
 3. 이미터마다(이름 `SmallEnt`, `LargeEnt`) 아래를 한다. 괄호 안이 대형 값이다.
    1. `AddEmitter`: 템플릿 `/Niagara/DefaultAssets/Templates/Emitters/Minimal`.
    2. `SetEmitterData`: `SimTarget` GPUComputeSim, `bLocalSpace` false(월드 공간, 원소가 월드 좌표다), `CalculateBoundsMode` Fixed, `FixedBounds` 3절과 같음, `bDeterminism` true, `RandomSeed` 3(4), `AllocationMode` ManualEstimate, `PreAllocationCount` 12000(1500)(1만에서 원소 약 5,600·620, 2만 기준), **`InterpolatedSpawnMode` NoInterpolation**. 보간 스폰을 끄면 새 입자는 첫 프레임에 업데이트를 돌지 않는다. 그래서 수명 0.001초 입자가 스폰된 프레임에 그려지고 다음 프레임의 `ParticleState`에서 죽는다.
-   3. 스프라이트 렌더러를 `RemoveRenderer`(인덱스 0)로 지우고 메시 렌더러를 `AddRenderer`. `SetRendererData`: 메시·회전·스케일·머티리얼은 3절과 같음(`SM_LabMinionVAT_Bone` + `MI_LabCrowdSmall`, 대형 `SM_LabMinionLargeVAT_Bone` 스케일 2 + `MI_LabCrowdLarge`, yaw −90), `FacingMode` Velocity, **`bCastShadows` true**, **`bEnableCameraDistanceCulling` true, `MinCameraDistance` 17500, `MaxCameraDistance` 200000**, **`MotionVectorSetting` Approximate**(이 입자는 업데이트를 돌지 않아 `Particles.Previous.Position`이 채워지지 않는다. Approximate는 이전 위치를 위치 − 속도 × 델타로 만든다).
+   3. 스프라이트 렌더러를 `RemoveRenderer`(인덱스 0)로 지우고 메시 렌더러를 `AddRenderer`. `SetRendererData`: 메시·회전·스케일·머티리얼은 3절과 같음(`SM_LabMinionVAT_Bone_Lod4` + `MI_LabCrowdSmall`, 대형 `SM_LabMinionLargeVAT_Bone_Lod4` 스케일 2 + `MI_LabCrowdLarge`, yaw −90), `FacingMode` Velocity, **`bCastShadows` true**, **`bEnableCameraDistanceCulling` true, `MinCameraDistance` 17500, `MaxCameraDistance` 200000**, **`MotionVectorSetting` Approximate**(이 입자는 업데이트를 돌지 않아 `Particles.Previous.Position`이 채워지지 않는다. Approximate는 이전 위치를 위치 − 속도 × 델타로 만든다).
    4. 이미터 업데이트: `AddModule` `/Niagara/Modules/Emitter/SpawnPerFrame`. `SetStackInputData` `["Spawn Count"]` = 다이내믹 입력 `/Niagara/DynamicInputs/Math/GetVector4ArrayCount`, `["Spawn Count", "Vector 4 Array"]` = `Linked` `User.LabSmallRecs`(`User.LabLargeRecs`), 형 `/Script/Niagara.NiagaraDataInterfaceArrayFloat4`.
    5. 입자 스폰(실행 순서대로):
       - `InitializeParticle.Lifetime` = 0.001.
@@ -77,3 +77,16 @@ MCP에 Python 실행 툴이 없어, 스크립트를 파일로 쓰고 SlateInspec
 MCP로 만들 때 남는 것: MCP `SetEmitterData`는 `PostEditChange`를 부르지 않아 `InterpolatedSpawnMode`를 바꿔도 스폰 스크립트의 용도(템플릿의 `ParticleSpawnScriptInterpolated`)가 바뀌지 않는다. 그래서 로드할 때마다 `LogNiagara: Disabling interpolated spawn because emitter flag and script type don't match` 경고가 이미터마다 한 줄 나오고 엔진이 메모리에서 용도를 고친다(`NiagaraEmitter.cpp:861-878`). GPU 계산 스크립트는 이미터 값(NoInterpolation)으로 컴파일되므로 동작은 같다(`NiagaraScript.cpp:1187-1193`). 경고를 없애려면 에디터에서 두 이미터의 Interpolated Spawn Mode를 UI로 한 번 바꿨다가 NoInterpolation으로 되돌리고 저장한다. 에디터에서 손으로 만들면 UI가 용도를 바꾸므로 이 문제가 없다.
 
 확인: 배열은 실행 때 코드가 넣으므로 에디터 뷰포트에는 엔티티 구동 입자가 없다. `run-dev.ps1 -N 10000 -Preset P1 -Duration 25 -ShotAt 20 -Stage M5 -Variant q4final`의 로그에 `lab_crowdfx ... small_recs=1 large_recs=1 now=1 orb_pos=1`이 있고 `lab_crowdfx_param missing=`이 없어야 한다. 독립 이미터를 잠시 끄고(`SetEmitterData` `bIsEnabled` false, 확인 뒤 되돌려 저장) 같은 실행을 하면 500m 밖이 비고 188\~500m가 엔티티 구동 입자로 찬다.
+
+## 6. 입자 전용 저폴리 메시(2026-11-12)
+
+200m 밖 입자는 원본 스켈레탈 메시의 LOD4로 구운 VAT 메시를 쓴다(소형 삼각형 586, 대형 621. LOD0 굽기는 9,786·10,379). 근거리 VAT 인스턴스와 ISKM은 LOD0 산출물을 그대로 쓴다. 고른 이유와 GPU 전후 값은 [Docs/Worklog/Q6.md](../Docs/Worklog/Q6.md) "입자 전용 저폴리 VAT 메시".
+
+1. LOD0 굽기(소형·대형)가 끝난 뒤 LOD4 굽기를 소형·대형 한 번씩 돌린다. 에디터 콘솔(Cmd)에서 `py "<저장소>/Scripts/bake-vat.py" --lod 4`와 `py "<저장소>/Scripts/bake-vat.py" --lod 4 --unit large`. 커맨들릿이면 `LAB_VAT_LOD=4`(대형은 `LAB_UNIT=large`도)를 주고 `bake-vat.py` 머리말의 실행 줄을 쓴다. 산출물은 `/Game/Lab/VAT/Baked/`의 `SM_`·`DA_`·`MI_LabMinionVAT_Bone_Lod4`, `T_LabMinionVAT_Bone_Lod4_Bone{Position,Rotation,Weight}`(대형은 `LabMinionLarge`)다. 부모 머티리얼은 LOD0의 `M_LabMinionVAT_Bone`을 함께 쓴다. 로그 `LABVAT Bone_Lod4 ... verts=734 tris=586`(대형 `verts=814 tris=621`)을 본다.
+2. 처음부터 만들면 2·3·5절의 값이 이미 LOD4다. 이미 있는 에셋을 바꿀 때는 아래를 한다.
+   1. 두 인스턴스의 부모를 바꾼다. Python `MaterialEditingLibrary.set_material_instance_parent(MI_LabCrowdSmall, MI_LabMinionVAT_Bone_Lod4)`(대형 `MI_LabCrowdLarge` ← `MI_LabMinionLargeVAT_Bone_Lod4`), `update_material_instance`, 저장. 정적 스위치 `AutoPlay`·`UseDynamicParameters`가 true로 남는지 본다. BoneWeight 텍스처와 그 크기 파라미터가 LOD마다 달라 부모를 바꿔야 한다(engine-notes 26절).
+   2. NS `GetRendererData`로 네 이미터(`Small`, `SmallEnt`, `Large`, `LargeEnt`)의 `Meshes` 배열을 읽고 `Meshes[0].mesh`만 `SM_LabMinionVAT_Bone_Lod4`(대형 `SM_LabMinionLargeVAT_Bone_Lod4`)로 바꿔 `SetRendererData`로 `Meshes`를 통째로 넣는다(스케일·회전·`LODMode`는 읽은 값 그대로). `OverrideMaterials`는 그대로 둔다.
+   3. `GetSystemCompileState`가 오류·경고 없음인지 보고 `AssetTools.save_assets`로 `NS_LabCrowd`, `MI_LabCrowdSmall`, `MI_LabCrowdLarge`를 저장한다.
+3. 확인: `run-dev.ps1 -Small -Stage M5 -Variant q4final`의 로그 `lab_crowdfx`에 `particles=` 값과 `small_recs=1 large_recs=1`이 있다. 화면 비교는 같은 시드 P1 20초 스크린샷의 지평선 띠다(`Measurements/CrowdFx2/shots/lod-compare-horizon.jpg`).
+
+비교용으로 다른 메시를 시험할 때는 에셋을 바꾸지 않고 `NS_LabCrowd`를 다른 경로에 복제해 메시와 인스턴스를 바꾼 뒤 실행 인자 `-ini:Game:[Lab]:CrowdFxSystem=<복제본 경로>`로 고른다. Git Bash에서 부르면 `/Game/...`이 Windows 경로로 바뀌므로 `MSYS_NO_PATHCONV=1`을 둔다. 복제본은 끝나면 지운다.
