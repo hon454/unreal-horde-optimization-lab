@@ -15,24 +15,22 @@
 
 순서대로 한다.
 
-1. **7·8단계 화면을 다시 찍는다.** 촬영 묶음은 `Pre6`이다. 화면은 찍었다. 촬영 세션이 풀 끔 실행의 떨림을 확인하는 중이다.
-2. **01번 글의 트레이스 값을 새 트레이스에서 다시 뽑는다.** 코디네이터가 촬영이 끝난 뒤에 한다. Insights 화면도 다시 찍는다.
-3. **Test 패키지를 GitHub Releases에 올린다.** 패키지는 08e45f2다. 라이선스 판단은 [D25](Worklog/autonomous-decisions.md)에 있다. 촬영이 끝난 뒤에 한다.
-4. **글 00\~09를 쓴다.** 대기열은 [backlog.md](backlog.md)에 있다. 나누는 법은 [D27](Worklog/autonomous-decisions.md)에 있다.
+1. **01번과 03번 글의 트레이스 값을 새 트레이스에서 다시 뽑는다.** 코디네이터가 한다. 글 01, 02, 04, 06, 07의 Insights 화면도 찍는다.
+2. **Test 패키지를 GitHub Releases에 올린다.** 패키지는 08e45f2다. 라이선스 판단은 [D25](Worklog/autonomous-decisions.md)에 있다.
+3. **글 00\~09를 쓴다.** 대기열은 [backlog.md](backlog.md)에 있다. 나누는 법은 [D27](Worklog/autonomous-decisions.md)에 있다.
    - 시범 글 01은 [Posts/01-actor-baseline](../Posts/01-actor-baseline/README.md)에 있다.
    - 글 규칙은 [posting.md](Guides/posting.md), [ADR-0014](Decisions/0014-post-format.md), [ADR-0015](Decisions/0015-readme-figures.md)에 있다.
    - 글 재료의 사실 확인 결과는 [post-review.md](post-review.md)에 있다. 재료의 측정값은 옛 묶음의 값이다. 경위는 수치 없이 방향만 쓴다.
    - 엔진 문제를 쓸 때는 이슈 링크와 이 레포의 해결 코드 블록을 함께 보인다.
    - 독자용 문장은 묶음 이름 대신 "최종 측정"이라고 쓴다.
    - 글을 다 쓰면 한눈에 보는 사이트를 만든다.
-5. **푸시한다.** 사용자가 2026-11-12에 푸시를 승인했다. 294a762까지 푸시했다. 촬영 중에는 푸시하지 않는다.
+4. **푸시한다.** 사용자가 2026-11-12에 푸시를 승인했다. 코디네이터는 단계가 끝날 때마다 푸시한다.
 
 ## 진행 중인 세션
 
-- 글 04, 06: 코디네이터의 하위 에이전트 둘이 쓴다. Opus high. 진행 중. 세션 대신 하위 에이전트를 쓰는 이유는 [D28](Worklog/autonomous-decisions.md)에 있다.
-- 글 00, 02, 03은 초안이 커밋됐다(2eb698f, bed7b5c, dbbdb71). 글 05는 풀 끔 떨림 확인이 끝난 뒤에 쓴다.
-- `pre6-capture`: 7·8단계 화면을 `Pre6`으로 다시 찍는다. 풀 끔 실행의 40\~80m 떨림을 화면으로 확인한다. Sonnet medium. 진행 중.
-- 촬영이 끝날 때까지 다른 세션과 사용자는 에디터, 빌드, Chrome을 띄우지 않는다.
+- 글 04, 05, 06: 코디네이터의 하위 에이전트 셋이 쓴다. Opus high. 진행 중. 세션 대신 하위 에이전트를 쓰는 이유는 [D28](Worklog/autonomous-decisions.md)에 있다.
+- 글 00, 02, 03은 초안이 커밋됐다(2eb698f, bed7b5c, dbbdb71).
+- 촬영은 끝났다(edc6eb0). 에디터, 빌드, Chrome의 제한은 없다.
 
 코디네이터는 세션을 띄우면 여기에 적는다. 끝난 세션은 결과를 확인하고 보관한 뒤 지운다.
 
