@@ -13,7 +13,7 @@ M0\~M5, M3b 완료(태그 `M0`\~`M5`, `M3b`). 품질 계획 Q1\~Q5 완료, Q6은
 - [ ] **Q6 마무리.** 측정·검사·요약·그래프는 끝났다([Worklog/Q6.md](Worklog/Q6.md) "총괄 묶음 Full1").
   - 문서는 `Full1` 값으로 맞췄다(README, ADR 0010\~0013 "결과", autonomous-decisions 요약, measurement.md, post-material "08". 9be3056). 표는 프레임 시간 옆에 Game p50, GPU p50을 두고 조건은 늘리지 않는다(2026-11-12 사용자 결정). [post-material.md](post-material.md)의 옛 묶음 값은 글을 쓸 때 그 절만 바꾼다. 글 재료는 그대로 쓸 수 없어 글 쓰기 전에 한 번 정리한다(2026-11-12 사용자 결정). README와 글 본문에는 `Full1` 같은 묶음 이름을 쓰지 않는다(같은 날).
   - Development 전환 점수 묶음도 끝났다(아래 "측정 결과").
-  - 사다리 여덟 단계의 움직이는 WebP가 `Saved/Capture/Pre5/`에 있다(git 밖. 1단계 1.1MB, 나머지 7.2\~7.9MB, HUD 확인). 남은 것은 사용자가 보고 레포에 넣을 파일을 고르는 일이다. 최종본을 다시 찍으면 `Pre6`부터 쓴다.
+  - 사다리 여덟 단계의 움직이는 WebP를 `Docs/figures/steps/step<N>-<조건>.webp`에 넣었다(촬영 `Pre5`, 약 51MB, Git LFS. 2026-11-12 사용자가 보고 여덟 개 모두 넣기로 결정). README와 글에는 아직 잇지 않았다. 다시 찍으면 `Pre6`부터 쓴다.
 - [ ] **글 00\~09.** [backlog.md](backlog.md) "글 대기열". 수치는 `Full1`에서만 만든다.
 
 ## 진행 중인 세션
