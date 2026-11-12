@@ -1,6 +1,6 @@
 # 글 틀과 문장 규칙
 
-글은 마일스톤이 끝난 뒤 [backlog.md](../backlog.md) "글 대기열"에서 꺼내 쓴다. 최신 main에서 쓰고, 수치는 가장 최근 총괄 묶음의 값이며 지난 단계의 화면은 `-LabStage=`로 얻는다([AGENTS.md](../../AGENTS.md) "진행 방식", [ADR-0004](../Decisions/0004-stages-as-run-modes.md), [ADR-0006](../Decisions/0006-three-measurement-tiers.md)). 형제 프로젝트의 규칙을 바탕으로 줄였다.
+글은 마일스톤이 끝난 뒤 [backlog.md](../backlog.md) "글 대기열"에서 꺼내 쓴다. 최신 main에서 쓰고, 수치는 가장 최근 총괄 묶음의 값이며 지난 단계의 화면은 `-LabStage=`로 얻는다([AGENTS.md](../../AGENTS.md) "측정과 비교"와 "진행 방식", [ADR-0004](../Decisions/0004-stages-as-run-modes.md), [ADR-0006](../Decisions/0006-three-measurement-tiers.md)). 형제 프로젝트의 규칙을 바탕으로 줄였다.
 
 글의 형식을 정한 결정과 버린 대안은 [ADR-0014](../Decisions/0014-post-format.md)에 있다. 이 문서에는 규칙만 적고 누가 언제 정했는지는 달지 않는다. 규칙을 바꾸는 결정이 생기면 ADR로 남긴다.
 
