@@ -12,13 +12,13 @@ M0\~M5, M3b 완료(태그 `M0`\~`M5`, `M3b`). 품질 계획 Q1\~Q5 완료, Q6은
 
 - [ ] **Q6 마무리.** 측정·검사·요약·그래프는 끝났다([Worklog/Q6.md](Worklog/Q6.md) "총괄 묶음 Full1").
   - 문서는 `Full1` 값으로 맞췄다(README, ADR 0010\~0013 "결과", autonomous-decisions 요약, measurement.md, post-material "08". 9be3056). 표는 프레임 시간 옆에 Game p50, GPU p50을 두고 조건은 늘리지 않는다(2026-11-12 사용자 결정). [post-material.md](post-material.md)의 옛 묶음 값은 글을 쓸 때 그 절만 바꾼다. 글 재료는 그대로 쓸 수 없어 글 쓰기 전에 한 번 정리한다(2026-11-12 사용자 결정). README와 글 본문에는 `Full1` 같은 묶음 이름을 쓰지 않는다(같은 날).
-  - Development 전환 점수 묶음([ADR-0012](Decisions/0012-ablation-switches-and-quality-metrics.md)).
-  - GIF 촬영(아래 "막힌 것"의 둘을 먼저 고친다).
+  - Development 전환 점수 묶음도 끝났다(아래 "측정 결과").
+  - 사다리 여덟 단계의 움직이는 WebP가 `Saved/Capture/Pre5/`에 있다(git 밖. 1단계 1.1MB, 나머지 7.2\~7.9MB, HUD 확인). 남은 것은 사용자가 보고 레포에 넣을 파일을 고르는 일이다. 최종본을 다시 찍으면 `Pre6`부터 쓴다.
 - [ ] **글 00\~09.** [backlog.md](backlog.md) "글 대기열". 수치는 `Full1`에서만 만든다.
 
 ## 진행 중인 세션
 
-- `capture-prep`(local_d56167d2): 촬영 준비. 러너 변경은 끝났고(c6daa5d: 화면 메시지 끔, WebP 출력) 시험 촬영 뒤 여덟 단계 촬영 중이다. Sonnet medium. 끝나면 Development 전환 점수 묶음을 잰다(2026-11-12 사용자 결정).
+없음.
 
 세션을 띄우면 세션, 작업 단위, 모델과 추론 수준, 상태를 여기에 적고, 끝나서 확인한 세션은 보관 처리하고 지운다(AGENTS.md "작업 세션은 작게 나눠 띄우고").
 
@@ -56,10 +56,11 @@ py -3 -I Scripts/plot.py --batch Full1
 - `L2-mass` 2만은 세 회차 범위가 3.35ms다. r1만 렌더 스레드의 `PrepareDistanceFieldScene`이 15.2ms였다(다른 회차 8.6, 8.8). 스태틱 메시 ISM을 쓰는 2\~5단계에만 드는 비용이라 최종 구성과 무관하다. 직접 원인은 확정하지 못했고 더 파지 않는다. 글에는 범위와 원인 후보를 함께 적는다(2026-11-12 사용자 결정).
 - 트레이스 16개의 단계별 비용 출처는 [Worklog/Q6.md](Worklog/Q6.md) "Full1 후속 분석"에 있다(L1은 이동 컴포넌트가 72%, L7의 증가는 GPU의 `BasePass`·`RenderVelocities`·`LumenSceneLighting`).
 
+- Development 전환 점수(참고, 화면 캡처 기반, `q4final` 1만 P1, 시드 셋의 중앙값. `Measurements/Full1/transition-dev/runs.csv`): 튐 평균이 최종 구성 4.63, VAT 5.22, 전환 대책 끔 7.46, 둘 다 끔 7.55다. 전환 대책의 이점은 세 시드 모두 보인다(눈에 띈 전환 3\~5% 대 9\~11%). ISKM 대 VAT의 전환 차이는 시드 범위 안이라 ISKM의 이점은 프레임으로 적는다. 엔티티 풀(`A8-pool`)의 이점은 어느 지표에서도 보이지 않았다.
+
 ## 막힌 것
 
-- 촬영 전에 고칠 것 둘(측정과 무관): 엔진의 "CsvProfiler Frame" 화면 메시지가 HUD 글자에 겹친다. 단계별 움직이는 그림은 GIF(42MB) 대신 움직이는 WebP 960폭, 15fps, 8초로 만든다(하나에 약 8MB. 2026-11-12 사용자가 표본을 보고 결정). 42MB GIF는 레포에 올리지 않는다.
-- 독자용 HUD는 Test 패키지에서 8단계 화면만 확인했다(`Measurements/Q5/shots/hud-test-step8.jpg`).
+- 단계별 움직이는 그림은 움직이는 WebP 960폭, 15fps, 8초다(2026-11-12 사용자가 표본을 보고 결정). 촬영 러너는 `Scripts/capture-full.ps1`이고 Chrome이 떠 있으면 거부한다. 42MB GIF는 레포에 올리지 않는다.
 
 ## 사용자에게 요청한 일
 
