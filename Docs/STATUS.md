@@ -29,7 +29,7 @@
 
 ## 진행 중인 세션
 
-- `post-00`, `post-02`, `post-03`: 글 00, 02, 03을 쓴다. Opus high. 진행 중.
+- 글 00, 02, 03: 코디네이터의 하위 에이전트 셋이 쓴다. Opus high. 진행 중. 새 세션은 Remote Control 중에 띄울 수 없었다([D28](Worklog/autonomous-decisions.md)).
 - `pre6-capture`: 7·8단계 화면을 `Pre6`으로 다시 찍는다. 풀 끔 실행의 40\~80m 떨림을 화면으로 확인한다. Sonnet medium. 진행 중.
 - 촬영이 끝날 때까지 다른 세션과 사용자는 에디터, 빌드, Chrome을 띄우지 않는다.
 
