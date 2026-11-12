@@ -35,7 +35,7 @@
 
 ## 진행 중인 세션
 
-- `crowdfx-lowpoly`: 입자 전용 저폴리 VAT 메시를 만든다. Opus high. 굽기 경로(`bake-vat.py --lod N`)는 끝났다. LOD3·4 굽기도 끝났다(소형 9,786 → 1,222 / 586 삼각형). 지금은 비교 스크린샷을 찍는다. **에디터가 떠 있다. 이 세션만 에디터, 빌드, Development 실행을 쓴다.** 끝나면 코디네이터가 에디터를 닫는다.
+- `crowdfx-lowpoly`: 입자 전용 저폴리 VAT 메시를 만든다. Opus high. 굽기 경로(`bake-vat.py --lod N`)는 끝났다. LOD3·4 굽기도 끝났다(소형 9,786 → 1,222 / 586 삼각형). 세션은 LOD4를 골랐다(소형 586, 대형 621 삼각형). 지금은 `NS_LabCrowd`의 네 이미터에 적용한다. **에디터가 떠 있다. 이 세션만 에디터, 빌드, Development 실행을 쓴다.** 끝나면 코디네이터가 에디터를 닫는다.
 - `asset-restore-guide`: `Scripts/restore-assets.ps1`과 `Docs/Guides/setup.md`를 썼다(c518699, e3e6024). Opus high. 실제 복구 실행은 검증하지 않았다. 검증은 `crowdfx-lowpoly`가 끝난 뒤에 한다.
 
 코디네이터는 세션을 띄우면 여기에 적는다. 끝난 세션은 결과를 확인하고 보관한 뒤 지운다.
