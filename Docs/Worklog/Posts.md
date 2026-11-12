@@ -418,6 +418,9 @@
 ### 진행
 
 - 조사 끝(성공). `full-conditions.json`의 `L6`→`L7`은 `LabCrowdFx` 0→1 하나만 다르다. 7단계는 원거리 그림자 켬(`LabFarShadow=1`)이라 엔티티 구동 입자가 그림자를 그린다(`SetupCrowdFx`, Q2.md "Q2c"). 다음은 트레이스 내보내기와 초안.
+- 트레이스 내보내기 끝(성공). `Full2trace-L6-m5bounds-*`, `Full2trace-L7-q2crowd-*`(병렬)에서 `GPU0-Graphics0`와 `GameThread`를 25\~75초로 한 번에 하나씩 뽑았다(`%TEMP%\horde-trace\F2-trace-L6-m5bounds-GPU.csv`, `-GT.csv`, `F2-trace-L7-q2crowd-GPU.csv`, `-GT.csv`). 다음은 초안.
+- 초안 끝(성공). `README.md`. 다음은 그림.
+- 그림 끝(성공). `make-figures.py`가 SVG 다섯 개(`ncf-summary`, `-problem`, `-principle`, `-delta`, `-ablation`)를 만든다. 다음은 측정 기록.
 
 ## 08 품질 올리기(2026-11-13)
 
@@ -432,6 +435,8 @@
 
 - 02번 끝(성공). 직렬 `Full2traceser-L2-mass`의 게임 스레드(구간 25\~75초, 프레임 5,038): 프레임 9.92ms, Mass PrePhysics 3.01, `EndVisualChanges` 2.52, 가장 긴 Processor `MassSmoothOrientationProcessor` 0.93, `MassUpdateISMProcessor` 0.57ms. `UCharacterMovementComponent_TickComponent`는 없다. README의 주석 자리를 값 문장으로 바꿨다. 본문 주장은 그대로다.
 - 04번 끝(성공). 직렬 `Full2traceser-L4-mass`(프레임 5,674)와 `L3-vatcull`(6,412) 게임 스레드: 메시 틱 1.05ms(257번), 평가 완료 0.83, `LabActorSyncProcessor` 0.51, `Sync_RenderingThread` 3단계 2.75 → 4단계 0.005, `Tick_Engine` 4.68 → 8.37ms. 메시 틱 호출 수 257이 액터 평균 373보다 작아 본문에 "액터 수와 같다"를 쓰지 않았다(원인 미확인).
+- 05번 끝(성공). 직렬 `Full2traceser-L4-mass`(프레임 5,674)와 `L5-m4offpool`(6,286) 게임 스레드: 엔진 이동·조향 넷의 합 1.68 → 0.67ms(39.7%, 예상 39%), `LabOffMoveProcessor` 0.006ms. 본문 주장은 그대로다. ISKM 트랙 누수의 공개 이슈 문장을 Epic 개발자 포럼 링크 문장으로 바꿨다(글 내용은 읽지 않았고 상태는 적지 않았다).
+- 06번 끝(성공). 병렬 `Full2trace-L5-m4offpool`(프레임 6,313)과 `L6-m5bounds`(6,515) 렌더 스레드 `FSceneRenderer::PrepareDistanceFieldScene` Excl 1.41 → 0.04ms, GPU `GlobalDistanceFieldUpdate` 0.30 → 0.003ms. 본문 주장은 그대로다. 트랙 누수 문장을 Epic 개발자 포럼 링크 문장으로 바꿨다(첫째 빈틈만. 둘째 빈틈의 이슈는 찾지 못했다). 게임 스레드 쪽 선택 항목(직렬)은 뽑지 않았다.
 
 ## 09 총괄(2026-11-13)
 
@@ -440,4 +445,3 @@
 ### 진행(09)
 
 - 조사 끝(성공). 사다리 여덟 행, 빼 보기 열 행과 `S8-col`, 최대 개체 수 CSV, `Pool1`, `Ref1` 값을 CSV에서 다시 읽어 브리프의 값과 맞음을 확인했다. README 그림 여섯 개의 글자를 읽었다(`ablation.svg`에는 `S8-col`이 없다). 다음은 초안.
-- 05번 끝(성공). 직렬 `Full2traceser-L4-mass`(프레임 5,674)와 `L5-m4offpool`(6,286) 게임 스레드: 엔진 이동·조향 넷의 합 1.68 → 0.67ms(39.7

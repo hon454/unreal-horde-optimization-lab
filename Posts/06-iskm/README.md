@@ -136,7 +136,7 @@ if (!Component.GetPrimitiveBoundsOverride().IsValid)
 
 ### 엔진이 챙기지 않는 것: 트랙
 
-Mass의 ISKM 경로에는 트랙을 다루는 빈틈이 둘 있다. 두 문제를 다룬 공개 이슈는 찾지 못했고, 엔진 소스에서 자리를 확인했다.
+Mass의 ISKM 경로에는 트랙을 다루는 빈틈이 둘 있다. 첫째 빈틈과 같은 문제를 다룬 글이 [Epic 개발자 포럼](https://forums.unrealengine.com/t/mass-crowds-using-skinnedmeshinstance-leak-gpu-memory-every-wave-of-spawned-and-killed-entities-permanently-grows-the-animation-track-pool-5-8/2742508)에 있다. 둘째 빈틈을 다룬 공개 이슈는 찾지 못했다. 두 자리 모두 엔진 소스에서 확인했다.
 
 `Engine/Plugins/Runtime/MassGameplay/Source/MassRepresentation/Private/MassVisualizationComponent.cpp`, `UMassVisualizationComponent::EndVisualChanges`와 `ProcessRemovesForComponent`
 
@@ -193,11 +193,7 @@ if (bRangeChanged || Track.AppliedState != int8(Anim.State) || Track.AppliedStar
 
 호드 총수 3만에서는 GPU가 4.97ms 줄고 게임 스레드가 1.13ms 늘었다. 병목이 게임 스레드라 3만의 프레임 시간은 0.615ms 길어졌다. 그래서 60fps를 지키는 최대 개체 수는 29,799다. 5단계는 잰 가장 큰 3만에서도 프레임 시간의 느린 쪽 5% 경계가 16.7ms 안이었다. 탑뷰 카메라에서는 GPU가 병목이라 1만의 프레임 시간이 2.35ms 줄었다.
 
-<!--
-코디네이터가 찍을 Insights 화면(measurements.md "코디네이터가 찍을 Insights 화면" 1번). 찍으면 주석을 풀고 캡션의 값을 채운다.
-![5단계와 6단계의 디스턴스 필드 장면 갱신. 호드 총수 1만, 오브 시점 카메라, 트레이스 한 회](images/iskm-insights-distance-field.jpg)
-캡션 초안: 위는 5단계, 아래는 6단계의 렌더 스레드다. 표시한 `PrepareDistanceFieldScene`이 5단계에는 프레임마다 OOms 있고, 6단계에는 거의 없다.
--->
+트레이스에서 렌더 스레드의 프레임 평균을 읽었다(Unreal Insights, 호드 총수 1만, 오브 시점 카메라, 한 회). 디스턴스 필드 장면을 갱신하는 `FSceneRenderer::PrepareDistanceFieldScene`은 5단계에서 프레임당 1.41ms였고, 6단계에서는 0.04ms다. GPU에서 디스턴스 필드를 갱신하는 `GlobalDistanceFieldUpdate`도 프레임당 0.30ms에서 0.003ms로 줄었다.
 
 남은 비용은 개체마다 게임 스레드가 하는 일이다. 엔진은 ISKM 인스턴스마다 트랙 맵을 찾고 재생 상태를 읽어 적는다. VAT가 쓰는 ISM 경로에는 없는 일이고, 끌 설정도 없다.
 

@@ -13,7 +13,7 @@
 | 빼 보기 조건 | `L8-q4final`(`-LabStage=M5 -LabVariant=q4final`), `A8-iskm`(+ `-LabIskm=0`, `LabTechIskm` 0, `LabIskmBounds` 0), `A8-bounds`(+ `-LabFixedBounds=0`, `LabTechFixedBounds` 0, `LabIskmBounds` 0). 인자와 기대값은 `Scripts/full-conditions.json` |
 | 요약 파일 | [최종 측정의 요약 표](../../Measurements/Full2/summary.csv)(세 회차 중앙값과 범위), [실행별 값](../../Measurements/Full2/runs.csv)(회차별 한 행) |
 | 60fps를 지키는 최대 개체 수(`N@16.7ms`) | [최대 개체 수 CSV](../../Docs/figures/full2/full-n-at-60fps.csv)(`Scripts/plot.py`가 측정 N 사이를 로그 보간) |
-| 트레이스 | 본문과 그림에 트레이스 값을 쓰지 않았다. 아래 "코디네이터가 찍을 Insights 화면" |
+| 트레이스 | 본문 "결과"의 트레이스 문단 값은 아래 "트레이스 값"이다. 최종 측정 빌드의 병렬 트레이스 한 회씩이다 |
 
 6단계의 구현(5단계와 다른 곳):
 
@@ -185,7 +185,7 @@
 | AnimToTexture는 스켈레탈 메시의 LOD 하나만 정적 메시로 옮긴다 | `Plugins/Experimental/AnimToTexture/Source/AnimToTextureEditor/Private/AnimToTextureBPLibrary.cpp:851-868` "Copy Single LOD" |
 | ASTPD의 쿡 데이터(애니메이션 바운드) | `ENG/Private/Animation/AnimSequenceTransformProviderData.cpp:716-735` `Serialize`, 쿡할 때 `CacheDerivedData`. 굽는 에디터 단계가 따로 없다는 근거 |
 
-공개 이슈: 트랙 누수, 클립 번호 조건, 모션 블러 번짐을 다룬 이슈 링크는 [references.md](../../Docs/Reference/references.md)와 [engine-notes.md](../../Docs/Reference/engine-notes.md)에 없다. 이 글을 쓰며 웹 검색은 하지 않았다. [references.md](../../Docs/Reference/references.md) "포럼 스레드"에 같은 누수를 다룬 Epic 포럼 글 "Mass crowds using SkinnedMeshInstance leak GPU memory"(2026-06)가 제목만 적혀 있고 주소가 없다. 주소를 확인하지 못해 본문에 링크를 달지 않았다. [engine-notes.md](../../Docs/Reference/engine-notes.md) 3절 "ISKM 트랙 풀 누수" 행의 파일 위치(`MassVisualizationComponent.cpp` 773·864·1156)는 이 글의 확인과 같다.
+공개 이슈: 트랙 누수(첫째 빈틈)를 다룬 글이 Epic 개발자 포럼에 있다: https://forums.unrealengine.com/t/mass-crowds-using-skinnedmeshinstance-leak-gpu-memory-every-wave-of-spawned-and-killed-entities-permanently-grows-the-animation-track-pool-5-8/2742508 ("Mass crowds using SkinnedMeshInstance leak GPU memory", 5.8). 글의 내용은 읽지 않았고 해결 여부는 적지 않았다. 본문은 이 주소로 가는 링크 문장만 둔다. 클립 번호 조건(둘째 빈틈)과 모션 블러 번짐을 다룬 이슈 링크는 [references.md](../../Docs/Reference/references.md)와 [engine-notes.md](../../Docs/Reference/engine-notes.md)에 없고, 웹 검색은 하지 않았다. [engine-notes.md](../../Docs/Reference/engine-notes.md) 3절 "ISKM 트랙 풀 누수" 행의 파일 위치(`MassVisualizationComponent.cpp` 773·864·1156)는 이 글의 확인과 같다.
 
 ### 본문에 넣은 발췌
 
@@ -204,17 +204,25 @@
 
 발췌 줄에는 마일스톤 이름이 든 줄 끝 주석이 없다(`:181` 주석은 발췌 밖이다). `LabCrowdSubsystem.cpp:187`의 줄 끝 주석은 엔진 줄 번호(`:1323-1325`)만 가리켜 뺐다.
 
-## 코디네이터가 찍을 Insights 화면
+## 트레이스 값
 
-본문의 주석 처리된 이미지 자리 하나다. Insights를 띄우면 아래를 찍어 `images/iskm-insights-distance-field.jpg`(품질 90)로 넣고, 본문 주석을 풀고 캡션의 `OO`를 읽은 값으로 채운다. 읽은 값과 방법은 이 절 아래에 표로 더한다.
+본문 "결과"의 트레이스 문단 값이다. Insights 화면은 찍지 않고 명령줄 내보내기로 뽑았다.
 
-1. **디스턴스 필드 장면 갱신이 사라진 것**(본문 "결과", [posting.md](../../Docs/Guides/posting.md) "Unreal Insights" 06번).
-   - 트레이스: `Saved/Traces/Full2trace-L5-m4offpool-N10000-P1-r1.utrace`와 `Full2trace-L6-m5bounds-N10000-P1-r1.utrace`(병렬, 같은 패키지 08e45f2).
-   - 구간: 25\~75초(03번 글과 같은 창). 화면은 같은 시각의 몇 프레임을 렌더 스레드 트랙으로 보인다.
-   - 타이머: 렌더 스레드 `FSceneRenderer::PrepareDistanceFieldScene`(Excl). 함께 읽을 것: GPU `GlobalDistanceFieldUpdate`·`DistanceFields`, `BasePass`, `RenderVelocities`, `ShadowDepths`.
-   - 읽을 값: 각 타이머의 창 안 합(초) × 1000 ÷ 창 안 `FEngineLoop::Tick` 수 = 프레임당 ms, 5단계와 6단계.
-2. **(선택) 게임 스레드 쪽.** `Full2traceser-L5-m4offpool-N10000-P1-r1.utrace`와 `Full2traceser-L6-m5bounds-N10000-P1-r1.utrace`(직렬). 타이머 `LabVatISMProcessor_*` 대 `LabIskmProcessor_*`, `MassVisualizationComponent EndVisualChanges`, `UWorld_SendAllEndOfFrameUpdates`와 그 안의 `ParallelFor.Wait`. 본문 "남은 비용"(엔진이 인스턴스마다 트랙을 찾고 상태를 읽는다)의 크기를 보이는 값이다. 지금 본문은 소스 확인만 적었다. 이 값을 쓰면 본문 한 문장과 그림 자리를 더한다.
-   - 고정 바운드가 없는 최종 측정 트레이스는 없다(`A8-bounds`는 트레이스를 뜨지 않았다). 그래서 "틀렸던 가설"의 프레임 끝 대기는 옛 트레이스의 방향으로만 적었다.
+| 항목 | 값 |
+| --- | --- |
+| 트레이스 | `Saved/Traces/Full2trace-L5-m4offpool-N10000-P1-r1.utrace`(5단계), `Full2trace-L6-m5bounds-N10000-P1-r1.utrace`(6단계). 병렬, 같은 패키지 08e45f2, 저장소 밖 |
+| 내보낸 표 | `%TEMP%\horde-trace\F2-trace-L5-m4offpool-RT.csv`, `F2-trace-L6-m5bounds-RT.csv`(스레드 `RenderThread*`), `-GPU.csv`(`GPU0-Graphics0`, 5단계만 새로 뽑음), `-GT.csv`(프레임 수). `Scripts/trace-export.ps1 -Command TimerStatistics`, 구간 25\~75초, 저장소 밖 |
+| 프레임 수 | 5단계 6,313, 6단계 6,515(`FEngineLoop::Tick` 횟수) |
+| 식 | 타이머의 합(초) × 1000 ÷ 프레임 수 = 프레임당 ms (03번 글과 같다) |
+
+| 본문 값 | 정밀한 값(5단계 / 6단계) | 타이머 | 합(초) |
+| --- | --- | --- | --- |
+| `PrepareDistanceFieldScene` 1.41 / 0.04ms | 1.4124 / 0.0368 | 렌더 스레드 `FSceneRenderer::PrepareDistanceFieldScene` Excl(횟수 6,312 / 6,514) | 8.916218 / 0.239721 |
+| `GlobalDistanceFieldUpdate` 0.30 / 0.003ms | 0.3022 / 0.0026 | GPU `GlobalDistanceFieldUpdate` Excl(횟수 6,312 / 135) | 1.907774 / 0.016782 |
+
+참고(본문에 쓰지 않았다): `PrepareDistanceFieldScene` Incl 1.9154 / 0.0600ms. GPU `ShadowDepths` Excl 1.5667 / 1.0911, `BasePass` 0.7552 / 0.2481, `RenderVelocities(%s)` 0.5843 / 0.1851ms. 트레이스를 켠 한 회라 `summary.csv`의 값과 직접 견주지 않는다. GPU 값은 큐 여럿의 합이라 더해도 GPU 프레임 시간이 되지 않는다.
+
+게임 스레드 쪽 직렬 트레이스(`Full2traceser-L5-*`, `Full2traceser-L6-*`)의 `LabVatISMProcessor`·`LabIskmProcessor` 값은 뽑지 않았다. 본문 "남은 비용"은 소스 확인만 적었다.
 
 ## 그림
 
@@ -248,7 +256,7 @@ SVG 다섯 개는 [make-figures.py](make-figures.py)가 만든다(저장소 루�
 
 ## 확인하지 않은 것
 
-- 최종 측정 트레이스의 값. 디스턴스 필드 비용이 실제로 얼마나 빠졌는지, 게임 스레드가 늘어난 곳이 어느 타이머인지는 Insights 화면을 찍은 뒤에 적는다. 본문은 엔진 소스로 확인한 경로만 적었다.
+- 게임 스레드가 늘어난 곳이 어느 타이머인지. 렌더 스레드의 디스턴스 필드 값은 위 "트레이스 값"에 있지만, 게임 스레드 쪽(직렬 트레이스)은 뽑지 않았다. 본문은 엔진 소스로 확인한 경로만 적었다.
 - 고정 바운드를 뺀 증가분 가운데 게임 스레드 밖의 몫(0.771 − 0.299)이 프레임 끝 바운드 계산인지. `A8-bounds` 트레이스가 없다.
 - 2만에서 옛 고정 바운드 묶음과 최종 측정의 6단계 게임 스레드가 갈린 이유.
 - 최종 측정 패키지의 ASTPD에 애니메이션 바운드가 있는지. Test 구성은 로그가 없다(`lab_iskm … bounds=`가 남지 않는다). 없으면 `CalcBounds`는 메시 바운드로 같은 반복을 하므로 본문의 설명(인스턴스 반복)은 그대로다.
