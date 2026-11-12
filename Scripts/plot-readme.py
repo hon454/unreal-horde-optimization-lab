@@ -52,6 +52,24 @@ METRICS = [("프레임 시간", "frame_p50_ms", DARK), ("게임 스레드", "gam
            ("렌더 스레드", "render_p50_ms", TEAL), ("GPU", "gpu_p50_ms", PINK)]
 BOTTLENECK_COL = {"game": "game_p50_ms", "render": "render_p50_ms", "gpu": "gpu_p50_ms"}
 
+# Scenario figure (scenario.svg). Not measured values: the fixed scenario in the source, in metres and seconds.
+MAP_R = 500           # LabConfig.h FLabScenario::MapRadius (50000 cm)
+RESPAWN_IN = 490      # FLabScenario::MapRadius - RespawnRingWidth (1000 cm); LabCrowdSpawner.cpp respawn radius
+ZONE_R = 8            # FLabScenario::ZoneRadius (800 cm); also the inner edge of the initial spawn radius
+ZONE_DPS = (100, 300) # FLabScenario::ZoneDpsEdge, ZoneDpsCenter
+HEALTH = (60, 240)    # FLabScenario::HealthMin, HealthMax (FLabConfig::HealthFor, uniform per serial)
+SPEED = 3             # FLabScenario::MoveSpeed (300 cm/s)
+SNIPE_EVERY, SNIPE_K = 2, 5            # FLabScenario::SnipeInterval, SnipeCount
+SNIPE_EDGES = (30, 80, 200)            # LabSnipe.h FLabSnipeBands::Edges (last edge is the map radius)
+SNIPE_COUNTS = (1, 2, 2)               # FLabSnipeBands::Counts
+LARGE_EVERY = 10      # LabUnitAssets.h FLabUnitTypes::IsLarge: serial % 10 == 0 -> 10 % large
+P1_BACK, P1_HEIGHT, P1_PERIOD = 15, 9, 60  # FLabScenario::OrbViewBack, OrbViewHeight, OrbViewPeriod (s per turn)
+P2_HEIGHT = 100       # FLabScenario::TopDownHeight (10000 cm), straight down (LabCameraRig.cpp Apply)
+FOV_H = 90            # engine default UCameraComponent::FieldOfView (CameraComponent.cpp:78); ALabCameraRig keeps it
+SEED = 20261106       # FLabConfig::Seed; only seeds the drawn dots here
+DOTS = 700            # dots drawn (illustration, not N)
+PURPLE = "#7c3aed"
+
 
 def load_summary():
     rows = {}
@@ -307,7 +325,169 @@ def transition():
     write("transition.svg", svg(y + 26, o))
 
 
+# ---------- 5. scenario (top-down sketch) ----------
+def scenario():
+    import math, random
+    o = ['<defs>'
+         f'<marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">'
+         f'<path d="M0 0 L10 5 L0 10 z" fill="{SUB}"/></marker>'
+         f'<marker id="arrb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">'
+         f'<path d="M0 0 L10 5 L0 10 z" fill="{BLUE}"/></marker>'
+         '</defs>']
+    y = title(o, "시나리오: 위에서 내려다본 맵",
+              ["사방에서 오브로 걸어오는 호드. 플레이어 캐릭터는 없고 카메라는 고정 위치 둘 중 하나다"])
+
+    def pol(cx, cy, r, deg):  # screen angle: 0 = right, 90 = up
+        a = math.radians(deg)
+        return cx + r * math.cos(a), cy - r * math.sin(a)
+
+    # ---- Panel A: the whole map to scale ----
+    CX, CY, RP = 262, y + 272, 220
+    s = RP / MAP_R
+    VIEW = 60   # P1 looks this way in the sketch (it turns once a minute)
+    o.append(f'<text x="32" y="{y + 42}" font-size="17" font-weight="700">맵 전체(반경 {MAP_R}m)</text>')
+    o.append(f'<circle cx="{CX}" cy="{CY}" r="{RP}" fill="{CARD}" stroke="{GRAY}" stroke-width="1.5"/>')
+    # P1 field of view (horizontal), from the orb outward
+    a0, a1 = VIEW - FOV_H / 2, VIEW + FOV_H / 2
+    x0, y0 = pol(CX, CY, RP, a0)
+    x1, y1 = pol(CX, CY, RP, a1)
+    o.append(f'<path d="M{CX} {CY} L{x0:.1f} {y0:.1f} A{RP} {RP} 0 0 0 {x1:.1f} {y1:.1f} Z" fill="{BLUE}" fill-opacity="0.10" stroke="{BLUE}" stroke-opacity="0.5" stroke-dasharray="4 4"/>')
+    # respawn ring
+    rr = (RESPAWN_IN + MAP_R) / 2 * s
+    o.append(f'<circle cx="{CX}" cy="{CY}" r="{rr:.1f}" fill="none" stroke="{AMBER}" stroke-opacity="0.45" stroke-width="{(MAP_R - RESPAWN_IN) * s:.1f}"/>')
+    # dots: radius uniform in [ZONE_R, MAP_R] -> density ~ 1/r, every LARGE_EVERY-th is large
+    rnd = random.Random(SEED)
+    dots = []
+    for i in range(DOTS):
+        r = rnd.uniform(ZONE_R, MAP_R)
+        a = rnd.uniform(0, 360)
+        dots.append((i, r, a))
+    for i, r, a in dots:
+        x, yy = pol(CX, CY, r * s, a)
+        if i % LARGE_EVERY == 0:
+            o.append(f'<circle cx="{x:.1f}" cy="{yy:.1f}" r="3.2" fill="{DARK}"/>')
+        else:
+            o.append(f'<circle cx="{x:.1f}" cy="{yy:.1f}" r="1.8" fill="{GRAY}"/>')
+    # snipe rings and shots: in view, per distance band, the first dots in seeded order stand in for the smallest hash
+    for e in SNIPE_EDGES:
+        o.append(f'<circle cx="{CX}" cy="{CY}" r="{e * s:.1f}" fill="none" stroke="{SUB}" stroke-width="1" stroke-dasharray="3 3"/>')
+    edges = list(SNIPE_EDGES) + [MAP_R + 1]
+    for b, k in enumerate(SNIPE_COUNTS):
+        picks = [d for d in dots if edges[b] <= d[1] < edges[b + 1] and a0 + 6 < d[2] < a1 - 6][:k]
+        for _, r, a in picks:
+            x, yy = pol(CX, CY, r * s, a)
+            o.append(f'<line x1="{CX}" y1="{CY}" x2="{x:.1f}" y2="{yy:.1f}" stroke="{PINK}" stroke-width="1.6"/>')
+            o.append(f'<circle cx="{x:.1f}" cy="{yy:.1f}" r="5" fill="none" stroke="{PINK}" stroke-width="2"/>')
+    # walking in
+    for a in (165, 215, 260, 320):
+        xa, ya = pol(CX, CY, 455 * s, a)
+        xb, yb = pol(CX, CY, 330 * s, a)
+        o.append(f'<line x1="{xa:.1f}" y1="{ya:.1f}" x2="{xb:.1f}" y2="{yb:.1f}" stroke="{SUB}" stroke-width="2" marker-end="url(#arr)"/>')
+    # orb
+    o.append(f'<circle cx="{CX}" cy="{CY}" r="5" fill="{PURPLE}"/>')
+    # ruler under the disc
+    ry = CY + RP + 26
+    o.append(f'<line x1="{CX}" y1="{ry}" x2="{CX + RP}" y2="{ry}" stroke="{SUB}"/>')
+    ticks = [(0, 1), (SNIPE_EDGES[0], 2), (SNIPE_EDGES[1], 1), (SNIPE_EDGES[2], 1), (MAP_R, 1)]
+    for d, row in ticks:
+        x = CX + d * s
+        o.append(f'<line x1="{x:.1f}" y1="{ry - 5}" x2="{x:.1f}" y2="{ry + 5 + (row - 1) * 18}" stroke="{SUB}"/>')
+        t = f"{d}m" if d == MAP_R else str(d)
+        o.append(f'<text x="{x:.1f}" y="{ry + 22 + (row - 1) * 18}" text-anchor="middle" font-size="16" fill="{SUB}">{t}</text>')
+    o.append(f'<text x="{CX - 12}" y="{ry + 5}" text-anchor="end" font-size="16" fill="{SUB}">오브에서 거리</text>')
+
+    # legend column
+    LX = 510
+    ly = y + 82
+
+    def item(mark, head, lines):
+        nonlocal ly
+        o.append(mark(LX + 10, ly - 5))
+        o.append(f'<text x="{LX + 28}" y="{ly}" font-size="16" font-weight="700">{esc(head)}</text>')
+        for j, ln in enumerate(lines):
+            o.append(f'<text x="{LX + 28}" y="{ly + 21 * (j + 1)}" font-size="16" fill="{SUB}">{esc(ln)}</text>')
+        ly += 21 * (len(lines) + 1) + 14
+
+    item(lambda x, yy: f'<circle cx="{x}" cy="{yy}" r="2.5" fill="{GRAY}"/>', "근접 미니언 90%", [])
+    item(lambda x, yy: f'<circle cx="{x}" cy="{yy}" r="4" fill="{DARK}"/>', "시즈 미니언 10%",
+         [f"둘 다 {SPEED}m/s로 오브에 직진", f"체력은 개체마다 {HEALTH[0]}–{HEALTH[1]}"])
+    item(lambda x, yy: f'<circle cx="{x}" cy="{yy}" r="5" fill="{PURPLE}"/>', "오브(맵 중앙)", [])
+    item(lambda x, yy: f'<g><line x1="{x - 8}" y1="{yy + 5}" x2="{x + 6}" y2="{yy - 6}" stroke="{PINK}" stroke-width="2"/>'
+                       f'<circle cx="{x + 6}" cy="{yy - 6}" r="4" fill="none" stroke="{PINK}" stroke-width="2"/></g>',
+         f"저격: {SNIPE_EVERY}초마다 {SNIPE_K}명", ["화면 안의 개체만",
+                                      f"{SNIPE_EDGES[0]}–{SNIPE_EDGES[1]}m {SNIPE_COUNTS[0]}명, {SNIPE_EDGES[1]}–{SNIPE_EDGES[2]}m {SNIPE_COUNTS[1]}명,",
+                                      f"{SNIPE_EDGES[2]}m 밖 {SNIPE_COUNTS[2]}명"])
+    item(lambda x, yy: f'<rect x="{x - 8}" y="{yy - 8}" width="16" height="16" rx="3" fill="{BLUE}" fill-opacity="0.15" stroke="{BLUE}" stroke-dasharray="3 3"/>',
+         f"오브 시점 화면(가로 {FOV_H}°)", ["1분에 한 바퀴 돈다"])
+    item(lambda x, yy: f'<rect x="{x - 8}" y="{yy - 4}" width="16" height="8" fill="{AMBER}" fill-opacity="0.45"/>',
+         f"재생성 링 {RESPAWN_IN}–{MAP_R}m", ["죽은 만큼 여기서 다시 생겨", "총수가 그대로다"])
+    o.append(f'<text x="{LX}" y="{ly + 6}" font-size="16" fill="{SUB}">점은 처음 배치: 거리마다 같은 수라</text>')
+    o.append(f'<text x="{LX}" y="{ly + 27}" font-size="16" fill="{SUB}">밀도가 1/거리로 준다</text>')
+
+    # ---- Panel B: the middle, enlarged ----
+    y = ry + 70
+    o.append(f'<line x1="32" y1="{y - 24}" x2="{W - 32}" y2="{y - 24}" stroke="{LINE}"/>')
+    o.append(f'<text x="32" y="{y + 6}" font-size="17" font-weight="700">가운데 확대(오브 둘레 20m)</text>')
+    BX, BY, SB = 400, y + 170, 6.0  # px per metre
+    o.append(f'<circle cx="{BX}" cy="{BY}" r="{20 * SB}" fill="{CARD}" stroke="{GRAY}" stroke-width="1.5"/>')
+    # P1 view cone from the camera, 15 m behind, looking through the orb
+    CAMX, CAMY = BX - P1_BACK * SB, BY
+    cone = 20 * SB + P1_BACK * SB
+    cx0, cy0 = pol(CAMX, CAMY, cone, -FOV_H / 2)
+    cx1, cy1 = pol(CAMX, CAMY, cone, FOV_H / 2)
+    o.append(f'<clipPath id="zc"><circle cx="{BX}" cy="{BY}" r="{20 * SB}"/></clipPath>')
+    o.append(f'<path clip-path="url(#zc)" d="M{CAMX} {CAMY} L{cx0:.1f} {cy0:.1f} L{cx1:.1f} {cy1:.1f} Z" fill="{BLUE}" fill-opacity="0.10" stroke="{BLUE}" stroke-opacity="0.5" stroke-dasharray="4 4"/>')
+    # P1 orbit
+    o.append(f'<circle cx="{BX}" cy="{BY}" r="{P1_BACK * SB}" fill="none" stroke="{BLUE}" stroke-width="1.5" stroke-dasharray="6 5"/>')
+    ox, oy = pol(BX, BY, P1_BACK * SB, 145)  # yaw grows clockwise seen from above (UE is left-handed)
+    o.append(f'<path d="M{CAMX} {CAMY} A{P1_BACK * SB} {P1_BACK * SB} 0 0 1 {ox:.1f} {oy:.1f}" fill="none" stroke="{BLUE}" stroke-width="2.5" marker-end="url(#arrb)"/>')
+    # damage zone and orb
+    o.append(f'<circle cx="{BX}" cy="{BY}" r="{ZONE_R * SB}" fill="{PURPLE}" fill-opacity="0.18" stroke="{PURPLE}" stroke-width="1.5"/>')
+    o.append(f'<circle cx="{BX}" cy="{BY}" r="6" fill="{PURPLE}"/>')
+    # top-down camera straight above the orb
+    o.append(f'<circle cx="{BX}" cy="{BY}" r="11" fill="none" stroke="{TEAL}" stroke-width="2.5"/>')
+    # minions walking into the zone
+    for a, r0 in ((75, 18.5), (110, 17), (300, 18), (255, 16.5), (20, 17.5)):
+        xa, ya = pol(BX, BY, r0 * SB, a)
+        xb, yb = pol(BX, BY, (r0 - 5) * SB, a)
+        o.append(f'<line x1="{xa:.1f}" y1="{ya:.1f}" x2="{xb:.1f}" y2="{yb:.1f}" stroke="{SUB}" stroke-width="1.5" marker-end="url(#arr)"/>')
+        o.append(f'<circle cx="{xa:.1f}" cy="{ya:.1f}" r="3.5" fill="{GRAY}"/>')
+    # camera icon
+    o.append(f'<rect x="{CAMX - 9}" y="{CAMY - 7}" width="18" height="14" rx="2" fill="{BLUE}"/>')
+    o.append(f'<path d="M{CAMX + 9} {CAMY - 4} L{CAMX + 15} {CAMY - 8} L{CAMX + 15} {CAMY + 8} L{CAMX + 9} {CAMY + 4} Z" fill="{BLUE}"/>')
+    # labels, left: P1 camera
+    label_l = [("오브 시점 카메라", BLUE), (f"오브 뒤 {P1_BACK}m, 높이 {P1_HEIGHT}m", SUB),
+               ("오브 너머 바깥을 보며", SUB), ("오브 둘레를 돈다", SUB)]
+    for j, (t, c) in enumerate(label_l):
+        o.append(f'<text x="32" y="{BY - 40 + 21 * j}" font-size="16"{" font-weight=" + chr(34) + "700" + chr(34) if j == 0 else ""} fill="{c}">{esc(t)}</text>')
+    o.append(f'<line x1="196" y1="{BY - 4}" x2="{CAMX - 14}" y2="{CAMY}" stroke="{BLUE}" stroke-width="1"/>')
+    # labels, right: zone and top-down camera
+    RX = 548
+    o.append(f'<text x="{RX}" y="{BY - 70}" font-size="16" font-weight="700" fill="{PURPLE}">피해 범위 {ZONE_R}m</text>')
+    o.append(f'<text x="{RX}" y="{BY - 49}" font-size="16" fill="{SUB}">초당 {ZONE_DPS[0]}(가장자리)–</text>')
+    o.append(f'<text x="{RX}" y="{BY - 28}" font-size="16" fill="{SUB}">{ZONE_DPS[1]}(중심) 피해</text>')
+    zx, zy = pol(BX, BY, ZONE_R * SB, 35)
+    o.append(f'<line x1="{RX - 6}" y1="{BY - 75}" x2="{zx:.1f}" y2="{zy:.1f}" stroke="{PURPLE}" stroke-width="1"/>')
+    o.append(f'<text x="{RX}" y="{BY + 34}" font-size="16" font-weight="700" fill="{TEAL}">탑뷰 카메라</text>')
+    o.append(f'<text x="{RX}" y="{BY + 55}" font-size="16" fill="{SUB}">오브 바로 위 {P2_HEIGHT}m에서</text>')
+    o.append(f'<text x="{RX}" y="{BY + 76}" font-size="16" fill="{SUB}">곧장 내려다본다</text>')
+    o.append(f'<line x1="{RX - 6}" y1="{BY + 29}" x2="{BX + 10}" y2="{BY + 5}" stroke="{TEAL}" stroke-width="1"/>')
+    # ruler
+    ry = BY + int(20 * SB) + 26
+    o.append(f'<line x1="{BX}" y1="{ry}" x2="{BX + 20 * SB}" y2="{ry}" stroke="{SUB}"/>')
+    for d in (0, ZONE_R, P1_BACK, 20):
+        x = BX + d * SB
+        o.append(f'<line x1="{x:.1f}" y1="{ry - 5}" x2="{x:.1f}" y2="{ry + 5}" stroke="{SUB}"/>')
+        o.append(f'<text x="{x:.1f}" y="{ry + 22}" text-anchor="middle" font-size="16" fill="{SUB}">{d}{"m" if d == 20 else ""}</text>')
+    o.append(f'<text x="{BX - 12}" y="{ry + 5}" text-anchor="end" font-size="16" fill="{SUB}">오브에서 거리</text>')
+    y = ry + 44
+    o.append(f'<line x1="32" y1="{y}" x2="{W - 32}" y2="{y}" stroke="{LINE}"/>')
+    o.append(f'<text x="32" y="{y + 28}" font-size="16" fill="{SUB}">두 그림 모두 거리는 축척대로다. 개체 점은 실제 수보다 적게 그렸다.</text>')
+    write("scenario.svg", svg(y + 50, o))
+
+
 if __name__ == "__main__":
+    scenario()
     ladder()
     max_entities()
     ablation()

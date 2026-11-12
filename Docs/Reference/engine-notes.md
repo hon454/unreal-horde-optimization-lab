@@ -335,3 +335,9 @@
 | MCP로 배열(DI) 사용자 변수를 만들 수 없다 | `FNiagaraParameterStore::SetParameter_InternalUseOnly`가 데이터 인터페이스 키를 받으면 오류 로그만 남기고 돌아온다. MCP `AddUserVariables`로 배열 변수를 만들면 오류 없이 아무것도 생기지 않은 까닭이다. 대신 다이내믹 입력의 배열 입력을 사용자 변수에 연결하면(`SetStackInputData`) DI 인스턴스와 변수가 함께 생긴다 | `NI/Private/NiagaraParameterStore.cpp:1457-1461` |
 | 이미터 로드 때 보간 스폰 불일치 경고 | 로드 때 이미터의 `InterpolatedSpawnMode`와 스폰 스크립트 종류가 다르면 엔진이 메모리에서 `NoInterpolation`으로 맞추고 "Disabling interpolated spawn…" 경고를 남긴다. MCP `SetEmitterData`는 `PostEditChange`를 부르지 않아 스폰 스크립트 용도가 템플릿 값으로 저장돼 이 경고가 생겼다. 동작은 같고, 에디터에서 한 번 다시 저장하면 없어진다고 Q2 세션이 적었다(쿡된 빌드에서의 경고 여부는 보지 않았다) | `NI/Private/NiagaraEmitter.cpp:859-879`(Q2.md는 861-878로 적었다) |
 | 화면 왼쪽 위 "CsvProfiler frame: N" 메시지 | 비출시 구성에서 csv 캡처 중(`IsCapturing`)이고 `bShowScreenMessages`(= `!GIsHighResScreenshot && !GIsDumpingMovie && GAreScreenMessagesEnabled`)이거나 `csv.AlwaysShowFrameCount`(기본 false)일 때 그린다. 캡처를 끄지 않고 `DisableAllScreenMessages` 명령(`-ExecCmds=DisableAllScreenMessages`)으로 `GAreScreenMessagesEnabled`를 꺼서 없앤다. 글자는 소문자 "frame"이다. HUD(`AHUD::DrawHUD`)는 이 플래그와 무관하다. Test 구성에서 `-ExecCmds`가 먹는지는 Worklog Q6 "촬영 준비"에 적는다 | `Engine/Private/UnrealEngine.cpp:13630, 13786-13799`(그리기), `5951-5954, 10595-10598`(명령), `608-612`(cvar) |
+
+## 25. 카메라 리그의 FOV(2026-11-12, README 시나리오 그림)
+
+| 항목 | 확인한 것 | 위치 |
+| --- | --- | --- |
+| `ALabCameraRig`의 가로 FOV | `ACameraActor`의 카메라 컴포넌트 기본값 90도 그대로다(리그는 FOV를 바꾸지 않는다). 저격의 화면 안 판정도 이 값과 16:9를 쓴다 | `Engine/Source/Runtime/Engine/Private/Camera/CameraComponent.cpp:78`, `Source/HordeOptLab/LabOrb.cpp:155` |
