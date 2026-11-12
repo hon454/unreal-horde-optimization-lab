@@ -50,3 +50,6 @@ Measurements/**/video/
 
 # 에디터 Python이 Scripts/ 모듈(lab_unit_colors.py)을 읽을 때 만드는 캐시
 __pycache__/
+
+# Site assets are copied by Scripts/build-site.py and deployed to the gh-pages branch
+Site/assets/
