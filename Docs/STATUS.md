@@ -35,7 +35,7 @@
 
 ## 진행 중인 세션
 
-- `crowdfx-lowpoly`: 입자 전용 저폴리 VAT 메시를 만든다. Opus high. 진행 중. **에디터가 떠 있다. 이 세션만 에디터, 빌드, Development 실행을 쓴다.** 끝나면 코디네이터가 에디터를 닫는다.
+- `crowdfx-lowpoly`: 입자 전용 저폴리 VAT 메시를 만든다. Opus high. 굽기 경로(`bake-vat.py --lod N`)는 끝났다. 지금은 LOD3·4를 굽는다. **에디터가 떠 있다. 이 세션만 에디터, 빌드, Development 실행을 쓴다.** 끝나면 코디네이터가 에디터를 닫는다.
 - `asset-restore-guide`: `Scripts/restore-assets.ps1`과 `Docs/Guides/setup.md`를 쓴다. Opus high. 진행 중. 에디터를 띄우는 검증은 하지 않는다.
 
 코디네이터는 세션을 띄우면 여기에 적는다. 끝난 세션은 결과를 확인하고 보관한 뒤 지운다.
