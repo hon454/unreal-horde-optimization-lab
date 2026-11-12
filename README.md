@@ -6,7 +6,7 @@ Night of the Dead에서 측정 없이 액터로 했던 좀비 호드 최적화�
 - **최적화**: Mass Entity(Fragment·Processor), Representation LOD(액터 / ISM+VAT / ISKM / 없음), 액터 하이드레이션과 풀링, Significance Manager → Animation Budget Allocator, URO, Simulation LOD(청크 단위 가변 틱), Niagara 배경 무리(엔티티 구동 입자).
 - **측정 도구**: Test 구성 패키지에서 `csvprofile`과 Unreal Insights.
 
-마일스톤 M0\~M5로 단계를 쌓은 뒤, 지금은 목표 사양(호드 총수 1만, 60fps) 안에서 거리별 품질을 확보하는 품질 계획 Q1\~Q6을 따른다. 가까이는 액터 하이드레이션, 멀리는 ISKM, 그리는 끝(200m) 밖은 Niagara 배경 무리로 그리고, 그렇게 번 프레임 시간을 액터 수와 전환 거리에 쓴다. 최종 구성의 기법은 모두 단계별 사다리와 "기법 하나를 뺀" 표에서 이점이 보여야 한다. 이 문서와 글의 수치는 총괄 묶음 `Full1`의 값이다.
+마일스톤 M0\~M5로 단계를 쌓은 뒤, 목표 사양(호드 총수 1만, 60fps) 안에서 거리별 품질을 확보하는 품질 계획 Q1\~Q6을 진행했다. 가까이는 액터 하이드레이션, 멀리는 ISKM, 그리는 끝(200m) 밖은 Niagara 배경 무리로 그리고, 그렇게 번 프레임 시간을 액터 수와 전환 거리에 쓴다. 최종 구성의 기법은 단계별 사다리와 "기법 하나를 뺀" 표로 이점을 확인했고, 이점이 보이지 않은 것도 그대로 적었다. 이 문서와 글의 수치는 마지막에 전 단계를 한 빌드에서 하루에 다시 잰 최종 측정의 값이다.
 
 형제 프로젝트 [UE5 Dedicated Server 최적화 실험실](https://github.com/hon454/ue-dedicated-server-optimization-lab)이 서버가 보내는 비용을 다루고, 이 프로젝트는 클라이언트가 그리고 움직이는 비용을 다룬다.
 
@@ -16,20 +16,26 @@ Night of the Dead에서 측정 없이 액터로 했던 좀비 호드 최적화�
 
 ## 결과 한눈에 보기
 
+| 1단계: 액터 군중 (프레임 약 440ms) | 8단계: 최종 구성 (프레임 약 11ms) |
+| --- | --- |
+| ![1단계 화면](Docs/figures/steps/step1-L1-full.webp) | ![8단계 화면](Docs/figures/steps/step8-L8-q4final.webp) |
+
+같은 호드 총수 1만, 같은 오브 시점이다. 화면 왼쪽 위 HUD에 단계 이름, 프레임 시간, 거리별 개체 수가 나온다. 녹화 부하가 섞여 HUD의 프레임 시간은 아래 표의 측정값보다 높다. 나머지 단계는 사다리 표의 "화면" 열에서 열 수 있다.
+
 ![사다리 여덟 단계: 목표 총수 1만의 프레임 시간](Docs/figures/full1/full-ladder-P1.svg)
 
 최종 측정의 값이다. 여덟 단계와 빼 보기 조건을 Test 패키지 하나(730ff18)에서 하루에 연달아 쟀다(2026-11-12). 호드 총수 1만, 오브 시점(P1), 2560x1440 Epic, 3회 중앙값, 단위 ms다(`Measurements/Full1/summary.csv`). 사다리는 단계마다 기술 하나를 더한다. 병목은 L1·L4\~L6이 Game, L2·L3·L7·L8이 GPU다.
 
-| 단계 | 도입한 기술 | 프레임 p50 | 프레임 p95 | Game p50 | GPU p50 | N@16.7ms |
-| --- | --- | --- | --- | --- | --- | --- |
-| L1 | 액터 군중(`ACharacter` + AnimBP) | 441.46 | 466.35 | 426.93 | 50.52 | 797 |
-| L2 | Mass 로직 + 애니 없는 ISM | 9.69 | 10.29 | 6.08 | 9.41 | 20,250 |
-| L3 | ISM + VAT, 200m 밖 그리지 않음 | 7.71 | 8.19 | 2.91 | 7.37 | 3만 안쪽 |
-| L4 | 30m 안 액터 하이드레이션(상한 500) + 애니메이션 예산 | 8.07 | 9.41 | 7.77 | 6.81 | 26,154 |
-| L5 | Simulation LOD + 엔티티 풀 | 7.51 | 8.83 | 7.20 | 6.83 | 3만 안쪽 |
-| L6 | ISKM + 고정 바운드 | 7.38 | 8.84 | 7.20 | 5.28 | 3만 안쪽 |
-| L7 | Niagara 배경 무리(200m 밖, 엔티티 위치 구동 입자) | 12.51 | 13.03 | 7.88 | 12.11 | 13,808 |
-| L8 | 품질 올리기: 액터 0\~40m(상한 1,000), 80m 밖 그림자 끔 | 11.12 | 11.64 | 7.82 | 10.71 | 16,826 |
+| 단계 | 도입한 기술 | 프레임 p50 | 프레임 p95 | Game p50 | GPU p50 | N@16.7ms | 화면 |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| L1 | 액터 군중(`ACharacter` + AnimBP) | 441.46 | 466.35 | 426.93 | 50.52 | 797 | [보기](Docs/figures/steps/step1-L1-full.webp) |
+| L2 | Mass 로직 + 애니 없는 ISM | 9.69 | 10.29 | 6.08 | 9.41 | 20,250 | [보기](Docs/figures/steps/step2-L2-mass.webp) |
+| L3 | ISM + VAT, 200m 밖 그리지 않음 | 7.71 | 8.19 | 2.91 | 7.37 | 3만 안쪽 | [보기](Docs/figures/steps/step3-L3-vatcull.webp) |
+| L4 | 30m 안 액터 하이드레이션(상한 500) + 애니메이션 예산 | 8.07 | 9.41 | 7.77 | 6.81 | 26,154 | [보기](Docs/figures/steps/step4-L4-mass.webp) |
+| L5 | Simulation LOD + 엔티티 풀 | 7.51 | 8.83 | 7.20 | 6.83 | 3만 안쪽 | [보기](Docs/figures/steps/step5-L5-m4offpool.webp) |
+| L6 | ISKM + 고정 바운드 | 7.38 | 8.84 | 7.20 | 5.28 | 3만 안쪽 | [보기](Docs/figures/steps/step6-L6-m5bounds.webp) |
+| L7 | Niagara 배경 무리(200m 밖, 엔티티 위치 구동 입자) | 12.51 | 13.03 | 7.88 | 12.11 | 13,808 | [보기](Docs/figures/steps/step7-L7-q2crowd.webp) |
+| L8 | 품질 올리기: 액터 0\~40m(상한 1,000), 80m 밖 그림자 끔 | 11.12 | 11.64 | 7.82 | 10.71 | 16,826 | [보기](Docs/figures/steps/step8-L8-q4final.webp) |
 
 N@16.7ms는 프레임 p95가 16.7ms 이하인 최대 개체 수다(`Docs/figures/full1/full-n-at-60fps.csv`의 보간값). L3·L5·L6은 3만에서도 16.7ms 안이라 값을 적지 않았다. L2의 2만 P1은 세 회차가 17.98 / 14.63 / 15.71ms로 범위가 3.35ms다(다른 조건은 0.4ms 안). 첫 회차에서 렌더 스레드의 `PrepareDistanceFieldScene`이 6.5ms 길었기 때문이고, L2의 N@16.7ms는 이 흔들림을 안고 있다([Worklog/Q6.md](Docs/Worklog/Q6.md)의 후속 분석 절).
 
@@ -54,6 +60,19 @@ L7·L8은 앞 단계에서 번 프레임 시간을 배경 무리와 액터 수·
 | 80m 밖 그림자 끔을 되돌림(켬) | 12.52 | 13.01 | 8.08 | 12.12 |
 
 배경 무리를 빼면 프레임 p50이 3.66ms 줄고(GPU p50 −5.53ms) 게임 스레드는 0.49ms만 줄어, 입자의 비용은 GPU에 실린다. 입자 대신 ISKM으로 그리면 병목이 Game으로 옮겨 가고 프레임 p95가 1.66ms 늘어난다. ISKM 끔(+1.28ms)과 80m 밖 그림자 켬(+1.40ms)도 GPU에서 난다. 하이드레이션(Game p50 −4.07ms), 애니메이션 예산(+0.82ms), Simulation LOD(+0.64ms)는 프레임 시간으로 구별되지 않지만 Game에서 갈린다.
+
+### 전환이 티 나는 정도
+
+개체가 인스턴스에서 액터로 바뀌는 순간, 그 자리 화면이 평소 움직임보다 얼마나 더 변했는지를 잰 값이다. 프레임 시간이 아니라 화면 캡처로 낸 값이라 Development 빌드에서 참고로 쟀다(최종 구성, 1만 P1, 시드 셋의 중앙값. `Measurements/Full1/transition-dev/runs.csv`).
+
+| 조건 | 튐 평균(밝기 0\~255) | 시드 셋의 범위 | 눈에 띈 전환 |
+| --- | --- | --- | --- |
+| 최종 구성(ISKM, 전환 대책 켬) | 4.63 | 4.59\~4.82 | 3\~5% |
+| VAT로 되돌림 | 5.22 | 4.71\~5.25 | 3% |
+| 전환 대책 끔 | 7.46 | 7.13\~7.64 | 10\~11% |
+| 둘 다 | 7.55 | 6.88\~7.58 | 9% |
+
+전환 대책은 프레임 시간으로는 구별되지 않지만 끄면 눈에 띄는 전환이 두세 배가 된다. ISKM과 VAT의 전환 차이는 시드 사이 흔들림과 비슷한 크기라 ISKM의 이점은 프레임 시간(위 표의 +1.28ms)으로만 적는다. 엔티티 풀은 프레임, Game, 전환 어느 지표에서도 이점이 보이지 않았다.
 
 ![오브 시점, 액터 5,000개](Measurements/M0/shots/full-N5000-P1.png)
 
@@ -98,10 +117,9 @@ L7·L8은 앞 단계에서 번 프레임 시간을 배경 무리와 액터 수·
 ```powershell
 powershell -ExecutionPolicy Bypass -File Scripts/package.ps1
 powershell -ExecutionPolicy Bypass -File Scripts/run-full.ps1 -DryRun
-powershell -ExecutionPolicy Bypass -File Scripts/run-e0.ps1
-powershell -ExecutionPolicy Bypass -File Scripts/run-e1.ps1
-py -3 Scripts/summarize.py --milestone M0
-py -3 Scripts/plot.py
+powershell -ExecutionPolicy Bypass -File Scripts/run-full.ps1
+py -3 -I Scripts/summarize.py --batch Full1
+py -3 -I Scripts/plot.py --batch Full1
 ```
 
 Fab 에셋은 저장소에 없다. 준비와 나머지 명령은 [Docs/Guides/commands.md](Docs/Guides/commands.md)에 있다.
@@ -113,6 +131,7 @@ Fab 에셋은 저장소에 없다. 준비와 나머지 명령은 [Docs/Guides/co
 | `Source/HordeOptLab/` | C++ 모듈. 클래스 접두사 `Lab` |
 | `Content/Lab/` | 직접 만든 콘텐츠. Fab 에셋은 커밋하지 않는다 |
 | `Scripts/` | 빌드, 패키징, 벤치마크, 그래프 |
-| `Docs/` | 계획, 결정 기록, 측정 규약, 엔진 소스 확인 기록 |
+| `Docs/` | 계획, 결정 기록(ADR), 측정 규약, 엔진 소스 확인 기록, 작업 기록(Worklog) |
+| `Docs/figures/` | 그래프(SVG)와 그 수치(CSV), 단계별 화면(`steps/`) |
 | `Posts/` | 글과 측정 기록 |
-| `Measurements/M<N>/` | 마일스톤별 수치와 대표 스크린샷 |
+| `Measurements/` | 묶음별 수치와 대표 스크린샷. 최종 측정은 `Full1/`, 마일스톤 경위는 `M<N>/`·`Q<N>/` |
