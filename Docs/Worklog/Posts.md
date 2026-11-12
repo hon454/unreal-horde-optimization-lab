@@ -167,6 +167,35 @@
 - 조사 끝(성공). 읽은 것: AGENTS.md, STATUS.md, posting.md, ADR-0014, backlog.md, post-review.md "02 Mass 코어", post-material.md "02", measurement.md, engine-notes.md 1·3·11·12·13·27절, 01번 글 전체, `full-conditions.json` `L2-mass`(note "로직을 Mass로, 표현은 애니 없는 ISM"), plan.md M1과 사다리, code-tour.md, `Source/HordeOptLab/`(LabMassTypes.h, LabMassTraits.cpp, LabCrowdSubsystem.cpp, LabMassProcessors.cpp, HordeOptLab.cpp, LabMinion.cpp/.h, LabOrb.cpp), `Config/DefaultMass.ini`. 엔진 소스: `MassMovementProcessors.cpp:41,100`, `MassRepresentationTypes.h:105`, `MassUpdateISMProcessor.cpp`, 기본으로 꺼진 프로세서 셋. 다음은 초안.
 - 그림 끝(성공). `make-figures.py`가 SVG 넷(`mass-summary`, `mass-processors`, `mass-draw-calls`, `mass-frame-vs-n`)을 만든다. 입력은 `summary.csv`와 `full-n-at-60fps.csv`뿐이고 트레이스 값은 없다. 다음은 초안.
 - 초안 끝(성공). `README.md`를 posting.md 틀(요약, 시나리오 카드, 배경 지식 셋, 문제, 원리, 바꾼 것, 결과, 한 문장으로)로 썼다. 본문은 코드·그림·제목을 빼고 약 4,000자(공백 포함, 시나리오 카드 포함)다. 엔진 코드 발췌는 14줄 하나(`UMassApplyMovementProcessor::Execute`)다. Insights 자리는 주석으로 두었다. 다음은 측정 기록.
+- 측정 기록 끝(성공). `measurements.md`: 빌드와 묶음, 2단계 구현 위치(파일:줄), 본문의 수치와 출처(세 회차 값, 계산식, 보간식), HUD 차이, 그림, 코디네이터가 찍을 Insights 화면, 엔진 소스, 발췌 원본 줄(엔진·프로젝트), 경위의 근거, 확인하지 않은 것. 다음은 확인.
+- 확인 끝(성공). 상대 링크는 모두 실제 파일을 가리킨다(주석 안의 `images/insights-mass-processors.jpg`만 아직 없다). 00·03번 글이 커밋돼 있어 "00번 글"과 "다음 글"에 링크를 걸었다. 코드 스팬 밖 `~`는 모두 `\~`다. 독자용 문장에 묶음 이름·조건 라벨·마일스톤 이름·다른 프로젝트 이름이 없다(이미지 경로에만 있다). 본문 수치를 측정 기록 표와 하나씩 대조했다. SVG 넷의 숫자 글자를 `summary.csv`·`full-n-at-60fps.csv`와 대조했고 글자 크기는 모두 16px 이상이다. 글자 겹침은 좌표로 어림해 두 곳(결과 그림의 500 값과 774 표시, 원리 도식의 Chunk 제목줄)을 고쳤다. 다음은 커밋.
+
+### 결정
+
+- **변수 둘을 본문에 밝힌다.** 사다리 1 → 2단계는 로직의 자리와 표현(애니메이션 있는 스켈레탈 메시 → 애니메이션 없는 ISM)이 함께 바뀌고 최종 측정에 둘을 가르는 조건이 없다. posting.md "바뀐 변수가 하나임을 명시"를 지킬 수 없어 "바꾼 것" 첫 문단과 "한 문장으로" 목록에 "변수 둘"을 적었다. 결과 그림에서 두 단계 계열을 잇지 않았다(measurement.md "차이 판정"). 버린 대안: 옛 묶음의 애니 없는 액터 변형으로 분해(묶음이 달라 규칙 위반).
+- **문제 절의 증거를 드로우 콜 그림으로 한다.** 1단계의 게임 스레드 원인은 01번 글이 트레이스로 보였으므로 한 문장과 링크로 받고, 이 글에서 새로 필요한 사실("GPU 50.2ms가 남아 표현도 바꿔야 한다")을 최종 측정의 `draw_calls_p50`로 보였다. 버린 대안: 01번 글의 `actor-frame-flow.svg`를 다시 싣기(트레이스 값이 든 그림이라 "트레이스에서만 나오는 수치는 본문에 쓰지 않는다"에 걸린다).
+- **결과의 "예상과 실제"를 개체당 게임 스레드 시간으로 그린다.** 1단계는 하위 스텝이 없는 500\~2천의 17µs가 기준이 되고, 2단계는 5천\~3만에서 0.62µs로 평평하다. 1만끼리의 67.4배 가운데 하위 스텝 몫과 개체당 비용 몫(27.0배)을 나눠 읽을 수 있다. 버린 대안: 프레임 시간 배율만 쓰기(병목이 GPU로 바뀌어 게임 스레드의 변화가 가려진다).
+- **엔진 코드 발췌는 `UMassApplyMovementProcessor::Execute` 하나(14줄)다.** Chunk 순회의 모양과 0.1초 상한을 한 블록에서 보인다. 그림자 기본값과 기본으로 꺼진 Processor는 발췌 없이 파일·심볼을 측정 기록에 두었다. 0.1초 상한은 엔진 주석대로 "폭주 방지 장치"로 적고 알려진 문제로 쓰지 않았다(그래서 이슈 링크가 필요 없다).
+- **프로젝트 코드 발췌의 줄 끝 주석을 뺐다.** 주석에 작업 단계 이름(M3b 등)이 있어 공개 문장 규칙에 걸린다. 뺀 줄을 측정 기록 발췌 표에 적었다.
+- **Lumen은 한 문장으로만 쓰고 수치를 쓰지 않는다.** 옛 시험 실행 값이고 최종 측정에 대응 조건이 없다. 모든 단계 공통 설정이라 2단계에서 바뀐 변수도 아니다. 03번 글이 "Lumen 항목은 02번 글이 맡는다"고 정해 이 글에 두었다.
+- **Insights 화면은 직렬 트레이스로 찍게 했다.** 브리프는 병렬 트레이스 `Full2trace-L2-mass-*`를 가리켰지만, 병렬 실행은 Processor가 워커 스레드로 흩어져 한 화면에서 읽기 어렵다(measurement.md "산출물"). 직렬 `Full2traceser-L2-mass-*`를 권하고 병렬을 대안으로 적었다.
+- **최대 개체 수는 20,753으로 적었다.** posting.md "개수는 줄이지 않는다"와 01·00번 글을 따랐다.
+- **본문 분량.** 시나리오 카드와 목록을 넣고 공백을 세면 약 4,000자다. 코드 블록이 넷이라 읽는 시간은 01번 글보다 길다.
+
+### 확인하지 못한 것
+
+- SVG와 WebP를 화면에서 보지 않았다(브라우저 금지). 겹침은 좌표와 글자 수로만 어림했다. `mass-processors.svg`의 칸 안 글자 길이, `mass-frame-vs-n.svg` 위쪽 판의 값 글자와 선의 겹침은 화면에서 봐야 한다.
+- 2단계 화면에서 "걷는 동작 없이 한 자세로 움직이고, 피격·사망 때 멈췄다가 사라진다"는 코드에서 판단했다. WebP를 재생해 보지 않았다.
+- 로직과 표현 가운데 어느 쪽이 얼마를 줄였는지, GPU 50.2ms의 패스별 내역, 게임 스레드 6.30ms의 내역, 병렬 처리의 몫.
+- 최종 측정의 트레이스(`Full2trace*-L2-mass-*`)는 열지 않았다.
+
+### 코디네이터용
+
+- **Insights 화면:** `Saved/Traces/Full2traceser-L2-mass-N10000-P1-r1.utrace`(직렬)를 열어 25\~75초 안의 보통 프레임 하나를 고른다. 왼쪽 빨간 상자는 그 프레임(GameThread 트랙을 펼쳐 Mass PrePhysics 처리 단계 안의 Processor 타이머와 PostPhysics의 `MassVisualizationComponent EndVisualChanges`가 보이게), 오른쪽 빨간 상자는 Timers 창을 "Processor"로 거르고 Incl 내림차순으로 둔 행이다. `images/insights-mass-processors.jpg`로 넣고, README "결과"의 주석을 풀어 캡션의 OO(프레임 길이, Mass 처리 단계 Incl, `EndVisualChanges` Incl, 가장 긴 Processor 이름과 Incl)를 채운다. 읽은 값은 측정 기록 "본문의 수치와 출처"에 "직렬 트레이스 한 프레임"으로 행을 더한다. 자세한 지시는 측정 기록 "코디네이터가 찍을 Insights 화면".
+- **루트 README "글" 표와 `Posts/README.md`:** 02번 행을 더한다.
+- **backlog.md 15행:** 02번 글 상태를 바꾼다. "글에 넣을 것"의 Mass ISM 그림자 기본값과 Lumen 항목은 02번 글이 다뤘다(Lumen은 수치 없이 한 문장).
+- **00번 글 "여덟 단계의 지도":** 02번 항목에 `../02-mass-logic/README.md` 링크를 건다. 제목은 "02 로직을 Mass로 — 액터마다 돌던 틱이 Processor 몇 개가 된다"다.
+- **engine-notes.md 11절 "이동 프로세서의 시간 상한" 행:** 엔진 주석의 의도("force explosion" 방지, `MassMovementProcessors.cpp:40,99`)를 한 줄 더할지 정한다. 이 세션은 그 파일을 고치지 않는다.
 
 ## 00 목적·목표 사양·측정 방법(2026-11-13)
 

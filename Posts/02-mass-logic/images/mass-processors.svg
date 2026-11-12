@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="786" viewBox="0 0 800 786" font-family="Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Segoe UI, sans-serif" font-size="16" fill="#111827">
+<rect x="0.5" y="0.5" width="799" height="785" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+<text x="32" y="46" font-size="22" font-weight="700">같은 로직을 도는 두 방식</text>
+<text x="32" y="74" font-size="16" fill="#4b5563">게임 스레드가 한 프레임에 하는 일. 위에서 아래 순서로 돈다</text>
+<text x="32" y="114" font-size="18" font-weight="700" fill="#dc2626">1단계: 액터마다 틱한다</text>
+<text x="416" y="114" font-size="18" font-weight="700" fill="#2563eb">2단계: Processor가 Chunk를 돈다</text>
+<rect x="32" y="134" width="352" height="124" rx="10" fill="#f8fafc" stroke="#e5e7eb"/>
+<text x="46" y="158" font-size="17" font-weight="700">액터 1</text>
+<rect x="46" y="168" width="324" height="24" rx="5" fill="#2563eb" fill-opacity="0.14" stroke="#2563eb"/>
+<text x="56" y="186" font-size="16">이동 컴포넌트 틱</text>
+<rect x="46" y="198" width="324" height="24" rx="5" fill="#9333ea" fill-opacity="0.14" stroke="#9333ea"/>
+<text x="56" y="216" font-size="16">스켈레탈 메시 틱 · AnimBP</text>
+<rect x="46" y="228" width="324" height="24" rx="5" fill="#9ca3af" fill-opacity="0.14" stroke="#9ca3af"/>
+<text x="56" y="246" font-size="16">렌더 상태 보내기</text>
+<rect x="32" y="270" width="352" height="124" rx="10" fill="#f8fafc" stroke="#e5e7eb"/>
+<text x="46" y="294" font-size="17" font-weight="700">액터 2</text>
+<rect x="46" y="304" width="324" height="24" rx="5" fill="#2563eb" fill-opacity="0.14" stroke="#2563eb"/>
+<text x="56" y="322" font-size="16">이동 컴포넌트 틱</text>
+<rect x="46" y="334" width="324" height="24" rx="5" fill="#9333ea" fill-opacity="0.14" stroke="#9333ea"/>
+<text x="56" y="352" font-size="16">스켈레탈 메시 틱 · AnimBP</text>
+<rect x="46" y="364" width="324" height="24" rx="5" fill="#9ca3af" fill-opacity="0.14" stroke="#9ca3af"/>
+<text x="56" y="382" font-size="16">렌더 상태 보내기</text>
+<text x="208.0" y="428" text-anchor="middle" font-size="22" font-weight="700" fill="#4b5563">⋮</text>
+<rect x="32" y="442" width="352" height="124" rx="10" fill="#f8fafc" stroke="#e5e7eb"/>
+<text x="46" y="466" font-size="17" font-weight="700">액터 10,000</text>
+<rect x="46" y="476" width="324" height="24" rx="5" fill="#2563eb" fill-opacity="0.14" stroke="#2563eb"/>
+<text x="56" y="494" font-size="16">이동 컴포넌트 틱</text>
+<rect x="46" y="506" width="324" height="24" rx="5" fill="#9333ea" fill-opacity="0.14" stroke="#9333ea"/>
+<text x="56" y="524" font-size="16">스켈레탈 메시 틱 · AnimBP</text>
+<rect x="46" y="536" width="324" height="24" rx="5" fill="#9ca3af" fill-opacity="0.14" stroke="#9ca3af"/>
+<text x="56" y="554" font-size="16">렌더 상태 보내기</text>
+<rect x="416" y="134" width="352" height="194" rx="10" fill="#f8fafc" stroke="#e5e7eb"/>
+<text x="430" y="158" font-size="17" font-weight="700">Chunk 하나(같은 Archetype)</text>
+<text x="430" y="316" font-size="16" fill="#4b5563">행 하나가 엔티티, 열 하나가 Fragment 배열</text>
+<text x="451.2" y="186" text-anchor="middle" font-size="16" fill="#4b5563">위치</text>
+<text x="521.6" y="186" text-anchor="middle" font-size="16" fill="#4b5563">속도</text>
+<text x="592.0" y="186" text-anchor="middle" font-size="16" fill="#4b5563">이동 목표</text>
+<text x="662.4" y="186" text-anchor="middle" font-size="16" fill="#4b5563">체력</text>
+<text x="732.8" y="186" text-anchor="middle" font-size="16" fill="#4b5563">상태</text>
+<rect x="422.0" y="197" width="58.4" height="20" rx="3" fill="#2563eb" fill-opacity="0.18"/>
+<rect x="492.4" y="197" width="58.4" height="20" rx="3" fill="#2563eb" fill-opacity="0.26"/>
+<rect x="562.8" y="197" width="58.4" height="20" rx="3" fill="#2563eb" fill-opacity="0.34"/>
+<rect x="633.2" y="197" width="58.4" height="20" rx="3" fill="#2563eb" fill-opacity="0.42"/>
+<rect x="703.6" y="197" width="58.4" height="20" rx="3" fill="#2563eb" fill-opacity="0.50"/>
+<rect x="422.0" y="223" width="58.4" height="20" rx="3" fill="#2563eb" fill-opacity="0.18"/>
+<rect x="492.4" y="223" width="58.4" height="20" rx="3" fill="#2563eb" fill-opacity="0.26"/>
+<rect x="562.8" y="223" width="58.4" height="20" rx="3" fill="#2563eb" fill-opacity="0.34"/>
+<rect x="633.2" y="223" width="58.4" height="20" rx="3" fill="#2563eb" fill-opacity="0.42"/>
+<rect x="703.6" y="223" width="58.4" height="20" rx="3" fill="#2563eb" fill-opacity="0.50"/>
+<rect x="422.0" y="249" width="58.4" height="20" rx="3" fill="#2563eb" fill-opacity="0.18"/>
+<rect x="492.4" y="249" width="58.4" height="20" rx="3" fill="#2563eb" fill-opacity="0.26"/>
+<rect x="562.8" y="249" width="58.4" height="20" rx="3" fill="#2563eb" fill-opacity="0.34"/>
+<rect x="633.2" y="249" width="58.4" height="20" rx="3" fill="#2563eb" fill-opacity="0.42"/>
+<rect x="703.6" y="249" width="58.4" height="20" rx="3" fill="#2563eb" fill-opacity="0.50"/>
+<rect x="422.0" y="275" width="58.4" height="20" rx="3" fill="#2563eb" fill-opacity="0.18"/>
+<rect x="492.4" y="275" width="58.4" height="20" rx="3" fill="#2563eb" fill-opacity="0.26"/>
+<rect x="562.8" y="275" width="58.4" height="20" rx="3" fill="#2563eb" fill-opacity="0.34"/>
+<rect x="633.2" y="275" width="58.4" height="20" rx="3" fill="#2563eb" fill-opacity="0.42"/>
+<rect x="703.6" y="275" width="58.4" height="20" rx="3" fill="#2563eb" fill-opacity="0.50"/>
+<rect x="416" y="348" width="352" height="52" rx="8" fill="#f8fafc" stroke="#e5e7eb"/>
+<rect x="416" y="348" width="6" height="52" rx="3" fill="#2563eb"/>
+<text x="434" y="370" font-size="16" font-weight="700">1. 오브 쪽으로 이동 목표를 쓴다</text>
+<text x="434" y="391" font-family="Consolas, SFMono-Regular, Menlo, monospace" font-size="16" fill="#4b5563">ULabApproachProcessor</text>
+<rect x="416" y="406" width="352" height="52" rx="8" fill="#f8fafc" stroke="#e5e7eb"/>
+<rect x="416" y="406" width="6" height="52" rx="3" fill="#2563eb"/>
+<text x="434" y="428" font-size="16" font-weight="700">2. 조향 · 이동 · 회전(엔진)</text>
+<text x="434" y="449" font-family="Consolas, SFMono-Regular, Menlo, monospace" font-size="16" fill="#4b5563">UMassApplyMovementProcessor 등</text>
+<rect x="416" y="464" width="352" height="52" rx="8" fill="#f8fafc" stroke="#e5e7eb"/>
+<rect x="416" y="464" width="6" height="52" rx="3" fill="#2563eb"/>
+<text x="434" y="486" font-size="16" font-weight="700">3. 범위 피해로 체력을 깎는다</text>
+<text x="434" y="507" font-family="Consolas, SFMono-Regular, Menlo, monospace" font-size="16" fill="#4b5563">ULabOrbContactProcessor</text>
+<rect x="416" y="522" width="352" height="52" rx="8" fill="#f8fafc" stroke="#e5e7eb"/>
+<rect x="416" y="522" width="6" height="52" rx="3" fill="#2563eb"/>
+<text x="434" y="544" font-size="16" font-weight="700">4. 2초마다 다섯을 저격한다</text>
+<text x="434" y="565" font-family="Consolas, SFMono-Regular, Menlo, monospace" font-size="16" fill="#4b5563">ULabOrbSnipeProcessor</text>
+<rect x="416" y="580" width="352" height="52" rx="8" fill="#f8fafc" stroke="#e5e7eb"/>
+<rect x="416" y="580" width="6" height="52" rx="3" fill="#2563eb"/>
+<text x="434" y="602" font-size="16" font-weight="700">5. 피격 · 사망 시간을 센다</text>
+<text x="434" y="623" font-family="Consolas, SFMono-Regular, Menlo, monospace" font-size="16" fill="#4b5563">ULabMinionStateProcessor</text>
+<rect x="416" y="638" width="352" height="52" rx="8" fill="#f8fafc" stroke="#e5e7eb"/>
+<rect x="416" y="638" width="6" height="52" rx="3" fill="#2563eb"/>
+<text x="434" y="660" font-size="16" font-weight="700">6. ISM 위치를 쓴다(엔진)</text>
+<text x="434" y="681" font-family="Consolas, SFMono-Regular, Menlo, monospace" font-size="16" fill="#4b5563">UMassUpdateISMProcessor</text>
+<line x1="32" y1="704" x2="768" y2="704" stroke="#e5e7eb"/>
+<text x="32" y="734" font-size="17" font-weight="700" fill="#dc2626">틱 함수 호출 = 개체 수 × 컴포넌트 수</text>
+<text x="416" y="734" font-size="17" font-weight="700" fill="#2563eb">순회 = Processor 수 × Chunk 수</text>
+<text x="32" y="760" font-size="16" fill="#4b5563">액터마다 메시 컴포넌트를 따로 그린다</text>
+<text x="416" y="760" font-size="16" fill="#4b5563">종류마다 ISM 컴포넌트 하나가 모두 그린다</text>
+</svg>
