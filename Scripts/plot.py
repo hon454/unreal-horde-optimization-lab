@@ -140,6 +140,7 @@ FULL_SERIES = [
 FULL_KIND_COLOR = {"start": "#6b7280", "earn": "#2563eb", "quality": "#ea580c"}
 FULL_KIND_NAME = {"start": "start", "earn": "earns frame time", "quality": "spends it on quality"}
 FULL_BASELINE = "L8-q4final"      # 빼 보기와 A/A의 기준 조건
+FULL_LADDER_CLIP_MS = 20.0        # 사다리 그림의 가로축 끝. 넘는 막대(L1)는 끊어 그린다
 FULL_MARGIN_MS = 13.3             # 목표: 16.7ms에서 여유 20%를 뺀 값(plan.md "목표 사양", 잠정)
 FULL_ROW_FIELDS = ["frame_p50_ms", "frame_p95_ms", "frame_p99_ms", "game_p50_ms", "render_p50_ms", "gpu_p50_ms", "mem_total_mb", "gpu_mem_p50",
                    "actors_mean", "view_actors_mean", "cover30_mean", "large_skip_ratio", "death_rate", "near30_mean"]
@@ -168,13 +169,18 @@ def write_rows(path, rows, fields):
         w.writerows([{k: r.get(k, "") for k in fields} for r in rows])
 
 
-def hbar_chart(items, title, subtitle, path, lines):
-    """items: (이름, p95, p50 또는 None, 색, 주석). lines: (ms, 색, 이름) 세로선."""
+def hbar_chart(items, title, subtitle, path, lines, clip=None, footer=None):
+    """items: (이름, p95, p50 또는 None, 색, 주석). lines: (ms, 색, 이름) 세로선.
+
+    clip(ms)을 주면 가로축을 거기서 끊는다. 넘는 막대는 축 끝까지만 그리고 끝에 끊김 표시를 한 뒤 값을 적는다
+    (L1이 400ms대라 선형 축에서는 나머지 단계가 몇 픽셀로 눌린다).
+    """
     W, L, R, T = 900, 290, 150, 70
     rowh = 38
     H = T + rowh * len(items) + 40
-    maxv = max([i[1] for i in items] + [l[0] for l in lines]) * 1.12
-    X = lambda v: L + (W - L - R) * v / maxv
+    maxv = clip if clip else max([i[1] for i in items] + [l[0] for l in lines]) * 1.12
+    XE = W - R
+    X = lambda v: L + (XE - L) * min(v, maxv) / maxv
     body = [f'<text x="{W/2}" y="26" text-anchor="middle" font-size="16" font-weight="600">{title}</text>',
             f'<text x="{W/2}" y="46" text-anchor="middle" font-size="12" fill="#555">{subtitle}</text>']
     for ms, color, name in lines:
@@ -186,8 +192,11 @@ def hbar_chart(items, title, subtitle, path, lines):
         body.append(f'<rect x="{L}" y="{y+2}" width="{X(v95)-L:.1f}" height="20" fill="{color}"/>')
         if v50 is not None:
             body.append(f'<rect x="{L}" y="{y+25}" width="{X(v50)-L:.1f}" height="6" fill="{color}" opacity="0.55"/>')
+        if clip and v95 > maxv:  # 끊김 표시: 막대 끝 가까이에 흰 사선 둘
+            for dx in (14, 22):
+                body.append(f'<line x1="{XE-dx-4}" y1="{y+34}" x2="{XE-dx+4}" y2="{y}" stroke="white" stroke-width="3"/>')
         body.append(f'<text x="{X(v95)+6:.1f}" y="{y+17}">{v95:.2f}' + (f' ({note})' if note else '') + '</text>')
-    body.append(f'<text x="{L}" y="{H-8}" font-size="11" fill="#555">ms. thick bar = frame p95, thin bar = frame p50 (median of runs)</text>')
+    body.append(f'<text x="{L}" y="{H-8}" font-size="11" fill="#555">{footer or "ms. thick bar = frame p95, thin bar = frame p50 (median of runs)"}</text>')
     path.write_text(svg(W, H, "\n".join(body)), encoding="utf-8")
 
 
@@ -240,8 +249,11 @@ def full_main(batch, target_n=None):
             row["frame_p95_ms_min"], row["frame_p95_ms_max"] = r.get("frame_p95_ms_min", ""), r.get("frame_p95_ms_max", "")
             ladder_csv.append(row)
         if items:
-            legend = ", ".join(f"{k}: {FULL_KIND_NAME[k]}" for k in FULL_KIND_COLOR)
-            hbar_chart(items, f"Ladder at N={target:,} ({preset})", (aa_note if preset == "P1" and aa_note else legend), out / f"full-ladder-{preset}.svg", budget)
+            # README에 싣는 그림이다. 부제에 A/A(재현성) 문구를 넣지 않는다(측정 기록에 있다). L1은 축 밖이라 끊어 그린다(2026-11-12 사용자 결정)
+            view = {"P1": "오브 시점", "P2": "탑뷰"}[preset]
+            hbar_chart(items, f"호드 총수 {target:,}의 프레임 시간 ({view})", "회색: 시작점 · 파랑: 프레임 시간을 번 단계 · 주황: 번 시간을 품질에 쓴 단계",
+                       out / f"full-ladder-{preset}.svg", [(BUDGET_MS, "#b45309", "16.7 ms (60 fps)"), (FULL_MARGIN_MS, "#16a34a", "13.3 ms")], clip=FULL_LADDER_CLIP_MS,
+                       footer="단위 ms. 굵은 막대 = 프레임 p95, 가는 막대 = 프레임 p50 (세 회차 중앙값). 1단계는 축 밖이라 끊어 그렸다")
     write_rows(out / "full-ladder.csv", ladder_csv, ["step", "name", "cond", "kind", "n", "preset", "runs", "frame_p95_ms_min", "frame_p95_ms_max"] + FULL_ROW_FIELDS)
 
     # 빼 보기: 조건 JSON의 group ablation 전부(summary.csv의 group 열). 막대가 기준(L8)보다 길면 그 기법이 번 것
