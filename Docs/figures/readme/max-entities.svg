@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="552" viewBox="0 0 800 552" font-family="Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Segoe UI, sans-serif" font-size="16" fill="#111827">
+<rect x="0.5" y="0.5" width="799" height="551" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+<text x="32" y="46" font-size="22" font-weight="700">60fps를 지키는 최대 개체 수</text>
+<text x="32" y="74" font-size="16" fill="#4b5563">프레임 시간(느린 쪽 5% 경계)이 16.7ms 이하인 가장 큰 호드 총수</text>
+<text x="32" y="96" font-size="16" fill="#4b5563">오브 시점 카메라, 단계마다 네 가지 호드 총수에서 잰 값 사이를 보간</text>
+<text x="32" y="151" font-size="17" font-weight="700">1단계 액터 군중</text>
+<rect x="290" y="136" width="9.3" height="22" rx="3" fill="#2563eb"/>
+<text x="307.3" y="153" font-size="16" font-weight="700">797</text>
+<text x="32" y="195" font-size="17" font-weight="700">2단계 Mass 로직</text>
+<rect x="290" y="180" width="236.2" height="22" rx="3" fill="#2563eb"/>
+<text x="534.2" y="197" font-size="16" font-weight="700">20,250</text>
+<text x="32" y="239" font-size="17" font-weight="700">3단계 ISM + VAT</text>
+<rect x="290" y="224" width="350.0" height="22" rx="3" fill="#2563eb" fill-opacity="0.35" stroke="#2563eb" stroke-dasharray="5 3"/>
+<path d="M644.0 225 L656.0 235 L644.0 245" fill="#2563eb"/>
+<text x="664.0" y="241" font-size="16" font-weight="700" fill="#2563eb">3만 이상</text>
+<text x="32" y="283" font-size="17" font-weight="700">4단계 액터 하이드레이션</text>
+<rect x="290" y="268" width="305.1" height="22" rx="3" fill="#2563eb"/>
+<text x="603.1" y="285" font-size="16" font-weight="700">26,154</text>
+<text x="32" y="327" font-size="17" font-weight="700">5단계 Simulation LOD</text>
+<rect x="290" y="312" width="350.0" height="22" rx="3" fill="#2563eb" fill-opacity="0.35" stroke="#2563eb" stroke-dasharray="5 3"/>
+<path d="M644.0 313 L656.0 323 L644.0 333" fill="#2563eb"/>
+<text x="664.0" y="329" font-size="16" font-weight="700" fill="#2563eb">3만 이상</text>
+<text x="32" y="371" font-size="17" font-weight="700">6단계 ISKM</text>
+<rect x="290" y="356" width="350.0" height="22" rx="3" fill="#2563eb" fill-opacity="0.35" stroke="#2563eb" stroke-dasharray="5 3"/>
+<path d="M644.0 357 L656.0 367 L644.0 377" fill="#2563eb"/>
+<text x="664.0" y="373" font-size="16" font-weight="700" fill="#2563eb">3만 이상</text>
+<text x="32" y="415" font-size="17" font-weight="700">7단계 Niagara 배경 무리</text>
+<rect x="290" y="400" width="161.1" height="22" rx="3" fill="#2563eb"/>
+<text x="459.1" y="417" font-size="16" font-weight="700">13,808</text>
+<text x="32" y="459" font-size="17" font-weight="700">8단계 품질 올리기</text>
+<rect x="290" y="444" width="196.3" height="22" rx="3" fill="#2563eb"/>
+<text x="494.3" y="461" font-size="16" font-weight="700">16,826</text>
+<line x1="406.7" y1="118" x2="406.7" y2="474" stroke="#b45309" stroke-width="2" stroke-dasharray="5 4"/>
+<text x="406.7" y="494" text-anchor="middle" font-size="16" font-weight="700" fill="#b45309">목표 1만</text>
+<line x1="32" y1="504" x2="768" y2="504" stroke="#e5e7eb"/>
+<text x="32" y="530" font-size="16" fill="#4b5563">점선 막대: 잰 범위의 끝인 3만에서도 16.7ms 안이라 실제 최대는 더 크다.</text>
+</svg>

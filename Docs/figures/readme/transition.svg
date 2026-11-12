@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="546" viewBox="0 0 800 546" font-family="Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Segoe UI, sans-serif" font-size="16" fill="#111827">
+<rect x="0.5" y="0.5" width="799" height="545" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+<text x="32" y="46" font-size="22" font-weight="700">인스턴스가 액터로 바뀌는 순간 화면이 튀는 정도</text>
+<text x="32" y="74" font-size="16" fill="#4b5563">최종 구성, 호드 총수 1만, 오브 시점 카메라, 시드 세 개</text>
+<text x="32" y="96" font-size="16" fill="#4b5563">튐 평균: 전환 자리의 밝기 변화가 평소 움직임보다 큰 양(0–255)</text>
+<text x="620" y="140" font-size="16" font-weight="700" fill="#4b5563">눈에 띈 전환</text>
+<text x="32" y="184" font-size="17" font-weight="700">최종 구성</text>
+<text x="32" y="205" font-size="16" fill="#4b5563">ISKM, 전환 대책 켬</text>
+<line x1="317.2" y1="188" x2="335.6" y2="188" stroke="#2563eb" stroke-width="6" stroke-linecap="round" stroke-opacity="0.35"/>
+<circle cx="320.4" cy="188" r="7" fill="#2563eb"/>
+<text x="320.4" y="174" text-anchor="middle" font-size="16" font-weight="700" fill="#2563eb">4.63</text>
+<text x="320.4" y="214" text-anchor="middle" font-size="16" fill="#4b5563">4.59–4.82</text>
+<text x="620" y="194" font-size="17" font-weight="700">3–5%</text>
+<text x="32" y="262" font-size="17" font-weight="700">VAT로 되돌림</text>
+<line x1="326.8" y1="266" x2="370.0" y2="266" stroke="#2563eb" stroke-width="6" stroke-linecap="round" stroke-opacity="0.35"/>
+<circle cx="367.6" cy="266" r="7" fill="#2563eb"/>
+<text x="367.6" y="252" text-anchor="middle" font-size="16" font-weight="700" fill="#2563eb">5.22</text>
+<text x="367.6" y="292" text-anchor="middle" font-size="16" fill="#4b5563">4.71–5.25</text>
+<text x="620" y="272" font-size="17" font-weight="700">3%</text>
+<text x="32" y="340" font-size="17" font-weight="700">전환 대책 끔</text>
+<line x1="520.4" y1="344" x2="561.2" y2="344" stroke="#2563eb" stroke-width="6" stroke-linecap="round" stroke-opacity="0.35"/>
+<circle cx="546.8" cy="344" r="7" fill="#2563eb"/>
+<text x="546.8" y="330" text-anchor="middle" font-size="16" font-weight="700" fill="#2563eb">7.46</text>
+<text x="546.8" y="370" text-anchor="middle" font-size="16" fill="#4b5563">7.13–7.64</text>
+<text x="620" y="350" font-size="17" font-weight="700">10–11%</text>
+<text x="32" y="418" font-size="17" font-weight="700">둘 다</text>
+<text x="32" y="439" font-size="16" fill="#4b5563">VAT, 전환 대책 끔</text>
+<line x1="500.4" y1="422" x2="556.4" y2="422" stroke="#2563eb" stroke-width="6" stroke-linecap="round" stroke-opacity="0.35"/>
+<circle cx="554.0" cy="422" r="7" fill="#2563eb"/>
+<text x="554.0" y="408" text-anchor="middle" font-size="16" font-weight="700" fill="#2563eb">7.55</text>
+<text x="554.0" y="448" text-anchor="middle" font-size="16" fill="#4b5563">6.88–7.58</text>
+<text x="620" y="428" font-size="17" font-weight="700">9%</text>
+<line x1="270" y1="470" x2="590" y2="470" stroke="#4b5563"/>
+<line x1="270.0" y1="152" x2="270.0" y2="470" stroke="#e5e7eb"/>
+<text x="270.0" y="492" text-anchor="middle" font-size="16" fill="#4b5563">4</text>
+<line x1="350.0" y1="152" x2="350.0" y2="470" stroke="#e5e7eb"/>
+<text x="350.0" y="492" text-anchor="middle" font-size="16" fill="#4b5563">5</text>
+<line x1="430.0" y1="152" x2="430.0" y2="470" stroke="#e5e7eb"/>
+<text x="430.0" y="492" text-anchor="middle" font-size="16" fill="#4b5563">6</text>
+<line x1="510.0" y1="152" x2="510.0" y2="470" stroke="#e5e7eb"/>
+<text x="510.0" y="492" text-anchor="middle" font-size="16" fill="#4b5563">7</text>
+<line x1="590.0" y1="152" x2="590.0" y2="470" stroke="#e5e7eb"/>
+<text x="590.0" y="492" text-anchor="middle" font-size="16" fill="#4b5563">8</text>
+<text x="32" y="520" font-size="16" fill="#4b5563">점: 세 시드의 중앙값. 막대와 아래 숫자: 시드 사이 범위. 가로축은 4에서 시작한다.</text>
+</svg>

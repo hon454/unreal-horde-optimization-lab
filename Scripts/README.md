@@ -14,6 +14,7 @@
 | `summarize.py` | 프레임 CSV → `Measurements/M<N>/runs.csv`, `summary.csv` |
 | `spikes.py` | 묶음의 주기 스파이크 검사 |
 | `plot.py` | `summary.csv` → `Docs/figures/` |
+| `plot-readme.py` | 최종 측정 CSV → 루트 README의 그림(`Docs/figures/readme/`) |
 | `check-iskm.py` | 러너의 메타데이터 검사(ISKM 인스턴스 수) |
 
 ## 에셋을 다시 만드는 것

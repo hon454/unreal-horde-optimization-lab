@@ -1,0 +1,105 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="1058" viewBox="0 0 800 1058" font-family="Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Segoe UI, sans-serif" font-size="16" fill="#111827">
+<rect x="0.5" y="0.5" width="799" height="1057" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+<text x="32" y="46" font-size="22" font-weight="700">단계마다 기법 하나를 더했을 때의 프레임 시간</text>
+<text x="32" y="74" font-size="16" fill="#4b5563">호드 총수 1만, 오브 시점 카메라, 60초씩 세 번 잰 중앙값(ms)</text>
+<rect x="32" y="95" width="16" height="16" rx="3" fill="#374151"/>
+<text x="54" y="108" font-size="16">프레임 시간</text>
+<rect x="178" y="95" width="16" height="16" rx="3" fill="#2563eb"/>
+<text x="200" y="108" font-size="16">게임 스레드</text>
+<rect x="324" y="95" width="16" height="16" rx="3" fill="#0d9488"/>
+<text x="346" y="108" font-size="16">렌더 스레드</text>
+<rect x="470" y="95" width="16" height="16" rx="3" fill="#db2777"/>
+<text x="492" y="108" font-size="16">GPU</text>
+<text x="32" y="148" font-size="16" fill="#4b5563">축척 A: 0–450ms</text>
+<text x="32" y="176" font-size="17" font-weight="700">1단계 액터 군중</text>
+<text x="32" y="197" font-size="16" fill="#4b5563">ACharacter + AnimBP</text>
+<rect x="330" y="162" width="343.4" height="17" rx="3" fill="#374151"/>
+<text x="680.4" y="176" font-size="16"><tspan font-weight="700" fill="#374151">441</tspan></text>
+<rect x="330" y="183" width="332.1" height="17" rx="3" fill="#2563eb"/>
+<text x="669.1" y="197" font-size="16"><tspan font-weight="700" fill="#2563eb">427</tspan><tspan font-weight="700" fill="#b45309"> 병목</tspan></text>
+<rect x="330" y="204" width="23.5" height="17" rx="3" fill="#0d9488"/>
+<text x="360.5" y="218" font-size="16"><tspan font-weight="700" fill="#0d9488">30.3</tspan></text>
+<rect x="330" y="225" width="39.3" height="17" rx="3" fill="#db2777"/>
+<text x="376.3" y="239" font-size="16"><tspan font-weight="700" fill="#db2777">50.5</tspan></text>
+<line x1="343.0" y1="134" x2="343.0" y2="252" stroke="#b45309" stroke-width="2" stroke-dasharray="5 4"/>
+<text x="337.0" y="138" text-anchor="end" font-size="16" font-weight="700" fill="#b45309">16.7ms</text>
+<line x1="32" y1="262" x2="768" y2="262" stroke="#e5e7eb"/>
+<text x="32" y="292" font-size="16" fill="#4b5563">축척 B: 0–17ms(축척 A의 약 26배)</text>
+<text x="32" y="320" font-size="17" font-weight="700">2단계 Mass 로직</text>
+<text x="32" y="341" font-size="16" fill="#4b5563">애니메이션 없는 ISM</text>
+<rect x="330" y="306" width="238.3" height="17" rx="3" fill="#374151"/>
+<text x="575.3" y="320" font-size="16"><tspan font-weight="700" fill="#374151">9.69</tspan></text>
+<rect x="330" y="327" width="149.5" height="17" rx="3" fill="#2563eb"/>
+<text x="486.5" y="341" font-size="16"><tspan font-weight="700" fill="#2563eb">6.08</tspan></text>
+<rect x="330" y="348" width="154.4" height="17" rx="3" fill="#0d9488"/>
+<text x="491.4" y="362" font-size="16"><tspan font-weight="700" fill="#0d9488">6.28</tspan></text>
+<rect x="330" y="369" width="231.6" height="17" rx="3" fill="#db2777"/>
+<text x="568.6" y="383" font-size="16"><tspan font-weight="700" fill="#db2777">9.41</tspan><tspan font-weight="700" fill="#b45309"> 병목</tspan></text>
+<text x="32" y="422" font-size="17" font-weight="700">3단계 ISM + VAT</text>
+<text x="32" y="443" font-size="16" fill="#4b5563">200m 밖은 그리지 않음</text>
+<rect x="330" y="408" width="189.7" height="17" rx="3" fill="#374151"/>
+<text x="526.7" y="422" font-size="16"><tspan font-weight="700" fill="#374151">7.71</tspan></text>
+<rect x="330" y="429" width="71.5" height="17" rx="3" fill="#2563eb"/>
+<text x="408.5" y="443" font-size="16"><tspan font-weight="700" fill="#2563eb">2.91</tspan></text>
+<rect x="330" y="450" width="100.1" height="17" rx="3" fill="#0d9488"/>
+<text x="437.1" y="464" font-size="16"><tspan font-weight="700" fill="#0d9488">4.07</tspan></text>
+<rect x="330" y="471" width="181.3" height="17" rx="3" fill="#db2777"/>
+<text x="518.3" y="485" font-size="16"><tspan font-weight="700" fill="#db2777">7.37</tspan><tspan font-weight="700" fill="#b45309"> 병목</tspan></text>
+<text x="32" y="524" font-size="17" font-weight="700">4단계 액터 하이드레이션</text>
+<text x="32" y="545" font-size="16" fill="#4b5563">30m 안 액터(상한 500)</text>
+<text x="32" y="566" font-size="16" fill="#4b5563">+ 애니메이션 예산</text>
+<rect x="330" y="510" width="198.6" height="17" rx="3" fill="#374151"/>
+<text x="535.6" y="524" font-size="16"><tspan font-weight="700" fill="#374151">8.07</tspan></text>
+<rect x="330" y="531" width="191.1" height="17" rx="3" fill="#2563eb"/>
+<text x="528.1" y="545" font-size="16"><tspan font-weight="700" fill="#2563eb">7.77</tspan><tspan font-weight="700" fill="#b45309"> 병목</tspan></text>
+<rect x="330" y="552" width="113.4" height="17" rx="3" fill="#0d9488"/>
+<text x="450.4" y="566" font-size="16"><tspan font-weight="700" fill="#0d9488">4.61</tspan></text>
+<rect x="330" y="573" width="167.6" height="17" rx="3" fill="#db2777"/>
+<text x="504.6" y="587" font-size="16"><tspan font-weight="700" fill="#db2777">6.81</tspan></text>
+<text x="32" y="626" font-size="17" font-weight="700">5단계 Simulation LOD</text>
+<text x="32" y="647" font-size="16" fill="#4b5563">+ 엔티티 풀</text>
+<rect x="330" y="612" width="184.8" height="17" rx="3" fill="#374151"/>
+<text x="521.8" y="626" font-size="16"><tspan font-weight="700" fill="#374151">7.51</tspan></text>
+<rect x="330" y="633" width="177.0" height="17" rx="3" fill="#2563eb"/>
+<text x="514.0" y="647" font-size="16"><tspan font-weight="700" fill="#2563eb">7.20</tspan><tspan font-weight="700" fill="#b45309"> 병목</tspan></text>
+<rect x="330" y="654" width="109.7" height="17" rx="3" fill="#0d9488"/>
+<text x="446.7" y="668" font-size="16"><tspan font-weight="700" fill="#0d9488">4.46</tspan></text>
+<rect x="330" y="675" width="168.1" height="17" rx="3" fill="#db2777"/>
+<text x="505.1" y="689" font-size="16"><tspan font-weight="700" fill="#db2777">6.83</tspan></text>
+<text x="32" y="728" font-size="17" font-weight="700">6단계 ISKM</text>
+<text x="32" y="749" font-size="16" fill="#4b5563">+ 고정 바운드</text>
+<rect x="330" y="714" width="181.4" height="17" rx="3" fill="#374151"/>
+<text x="518.4" y="728" font-size="16"><tspan font-weight="700" fill="#374151">7.38</tspan></text>
+<rect x="330" y="735" width="177.1" height="17" rx="3" fill="#2563eb"/>
+<text x="514.1" y="749" font-size="16"><tspan font-weight="700" fill="#2563eb">7.20</tspan><tspan font-weight="700" fill="#b45309"> 병목</tspan></text>
+<rect x="330" y="756" width="77.3" height="17" rx="3" fill="#0d9488"/>
+<text x="414.3" y="770" font-size="16"><tspan font-weight="700" fill="#0d9488">3.14</tspan></text>
+<rect x="330" y="777" width="129.9" height="17" rx="3" fill="#db2777"/>
+<text x="466.9" y="791" font-size="16"><tspan font-weight="700" fill="#db2777">5.28</tspan></text>
+<text x="32" y="830" font-size="17" font-weight="700">7단계 Niagara 배경 무리</text>
+<text x="32" y="851" font-size="16" fill="#4b5563">200m 밖, 엔티티 위치로</text>
+<text x="32" y="872" font-size="16" fill="#4b5563">움직이는 입자</text>
+<rect x="330" y="816" width="307.6" height="17" rx="3" fill="#374151"/>
+<text x="644.6" y="830" font-size="16"><tspan font-weight="700" fill="#374151">12.5</tspan></text>
+<rect x="330" y="837" width="193.8" height="17" rx="3" fill="#2563eb"/>
+<text x="530.8" y="851" font-size="16"><tspan font-weight="700" fill="#2563eb">7.88</tspan></text>
+<rect x="330" y="858" width="82.8" height="17" rx="3" fill="#0d9488"/>
+<text x="419.8" y="872" font-size="16"><tspan font-weight="700" fill="#0d9488">3.36</tspan></text>
+<rect x="330" y="879" width="297.9" height="17" rx="3" fill="#db2777"/>
+<text x="634.9" y="893" font-size="16"><tspan font-weight="700" fill="#db2777">12.1</tspan><tspan font-weight="700" fill="#b45309"> 병목</tspan></text>
+<text x="32" y="932" font-size="17" font-weight="700">8단계 품질 올리기</text>
+<text x="32" y="953" font-size="16" fill="#4b5563">액터 0~40m(상한 1,000)</text>
+<text x="32" y="974" font-size="16" fill="#4b5563">80m 밖 그림자 끔</text>
+<rect x="330" y="918" width="273.6" height="17" rx="3" fill="#374151"/>
+<text x="610.6" y="932" font-size="16"><tspan font-weight="700" fill="#374151">11.1</tspan></text>
+<rect x="330" y="939" width="192.3" height="17" rx="3" fill="#2563eb"/>
+<text x="529.3" y="953" font-size="16"><tspan font-weight="700" fill="#2563eb">7.82</tspan></text>
+<rect x="330" y="960" width="84.8" height="17" rx="3" fill="#0d9488"/>
+<text x="421.8" y="974" font-size="16"><tspan font-weight="700" fill="#0d9488">3.45</tspan></text>
+<rect x="330" y="981" width="263.5" height="17" rx="3" fill="#db2777"/>
+<text x="600.5" y="995" font-size="16"><tspan font-weight="700" fill="#db2777">10.7</tspan><tspan font-weight="700" fill="#b45309"> 병목</tspan></text>
+<line x1="740.0" y1="278" x2="740.0" y2="1008" stroke="#b45309" stroke-width="2" stroke-dasharray="5 4"/>
+<text x="734.0" y="282" text-anchor="end" font-size="16" font-weight="700" fill="#b45309">16.7ms</text>
+<line x1="32" y1="1010" x2="768" y2="1010" stroke="#e5e7eb"/>
+<text x="32" y="1036" font-size="16" fill="#4b5563">프레임 시간은 게임 스레드, 렌더 스레드, GPU 가운데 가장 느린 쪽(병목)이 정한다.</text>
+</svg>
