@@ -26,17 +26,13 @@
 
 ![단계마다 기법 하나를 더했을 때의 프레임 시간, 게임 스레드, 렌더 스레드, GPU 시간](Docs/figures/readme/ladder.svg)
 
-| 1단계: 액터 군중 | 2단계: Mass 로직 | 3단계: ISM + VAT |
-| --- | --- | --- |
-| ![1단계 화면](Docs/figures/steps/step1-L1-full.webp) | ![2단계 화면](Docs/figures/steps/step2-L2-mass.webp) | ![3단계 화면](Docs/figures/steps/step3-L3-vatcull.webp) |
+| 1단계: 액터 군중 | 2단계: Mass 로직 | 3단계: ISM + VAT | 4단계: 액터 하이드레이션 |
+| --- | --- | --- | --- |
+| ![1단계 화면](Docs/figures/steps/step1-L1-full.webp) | ![2단계 화면](Docs/figures/steps/step2-L2-mass.webp) | ![3단계 화면](Docs/figures/steps/step3-L3-vatcull.webp) | ![4단계 화면](Docs/figures/steps/step4-L4-mass.webp) |
 
-| 4단계: 액터 하이드레이션 | 5단계: Simulation LOD | 6단계: ISKM |
-| --- | --- | --- |
-| ![4단계 화면](Docs/figures/steps/step4-L4-mass.webp) | ![5단계 화면](Docs/figures/steps/step5-L5-m4offpool.webp) | ![6단계 화면](Docs/figures/steps/step6-L6-m5bounds.webp) |
-
-| 7단계: Niagara 배경 무리 | 8단계: 품질 올리기 | |
-| --- | --- | --- |
-| ![7단계 화면](Docs/figures/steps/step7-L7-q2crowd.webp) | ![8단계 화면](Docs/figures/steps/step8-L8-q4final.webp) | |
+| 5단계: Simulation LOD | 6단계: ISKM | 7단계: Niagara 배경 무리 | 8단계: 품질 올리기 |
+| --- | --- | --- | --- |
+| ![5단계 화면](Docs/figures/steps/step5-L5-m4offpool.webp) | ![6단계 화면](Docs/figures/steps/step6-L6-m5bounds.webp) | ![7단계 화면](Docs/figures/steps/step7-L7-q2crowd.webp) | ![8단계 화면](Docs/figures/steps/step8-L8-q4final.webp) |
 
 ![단계별 60fps를 지키는 최대 개체 수](Docs/figures/readme/max-entities.svg)
 
