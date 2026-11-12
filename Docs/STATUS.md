@@ -24,9 +24,9 @@ M0\~M5, M3b 완료(태그 `M0`\~`M5`, `M3b`). 품질 계획 Q1\~Q5 완료, Q6은
 
 ## 진행 중인 세션
 
-- `crowdfx-lowpoly`: 200m 밖 입자의 메시를 원본 스켈레탈 낮은 LOD로 구운 입자 전용 VAT 메시로 바꾼다(굽기 경로, LOD 선택과 경계 화질 비교, `NS_LabCrowd` 적용, Development 확인). Opus high. 진행 중. **에디터가 떠 있고 이 세션이 에디터·빌드·Development 실행을 쓴다.** 끝나면 코디네이터가 에디터를 닫는다.
-- `asset-restore-guide`: 클론 뒤 Fab 두 팩(ParagonMinions, NiagaraExamples)을 받고 `Scripts/restore-assets.ps1` 하나로 git 밖 에셋을 복구하는 구성과 가이드 `Docs/Guides/setup.md`를 만든다(2026-11-12 사용자 결정). 에디터를 띄우는 검증은 코디네이터에 묻고 기다린다. Opus high. 진행 중.
-- `code-tour`: 최종 구성의 한 프레임을 순서대로 적는 `Docs/Guides/code-tour.md`와 흐름 그림을 만들고 README "구조"에서 링크한다(평가 7번, 2026-11-12 사용자 결정). 코드는 고치지 않는다. Opus high. 진행 중.
+- `crowdfx-lowpoly`: 입자 전용 저폴리 VAT 메시(굽기, LOD 선택, 적용, Development 확인). Opus high. 진행 중. **에디터가 떠 있고 이 세션이 에디터·빌드·Development 실행을 쓴다.** 끝나면 코디네이터가 에디터를 닫는다.
+- `asset-restore-guide`: `Scripts/restore-assets.ps1`과 `Docs/Guides/setup.md`. 에디터를 띄우는 검증은 하지 않는다. Opus high. 진행 중.
+- `code-tour`: `Docs/Guides/code-tour.md`와 흐름 그림, README "구조" 링크. 코드는 고치지 않는다. Opus high. 진행 중.
 
 세션을 띄우면 세션, 작업 단위, 모델과 추론 수준, 상태를 여기에 적고, 끝나서 확인한 세션은 보관 처리하고 지운다(AGENTS.md "여러 세션"의 코디네이터 항목).
 
