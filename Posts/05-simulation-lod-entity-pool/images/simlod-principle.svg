@@ -53,26 +53,26 @@
 <line x1="32" y1="450" x2="768" y2="450" stroke="#e5e7eb"/>
 <text x="32" y="476" font-size="18" font-weight="700">죽은 개체의 엔티티</text>
 <text x="32" y="519" font-size="17" font-weight="700">4단계</text>
-<rect x="120" y="494" width="170" height="38" rx="6" fill="#f8fafc" stroke="#9ca3af" stroke-width="2"/>
-<text x="205.0" y="519" text-anchor="middle" font-size="16">사망이 끝난다</text>
-<path d="M294 513 L316 513" stroke="#4b5563" stroke-width="2"/>
-<path d="M310 507 L318 513 L310 519" fill="none" stroke="#4b5563" stroke-width="2"/>
-<rect x="322" y="494" width="170" height="38" rx="6" fill="#f8fafc" stroke="#9ca3af" stroke-width="2"/>
-<text x="407.0" y="519" text-anchor="middle" font-size="16">엔티티를 파괴한다</text>
-<path d="M496 513 L518 513" stroke="#4b5563" stroke-width="2"/>
-<path d="M512 507 L520 513 L512 519" fill="none" stroke="#4b5563" stroke-width="2"/>
-<rect x="524" y="494" width="170" height="38" rx="6" fill="#f8fafc" stroke="#9ca3af" stroke-width="2"/>
-<text x="609.0" y="519" text-anchor="middle" font-size="16">새 엔티티를 만든다</text>
+<rect x="120" y="494" width="200" height="38" rx="6" fill="#f8fafc" stroke="#9ca3af" stroke-width="2"/>
+<text x="220.0" y="519" text-anchor="middle" font-size="16">사망이 끝난다</text>
+<path d="M324 513 L342 513" stroke="#4b5563" stroke-width="2"/>
+<path d="M336 507 L344 513 L336 519" fill="none" stroke="#4b5563" stroke-width="2"/>
+<rect x="348" y="494" width="200" height="38" rx="6" fill="#f8fafc" stroke="#9ca3af" stroke-width="2"/>
+<text x="448.0" y="519" text-anchor="middle" font-size="16">엔티티를 파괴한다</text>
+<path d="M552 513 L570 513" stroke="#4b5563" stroke-width="2"/>
+<path d="M564 507 L572 513 L564 519" fill="none" stroke="#4b5563" stroke-width="2"/>
+<rect x="576" y="494" width="200" height="38" rx="6" fill="#f8fafc" stroke="#9ca3af" stroke-width="2"/>
+<text x="676.0" y="519" text-anchor="middle" font-size="16">새 엔티티를 만든다</text>
 <text x="32" y="569" font-size="17" font-weight="700">5단계</text>
-<rect x="120" y="544" width="170" height="38" rx="6" fill="#f8fafc" stroke="#2563eb" stroke-width="2"/>
-<text x="205.0" y="569" text-anchor="middle" font-size="16">사망이 끝난다</text>
-<path d="M294 563 L316 563" stroke="#4b5563" stroke-width="2"/>
-<path d="M310 557 L318 563 L310 569" fill="none" stroke="#4b5563" stroke-width="2"/>
-<rect x="322" y="544" width="170" height="38" rx="6" fill="#f8fafc" stroke="#2563eb" stroke-width="2"/>
-<text x="407.0" y="569" text-anchor="middle" font-size="16">풀에 넣는다</text>
-<path d="M496 563 L518 563" stroke="#4b5563" stroke-width="2"/>
-<path d="M512 557 L520 563 L512 569" fill="none" stroke="#4b5563" stroke-width="2"/>
-<rect x="524" y="544" width="170" height="38" rx="6" fill="#f8fafc" stroke="#2563eb" stroke-width="2"/>
-<text x="609.0" y="569" text-anchor="middle" font-size="16">같은 엔티티를 다시 쓴다</text>
+<rect x="120" y="544" width="200" height="38" rx="6" fill="#f8fafc" stroke="#2563eb" stroke-width="2"/>
+<text x="220.0" y="569" text-anchor="middle" font-size="16">사망이 끝난다</text>
+<path d="M324 563 L342 563" stroke="#4b5563" stroke-width="2"/>
+<path d="M336 557 L344 563 L336 569" fill="none" stroke="#4b5563" stroke-width="2"/>
+<rect x="348" y="544" width="200" height="38" rx="6" fill="#f8fafc" stroke="#2563eb" stroke-width="2"/>
+<text x="448.0" y="569" text-anchor="middle" font-size="16">풀에 넣는다</text>
+<path d="M552 563 L570 563" stroke="#4b5563" stroke-width="2"/>
+<path d="M564 557 L572 563 L564 569" fill="none" stroke="#4b5563" stroke-width="2"/>
+<rect x="576" y="544" width="200" height="38" rx="6" fill="#f8fafc" stroke="#2563eb" stroke-width="2"/>
+<text x="676.0" y="569" text-anchor="middle" font-size="16">같은 엔티티를 다시 쓴다</text>
 <text x="120" y="604" font-size="16" fill="#4b5563">두 경우 모두 새 위치는 맵 가장자리 고리(490–500m)이고 일련번호도 같다.</text>
 </svg>

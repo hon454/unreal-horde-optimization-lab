@@ -163,8 +163,8 @@ def principle():
         y += 50
     for m in [0, 30, 80, 200, 500]:
         o.append(f'<line x1="{X(m):.1f}" y1="{y - 8}" x2="{X(m):.1f}" y2="{y}" stroke="{SUB}"/>')
-        anchor = "start" if m == 0 else "end" if m == 500 else "middle"
-        o.append(f'<text x="{X(m):.1f}" y="{y + 20}" text-anchor="{anchor}" font-size="16" fill="{SUB}">{m}m</text>')
+        anchor = "end" if m in (0, 500) else "middle"  # 0m ends at its tick so it does not run into 30m
+        o.append(f'<text x="{X(m) + (6 if m == 0 else 0):.1f}" y="{y + 20}" text-anchor="{anchor}" font-size="16" fill="{SUB}">{m}m</text>')
     y += 50
     o.append(f'<text x="32" y="{y}" font-size="16" fill="{SUB}">거리는 카메라에서 잰다. 맵 반경 500m에서 개체의 60%가 200m 밖에 있다.</text>')
     o.append(f'<text x="32" y="{y + 24}" font-size="16" fill="{SUB}">3단계는 30m·80m 경계를 두지만 세 구간 모두 VAT 인스턴스로 그린다.</text>')
@@ -207,12 +207,13 @@ def problem():
               ("렌더 스레드", [v(L2, n, "render_p50_ms") for n in NS], TEAL, False),
               ("게임 스레드", [v(L2, n, "game_p50_ms") for n in NS], BLUE, False)]
     X, Y = line_chart(o, series, T, B, L, R, 22, [0, 5, 10, 15, 20], "스레드별 시간 중앙값(ms)")
-    # value labels: above (-12) or below (+24) the point, chosen per point so that close lines do not collide
-    offs = {"GPU": [-12, -12, -12, -12], "렌더 스레드": [-12, -12, 24, 24], "게임 스레드": [24, 24, -12, 24]}
+    # value labels sit off the lines, which all rise to the right: above-left (ul), below-right (br) or above-right (ar)
+    side = {"GPU": ["ul", "ul", "ul", "ul"], "렌더 스레드": ["ul", "ul", "br", "br"], "게임 스레드": ["br", "br", "ml", "br"]}
+    pos = {"ul": (-8, -12, "end"), "br": (8, 24, "start"), "ml": (-10, -2, "end")}  # ml: left of the point, between the GPU and 렌더 스레드 lines
     for lab, vals, col, _ in series:
         for k, (n, val) in enumerate(zip(NS, vals)):
-            dy = offs[lab][k]
-            o.append(f'<text x="{X(n) + (8 if k < 3 else -8):.1f}" y="{Y(val) + dy:.1f}" text-anchor="{"start" if k < 3 else "end"}" '
+            dx, dy, anc = pos[side[lab][k]]
+            o.append(f'<text x="{X(n) + dx:.1f}" y="{Y(val) + dy:.1f}" text-anchor="{anc}" '
                      f'font-size="16" font-weight="700" fill="{col}">{fmt(val)}</text>')
     lx = 590
     for i, (lab, _, col, _) in enumerate(series):
@@ -269,17 +270,22 @@ def maxn():
     p3 = [v(L3, n, "frame_p95_ms") for n in NS]
     series = [("2단계", p2, GRAY, True), ("3단계", p3, BLUE, False)]
     X, Y = line_chart(o, series, T, B, L, R, 25, [0, 5, 10, 15, 20, 25], "프레임 시간 느린 쪽 5% 경계(ms)")
-    for k, (n, a, b) in enumerate(zip(NS, p2, p3)):
-        anchor = "start" if k < 3 else "end"
-        dx = 8 if k < 3 else -8
-        ya = Y(a) + 24 if k == 2 else Y(a) - 10  # 2만: below the point, clear of the 16.7 ms line and the limit marker
-        o.append(f'<text x="{X(n) + dx:.1f}" y="{ya:.1f}" text-anchor="{anchor}" font-size="16" font-weight="700" fill="{DARK}">{fmt(a)}</text>')
-        o.append(f'<text x="{X(n) + dx:.1f}" y="{Y(b) + 24:.1f}" text-anchor="{anchor}" font-size="16" font-weight="700" fill="{BLUE}">{fmt(b)}</text>')
-    y167 = Y(16.667)
     nx = X(N_AT_60_L2)
+    for k, (n, a, b) in enumerate(zip(NS, p2, p3)):
+        if k == 2:
+            # 2만: the limit marker's dotted line runs just right of the point, so both labels start right of that line
+            xa, xb, aa, ab, ya = nx + 8, nx + 8, "start", "start", Y(a) + 24
+        elif k < 2:
+            # the rising 2단계 line passes right of and below its point, so that label goes above-left
+            xa, xb, aa, ab, ya = X(n) - 8, X(n) + 8, "end", "start", Y(a) - 10
+        else:
+            xa, xb, aa, ab, ya = X(n) - 8, X(n) - 8, "end", "end", Y(a) - 10
+        o.append(f'<text x="{xa:.1f}" y="{ya:.1f}" text-anchor="{aa}" font-size="16" font-weight="700" fill="{DARK}">{fmt(a)}</text>')
+        o.append(f'<text x="{xb:.1f}" y="{Y(b) + 24:.1f}" text-anchor="{ab}" font-size="16" font-weight="700" fill="{BLUE}">{fmt(b)}</text>')
+    y167 = Y(16.667)
     o.append(f'<circle cx="{nx:.1f}" cy="{y167:.1f}" r="5.5" fill="white" stroke="{AMBER}" stroke-width="2.5"/>')
     o.append(f'<path d="M{nx:.1f} {y167 + 8:.1f} L{nx:.1f} {B - 4}" stroke="{AMBER}" stroke-width="1.5" stroke-dasharray="3 3"/>')
-    o.append(f'<text x="{nx:.1f}" y="{B - 10}" text-anchor="middle" font-size="16" font-weight="700" fill="{AMBER}">{N_AT_60_L2:,}</text>')
+    o.append(f'<text x="{nx + 8:.1f}" y="{B - 10}" text-anchor="start" font-size="16" font-weight="700" fill="{AMBER}">{N_AT_60_L2:,}</text>')
     lx = 590
     o.append(f'<line x1="{lx}" y1="160" x2="{lx + 28}" y2="160" stroke="{GRAY}" stroke-width="2.5" stroke-dasharray="6 4"/><text x="{lx + 36}" y="166" font-size="16">2단계</text>')
     o.append(f'<line x1="{lx}" y1="192" x2="{lx + 28}" y2="192" stroke="{BLUE}" stroke-width="2.5"/><text x="{lx + 36}" y="198" font-size="16">3단계</text>')

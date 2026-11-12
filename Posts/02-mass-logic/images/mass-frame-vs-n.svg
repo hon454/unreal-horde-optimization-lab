@@ -38,7 +38,7 @@
 <text x="554" y="333.1" font-size="16" font-weight="700" fill="#b45309">16.7ms(60fps)</text>
 <polyline points="136.0,348.2 201.2,317.6 266.4,283.0 417.7,157.1" fill="none" stroke="#dc2626" stroke-width="2.5"/>
 <circle cx="136.0" cy="348.2" r="4.5" fill="#dc2626"/>
-<text x="126.0" y="338.2" text-anchor="end" font-size="16" font-weight="700" fill="#dc2626">11.0</text>
+<text x="126.0" y="370.2" text-anchor="end" font-size="16" font-weight="700" fill="#dc2626">11.0</text>
 <circle cx="201.2" cy="317.6" r="4.5" fill="#dc2626"/>
 <text x="191.2" y="307.6" text-anchor="end" font-size="16" font-weight="700" fill="#dc2626">20.0</text>
 <circle cx="266.4" cy="283.0" r="4.5" fill="#dc2626"/>

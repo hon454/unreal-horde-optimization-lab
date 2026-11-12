@@ -304,18 +304,21 @@ def maxn():
     series = [("3단계", p3, GRAY, True), ("4단계", p4, RED, False)]
     X, Y = line_chart(o, series, T, B, L, R, 25, [0, 5, 10, 15, 20, 25], "프레임 시간 느린 쪽 5% 경계(ms)")
     for k, (n, a, b) in enumerate(zip(NS, p3, p4)):
-        anchor = "start" if k < 3 else "end"
-        dx = 8 if k < 3 else -8
-        # 5천: step 4 sits just below step 3, so step 3 goes above the point and step 4 below
-        ya = Y(a) - 10 if k == 0 else Y(a) + 24
-        o.append(f'<text x="{X(n) + dx:.1f}" y="{ya:.1f}" text-anchor="{anchor}" font-size="16" font-weight="700" fill="{DARK}">{fmt(a)}</text>')
-        yb = Y(b) + 24 if k == 0 else Y(b) - 10
-        o.append(f'<text x="{X(n) + dx:.1f}" y="{yb:.1f}" text-anchor="{anchor}" font-size="16" font-weight="700" fill="{RED}">{fmt(b)}</text>')
+        # both lines rise to the right: a label goes above-left or below-right of its point so that no line crosses it
+        # 5천: step 4 sits just below step 3, so step 3 goes above-left and step 4 below-right
+        if k == 0:
+            xa, aa, ya = X(n) - 8, "end", Y(a) - 10
+            xb, ab, yb = X(n) + 8, "start", Y(b) + 24
+        else:
+            xa, aa, ya = X(n) + 8, "start", Y(a) + 24
+            xb, ab, yb = X(n) - 8, "end", Y(b) - 10
+        o.append(f'<text x="{xa:.1f}" y="{ya:.1f}" text-anchor="{aa}" font-size="16" font-weight="700" fill="{DARK}">{fmt(a)}</text>')
+        o.append(f'<text x="{xb:.1f}" y="{yb:.1f}" text-anchor="{ab}" font-size="16" font-weight="700" fill="{RED}">{fmt(b)}</text>')
     y167 = Y(16.667)
     nx = X(N_AT_60_L4)
     o.append(f'<circle cx="{nx:.1f}" cy="{y167:.1f}" r="5.5" fill="white" stroke="{AMBER}" stroke-width="2.5"/>')
     o.append(f'<path d="M{nx:.1f} {y167 + 8:.1f} L{nx:.1f} {B - 4}" stroke="{AMBER}" stroke-width="1.5" stroke-dasharray="3 3"/>')
-    o.append(f'<text x="{nx:.1f}" y="{B - 10}" text-anchor="middle" font-size="16" font-weight="700" fill="{AMBER}">{N_AT_60_L4:,}</text>')
+    o.append(f'<text x="{nx + 8:.1f}" y="{B - 10}" text-anchor="start" font-size="16" font-weight="700" fill="{AMBER}">{N_AT_60_L4:,}</text>')
     lx = 590
     o.append(f'<line x1="{lx}" y1="160" x2="{lx + 28}" y2="160" stroke="{GRAY}" stroke-width="2.5" stroke-dasharray="6 4"/><text x="{lx + 36}" y="166" font-size="16">3단계</text>')
     o.append(f'<line x1="{lx}" y1="192" x2="{lx + 28}" y2="192" stroke="{RED}" stroke-width="2.5"/><text x="{lx + 36}" y="198" font-size="16">4단계</text>')

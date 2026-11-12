@@ -246,8 +246,8 @@ def frame_vs_n():
     o.append(f'<line x1="{L}" y1="{y167:.1f}" x2="{R}" y2="{y167:.1f}" stroke="{AMBER}" stroke-dasharray="6 4" stroke-width="1.5"/>')
     o.append(f'<text x="{R + 6}" y="{y167 + 6:.1f}" font-size="16" font-weight="700" fill="{AMBER}">16.7ms(60fps)</text>')
     # label placement per point: (dx, dy, anchor). "ul" = up-left, "dr" = down-right
-    place = {"ul": (-10, -10, "end"), "dr": (10, 22, "start")}
-    where = {(A, 500): "ul", (A, 1000): "ul", (A, 2000): "ul", (A, 10000): "ul",
+    place = {"ul": (-10, -10, "end"), "dr": (10, 22, "start"), "dl": (-10, 22, "end")}  # dl: the 16.7ms line crosses an up-left label at 500
+    where = {(A, 500): "dl", (A, 1000): "ul", (A, 2000): "ul", (A, 10000): "ul",
              (M, 5000): "dr", (M, 10000): "ul", (M, 20000): "dr", (M, 30000): "ul"}
     for var, ns_, col in [(A, NS_A, RED), (M, NS_M, BLUE)]:
         vals = [v(var, n, "frame_p95_ms") for n in ns_]

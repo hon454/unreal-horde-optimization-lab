@@ -130,16 +130,19 @@ def problem():
         lx += 150
     y = 140
     top = y - 6
+    labels = []
     for n, lab in zip(NS, NLAB):
         o.append(f'<text x="{X0 - 16}" y="{y + 42}" text-anchor="end" font-size="17" font-weight="700">{lab}</text>')
         for name, col, c in bars:
             val = v(L4, n, col)
             w = val * scale
             o.append(f'<rect x="{X0}" y="{y}" width="{w:.1f}" height="20" rx="3" fill="{c}"/>')
-            o.append(f'<text x="{X0 + w + 8:.1f}" y="{y + 16}" font-size="16" font-weight="700" fill="{c}">{fmt(val)}</text>')
+            # value labels are drawn after the 16.7 ms line, with a white halo, because that line crosses the longest label
+            labels.append(f'<text x="{X0 + w + 8:.1f}" y="{y + 16}" font-size="16" font-weight="700" fill="{c}" stroke="white" stroke-width="5" paint-order="stroke">{fmt(val)}</text>')
             y += 25
         y += 22
     line167(o, X0 + 16.667 * scale, top, y - 18)
+    o.extend(labels)
     o.append(f'<text x="{X0 - 16}" y="{y + 16}" text-anchor="end" font-size="16" fill="{SUB}">호드 총수</text>')
     y += 34
     o.append(f'<line x1="32" y1="{y - 12}" x2="{W - 32}" y2="{y - 12}" stroke="{LINE}"/>')
@@ -191,7 +194,7 @@ def principle():
     y += 30
     flows = [("4단계", GRAY, ["사망이 끝난다", "엔티티를 파괴한다", "새 엔티티를 만든다"]),
              ("5단계", BLUE, ["사망이 끝난다", "풀에 넣는다", "같은 엔티티를 다시 쓴다"])]
-    BW, GAP = 170, 32
+    BW, GAP = 200, 28
     for lab, col, steps in flows:
         o.append(f'<text x="{LX}" y="{y + 25}" font-size="17" font-weight="700">{lab}</text>')
         x = 120
@@ -234,12 +237,11 @@ def result():
         for n, val in zip(NS, vals):
             o.append(f'<circle cx="{X(n):.1f}" cy="{Y(val):.1f}" r="4.5" fill="{col}"/>')
     for k, (n, va, vb) in enumerate(zip(NS, a, b)):
-        anchor = "start" if k < 3 else "end"
-        dx = 8 if k < 3 else -8
-        o.append(f'<text x="{X(n) + dx:.1f}" y="{Y(va) - 10:.1f}" text-anchor="{anchor}" font-size="16" font-weight="700" fill="{DARK}">{fmt(va)}</text>')
-        o.append(f'<text x="{X(n) + dx:.1f}" y="{Y(vb) + 24:.1f}" text-anchor="{anchor}" font-size="16" font-weight="700" fill="{BLUE}">{fmt(vb)}</text>')
-    o.append(f'<text x="{L - 10}" y="{B + 26}" text-anchor="end" font-size="16" fill="{SUB}">호드 총수</text>')
-    o.append(f'<text x="{L - 10}" y="{B + 50}" text-anchor="end" font-size="16" fill="{BLUE}">차이</text>')
+        # both lines rise to the right: the step 4 label goes above-left and the step 5 label below-right of its point
+        o.append(f'<text x="{X(n) - 8:.1f}" y="{Y(va) - 10:.1f}" text-anchor="end" font-size="16" font-weight="700" fill="{DARK}">{fmt(va)}</text>')
+        o.append(f'<text x="{X(n) + 8:.1f}" y="{Y(vb) + 24:.1f}" text-anchor="start" font-size="16" font-weight="700" fill="{BLUE}">{fmt(vb)}</text>')
+    o.append(f'<text x="{L + 44}" y="{B + 26}" text-anchor="end" font-size="16" fill="{SUB}">호드 총수</text>')
+    o.append(f'<text x="{L + 44}" y="{B + 50}" text-anchor="end" font-size="16" fill="{BLUE}">차이</text>')
     for n, lab, va, vb in zip(NS, NLAB, a, b):
         o.append(f'<line x1="{X(n):.1f}" y1="{B}" x2="{X(n):.1f}" y2="{B + 5}" stroke="{SUB}"/>')
         o.append(f'<text x="{X(n):.1f}" y="{B + 26}" text-anchor="middle" font-size="16">{lab}</text>')

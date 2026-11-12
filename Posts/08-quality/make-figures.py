@@ -169,10 +169,11 @@ def headroom():
         o.append(f'<rect x="{X0}" y="{y}" width="{w:.1f}" height="24" rx="3" fill="{c}"/>')
         o.append(f'<text x="{X0 + w + 8:.1f}" y="{y + 18}" font-size="17" font-weight="700" fill="{c}">{fmt(val)}</text>')
         y += 58
-    for val, lab in [(MARGIN, "13.3ms(여유 20%)"), (BUDGET, "16.7ms(60fps)")]:
+    # the two lines are 60px apart, so the left label ends at its line and the right label starts at its line
+    for val, lab, anc, dx in [(MARGIN, "13.3ms(여유 20%)", "end", 6), (BUDGET, "16.7ms(60fps)", "start", -6)]:
         x = X0 + val * scale
         o.append(f'<line x1="{x:.1f}" y1="{top}" x2="{x:.1f}" y2="{y - 26}" stroke="{AMBER}" stroke-width="2" stroke-dasharray="5 4"/>')
-        o.append(f'<text x="{x:.1f}" y="{y - 6}" text-anchor="middle" font-size="16" font-weight="700" fill="{AMBER}">{lab}</text>')
+        o.append(f'<text x="{x + dx:.1f}" y="{y - 6}" text-anchor="{anc}" font-size="16" font-weight="700" fill="{AMBER}">{lab}</text>')
     y += 34
     p95 = v(L7, N, "frame_p95_ms")
     gap = v(L7, N, "game_p50_ms") - v(L7, N, "gpu_p50_ms")

@@ -69,9 +69,11 @@ def summary():
                ("렌더 스레드", "render_p50_ms", TEAL), ("GPU", "gpu_p50_ms", PINK)]
     y = 120
     top = y - 8
+    segs = []  # the 16.7ms line is drawn per group, below the group title, so it never crosses a title
     for g, var in groups:
         o.append(f'<text x="{X0}" y="{y}" font-size="17" font-weight="700">{g}</text>')
         y += 12
+        segs.append((y - 2, y + 26 * len(metrics) - 4))
         for name, col, c in metrics:
             val = v(var, 10000, col)
             w = val * scale
@@ -81,7 +83,9 @@ def summary():
             y += 26
         y += 30
     x167 = X0 + 16.667 * scale
-    o.append(f'<line x1="{x167:.1f}" y1="{top + 14}" x2="{x167:.1f}" y2="{y - 14}" stroke="{AMBER}" stroke-width="2" stroke-dasharray="5 4"/>')
+    for y1, y2 in segs:
+        o.append(f'<line x1="{x167:.1f}" y1="{y1}" x2="{x167:.1f}" y2="{y2}" stroke="{AMBER}" stroke-width="2" stroke-dasharray="5 4"/>')
+    o.append(f'<line x1="{x167:.1f}" y1="{segs[-1][1]}" x2="{x167:.1f}" y2="{y - 14}" stroke="{AMBER}" stroke-width="2" stroke-dasharray="5 4"/>')
     o.append(f'<text x="{x167 + 6:.1f}" y="{y - 2}" font-size="16" font-weight="700" fill="{AMBER}">16.7ms(60fps)</text>')
     y += 30
     o.append(f'<line x1="32" y1="{y - 14}" x2="{W - 32}" y2="{y - 14}" stroke="{LINE}"/>')
@@ -218,7 +222,7 @@ def techniques():
     title(o, "애니메이션 기법을 덧대 줄어든 시간",
           "호드 총수 1만, 오브 시점 카메라, 세 번 잰 중앙값을 액터 군중과 비교(ms)")
     base_f, base_g = v("L1-full", 10000, "frame_p50_ms"), v("L1-full", 10000, "game_p50_ms")
-    X0, scale = 40, 520 / 45.0
+    X0, scale = 40, 440 / 45.0  # the longest bar (43.0) plus its label must stay inside the right margin
     y = 120
     for name, var in [("URO", "S1-uro"), ("Animation Budget Allocator(예산 2ms)", "S1-budget")]:
         f, g = v(var, 10000, "frame_p50_ms"), v(var, 10000, "game_p50_ms")

@@ -29,7 +29,10 @@
 <text x="84.0" y="492" font-size="16"><tspan font-weight="700" fill="#0d9488">28.9</tspan><tspan fill="#4b5563"> 렌더 스레드</tspan></text>
 <rect x="40" y="502" width="62.4" height="20" rx="3" fill="#db2777"/>
 <text x="110.4" y="518" font-size="16"><tspan font-weight="700" fill="#db2777">50.1</tspan><tspan fill="#4b5563"> GPU</tspan></text>
-<line x1="60.7" y1="126" x2="60.7" y2="544" stroke="#b45309" stroke-width="2" stroke-dasharray="5 4"/>
+<line x1="60.7" y1="130" x2="60.7" y2="232" stroke="#b45309" stroke-width="2" stroke-dasharray="5 4"/>
+<line x1="60.7" y1="276" x2="60.7" y2="378" stroke="#b45309" stroke-width="2" stroke-dasharray="5 4"/>
+<line x1="60.7" y1="422" x2="60.7" y2="524" stroke="#b45309" stroke-width="2" stroke-dasharray="5 4"/>
+<line x1="60.7" y1="524" x2="60.7" y2="544" stroke="#b45309" stroke-width="2" stroke-dasharray="5 4"/>
 <text x="66.7" y="556" font-size="16" font-weight="700" fill="#b45309">16.7ms(60fps)</text>
 <line x1="32" y1="574" x2="768" y2="574" stroke="#e5e7eb"/>
 <text x="32" y="600" font-size="16" fill="#4b5563">프레임 시간은 셋 가운데 가장 느린 쪽이 정한다. 세 구성 모두 게임 스레드다.</text>

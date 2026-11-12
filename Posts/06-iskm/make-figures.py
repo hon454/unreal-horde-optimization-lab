@@ -190,12 +190,14 @@ def problem():
               ("GPU", [v(L5, n, "gpu_p50_ms") for n in NS], PINK, False),
               ("렌더 스레드", [v(L5, n, "render_p50_ms") for n in NS], TEAL, False)]
     X, Y = line_chart(o, series, T, B, L, R, 17.5, [0, 5, 10, 15], "스레드별 시간 중앙값(ms)")
-    # labels: game above, GPU below, render below
-    offs = {"게임 스레드": [24, -12, -12, -12], "GPU": [-12, 24, 24, 24], "렌더 스레드": [24, 24, 24, 24]}
+    # labels stay off the lines, which all rise to the right: left of the point at 5천 (the three points are 18-26px apart),
+    # then above-left for 게임 스레드 and below-right for GPU and 렌더 스레드
+    side = {"게임 스레드": ["ml", "ul", "ul", "ul"], "GPU": ["ml", "br", "br", "br"], "렌더 스레드": ["ml", "br", "br", "br"]}
+    pos = {"ml": (-10, 5, "end"), "ul": (-8, -12, "end"), "br": (8, 24, "start")}
     for lab, vals, col, _ in series:
         for k, (n, val) in enumerate(zip(NS, vals)):
-            dy = offs[lab][k]
-            o.append(f'<text x="{X(n) + (8 if k < 3 else -8):.1f}" y="{Y(val) + dy:.1f}" text-anchor="{"start" if k < 3 else "end"}" '
+            dx, dy, anc = pos[side[lab][k]]
+            o.append(f'<text x="{X(n) + dx:.1f}" y="{Y(val) + dy:.1f}" text-anchor="{anc}" '
                      f'font-size="16" font-weight="700" fill="{col}">{fmt(val)}</text>')
     lx = 590
     for i, (lab, _, col, _) in enumerate(series):
