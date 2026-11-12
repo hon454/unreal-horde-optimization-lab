@@ -24,13 +24,21 @@
 
 ![단계마다 기법 하나를 더했을 때의 프레임 시간, 게임 스레드, 렌더 스레드, GPU 시간](Docs/figures/readme/ladder.svg)
 
-단계별 화면: [1단계 액터 군중](Docs/figures/steps/step1-L1-full.webp) · [2단계 Mass 로직](Docs/figures/steps/step2-L2-mass.webp) · [3단계 ISM + VAT](Docs/figures/steps/step3-L3-vatcull.webp) · [4단계 액터 하이드레이션](Docs/figures/steps/step4-L4-mass.webp) · [5단계 Simulation LOD](Docs/figures/steps/step5-L5-m4offpool.webp) · [6단계 ISKM](Docs/figures/steps/step6-L6-m5bounds.webp) · [7단계 Niagara 배경 무리](Docs/figures/steps/step7-L7-q2crowd.webp) · [8단계 품질 올리기](Docs/figures/steps/step8-L8-q4final.webp)
+| 1단계: 액터 군중 | 2단계: Mass 로직 | 3단계: ISM + VAT |
+| --- | --- | --- |
+| ![1단계 화면](Docs/figures/steps/step1-L1-full.webp) | ![2단계 화면](Docs/figures/steps/step2-L2-mass.webp) | ![3단계 화면](Docs/figures/steps/step3-L3-vatcull.webp) |
+
+| 4단계: 액터 하이드레이션 | 5단계: Simulation LOD | 6단계: ISKM |
+| --- | --- | --- |
+| ![4단계 화면](Docs/figures/steps/step4-L4-mass.webp) | ![5단계 화면](Docs/figures/steps/step5-L5-m4offpool.webp) | ![6단계 화면](Docs/figures/steps/step6-L6-m5bounds.webp) |
+
+| 7단계: Niagara 배경 무리 | 8단계: 품질 올리기 | |
+| --- | --- | --- |
+| ![7단계 화면](Docs/figures/steps/step7-L7-q2crowd.webp) | ![8단계 화면](Docs/figures/steps/step8-L8-q4final.webp) | |
 
 ![단계별 60fps를 지키는 최대 개체 수](Docs/figures/readme/max-entities.svg)
 
 7단계와 8단계는 앞 단계에서 번 프레임 시간을 배경 무리와 액터 수, 전환 거리에 쓰는 품질 단계다. 2단계는 호드 총수 2만에서 세 번 잰 프레임 시간(중앙값)이 3.35ms 갈려, 최대 개체 수가 이 흔들림을 안고 있다([Worklog/Q6.md](Docs/Worklog/Q6.md)의 후속 분석 절).
-
-정확한 값은 [summary.csv](Measurements/Full1/summary.csv)와 [full-n-at-60fps.csv](Docs/figures/full1/full-n-at-60fps.csv)에 있다.
 
 ### 빼 보기: 최종 구성에서 기법 하나를 뺀 값
 
@@ -38,16 +46,14 @@
 
 ![최종 구성에서 기법 하나를 뺐을 때 프레임 시간, 게임 스레드, GPU 시간의 변화](Docs/figures/readme/ablation.svg)
 
-배경 무리의 비용은 GPU에 실린다. 200m 밖을 입자 대신 ISKM으로 그리면 병목이 게임 스레드로 옮겨 간다. 정확한 값은 [full-ablation.csv](Docs/figures/full1/full-ablation.csv)에 있다.
-
+배경 무리의 비용은 GPU에 실린다. 200m 밖을 입자 대신 ISKM으로 그리면 병목이 게임 스레드로 옮겨 간다.
 ### 전환이 티 나는 정도
 
 개체가 인스턴스에서 액터로 바뀌는 순간, 그 자리 화면이 평소 움직임보다 얼마나 더 변했는지를 잰 값이다. 프레임 시간이 아니라 화면 캡처로 낸 값이라 Development 빌드에서 참고로 쟀다.
 
 ![인스턴스가 액터로 바뀌는 순간 화면이 튀는 정도](Docs/figures/readme/transition.svg)
 
-전환 대책은 프레임 시간으로는 구별되지 않지만, 끄면 눈에 띄는 전환이 두세 배가 된다. ISKM과 VAT의 전환 차이는 시드 사이 흔들림과 비슷한 크기다. 그래서 ISKM의 이점은 프레임 시간으로만 적는다. 엔티티 풀은 프레임 시간, 게임 스레드, 전환 어느 지표에서도 이점이 보이지 않았다. 정확한 값은 [runs.csv](Measurements/Full1/transition-dev/runs.csv)에 있다.
-
+전환 대책은 프레임 시간으로는 구별되지 않지만, 끄면 눈에 띄는 전환이 두세 배가 된다. ISKM과 VAT의 전환 차이는 시드 사이 흔들림과 비슷한 크기다. 그래서 ISKM의 이점은 프레임 시간으로만 적는다. 엔티티 풀은 프레임 시간, 게임 스레드, 전환 어느 지표에서도 이점이 보이지 않았다.
 ## 글
 
 | # | 제목 | 알게 된 것 |
@@ -56,20 +62,13 @@
 
 ## 측정 방법
 
-- 측정 PC는 Ryzen 9 5950X, RTX 4090, 64GB, Windows 11, UE 5.8.4 소스 빌드다. 자세한 값은 [Docs/Reference/pc-specs.md](Docs/Reference/pc-specs.md)에 있다.
-- 화면은 2560×1440 창 모드, 스케일러빌리티 Epic이다. 수직 동기화와 프레임 상한은 끄고(`r.VSync 0`, `t.MaxFPS 0`), 화면 비율은 100%로 두고 동적 해상도는 껐다. 그래서 프레임 시간은 모니터 주사율에 묶이지 않는다.
+- 측정 PC는 Ryzen 9 5950X, RTX 4090, 64GB, Windows 11, UE 5.8.4 소스 빌드다.- 화면은 2560×1440 창 모드, 스케일러빌리티 Epic이다. 수직 동기화와 프레임 상한은 끄고(`r.VSync 0`, `t.MaxFPS 0`), 화면 비율은 100%로 두고 동적 해상도는 껐다. 그래서 프레임 시간은 모니터 주사율에 묶이지 않는다.
 - 고정 시드로 초기 조건을 재현한다. 개체는 정상 상태 분포(밀도 ∝ 1/r)로 미리 놓고 15초 뒤 60초를 잰다. 궤적은 비결정적이라 3회 실행의 중앙값과 범위를 함께 적는다.
 - 목표 총수 1만에서 사다리 전 단계(오브 시점·탑뷰)와 빼 보기 조건을 재고, 보조로 단계별 최대 개체 수를 잰다.
 - 수치는 Test 구성 패키지에서 `csvprofile`로 얻는다.
 - 중앙값의 차이가 두 구성의 범위 중 큰 쪽보다 작으면 "구별되지 않았다"고 적는다.
 
 규약 전체는 [Docs/Guides/measurement.md](Docs/Guides/measurement.md)에 있다.
-
-## 측정의 한계
-
-- PC 한 대, 해상도와 스케일러빌리티를 고정한 Test 패키지다. 다른 하드웨어의 절댓값은 다르다.
-- Paragon 미니언은 실제 게임 캐릭터보다 가볍다. 상대 변화를 본다.
-- Mass의 병렬 처리와 가변 프레임 시간 때문에 같은 시드도 궤적이 다르다. 범위를 함께 본다.
 
 ## 실행
 
