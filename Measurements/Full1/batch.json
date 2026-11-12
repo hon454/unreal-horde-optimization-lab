@@ -1,0 +1,21 @@
+﻿{
+    "batch":  "Full1",
+    "state":  "done",
+    "commit":  "730ff186141a90f1e512b9fb1dbf51c5e1081e52",
+    "started":  "2026-11-12 10:57:00",
+    "ended":  "2026-11-12 15:01:24",
+    "resumes":  0,
+    "order":  "round",
+    "runs_per_condition":  3,
+    "target_n":  10000,
+    "duration_override":  0,
+    "only":  "",
+    "conditions":  70,
+    "planned_runs":  178,
+    "planned_runs_ok":  178,
+    "planned_runs_missing":  0,
+    "failed_runs":  0,
+    "giveups":  [
+
+                ]
+}

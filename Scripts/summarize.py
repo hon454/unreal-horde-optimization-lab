@@ -14,7 +14,7 @@ E4 (d) `m4offmove`(LabSimLod 끝 ` offmove=1`)는 Lab/SimTickOff·SimBandOff·Of
 실제 틱 주기(초) = 평균 프레임 시간(초) x 평균 SimBand / 평균 SimTick을 밴드마다 runs.csv·summary.csv의 맨 끝 열에 쓴다(Worklog/M4.md).
 Full<n>부터(총괄 묶음, Docs/Worklog/Q5.md "2단위"): 라벨 Full<n>-<단계>-<변형>-N<N>-<P1|P2>-r<i>를 읽고 조건 이름(L8-q4final)을 variant로 쓴다. 열 cond·group·ladder와 동등성 값(deaths, snipes,
 death_rate, near30_mean, alive_min, alive_max)을 맨 끝에 붙인다. 프로세스 메모리 = mem_total_mb(PhysicalUsedMB p50), GPU 메모리 = gpu_mem_p50, 품질 열은 Q4와 같다. 회차 11 이상은 A/A(<조건>-aa),
-Measurements/<묶음>/failures.csv의 라벨과 r0은 뺀다. 촬영(Full1shot-)·트레이스(Full1trace-)는 접두사가 달라 읽지 않는다.
+Measurements/<묶음>/failures.csv의 라벨과 r0은 뺀다. 스레드별 p95(game_p95_ms, gpu_p95_ms)도 총괄 묶음에만 맨 끝에 붙인다. 촬영(Full1shot-)·트레이스(Full1trace-)는 접두사가 달라 읽지 않는다.
 Q4부터: 마일스톤 Q<n> 라벨을 읽고(조건 이름 = <variant>-<태그 전체>), 품질 지표 열(QUALITY_FIELDS)을 맨 끝에 붙인다(Docs/Worklog/Q4.md).
 실행: py -3 -I Scripts/summarize.py --milestone M0 [--pc 1] [--rebuild]   (총괄 묶음은 --milestone Full1, --batch도 같은 뜻)
 """
@@ -38,7 +38,9 @@ FULL_AA_MIN_RUN = 10
 # 총괄 묶음에만 붙는 열: 조건 이름, 묶음 종류(ladder·ablation·sub), 사다리 단계(LabLadder), 동등성 값(Docs/Worklog/Q5.md "동등성 통계")
 FULL_TEXT = ["cond", "group", "ladder"]
 FULL_NUM = ["deaths", "snipes", "death_rate", "near30_mean", "alive_min", "alive_max"]
-FULL_FIELDS = FULL_TEXT + FULL_NUM
+# 스레드별 p95(2026-11-12 사용자 결정): 기법이 Game과 GPU 중 어느 쪽 부하를 바꾸는지 p95에서도 가른다. 총괄 묶음에만 붙여 옛 묶음의 열 순서를 바꾸지 않는다. summary에는 중앙값과 _min·_max
+FULL_THREAD = ["game_p95_ms", "gpu_p95_ms"]
+FULL_FIELDS = FULL_TEXT + FULL_NUM + FULL_THREAD
 
 _full_by_label = None
 
@@ -343,6 +345,8 @@ def summarize_run(path, pc):
     row["fg_ok"] = fg_ok(label)
     if "cond" in m:
         row.update(full_fields(meta, m))
+        row["game_p95_ms"] = percentile(column(header, data, COLS["game"]), 0.95)
+        row["gpu_p95_ms"] = percentile(column(header, data, COLS["gpu"]), 0.95)
     return row
 
 
@@ -416,7 +420,9 @@ def main():
     fields += ["bottleneck", "build", "types", "types_assets", "large_skip_ratio", "final", "fg_ok"]
     fields += ["sim_lod"] + [f for f in SIM_FIELDS if f != "sim_lod"]
     if full:
-        fields += FULL_FIELDS
+        fields += FULL_TEXT + FULL_NUM
+        for c in FULL_THREAD:
+            fields += [c, f"{c}_min", f"{c}_max"]
     with open(out_dir / "summary.csv", "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=fields)
         w.writeheader()
@@ -450,6 +456,11 @@ def main():
                 for c in FULL_NUM:
                     vals = [float(r[c]) for r in rs if str(r.get(c, "")) != ""]
                     out[c] = round(statistics.median(vals), 4) if vals else ""
+                for c in FULL_THREAD:
+                    vals = [float(r[c]) for r in rs if str(r.get(c, "")) != ""]
+                    out[c] = round(statistics.median(vals), 3) if vals else ""
+                    out[f"{c}_min"] = min(vals) if vals else ""
+                    out[f"{c}_max"] = max(vals) if vals else ""
             w.writerow(out)
 
     print(f"runs.csv: {len(rows)} rows (+{added}), summary.csv: {len(groups)} conditions -> {out_dir}")

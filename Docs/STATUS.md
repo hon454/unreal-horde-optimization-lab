@@ -20,12 +20,14 @@ M0\~M5, M3b 완료(태그 `M0`\~`M5`, `M3b`). 필수 마일스톤이 끝났다. 
 - [x] **Q3 빼 보기 스위치와 전환 점수**(fccc4fb). 인자 하나씩 빼는 행이고 `LabTech*`를 `Scripts/ablation-check.py`가 대조한다. 전환 점수는 Development에서만 낸다. [Worklog/Q3.md](Worklog/Q3.md).
 - [x] **Q4 품질 올리기**(Q4b 0a37e91 포함). 최종 구성 `q4final`: 액터 상한 1,000, 전환 40m, 80m 밖 그림자 끔. 목표 총수 1만. [Worklog/Q4.md](Worklog/Q4.md).
 - [x] **Q5 측정 준비.** 러너·HUD·조건 표 21개, 예행 `Reh2` 통과(동등성, 스파이크 0건). 액터 1만 조건 여섯은 10초 구간에서 프레임 수 검사(100 이상)에 걸렸다(60초는 미확인, `Full1` 첫 실행 `r0`로 확인하고 실패하면 멈춘다). 후처리 스크립트의 촬영 잘림과 목표 총수를 고쳤다(624d6ae). [Worklog/Q5.md](Worklog/Q5.md).
-- [ ] **Q6 총괄 묶음 `Full1`** → 글 00\~09([backlog.md](backlog.md) "글 대기열").
-  - 요약을 내기 전에 `summarize.py`에 Game·GPU p95 열을 더한다. 사다리 표와 빼 보기 표는 프레임 시간 옆에 Game p50, GPU p50을 둔다(Render는 측정 기록에만). 조건은 늘리지 않는다(2026-11-12 사용자 결정).
+- [ ] **Q6 총괄 묶음 `Full1`** → 글 00\~09([backlog.md](backlog.md) "글 대기열"). 측정·검사·요약·그래프는 끝났다([Worklog/Q6.md](Worklog/Q6.md) "총괄 묶음 Full1"). 남은 것:
+  - Development 전환 점수 묶음([ADR-0012](Decisions/0012-ablation-switches-and-quality-metrics.md)), GIF 촬영(아래 "막힌 것"의 둘을 먼저 고친다).
+  - ADR 0010\~0013 "결과" 덧붙임, `autonomous-decisions.md` 맨 위 요약, README·measurement.md 수치를 `Full1` 값으로.
+  - 사다리 표와 빼 보기 표는 프레임 시간 옆에 Game p50, GPU p50을 둔다(Render는 측정 기록에만). 조건은 늘리지 않는다(2026-11-12 사용자 결정).
 
 ## 진행 중인 세션
 
-- 코디네이터: 총괄 묶음 `Full1` 실행 중(패키지 730ff18, 2026-11-12 시작, 4.5\~5.5시간). 예행 `Reh3`는 통과했다([Worklog/Q6.md](Worklog/Q6.md)). 끝날 때까지 빌드·에디터·패키징 금지.
+없다.
 
 세션을 띄우면 세션, 작업 단위, 모델과 추론 수준, 상태를 여기에 적고, 끝나서 확인한 세션은 보관 처리하고 지운다(AGENTS.md "작업 세션은 작게 나눠 띄우고").
 
@@ -66,7 +68,14 @@ py -3 Scripts/summarize.py --milestone M5
 
 ## 측정 결과
 
-마일스톤 묶음의 값이다. 글과 README의 수치는 총괄 묶음에서 다시 만든다.
+**총괄 묶음 `Full1`**(Test 패키지 730ff18, 2026-11-12, 178회 실패 0, 동등성 54조건 통과, 스파이크 0건). 표는 `Measurements/Full1/summary.csv`, 그래프는 `Docs/figures/full1/`.
+
+- 1만 P1 프레임 p50 / p95(ms): L1 441.5 / 466.4, L2 9.69 / 10.29, L3 7.71 / 8.19, L4 8.07 / 9.41, L5 7.51 / 8.83, L6 7.38 / 8.84, L7 12.51 / 13.03, L8 11.12 / 11.64. 최종 구성의 병목은 GPU다(Game p50 7.82, GPU p50 10.71).
+- N@16.7ms(프레임 p95): L1 797, L2 20,250, L4 26,154, L7 13,808, L8 16,826. L3·L5·L6은 3만에서도 안쪽이다.
+- 빼 보기(프레임 p50, L8 대비): `A8-crowdfx` −3.66, `A8-farshadow` +1.40, `A8-iskm` +1.28, `A8-farcull` +0.70(병목이 Game으로 옮겨 간다). 나머지 다섯과 `S8-col`은 ±0.1 안이고 Game에서 갈린다(`A8-hydrate` Game −4.07).
+- `L2-mass` 2만은 세 회차 범위가 3.35ms다(원인 미확인).
+
+아래는 마일스톤 묶음의 값이다. 글과 README의 수치는 총괄 묶음에서 다시 만든다.
 
 - 60fps를 지키는 최대 N(P1): M0 full 813, M0 static 1,196 → M1 20,577 → M2 20,518(같은 묶음의 M1 21,396) → M3 22,046(같은 묶음의 M2 + 200m 밖 Off 35,763).
 - M5 묶음(2종 P1, 프레임 p95 기준 N@16.7ms): `m4offpool`(VAT, 기준점) 약 17,100, `m5iskm`(ISKM) 약 16,000.
@@ -81,5 +90,4 @@ py -3 Scripts/summarize.py --milestone M5
 
 ## 사용자에게 요청한 일
 
-- `Full1`은 사용자가 승인했다(2026-11-12, HUD 세션과 재패키징 뒤).
 - 돌아오면 [Worklog/autonomous-decisions.md](Worklog/autonomous-decisions.md)를 검토해 달라(맨 위 요약, "사용자 판단 필요" 항목).

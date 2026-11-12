@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="414" viewBox="0 0 900 414" font-family="Segoe UI, Arial, sans-serif" font-size="13">
+<rect width="100%" height="100%" fill="white"/>
+<text x="450.0" y="26" text-anchor="middle" font-size="16" font-weight="600">Ladder at N=10,000 (P1)</text>
+<text x="450.0" y="46" text-anchor="middle" font-size="12" fill="#555">A/A (L8-q4final again, 3 runs): p95 11.65 ms (range 11.59-11.66) vs 11.64</text>
+<line x1="304.7" y1="62" x2="304.7" y2="384" stroke="#b45309" stroke-dasharray="6 4"/>
+<text x="308.7" y="58" fill="#b45309" font-size="11">16.7 ms</text>
+<line x1="301.7" y1="62" x2="301.7" y2="384" stroke="#16a34a" stroke-dasharray="6 4"/>
+<text x="305.7" y="58" fill="#16a34a" font-size="11">13.3 ms</text>
+<text x="280" y="87" text-anchor="end">1. Actor baseline</text>
+<rect x="290" y="72" width="410.7" height="20" fill="#6b7280"/>
+<rect x="290" y="95" width="388.8" height="6" fill="#6b7280" opacity="0.55"/>
+<text x="706.7" y="87">466.35</text>
+<text x="280" y="125" text-anchor="end">2. Logic on Mass</text>
+<rect x="290" y="110" width="9.1" height="20" fill="#2563eb"/>
+<rect x="290" y="133" width="8.5" height="6" fill="#2563eb" opacity="0.55"/>
+<text x="305.1" y="125">10.29</text>
+<text x="280" y="163" text-anchor="end">3. ISM + VAT, cull past 200 m</text>
+<rect x="290" y="148" width="7.2" height="20" fill="#ea580c"/>
+<rect x="290" y="171" width="6.8" height="6" fill="#ea580c" opacity="0.55"/>
+<text x="303.2" y="163">8.19</text>
+<text x="280" y="201" text-anchor="end">4. Near actors + anim budget</text>
+<rect x="290" y="186" width="8.3" height="20" fill="#ea580c"/>
+<rect x="290" y="209" width="7.1" height="6" fill="#ea580c" opacity="0.55"/>
+<text x="304.3" y="201">9.41</text>
+<text x="280" y="239" text-anchor="end">5. Simulation LOD + entity pool</text>
+<rect x="290" y="224" width="7.8" height="20" fill="#2563eb"/>
+<rect x="290" y="247" width="6.6" height="6" fill="#2563eb" opacity="0.55"/>
+<text x="303.8" y="239">8.83</text>
+<text x="280" y="277" text-anchor="end">6. ISKM + fixed bounds</text>
+<rect x="290" y="262" width="7.8" height="20" fill="#ea580c"/>
+<rect x="290" y="285" width="6.5" height="6" fill="#ea580c" opacity="0.55"/>
+<text x="303.8" y="277">8.84</text>
+<text x="280" y="315" text-anchor="end">7. Niagara background crowd</text>
+<rect x="290" y="300" width="11.5" height="20" fill="#ea580c"/>
+<rect x="290" y="323" width="11.0" height="6" fill="#ea580c" opacity="0.55"/>
+<text x="307.5" y="315">13.03</text>
+<text x="280" y="353" text-anchor="end">8. Raise quality (actor cap, hydrate dist)</text>
+<rect x="290" y="338" width="10.2" height="20" fill="#ea580c"/>
+<rect x="290" y="361" width="9.8" height="6" fill="#ea580c" opacity="0.55"/>
+<text x="306.2" y="353">11.64</text>
+<text x="290" y="406" font-size="11" fill="#555">ms. thick bar = frame p95, thin bar = frame p50 (median of runs)</text></svg>
