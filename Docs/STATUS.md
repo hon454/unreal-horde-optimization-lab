@@ -29,7 +29,8 @@
 
 ## 진행 중인 세션
 
-- 글 00, 02, 03: 코디네이터의 하위 에이전트 셋이 쓴다. Opus high. 진행 중. 새 세션은 Remote Control 중에 띄울 수 없었다([D28](Worklog/autonomous-decisions.md)).
+- 글 04, 06: 코디네이터의 하위 에이전트 둘이 쓴다. Opus high. 진행 중. 세션 대신 하위 에이전트를 쓰는 이유는 [D28](Worklog/autonomous-decisions.md)에 있다.
+- 글 00, 02, 03은 초안이 커밋됐다(2eb698f, bed7b5c, dbbdb71). 글 05는 풀 끔 떨림 확인이 끝난 뒤에 쓴다.
 - `pre6-capture`: 7·8단계 화면을 `Pre6`으로 다시 찍는다. 풀 끔 실행의 40\~80m 떨림을 화면으로 확인한다. Sonnet medium. 진행 중.
 - 촬영이 끝날 때까지 다른 세션과 사용자는 에디터, 빌드, Chrome을 띄우지 않는다.
 
