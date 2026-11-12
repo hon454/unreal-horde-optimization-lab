@@ -20,6 +20,7 @@
 | 확정된 결정과 이유, 버린 대안 | [Docs/Decisions/](Docs/Decisions/README.md)(ADR). ADR이 없는 결정은 그 README의 표 |
 | 측정 규약: 시나리오 고정값, 빌드 구성, 절차, 지표 이름, 차이 판정, 한계 | [measurement.md](Docs/Guides/measurement.md) |
 | 빌드·패키징·벤치마크·그래프 명령과 인자 | [commands.md](Docs/Guides/commands.md). 매번 쓰는 것만 STATUS.md "명령"에 둔다 |
+| 최종 구성에서 한 프레임에 도는 코드, 프로세서 순서, 엔티티 구성 | [code-tour.md](Docs/Guides/code-tour.md). 흐름 그림은 `Scripts/plot-code-tour.py`가 만든다 |
 | 빌드나 실행이 실패했을 때의 증상별 대처 | [troubleshooting.md](Docs/Guides/troubleshooting.md). 문제가 생겼을 때만 연다 |
 | 글과 README의 독자, 틀, 문장 규칙, 그림 규칙 | [posting.md](Docs/Guides/posting.md) |
 | 글 재료: 작업 중 질답에서 나온, 독자에게 설명이 필요한 부분 | [post-material.md](Docs/post-material.md). 사용자가 원인을 물어 답한 것은 여기에 더한다 |
@@ -58,6 +59,13 @@
 - **개발 속도가 최우선이다.** 단위 테스트, CI, PR, 외부 이슈 트래커를 쓰지 않는다. main에 직접 커밋한다.
 - **커밋 메시지는 [Conventional Commits](https://www.conventionalcommits.org/)로 쓴다.** `type(scope): summary` 한 줄, 영어 명령형 소문자. type은 `feat`, `fix`, `docs`, `build`, `refactor`, `chore`, `bench`(측정 결과 추가). 측정 조건이나 설정값을 바꾼 커밋은 본문에 이유를 쓴다.
 - **STATUS.md에는 지금 유효한 것만 두고 10KB를 넘기지 않는다.** 세션마다 통째로 읽는 파일이다. 끝낸 작업의 경위는 Worklog로 옮기고, 다음 작업을 제약하는 결과만 한 줄 남긴다. 매번 쓰지 않는 명령은 commands.md에, 확정값은 measurement.md에, 다시 나올 문제는 troubleshooting.md에, 엔진 소스에서 확인한 사실은 engine-notes.md에 둔다.
+- **STATUS.md는 ASD-STE100(Simplified Technical English)의 작성 규칙에 맞춰 쓴다.** 그 규칙을 한국어 문장에 적용한다.
+  - 한 문장에 한 가지 내용만 쓴다. 사실, 결정, 할 일을 한 문장에 섞지 않는다.
+  - 절차 문장은 20어절, 서술 문장은 25어절을 넘기지 않는다. 한 문단은 여섯 문장까지다.
+  - 누가 하는지 밝히고 능동형으로 쓴다. 할 일은 한 줄에 한 동작으로 쓰고, 순서가 있으면 번호를 붙인다.
+  - 같은 것은 늘 같은 낱말로 부른다. 묶음, 조건, 단계, 지표의 이름은 measurement.md와 plan.md의 이름을 쓴다. 약어는 처음 나올 때 푼다.
+  - 괄호 안에 문장을 넣지 않는다. 괄호에는 근거(커밋, 파일, ADR)와 짧은 값만 둔다.
+  - 여러 값을 견줄 때는 표나 목록을 쓴다.
 - **저장소 용량을 최소로 둔다.** 커밋하는 것은 소스, `Config/`, `.uproject`, 직접 만든 `Content/Lab/`, `Docs/`, `Posts/`, `Scripts/`, `Measurements/`의 `summary.csv`·`runs.csv`·대표 스크린샷이다. Fab 콘텐츠(`Content/ParagonMinions/`), VAT 베이크 산출물, `Saved/`, `Binaries/`, `Intermediate/`, `DerivedDataCache/`, 패키지는 커밋하지 않는다. 프레임 CSV·트레이스·영상은 저장소 밖에 두고 경로만 적는다. 이미지(`.png`, `.jpg`, `.webp`, `.gif`)와 `.uasset`·`.umap`은 Git LFS다(`.gitattributes`).
 - **문서가 근거로 인용하는 스크린샷은 레포에 넣는다.** `Measurements/<묶음>/shots/`에 jpg(품질 90)로 복사해 커밋하고 문서에는 그 경로를 적는다. `Saved/` 경로는 git 밖이라 근거로 적지 않는다. 대량으로 찍은 프레임은 대표 프레임만 옮기고 고른 기준을 Worklog에 적은 뒤 지운다. 이미 커밋된 이미지는 형식을 바꾸지 않는다.
 
