@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="526" viewBox="0 0 800 526" font-family="Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Segoe UI, sans-serif" font-size="16" fill="#111827">
+<rect x="0.5" y="0.5" width="799" height="525" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+<text x="32" y="46" font-size="22" font-weight="700">호드 총수 1만에서 7단계와 8단계가 쓰는 시간</text>
+<text x="32" y="74" font-size="16" fill="#4b5563">오브 시점 카메라, 60초씩 세 번 잰 중앙값(ms)</text>
+<text x="40" y="120" font-size="17" font-weight="700">7단계: 액터 0~30m(상한 500), 모든 거리에 그림자</text>
+<rect x="40" y="132" width="266.9" height="20" rx="3" fill="#374151"/>
+<text x="314.9" y="148" font-size="16"><tspan font-weight="700" fill="#374151">7.79</tspan><tspan fill="#4b5563"> 프레임 시간</tspan></text>
+<rect x="40" y="158" width="261.5" height="20" rx="3" fill="#2563eb"/>
+<text x="309.5" y="174" font-size="16"><tspan font-weight="700" fill="#2563eb">7.63</tspan><tspan fill="#4b5563"> 게임 스레드 ← 가장 느리다</tspan></text>
+<rect x="40" y="184" width="115.2" height="20" rx="3" fill="#0d9488"/>
+<text x="163.2" y="200" font-size="16"><tspan font-weight="700" fill="#0d9488">3.36</tspan><tspan fill="#4b5563"> 렌더 스레드</tspan></text>
+<rect x="40" y="210" width="209.0" height="20" rx="3" fill="#db2777"/>
+<text x="257.0" y="226" font-size="16"><tspan font-weight="700" fill="#db2777">6.10</tspan><tspan fill="#4b5563"> GPU</tspan></text>
+<text x="40" y="266" font-size="17" font-weight="700">8단계: 액터 0~40m(상한 1,000), 80m 밖 그림자 끔</text>
+<rect x="40" y="278" width="266.8" height="20" rx="3" fill="#374151"/>
+<text x="314.8" y="294" font-size="16"><tspan font-weight="700" fill="#374151">7.78</tspan><tspan fill="#4b5563"> 프레임 시간</tspan></text>
+<rect x="40" y="304" width="262.2" height="20" rx="3" fill="#2563eb"/>
+<text x="310.2" y="320" font-size="16"><tspan font-weight="700" fill="#2563eb">7.65</tspan><tspan fill="#4b5563"> 게임 스레드 ← 가장 느리다</tspan></text>
+<rect x="40" y="330" width="121.2" height="20" rx="3" fill="#0d9488"/>
+<text x="169.2" y="346" font-size="16"><tspan font-weight="700" fill="#0d9488">3.54</tspan><tspan fill="#4b5563"> 렌더 스레드</tspan></text>
+<rect x="40" y="356" width="196.1" height="20" rx="3" fill="#db2777"/>
+<text x="244.1" y="372" font-size="16"><tspan font-weight="700" fill="#db2777">5.72</tspan><tspan fill="#4b5563"> GPU</tspan></text>
+<line x1="611.4" y1="126" x2="611.4" y2="398" stroke="#b45309" stroke-width="2" stroke-dasharray="5 4"/>
+<text x="605.4" y="410" text-anchor="end" font-size="16" font-weight="700" fill="#b45309">16.7ms(60fps)</text>
+<line x1="32" y1="428" x2="768" y2="428" stroke="#e5e7eb"/>
+<text x="32" y="454" font-size="16" fill="#4b5563">프레임 시간은 −0.002ms로 세 번 잰 범위 안이다. GPU는 −0.376ms 바뀌었다.</text>
+<text x="32" y="478" font-size="16" fill="#4b5563">같은 프레임 시간에 액터가 374개에서 458개로 늘었다(프레임 평균).</text>
+</svg>

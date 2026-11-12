@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="468" viewBox="0 0 800 468" font-family="Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Segoe UI, sans-serif" font-size="16" fill="#111827">
+<rect x="0.5" y="0.5" width="799" height="467" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+<text x="32" y="46" font-size="22" font-weight="700">7단계는 호드 총수 1만에서 시간이 남는다</text>
+<text x="32" y="74" font-size="16" fill="#4b5563">오브 시점 카메라, 세 번 잰 중앙값(ms)</text>
+<text x="40" y="116" font-size="17" font-weight="700">프레임 시간(느린 쪽 5% 경계)</text>
+<rect x="40" y="128" width="320.1" height="24" rx="3" fill="#374151"/>
+<text x="368.1" y="146" font-size="17" font-weight="700" fill="#374151">9.34</text>
+<text x="40" y="186" font-size="17" font-weight="700">게임 스레드(중앙값)</text>
+<rect x="40" y="198" width="261.5" height="24" rx="3" fill="#2563eb"/>
+<text x="309.5" y="216" font-size="17" font-weight="700" fill="#2563eb">7.63</text>
+<text x="40" y="256" font-size="17" font-weight="700">GPU(중앙값)</text>
+<rect x="40" y="268" width="209.0" height="24" rx="3" fill="#db2777"/>
+<text x="257.0" y="286" font-size="17" font-weight="700" fill="#db2777">6.10</text>
+<line x1="497.1" y1="110" x2="497.1" y2="300" stroke="#b45309" stroke-width="2" stroke-dasharray="5 4"/>
+<text x="497.1" y="320" text-anchor="middle" font-size="16" font-weight="700" fill="#b45309">13.3ms(여유 20%)</text>
+<line x1="611.4" y1="110" x2="611.4" y2="300" stroke="#b45309" stroke-width="2" stroke-dasharray="5 4"/>
+<text x="611.4" y="320" text-anchor="middle" font-size="16" font-weight="700" fill="#b45309">16.7ms(60fps)</text>
+<line x1="32" y1="346" x2="768" y2="346" stroke="#e5e7eb"/>
+<text x="32" y="372" font-size="16" fill="#4b5563">느린 쪽 5% 경계는 13.3ms까지 4.00ms, 16.7ms까지 7.33ms가 남는다.</text>
+<text x="32" y="396" font-size="16" fill="#4b5563">GPU는 게임 스레드보다 1.53ms 짧다. 병목은 게임 스레드다.</text>
+<text x="32" y="420" font-size="16" fill="#4b5563">대형 액터의 애니메이션 갱신 가운데 건너뛴 것은 0.650%다. 예산 2ms가 거의 쉰다.</text>
+</svg>

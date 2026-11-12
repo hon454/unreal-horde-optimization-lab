@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="544" viewBox="0 0 800 544" font-family="Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Segoe UI, sans-serif" font-size="16" fill="#111827">
+<rect x="0.5" y="0.5" width="799" height="543" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+<text x="32" y="46" font-size="22" font-weight="700">8단계가 더하고 뺀 시간: 예상과 실제</text>
+<text x="32" y="74" font-size="16" fill="#4b5563">호드 총수 1만, 오브 시점 카메라, 세 번 잰 중앙값에서 계산(ms)</text>
+<text x="320" y="112" text-anchor="end" font-size="16" fill="#4b5563">← 줄었다</text>
+<text x="340" y="112" font-size="16" fill="#4b5563">늘었다 →</text>
+<text x="32" y="146" font-size="18" font-weight="700">게임 스레드</text>
+<text x="48" y="172" font-size="16" fill="#4b5563">예상: 늘어난 액터 84개 × 4단계 액터 단가 12.5µs</text>
+<rect x="330.0" y="182" width="263.5" height="24" rx="3" fill="white" stroke="#2563eb" stroke-width="2" stroke-dasharray="5 3"/>
+<text x="603.5" y="200" text-anchor="start" font-size="17" font-weight="700" fill="#2563eb">+1.05</text>
+<line x1="330" y1="178" x2="330" y2="210" stroke="#4b5563" stroke-width="1.5"/>
+<text x="48" y="232" font-size="16" fill="#4b5563">실제: 8단계 − 7단계(세 번 잰 범위 안)</text>
+<rect x="330.0" y="242" width="5.0" height="24" rx="3" fill="#2563eb"/>
+<text x="345.0" y="260" text-anchor="start" font-size="17" font-weight="700" fill="#2563eb">+0.020</text>
+<line x1="330" y1="238" x2="330" y2="270" stroke="#4b5563" stroke-width="1.5"/>
+<text x="32" y="298" font-size="18" font-weight="700">GPU</text>
+<text x="48" y="324" font-size="16" fill="#4b5563">80m 밖 그림자의 몫: 최종 구성에서 다시 켠 측정의 차이</text>
+<rect x="233.5" y="334" width="96.5" height="24" rx="3" fill="white" stroke="#db2777" stroke-width="2" stroke-dasharray="5 3"/>
+<text x="223.5" y="352" text-anchor="end" font-size="17" font-weight="700" fill="#db2777">−0.386</text>
+<line x1="330" y1="330" x2="330" y2="362" stroke="#4b5563" stroke-width="1.5"/>
+<text x="48" y="384" font-size="16" fill="#4b5563">실제: 8단계 − 7단계</text>
+<rect x="236.0" y="394" width="94.0" height="24" rx="3" fill="#db2777"/>
+<text x="226.0" y="412" text-anchor="end" font-size="17" font-weight="700" fill="#db2777">−0.376</text>
+<line x1="330" y1="390" x2="330" y2="422" stroke="#4b5563" stroke-width="1.5"/>
+<line x1="32" y1="446" x2="768" y2="446" stroke="#e5e7eb"/>
+<text x="32" y="472" font-size="16" fill="#4b5563">늘어난 액터의 게임 스레드 비용은 거의 보이지 않았다. 대신 대형 액터의 애니메이션 갱신을</text>
+<text x="32" y="496" font-size="16" fill="#4b5563">건너뛴 비율이 0.650%에서 20.7%로 뛰었다. GPU 감소는 80m 밖 그림자의 몫과 거의 같다.</text>
+</svg>
