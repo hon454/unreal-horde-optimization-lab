@@ -4,90 +4,136 @@
 
 호드 1만을 `ACharacter` 액터와 AnimBP로 돌리면 프레임 시간이 441ms다. 60fps의 한 프레임인 16.7ms의 26.5배다. 시간의 대부분은 애니메이션이 아니라 이동 컴포넌트가 쓴다. 그래서 애니메이션을 줄이는 URO와 Animation Budget Allocator를 덧대도 프레임은 400ms대에 남는다.
 
-| 구성(호드 1만, 오브 시점) | 프레임 p50 | 프레임 p95 | Game p50 |
-| --- | --- | --- | --- |
-| 액터 군중 | 441ms | 466ms | 427ms |
-| + URO | 422ms | 449ms | 408ms |
-| + Animation Budget Allocator(예산 2ms) | 401ms | 424ms | 386ms |
+아래 값은 호드 총수 1만, 오브 시점 카메라에서 60초씩 세 번 잰 중앙값이다.
 
-![1단계 액터 군중의 화면: 호드 1만, 오브 시점](../../Docs/figures/steps/step1-L1-full.webp)
+| 군중을 만든 방법 | 프레임 시간(ms) | 게임 스레드 시간(ms) | 렌더 스레드 시간(ms) | GPU 시간(ms) |
+| --- | --- | --- | --- | --- |
+| 액터 군중 | 441 | 427 | 30.3 | 50.5 |
+| 액터 군중 + URO | 422 | 408 | 28.7 | 50.5 |
+| 액터 군중 + Animation Budget Allocator(예산 2ms) | 401 | 386 | 28.9 | 50.2 |
 
-화면 왼쪽 위 HUD의 프레임 시간에는 녹화 부하가 섞여 있어 표의 값보다 높다. 수치의 근거는 [측정 기록](measurements.md)에 있다.
+프레임 시간은 한 프레임이 걸린 시간이다. 게임 스레드, 렌더 스레드, GPU는 각자 그 프레임에 일한 시간을 따로 잰다. 프레임 시간은 셋 가운데 가장 느린 쪽이 정하고, 이 구성에서는 게임 스레드가 가장 느리다. 지표의 자세한 설명은 00번 글에 둔다.
+
+![1단계 액터 군중의 화면: 호드 총수 1만, 오브 시점 카메라](../../Docs/figures/steps/step1-L1-full.webp)
+
+수치의 근거는 [측정 기록](measurements.md)에 있다.
 
 > **시나리오.** 플레이어는 움직이지 않는다. 맵 중앙의 오브를 향해 개체가 사방에서 걸어오고, 오브는 가까운 개체를 지우고 먼 개체를 주기적으로 쏜다. 모든 거리에서 생성·피격·사망·표현 전환이 계속 일어나게 하는 벤치마크 장치다.
 
-**쓰인 것**
+## 쓰인 기술
 
-| 이름 | 한 줄 설명 | 이 글에서 한 일 |
-| --- | --- | --- |
-| 프레임 시간 p50·p95, Game p50 | 60초 측정 동안 프레임 시간의 중앙값과 느린 쪽 5% 경계. Game은 게임 스레드가 일한 시간이다 | 개체 수마다 세 번 재고 중앙값을 적었다 |
-| N@16.7ms | 프레임 p95가 16.7ms 안에 드는 최대 개체 수 | 액터 군중의 한계를 797로 구했다 |
-| CharacterMovement | `ACharacter`의 이동 컴포넌트 `UCharacterMovementComponent`. 매 틱 개체를 걷게 하고 충돌과 바닥을 검사한다 | 기본 설정 그대로 두고 트레이스에서 비용을 읽었다 |
-| URO | Update Rate Optimization. 스켈레탈 메시가 거리에 따라 애니메이션 갱신을 건너뛰게 한다 | 메시의 `bEnableUpdateRateOptimizations`를 켜고 거리 단계는 엔진 기본값으로 두었다 |
-| Animation Budget Allocator | 애니메이션에 쓰는 게임 스레드 시간에 예산을 두고, 중요도가 낮은 메시부터 갱신을 건너뛰게 한다 | 메시를 `USkeletalMeshComponentBudgeted`로 바꾸고 예산을 2ms로 두었다. 중요도는 오브에서의 거리 단계로 주었다 |
+### CharacterMovement
+
+`UCharacterMovementComponent`는 `ACharacter`에 붙는 이동 컴포넌트다. 매 틱 속도를 계산해 캡슐을 바닥을 따라 옮기고, 옮긴 뒤 바닥을 다시 찾는다. 한 틱에 흐른 시간이 길면 그 시간을 나눠 이 계산을 여러 번 한다. 이 글에서는 설정을 바꾸지 않았다.
+
+### URO
+
+URO(Update Rate Optimization)는 스켈레탈 메시가 애니메이션을 몇 프레임에 한 번 갱신할지 정하는 기능이다. 엔진 기본값은 메시 LOD가 쓰는 화면 크기로 간격을 정한다. 화면 크기가 0.24를 넘으면 매 프레임, 0.12를 넘으면 두 프레임에 한 번, 그보다 작으면 세 프레임에 한 번 갱신한다. 화면에 그려지지 않은 메시는 네 프레임에 한 번이다. 이 글에서는 메시의 `bEnableUpdateRateOptimizations`만 켜고 간격은 기본값으로 두었다.
+
+### Animation Budget Allocator
+
+Animation Budget Allocator는 애니메이션에 쓰는 게임 스레드 시간에 프레임당 예산을 둔다. 할당기는 메시 하나의 평균 갱신 시간으로 예산 안에 드는 메시 수를 구한다. 중요도가 큰 메시부터 그 수만큼 매 프레임 갱신하고, 나머지는 갱신 간격을 늘린다. 이 글에서는 메시를 `USkeletalMeshComponentBudgeted`로 바꾸고 예산을 2ms로 두었다. 중요도는 Significance Manager가 카메라와의 거리로 준다. 가까울수록 크고, 250m 밖은 0이다.
 
 ## 원리: 한 프레임에 액터 한 개체가 하는 일
 
-액터 군중의 비용은 개체 하나가 한 프레임에 하는 일의 합이다. 개체마다 컴포넌트 몇 개가 게임 스레드에서 차례로 틱한다. 아래 도식은 1만 실행의 트레이스에서 이름을 확인한 타이머만 적었다.
+액터 군중의 비용은 개체 하나가 한 프레임에 하는 일의 합이다. 개체마다 컴포넌트가 게임 스레드에서 차례로 틱한다. 아래 그림의 칸은 1만 실행의 트레이스에서 이름을 확인한 타이머다. 막대는 그 타이머가 1만에서 쓴 프레임당 시간이다.
 
-```mermaid
-flowchart TD
-    A["CharacterMovement 틱<br/>UCharacterMovementComponent_TickComponent<br/>걷기, 충돌·바닥 검사"]
-    B["스켈레탈 메시 틱<br/>USkinnedMeshComponent_TickComponent<br/>안에서 AnimBP 갱신(USkeletalMeshComponent_TickAnimation)"]
-    C["애니메이션 평가 마무리<br/>USkeletalMeshComponent_CompleteParallelAnimationEvaluation<br/>병렬로 평가한 포즈를 메시에 반영"]
-    D["프레임 끝 렌더 갱신<br/>UWorld_SendAllEndOfFrameUpdates"]
-    A --> B --> C --> D
+![액터 한 개체가 한 프레임에 하는 일 네 가지와 1만에서의 시간: 이동 컴포넌트 틱 323ms가 72%를 차지한다](images/actor-frame-flow.svg)
+
+이 가운데 CharacterMovement는 프레임이 길어지면 일을 더 한다. 지난 틱 뒤에 흐른 시간을 한 번에 계산하지 않고 나눠 계산하기 때문이다. 나눈 한 번을 하위 스텝이라 부른다. 나누는 규칙은 다음 함수가 정한다.
+
+`Engine/Source/Runtime/Engine/Private/Components/CharacterMovementComponent.cpp`, `UCharacterMovementComponent::GetSimulationTimeStep`
+
+```cpp
+float UCharacterMovementComponent::GetSimulationTimeStep(float RemainingTime, int32 Iterations) const
+{
+	if (RemainingTime > MaxSimulationTimeStep)
+	{
+		if (Iterations < MaxSimulationIterations)
+		{
+			RemainingTime = FMath::Min(MaxSimulationTimeStep, RemainingTime * 0.5f);
+		}
+		// ...
+	}
+	return FMath::Max(MIN_TICK_TIME, RemainingTime);
+}
 ```
 
-이 가운데 CharacterMovement는 프레임이 길어지면 일을 더 한다. CharacterMovement는 지난 프레임 뒤에 흐른 시간만큼 개체를 옮긴다. 한 번에 계산하는 시간은 50ms까지다. 흐른 시간이 더 길면 한 틱 안에서 시간을 나눠 여러 번 계산한다. 나눌 때는 남은 시간의 절반과 50ms 중 짧은 쪽을 쓴다. 60ms면 30ms씩 두 번이다. 이 한 번 한 번을 하위 스텝이라 부른다. 하위 스텝마다 충돌과 바닥을 다시 검사하므로, 개체가 벽을 뚫거나 바닥을 놓치지 않는다.
+`MaxSimulationTimeStep`의 기본값은 0.05초이고 `MaxSimulationIterations`는 8이다. 남은 시간이 50ms보다 길면 남은 시간의 절반과 50ms 중 짧은 쪽만 이번 스텝에 쓴다. 60ms면 30ms씩 두 번이다.
 
-하위 스텝의 상한은 여덟 번이다. 1만에서는 프레임이 0.4초를 넘는다. 엔진은 한 틱에 넘기는 시간을 0.4초로 자른다. CharacterMovement는 그 0.4초를 50ms씩 여덟 번에 나눠 계산한다. 이미 느린 프레임에서 정확도를 지키려고 계산을 더 하는 셈이다.
+같은 파일, `UCharacterMovementComponent::PhysWalking`
 
-**예상.** 프레임이 50ms 안이면 하위 스텝은 한 번이다. 그 구간에서는 비용이 개체 수에 비례할 것이다. 1천의 Game p50을 1만으로 늘리면 166ms다. 1만에서는 하위 스텝이 여덟 번이 되므로 실제 값은 이보다 클 것이다.
+```cpp
+	float remainingTime = deltaTime;
+	// ...
+	while ( (remainingTime >= MIN_TICK_TIME) && (Iterations < MaxSimulationIterations) && CharacterOwner // ...
+	{
+		Iterations++;
+		// ...
+		const float timeTick = GetSimulationTimeStep(remainingTime, Iterations);
+		remainingTime -= timeTick;
+		// ...
+			MoveAlongFloor(MoveVelocity, timeTick, &StepDownResult);
+		// ...
+			FindFloor(UpdatedComponent->GetComponentLocation(), CurrentFloor, bZeroDelta, NULL);
+		// ...
+	}
+```
+
+`while` 조건이 하위 스텝을 최대 여덟 번 돌린다. 스텝마다 `MoveAlongFloor`가 캡슐을 옮기고 `FindFloor`가 바닥을 다시 찾는다. 그래서 스텝 수만큼 충돌 검사가 는다.
+
+1만에서는 프레임이 0.4초를 넘는다. 엔진은 한 틱에 넘기는 월드 시간을 0.4초로 자른다.
+
+`Engine/Source/Runtime/Engine/Private/WorldSettings.cpp`, `AWorldSettings::FixupDeltaSeconds`
+
+```cpp
+float AWorldSettings::FixupDeltaSeconds(float DeltaSeconds, float RealDeltaSeconds)
+{
+	// ...
+	return FMath::Clamp(DeltaSeconds, MinFrameTime, MaxFrameTime);
+}
+```
+
+`MaxFrameTime`은 `BaseGame.ini`의 `MaxUndilatedFrameTime=0.4`에서 온다. 그래서 1만의 CharacterMovement는 0.4초를 50ms씩 여덟 번에 나눠 계산한다. 이미 느린 프레임에서 정확도를 지키려고 계산을 더 하는 셈이다.
+
+**예상.** 프레임이 50ms 안이면 하위 스텝은 한 번이고, 비용은 개체 수에 비례할 것이다. 1천의 게임 스레드 시간은 16.6ms이고, 이것을 열 배 하면 166ms다. 1만에서는 하위 스텝이 여덟 번이므로 실제 값은 이보다 클 것이다.
 
 ## 문제: 1만에서 시간은 이동 컴포넌트가 쓴다
 
-1만의 게임 스레드 한 프레임은 446ms이고, 그중 323ms가 CharacterMovement의 틱이다. 72.5%다. 애니메이션 쪽 타이머 두 개는 합쳐 41.9ms다. 값은 최종 측정 때 따로 뜬 트레이스 한 회에서 읽었다.
+1만에서 게임 스레드 한 프레임은 446ms이고, 그중 323ms를 CharacterMovement 틱이 쓴다. 72.5%다. 애니메이션 쪽 두 타이머는 합쳐 41.9ms다. 이 값은 최종 측정 때 따로 뜬 트레이스 한 회의 구간 평균이고, 위 그림의 막대가 이 값이다. 개체 하나로 나누면 CharacterMovement가 한 프레임에 32.3µs를 쓴다.
 
-![게임 스레드 한 프레임 446ms의 구성: CharacterMovement 323ms가 72%를 차지한다](images/actor-gamethread-breakdown.svg)
+Unreal Insights에서 프레임 하나만 골라도 비율은 같다. 아래 스크린샷은 1만 실행의 트레이스에서 프레임 하나를 고르고, Timers 창을 CharacterMovement로 거른 화면이다.
 
-Unreal Insights에서 한 프레임만 골라도 거의 같은 비율이 나온다. 아래 스크린샷은 프레임 하나를 선택하고 Timers 창에서 CharacterMovement로 거른 화면이다. 프레임 하나 447.88ms 중 321.66ms가 CharacterMovement 틱이다(71.8%).
+![Unreal Insights, 프레임 하나: 448ms 중 322ms가 CharacterMovement 틱이다](images/insights-gamethread.jpg)
 
-![Unreal Insights, 프레임 하나: 447.88ms 중 321.66ms가 CharacterMovement 틱이다](images/insights-gamethread.jpg)
+스크린샷의 빨간 상자 두 곳에서 읽은 값이다(호드 총수 1만, 오브 시점 카메라, 트레이스의 프레임 하나).
 
-그림과 아래 표의 값은 이 한 프레임이 아니라 다른 트레이스의 구간 평균이다. 두 값의 차이는 2ms 안쪽이다.
-
-| 타이머(구간 평균, 직렬 실행 트레이스, 프레임당) | 시간 |
+| 읽은 곳 | 값 |
 | --- | --- |
-| `FEngineLoop::Tick`(한 프레임 전체) | 446ms |
-| `UCharacterMovementComponent_TickComponent` | 323ms |
-| `USkinnedMeshComponent_TickComponent` | 27.2ms |
-| `USkeletalMeshComponent_CompleteParallelAnimationEvaluation` | 14.7ms |
-
-개체 하나로 나누면 CharacterMovement가 한 프레임에 32.3µs를 쓴다. 개체당 Game 시간도 같은 방향을 보인다. 프레임이 50ms 안인 500\~2천에서는 17µs 안팎으로 평평하다. 하위 스텝이 여덟 번인 1만에서는 42.7µs다. 2천에서 1만으로 개체 수는 5배인데 Game 시간은 12.3배다.
-
-| 호드 총수 | 프레임 p50 | 하위 스텝 | 개체당 Game 시간 |
-| --- | --- | --- | --- |
-| 500 | 9.03ms | 1회 | 17.0µs |
-| 1,000 | 17.5ms | 1회 | 16.6µs |
-| 2,000 | 36.4ms | 1회 | 17.3µs |
-| 10,000 | 441ms | 8회 | 42.7µs |
+| 고른 프레임의 길이(왼쪽, Timing 뷰) | 448ms |
+| `UCharacterMovementComponent_TickComponent`의 합(오른쪽, Timers 창) | 322ms(71.8%) |
+| 같은 타이머가 그 프레임에 불린 횟수 | 10,048회 |
 
 ## 결과: 액터 군중은 797에서 막히고, URO와 Budget은 벽을 옮기지 못한다
 
-액터 군중이 60fps를 지키는 최대 개체 수는 797이다. 1천에서 이미 프레임 p95가 19.7ms다. 목표 사양 1만은 이 한계의 12.5배다. 1만의 프레임 시간 441ms는 1초에 2.27장이다.
+액터 군중이 60fps를 지키는 최대 개체 수는 797이다. 프레임 시간의 느린 쪽 5% 경계가 16.7ms 안에 드는 가장 큰 호드 총수를 잰 개체 수 사이에서 보간했다. 1천에서 이미 그 경계가 19.7ms다. 목표 사양 1만은 이 한계의 12.5배다.
 
-![호드 총수에 따른 프레임 시간과 개체당 Game 시간](images/actor-frame-vs-n.svg)
+![호드 총수에 따른 프레임 시간과 개체 하나당 게임 스레드 시간](images/actor-frame-vs-n.svg)
 
-애니메이션을 줄이는 기법 두 개를 따로 덧대 1만에서 다시 쟀다. URO는 프레임 p50을 19.2ms 줄였다(4.35%). Animation Budget Allocator는 40.7ms 줄였다(9.22%). 둘 다 세 회차 범위를 넘는 차이지만, 프레임은 여전히 400ms대다.
+그래프 아래쪽 막대는 개체당 비용이 일정하지 않음을 보인다. 프레임이 50ms 안인 500\~2천에서는 개체당 게임 스레드 시간이 17µs 안팎으로 평평하다. 하위 스텝이 여덟 번인 1만에서는 42.7µs다. 2천에서 1만으로 개체 수는 5배인데 게임 스레드 시간은 12.3배다. 실제 값 427ms는 예상한 166ms보다 크다.
 
-| 1만 오브 시점 | 프레임 p50 | 변화 | Game p50 | 변화 |
-| --- | --- | --- | --- | --- |
-| 액터 군중 | 441ms | | 427ms | |
-| + URO | 422ms | −19.2ms | 408ms | −19.3ms |
-| + Animation Budget Allocator | 401ms | −40.7ms | 386ms | −41.4ms |
+애니메이션을 줄이는 기법 두 개를 따로 덧대 1만에서 다시 쟀다. 아래 표는 호드 총수 1만, 오브 시점 카메라에서 세 번 잰 중앙값을 액터 군중과 비교한 변화다.
 
-두 기법이 못 넘는 이유는 트레이스가 보인다. 애니메이션 쪽 게임 스레드 타이머는 합쳐 41.9ms다. 애니메이션을 통째로 지워도 남는 시간은 약 404ms다. Budget이 줄인 Game 시간 41.4ms는 이 몫과 크기가 비슷하다. 다만 Budget 실행의 트레이스는 뜨지 않아 무엇이 줄었는지는 확인하지 않았다. URO가 Budget의 절반쯤만 줄인 이유도 확인하지 않았다.
+| 덧댄 기법 | 프레임 시간 변화(ms) | 게임 스레드 시간 변화(ms) |
+| --- | --- | --- |
+| URO | −19.2(−4.35%) | −19.3 |
+| Animation Budget Allocator(예산 2ms) | −40.7(−9.22%) | −41.4 |
+
+두 변화 모두 세 회차의 흔들림보다 크다. 그래도 프레임은 400ms대에 남는다.
+
+두 기법이 벽을 못 넘는 이유는 위 그림의 막대가 보인다. 애니메이션 쪽 두 타이머는 합쳐 41.9ms이고, 애니메이션을 통째로 지워도 약 404ms가 남는다. Budget이 줄인 게임 스레드 시간 41.4ms는 이 몫과 크기가 비슷하다.
+
+다만 Budget 실행의 트레이스는 뜨지 않아 무엇이 줄었는지는 확인하지 않았다. URO가 Budget의 절반쯤만 줄인 이유도 확인하지 않았다.
 
 앞 마일스톤에서도 같은 방향을 보았다. 애니메이션을 정적 메시로 바꾼 액터와 CharacterMovement 틱만 끈 액터를 따로 쟀다. 각 변형은 자기 비용 하나만 뺐다. 액터마다 도는 컴포넌트 틱과 렌더 갱신은 남았고, 한계는 조금만 올랐다. 이 두 변형은 최종 측정에 없어 수치를 적지 않는다.
 
@@ -95,8 +141,8 @@ Unreal Insights에서 한 프레임만 골라도 거의 같은 비율이 나온�
 
 액터 1만의 벽은 애니메이션이 아니라 이동 컴포넌트이고, 프레임이 느려질수록 그 이동 컴포넌트가 정확도를 지키려고 계산을 더 해서 더 느려진다.
 
-- 개체당 비용은 프레임이 50ms 안인 구간에서만 일정했다. 액터 군중의 한계를 개체당 비용으로 어림하면 큰 N에서 틀린다.
-- 애니메이션 기법은 애니메이션 몫만 줄인다. 1만에서 그 몫은 게임 스레드의 약 9%다.
+- 개체당 비용은 프레임이 50ms 안인 구간에서만 일정했다. 액터 군중의 한계를 개체당 비용으로 어림하면 큰 개체 수에서 틀린다.
+- 애니메이션 기법은 애니메이션 몫만 줄인다. 1만에서 그 몫은 게임 스레드의 9.39%다.
 - 한계: 하위 스텝을 끄고 다시 잰 실험은 없다. 원인은 엔진 소스와 트레이스로 설명했다.
 
 다음 글에서는 같은 로직을 Mass로 옮긴다. 이동 컴포넌트와 액터마다 도는 틱이 함께 사라진다.

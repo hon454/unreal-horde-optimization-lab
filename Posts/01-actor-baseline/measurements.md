@@ -11,64 +11,79 @@
 | 조건 | 2560x1440 Epic, `r.VSync=0`, `t.MaxFPS=0`, Lumen·VSM 켬, `mass.FullyParallel=true`. 2종(소형 90%, 대형 10%), 체력 60\~240(시드 20261106). 오브 시점(P1). 측정 창 60초, 세 회차 중앙값 |
 | 단계와 변형 | `L1-full`(`-LabStage=M0 -LabVariant=full`), `S1-uro`(`-LabVariant=uro`), `S1-budget`(`-LabVariant=budget`). 인자와 기대 메타데이터는 `Scripts/full-conditions.json` |
 | 요약 파일 | `Measurements/Full1/summary.csv`(세 회차 중앙값과 범위), `Measurements/Full1/runs.csv`(회차별 한 행) |
-| N@16.7ms | `Docs/figures/full1/full-n-at-60fps.csv`(`Scripts/plot.py`가 측정 N 사이를 로그 보간) |
+| 60fps를 지키는 최대 개체 수(`N@16.7ms`) | `Docs/figures/full1/full-n-at-60fps.csv`(`Scripts/plot.py`가 측정 N 사이를 로그 보간) |
 | 트레이스 | `Saved/Traces/Full1traceser-L1-full-*`(직렬, 1만 P1, 한 회). 25\~75초 창을 `Scripts/trace-export.ps1 -Command TimerStatistics`로 내보냈다(저장소 밖 `%TEMP%\horde-trace\F1-traceser-L1-full-GT.csv`). 표는 [Worklog/Q6.md](../../Docs/Worklog/Q6.md) "Full1 후속 분석"의 "트레이스 16개" |
 
-변형의 구현: URO는 메시의 `bEnableUpdateRateOptimizations = true`이고 거리 단계는 `FAnimUpdateRateParameters` 기본값이다(`Source/HordeOptLab/LabMinion.cpp` `ALabMinion::SetupVisual`). Budget은 메시를 `USkeletalMeshComponentBudgeted`로 바꾸고(`ALabMinionBudget` 생성자), Significance Manager가 오브에서의 거리 25 / 50 / 100 / 250m에 중요도 1 / 0.75 / 0.5 / 0.25, 그 밖에 0을 준다(`LabTierSignificance`, `FLabScenario::BudgetTiers` `LabConfig.h:161`). 예산은 `a.Budget.BudgetMs 2`(`FLabScenario::BudgetMs` `LabConfig.h:162`, `LabGameMode.cpp:363-364`에서 `a.Budget.Enabled 1`과 함께 설정).
+변형의 구현: URO는 메시의 `bEnableUpdateRateOptimizations = true`이고 간격은 `FAnimUpdateRateParameters` 기본값이다(`Source/HordeOptLab/LabMinion.cpp:80-83` `ALabMinion::SetupVisual`). Budget은 메시를 `USkeletalMeshComponentBudgeted`로 바꾸고(`ALabMinionBudget` 생성자 `LabMinion.cpp:244-247`), Significance Manager가 시점에서의 거리 25 / 50 / 100 / 250m 안에 중요도 1 / 0.75 / 0.5 / 0.25, 그 밖에 0을 준다(`LabTierSignificance` `LabMinion.cpp:229-241`, `FLabScenario::BudgetTiers` `LabConfig.h:161`). 시점은 게임 모드가 매 틱 넘기는 카메라 트랜스폼이다(`LabGameMode.cpp:595-601` `Sig->Update`). 그래서 본문은 "카메라와의 거리"로 적었다(P1 카메라는 오브 위 9m에서 제자리 회전한다). 예산은 `a.Budget.BudgetMs 2`(`FLabScenario::BudgetMs` `LabConfig.h:162`, `LabGameMode.cpp:363-364`에서 `a.Budget.Enabled 1`과 함께 설정).
 
 ## 본문의 수치와 출처
 
-`summary.csv`는 행을 `variant,n,preset`으로 찾는다. 범위는 세 회차의 최솟값\~최댓값이다.
+`summary.csv`는 행을 `variant,n,preset`으로 찾는다. 범위는 세 회차의 최솟값\~최댓값이다. "(그림)"은 본문 산문이 아니라 그림에만 쓴 값이다.
 
 | 본문 값 | 정밀한 값 | 조건 | 출처(열) | 세 회차(r1 / r2 / r3) |
 | --- | --- | --- | --- | --- |
-| 액터 군중 프레임 p50 441ms | 441.461 | `L1-full` 10000 P1 | `frame_p50_ms` | 438.629 / 441.461 / 446.316 |
-| 액터 군중 프레임 p95 466ms | 466.35 | 같음 | `frame_p95_ms` | 463.88 / 466.35 / 471.869 |
-| 액터 군중 Game p50 427ms | 426.933 | 같음 | `game_p50_ms` | 423.679 / 426.933 / 429.778 |
-| + URO 프레임 p50 422ms | 422.238 | `S1-uro` 10000 P1 | `frame_p50_ms` | 422.238 / 422.069 / 424.678 |
-| + URO 프레임 p95 449ms | 449.075 | 같음 | `frame_p95_ms` | 범위 446.303\~449.969 |
-| + URO Game p50 408ms | 407.664 | 같음 | `game_p50_ms` | 407.664 / 407.16 / 409.976 |
-| + Budget 프레임 p50 401ms | 400.772 | `S1-budget` 10000 P1 | `frame_p50_ms` | 399.012 / 401.005 / 400.772 |
-| + Budget 프레임 p95 424ms | 424.217 | 같음 | `frame_p95_ms` | 범위 422.669\~424.705 |
-| + Budget Game p50 386ms | 385.538 | 같음 | `game_p50_ms` | 383.747 / 385.538 / 385.697 |
+| 액터 군중 프레임 시간 441ms | 441.461 | `L1-full` 10000 P1 | `frame_p50_ms` | 438.629 / 441.461 / 446.316 |
+| 액터 군중 게임 스레드 427ms | 426.933 | 같음 | `game_p50_ms` | 423.679 / 426.933 / 429.778 |
+| 액터 군중 렌더 스레드 30.3ms | 30.277 | 같음 | `render_p50_ms` | 28.073 / 30.396 / 30.277 |
+| 액터 군중 GPU 50.5ms | 50.516 | 같음 | `gpu_p50_ms` | 50.608 / 50.516 / 50.459 |
+| + URO 프레임 시간 422ms | 422.238 | `S1-uro` 10000 P1 | `frame_p50_ms` | 422.238 / 422.069 / 424.678 |
+| + URO 게임 스레드 408ms | 407.664 | 같음 | `game_p50_ms` | 407.664 / 407.16 / 409.976 |
+| + URO 렌더 스레드 28.7ms | 28.706 | 같음 | `render_p50_ms` | 28.706 / 28.061 / 30.959 |
+| + URO GPU 50.5ms | 50.483 | 같음 | `gpu_p50_ms` | 50.483 / 50.472 / 50.642 |
+| + Budget 프레임 시간 401ms | 400.772 | `S1-budget` 10000 P1 | `frame_p50_ms` | 399.012 / 401.005 / 400.772 |
+| + Budget 게임 스레드 386ms | 385.538 | 같음 | `game_p50_ms` | 383.747 / 385.538 / 385.697 |
+| + Budget 렌더 스레드 28.9ms | 28.939 | 같음 | `render_p50_ms` | 28.321 / 28.939 / 30.642 |
+| + Budget GPU 50.2ms | 50.246 | 같음 | `gpu_p50_ms` | 50.246 / 48.787 / **112.456** |
+| "이 구성에서는 게임 스레드가 가장 느리다" | | | `bottleneck` = `game`(세 행 모두) | |
 | 16.7ms의 26.5배 | 26.49 | 계산 | 441.461 ÷ 16.667 | |
-| 1초에 2.27장 | 2.265 | 계산 | 1000 ÷ 441.461 | |
-| 500 프레임 p50 9.03ms | 9.028 | `L1-full` 500 P1 | `frame_p50_ms` | 8.983 / 9.028 / 9.113 |
-| 1,000 프레임 p50 17.5ms | 17.539 | `L1-full` 1000 P1 | `frame_p50_ms` | 17.539 / 17.41 / 17.773 |
-| 2,000 프레임 p50 36.4ms | 36.391 | `L1-full` 2000 P1 | `frame_p50_ms` | 36.027 / 36.391 / 36.436 |
-| 1,000 프레임 p95 19.7ms | 19.734 | `L1-full` 1000 P1 | `frame_p95_ms` | 19.734 / 19.446 / 19.864 |
-| 개체당 Game 500: 17.0µs | 16.99 | 계산 | 8.493 ms ÷ 500 | Game p50 8.45 / 8.493 / 8.581 |
-| 개체당 Game 1,000: 16.6µs | 16.62 | 계산 | 16.624 ms ÷ 1000 | Game p50 16.624 / 16.495 / 16.855 |
-| 개체당 Game 2,000: 17.3µs | 17.30 | 계산 | 34.604 ms ÷ 2000 | Game p50 34.203 / 34.604 / 34.659 |
-| 개체당 Game 1만: 42.7µs | 42.69 | 계산 | 426.933 ms ÷ 10000 | 위 `L1-full` 10000 |
-| "17µs 안팎으로 평평" | 16.62\~17.30 | 계산 | 위 세 값 | |
-| 2천 → 1만, Game 12.3배 | 12.34 | 계산 | 426.933 ÷ 34.604 | |
+| 1,000 게임 스레드 16.6ms | 16.624 | `L1-full` 1000 P1 | `game_p50_ms` | 16.624 / 16.495 / 16.855 |
 | 1천을 1만으로 늘리면 166ms(예상) | 166.24 | 계산 | 16.624 × 10 | |
-| N@16.7ms 797 | 797 | `1 L1-full` | `full-n-at-60fps.csv` `n_p95` | p50 기준은 934(`n_p50`) |
+| (그림) 500 프레임 시간 9.03ms | 9.028 | `L1-full` 500 P1 | `frame_p50_ms` | 8.983 / 9.028 / 9.113 |
+| (그림) 1,000 프레임 시간 17.5ms | 17.539 | `L1-full` 1000 P1 | `frame_p50_ms` | 17.539 / 17.41 / 17.773 |
+| (그림) 2,000 프레임 시간 36.4ms | 36.391 | `L1-full` 2000 P1 | `frame_p50_ms` | 36.027 / 36.391 / 36.436 |
+| (그림) 1만 프레임 시간 느린 쪽 5% 경계 466ms | 466.35 | `L1-full` 10000 P1 | `frame_p95_ms` | 463.88 / 466.35 / 471.869 |
+| 1,000 느린 쪽 5% 경계 19.7ms | 19.734 | `L1-full` 1000 P1 | `frame_p95_ms` | 19.734 / 19.446 / 19.864 |
+| (그림) 개체당 게임 스레드 500: 17.0µs | 16.99 | 계산 | 8.493 ms ÷ 500 | 게임 스레드 8.45 / 8.493 / 8.581 |
+| (그림) 개체당 게임 스레드 1,000: 16.6µs | 16.62 | 계산 | 16.624 ms ÷ 1000 | 위 1,000 행 |
+| (그림) 개체당 게임 스레드 2,000: 17.3µs | 17.30 | 계산 | 34.604 ms ÷ 2000 | 게임 스레드 34.203 / 34.604 / 34.659 |
+| 개체당 게임 스레드 1만: 42.7µs | 42.69 | 계산 | 426.933 ms ÷ 10000 | 위 `L1-full` 10000 |
+| "17µs 안팎으로 평평" | 16.62\~17.30 | 계산 | 위 세 값 | |
+| 2천 → 1만, 게임 스레드 12.3배 | 12.34 | 계산 | 426.933 ÷ 34.604 | |
+| 60fps를 지키는 최대 개체 수 797 | 797 | `1 L1-full` | `full-n-at-60fps.csv` `n_p95` | 중앙값 기준은 934(`n_p50`) |
 | 1만은 한계의 12.5배 | 12.55 | 계산 | 10000 ÷ 797 | |
-| URO 프레임 −19.2ms(4.35%) | −19.223, −4.354% | 계산 | 422.238 − 441.461, ÷ 441.461 | |
-| URO Game −19.3ms | −19.269 | 계산 | 407.664 − 426.933 | (−4.51%) |
-| Budget 프레임 −40.7ms(9.22%) | −40.689, −9.217% | 계산 | 400.772 − 441.461, ÷ 441.461 | |
-| Budget Game −41.4ms | −41.395 | 계산 | 385.538 − 426.933 | (−9.70%) |
-| "세 회차 범위를 넘는 차이" | 프레임 기준 범위 7.687(`L1`), 2.609(`uro`), 1.993(`budget`). Game 범위 6.099 / 2.816 / 1.950 | 계산 | [measurement.md](../../Docs/Guides/measurement.md) "차이 판정": 변화가 두 범위 중 큰 쪽보다 크다 | |
+| URO 프레임 시간 −19.2ms(4.35%) | −19.223, −4.354% | 계산 | 422.238 − 441.461, ÷ 441.461 | |
+| URO 게임 스레드 −19.3ms | −19.269 | 계산 | 407.664 − 426.933 | (−4.51%) |
+| Budget 프레임 시간 −40.7ms(9.22%) | −40.689, −9.217% | 계산 | 400.772 − 441.461, ÷ 441.461 | |
+| Budget 게임 스레드 −41.4ms | −41.395 | 계산 | 385.538 − 426.933 | (−9.70%) |
+| "세 회차의 흔들림보다 크다" | 프레임 시간 범위 7.687(`L1`), 2.609(`uro`), 1.993(`budget`). 게임 스레드 범위 6.099 / 2.816 / 1.950 | 계산 | [measurement.md](../../Docs/Guides/measurement.md) "차이 판정": 변화가 두 범위 중 큰 쪽보다 크다 | |
 | 게임 스레드 한 프레임 446ms | 446.43 | 직렬 트레이스 L1 1만 P1 | `FEngineLoop::Tick` Incl ÷ 112 프레임 | 한 회 |
 | CharacterMovement 틱 323ms | 323.49 | 같음 | `UCharacterMovementComponent_TickComponent` Incl | 한 회 |
-| 72.5% | 72.46% | 계산 | 323.49 ÷ 446.43 | |
-| 스켈레탈 메시 틱 27.2ms | 27.24 | 같음 | `USkinnedMeshComponent_TickComponent` Incl(Excl 11.33) | 한 회 |
-| 애니 평가 마무리 14.7ms | 14.70 | 같음 | `USkeletalMeshComponent_CompleteParallelAnimationEvaluation` Incl | 한 회 |
-| 애니메이션 쪽 타이머 합 41.9ms | 41.94 | 계산 | 27.24 + 14.70. 본문 "약 9%"는 41.94 ÷ 446.43 = 9.39% | |
+| 72.5%(그림은 72%) | 72.46% | 계산 | 323.49 ÷ 446.43 | |
+| (그림) 스켈레탈 메시 틱 27.2ms · 6% | 27.24 | 같음 | `USkinnedMeshComponent_TickComponent` Incl(Excl 11.33). 6.10% | 한 회 |
+| (그림) 애니 평가 마무리 14.7ms · 3% | 14.70 | 같음 | `USkeletalMeshComponent_CompleteParallelAnimationEvaluation` Incl. 3.29% | 한 회 |
+| 애니메이션 쪽 두 타이머 합 41.9ms | 41.94 | 계산 | 27.24 + 14.70 | |
+| 게임 스레드의 9.39% | 9.39% | 계산 | 41.94 ÷ 446.43 | |
 | 애니메이션을 지워도 남는 약 404ms | 404.49 | 계산 | 446.43 − 41.94. 트레이스 한 회에서 뺀 어림이다 | |
-| 그림의 나머지 81.0ms(18%) | 81.00 | 계산 | 446.43 − 323.49 − 27.24 − 14.70 | |
+| (그림) 나머지 81.0ms · 18% | 81.00 | 계산 | 446.43 − 323.49 − 27.24 − 14.70. 18.1% | |
 | 개체당 CharacterMovement 32.3µs | 32.35 | 계산 | 323.49 ms ÷ 10000. 실제 호출은 프레임당 9,920회(1,111,002 ÷ 112)라 호출당은 32.6µs | |
-| 스크린샷의 프레임 하나 447.88ms | 447.88 | 병렬 트레이스 `Full1trace-L1-full-N10000-P1-r1`, 렌더링 프레임 109(56.56초 시작) | Timing 뷰의 선택 구간 길이(GameThread `FEngineLoop::Tick`은 447.4ms) | 한 프레임 |
-| 스크린샷의 CharacterMovement 321.66ms | 321.66 | 같음 | Timers 패널 `UCharacterMovementComponent_TickComponent` Incl(Count 10,048, Excl 320.37) | 한 프레임 |
+| 스크린샷의 프레임 하나 448ms | 447.88 | 병렬 트레이스 `Full1trace-L1-full-N10000-P1-r1`, 렌더링 프레임 109(56.56초 시작) | Timing 뷰의 선택 구간 길이(GameThread `FEngineLoop::Tick`은 447.4ms) | 한 프레임 |
+| 스크린샷의 CharacterMovement 322ms | 321.66 | 같음 | Timers 패널 `UCharacterMovementComponent_TickComponent` Incl(Excl 320.37) | 한 프레임 |
+| 스크린샷의 호출 수 10,048회 | 10,048 | 같음 | Timers 패널 Count | 한 프레임 |
 | 71.8% | 71.82% | 계산 | 321.66 ÷ 447.88 | |
-| 두 값의 차이는 2ms 안쪽 | 1.45, 1.83 | 계산 | 447.88 − 446.43, 323.49 − 321.66 | |
-| 하위 스텝 1회 / 8회 | | 계산 | 아래 "엔진 소스". 프레임 50ms 미만이면 1회. 1만은 델타가 0.4초로 잘려 0.4 ÷ 0.05 = 8회 | |
-| 60ms면 30ms씩 두 번 | | 계산 | `Min(0.05, 0.06 × 0.5)` = 0.03 | |
-| 예산 2ms, 거리 단계 | 2.0 | 코드 | `LabConfig.h:162`, `BudgetTiers` `:161` | |
+| 하위 스텝 1회 / 8회 | | 계산 | 아래 "엔진 소스". 프레임 50ms 미만이면 1회. 1만은 델타가 0.4초로 잘려 0.4 ÷ 0.05 = 8회(일곱 번째까지 `Min(0.05, 남은 시간 × 0.5)` = 0.05, 여덟 번째는 남은 0.05초를 모두 쓴다) | |
+| 60ms면 30ms씩 두 번 | | 계산 | `Min(0.05, 0.06 × 0.5)` = 0.03, 남은 0.03은 50ms 이하라 그대로 쓴다 | |
+| 기본값 0.05초, 8회 | | 엔진 소스 | 아래 "엔진 소스" | |
+| 0.4초 | 0.4 | 엔진 설정 | `BaseGame.ini:199` | |
+| URO 0.24, 0.12, 네 프레임에 한 번 | | 엔진 소스 | 아래 "엔진 소스" | |
+| 예산 2ms, 거리 단계 25 / 50 / 100 / 250m, 중요도 1 / 0.75 / 0.5 / 0.25 / 0 | 2.0 | 코드 | `LabConfig.h:161-162`, `LabMinion.cpp:229-241` | |
 
 `L1-full` 10000 P1에는 버리는 첫 실행 `Full1-L1-full-N10000-P1-r0`(프레임 p50 441.156)이 `runs.csv`에 있다. 요약은 r1\~r3만 쓴다.
+
+`S1-budget` 10000 P1의 GPU 중앙값은 r3만 112.456ms로 튀었다(r1 50.246, r2 48.787). 같은 회차의 프레임 시간(400.772)과 렌더 스레드(30.642)는 다른 회차와 같다. 본문은 세 회차 중앙값 50.2ms만 쓴다. 원인은 확인하지 않았다.
+
+## 화면의 HUD와 표의 차이
+
+요약의 1단계 화면(`step1-L1-full.webp`) 왼쪽 위 HUD에 보이는 프레임 시간(542.7ms)은 표의 값(441ms)보다 높다. 그 화면은 측정 실행이 아니라 촬영 실행(`Pre5shot-L1-full-N10000-P1-r1`)에서 찍었고, 4K 영역 화면 녹화 부하가 섞인다. 수치는 표(Test 패키지 측정 실행)의 값만 쓴다. 촬영 경위는 [Worklog/Q6.md](../../Docs/Worklog/Q6.md) "촬영 준비"에 있다.
 
 ## 두 트레이스
 
@@ -76,8 +91,8 @@
 
 | 쓰인 곳 | 트레이스 | 구간 | 값 |
 | --- | --- | --- | --- |
-| 그림 `actor-gamethread-breakdown.svg`, 스크린샷 옆 표, 본문 446 / 323 / 27.2 / 14.7ms | 직렬 실행 `Full1traceser-L1-full-*`(`mass.FullyParallel` 끔) | 25\~75초, 112프레임의 프레임당 평균 | `FEngineLoop::Tick` 446.43, CharacterMovement 323.49 |
-| 스크린샷과 캡션, 본문 447.88 / 321.66ms | 병렬 실행 `Full1trace-L1-full-N10000-P1-r1` | 렌더링 프레임 109 하나 | 선택 구간 447.88, CharacterMovement 321.66 |
+| 그림 `actor-frame-flow.svg`의 막대, 본문 446 / 323 / 41.9ms | 직렬 실행 `Full1traceser-L1-full-*`(`mass.FullyParallel` 끔) | 25\~75초, 112프레임의 프레임당 평균 | `FEngineLoop::Tick` 446.43, CharacterMovement 323.49 |
+| 스크린샷, 캡션, 옆 표 448 / 322ms / 10,048회 | 병렬 실행 `Full1trace-L1-full-N10000-P1-r1` | 렌더링 프레임 109 하나 | 선택 구간 447.88, CharacterMovement 321.66 |
 
 병렬 트레이스의 같은 25\~75초 구간 평균은 `FEngineLoop::Tick` 446.43, CharacterMovement 323.06ms다(`%TEMP%\horde-trace\F1-trace-L1-full-GT.csv`). 1단계는 Mass 프로세서가 거의 돌지 않아(`PrePhysics` 0.05ms) 직렬·병렬 설정이 액터 비용에 닿지 않는다. 그래서 스크린샷을 직렬 트레이스로 다시 찍지 않았다. 한 프레임과 구간 평균의 차이(1.45ms, 1.83ms)는 프레임 사이의 흔들림이다.
 
@@ -85,25 +100,39 @@
 
 | 파일 | 내용 | 값의 출처 |
 | --- | --- | --- |
-| `images/actor-gamethread-breakdown.svg` | 446.43ms를 CharacterMovement 323.49, 스켈레탈 메시 틱 27.24, 애니 평가 마무리 14.70, 나머지 81.00으로 나눈 가로 막대. 16.7ms 막대를 같은 축척으로 | 위 트레이스 행 |
-| `images/actor-frame-vs-n.svg` | 왼쪽: 프레임 p50·p95(로그-로그), 16.7ms 선, 50ms 선, N@16.7ms 797. 오른쪽: 개체당 Game µs와 하위 스텝 횟수 | 위 `L1-full` 행 |
+| `images/actor-frame-flow.svg` | 한 개체가 한 프레임에 하는 일 네 칸(이동 컴포넌트 틱, 스켈레탈 메시 틱과 AnimBP 갱신, 애니메이션 평가 마무리, 프레임 끝 렌더 갱신)과 칸마다 엔진 타이머 이름. 오른쪽 막대 길이가 1만의 프레임당 시간(323.49, 27.24, 14.70). 네 번째 칸 `UWorld_SendAllEndOfFrameUpdates`의 값은 따로 읽지 않아, 나머지 81.00ms(이 칸과 그 밖의 일)를 점선 막대로 보였다. 맨 아래 16.7ms 막대는 같은 축척 | 위 트레이스 행 |
+| `images/actor-frame-vs-n.svg` | 위: 프레임 시간 중앙값·느린 쪽 5% 경계(로그-로그), 16.7ms 선, 50ms 선, 60fps를 지키는 최대 개체 수 797. 아래: 개체당 게임 스레드 시간(µs)과 하위 스텝 횟수 | 위 `L1-full` 행 |
 | `images/insights-gamethread.jpg` | Unreal Insights. 왼쪽은 Timing 뷰에서 렌더링 프레임 109(56.56초 시작, 447.88ms, 빨간 상자)를 고른 화면이고 GameThread 트랙에 `FEngineLoop::Tick` 447.4ms, `UWorld_Tick` 442.18ms, `TickCompletionEvents` 404.97ms가 보인다. 오른쪽은 그 구간을 Timers 패널에서 "CharacterMovement"로 거른 행(빨간 상자)이다. 코디네이터가 찍었다(2560x749) | `Saved/Traces/Full1trace-L1-full-N10000-P1-r1.utrace`(병렬 실행, 1만 P1) |
-| `../../Docs/figures/steps/step1-L1-full.webp` | 1단계 화면(HUD 켬, 녹화 부하가 섞여 HUD 프레임 시간이 측정값보다 높다) | 촬영 경위는 [Worklog/Q6.md](../../Docs/Worklog/Q6.md) "촬영 준비" |
+| `../../Docs/figures/steps/step1-L1-full.webp` | 1단계 화면(HUD 켬). HUD 값은 위 "화면의 HUD와 표의 차이" | 촬영 경위는 [Worklog/Q6.md](../../Docs/Worklog/Q6.md) "촬영 준비" |
 
-SVG 두 개는 표준 라이브러리 Python으로 값을 넣어 쓴 정적 파일이다(생성 스크립트는 저장소에 두지 않았다). 배경은 흰색이라 GitHub의 밝은·어두운 테마 모두에서 같은 색으로 보인다.
+SVG 두 개는 표준 라이브러리 Python으로 값을 넣어 쓴 정적 파일이다(생성 스크립트는 저장소에 두지 않았다). 폭 800 기준으로 글자는 14px 이상이고, 자기 흰 배경을 가져 GitHub의 밝은·어두운 테마 모두에서 같은 색으로 보인다. 처음 글의 `actor-gamethread-breakdown.svg`(같은 네 값의 가로 막대)는 `actor-frame-flow.svg`에 합쳐 지웠다.
 
 ## 엔진 소스
 
-로컬 소스 빌드 `G:/Epic Games/UE_5.8.4`에서 확인했다.
+로컬 소스 빌드 `G:/Epic Games/UE_5.8.4`에서 확인했다. 경로는 `Engine/` 아래다.
 
 | 사실 | 위치 |
 | --- | --- |
-| `MaxSimulationTimeStep = 0.05f`, `MaxSimulationIterations = 8` | `Engine/Source/Runtime/Engine/Private/Components/CharacterMovementComponent.cpp:698-699` |
+| `MaxSimulationTimeStep = 0.05f`, `MaxSimulationIterations = 8` | `Source/Runtime/Engine/Private/Components/CharacterMovementComponent.cpp:698-699` |
 | 나누는 규칙 `FMath::Min(MaxSimulationTimeStep, RemainingTime * 0.5f)`, 마지막 회차는 남은 시간을 모두 쓴다 | 같은 파일 `UCharacterMovementComponent::GetSimulationTimeStep` `:8162-8187` |
-| 월드 델타를 `[MinUndilatedFrameTime, MaxUndilatedFrameTime]`로 자른다 | `Engine/Source/Runtime/Engine/Private/WorldSettings.cpp:334-343` `AWorldSettings::FixupDeltaSeconds` |
-| `MaxUndilatedFrameTime=0.4`(2.5fps). 프로젝트 `Config/`는 바꾸지 않는다 | `Engine/Config/BaseGame.ini:199` |
-| URO 거리 단계는 `FAnimUpdateRateParameters` 기본값 | [engine-notes.md](../../Docs/Reference/engine-notes.md) 11절(`EngineTypes.h:2768-2785`, 이번에 다시 열지 않음) |
-| Budget은 `a.Budget.Enabled`와 월드 할당기의 `bEnabled`가 둘 다 참일 때만 돈다. 등록 시 URO를 끈다 | engine-notes.md(`AnimationBudgetAllocatorCVars.cpp:7`, `AnimationBudgetAllocator.cpp:75,115,135`). 실행의 메타데이터 `LabBudget=1`(`full-conditions.json` 기대값) |
+| 걷기 루프: `while`가 `Iterations < MaxSimulationIterations`까지 돌고, 스텝마다 `GetSimulationTimeStep`, `MoveAlongFloor`, `FindFloor`를 부른다 | 같은 파일 `UCharacterMovementComponent::PhysWalking` `:5653`, `remainingTime` `:5680`, `while` `:5686`, `Iterations++` `:5688`, `GetSimulationTimeStep` `:5690-5691`, `MoveAlongFloor` `:5744`, `FindFloor` `:5773` |
+| `MIN_TICK_TIME = 1e-6f` | 같은 파일 `:97` |
+| 월드 델타를 `[MinUndilatedFrameTime, MaxUndilatedFrameTime]`(시간 팽창을 곱한 값)로 자른다 | `Source/Runtime/Engine/Private/WorldSettings.cpp:334-343` `AWorldSettings::FixupDeltaSeconds` |
+| `MaxUndilatedFrameTime=0.4`(2.5fps). 프로젝트 `Config/`는 바꾸지 않는다 | `Config/BaseGame.ini:199` |
+| URO 기본값: 보이는 메시의 화면 크기 단계 `BaseVisibleDistanceFactorThesholds` = 0.24, 0.12. 그려지지 않은 메시는 `BaseNonRenderedUpdateRate(4)` | `Source/Runtime/Engine/Classes/Engine/EngineTypes.h:2820-2826`(주석 `:2772-2785`가 "MaxDistanceFactor is size on screen, as used by LODs") |
+| URO 간격 결정: 화면 크기가 단계 i의 값을 넘으면 i + 1 프레임에 한 번, 어느 단계도 못 넘으면 단계 수 + 1(= 3) | `Source/Runtime/Engine/Private/Components/SkinnedMeshComponent.cpp:283-370` `AnimUpdateRateSetParams`(단계 비교 `:310-319`) |
+| Budget 분배: 중요도 큰 순으로 정렬하고(`:327-342`), 예산 ÷ 평균 갱신 시간으로 매 프레임 갱신할 수를 구한 뒤(`:558-570`), 그 뒤를 보간 묶음과 간격 제한 묶음으로 나눈다(`:610-640`) | `Plugins/Runtime/AnimationBudgetAllocator/Source/AnimationBudgetAllocator/Private/AnimationBudgetAllocator.cpp` |
+| Budget은 `a.Budget.Enabled`와 월드 할당기의 `bEnabled`가 둘 다 참일 때만 돈다. 등록 시 URO를 끈다 | [engine-notes.md](../../Docs/Reference/engine-notes.md)(`AnimationBudgetAllocatorCVars.cpp:7`, `AnimationBudgetAllocator.cpp:75,115,135`). 실행의 메타데이터 `LabBudget=1`(`full-conditions.json` 기대값) |
+
+### 본문에 넣은 발췌
+
+글 전체의 엔진 코드는 30줄이다(12 + 13 + 5). 줄인 곳은 `// ...`로 적었고, 남긴 줄은 소스를 그대로 옮겼다.
+
+| 블록 | 줄 수 | 원본 줄 |
+| --- | --- | --- |
+| `GetSimulationTimeStep` | 12 | `CharacterMovementComponent.cpp:8162-8163, 8165-8168, 8170-8171`, `// ...`(`:8172-8182` 마지막 회차의 else 분기와 경고), `:8183`, `:8186-8187`. `static` 경고 카운터(`:8164`), 주석(`:8169`, `:8185`), 빈 줄(`:8184`)을 뺐다 |
+| `PhysWalking` 루프 | 13 | `:5680`, `:5686`(조건 뒤쪽을 `// ...`로 줄임), `:5687-5688`, `:5690-5691`, `:5744`, `:5773`, 닫는 괄호 |
+| `FixupDeltaSeconds` | 5 | `WorldSettings.cpp:334-335`, `// ...`(`:336-340`), `:341`, `:342` |
 
 `WorldSettings`·`BaseGame.ini`의 0.4초 상한은 engine-notes.md에 아직 없다(이 작업은 그 파일을 고치지 않는다. [Worklog/Posts.md](../../Docs/Worklog/Posts.md)에 남겼다).
 
@@ -120,6 +149,8 @@ SVG 두 개는 표준 라이브러리 Python으로 값을 넣어 쓴 정적 파�
 - 하위 스텝을 끄고(`MaxSimulationIterations` 1 등) 다시 잰 직접 실험은 없다. "1만에서 8회"는 엔진 소스의 규칙과 0.4초 상한으로 계산한 값이고, 실행에서 횟수를 세지 않았다.
 - 0.4초 상한 때문에 1만 실행에서는 게임 시간이 실제 시간보다 느리게 흐른다(441ms 프레임에 0.4초). 사망 수가 2단계 1만과 0.3% 안으로 맞는 이유(동등성 검사 통과)와 이 상한의 관계는 보지 않았다.
 - Budget·URO 실행의 트레이스는 없다. Budget이 줄인 41.4ms가 애니메이션 타이머에서 났는지, URO가 Budget의 절반쯤만 줄인 이유는 확인하지 않았다. 글 재료의 "포즈 계산이 워커에서 돌아서" 설명은 쓰지 않았다.
-- `S1-budget` r3의 GPU p50이 112.456ms로 다른 두 회차(50.246, 48.787)와 다르다. 프레임 p50(400.772)은 다른 회차와 같아 본문 값에 영향이 없고, 원인은 보지 않았다.
+- `S1-budget` r3의 GPU 중앙값 112.456ms(위 표 아래 문단). 원인은 보지 않았다.
+- URO 실행에서 개체마다 실제로 고른 갱신 간격(화면 크기 분포)은 세지 않았다. 본문의 URO 설명은 엔진 기본값의 규칙이다.
 - 트레이스는 직렬(`mass.FullyParallel` 끔) 실행이다. 1단계는 Mass 프로세서가 거의 돌지 않아(`PrePhysics` 0.05ms) 병렬 트레이스와 값이 같다(병렬 `F1-trace-L1-full-GT.csv`: `FEngineLoop::Tick` 446.43, CharacterMovement 323.06).
-- 도식의 "AnimBP 갱신이 스켈레탈 메시 틱 안에 있다"는 Incl − Excl(27.24 − 11.33 = 15.91)이 `USkeletalMeshComponent_TickAnimation` 14.90과 맞는 것으로 판단했다. 트레이스에서 부모 관계를 직접 펼쳐 보지는 않았다.
+- 그림의 "AnimBP 갱신이 스켈레탈 메시 틱 안에 있다"는 Incl − Excl(27.24 − 11.33 = 15.91)이 `USkeletalMeshComponent_TickAnimation` 14.90과 맞는 것으로 판단했다. 트레이스에서 부모 관계를 직접 펼쳐 보지는 않았다.
+- 네 번째 칸 `UWorld_SendAllEndOfFrameUpdates`가 그림의 "나머지 81.0ms" 안에 든다는 것은 앞 세 타이머 안에서 불리지 않는 월드 틱 단계라는 판단이다. 그 타이머의 값은 읽지 않았다.
