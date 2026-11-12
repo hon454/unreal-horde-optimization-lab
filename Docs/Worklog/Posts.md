@@ -421,6 +421,34 @@
 - 트레이스 내보내기 끝(성공). `Full2trace-L6-m5bounds-*`, `Full2trace-L7-q2crowd-*`(병렬)에서 `GPU0-Graphics0`와 `GameThread`를 25\~75초로 한 번에 하나씩 뽑았다(`%TEMP%\horde-trace\F2-trace-L6-m5bounds-GPU.csv`, `-GT.csv`, `F2-trace-L7-q2crowd-GPU.csv`, `-GT.csv`). 다음은 초안.
 - 초안 끝(성공). `README.md`. 다음은 그림.
 - 그림 끝(성공). `make-figures.py`가 SVG 다섯 개(`ncf-summary`, `-problem`, `-principle`, `-delta`, `-ablation`)를 만든다. 다음은 측정 기록.
+- 측정 기록 끝(성공). `measurements.md`에 본문 수치마다 세 회차 값·계산식·트레이스 행·소스 줄을 적었다. 다음은 확인.
+- 확인 끝(성공). 상대 링크가 모두 실제 파일을 가리킨다(주석 안의 Insights 이미지 자리만 없다). 코드 스팬 밖 `~`는 모두 `\~`다. 본문에 묶음 이름·조건 라벨·Markdown 표가 없다. 본문은 공백 빼고 약 3,500자, 배경 지식 약 600자. SVG 값은 스크립트 출력과 대조했다. 다음은 커밋.
+
+### 결정
+
+- 제목과 요약의 대표 수치를 프레임 시간 +0.279ms로 했다. 대안은 GPU +0.740ms였다. 독자가 보는 것은 프레임 시간이고, 병목이 게임 스레드라 GPU 증가가 프레임에 보이지 않는다는 것이 이 글의 요점이라서다.
+- "틀렸던 가설" 절을 두지 않았다. LOD0 → LOD4 메시의 경위는 "바꾼 것"의 하위 절에 방향만 적었다. posting.md가 가설 절을 03·05·06에만 두고, 7단계의 메시 교체는 측정 전 설계 수정이라 최종 측정이 뒤집은 가설이 아니다.
+- 새 트레이스(`Full2trace-L6/L7`, 병렬)의 값을 본문 문장에 썼다(모으기 0.199ms, BasePass·속도 패스 각 +0.243, 그림자 깊이 +0.252, Lumen 화면 프로브 +0.420ms). 그림에는 넣지 않았다. 대안은 트레이스 없이 쓰는 것이었다. GPU 0.740ms가 어디로 가는지가 "입자 메시를 두 번 그린다"는 설명의 근거라서 넣었다.
+- "그리지 않는 개체 6,226"은 `10,000 − actors_mean − ism_band0~3`로 계산했다. 엔티티 구동 입자 수(`Lab/CrowdRecs`)는 `summarize.py`가 요약하지 않는다. 대안(옛 개발 로그의 약 6,200, 요약 스크립트 수정)은 옛 값이거나 내 파일 밖이라 버렸다.
+- LOD 비교 화면은 이미 커밋된 `Measurements/CrowdFx2/shots/lod-compare-horizon.jpg`를 상대 경로로 인용했다. `images/`에 복사하지 않았다(저장소 용량 규칙). 그림 안의 영어 표기("current" 등)는 그대로다.
+- 배경 지식 셋째 항목을 동적 머티리얼 파라미터로 했다. 표현 LOD의 히스테리시스는 03번 글이 정의했으므로 배경 지식에 다시 쓰지 않고 "원리"의 엔진 발췌로 보였다.
+- 빼 보기 `A8-farcull`을 "ISKM(500m까지)"로 적고 500m 밖 독립 입자가 남는다고 밝혔다(post-review.md 08-1의 지적 (1)).
+- 탑뷰 카메라(P2)의 6→7단계 차이(+0.094ms)는 본문에 넣지 않았다. 분량 대비 얻는 것이 적다.
+
+### 확인하지 못한 것
+
+- 게임 스레드 +0.284ms 중 모으기 프로세서 밖의 몫, `LumenScreenProbeGather` +0.420ms의 원인, `A8-farcull` 게임 스레드 +4.24ms의 내역.
+- 엔티티 구동 입자 수의 최종 측정 값(`Lab/CrowdRecs` 미요약).
+- SVG를 화면에 그려 보지 않았다(좌표와 글자 수로만 겹침 확인). WebP는 첫 프레임만 봤다.
+
+### 코디네이터용
+
+- Insights 화면: `measurements.md` "코디네이터가 찍을 Insights 화면"(트레이스 `Full2trace-L7-q2crowd-N10000-P1-r1`·`L6-m5bounds`, GPU의 `BasePass`·`RenderVelocities`·`ShadowDepths`). 찍으면 README 주석을 풀고 캡션을 채운다.
+- 08번 글이 커밋되면 07 README 끝 "다음 글" 문장에 링크를 더한다. 이 커밋 때 `Posts/08-quality/`는 있지만 커밋되지 않아 링크하지 않았다.
+- 07 README는 `../06-iskm/README.md`와 `../05-simulation-lod-entity-pool/README.md`를 링크한다(둘 다 커밋됨).
+- 루트 README "글" 표에 07번 행을 더한다.
+- engine-notes.md에 더할 만한 것: `MassLODCalculator.h:271` `BufferHysteresisOnDistanceRatio = 0.1f`(17절 188m 행의 비율 출처).
+- 선택: `Scripts/summarize.py`가 `Lab/CrowdRecs` 평균을 열로 내면 다음 묶음부터 입자 수를 표로 쓸 수 있다.
 
 ## 08 품질 올리기(2026-11-13)
 
@@ -444,4 +472,5 @@
 
 ### 진행(09)
 
-- 조사 끝(성공). 사다리 여덟 행, 빼 보기 열 행과 `S8-col`, 최대 개체 수 CSV, `Pool1`, `Ref1` 값을 CSV에서 다시 읽어 브리프의 값과 맞음을 확인했다. README 그림 여섯 개의 글자를 읽었다(`ablation.svg`에는 `S8-col`이 없다). 다음은 초안.
+- 조사 끝(성공). 사다리 여덟 행, 빼 보기 열 행과 `S8-col`, 최대 개체 수 CSV, `Pool1`, `Ref1` 값을 CSV에서 다시 읽어 브리프의 값과 맞음을 확인했다. README 그림 여섯 개의 글자를 읽었다(`ablation.svg`에는 `S8-col`이 없다). 다음은 초안.- 그림 끝(성공). `make-figures.py`가 SVG 일곱 개(`q-summary`, `-headroom`, `-bands`, `-expected`, `-tradeoff`, `-ablation`, `-lowres`)를 `summary.csv`·`full-n-at-60fps.csv`와 `Ref1/summary.csv`(1280×720 그림만)에서 만든다. 상수 없음. 글자 폭을 추정해 넘침을 고쳤다. 다음은 초안.
+- 초안 끝(성공). README.md: 요약, 시나리오 카드, 배경 지식 둘, 문제, 원리(기준 셋과 예상), 바꾼 것(Lab 코드 넷, 엔진 발췌 둘, 트랙 다시 쓰기 소절), 결과(호드 크기, 빼 보기, 해상도 소절), 한 문장으로. 다음은 측정 기록.

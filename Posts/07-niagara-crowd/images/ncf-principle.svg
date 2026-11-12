@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="598" viewBox="0 0 800 598" font-family="Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Segoe UI, sans-serif" font-size="16" fill="#111827">
+<rect x="0.5" y="0.5" width="799" height="597" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+<text x="32" y="46" font-size="22" font-weight="700">200m 밖의 엔티티를 입자로 그리는 길</text>
+<text x="32" y="74" font-size="16" fill="#4b5563">위: 거리 구간마다 그리는 것. 아래: 한 프레임에 엔티티의 자리가 입자가 되는 길</text>
+<text x="40" y="112" font-size="17" font-weight="700">6단계</text>
+<rect x="40" y="122" width="96" height="38" rx="4" fill="#dc2626" fill-opacity="0.16" stroke="#dc2626" stroke-width="1.5"/>
+<text x="88.0" y="147" text-anchor="middle" font-size="16" font-weight="700" fill="#dc2626">액터</text>
+<rect x="140" y="122" width="186" height="38" rx="4" fill="#2563eb" fill-opacity="0.16" stroke="#2563eb" stroke-width="1.5"/>
+<text x="233.0" y="147" text-anchor="middle" font-size="16" font-weight="700" fill="#2563eb">ISKM</text>
+<rect x="330" y="122" width="226" height="38" rx="4" fill="white" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="5 4"/>
+<text x="443.0" y="147" text-anchor="middle" font-size="16" fill="#4b5563">그리지 않음</text>
+<rect x="560" y="122" width="196" height="38" rx="4" fill="white" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="5 4"/>
+<text x="658.0" y="147" text-anchor="middle" font-size="16" fill="#4b5563">빈 땅</text>
+<text x="40" y="182" font-size="17" font-weight="700">7단계</text>
+<rect x="40" y="192" width="96" height="38" rx="4" fill="#dc2626" fill-opacity="0.16" stroke="#dc2626" stroke-width="1.5"/>
+<text x="88.0" y="217" text-anchor="middle" font-size="16" font-weight="700" fill="#dc2626">액터</text>
+<rect x="140" y="192" width="186" height="38" rx="4" fill="#2563eb" fill-opacity="0.16" stroke="#2563eb" stroke-width="1.5"/>
+<text x="233.0" y="217" text-anchor="middle" font-size="16" font-weight="700" fill="#2563eb">ISKM</text>
+<rect x="330" y="192" width="226" height="38" rx="4" fill="#db2777" fill-opacity="0.16" stroke="#db2777" stroke-width="1.5"/>
+<text x="443.0" y="217" text-anchor="middle" font-size="16" font-weight="700" fill="#db2777">엔티티 구동 입자</text>
+<rect x="560" y="192" width="196" height="38" rx="4" fill="#9333ea" fill-opacity="0.16" stroke="#9333ea" stroke-width="1.5"/>
+<text x="658.0" y="217" text-anchor="middle" font-size="16" font-weight="700" fill="#9333ea">독립 입자</text>
+<line x1="40" y1="232" x2="40" y2="240" stroke="#4b5563"/>
+<text x="40" y="260" text-anchor="start" font-size="16" fill="#4b5563">0</text>
+<line x1="138" y1="232" x2="138" y2="240" stroke="#4b5563"/>
+<text x="138" y="260" text-anchor="middle" font-size="16" fill="#4b5563">30m</text>
+<line x1="328" y1="232" x2="328" y2="240" stroke="#4b5563"/>
+<text x="328" y="260" text-anchor="middle" font-size="16" fill="#4b5563">200m</text>
+<line x1="558" y1="232" x2="558" y2="240" stroke="#4b5563"/>
+<text x="558" y="260" text-anchor="middle" font-size="16" fill="#4b5563">500m</text>
+<line x1="758" y1="232" x2="758" y2="240" stroke="#4b5563"/>
+<text x="758" y="260" text-anchor="end" font-size="16" fill="#4b5563">1,000m</text>
+<text x="40" y="286" font-size="16" fill="#4b5563">0~200m는 카메라에서, 500m·1,000m는 오브에서 잰 거리다. 엔티티는 오브 500m 안에만 있다.</text>
+<text x="40" y="310" font-size="16" fill="#4b5563">엔티티는 카메라 188m 안에 들어와야 ISKM이 된다(표현 LOD의 히스테리시스).</text>
+<rect x="32" y="344" width="228" height="160" rx="10" fill="#f8fafc" stroke="#e5e7eb"/>
+<rect x="32" y="344" width="228" height="6" rx="3" fill="#2563eb"/>
+<text x="46" y="378" font-size="17" font-weight="700" fill="#2563eb">게임 스레드</text>
+<text x="46" y="408" font-size="16">모으기 프로세서가</text>
+<text x="46" y="432" font-size="16">표현이 없는 걷는</text>
+<text x="46" y="456" font-size="16">엔티티의 자리·시각·</text>
+<text x="46" y="480" font-size="16">걷기 위상을 담는다</text>
+<path d="M262 424.0 L275 424.0" stroke="#4b5563" stroke-width="2"/>
+<path d="M269 418.0 L277 424.0 L269 430.0" fill="none" stroke="#4b5563" stroke-width="2"/>
+<rect x="278" y="344" width="228" height="160" rx="10" fill="#f8fafc" stroke="#e5e7eb"/>
+<rect x="278" y="344" width="228" height="6" rx="3" fill="#9333ea"/>
+<text x="292" y="378" font-size="17" font-weight="700" fill="#9333ea">Niagara 사용자 변수</text>
+<text x="292" y="408" font-size="16">소형·대형 배열 둘을</text>
+<text x="292" y="432" font-size="16">매 프레임 통째로</text>
+<text x="292" y="456" font-size="16">바꿔 넣는다</text>
+<path d="M508 424.0 L521 424.0" stroke="#4b5563" stroke-width="2"/>
+<path d="M515 418.0 L523 424.0 L515 430.0" fill="none" stroke="#4b5563" stroke-width="2"/>
+<rect x="524" y="344" width="228" height="160" rx="10" fill="#f8fafc" stroke="#e5e7eb"/>
+<rect x="524" y="344" width="228" height="6" rx="3" fill="#db2777"/>
+<text x="538" y="378" font-size="17" font-weight="700" fill="#db2777">GPU</text>
+<text x="538" y="408" font-size="16">원소마다 입자 하나를</text>
+<text x="538" y="432" font-size="16">오브 쪽으로 외삽한</text>
+<text x="538" y="456" font-size="16">자리에 만들고 그</text>
+<text x="538" y="480" font-size="16">프레임에만 그린다</text>
+<line x1="32" y1="526" x2="768" y2="526" stroke="#e5e7eb"/>
+<text x="32" y="552" font-size="16" fill="#4b5563">입자 하나가 엔티티 하나다. 엔티티가 ISKM이 된 프레임에는 배열에서 빠진다.</text>
+<text x="32" y="576" font-size="16" fill="#4b5563">그래서 같은 개체가 입자와 ISKM으로 함께 그려지는 프레임이 없다.</text>
+</svg>
