@@ -332,6 +332,10 @@ void ULabIskmProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutio
 	CSV_CUSTOM_STAT(Lab, IsmBand1, BandCounts[1], ECsvCustomStatOp::Set);
 	CSV_CUSTOM_STAT(Lab, IsmBand2, BandCounts[2], ECsvCustomStatOp::Set);
 	CSV_CUSTOM_STAT(Lab, IsmBand3, BandCounts[3], ECsvCustomStatOp::Set);
+	if (Crowd->bHudCounts.load(std::memory_order_relaxed)) // 독자용 HUD가 보일 때만(Docs/Worklog/Q5-hud.md)
+	{
+		Crowd->HudInstances.store(BandCounts[0] + BandCounts[1] + BandCounts[2] + BandCounts[3], std::memory_order_relaxed);
+	}
 
 	// plan.md "M5" 결정 8: 트랙 맵 크기와 ISKM 인스턴스 수. 엔진 EndVisualChanges가 이 프로세서 뒤에 돌므로 지난 프레임까지 반영된 값이다.
 	if (!RepresentationSubsystemForStats)

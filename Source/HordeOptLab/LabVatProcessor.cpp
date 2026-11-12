@@ -213,6 +213,10 @@ void ULabVatISMProcessor::Execute(FMassEntityManager& EntityManager, FMassExecut
 	CSV_CUSTOM_STAT(Lab, IsmBand1, BandCounts[1], ECsvCustomStatOp::Set);
 	CSV_CUSTOM_STAT(Lab, IsmBand2, BandCounts[2], ECsvCustomStatOp::Set);
 	CSV_CUSTOM_STAT(Lab, IsmBand3, BandCounts[3], ECsvCustomStatOp::Set);
+	if (Crowd->bHudCounts.load(std::memory_order_relaxed)) // 독자용 HUD가 보일 때만(Docs/Worklog/Q5-hud.md)
+	{
+		Crowd->HudInstances.store(BandCounts[0] + BandCounts[1] + BandCounts[2] + BandCounts[3], std::memory_order_relaxed);
+	}
 	if (FLabConfig::Get().Stage >= ELabStage::M3) // 액터가 있는 단계만(M1·M2 CSV 열은 그대로)
 	{
 		CSV_CUSTOM_STAT(Lab, ViewInst30, ViewInst30, ECsvCustomStatOp::Set);

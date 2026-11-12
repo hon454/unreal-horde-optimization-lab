@@ -104,6 +104,12 @@ public:
 	/** Q5 HUD: 이 프레임 동기화한 하이드레이션 액터 수(CSV 스탯 Lab/Actors와 같은 값, ULabActorSyncProcessor가 쓴다) */
 	mutable std::atomic<int32> ActorCount{0};
 	/**
+	 * 독자용 HUD(Docs/Worklog/Q5-hud.md): 이 프레임 인스턴스로 그린 개체 수(VAT·ISKM 프로세서의 밴드 집계 Lab/IsmBand0~3의 합).
+	 * HUD가 보일 때만 ALabHud가 bHudCounts를 켜고, 꺼져 있으면 프로세서는 이 값을 쓰지 않는다(측정 실행의 동작 그대로).
+	 */
+	std::atomic<bool> bHudCounts{false};
+	mutable std::atomic<int32> HudInstances{0};
+	/**
 	 * Q2b 엔티티 구동 입자(-LabCrowdFx=1, -LabCrowdFxEntity=1). 게임 모드가 배경 무리 컴포넌트를 켠 뒤 넣고, ULabCrowdFxGatherProcessor(게임 스레드)가 매 프레임 배열과 시각을 넣는다.
 	 * bCrowdFx*는 에셋에 그 사용자 변수가 있는지(게임 모드가 활성화 전에 한 번 확인한다). 없는 값은 넣지 않는다(없는 이름은 Niagara가 부를 때마다 경고를 남긴다).
 	 */
