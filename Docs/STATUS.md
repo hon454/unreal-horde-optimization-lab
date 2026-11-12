@@ -14,22 +14,17 @@ M0\~M5, M3b 완료(태그 `M0`\~`M5`, `M3b`). 필수 마일스톤이 끝났다. 
 
 계획은 [plan.md](plan.md) "품질 계획"에 있다. 목표 사양은 호드 총수 1만(잠정)·60fps이고, 주 지표는 목표 총수에서의 프레임 시간이다. 최종 구성의 기법은 모두 사다리와 빼 보기 표에서 이점이 보여야 한다.
 
-- [x] **Q1 체력 분산.** 구현했다(81049f2, `FLabConfig::HealthFor`, 전 상태 재현은 `-LabHealthFixed=100`). 초당 사망 수는 28.7→28.6으로 그대로다(Development, 한 번씩, 참고). 시체가 한 줄 고리에서 넓은 띠로 퍼졌다([Worklog/Q1.md](Worklog/Q1.md)). 사용자가 전후 스크린샷을 보고 60\~240을 유지하기로 했다(2026-11-12).
-- [x] **Q1b 시즈 사망 클립 길이 맞추기.** 끝났다(d6bdc79). 시즈 사망 클립은 0.63\~0.67초, 소형은 2.13초였고 배율 약 0.30으로 늘려 재생한다. VAT는 로그로 확인했고, 액터(`GlobalAnimRateScale`)와 ISKM(`PlayRate`)도 런타임 로그로 끝까지 재생됨을 확인했다(72ad2e6, [Worklog/Q1.md](Worklog/Q1.md) "Q1b" 끝). 화면에서는 밀집 때문에 한 개체를 끝까지 따라가지 못했다.
-- [x] **Q2 Niagara 배경 무리.** 끝났다(fafc8cf, 2617de6, 72ad2e6, [Worklog/Q2.md](Worklog/Q2.md)). 변형 `q2crowd`(= `m5bounds` + `-LabCrowdFx=1`, 기본값 끔)가 오브 172.8\~1,000m를 GPU 입자 + VAT 메시로 채운다(1만에서 16,544개, 로그 실측 16,547). 안쪽 반경을 200m에서 172.8m로 옮긴 것은 실제 미니언이 카메라 188m에서 나타나 P1 정면에 빈 띠가 생겼기 때문이다. Development 참고로 켬이 약 +0.3ms다. 입자와 실제 미니언의 톤 차이가 남아 있다(보고서 D6). Test 패키지에서는 아직 돌리지 않았다.
-- [x] **Q3 빼 보기 스위치와 전환 점수.** 끝났다(fccc4fb, [Worklog/Q3.md](Worklog/Q3.md)). 아홉 행은 최종 변형 + 인자 하나다(commands.md "빼 보기 스위치(Q3)"). CSV 메타데이터 `LabTech*`와 적용값을 `Scripts/ablation-check.py`가 대조한다. 전환 점수는 Development에서만 낸다(이벤트 로그가 Test에 없다). Development 참고로 엔티티 풀, 전환 대책, 배경 무리, 하이드레이션 행은 프레임 이점이 보이지 않는다(보고서 D9).
-- [x] **Q4 품질 올리기.** 끝났다(652cee4, 33cd55b, 48e0d03, [Worklog/Q4.md](Worklog/Q4.md), `Measurements/Q4/`). 최종 구성은 Q4b(0a37e91)에서 바뀌었다: 액터 상한 1,000, 화면 안 전환 거리 40m, 80m 밖 ISKM 그림자 끔(아래 수치는 옛 79m 구성의 값이다). 1만 P1 프레임 p95 11.98ms(기준 500/30m는 10.60ms), P2 5.47ms. 액터 709개(기준 373). 목표 총수는 1만으로 둔다(2만은 17.43ms). 배경 무리는 GPU p50 +3.9ms다. 전환 거리가 늘수록 대형 액터의 애니메이션 갱신을 건너뛰는 비율이 는다(79m에서 0.66, 보고서 D11).
-- [ ] **Q5 측정 준비.** 코드와 러너가 끝났다([Worklog/Q5.md](Worklog/Q5.md)): 동등성 통계, Test 패키지 HUD(`-LabHud`), 조건 표 `Scripts/full-conditions.json`(6f9c18e), 하이드레이션 액터 캡슐 콜리전 기본 끔(2b202fc, 1만 P1 참고로 프레임 p95 −1.69ms, 보고서 D15), 러너 `Scripts/run-full.ps1`과 동등성 검사·촬영·요약 스크립트(71ad99f). 남은 것: 예행 묶음.
+- [x] **Q1 체력 분산**(81049f2). 개체마다 60\~240. 초당 사망 수는 그대로다(28.7→28.6, Development 참고). [Worklog/Q1.md](Worklog/Q1.md).
+- [x] **Q1b 시즈 사망 클립 길이 맞추기**(d6bdc79, 72ad2e6). 배율 약 0.30으로 늘려 재생한다. [Worklog/Q1.md](Worklog/Q1.md) "Q1b".
+- [x] **Q2 Niagara 배경 무리**(Q2b·Q2c 포함). 200\~500m는 엔티티 구동 입자, 500\~1,000m는 독립 입자다. Test 패키지 수치는 `Full1`에서 처음 낸다. [Worklog/Q2.md](Worklog/Q2.md).
+- [x] **Q3 빼 보기 스위치와 전환 점수**(fccc4fb). 인자 하나씩 빼는 행이고 `LabTech*`를 `Scripts/ablation-check.py`가 대조한다. 전환 점수는 Development에서만 낸다. [Worklog/Q3.md](Worklog/Q3.md).
+- [x] **Q4 품질 올리기**(Q4b 0a37e91 포함). 최종 구성 `q4final`: 액터 상한 1,000, 전환 40m, 80m 밖 그림자 끔. 목표 총수 1만. [Worklog/Q4.md](Worklog/Q4.md).
+- [x] **Q5 측정 준비.** 러너·HUD·조건 표 21개, 예행 `Reh2` 통과(동등성, 스파이크 0건). 액터 1만 조건 여섯은 10초 구간에서 프레임 수 검사(100 이상)에 걸렸다(60초는 미확인, `Full1` 첫 실행 `r0`로 확인하고 실패하면 멈춘다). 후처리 스크립트의 촬영 잘림과 목표 총수를 고쳤다(624d6ae). [Worklog/Q5.md](Worklog/Q5.md).
 - [ ] **Q6 총괄 묶음 `Full1`** → 글 00\~09([backlog.md](backlog.md) "글 대기열").
 
 ## 진행 중인 세션
 
-- 예행 묶음 `Reh2`: 끝났다(Q5.md). 검사는 통과했다. 액터 1만 조건 여섯은 10초 구간에서 프레임 수 검사(100 이상)에 걸렸다(60초는 미확인, 첫 실행으로 확인). 40m의 대형 액터 애니 건너뜀 비율은 0.055다.
-- Q2b(엔티티 구동 입자)와 Q4b(표현 LOD 재편)는 끝났다(dc73479, 0a37e91, c026d53, 67d7d29).
-- Q2c(입자 그림자를 `-LabFarShadow`에 묶기, 33a752a)가 끝났다. 조건 표는 21개로 줄였다(보고서 D19). 예행 산출물은 `Saved/Rehearsal/`에 있다.
-- `full-postfix`(Sonnet medium): `capture-full.ps1` 촬영 잘림, `plot.py --batch` 목표 총수 수정. 진행 중.
-- `docs-check`(Sonnet medium): 문서 점검([Worklog/Q6.md](Worklog/Q6.md)). 진행 중.
-- `hud-reader`(Opus high): 독자용 HUD(Worklog/Q5-hud.md). 진행 중. 셋이 끝나면 재패키징, 짧은 예행, `Full1` 순이다.
+- `hud-reader`(Opus high): 독자용 HUD([Worklog/Q5-hud.md](Worklog/Q5-hud.md)). 구현 중. 끝나면 재패키징, 짧은 예행, `Full1` 순이다.
 
 세션을 띄우면 세션, 작업 단위, 모델과 추론 수준, 상태를 여기에 적고, 끝나서 확인한 세션은 보관 처리하고 지운다(AGENTS.md "작업 세션은 작게 나눠 띄우고").
 
@@ -48,8 +43,8 @@ M0\~M5, M3b 완료(태그 `M0`\~`M5`, `M3b`). 필수 마일스톤이 끝났다. 
 M2\~M5 공통이고 근거는 [measurement.md](Guides/measurement.md) "확정값"이다.
 
 - 미니언끼리 비켜 가기 끔. 미니언 표현은 Lumen 장면 밖, 그림자 켬(최종 구성은 80m 밖에서 끔).
-- 원거리 표현은 M5까지 Bone VAT ISM(`Scripts/bake-vat.py`), 이후 대표는 `m5bounds`(ISKM + 고정 바운드)다. M3부터 200m 밖은 Off(그리지 않음).
-- 0\~30m는 액터(상한 500), 전환 대책 다섯 가지 전부 켬(`-LabHydrateFixMask` 기본 31).
+- 원거리 표현은 M5까지 Bone VAT ISM(`Scripts/bake-vat.py`), 사다리 6단계는 `m5bounds`(ISKM + 고정 바운드), 최종 구성은 `q4final`(200m 밖은 엔티티 구동 입자)이다. M3부터 200m 밖은 Off(그리지 않음).
+- 사다리 1\~7단계는 0\~30m 액터(상한 500), 최종 구성은 0\~40m(상한 1,000). 전환 대책 다섯 가지 전부 켬(`-LabHydrateFixMask` 기본 31).
 - 비교는 같은 묶음에서 잰 것끼리만 한다. 주기 스파이크는 `Scripts/spikes.py`로 확인한다.
 - 마일스톤 묶음의 대표 지표는 프레임 p95 N@16.7ms다(총괄 묶음부터는 보조 지표). p50 기준 N(프레임·Game·Render·GPU p50 중 최댓값이 16.7ms)과 병목을 함께 적는다. 하위 실험 앵커는 20k P1, Mass 단계 앵커에 30k 추가, 묶음 끝 A/A, 트레이스 병렬+직렬.
 - 측정은 세 층이다(ADR-0006): 개발 확인(20k P1, 비교에 쓰지 않음), 마일스톤 묶음(새 단계와 기준점만), 총괄 묶음(전 단계와 글이 쓰는 모든 점). 글과 README의 수치는 총괄 묶음에서만 만든다.
@@ -81,8 +76,9 @@ py -3 Scripts/summarize.py --milestone M5
 ## 막힌 것
 
 - 러너가 게임 창을 앞으로 보내고 검사한다. 측정 중에는 PC를 쓰지 않는다. 디스크의 Test 패키지는 a817827이다. HUD 수정 뒤 다시 패키징한다.
+- 촬영 GIF 하나가 42MB다(`Pre2`, 960x540 150프레임). `Full1` 촬영 전에 폭·fps를 정한다(측정과 무관).
 
 ## 사용자에게 요청한 일
 
-- `Full1`은 사용자가 승인했다(2026-11-12, 위 세션들과 재패키징 뒤).
+- `Full1`은 사용자가 승인했다(2026-11-12, HUD 세션과 재패키징 뒤).
 - 돌아오면 [Worklog/autonomous-decisions.md](Worklog/autonomous-decisions.md)를 검토해 달라(맨 위 요약, "사용자 판단 필요" 항목).

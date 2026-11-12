@@ -94,7 +94,7 @@ py -3 -I Scripts/turn-fill.py Saved/Logs/LabDev-q4final-N10000-P1.log
 
 ## 총괄 묶음 조건과 HUD(Q5)
 
-총괄 묶음 `Full1`의 조건(사다리 8단계 `L1`\~`L8`, 빼 보기 아홉 행 `A8-*`, 하위 실험 `S1-budget`·`S1-uro`·`S8-col`·`S8-h70`·`S8-h50`)은 `Scripts/full-conditions.json`에 인자 줄과 기대 메타데이터로 있다. 표와 경위는 [Worklog/Q5.md](../Worklog/Q5.md).
+총괄 묶음 `Full1`의 조건(사다리 8단계 `L1`\~`L8`, 빼 보기 열 행 `A8-*`, 하위 실험 `S1-budget`·`S1-uro`·`S8-col`)은 `Scripts/full-conditions.json`에 인자 줄과 기대 메타데이터로 있다. 표와 경위는 [Worklog/Q5.md](../Worklog/Q5.md).
 
 | 인자 | 뜻 |
 | --- | --- |
