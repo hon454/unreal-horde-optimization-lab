@@ -106,7 +106,7 @@ py -3 -I Scripts/plot.py --batch Full1
 
 | 경로 | 내용 |
 | --- | --- |
-| `Source/HordeOptLab/` | C++ 모듈 |
+| `Source/HordeOptLab/` | C++ 모듈. 최종 구성에서 한 프레임에 도는 코드는 [코드 투어](Docs/Guides/code-tour.md) |
 | `Content/Lab/` | 직접 만든 콘텐츠 |
 | `Scripts/` | 빌드, 패키징, 벤치마크, 그래프 |
 | `Docs/` | 계획, 결정 기록(ADR), 측정 규약, 엔진 소스 확인 기록, 작업 기록(Worklog) |

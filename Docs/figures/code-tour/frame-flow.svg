@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="954" viewBox="0 0 800 954" font-family="Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Segoe UI, sans-serif" font-size="16" fill="#111827">
+<rect x="0.5" y="0.5" width="799" height="953" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+<defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#4b5563"/></marker></defs>
+<text x="32" y="46" font-size="22" font-weight="700">최종 구성의 한 프레임</text>
+<text x="32" y="74" font-size="16" fill="#4b5563">화살표는 코드에 선언된 실행 순서다. 칩은 그 코드가 들어온 사다리 단계다.</text>
+<rect x="32" y="98" width="736" height="88" rx="10" fill="#f8fafc" stroke="#e5e7eb"/>
+<text x="48" y="126" font-size="17" font-weight="700">액터 틱(틱 그룹 PrePhysics)</text>
+<text x="48" y="152" font-size="16" fill="#4b5563">ALabOrb: 저격 요청과 이펙트 · ALabCameraRig · ALabGameMode: CSV 기록</text>
+<text x="48" y="174" font-size="16" fill="#4b5563">Mass 처리와 같은 틱 그룹이고 둘 사이의 순서 선언은 없다</text>
+<text x="24" y="216" font-size="17" font-weight="700">Mass 처리(PrePhysics 단계)</text>
+<rect x="44" y="234" width="712" height="88" rx="10" fill="#f8fafc" stroke="#e5e7eb"/>
+<text x="60" y="262" font-size="17" font-weight="700">1 거리 판정(LOD 그룹)</text>
+<rect x="685" y="245" width="59" height="22" rx="11" fill="#2563eb" fill-opacity="0.12" stroke="#2563eb"/>
+<text x="714.5" y="261" text-anchor="middle" font-size="16" font-weight="700" fill="#2563eb">5단계</text>
+<rect x="620" y="245" width="59" height="22" rx="11" fill="#2563eb" fill-opacity="0.12" stroke="#2563eb"/>
+<text x="649.5" y="261" text-anchor="middle" font-size="16" font-weight="700" fill="#2563eb">2단계</text>
+<text x="60" y="288" font-size="16" fill="#4b5563">UMassLODCollectorProcessor 다음에 UMassSimulationLODProcessor와</text>
+<text x="60" y="310" font-size="16" fill="#4b5563">UMassVisualizationLODProcessor. 두 LOD 계산 사이의 순서는 없다</text>
+<path d="M217.0 322 L217.0 354" stroke="#4b5563" stroke-width="1.6" fill="none" marker-end="url(#arr)"/>
+<path d="M583.0 322 L583.0 354" stroke="#4b5563" stroke-width="1.6" fill="none" marker-end="url(#arr)"/>
+<rect x="44" y="356" width="346" height="88" rx="10" fill="#f8fafc" stroke="#e5e7eb"/>
+<text x="60" y="384" font-size="17" font-weight="700">2 접근과 조향</text>
+<rect x="319" y="367" width="59" height="22" rx="11" fill="#2563eb" fill-opacity="0.12" stroke="#2563eb"/>
+<text x="348.5" y="383" text-anchor="middle" font-size="16" font-weight="700" fill="#2563eb">2단계</text>
+<text x="60" y="410" font-size="16" fill="#4b5563">ULabApproachProcessor(Tasks)</text>
+<text x="60" y="432" font-size="16" fill="#4b5563">다음 UMassSteerToMoveTargetProcessor</text>
+<path d="M217.0 444 L217.0 474" stroke="#4b5563" stroke-width="1.6" fill="none" marker-end="url(#arr)"/>
+<rect x="44" y="476" width="346" height="88" rx="10" fill="#f8fafc" stroke="#e5e7eb"/>
+<text x="60" y="504" font-size="17" font-weight="700">3 이동(Movement)</text>
+<rect x="319" y="487" width="59" height="22" rx="11" fill="#2563eb" fill-opacity="0.12" stroke="#2563eb"/>
+<text x="348.5" y="503" text-anchor="middle" font-size="16" font-weight="700" fill="#2563eb">5단계</text>
+<rect x="254" y="487" width="59" height="22" rx="11" fill="#2563eb" fill-opacity="0.12" stroke="#2563eb"/>
+<text x="283.5" y="503" text-anchor="middle" font-size="16" font-weight="700" fill="#2563eb">2단계</text>
+<text x="60" y="530" font-size="16" fill="#4b5563">엔진 이동·회전</text>
+<text x="60" y="552" font-size="16" fill="#4b5563">ULabOffMoveProcessor: 200m 밖</text>
+<path d="M217.0 564 L217.0 594" stroke="#4b5563" stroke-width="1.6" fill="none" marker-end="url(#arr)"/>
+<rect x="44" y="596" width="346" height="110" rx="10" fill="#f8fafc" stroke="#e5e7eb"/>
+<text x="60" y="624" font-size="17" font-weight="700">4 Lab 로직(LabLogic)</text>
+<rect x="319" y="607" width="59" height="22" rx="11" fill="#2563eb" fill-opacity="0.12" stroke="#2563eb"/>
+<text x="348.5" y="623" text-anchor="middle" font-size="16" font-weight="700" fill="#2563eb">2단계</text>
+<text x="60" y="650" font-size="16" fill="#4b5563">ULabOrbContactProcessor: 범위 피해</text>
+<text x="60" y="672" font-size="16" fill="#4b5563">다음 ULabOrbSnipeProcessor: 저격</text>
+<text x="60" y="694" font-size="16" fill="#4b5563">다음 ULabMinionStateProcessor</text>
+<rect x="410" y="356" width="346" height="88" rx="10" fill="#f8fafc" stroke="#e5e7eb"/>
+<text x="426" y="384" font-size="17" font-weight="700">5 표현 전환</text>
+<rect x="685" y="367" width="59" height="22" rx="11" fill="#db2777" fill-opacity="0.12" stroke="#db2777"/>
+<text x="714.5" y="383" text-anchor="middle" font-size="16" font-weight="700" fill="#db2777">8단계</text>
+<rect x="620" y="367" width="59" height="22" rx="11" fill="#2563eb" fill-opacity="0.12" stroke="#2563eb"/>
+<text x="649.5" y="383" text-anchor="middle" font-size="16" font-weight="700" fill="#2563eb">3단계</text>
+<text x="426" y="410" font-size="16" fill="#4b5563">UMassVisualizationProcessor</text>
+<text x="426" y="432" font-size="16" fill="#4b5563">액터 · ISKM · 그리지 않음</text>
+<path d="M583.0 444 L583.0 474" stroke="#4b5563" stroke-width="1.6" fill="none" marker-end="url(#arr)"/>
+<rect x="410" y="476" width="346" height="132" rx="10" fill="#f8fafc" stroke="#e5e7eb"/>
+<text x="426" y="504" font-size="17" font-weight="700">6 ISKM과 입자 갱신</text>
+<rect x="685" y="487" width="59" height="22" rx="11" fill="#db2777" fill-opacity="0.12" stroke="#db2777"/>
+<text x="714.5" y="503" text-anchor="middle" font-size="16" font-weight="700" fill="#db2777">7단계</text>
+<rect x="620" y="487" width="59" height="22" rx="11" fill="#2563eb" fill-opacity="0.12" stroke="#2563eb"/>
+<text x="649.5" y="503" text-anchor="middle" font-size="16" font-weight="700" fill="#2563eb">6단계</text>
+<text x="426" y="530" font-size="16" fill="#4b5563">ULabIskmProcessor</text>
+<text x="426" y="552" font-size="16" fill="#4b5563">ULabCrowdFxGatherProcessor</text>
+<text x="426" y="574" font-size="16" fill="#4b5563">둘 사이의 순서는 없다</text>
+<text x="426" y="596" font-size="16" font-weight="700" fill="#b45309">게임 스레드</text>
+<path d="M583.0 608 L583.0 638" stroke="#4b5563" stroke-width="1.6" fill="none" marker-end="url(#arr)"/>
+<rect x="410" y="640" width="346" height="88" rx="10" fill="#f8fafc" stroke="#e5e7eb"/>
+<text x="426" y="668" font-size="17" font-weight="700">7 액터 동기화</text>
+<rect x="685" y="651" width="59" height="22" rx="11" fill="#2563eb" fill-opacity="0.12" stroke="#2563eb"/>
+<text x="714.5" y="667" text-anchor="middle" font-size="16" font-weight="700" fill="#2563eb">4단계</text>
+<text x="426" y="694" font-size="16" fill="#4b5563">ULabActorSyncProcessor</text>
+<text x="426" y="716" font-size="16" font-weight="700" fill="#b45309">게임 스레드</text>
+<text x="44" y="760" font-size="16" font-weight="700" fill="#b45309">왼쪽 열(로직)과 오른쪽 열(표현) 사이에는 순서 선언이 없다.</text>
+<text x="44" y="784" font-size="16" fill="#4b5563">태그 변경과 풀·재생성은 지연 명령이라 명령 버퍼를 비울 때 적용된다.</text>
+<text x="44" y="808" font-size="16" fill="#4b5563">ULabNearOrbCountProcessor(오브 30m 안 개체 수)는 순서 선언이 없다.</text>
+<rect x="24" y="224" width="752" height="606" rx="12" fill="none" stroke="#9ca3af" stroke-dasharray="6 5"/>
+<rect x="32" y="856" width="736" height="66" rx="10" fill="#f8fafc" stroke="#e5e7eb"/>
+<text x="48" y="884" font-size="17" font-weight="700">PostPhysics 단계가 끝날 때</text>
+<text x="48" y="910" font-size="16" fill="#4b5563">엔진 EndVisualChanges가 쌓인 위치와 애니 데이터를 ISKM 컴포넌트에 올린다</text>
+</svg>
