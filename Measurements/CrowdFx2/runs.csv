@@ -1,0 +1,5 @@
+label,mesh,args,frames,frame_p50_ms,game_p50_ms,render_p50_ms,gpu_p50_ms,gpu_p95_ms,crowd_recs_mean
+CFX2-base,lod4,"",3544,11.12,11.15,6.31,6.56,6.98,6219
+CFX2-nofx,-,-LabCrowdFx=0,3518,11.17,11.19,6.21,6.01,6.45,
+CFX2-old,lod0,"-ini:Game:[Lab]:CrowdFxSystem=/Game/LabTmp/NS_LabCrowd_Lod0.NS_LabCrowd_Lod0",3256,12.22,11.49,12.04,11.75,12.17,6219
+CFX2-base2,lod4,"",3485,11.25,11.27,6.37,6.56,7.02,6220
