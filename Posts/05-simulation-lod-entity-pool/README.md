@@ -111,11 +111,7 @@ Query.SetChunkFilter(&FMassSimulationVariableTickChunkFragment::ShouldTickChunkT
 
 ![4단계와 5단계의 프레임 시간 중앙값 대 호드 총수. 차이는 5천 +0.02, 1만 −0.51, 2만 −1.27, 3만 −2.09ms다](images/simlod-result.svg)
 
-<!-- 코디네이터: 아래 Insights 화면을 찍어 넣는다(measurements.md "코디네이터가 찍을 Insights 화면").
-![호드 총수 1만, 오브 시점 카메라, Mass 병렬 처리를 끈 트레이스. 엔진 이동·조향 넷과 Lab Off 이동 프로세서의 프레임당 시간을 4단계와 5단계로 견준다](images/insights-movement-l4-l5.jpg)
-
-캡션 초안: 엔진 이동·조향 넷의 합이 4단계 X.XXms에서 5단계 X.XXms로 줄었다(예상 39%, 실제 XX%). Lab Off 이동 프로세서는 X.XXms다.
--->
+트레이스에서 게임 스레드의 프레임 평균을 읽었다(Unreal Insights, 호드 총수 1만, Processor를 한 스레드에 돌린 실행이라 위의 측정값과 견주지 않는다). 엔진 이동·조향 Processor 넷(`UMassApplyForceProcessor`, `UMassApplyMovementProcessor`, `UMassSteerToMoveTargetProcessor`, `UMassSmoothOrientationProcessor`)의 합은 4단계에서 프레임당 1.68ms였고, 5단계에서 0.67ms다. 5단계의 합은 4단계의 39.7%다. 처리하는 개체가 39%라는 예상과 거의 같다. 200m 밖을 움직이는 `LabOffMoveProcessor`는 0.006ms다.
 
 설정한 간격과 실제로 도는 주기는 달랐다. 값은 호드 총수 1만의 것이다. Medium 간격은 0.5초로 두었지만, 실제로는 0.110초마다 돌았다. Off 간격은 1초로 두었지만, 실제로는 0.321초마다 돌았다. 엔진은 엔티티가 드나든 청크를 간격과 상관없이 다음 프레임에 돌린다.
 
@@ -170,7 +166,7 @@ if (TrackElementId.IsValid())
 	SharedTrackMap.RemoveByElementId(TrackElementId);
 ```
 
-트랙을 돌려받는 곳은 이 함수뿐이다. 이 함수에 엔티티를 넘기는 것은 정지 표현의 전환 프로세서뿐이다. 이 문제를 다룬 공개 이슈의 주소는 확인하지 못했다. 근거는 엔진 소스다.
+트랙을 돌려받는 곳은 이 함수뿐이다. 이 함수에 엔티티를 넘기는 것은 정지 표현의 전환 프로세서뿐이다. 같은 문제를 다룬 글이 [Epic 개발자 포럼](https://forums.unrealengine.com/t/mass-crowds-using-skinnedmeshinstance-leak-gpu-memory-every-wave-of-spawned-and-killed-entities-permanently-grows-the-animation-track-pool-5-8/2742508)에 있다. 이 글의 근거는 엔진 소스다.
 
 이 레포는 죽은 엔티티를 파괴하지 않는다. 상태 프로세서가 사망이 끝난 엔티티를 풀로 넘기고, 재생성이 풀의 엔티티를 먼저 꺼낸다.
 

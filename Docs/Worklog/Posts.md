@@ -432,3 +432,12 @@
 
 - 02번 끝(성공). 직렬 `Full2traceser-L2-mass`의 게임 스레드(구간 25\~75초, 프레임 5,038): 프레임 9.92ms, Mass PrePhysics 3.01, `EndVisualChanges` 2.52, 가장 긴 Processor `MassSmoothOrientationProcessor` 0.93, `MassUpdateISMProcessor` 0.57ms. `UCharacterMovementComponent_TickComponent`는 없다. README의 주석 자리를 값 문장으로 바꿨다. 본문 주장은 그대로다.
 - 04번 끝(성공). 직렬 `Full2traceser-L4-mass`(프레임 5,674)와 `L3-vatcull`(6,412) 게임 스레드: 메시 틱 1.05ms(257번), 평가 완료 0.83, `LabActorSyncProcessor` 0.51, `Sync_RenderingThread` 3단계 2.75 → 4단계 0.005, `Tick_Engine` 4.68 → 8.37ms. 메시 틱 호출 수 257이 액터 평균 373보다 작아 본문에 "액터 수와 같다"를 쓰지 않았다(원인 미확인).
+
+## 09 총괄(2026-11-13)
+
+하위 에이전트(Opus)가 `Posts/09-summary/`를 쓴다. 수치는 최종 측정(Test 패키지 08e45f2)의 `Measurements/Full2/summary.csv`·`runs.csv`, `Docs/figures/full2/full-n-at-60fps.csv`, 엔티티 풀 `Measurements/Pool1/timeline.csv`, 참고 측정 `Measurements/Ref1/summary.csv`(한 문장)에서만 만든다. 에디터, 빌드, 패키징, 게임, 브라우저, Insights는 띄우지 않았다.
+
+### 진행(09)
+
+- 조사 끝(성공). 사다리 여덟 행, 빼 보기 열 행과 `S8-col`, 최대 개체 수 CSV, `Pool1`, `Ref1` 값을 CSV에서 다시 읽어 브리프의 값과 맞음을 확인했다. README 그림 여섯 개의 글자를 읽었다(`ablation.svg`에는 `S8-col`이 없다). 다음은 초안.
+- 05번 끝(성공). 직렬 `Full2traceser-L4-mass`(프레임 5,674)와 `L5-m4offpool`(6,286) 게임 스레드: 엔진 이동·조향 넷의 합 1.68 → 0.67ms(39.7

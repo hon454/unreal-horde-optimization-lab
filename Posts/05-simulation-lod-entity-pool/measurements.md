@@ -13,7 +13,7 @@
 | 단계와 변형 | `L4-mass`(`-LabStage=M3 -LabVariant=mass`), `L5-m4offpool`(`-LabStage=M5 -LabVariant=m4offpool`), 빼 보기 `L8-q4final`, `A8-simlod`(`-LabSimLod=0`), `A8-pool`(`-LabEntityPool=0`). 인자와 기대 메타데이터는 `Scripts/full-conditions.json` |
 | 요약 파일 | [최종 측정의 요약 표](../../Measurements/Full2/summary.csv)(세 회차 중앙값과 범위), [실행별 값](../../Measurements/Full2/runs.csv), [16분 실행의 1분 구간 값](../../Measurements/Pool1/timeline.csv), [16분 실행의 전체 값](../../Measurements/Pool1/summary.csv) |
 | 60fps를 지키는 최대 개체 수(`N@16.7ms`) | [최대 개체 수 CSV](../../Docs/figures/full2/full-n-at-60fps.csv)(`Scripts/plot.py`가 측정 N 사이를 로그 보간) |
-| 트레이스 | 본문에 트레이스 값이 없다. 아래 "코디네이터가 찍을 Insights 화면" |
+| 트레이스 | 본문 "결과"의 트레이스 문단 값은 아래 "트레이스 값"이다. 최종 측정 빌드의 직렬 트레이스 한 회씩이다 |
 
 ### 4단계와 5단계의 차이(코드)
 
@@ -160,7 +160,7 @@ engine-notes.md 3절 "ISKM 트랙 풀 누수"(773·864·1156)와 5절과 같은 
 
 ### 공개 이슈
 
-공개 이슈의 주소는 찾지 못했다. [references.md](../../Docs/Reference/references.md) "포럼 스레드"에 제목만 있다("Mass crowds using SkinnedMeshInstance leak GPU memory", 2026-06, 5.8.4 소스에서도 미수정). 주소가 적혀 있지 않아 본문에 링크하지 않았다. 주소를 확인하면 본문의 "공개 이슈의 주소는 확인하지 못했다" 문장을 링크로 바꾼다.
+같은 문제를 다룬 글이 Epic 개발자 포럼에 있다: https://forums.unrealengine.com/t/mass-crowds-using-skinnedmeshinstance-leak-gpu-memory-every-wave-of-spawned-and-killed-entities-permanently-grows-the-animation-track-pool-5-8/2742508 ("Mass crowds using SkinnedMeshInstance leak GPU memory", 5.8). 글의 내용은 읽지 않았다. 해결 여부는 적지 않았다. 본문은 이 주소로 가는 링크 문장만 둔다. 이 글의 근거는 엔진 소스다. [references.md](../../Docs/Reference/references.md) "포럼 스레드"에는 제목만 있다.
 
 ### 본문에 넣은 발췌
 
@@ -177,15 +177,33 @@ engine-notes.md 3절 "ISKM 트랙 풀 누수"(773·864·1156)와 5절과 같은 
 | `ULabMinionStateProcessor::Execute` | 15 | `LabMassProcessors.cpp:720-721`, `// ...`(`:722-724`), `:725-734`, `// ...`(`:735-736`), `:737` |
 | `ULabCrowdSubsystem::SpawnEntities` | 8 | `LabCrowdSubsystem.cpp:257-264` |
 
-## 코디네이터가 찍을 Insights 화면
+## 트레이스 값
 
-본문 "결과"에 주석 처리한 이미지 자리(`images/insights-movement-l4-l5.jpg`)와 캡션 초안이 있다.
+본문 "결과"의 트레이스 문단 값이다. Insights 화면은 찍지 않고 명령줄 내보내기로 뽑았다.
 
-- 트레이스: `Saved/Traces/Full2traceser-L4-mass-N10000-P1-r1.utrace`와 `Full2traceser-L5-m4offpool-N10000-P1-r1.utrace`(직렬, `-LabFullyParallel=0`). 직렬을 고른 것은 병렬 트레이스에서 프로세서 시간에 다른 프로세서를 기다리는 시간이 섞이기 때문이다(03번 글 "틀렸던 가설").
-- 구간: 25\~75초(다른 글과 같다). 게임 스레드, Timers 표, Incl.
-- 읽을 것: `UMassApplyForceProcessor`, `UMassApplyMovementProcessor`, `UMassSteerToMoveTargetProcessor`, `UMassSmoothOrientationProcessor` 네 타이머의 프레임당 합(합 × 1000 ÷ 구간 프레임 수), `LabOffMoveProcessor`, `LabApproachProcessor`, `UMassSimulationLODProcessor`. 화면 하나에 4단계와 5단계의 넷의 합을 나란히 표시한다.
-- 넣을 값: 캡션의 X.XX 셋과 "예상 39%, 실제 XX%"(5단계 합 ÷ 4단계 합). 값은 이 표에 행으로 더한다.
-- 예상보다 덜 줄면 원인 후보: `UMassSmoothOrientationProcessor`는 Off 개체를 따로 도는 쿼리가 있다(`MassSmoothOrientationProcessors.cpp:38`).
+| 항목 | 값 |
+| --- | --- |
+| 트레이스 | `Saved/Traces/Full2traceser-L4-mass-N10000-P1-r1.utrace`(4단계), `Full2traceser-L5-m4offpool-N10000-P1-r1.utrace`(5단계). 둘 다 직렬(`mass.FullyParallel` 끔), 저장소 밖 |
+| 내보낸 표 | `%TEMP%\horde-trace\F2-traceser-L4-mass-GT.csv`, `F2-traceser-L5-m4offpool-GT.csv`(`Scripts/trace-export.ps1 -Command TimerStatistics`, 스레드 `GameThread`, 구간 25\~75초, 저장소 밖) |
+| 프레임 수 | 4단계 5,674, 5단계 6,286(`FEngineLoop::Tick` 횟수) |
+| 식 | 타이머의 합(초) × 1000 ÷ 프레임 수 = 프레임당 ms. 모두 Incl이고 이 Processor들은 Incl = Excl이다 |
+
+| Processor(타이머 이름 접두) | 4단계 합(초) → 프레임당 ms | 5단계 합(초) → 프레임당 ms |
+| --- | --- | --- |
+| `MassApplyForceProcessor` | 0.847657 → 0.1494 | 0.450729 → 0.0717 |
+| `MassApplyMovementProcessor` | 0.740211 → 0.1305 | 0.217270 → 0.0346 |
+| `MassSteerToMoveTargetProcessor` | 2.654627 → 0.4679 | 1.226173 → 0.1951 |
+| `MassSmoothOrientationProcessor` | 5.311797 → 0.9362 | 2.310555 → 0.3676 |
+| 넷의 합 | 9.554292 → 1.6839 | 4.204727 → 0.6689 |
+| `LabOffMoveProcessor` | (없음) | 0.040224 → 0.0064 |
+
+| 본문 값 | 정밀한 값 | 식 |
+| --- | --- | --- |
+| 넷의 합 1.68ms → 0.67ms | 1.6839 → 0.6689 | 위 표 |
+| 실제 39.7% | 39.72% | 0.6689 ÷ 1.6839 |
+| `LabOffMoveProcessor` 0.006ms | 0.0064 | 0.040224 × 1000 ÷ 6,286 |
+
+참고(본문에 쓰지 않았다): `LabApproachProcessor` 0.1100 → 0.0237ms, `MassSimulationLODProcessor` 5단계 0.0671ms(0.421803초), `LabOffMoveEnterObserver` 5단계 0.0008ms(2,543번). 직렬 트레이스 한 회라 `summary.csv`의 값과 직접 견주지 않는다. 예상 39%(위 3,869 ÷ 9,866)는 개체 수 비율이고, 실제 39.7%는 시간 비율이다. 5단계에서 `MassSmoothOrientationProcessor`가 예상보다 덜 줄었다는 징후는 없었다(Off 개체 쿼리, `MassSmoothOrientationProcessors.cpp:38`).
 
 ## 화면
 
@@ -222,7 +240,7 @@ SVG 다섯 개는 [make-figures.py](make-figures.py)가 만든다(저장소 루�
 ## 확인하지 않은 것
 
 - 5단계에서 엔티티 풀만의 몫. 최종 측정의 사다리에 풀만 뺀 5단계가 없다. `A8-pool`은 최종 구성(ISKM, 입자)에서 뺀 값이다.
-- 엔진 이동·조향 넷이 실제로 39% 근처로 줄었는지. 최종 측정 빌드의 트레이스를 내보내지 않았다(위 "코디네이터가 찍을 Insights 화면").
+- 엔진 이동·조향 넷의 시간이 39% 근처로 줄었는지는 직렬 트레이스 한 회로 확인했다(39.7%, 위 "트레이스 값"). 병렬 실행에서의 값은 보지 않았다.
 - 풀 켬에서 트랙이 약 2만에서 멈추는 이유. 위 "16분 실행"의 추정(컴포넌트 둘)은 코드로 확인하지 않았다.
 - 풀 끔 13분째 GPU 메모리 계단(약 1.15GB)의 원인.
 - 풀 끔에서 시간이 갈수록 프레임 시간 변동(느린 쪽)이 커지는지. `timeline.csv`는 p50만 있다. 풀 끔에서 미니언이 떨려 보인다는 관찰은 화면 근거가 없어 본문에 쓰지 않았다(9분 시점 녹화 4건에서 재현하지 못했다, Worklog/Q6.md "Pre6 촬영과 풀 끔 떨림 확인").
