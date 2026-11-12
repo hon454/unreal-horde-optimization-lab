@@ -6,7 +6,7 @@
 
 - 마일스톤 M0\~M5와 M3b는 끝났다. 태그는 `M0`\~`M5`, `M3b`다.
 - 품질 계획 Q1\~Q5는 끝났다. Q6은 총괄 묶음 `Full2`의 측정까지 끝났다.
-- 지금은 새 값으로 문서를 고치고 글을 쓴다.
+- 문서는 새 값으로 고쳤다(090f52c). 지금은 글을 쓴다.
 - 방향은 목표 사양(호드 총수 1만, 60fps) 안에서 거리별 품질을 확보하는 것이다([ADR-0009](Decisions/0009-flat-scenario-quality-by-distance.md)).
 - 계획은 [plan.md](plan.md) "품질 계획"에 있다. 경위는 `Worklog/M<N>.md`와 `Worklog/Q<N>.md`에 있다.
 - 사용자는 2026-11-12에 남은 작업을 코디네이터에게 맡겼다. 코디네이터는 결정을 [autonomous-decisions.md](Worklog/autonomous-decisions.md) D20부터 적는다.
@@ -15,21 +15,21 @@
 
 순서대로 한다.
 
-1. **새 값으로 문서를 고친다.** 대상은 README 그림과 문장, measurement.md, 01번 글의 수치, ADR-0011 "결과"다. 근거는 [Worklog/Q6.md](Worklog/Q6.md) "Full2 재측정"이다.
-2. **7·8단계 화면을 다시 찍는다.** 촬영 묶음은 `Pre6`이다.
-3. **Test 패키지를 GitHub Releases에 올린다.** 패키지는 08e45f2다. 코디네이터는 먼저 Epic 콘텐츠 라이선스 원문을 확인한다.
-4. **글 00\~09를 쓴다.** 대기열은 [backlog.md](backlog.md)에 있다.
+1. **7·8단계 화면을 다시 찍는다.** 촬영 묶음은 `Pre6`이다. 화면은 찍었다. 촬영 세션이 풀 끔 실행의 떨림을 확인하는 중이다.
+2. **01번 글의 트레이스 값을 새 트레이스에서 다시 뽑는다.** 코디네이터가 촬영이 끝난 뒤에 한다. Insights 화면도 다시 찍는다.
+3. **Test 패키지를 GitHub Releases에 올린다.** 패키지는 08e45f2다. 라이선스 판단은 [D25](Worklog/autonomous-decisions.md)에 있다. 촬영이 끝난 뒤에 한다.
+4. **글 00\~09를 쓴다.** 대기열은 [backlog.md](backlog.md)에 있다. 나누는 법은 [D27](Worklog/autonomous-decisions.md)에 있다.
    - 시범 글 01은 [Posts/01-actor-baseline](../Posts/01-actor-baseline/README.md)에 있다.
    - 글 규칙은 [posting.md](Guides/posting.md), [ADR-0014](Decisions/0014-post-format.md), [ADR-0015](Decisions/0015-readme-figures.md)에 있다.
    - 글 재료의 사실 확인 결과는 [post-review.md](post-review.md)에 있다. 재료의 측정값은 옛 묶음의 값이다. 경위는 수치 없이 방향만 쓴다.
    - 엔진 문제를 쓸 때는 이슈 링크와 이 레포의 해결 코드 블록을 함께 보인다.
-   - 남은 질문 넷은 [Worklog/Posts.md](Worklog/Posts.md) "코디네이터용"에 있다.
+   - 독자용 문장은 묶음 이름 대신 "최종 측정"이라고 쓴다.
    - 글을 다 쓰면 한눈에 보는 사이트를 만든다.
-5. **푸시한다.** 사용자가 2026-11-12에 푸시를 승인했다. 294a762까지 푸시했다.
+5. **푸시한다.** 사용자가 2026-11-12에 푸시를 승인했다. 294a762까지 푸시했다. 촬영 중에는 푸시하지 않는다.
 
 ## 진행 중인 세션
 
-- `docs-full2`: README 그림과 문장, measurement.md, 01번 글, ADR-0011 "결과"를 `Full2` 값으로 고친다. Opus high. 진행 중.
+- `post-00`, `post-02`, `post-03`: 글 00, 02, 03을 쓴다. Opus high. 진행 중.
 - `pre6-capture`: 7·8단계 화면을 `Pre6`으로 다시 찍는다. 풀 끔 실행의 40\~80m 떨림을 화면으로 확인한다. Sonnet medium. 진행 중.
 - 촬영이 끝날 때까지 다른 세션과 사용자는 에디터, 빌드, Chrome을 띄우지 않는다.
 
