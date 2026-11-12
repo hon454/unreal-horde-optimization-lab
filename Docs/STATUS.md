@@ -22,7 +22,7 @@
    - 참고 묶음: 해상도를 낮춰 게임 스레드를 병목으로 만든다. 조건은 8단계와 빼 보기 열 행이다(11조건 × 3회). 이 묶음 안에서만 비교한다. 낮추는 방법과 값은 측정 세션이 제안한다.
    - 엔티티 풀: 16분 실행을 두 번 한다(풀 켬, 풀 끔). ISKM 트랙 수와 GPU 메모리를 시간에 따라 기록한다.
 4. **새 값으로 문서를 고친다.** 대상은 README 그림, 01번 글의 수치, 7·8단계 화면이다.
-5. **에셋 복구 스크립트를 실제로 돌려 검증한다.** 1번이 끝난 뒤에 한다. 세션 `asset-restore-guide`가 스크립트와 가이드를 쓰고 있다.
+5. **에셋 복구 스크립트를 실제로 돌려 검증한다.** 1번이 끝난 뒤에 한다. 사용자가 범위를 정했다(2026-11-12): `Content/ParagonMinions`와 `Content/NiagaraExamples`도 백업 폴더로 옮기고 팩 이전부터 돌린다. 세션 `asset-restore-guide`가 스크립트와 가이드를 쓰고 있다.
 6. **Test 패키지를 GitHub Releases에 올린다.** 3번의 패키지를 쓴다. 조건은 "사용자에게 요청한 일"에 있다.
 7. **글 00\~09를 쓴다.** 대기열은 [backlog.md](backlog.md)에 있다.
    - 시범 글 01은 [Posts/01-actor-baseline](../Posts/01-actor-baseline/README.md)에 있다. 사용자의 두 번째 검토를 기다린다.
@@ -112,7 +112,6 @@ py -3 -I Scripts/plot-readme.py
 
 ## 사용자에게 요청한 일
 
-- **팩 폴더 재이전 검증의 OK.** 복구 스크립트를 끝까지 검증하려면 `Content/ParagonMinions`와 `Content/NiagaraExamples`를 백업 폴더로 옮기고 다시 이전해야 한다. 사용자의 OK가 필요하다.
 - **Releases 올리기 전의 OK.** 코디네이터가 Epic 콘텐츠 라이선스 원문을 확인한다. 그 뒤 파일 목록과 태그 이름을 사용자에게 보인다. 사용자가 OK하면 올린다.
 - **01번 글의 두 번째 검토.**
 - **[autonomous-decisions.md](Worklog/autonomous-decisions.md)의 "사용자 판단 필요" 항목 검토.**
