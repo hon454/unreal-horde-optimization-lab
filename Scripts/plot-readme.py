@@ -273,7 +273,7 @@ def resources():
     o = [HATCH]
     y = title(o, "단계마다 쓰는 메모리와 드로우 콜",
               ["호드 총수 1만, 오브 시점 카메라, 60초씩 세 번 잰 중앙값",
-               "막대 끝의 가는 선: 세 번 잰 범위"])
+               "막대 둘레의 옅은 띠: 세 번 잰 범위(좁아서 2px가 안 되는 범위는 그리지 않았다)"])
     LX, CX, CR = 32, 262, W - 32
     CW = (CR - CX) / 3
     BWMAX = 92
@@ -284,6 +284,7 @@ def resources():
         o.append(f'<text x="{x:.1f}" y="{y + 21}" font-size="16" fill="{SUB}">{esc(unit)}</text>')
     y += 38
     RH, BAR = 36, 18
+    RANGE_MIN_PX = 2.0  # narrower ranges are not drawn (stated in the subtitle)
     for cond, num, name, _ in STEPS:
         if num in GROUPS:
             y += 24 if num == 1 else 30
@@ -297,11 +298,14 @@ def resources():
             v = val(cond, col)
             lo, hi = span[cond, col]
             by = y + 9
+            if (hi - lo) * sc >= RANGE_MIN_PX:  # pale band of the same colour behind the bar, min to max
+                o.append(f'<rect x="{x + lo * sc:.1f}" y="{by - 4}" width="{(hi - lo) * sc:.1f}" height="{BAR + 8}" '
+                         f'rx="4" fill="{c}" fill-opacity="0.28"/>')
+                end = max(v, hi) * sc
+            else:
+                end = v * sc
             bar(o, x, by, max(v * sc, 1.5), BAR, c, num)
-            o.append(f'<line x1="{x + lo * sc:.1f}" y1="{by + BAR / 2}" x2="{x + hi * sc:.1f}" y2="{by + BAR / 2}" stroke="{INK}" stroke-width="2"/>')
-            for e in (lo, hi):
-                o.append(f'<line x1="{x + e * sc:.1f}" y1="{by + 3}" x2="{x + e * sc:.1f}" y2="{by + BAR - 3}" stroke="{INK}" stroke-width="2"/>')
-            tx = x + max(v, hi) * sc + 7
+            tx = x + end + 7
             o.append(f'<text x="{tx:.1f}" y="{by + 15}" font-size="16" font-weight="700" fill="{c}">{round(v):,}</text>')
         y += RH
     o.append(f'<line x1="32" y1="{y}" x2="{W - 32}" y2="{y}" stroke="{LINE}"/>')
