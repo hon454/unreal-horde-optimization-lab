@@ -1,0 +1,101 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="930" viewBox="0 0 800 930" font-family="Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Segoe UI, sans-serif" font-size="16" fill="#111827">
+<defs><pattern id="hatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="8" height="8" fill="#f3f4f6"/><line x1="0" y1="0" x2="0" y2="8" stroke="#9ca3af" stroke-width="3"/></pattern><pattern id="shade" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="7" stroke="#ffffff" stroke-opacity="0.55" stroke-width="2.5"/></pattern></defs>
+<rect x="0.5" y="0.5" width="799" height="929" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+<text x="32" y="46" font-size="22" font-weight="700">여덟 단계: 거리마다 무엇으로 그리나</text>
+<text x="32" y="74" font-size="16" fill="#4b5563">앞 단계 위에 하나씩 더한다. 가로는 카메라에서의 거리이고 축척이 아니다</text>
+<text x="330.0" y="118" text-anchor="middle" font-size="16" fill="#4b5563">0</text>
+<text x="422.0" y="118" text-anchor="middle" font-size="16" fill="#4b5563">30</text>
+<text x="450.0" y="118" text-anchor="middle" font-size="16" fill="#4b5563">40</text>
+<text x="540.0" y="118" text-anchor="middle" font-size="16" fill="#4b5563">80</text>
+<text x="660.0" y="118" text-anchor="middle" font-size="16" fill="#4b5563">200</text>
+<text x="768.0" y="118" text-anchor="end" font-size="16" fill="#4b5563">500m</text>
+<circle cx="46" cy="145" r="14" fill="#374151"/>
+<text x="46" y="151" text-anchor="middle" font-size="16" font-weight="700" fill="white">1</text>
+<text x="70" y="151" font-size="17" font-weight="700">액터 군중</text>
+<text x="70" y="180" font-size="16" fill="#4b5563">모든 개체가 ACharacter 액터다</text>
+<rect x="331.0" y="130" width="436.0" height="30" rx="4" fill="#dc2626"/>
+<text x="549.0" y="151" text-anchor="middle" font-size="16" font-weight="700" fill="white">액터</text>
+<circle cx="46" cy="217" r="14" fill="#374151"/>
+<text x="46" y="223" text-anchor="middle" font-size="16" font-weight="700" fill="white">2</text>
+<text x="70" y="223" font-size="17" font-weight="700">Mass 로직</text>
+<text x="70" y="252" font-size="16" fill="#4b5563">로직을 Mass로 옮기고, 애니메이션 없는 ISM으로 그린다</text>
+<rect x="331.0" y="202" width="436.0" height="30" rx="4" fill="#9ca3af"/>
+<text x="549.0" y="223" text-anchor="middle" font-size="16" font-weight="700" fill="#111827">ISM</text>
+<circle cx="46" cy="289" r="14" fill="#374151"/>
+<text x="46" y="295" text-anchor="middle" font-size="16" font-weight="700" fill="white">3</text>
+<text x="70" y="295" font-size="17" font-weight="700">ISM + VAT</text>
+<text x="70" y="324" font-size="16" fill="#4b5563">인스턴스에 VAT 애니메이션을 입히고, 200m 밖은 그리지 않는다</text>
+<rect x="331.0" y="274" width="328.0" height="30" rx="4" fill="#93c5fd"/>
+<text x="495.0" y="295" text-anchor="middle" font-size="16" font-weight="700" fill="#111827">VAT</text>
+<rect x="661.0" y="274" width="106.0" height="30" rx="4" fill="white" stroke="#9ca3af" stroke-dasharray="4 3"/>
+<text x="714.0" y="295" text-anchor="middle" font-size="16" fill="#4b5563">그리지 않음</text>
+<circle cx="46" cy="361" r="14" fill="#374151"/>
+<text x="46" y="367" text-anchor="middle" font-size="16" font-weight="700" fill="white">4</text>
+<text x="70" y="367" font-size="17" font-weight="700">액터 하이드레이션</text>
+<text x="70" y="396" font-size="16" fill="#4b5563">30m 안을 액터로 바꾸고(상한 500), 애니메이션 예산을 둔다</text>
+<rect x="331.0" y="346" width="90.0" height="30" rx="4" fill="#dc2626"/>
+<text x="376.0" y="367" text-anchor="middle" font-size="16" font-weight="700" fill="white">액터</text>
+<rect x="423.0" y="346" width="236.0" height="30" rx="4" fill="#93c5fd"/>
+<text x="541.0" y="367" text-anchor="middle" font-size="16" font-weight="700" fill="#111827">VAT</text>
+<rect x="661.0" y="346" width="106.0" height="30" rx="4" fill="white" stroke="#9ca3af" stroke-dasharray="4 3"/>
+<text x="714.0" y="367" text-anchor="middle" font-size="16" fill="#4b5563">그리지 않음</text>
+<circle cx="46" cy="433" r="14" fill="#374151"/>
+<text x="46" y="439" text-anchor="middle" font-size="16" font-weight="700" fill="white">5</text>
+<text x="70" y="439" font-size="17" font-weight="700">Simulation LOD</text>
+<text x="70" y="468" font-size="16" fill="#4b5563">먼 개체의 계산을 줄이고, 엔티티를 다시 쓴다</text>
+<rect x="331.0" y="418" width="90.0" height="30" rx="4" fill="#dc2626"/>
+<text x="376.0" y="439" text-anchor="middle" font-size="16" font-weight="700" fill="white">액터</text>
+<rect x="423.0" y="418" width="236.0" height="30" rx="4" fill="#93c5fd"/>
+<text x="541.0" y="439" text-anchor="middle" font-size="16" font-weight="700" fill="#111827">VAT</text>
+<rect x="661.0" y="418" width="106.0" height="30" rx="4" fill="white" stroke="#9ca3af" stroke-dasharray="4 3"/>
+<text x="714.0" y="439" text-anchor="middle" font-size="16" fill="#4b5563">그리지 않음</text>
+<circle cx="46" cy="505" r="14" fill="#374151"/>
+<text x="46" y="511" text-anchor="middle" font-size="16" font-weight="700" fill="white">6</text>
+<text x="70" y="511" font-size="17" font-weight="700">ISKM</text>
+<text x="70" y="540" font-size="16" fill="#4b5563">VAT 자리를 ISKM으로 바꾸고, 바운드를 고정한다</text>
+<rect x="331.0" y="490" width="90.0" height="30" rx="4" fill="#dc2626"/>
+<text x="376.0" y="511" text-anchor="middle" font-size="16" font-weight="700" fill="white">액터</text>
+<rect x="423.0" y="490" width="236.0" height="30" rx="4" fill="#2563eb"/>
+<text x="541.0" y="511" text-anchor="middle" font-size="16" font-weight="700" fill="white">ISKM</text>
+<rect x="661.0" y="490" width="106.0" height="30" rx="4" fill="white" stroke="#9ca3af" stroke-dasharray="4 3"/>
+<text x="714.0" y="511" text-anchor="middle" font-size="16" fill="#4b5563">그리지 않음</text>
+<circle cx="46" cy="577" r="14" fill="#374151"/>
+<text x="46" y="583" text-anchor="middle" font-size="16" font-weight="700" fill="white">7</text>
+<text x="70" y="583" font-size="17" font-weight="700">Niagara 배경 무리</text>
+<text x="70" y="612" font-size="16" fill="#4b5563">200m 밖 엔티티 자리에 입자를 그린다</text>
+<rect x="331.0" y="562" width="90.0" height="30" rx="4" fill="#dc2626"/>
+<text x="376.0" y="583" text-anchor="middle" font-size="16" font-weight="700" fill="white">액터</text>
+<rect x="423.0" y="562" width="236.0" height="30" rx="4" fill="#2563eb"/>
+<text x="541.0" y="583" text-anchor="middle" font-size="16" font-weight="700" fill="white">ISKM</text>
+<rect x="661.0" y="562" width="106.0" height="30" rx="4" fill="#0d9488"/>
+<text x="714.0" y="583" text-anchor="middle" font-size="16" font-weight="700" fill="white">입자</text>
+<circle cx="46" cy="649" r="14" fill="#374151"/>
+<text x="46" y="655" text-anchor="middle" font-size="16" font-weight="700" fill="white">8</text>
+<text x="70" y="655" font-size="17" font-weight="700">품질 올리기</text>
+<text x="70" y="684" font-size="16" fill="#4b5563">40m 안을 액터로(상한 1,000), 80m 밖은 그림자를 끈다</text>
+<rect x="331.0" y="634" width="118.0" height="30" rx="4" fill="#dc2626"/>
+<text x="390.0" y="655" text-anchor="middle" font-size="16" font-weight="700" fill="white">액터</text>
+<rect x="451.0" y="634" width="88.0" height="30" rx="4" fill="#2563eb"/>
+<text x="495.0" y="655" text-anchor="middle" font-size="16" font-weight="700" fill="white">ISKM</text>
+<rect x="541.0" y="634" width="118.0" height="30" rx="4" fill="#2563eb"/>
+<rect x="541.0" y="634" width="118.0" height="30" rx="4" fill="url(#shade)"/>
+<text x="600.0" y="655" text-anchor="middle" font-size="16" font-weight="700" fill="white">ISKM</text>
+<rect x="661.0" y="634" width="106.0" height="30" rx="4" fill="#0d9488"/>
+<rect x="661.0" y="634" width="106.0" height="30" rx="4" fill="url(#shade)"/>
+<text x="714.0" y="655" text-anchor="middle" font-size="16" font-weight="700" fill="white">입자</text>
+<line x1="32" y1="698" x2="768" y2="698" stroke="#e5e7eb"/>
+<rect x="32" y="720" width="22" height="18" rx="3" fill="#dc2626"/>
+<text x="64" y="735" font-size="16">액터: 스켈레탈 메시와 AnimBP를 가진 ACharacter</text>
+<rect x="32" y="748" width="22" height="18" rx="3" fill="#9ca3af"/>
+<text x="64" y="763" font-size="16">ISM: 애니메이션 없는 정적 메시 인스턴스</text>
+<rect x="32" y="776" width="22" height="18" rx="3" fill="#93c5fd"/>
+<text x="64" y="791" font-size="16">VAT: 애니메이션을 텍스처로 구워 입힌 ISM</text>
+<rect x="32" y="804" width="22" height="18" rx="3" fill="#2563eb"/>
+<text x="64" y="819" font-size="16">ISKM: 스켈레탈 메시를 그대로 인스턴스로 그린다</text>
+<rect x="32" y="832" width="22" height="18" rx="3" fill="#0d9488"/>
+<text x="64" y="847" font-size="16">입자: 엔티티 자리에 그리는 Niagara 입자</text>
+<rect x="32" y="860" width="22" height="18" rx="3" fill="#2563eb"/>
+<rect x="32" y="860" width="22" height="18" rx="3" fill="url(#shade)"/>
+<text x="64" y="875" font-size="16">빗금: 그림자를 그리지 않는다</text>
+<text x="32" y="906" font-size="16" fill="#4b5563">액터 구간은 화면 안의 거리다. 화면 밖은 15m 안만 액터로 바꾼다.</text>
+</svg>

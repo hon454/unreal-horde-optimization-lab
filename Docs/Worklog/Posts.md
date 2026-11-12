@@ -207,7 +207,7 @@
 - **backlog.md 13행:** 00번 글 상태를 바꾼다.
 - **01번 글:** "지표의 자세한 설명은 00번 글에 둔다"를 `../00-goals-and-method/README.md` 링크로 바꿀 수 있다.
 - **표기 맞추기:** 최대 개체 수의 표기(25,958 대 "약 2만 6천")를 글 사이에서 정한다.
-- **engine-notes.md:** CSV 스레드 시간의 정의(`UnrealClient.cpp:1842-1844`, `SlateRHIRenderer.cpp:1359`, `FScopeIdle` `WindowsPlatformProcess.cpp:1870,1940`)와 `FFrameEndSync`(`RenderingThread.cpp:2458-2478`, `r.OneFrameThreadLag` 1, `r.GTSyncType` 0)가 없으면 더한다(이 세션은 그 파일을 고치지 않는다).
+- **engine-notes.md:** 스레드 시간의 정의는 284행에 있다. 없는 것 둘을 더할지 정한다(이 세션은 그 파일을 고치지 않는다): `Waits`에 드는 대기는 `Sleep`과 이벤트 대기의 `FThreadIdleStats::FScopeIdle`(`Core/Private/Windows/WindowsPlatformProcess.cpp:1870,1940`), 게임 스레드는 N−1 렌더 스레드 프레임과 맞추고 추가 울타리가 RHI 스레드·스왑체인보다 너무 앞서지 않게 한다(`RenderCore/Private/RenderingThread.cpp:2458-2478` `FFrameEndSync`, 기본값 `r.OneFrameThreadLag` 1, `r.GTSyncType` 0 `:2435-2450`).
 
 ## 03 ISM + VAT(2026-11-13)
 

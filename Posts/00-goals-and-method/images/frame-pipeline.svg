@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="542" viewBox="0 0 800 542" font-family="Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Segoe UI, sans-serif" font-size="16" fill="#111827">
+<defs><pattern id="hatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="8" height="8" fill="#f3f4f6"/><line x1="0" y1="0" x2="0" y2="8" stroke="#9ca3af" stroke-width="3"/></pattern><pattern id="shade" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="7" stroke="#ffffff" stroke-opacity="0.55" stroke-width="2.5"/></pattern></defs>
+<rect x="0.5" y="0.5" width="799" height="541" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+<text x="32" y="46" font-size="22" font-weight="700">세 일꾼은 서로 다른 프레임을 동시에 처리한다</text>
+<text x="32" y="74" font-size="16" fill="#4b5563">개념도. 게임 스레드가 다음 프레임을 계산하는 동안</text>
+<text x="32" y="98" font-size="16" fill="#4b5563">렌더 스레드와 GPU는 앞 프레임을 처리한다</text>
+<text x="32" y="175" font-size="17" font-weight="700" fill="#2563eb">게임 스레드</text>
+<rect x="255.7" y="152" width="64.3" height="34" rx="3" fill="url(#hatch)" stroke="#9ca3af" stroke-width="0.8"/>
+<rect x="405.7" y="152" width="64.3" height="34" rx="3" fill="url(#hatch)" stroke="#9ca3af" stroke-width="0.8"/>
+<rect x="555.7" y="152" width="64.3" height="34" rx="3" fill="url(#hatch)" stroke="#9ca3af" stroke-width="0.8"/>
+<rect x="705.7" y="152" width="64.3" height="34" rx="3" fill="url(#hatch)" stroke="#9ca3af" stroke-width="0.8"/>
+<rect x="170.0" y="146" width="83.7" height="46" rx="5" fill="#2563eb"/>
+<text x="212.9" y="175" text-anchor="middle" font-size="17" font-weight="700" fill="white">1</text>
+<rect x="320.0" y="146" width="83.7" height="46" rx="5" fill="#2563eb"/>
+<text x="362.9" y="175" text-anchor="middle" font-size="17" font-weight="700" fill="white">2</text>
+<rect x="470.0" y="146" width="83.7" height="46" rx="5" fill="#2563eb"/>
+<text x="512.9" y="175" text-anchor="middle" font-size="17" font-weight="700" fill="white">3</text>
+<rect x="620.0" y="146" width="83.7" height="46" rx="5" fill="#2563eb"/>
+<text x="662.9" y="175" text-anchor="middle" font-size="17" font-weight="700" fill="white">4</text>
+<text x="32" y="243" font-size="17" font-weight="700" fill="#0d9488">렌더 스레드</text>
+<rect x="170.0" y="220" width="85.7" height="34" rx="3" fill="url(#hatch)" stroke="#9ca3af" stroke-width="0.8"/>
+<rect x="320.0" y="220" width="85.7" height="34" rx="3" fill="url(#hatch)" stroke="#9ca3af" stroke-width="0.8"/>
+<rect x="470.0" y="220" width="85.7" height="34" rx="3" fill="url(#hatch)" stroke="#9ca3af" stroke-width="0.8"/>
+<rect x="620.0" y="220" width="85.7" height="34" rx="3" fill="url(#hatch)" stroke="#9ca3af" stroke-width="0.8"/>
+<rect x="255.7" y="214" width="62.3" height="46" rx="5" fill="#0d9488"/>
+<text x="287.9" y="243" text-anchor="middle" font-size="17" font-weight="700" fill="white">1</text>
+<rect x="405.7" y="214" width="62.3" height="46" rx="5" fill="#0d9488"/>
+<text x="437.9" y="243" text-anchor="middle" font-size="17" font-weight="700" fill="white">2</text>
+<rect x="555.7" y="214" width="62.3" height="46" rx="5" fill="#0d9488"/>
+<text x="587.9" y="243" text-anchor="middle" font-size="17" font-weight="700" fill="white">3</text>
+<rect x="705.7" y="214" width="62.3" height="46" rx="5" fill="#0d9488"/>
+<text x="737.9" y="243" text-anchor="middle" font-size="17" font-weight="700" fill="white">4</text>
+<text x="32" y="311" font-size="17" font-weight="700" fill="#db2777">GPU</text>
+<rect x="170.0" y="288" width="150.0" height="34" rx="3" fill="url(#hatch)" stroke="#9ca3af" stroke-width="0.8"/>
+<rect x="320.0" y="282" width="148.0" height="46" rx="5" fill="#db2777"/>
+<text x="395.0" y="311" text-anchor="middle" font-size="17" font-weight="700" fill="white">1</text>
+<rect x="470.0" y="282" width="148.0" height="46" rx="5" fill="#db2777"/>
+<text x="545.0" y="311" text-anchor="middle" font-size="17" font-weight="700" fill="white">2</text>
+<rect x="620.0" y="282" width="148.0" height="46" rx="5" fill="#db2777"/>
+<text x="695.0" y="311" text-anchor="middle" font-size="17" font-weight="700" fill="white">3</text>
+<path d="M470.0 354 L470.0 364 L620.0 364 L620.0 354" fill="none" stroke="#111827" stroke-width="1.5"/>
+<text x="545.0" y="388" text-anchor="middle" font-size="16" font-weight="700">프레임 시간</text>
+<text x="545.0" y="410" text-anchor="middle" font-size="16" fill="#4b5563">= 가장 느린 GPU의 한 칸</text>
+<rect x="32" y="431" width="34" height="20" rx="3" fill="url(#hatch)" stroke="#9ca3af" stroke-width="0.8"/>
+<text x="76" y="446" font-size="16">기다림: 앞서 나갈 수 있는 프레임 수에 한도가 있어 쉰다</text>
+<text x="32" y="472" font-size="16">칸의 숫자는 프레임 번호다. 칸의 길이는 지어낸 값이다.</text>
+<line x1="32" y1="492" x2="768" y2="492" stroke="#e5e7eb"/>
+<text x="32" y="520" font-size="16" fill="#4b5563">게임 스레드가 가장 느리면 게임 스레드의 한 칸이 프레임 시간이 된다.</text>
+</svg>
