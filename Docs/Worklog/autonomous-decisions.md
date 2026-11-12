@@ -2,7 +2,7 @@
 
 사용자가 자리를 비운 동안 코디네이터가 [plan.md](../plan.md) "품질 계획"의 Q2 나머지\~Q6을 묻지 않고 진행하며 내린 결정을 적는다. ADR 초안은 쓰지 않았다. 사용자가 이 보고서를 검토한 뒤에 쓴다.
 
-2026-11-12 덧붙임: 사용자 지시로 ADR 초안 넷을 "제안됨"으로 썼다. [ADR-0010](../Decisions/0010-final-representation-bands.md)(D11, D12, D15, D18), [ADR-0011](../Decisions/0011-entity-driven-crowd-particles.md)(D1\~D4, D6, D17), [ADR-0012](../Decisions/0012-ablation-switches-and-quality-metrics.md)(D9, D10, D13), [ADR-0013](../Decisions/0013-full-batch-runner-and-condition-table.md)(D8, D16, D19). D5, D7, D14는 대안을 비교한 설계 결정이 아니라 ADR로 쓰지 않았다.
+2026-11-12 덧붙임: 사용자 지시로 ADR 초안 넷을 "제안됨"으로 썼다. [ADR-0010](../Decisions/0010-final-representation-bands.md)(D11, D12, D15, D18), [ADR-0011](../Decisions/0011-entity-driven-crowd-particles.md)(D1\~D4, D6, D17), [ADR-0012](../Decisions/0012-ablation-switches-and-quality-metrics.md)(D9, D10, D13), [ADR-0013](../Decisions/0013-full-batch-runner-and-condition-table.md)(D8, D16, D19). D5, D7, D14는 대안을 비교한 설계 결정이 아니라 ADR로 쓰지 않았다. 넷 모두 같은 날 사용자가 승인했다.
 
 ## 요약
 

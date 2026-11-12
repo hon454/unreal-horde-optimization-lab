@@ -81,5 +81,4 @@ py -3 Scripts/summarize.py --milestone M5
 ## 사용자에게 요청한 일
 
 - `Full1`은 사용자가 승인했다(2026-11-12, HUD 세션과 재패키징 뒤).
-- ADR 초안 넷([0010\~0013](Decisions/README.md), 제안됨)의 승인을 요청했다.
 - 돌아오면 [Worklog/autonomous-decisions.md](Worklog/autonomous-decisions.md)를 검토해 달라(맨 위 요약, "사용자 판단 필요" 항목).
