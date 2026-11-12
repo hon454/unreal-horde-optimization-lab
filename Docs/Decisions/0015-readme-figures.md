@@ -34,3 +34,4 @@
 ## 결과
 
 - README의 그림 세 개와 표 정리는 작업 세션이 진행한다([Worklog/Posts.md](../Worklog/Posts.md)).
+- 2026-11-13: 총괄 묶음이 `Full2`로 바뀌어 결정 5의 링크는 `Measurements/Full2/summary.csv`와 `Docs/figures/full2/`를 가리킨다. 엔티티 풀의 16분 실행 그림(`entity-pool.svg`, `Measurements/Pool1/timeline.csv`)을 더했다([Worklog/Posts.md](../Worklog/Posts.md) "Full2 값 반영").

@@ -94,7 +94,7 @@ py -3 -I Scripts/turn-fill.py Saved/Logs/LabDev-q4final-N10000-P1.log
 
 ## 총괄 묶음 조건과 HUD(Q5)
 
-총괄 묶음 `Full1`의 조건(사다리 8단계 `L1`\~`L8`, 빼 보기 열 행 `A8-*`, 하위 실험 `S1-budget`·`S1-uro`·`S8-col`)은 `Scripts/full-conditions.json`에 인자 줄과 기대 메타데이터로 있다. 표와 경위는 [Worklog/Q5.md](../Worklog/Q5.md).
+총괄 묶음(`Full1`, 지금은 `Full2`)의 조건(사다리 8단계 `L1`\~`L8`, 빼 보기 열 행 `A8-*`, 하위 실험 `S1-budget`·`S1-uro`·`S8-col`)은 `Scripts/full-conditions.json`에 인자 줄과 기대 메타데이터로 있다. 표와 경위는 [Worklog/Q5.md](../Worklog/Q5.md).
 
 | 인자 | 뜻 |
 | --- | --- |
@@ -106,7 +106,7 @@ py -3 -I Scripts/turn-fill.py Saved/Logs/LabDev-q4final-N10000-P1.log
 
 ```bash
 # 메타데이터 대조. 라벨이 Full<n>-<단계>-<변형>-N<N>-<P1|P2>-r<i>면 조건을 라벨에서 고른다. 아니면 --cond
-py -3 -I Scripts/ablation-check.py Saved/Profiling/CSV/Full1-L8-q4final-N10000-P1-r1.csv
+py -3 -I Scripts/ablation-check.py Saved/Profiling/CSV/Full2-L8-q4final-N10000-P1-r1.csv
 py -3 -I Scripts/ablation-check.py <CSV> --cond L8-q4final --shot
 ```
 
@@ -191,7 +191,7 @@ LAB_MIGRATE_SET=minion LAB_MIGRATE_DRY=0 LAB_MIGRATE_DEST="G:/Epic Games/UE_5.8.
 curl -s -X POST http://127.0.0.1:8001/mcp -H "Content-Type: application/json" -H "Accept: application/json, text/event-stream" -H "Mcp-Session-Id: <id>" -d '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"list_toolsets","arguments":{}}}'
 ```
 
-## 총괄 묶음(Full1) 러너·검사·요약·촬영
+## 총괄 묶음 러너·검사·요약·촬영
 
 조건과 기대값은 `Scripts/full-conditions.json`이 정한다(조건 이름을 스크립트에 박지 않는다). 러너는 패키지 exe를 직접 부르고(`run-bench.ps1`을 거치지 않는다), 시작할 때 `UnrealEditor`·게임·`chrome.exe`가 떠 있으면 멈춘다. 측정 중에는 PC를 쓰지 않는다. 경위와 설계 선택은 [Worklog/Q5.md](../Worklog/Q5.md) "2단위".
 
@@ -200,18 +200,18 @@ curl -s -X POST http://127.0.0.1:8001/mcp -H "Content-Type: application/json" -H
 powershell -ExecutionPolicy Bypass -File Scripts/run-full.ps1 -DryRun
 # 예행 묶음(짧은 측정 구간, 작은 보조 N): 라벨 Reh1-...
 powershell -ExecutionPolicy Bypass -File Scripts/run-full.ps1 -Batch Reh1 -TargetN 10000 -MaxNList 30000 -ActorNList 2000 -Runs 1 -DurationOverride 10
-# 본 묶음(몇 시간)
-powershell -ExecutionPolicy Bypass -File Scripts/run-full.ps1
+# 본 묶음(몇 시간). 기본 이름 Full1은 이미 쓴 이름이라 새 묶음은 -Batch로 새 이름을 준다(지금 묶음은 Full2)
+powershell -ExecutionPolicy Bypass -File Scripts/run-full.ps1 -Batch Full2
 # 끊겼으면 이어 한다(progress.log에 있는 라벨은 건너뛴다)
 powershell -ExecutionPolicy Bypass -File Scripts/run-full.ps1 -Resume
 # 일부만: -Only ladder|ablation|maxn|actor|sub|aa|trace (쉼표로 여러 개)
 powershell -ExecutionPolicy Bypass -File Scripts/run-full.ps1 -Only ladder,ablation -Runs 1
 
 # 묶음 검사와 요약
-py -3 -I Scripts/equivalence-check.py --batch Full1
-py -3 -I Scripts/spikes.py --batch Full1
-py -3 -I Scripts/summarize.py --milestone Full1
-py -3 -I Scripts/plot.py --batch Full1   # 목표 총수는 batch.json의 target_n, `--target-n`으로 덮어쓴다
+py -3 -I Scripts/equivalence-check.py --batch Full2
+py -3 -I Scripts/spikes.py --batch Full2
+py -3 -I Scripts/summarize.py --milestone Full2
+py -3 -I Scripts/plot.py --batch Full2   # 목표 총수는 batch.json의 target_n, `--target-n`으로 덮어쓴다
 
 # 촬영(측정이 끝난 뒤 따로)
 powershell -ExecutionPolicy Bypass -File Scripts/capture-full.ps1 -DryRun
@@ -220,7 +220,7 @@ powershell -ExecutionPolicy Bypass -File Scripts/capture-full.ps1
 
 | 인자(`run-full.ps1`) | 뜻 |
 | --- | --- |
-| `-Batch` | 묶음 이름(기본 `Full1`). 폴더 `Measurements/<Batch>/`, 라벨 접두사. 예행은 `Reh1`처럼 다른 이름 |
+| `-Batch` | 묶음 이름(기본 `Full1`, 이미 쓴 이름이다). 폴더 `Measurements/<Batch>/`, 라벨 접두사. 예행은 `Reh1`처럼 다른 이름. 참고 묶음·엔티티 풀 묶음의 명령은 [measurement.md](measurement.md) "참고 묶음 규약"·"엔티티 풀 묶음 규약" |
 | `-Only` | 묶음 종류만: `ladder`(8단계 x 목표 총수 x P1·P2), `ablation`(빼 보기 9행 x P1), `maxn`(단계 2\~8 x `-MaxNList` x P1), `actor`(단계 1 x `-ActorNList` x P1), `sub`(JSON의 하위 실험 x P1), `aa`(L8 기준점 3회, 회차 11\~13), `trace`(8단계 x 병렬·직렬, `Saved/Traces/`) |
 | `-Runs` | 조건마다 회차 수(기본 3) |
 | `-TargetN`, `-MaxNList`, `-ActorNList` | 목표 총수(기본 10000), 최대 N 보조 목록(기본 `5000,20000,30000`), 액터 보조 목록(기본 `500,1000,2000`) |

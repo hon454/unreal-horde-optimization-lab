@@ -100,4 +100,4 @@ powershell -ExecutionPolicy Bypass -File Scripts/package.ps1
 powershell -ExecutionPolicy Bypass -File Scripts/run-full.ps1 -DryRun
 ```
 
-조건 수, 실행 순서, 예상 시간을 보여 준다. 실제 측정은 `-DryRun` 없이 돌리고(몇 시간), 측정 중에는 에디터·브라우저를 띄우지 않고 PC를 쓰지 않는다. 묶음 이름과 요약·그래프 명령은 [commands.md](commands.md) "총괄 묶음(Full1) 러너·검사·요약·촬영", 측정 규약은 [measurement.md](measurement.md)에 있다.
+조건 수, 실행 순서, 예상 시간을 보여 준다. 실제 측정은 `-DryRun` 없이 돌리고(몇 시간), 측정 중에는 에디터·브라우저를 띄우지 않고 PC를 쓰지 않는다. 묶음 이름과 요약·그래프 명령은 [commands.md](commands.md) "총괄 묶음 러너·검사·요약·촬영", 측정 규약은 [measurement.md](measurement.md)에 있다.

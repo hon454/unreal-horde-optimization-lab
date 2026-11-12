@@ -35,7 +35,7 @@
 | 총괄 묶음의 조건 표와 스크립트 목록 | `Scripts/full-conditions.json`, [Scripts/README.md](Scripts/README.md) |
 | 글 본문과 이미지 | `Posts/NN-이름/README.md`, `Posts/NN-이름/images/` |
 | 글 수치의 근거(실행 라벨, 세 실행의 값, 계산식, 캡처, 소스 위치) | `Posts/NN-이름/measurements.md` |
-| 묶음별 측정 결과 | `Measurements/<묶음>/`(총괄 묶음은 `Full1/`). 안에 `summary.csv`(조건별 중앙값·범위), `runs.csv`(실행별 한 행), `shots/` |
+| 묶음별 측정 결과 | `Measurements/<묶음>/`(총괄 묶음은 지금 `Full2/`). 안에 `summary.csv`(조건별 중앙값·범위), `runs.csv`(실행별 한 행), `shots/` |
 | 그래프(SVG)와 그 수치(CSV) | `Docs/figures/`(`Scripts/plot.py`). README의 그림은 `Docs/figures/readme/`(`Scripts/plot-readme.py`), 단계별 화면은 `Docs/figures/steps/` |
 | 공개 소개와 결과 요약 | [README.md](README.md) |
 | 참고 프로젝트(City Sample, MetaHuman Crowd Sample, Fab 원본 팩) | 형제 디렉터리 `../unreal-horde-references/`(git 밖, 읽기 전용) |

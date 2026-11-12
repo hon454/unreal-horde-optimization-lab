@@ -110,7 +110,7 @@ ISKM의 이점은 프레임 시간이 아니라 GPU 시간이다. ISKM을 VAT로
 ```powershell
 powershell -ExecutionPolicy Bypass -File Scripts/package.ps1
 powershell -ExecutionPolicy Bypass -File Scripts/run-full.ps1 -DryRun
-powershell -ExecutionPolicy Bypass -File Scripts/run-full.ps1
+powershell -ExecutionPolicy Bypass -File Scripts/run-full.ps1 -Batch Full2
 py -3 -I Scripts/summarize.py --batch Full2
 py -3 -I Scripts/plot.py --batch Full2
 ```
