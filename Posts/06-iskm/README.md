@@ -32,7 +32,7 @@ ASTPD(`UAnimSequenceTransformProviderData`)는 ISKM이 재생할 AnimSequence �
 
 ## 문제: 5단계는 GPU가 게임 스레드 바로 뒤에 있다
 
-5단계(05번 글)에서는 200m 밖 이동을 자체 프로세서로 바꾸고 엔티티 풀을 넣었다. 호드 총수 1만에서 프레임 시간을 정하는 것은 게임 스레드 7.33ms다. GPU는 6.97ms로 0.359ms 뒤에 있다. 호드 총수 5천과 탑뷰 카메라에서는 이미 GPU가 병목이다.
+5단계([05번 글](../05-simulation-lod-entity-pool/README.md))에서는 200m 밖 이동을 자체 프로세서로 바꾸고 엔티티 풀을 넣었다. 호드 총수 1만에서 프레임 시간을 정하는 것은 게임 스레드 7.33ms다. GPU는 6.97ms로 0.359ms 뒤에 있다. 호드 총수 5천과 탑뷰 카메라에서는 이미 GPU가 병목이다.
 
 ![5단계의 게임 스레드·GPU·렌더 스레드 시간이 호드 총수와 함께 는다. 1만부터 게임 스레드가 가장 길고 GPU가 바로 뒤에 있다](images/iskm-problem.svg)
 
@@ -151,7 +151,7 @@ TrackId = TrackMap.GetByElementId(TrackElementId).Value = ASTPDI->AllocateTrack(
 ASTPDI->DeallocateTrack(SharedTrackMap.GetByElementId(TrackElementId).Value);
 ```
 
-첫 빈틈은 마지막 줄이다. 엔진이 트랙을 돌려받는 곳은 이 함수 하나이고, 이 함수로 오는 경로는 움직이지 않는 개체의 것뿐이다. 그래서 움직이는 개체를 파괴하면 트랙이 남는다. 이 레포는 죽은 엔티티를 풀에 넣었다가 같은 핸들로 다시 써서 트랙도 다시 쓰게 한다(05번 글).
+첫 빈틈은 마지막 줄이다. 엔진이 트랙을 돌려받는 곳은 이 함수 하나이고, 이 함수로 오는 경로는 움직이지 않는 개체의 것뿐이다. 그래서 움직이는 개체를 파괴하면 트랙이 남는다. 이 레포는 죽은 엔티티를 풀에 넣었다가 같은 핸들로 다시 써서 트랙도 다시 쓰게 한다([05번 글](../05-simulation-lod-entity-pool/README.md)).
 
 `Source/HordeOptLab/LabCrowdSubsystem.cpp`, `ULabCrowdSubsystem::SpawnEntities`
 
@@ -193,7 +193,7 @@ if (bRangeChanged || Track.AppliedState != int8(Anim.State) || Track.AppliedStar
 
 호드 총수 3만에서는 GPU가 4.97ms 줄고 게임 스레드가 1.13ms 늘었다. 병목이 게임 스레드라 3만의 프레임 시간은 0.615ms 길어졌다. 그래서 60fps를 지키는 최대 개체 수는 29,799다. 5단계는 잰 가장 큰 3만에서도 프레임 시간의 느린 쪽 5% 경계가 16.7ms 안이었다. 탑뷰 카메라에서는 GPU가 병목이라 1만의 프레임 시간이 2.35ms 줄었다.
 
-트레이스에서 렌더 스레드의 프레임 평균을 읽었다(Unreal Insights, 호드 총수 1만, 오브 시점 카메라, 한 회). 디스턴스 필드 장면을 갱신하는 `FSceneRenderer::PrepareDistanceFieldScene`은 5단계에서 프레임당 1.41ms였고, 6단계에서는 0.04ms다. GPU에서 디스턴스 필드를 갱신하는 `GlobalDistanceFieldUpdate`도 프레임당 0.30ms에서 0.003ms로 줄었다.
+트레이스에서 렌더 스레드의 프레임 평균을 읽었다(Unreal Insights, 호드 총수 1만, 오브 시점 카메라, 한 회). 디스턴스 필드 장면을 갱신하는 `FSceneRenderer::PrepareDistanceFieldScene`은 5단계에서 프레임당 1.41ms였고, 6단계에서는 0.0368ms다. GPU에서 디스턴스 필드를 갱신하는 `GlobalDistanceFieldUpdate`도 프레임당 0.302ms에서 0.003ms로 줄었다.
 
 남은 비용은 개체마다 게임 스레드가 하는 일이다. 엔진은 ISKM 인스턴스마다 트랙 맵을 찾고 재생 상태를 읽어 적는다. VAT가 쓰는 ISM 경로에는 없는 일이고, 끌 설정도 없다.
 
@@ -227,4 +227,4 @@ ISKM은 먼 개체의 GPU 시간을 23% 줄였지만, 게임 스레드가 병목
 - 고정 상자는 오브와 카메라 중심이 움직이지 않는 이 시나리오라서 쓸 수 있다. 카메라가 움직이는 게임이라면 상자를 카메라와 함께 옮겨야 한다.
 - ISKM은 개체마다 게임 스레드의 일이 VAT보다 많다. 호드 총수 3만에서는 프레임 시간이 0.615ms 길다.
 
-다음 글에서는 200m 밖의 빈 땅을 엔티티가 움직이는 Niagara 입자로 채운다. 이 단계에서 번 GPU 시간이 그 비용을 받는다.
+[다음 글](../07-niagara-crowd/README.md)에서는 200m 밖의 빈 땅을 엔티티가 움직이는 Niagara 입자로 채운다. 이 단계에서 번 GPU 시간이 그 비용을 받는다.

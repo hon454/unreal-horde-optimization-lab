@@ -41,8 +41,14 @@
 | 엔진 군중 표현 기본값 | High 고품질 액터, Medium 저품질 액터, Low ISM, Off 없음. 거리(화면 밖) 0/5/10/50m, (화면 안) 0/10/50/100m, 최대 수 10/20/500/무제한. `bKeepLowResActors = true` | `Engine/Plugins/AI/MassCrowd/Source/MassCrowd/Private/MassCrowdVisualizationTrait.cpp:16-38` |
 | ISKM Mass 경로 | `FMassSkinnedMeshInstanceVisualizationMeshDesc`, `UMassConsumeInstancedSkinnedMeshAnimationProcessor`(엔티티 → `FAnimSequenceTrackAutoPlayData` → ISKM 배치 갱신), `FMassInstancedSkinnedMeshComponentSharedData` | `MassRepresentation/Public/MassSkinnedMeshRepresentationTypes.h`, `MassUpdateSkinnedMeshProcessor.h` |
 | ISKM 트랙 풀 누수 | 5.8.4에도 남아 있다. 트랙 할당은 엔티티 키가 트랙 맵에 없을 때, 해제(`DeallocateTrack`)는 `RemoveInstance` 입력에서만이고 그 호출자는 `FMassStaticRepresentationTag`를 요구하는 정적 경로뿐이다. 움직이는 개체를 파괴하면 트랙이 남는다. 우회: 엔티티 풀링(같은 핸들을 다시 쓰면 기존 트랙을 다시 쓴다). 엔진은 `SetAutoPlayData`를 시퀀스 번호가 바뀔 때만 부른다 | `MassRepresentation/Private/MassVisualizationComponent.cpp` 773·864(할당), 1156(해제) |
-| ISKM 블렌딩 | BlendTime 크로스페이드와 BlendSpace 트랙이 있다. 없는 것은 AnimBP다. 계획의 "블렌딩 없음"은 틀렸다 **[계획 수정]** | `InstancedSkinnedMeshComponent.h` |
+| ISKM 블렌딩 | BlendTime 크로스페이드와 BlendSpace 트랙이 있다. 없는 것은 AnimBP다. 계획의 "블렌딩 없음"은 틀렸다 **[계획 수정]** | `Engine/Source/Runtime/Engine/Classes/Animation/AnimSequenceTransformProviderData.h:104-127`(`FAnimSequenceTrackAutoPlayData::BlendTime`), `:152-174`(`FAnimSequenceTrackBlendSpaceData`) |
 | 엔진 기본 `LODMaxCount` | High/Medium/Low 기본 `{50, 100, 500}`. 밴드 거리보다 이 상한이 먼저 걸린다. 프로젝트 값을 명시한다 | `MassLODTrait.h` / `MassRepresentationParameters`(M0에서 줄 번호 확인) |
+| 표현 LOD 경계 히스테리시스 기본값(2026-11-13, 03번 글) | `FMassVisualizationLODParameters::BufferHysteresisOnDistancePercentage = 10.0f`. 거리 경계에 이 퍼센트의 완충을 둔다 | `Engine/Plugins/Runtime/MassGameplay/Source/MassRepresentation/Public/MassRepresentationFragments.h:309` |
+| 계산기의 히스테리시스 비율(2026-11-13, 07번 글) | `BufferHysteresisOnDistanceRatio = 0.1f`. LOD 계산기가 쓰는 비율 기본값이다 | `Engine/Plugins/Runtime/MassGameplay/Source/MassLOD/Public/MassLODCalculator.h:271` |
+| ISM 커스텀 데이터 개수 검사 줄(2026-11-13, 03번 글) | `NumCustomDataFloats`를 `StaticMeshInstanceCustomFloats.Num() / UpdateInstanceIds.Num()`로 구하고, 0이 아니면 `ensure`로 `Num() == NumCustomDataFloats * UpdateInstanceIds.Num()`을 검사한 뒤 `SetNumCustomDataFloats`를 부른다 | `Engine/Plugins/Runtime/MassGameplay/Source/MassRepresentation/Private/MassVisualizationComponent.cpp:566-571` |
+| 애니메이션 예산의 계산(2026-11-13, 04번 글) | 가용 예산 = `BudgetInMs - ExternalAnimationTimeSpent`(`:558`). 작업 단위 예산 = `max(가용 예산 / 평균 작업 단위 시간, 이상적 작업 단위 × MinQuality)`(`:561`). 초과분 `WorkUnitsExcess`가 0보다 클 때만 매 프레임 갱신하는 몫을 줄인다(`:566`). 정렬은 `bAlwaysTick`이 먼저, 그다음 중요도가 큰 순이다(`:339`, 3절 위의 `:327`은 주석 줄) | `Engine/Plugins/Runtime/AnimationBudgetAllocator/Source/AnimationBudgetAllocator/Private/AnimationBudgetAllocator.cpp:558,561,566,339` |
+| 애니메이션 예산의 기본값 | `FAnimationBudgetAllocatorParameters::BudgetInMs = 1.0f` | `Engine/Plugins/Runtime/AnimationBudgetAllocator/Source/AnimationBudgetAllocator/Public/AnimationBudgetAllocatorParameters.h:19` |
+| 예산 할당기에 등록되는 것(2026-11-13, 08번 글) | `IAnimationBudgetAllocator::RegisterComponent`는 `USkeletalMeshComponentBudgeted`만 받는다. 등록하면 기본 틱이 꺼지고 URO가 꺼지며 병렬 애니메이션 작업이 할당기로 간다. ISKM은 예산 밖이다 | `Engine/Plugins/Runtime/AnimationBudgetAllocator/Source/AnimationBudgetAllocator/Public/IAnimationBudgetAllocator.h:22-27` |
 
 ## 4. 액터 풀링
 
@@ -50,6 +56,11 @@
 | --- | --- | --- |
 | 풀 반환 동작 | `UMassActorSpawnerSubsystem`의 풀링은 액터를 숨기고 보관한다. 컴포넌트 등록과 틱은 유지된다. `USkeletalMeshComponentBudgeted`가 붙어 있으면 숨긴 뒤에도 예산에 남는다 | `MassActors/Private/MassActorSpawnerSubsystem.cpp`(M3 전에 줄 번호 확인) |
 | 대처 | `IMassActorPoolableInterface::PrepareForPooling`에서 중요도 0, 틱 끔. `PrepareForGame`에서 복원 | `MassActors/Public/MassActorPoolableInterface.h` |
+| 풀에서 꺼낸 액터는 바로 보인다(2026-11-13, 04번 글) | `SetActorHiddenInGame(false)`, `SetActorTransform(…, ETeleportType::ResetPhysics)`, `PrepareForGame` 순이다 | `Engine/Plugins/Runtime/MassGameplay/Source/MassActors/Private/MassActorSpawnerSubsystem.cpp:252-255` |
+| `TeleportActor` 기본 구현 | 위치가 다르면 지연 커맨드로 `SetActorTransform(…, ETeleportType::TeleportPhysics)`를 부른다 | `Engine/Plugins/Runtime/MassGameplay/Source/MassRepresentation/Private/MassRepresentationActorManagement.cpp:47-56` |
+| `IsActorReadyForRepresentation` 기본 구현 | 항상 참이다 | `Engine/Plugins/Runtime/MassGameplay/Source/MassRepresentation/Private/MassRepresentationActorManagement.cpp:58-61` |
+| 액터 준비를 기다리는 조건 | `bShouldDefer = (bDoWaitForActorVisualReadiness && bHasMeshFallback) \|\| !bActorReady`. 참이면 액터를 켜지 않고 표현을 유지한다 | `Engine/Plugins/Runtime/MassGameplay/Source/MassRepresentation/Private/MassRepresentationProcessor.cpp:275-298` |
+| 준비 대기 두 플래그의 기본값 | `bKeepActorExtraFrame`(`:202`)과 `bWaitForActorVisualReadiness`(`:211`)는 모두 거짓이다 | `Engine/Plugins/Runtime/MassGameplay/Source/MassRepresentation/Public/MassRepresentationFragments.h:202,211` |
 
 ## 5. Simulation LOD와 회피
 
@@ -81,6 +92,7 @@
 | 새 엔티티는 Simulation LOD에서만 히스테리시스를 받는다 | Simulation LOD는 LOD 태그를 쓰면 프래그먼트의 `LOD`를 Off로 두고 시작해 첫 계산의 `PrevLOD`가 Off다. Off와 Low 사이에 밴드가 있으면 Lerp(Low, Off, 0.9)보다 먼 새 엔티티는 Off로 남는다. 표현 LOD는 `PrevLOD`가 `Max`에서 시작해 첫 계산에 히스테리시스가 없다. 두 Off 거리를 같게 두면 그 사이의 새 엔티티는 그려지면서 Simulation LOD는 Off다(20k, 500m에서 프레임마다 약 550, `Docs/Worklog/M4.md` "그리는 거리 인자") | `MassLOD/Private/MassLODTrait.cpp:128-133`, `MassLOD/Public/MassSimulationLOD.h:25-28`, `MassRepresentation/Public/MassRepresentationFragments.h:37`, `MassLODCalculator.h:453-454,873-880` |
 | 가변 틱 프래그먼트의 시각으로 "마지막으로 돈 뒤 흐른 시간"을 셈하면 모자란다 | 엔진은 청크가 돈 **다음** 갱신에서 `DeltaTime`과 `LastTickedTime`을 적는다. 그래서 프로세서가 읽는 `DeltaTime`은 한 주기 전의 간격이다. `지금 − LastTickedTime + 한 프레임`으로 셈해도 20,000 개체 Development 실행에서 자체 시각으로 셈한 값의 약 94%만 나왔다(실행 로그 `LabDev-m4offmove-N20000-P1.log`의 `lab_offmove`, 27초 동안 Off 밴드 개체·초 322,303, 자체 시각으로 옮긴 합 328,185, 엔진 시각으로 셈한 합 308,601). 빠지는 경로는 가르지 못했다 | `Public/MassLODTickRateController.h:157-164`, `Public/MassSimulationLOD.h:37` |
 | Off 청크는 틱이 온 프레임에만 LOD를 다시 계산한다 | `ShouldCalculateLODForChunk`는 청크 LOD가 Off가 아니면 매 프레임 참이고, Off면 `ShouldTickThisFrame`일 때만 참이다. Off 밴드에서 안쪽으로 넘어온 개체는 그 청크의 다음 틱까지 Off로 남는다 | `Public/MassLODTickRateController.h:83-97`, `Private/MassSimulationLOD.cpp:90-91` |
+| 조향 프로세서의 Off 쿼리 줄(2026-11-13, 05번 글) | `UMassSteerToMoveTargetProcessor`의 쿼리가 `FMassOffLODTag`를 `None`으로 요구하는 줄이다("No need for Off LOD to do steering") | `Engine/Plugins/AI/MassAI/Source/MassNavigation/Private/MassSteeringProcessors.cpp:85-86` |
 
 ## 6. Test 구성 매크로(측정 빌드)
 
@@ -107,6 +119,8 @@
 | 히치 스냅샷 | 콘솔 `snapshothitches -start/-stop/-test`, `TRACE_BOOKMARK("Hitch detected")`, `Saved/Profiling/Hitches/`. 스탯 그룹이 켜져 있어야 동작하므로 Test에서는 확인 필요 | `Engine/Private/ProfilingDebugging/TraceHitches.cpp:26` |
 | Mass 트레이스 채널 | `-trace=…,mass`(MassChannel) | `MassEntity/Public/MassDebugger.h`(M1 전에 확인) |
 | CSV `CPUUsage_Process`·`CPUUsage_Idle` | Shipping이 아니면 CSV 캡처 중 프레임마다 쓴다. Windows에서 `QueryProcessCycleTime`(게임 프로세스 스레드의 사이클)과 `QueryIdleProcessorCycleTime`(코어별 유휴 사이클 합)의 프레임 간 차이를 같은 분모(프레임 시간 × QPC 주파수 × 1000 × 논리 코어 수)로 나눈 값의 100배다. 분모 단위가 CPU 사이클과 달라 절댓값은 %가 아니지만 같은 프레임 안에서 두 값의 비는 의미가 있다. 유휴가 크게 줄었는데 프로세스 값이 늘지 않으면 그 사이클은 다른 프로세스(또는 DPC·인터럽트)가 썼다 | `Runtime/Launch/Private/LaunchEngineLoop.cpp:1456-1470`, `Runtime/Core/Private/Windows/WindowsPlatformProcess.cpp:883-976` |
+| 스레드 시간에 들지 않는 대기(2026-11-13, 00번 글) | `FWindowsPlatformProcess::Sleep`과 이벤트 대기는 `UE::Stats::FThreadIdleStats::FScopeIdle`로 감싸 유휴 시간으로 센다. 이벤트 대기(`FEventWin::Wait`)는 인자 `bIgnoreThreadIdleStats`(기본 거짓)를 `FScopeIdle`에 넘긴다 | `Engine/Source/Runtime/Core/Private/Windows/WindowsPlatformProcess.cpp:1870,1940` |
+| 게임 스레드의 프레임 끝 동기화(2026-11-13, 00번 글) | `FFrameEndSync`는 게임 스레드를 N−1 렌더 스레드 프레임에 맞추는 울타리(`FRenderThreadFence`, `:2458-2473`)와, RHI 스레드·스왑체인보다 너무 앞서지 않게 하는 추가 울타리(`:2476-2478`)를 쓴다. `r.OneFrameThreadLag` 기본 1, `r.GTSyncType` 기본 0(`<= 0`이면 N−1 렌더 스레드 프레임 뒤에 N−m RHI 스레드 프레임, 도움말 `:2441-2450`) | `Engine/Source/Runtime/RenderCore/Private/RenderingThread.cpp:2435-2478` |
 
 ## 8. Unreal MCP
 
@@ -161,6 +175,8 @@
 | Game Thread 시간과 워커 대기 | CSV `GameThreadTime`은 게임 스레드가 태스크를 기다린 시간(`Exclusive/GameThread/EventWait/*`)을 뺀다. Mass 작업이 워커 스레드에서 길어지면 Game Thread p50은 작게 나오고 프레임만 길어진다. E1 `massav` N=20k: GameThreadTime 9.3ms, `EventWait/PrePhysics` 46.5ms, 프레임 57.7ms | `Measurements/M1/runs.csv`, M1-massav-N20000-P1 CSV |
 | 병렬 Mass의 질의 대기 | `FMassEntityQuery::ForEachEntityChunk`는 `FScopedEntityQueryContext`에서 `PreQueryCallback`을 먼저 부르고, 병렬 처리 큐에서는 이것이 `FProcessorWorker::WaitForQueryResources`로 같은 자원을 쥔 다른 프로세서가 끝날 때까지 기다린다. 그 시간은 기다린 프로세서의 실행 시간에 잡힌다. M3 20k P1에서 VAT ISM 프로세서가 액터 유무로 1.41 / 3.68ms였는데 첫 청크 전 대기가 0.006 → 2.06ms였고, `mass.FullyParallel=0`이면 1.35 / 1.35ms였다 | `MassEntity/Private/MassEntityQuery.cpp:39-47,258-276`, `MassProcessingQueueTypes.cpp:640-650,678-690`. diag-vtC/vtD/vtE/vtF CSV |
 | 하이드레이션 액터 캡슐 | `ACharacter` 캡슐은 `Pawn` 프로필에 `SetShouldUpdatePhysicsVolume(true)`다. M3 20k P1(액터 495개, 3회): 이동 1.22ms, 프레임 15.78. 오버랩·물리 볼륨 갱신을 끄면 15.64, QueryOnly를 더하면 15.49, 콜리전을 끄면 14.23(이동 0.43, EndPhysics 대기 0.52 → 0.06) | `Engine/Private/Character.cpp:77-84`. diag-vtG/vtH/vtJ/vtI CSV, `-LabActorMoveCheap`·`-LabActorQueryOnly`·`-LabActorNoCollision` |
+| 이동 프로세서 시간 상한의 의도(2026-11-13, 02번 글) | 두 프로세서의 주석은 "Clamp max delta time to avoid force explosion on large time steps (i.e. during initialization)"이다. 0.1초 상한은 초기화 때의 큰 시간 간격에서 힘이 터지는 것을 막으려는 것이다 | `Engine/Plugins/Runtime/MassGameplay/Source/MassMovement/Private/MassMovementProcessors.cpp:40,99` |
+| 거리 필드 장면에 드는 조건(2026-11-13, 06번 글) | `PrimitiveNeedsDistanceFieldSceneData`: (전부 추적하거나 동적 간접 그림자를 드리우고) && 거리 필드 조명에 영향 && (게임에서 그려지거나 숨은 그림자·간접광이 있고) && (동적 그림자를 드리우거나 동적 간접광에 영향)이다. 프록시의 `bSupportsDistanceFieldRepresentation` 기본값은 거짓(`PrimitiveSceneProxy.cpp:394`)이고, 정적 메시 프록시가 불투명 머티리얼과 유효한 거리 필드 데이터가 있을 때 참으로 둔다(`StaticMeshSceneProxy.cpp:340`) | `Engine/Source/Runtime/Engine/Public/SceneManagement.h:1069-1082`, `Engine/Source/Runtime/Engine/Private/PrimitiveSceneProxy.cpp:394`, `Engine/Source/Runtime/Engine/Private/StaticMeshSceneProxy.cpp:340` |
 
 ## 12. M3b 코드 정비에서 확인한 것(2026-11-09)
 
@@ -224,6 +240,12 @@
 | 청크 표시 프래그먼트 위치 | `FMassVisualizationChunkFragment`(`AreAnyEntitiesVisibleInChunk`)는 MassLOD 모듈이다 | `Engine/Plugins/Runtime/MassGameplay/Source/MassLOD/Public/MassLODFragments.h:136` |
 | ASTPD 바운드(실행) | Development 에디터 `-game` 실행에서 로드 직후 `HasAnimationBounds()` 0, `IsCompiling()` 1(비동기 계산 중). Test 패키지(쿡)에서는 아직 보지 않았다(로그 `lab_iskm … bounds=`) | 2026-11-11 `LabDev-m5iskm-M5-N100-P1.log` |
 | ISKM 고정 바운드 | `SetPrimitiveBoundsOverride(FBox)`는 값만 저장한다. 값이 유효하면 `CalcBounds`가 인스턴스 반복 없이 이 상자를 돌려주고, `UpdateBounds`로 부르면 월드 좌표 그대로다. 인스턴스 로컬 바운드와 GPU LOD 선택은 이 값을 쓰지 않는다. VSM 빛 반경 검사는 프리미티브 바운드를 쓰지만 방향광은 늘 참이다 | `ENG/Private/Components/InstancedSkinnedMeshComponent.cpp:1249-1253`, `ENG/Public/InstancedSkinnedMeshComponentHelper.h:119-135`, `ENG/Private/InstancedSkinnedMeshSceneProxy.h:139-160`, `Renderer/Private/VirtualShadowMaps/VirtualShadowMapCacheManager.h:165-169` |
+| ISKM 트랙 쓰기 줄(2026-11-13, 08번 글) | 갱신 경로는 트랙이 있고 시퀀스 번호가 다를 때 `SetAutoPlayData`를 부른다(`:766-769`). 추가 경로의 같은 동작은 `:857-860`이다 | `Engine/Plugins/Runtime/MassGameplay/Source/MassRepresentation/Private/MassVisualizationComponent.cpp:766-769,857-860` |
+| 트랙 해제 입력(2026-11-13, 05번 글) | 해제 `DeallocateTrack` 호출은 MassGameplay 전체에서 `:1156` 하나이고 입력은 `EntitiesRequiringRemoval`이다. 그 목록은 `FMassLODInstancedSkinnedMeshSignificanceRange::RemoveInstance`(`:1537-1544`)가 채우고, 그 호출은 `UMassStationaryISMSwitcherProcessor`의 `MeshInfo.RemoveInstance`(`:127`)뿐이다. 그 쿼리는 `FMassStaticRepresentationTag`를 요구한다(`:30`) | `Engine/Plugins/Runtime/MassGameplay/Source/MassRepresentation/Private/MassVisualizationComponent.cpp:1156,1537-1544`, `Engine/Plugins/Runtime/MassGameplay/Source/MassRepresentation/Private/MassStationaryISMSwitcherProcessor.cpp:30,127` |
+| ISKM의 재생 상태 읽기(2026-11-13, 06번 글) | 트랙을 쓴 직후 매번 `GetSequenceIndex`·`GetPosition`·`GetPlayRate`로 재생 상태를 읽어 `ResolvedAnimStates`에 넣는다(UAF 인계용 주석). 끄는 분기가 없다 | `Engine/Plugins/Runtime/MassGameplay/Source/MassRepresentation/Private/MassVisualizationComponent.cpp:777-787,868-878` |
+| ISKM의 인스턴스 변경 뒤 바운드 갱신(2026-11-13, 06번 글) | `UInstancedSkinnedMeshComponent::SendRenderInstanceData_Concurrent`가 장면 프록시가 있을 때 `InstanceDataManager.FlushChanges`가 참이면 `UpdateBounds()`를 부른다 | `Engine/Source/Runtime/Engine/Private/Components/InstancedSkinnedMeshComponent.cpp:495-497` |
+| ISKM 바운드 계산의 인스턴스 반복(2026-11-13, 06번 글) | `bFastBuild = false`로 박혀 있다(`:202`). 인스턴스마다 애니메이션 바운드를 변환해 합치고(`:227-235`), 애니메이션 바운드가 없으면 메시 바운드를 인스턴스마다 변환해 합친다(`:245-251`) | `Engine/Source/Runtime/Engine/Public/InstancedSkinnedMeshComponentHelper.h:202,227-235,245-251` |
+| ISKM GPU 메시 LOD 선택 조건 | `bUseGpuLodSelection = NumLODs > 1 && 메시 설명자의 bUseGpuLodSelection && (bRenderStatic \|\| 통합 본 맵이 있음)` | `Engine/Source/Runtime/Engine/Private/InstancedSkinnedMeshSceneProxy.cpp:76` |
 
 ## 16. G1 게임 장면에서 확인한 것(2026-11-11, 코드 세션)
 

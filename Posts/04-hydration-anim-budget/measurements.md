@@ -150,8 +150,8 @@
 | 본문 값 | 정밀한 값 | 타이머 | 합(초) / 횟수 |
 | --- | --- | --- | --- |
 | 스켈레탈 메시 틱 1.05ms, 257번 | 1.0543ms, 프레임당 257.1번 | `USkinnedMeshComponent_TickComponent` Incl(4단계) | 5.981948 / 1,458,570 |
-| 애니메이션 평가 완료 0.83ms | 0.8279 | `USkeletalMeshComponent_CompleteParallelAnimationEvaluation` Incl | 4.697633 / 1,451,822 |
-| 액터 동기화 0.51ms | 0.5098 | `LabActorSyncProcessor_2147482256` Incl(Excl 2.854808) | 2.892495 / 5,672 |
+| 애니메이션 평가 완료 0.828ms | 0.8279 | `USkeletalMeshComponent_CompleteParallelAnimationEvaluation` Incl | 4.697633 / 1,451,822 |
+| 액터 동기화 0.510ms | 0.5098 | `LabActorSyncProcessor_2147482256` Incl(Excl 2.854808) | 2.892495 / 5,672 |
 | `Sync_RenderingThread` 3단계 2.75ms | 2.7488 | 3단계 Incl | 17.625474 / 6,412 |
 | `Sync_RenderingThread` 4단계 0.005ms | 0.0045 | 4단계 Incl | 0.025783 / 5,673 |
 | `Tick_Engine` 4.68 → 8.37ms | 4.6766 → 8.3672 | 3단계 29.986314초 → 4단계 47.475477초 | |
@@ -219,7 +219,7 @@ SVG 여섯 개는 [make-figures.py](make-figures.py)가 만든다(저장소 루�
 ## 확인하지 않은 것
 
 - 4단계에서 GPU가 0.597ms 준 원인. 가까운 VAT 인스턴스가 액터로 바뀐 몫으로 짐작하지만, 패스별 값을 새 트레이스로 가르지 않았다.
-- 액터 하나 12.5µs의 내역. 직렬 트레이스에서 메시 틱 1.05, 평가 완료 0.83, 동기화 0.51ms(프레임당)를 읽었지만 병렬 측정과 직접 맞춰 합치지 않았다. 호출 수 257이 `actors_mean` 373과 다른 이유도 보지 않았다.
+- 액터 하나 12.5µs의 내역. 직렬 트레이스에서 메시 틱 1.05, 평가 완료 0.828, 동기화 0.510ms(프레임당)를 읽었지만 병렬 측정과 직접 맞춰 합치지 않았다. 호출 수 257이 `actors_mean` 373과 다른 이유도 보지 않았다.
 - `S8-col`에서 프레임 시간(+2.01)이 게임 스레드(+1.54)보다 더 는 이유.
 - `A8-budget`의 +1.75ms가 무엇에서 나는지. 예산을 빼면 액터 클래스가 `ALabMinionMassActor`(일반 스켈레탈 메시)로 바뀐다(`LabCrowdSubsystem.cpp:101,109`). 4단계에서 예산만 끈 측정은 최종 측정에 없다.
 - 소형 액터의 애니메이션 건너뜀 비율. 대형만 센다.

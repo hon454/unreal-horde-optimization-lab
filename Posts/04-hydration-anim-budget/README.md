@@ -190,7 +190,7 @@ void ALabMinionMassActor::HideUntilPoseReady()
 
 같은 단계에서 GPU 시간은 0.597ms 줄었다. 그래서 게임 스레드가 GPU를 넘어서고도 프레임 시간은 0.249ms만 늘었다. GPU가 줄어든 원인은 가르지 않았다. 렌더 스레드는 0.573ms 늘었다. 액터는 메시마다 따로 그려서 드로우 콜이 123에서 1,321이 됐다.
 
-트레이스에서 게임 스레드의 프레임 평균을 읽었다(Unreal Insights, 호드 총수 1만, Processor를 한 스레드에 돌린 실행이라 위의 측정값과 견주지 않는다). 4단계에서 스켈레탈 메시 틱(`USkinnedMeshComponent_TickComponent`)은 프레임당 1.05ms를 쓰고 257번 불린다. 애니메이션 평가를 마치는 일(`USkeletalMeshComponent_CompleteParallelAnimationEvaluation`)은 0.83ms, 액터 동기화 Processor(`ULabActorSyncProcessor`)는 0.51ms다. 3단계에서 게임 스레드가 렌더 스레드를 기다리던 `Sync_RenderingThread`는 2.75ms였고, 4단계에서는 0.005ms로 사라진다. 엔진 틱(`Tick_Engine`)은 3단계의 4.68ms에서 4단계의 8.37ms로 늘었다.
+트레이스에서 게임 스레드의 프레임 평균을 읽었다(Unreal Insights, 호드 총수 1만, Processor를 한 스레드에 돌린 실행이라 위의 측정값과 견주지 않는다). 4단계에서 스켈레탈 메시 틱(`USkinnedMeshComponent_TickComponent`)은 프레임당 1.05ms를 쓰고 257번 불린다. 애니메이션 평가를 마치는 일(`USkeletalMeshComponent_CompleteParallelAnimationEvaluation`)은 0.828ms, 액터 동기화 Processor(`ULabActorSyncProcessor`)는 0.510ms다. 3단계에서 게임 스레드가 렌더 스레드를 기다리던 `Sync_RenderingThread`는 2.75ms였고, 4단계에서는 0.005ms로 사라진다. 엔진 틱(`Tick_Engine`)은 3단계의 4.68ms에서 4단계의 8.37ms로 늘었다.
 
 60fps를 지키는 최대 개체 수는 3단계가 잰 범위 3만 안에서 한계에 닿지 않았다. 4단계는 25,636이다. 프레임 시간의 느린 쪽 5% 경계가 16.7ms에 닿는 호드 총수를, 잰 개체 수 사이에서 보간한 값이다. 이 단계가 품질을 사는 대신 내는 값이다.
 
@@ -202,7 +202,7 @@ void ALabMinionMassActor::HideUntilPoseReady()
 
 ### 최종 구성에서 하나씩 빼면
 
-최종 구성은 화면 안 40m까지 액터로 그리고 상한을 1,000으로 둔다(08번 글). 이 구성에서 4단계의 설정을 하나씩 빼거나 바꿔 다시 쟀다.
+최종 구성은 화면 안 40m까지 액터로 그리고 상한을 1,000으로 둔다([08번 글](../08-quality/README.md)). 이 구성에서 4단계의 설정을 하나씩 빼거나 바꿔 다시 쟀다.
 
 ![최종 구성에서 하나만 바꾼 측정. 하이드레이션을 빼면 프레임 −1.59ms, 게임 스레드 −3.85ms이고 병목이 GPU로 바뀐다. 애니메이션 예산을 빼면 프레임 +1.75ms. 캡슐 콜리전을 켜면 프레임 +2.01ms. 전환 대책을 빼면 −0.017ms로 구별되지 않는다](images/hyd-ablation.svg)
 
@@ -218,4 +218,4 @@ void ALabMinionMassActor::HideUntilPoseReady()
 - 애니메이션 예산은 예산을 넘을 때만 일한다. 4단계 1만에서는 거의 쉬었고, 액터가 더 많은 최종 구성에서 빼면 프레임이 1.75ms 늘었다.
 - 한계: 4단계에서 예산만 끈 측정은 없다. 예산과 콜리전의 몫은 액터 상한과 전환 거리가 다른 최종 구성에서 쟀다.
 
-다음 글에서는 거리마다 로직을 덜 자주 돌린다(Simulation LOD). 200m 밖의 이동을 자체 프로세서로 바꾸고, 죽은 엔티티를 지우지 않고 다시 쓴다.
+[다음 글](../05-simulation-lod-entity-pool/README.md)에서는 거리마다 로직을 덜 자주 돌린다(Simulation LOD). 200m 밖의 이동을 자체 프로세서로 바꾸고, 죽은 엔티티를 지우지 않고 다시 쓴다.

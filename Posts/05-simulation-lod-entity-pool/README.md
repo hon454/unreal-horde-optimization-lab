@@ -111,7 +111,7 @@ Query.SetChunkFilter(&FMassSimulationVariableTickChunkFragment::ShouldTickChunkT
 
 ![4단계와 5단계의 프레임 시간 중앙값 대 호드 총수. 차이는 5천 +0.02, 1만 −0.51, 2만 −1.27, 3만 −2.09ms다](images/simlod-result.svg)
 
-트레이스에서 게임 스레드의 프레임 평균을 읽었다(Unreal Insights, 호드 총수 1만, Processor를 한 스레드에 돌린 실행이라 위의 측정값과 견주지 않는다). 엔진 이동·조향 Processor 넷(`UMassApplyForceProcessor`, `UMassApplyMovementProcessor`, `UMassSteerToMoveTargetProcessor`, `UMassSmoothOrientationProcessor`)의 합은 4단계에서 프레임당 1.68ms였고, 5단계에서 0.67ms다. 5단계의 합은 4단계의 39.7%다. 처리하는 개체가 39%라는 예상과 거의 같다. 200m 밖을 움직이는 `LabOffMoveProcessor`는 0.006ms다.
+트레이스에서 게임 스레드의 프레임 평균을 읽었다(Unreal Insights, 호드 총수 1만, Processor를 한 스레드에 돌린 실행이라 위의 측정값과 견주지 않는다). 엔진 이동·조향 Processor 넷(`UMassApplyForceProcessor`, `UMassApplyMovementProcessor`, `UMassSteerToMoveTargetProcessor`, `UMassSmoothOrientationProcessor`)의 합은 4단계에서 프레임당 1.68ms였고, 5단계에서 0.669ms다. 5단계의 합은 4단계의 39.7%다. 처리하는 개체가 39%라는 예상과 거의 같다. 200m 밖을 움직이는 `LabOffMoveProcessor`는 0.006ms다.
 
 설정한 간격과 실제로 도는 주기는 달랐다. 값은 호드 총수 1만의 것이다. Medium 간격은 0.5초로 두었지만, 실제로는 0.110초마다 돌았다. Off 간격은 1초로 두었지만, 실제로는 0.321초마다 돌았다. 엔진은 엔티티가 드나든 청크를 간격과 상관없이 다음 프레임에 돌린다.
 
@@ -123,9 +123,9 @@ bShouldTickThisFrame = TimeUntilNextTick <= 0.0f || LastChunkSerialModificationN
 
 뒤 조건이 "청크에 엔티티가 들어오거나 나갔다"다. 이 호드에서는 개체가 계속 죽고 생기며 거리 등급을 넘는다. 그래서 설정한 간격은 상한일 뿐이다.
 
-최종 구성에서 Simulation LOD만 빼도 같은 방향이다. 호드 총수 1만에서 프레임 시간이 1.04ms 길어진다. 엔티티 풀만 빼면 0.05ms 차이로, 세 번 잰 범위 안이다.
+최종 구성에서 Simulation LOD만 빼도 같은 방향이다. 호드 총수 1만에서 프레임 시간이 1.04ms 길어진다. 엔티티 풀만 빼면 0.055ms 차이로, 세 번 잰 범위 안이다.
 
-![최종 구성, Simulation LOD를 뺀 구성, 엔티티 풀을 뺀 구성의 프레임 시간. Simulation LOD를 빼면 +1.04ms, 엔티티 풀을 빼면 +0.05ms로 범위 안이다](images/simlod-ablation.svg)
+![최종 구성, Simulation LOD를 뺀 구성, 엔티티 풀을 뺀 구성의 프레임 시간. Simulation LOD를 빼면 +1.04ms, 엔티티 풀을 빼면 +0.055ms로 범위 안이다](images/simlod-ablation.svg)
 
 화면에서 달라진 점은 없다. Off 개체는 평균 0.321초마다 약 0.963m씩 한 번에 옮겨지지만, 그리지 않는 거리다.
 
@@ -231,4 +231,4 @@ Simulation LOD는 간격을 주는 틀일 뿐이고, 프레임을 줄인 것은 
 - 시간에 따라 쌓이는 비용은 60초 측정으로 보이지 않는다. 16분 실행은 한 번씩이라 범위가 없다.
 - 탑뷰 카메라에서는 5단계의 게임 스레드가 2.67ms에서 3.13ms로 오히려 늘었다. 프레임은 GPU가 정해 같다. 원인은 가르지 않았다.
 
-다음 글에서는 30\~200m의 VAT 인스턴스를 ISKM으로 바꾼다. 엔티티 풀이 막는 트랙 누수가 그 단계부터 실제로 생긴다.
+[다음 글](../06-iskm/README.md)에서는 30\~200m의 VAT 인스턴스를 ISKM으로 바꾼다. 엔티티 풀이 막는 트랙 누수가 그 단계부터 실제로 생긴다.

@@ -217,8 +217,8 @@
 
 | 본문 값 | 정밀한 값(5단계 / 6단계) | 타이머 | 합(초) |
 | --- | --- | --- | --- |
-| `PrepareDistanceFieldScene` 1.41 / 0.04ms | 1.4124 / 0.0368 | 렌더 스레드 `FSceneRenderer::PrepareDistanceFieldScene` Excl(횟수 6,312 / 6,514) | 8.916218 / 0.239721 |
-| `GlobalDistanceFieldUpdate` 0.30 / 0.003ms | 0.3022 / 0.0026 | GPU `GlobalDistanceFieldUpdate` Excl(횟수 6,312 / 135) | 1.907774 / 0.016782 |
+| `PrepareDistanceFieldScene` 1.41 / 0.0368ms | 1.4124 / 0.0368 | 렌더 스레드 `FSceneRenderer::PrepareDistanceFieldScene` Excl(횟수 6,312 / 6,514) | 8.916218 / 0.239721 |
+| `GlobalDistanceFieldUpdate` 0.302 / 0.003ms | 0.3022 / 0.0026 | GPU `GlobalDistanceFieldUpdate` Excl(횟수 6,312 / 135) | 1.907774 / 0.016782 |
 
 참고(본문에 쓰지 않았다): `PrepareDistanceFieldScene` Incl 1.9154 / 0.0600ms. GPU `ShadowDepths` Excl 1.5667 / 1.0911, `BasePass` 0.7552 / 0.2481, `RenderVelocities(%s)` 0.5843 / 0.1851ms. 트레이스를 켠 한 회라 `summary.csv`의 값과 직접 견주지 않는다. GPU 값은 큐 여럿의 합이라 더해도 GPU 프레임 시간이 되지 않는다.
 

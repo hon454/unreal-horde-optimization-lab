@@ -111,9 +111,9 @@ SVG 넷은 [make-figures.py](make-figures.py)가 만든다(저장소 루트에�
 | 프레임 평균 9.92ms | 9.9244 | `FEngineLoop::Tick` Incl | 49.998456 |
 | Mass 처리 단계 3.01ms | 3.0122 | `FMassProcessingPhase::ExecuteTick EMassProcessingPhase::PrePhysics` Incl(횟수 5,037) | 15.175215 |
 | `EndVisualChanges` 2.52ms | 2.5152 | `MassVisualizationComponent EndVisualChanges` Incl = Excl | 12.671333 |
-| 가장 긴 Processor 0.93ms | 0.9251 | `MassSmoothOrientationProcessor_2147482251` Incl = Excl | 4.660537 |
-| 그다음 0.44ms | 0.4398 | `MassSteerToMoveTargetProcessor_2147482252` Incl = Excl | 2.215693 |
-| `UMassUpdateISMProcessor` 0.57ms | 0.5729 | `MassUpdateISMProcessor_2147482256` Incl = Excl | 2.886137 |
+| 가장 긴 Processor 0.925ms | 0.9251 | `MassSmoothOrientationProcessor_2147482251` Incl = Excl | 4.660537 |
+| 그다음 0.440ms | 0.4398 | `MassSteerToMoveTargetProcessor_2147482252` Incl = Excl | 2.215693 |
+| `UMassUpdateISMProcessor` 0.573ms | 0.5729 | `MassUpdateISMProcessor_2147482256` Incl = Excl | 2.886137 |
 | `UCharacterMovementComponent_TickComponent` 없음 | 표에 행 없음(`Character`로 찾은 행은 `FActorComponentTickFunction::ExecuteTick`뿐) | 304행 전체 | |
 
 참고(본문에 쓰지 않았다): `Sync_RenderingThread` 2.7704ms(13.957100초), `MassApplyMovementProcessor` 0.1506, `LabApproachProcessor` 0.1297, `MassApplyForceProcessor` 0.1077ms. 타이머 이름 끝의 숫자는 Processor 인스턴스 번호다.
