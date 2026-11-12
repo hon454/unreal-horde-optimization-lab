@@ -1,7 +1,8 @@
 # Makes the SVG figures of the root README in Docs/figures/readme/.
 # Run from anywhere: py -3 -I Scripts/plot-readme.py
 # Every value comes from the final measurement:
-#   Measurements/Full1/summary.csv               ladder and ablation (10000, P1)
+#   Measurements/Full1/summary.csv               ladder, resources and ablation (10000, P1)
+#   Measurements/Full1/runs.csv                  run ranges of the resource figure
 #   Docs/figures/full1/full-n-at-60fps.csv       max entities at 60 fps (n_p95)
 #   Measurements/Full1/transition-dev/runs.csv   transition pop (mean_excess, noticeable/events)
 # Colours and fonts follow Posts/01-actor-baseline/make-figures.py.
@@ -194,6 +195,88 @@ def ladder():
     o.append(f'<line x1="32" y1="{y - 14}" x2="{W - 32}" y2="{y - 14}" stroke="{LINE}"/>')
     o.append(f'<text x="32" y="{y + 12}" font-size="16" fill="{SUB}">프레임 시간은 게임 스레드, 렌더 스레드, GPU 가운데 가장 느린 쪽(병목)이 정한다.</text>')
     write("ladder.svg", svg(y + 34, o))
+
+
+# ---------- 1b. resources per step ----------
+# mem_total_mb   = CSV PhysicalUsedMB = process working set (CsvProfiler.cpp:4189, WindowsPlatformMemory.cpp:342)
+# gpu_mem_p50    = CSV GPUMem/LocalUsedMB = DXGI local CurrentUsage of this process (RHIStats.cpp:91, DXGIUtilities.cpp:111)
+# draw_calls_p50 = CSV RHI/DrawCalls per frame (GPUProfiler.cpp:2107)
+RESOURCES = [("프로세스 메모리", "작업 집합, MB", "mem_total_mb", BLUE),
+             ("GPU 메모리", "VRAM 사용량, MB", "gpu_mem_p50", PINK),
+             ("드로우 콜", "프레임당 개수", "draw_calls_p50", TEAL)]
+# Rises after step 3 named in the note, with what the step changed. Each is checked below against the run range.
+RISES = [("gpu_mem_p50", [(4, "30m 안 액터"), (6, "ISKM"), (7, "Niagara 배경 무리")]),
+         ("draw_calls_p50", [(4, "30m 안 액터"), (8, "액터 0~40m, 상한 1,000")])]
+
+
+def run_values(cond, col):
+    """Per-run values behind a summary row: r1..r10 (r0 and the A/A runs r11+ are left out, as in summarize.py)."""
+    import re
+    out = []
+    with open(os.path.join(ROOT, "Measurements", "Full1", "runs.csv"), encoding="utf-8") as f:
+        for r in csv.DictReader(f):
+            m = re.search(r"-r(\d+)$", r["label"])
+            if (r["variant"] == cond and int(r["n"]) == N and r["preset"] == PRESET
+                    and m and 1 <= int(m.group(1)) <= 10 and r[col]):
+                out.append(float(r[col]))
+    return out
+
+
+def resources():
+    span = {}  # (cond, col) -> (min, max) over the runs
+    for cond, *_ in STEPS:
+        for _, _, col, _ in RESOURCES:
+            vs = run_values(cond, col)
+            assert len(vs) == 3 and abs(statistics.median(vs) - val(cond, col)) < 0.01, (cond, col, vs)
+            span[cond, col] = (min(vs), max(vs))
+    width = lambda c, col: span[c, col][1] - span[c, col][0]
+    for col, rises in RISES:  # a named rise must be larger than both run ranges (measurement.md rule)
+        for num, _ in rises:
+            a, b = STEPS[num - 2][0], STEPS[num - 1][0]
+            assert val(b, col) - val(a, col) > max(width(a, col), width(b, col)), (col, num)
+    mem_spread = max(width(c, "mem_total_mb") for c, *_ in STEPS)
+
+    o = []
+    y = title(o, "단계마다 쓰는 메모리와 드로우 콜",
+              ["호드 총수 1만, 오브 시점 카메라, 60초씩 세 번 잰 중앙값",
+               "막대 끝의 가는 선: 세 번 잰 범위"])
+    LX, CX, CR = 32, 262, W - 32
+    CW = (CR - CX) / 3
+    BWMAX = 92
+    y += 44
+    for i, (name, unit, _, c) in enumerate(RESOURCES):
+        x = CX + i * CW
+        o.append(f'<text x="{x:.1f}" y="{y}" font-size="17" font-weight="700" fill="{c}">{esc(name)}</text>')
+        o.append(f'<text x="{x:.1f}" y="{y + 21}" font-size="16" fill="{SUB}">{esc(unit)}</text>')
+    y += 38
+    RH, BAR = 36, 18
+    for cond, num, name, _ in STEPS:
+        o.append(f'<line x1="32" y1="{y}" x2="{W - 32}" y2="{y}" stroke="{LINE}"/>')
+        o.append(f'<text x="{LX}" y="{y + 24}" font-size="17" font-weight="700">{num}단계 {esc(name)}</text>')
+        for i, (_, _, col, c) in enumerate(RESOURCES):
+            x = CX + i * CW
+            sc = BWMAX / val(STEPS[0][0], col)
+            v = val(cond, col)
+            lo, hi = span[cond, col]
+            by = y + 9
+            o.append(f'<rect x="{x:.1f}" y="{by}" width="{max(v * sc, 1.5):.1f}" height="{BAR}" rx="3" fill="{c}"/>')
+            o.append(f'<line x1="{x + lo * sc:.1f}" y1="{by + BAR / 2}" x2="{x + hi * sc:.1f}" y2="{by + BAR / 2}" stroke="{INK}" stroke-width="2"/>')
+            for e in (lo, hi):
+                o.append(f'<line x1="{x + e * sc:.1f}" y1="{by + 3}" x2="{x + e * sc:.1f}" y2="{by + BAR - 3}" stroke="{INK}" stroke-width="2"/>')
+            tx = x + max(v, hi) * sc + 7
+            o.append(f'<text x="{tx:.1f}" y="{by + 15}" font-size="16" font-weight="700" fill="{c}">{round(v):,}</text>')
+        y += RH
+    o.append(f'<line x1="32" y1="{y}" x2="{W - 32}" y2="{y}" stroke="{LINE}"/>')
+    y += 32
+    o.append(f'<text x="32" y="{y}" font-size="16" font-weight="700">4단계부터 다시 느는 단계와 그 단계에서 바꾼 것</text>')
+    for col, rises in RISES:
+        y += 22
+        name = next(r[0] for r in RESOURCES if r[2] == col)
+        o.append(f'<text x="32" y="{y}" font-size="16" fill="{SUB}">{esc(name)}: '
+                 + ", ".join(f"{n}단계({esc(t)})" for n, t in rises) + "</text>")
+    y += 30
+    o.append(f'<text x="32" y="{y}" font-size="16" fill="{SUB}">프로세스 메모리는 같은 단계에서도 실행마다 최대 약 {round(mem_spread, -1):.0f}MB 달랐다.</text>')
+    write("resources.svg", svg(y + 30, o))
 
 
 # ---------- 2. max entities at 60 fps ----------
@@ -489,6 +572,7 @@ def scenario():
 if __name__ == "__main__":
     scenario()
     ladder()
+    resources()
     max_entities()
     ablation()
     transition()

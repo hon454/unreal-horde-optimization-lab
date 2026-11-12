@@ -1,0 +1,153 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="602" viewBox="0 0 800 602" font-family="Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Segoe UI, sans-serif" font-size="16" fill="#111827">
+<rect x="0.5" y="0.5" width="799" height="601" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+<text x="32" y="46" font-size="22" font-weight="700">단계마다 쓰는 메모리와 드로우 콜</text>
+<text x="32" y="74" font-size="16" fill="#4b5563">호드 총수 1만, 오브 시점 카메라, 60초씩 세 번 잰 중앙값</text>
+<text x="32" y="96" font-size="16" fill="#4b5563">막대 끝의 가는 선: 세 번 잰 범위</text>
+<text x="262.0" y="140" font-size="17" font-weight="700" fill="#2563eb">프로세스 메모리</text>
+<text x="262.0" y="161" font-size="16" fill="#4b5563">작업 집합, MB</text>
+<text x="430.7" y="140" font-size="17" font-weight="700" fill="#db2777">GPU 메모리</text>
+<text x="430.7" y="161" font-size="16" fill="#4b5563">VRAM 사용량, MB</text>
+<text x="599.3" y="140" font-size="17" font-weight="700" fill="#0d9488">드로우 콜</text>
+<text x="599.3" y="161" font-size="16" fill="#4b5563">프레임당 개수</text>
+<line x1="32" y1="178" x2="768" y2="178" stroke="#e5e7eb"/>
+<text x="32" y="202" font-size="17" font-weight="700">1단계 액터 군중</text>
+<rect x="262.0" y="187" width="92.0" height="18" rx="3" fill="#2563eb"/>
+<line x1="353.9" y1="196.0" x2="354.3" y2="196.0" stroke="#111827" stroke-width="2"/>
+<line x1="353.9" y1="190" x2="353.9" y2="202" stroke="#111827" stroke-width="2"/>
+<line x1="354.3" y1="190" x2="354.3" y2="202" stroke="#111827" stroke-width="2"/>
+<text x="361.3" y="202" font-size="16" font-weight="700" fill="#2563eb">3,083</text>
+<rect x="430.7" y="187" width="92.0" height="18" rx="3" fill="#db2777"/>
+<line x1="522.7" y1="196.0" x2="522.7" y2="196.0" stroke="#111827" stroke-width="2"/>
+<line x1="522.7" y1="190" x2="522.7" y2="202" stroke="#111827" stroke-width="2"/>
+<line x1="522.7" y1="190" x2="522.7" y2="202" stroke="#111827" stroke-width="2"/>
+<text x="529.7" y="202" font-size="16" font-weight="700" fill="#db2777">8,643</text>
+<rect x="599.3" y="187" width="92.0" height="18" rx="3" fill="#0d9488"/>
+<line x1="691.3" y1="196.0" x2="691.3" y2="196.0" stroke="#111827" stroke-width="2"/>
+<line x1="691.3" y1="190" x2="691.3" y2="202" stroke="#111827" stroke-width="2"/>
+<line x1="691.3" y1="190" x2="691.3" y2="202" stroke="#111827" stroke-width="2"/>
+<text x="698.3" y="202" font-size="16" font-weight="700" fill="#0d9488">10,270</text>
+<line x1="32" y1="214" x2="768" y2="214" stroke="#e5e7eb"/>
+<text x="32" y="238" font-size="17" font-weight="700">2단계 Mass 로직</text>
+<rect x="262.0" y="223" width="47.9" height="18" rx="3" fill="#2563eb"/>
+<line x1="309.5" y1="232.0" x2="314.7" y2="232.0" stroke="#111827" stroke-width="2"/>
+<line x1="309.5" y1="226" x2="309.5" y2="238" stroke="#111827" stroke-width="2"/>
+<line x1="314.7" y1="226" x2="314.7" y2="238" stroke="#111827" stroke-width="2"/>
+<text x="321.7" y="238" font-size="16" font-weight="700" fill="#2563eb">1,604</text>
+<rect x="430.7" y="223" width="32.3" height="18" rx="3" fill="#db2777"/>
+<line x1="463.0" y1="232.0" x2="463.0" y2="232.0" stroke="#111827" stroke-width="2"/>
+<line x1="463.0" y1="226" x2="463.0" y2="238" stroke="#111827" stroke-width="2"/>
+<line x1="463.0" y1="226" x2="463.0" y2="238" stroke="#111827" stroke-width="2"/>
+<text x="470.0" y="238" font-size="16" font-weight="700" fill="#db2777">3,039</text>
+<rect x="599.3" y="223" width="1.5" height="18" rx="3" fill="#0d9488"/>
+<line x1="600.4" y1="232.0" x2="600.4" y2="232.0" stroke="#111827" stroke-width="2"/>
+<line x1="600.4" y1="226" x2="600.4" y2="238" stroke="#111827" stroke-width="2"/>
+<line x1="600.4" y1="226" x2="600.4" y2="238" stroke="#111827" stroke-width="2"/>
+<text x="607.4" y="238" font-size="16" font-weight="700" fill="#0d9488">123</text>
+<line x1="32" y1="250" x2="768" y2="250" stroke="#e5e7eb"/>
+<text x="32" y="274" font-size="17" font-weight="700">3단계 ISM + VAT</text>
+<rect x="262.0" y="259" width="51.9" height="18" rx="3" fill="#2563eb"/>
+<line x1="312.6" y1="268.0" x2="314.4" y2="268.0" stroke="#111827" stroke-width="2"/>
+<line x1="312.6" y1="262" x2="312.6" y2="274" stroke="#111827" stroke-width="2"/>
+<line x1="314.4" y1="262" x2="314.4" y2="274" stroke="#111827" stroke-width="2"/>
+<text x="321.4" y="274" font-size="16" font-weight="700" fill="#2563eb">1,740</text>
+<rect x="430.7" y="259" width="32.3" height="18" rx="3" fill="#db2777"/>
+<line x1="462.9" y1="268.0" x2="463.1" y2="268.0" stroke="#111827" stroke-width="2"/>
+<line x1="462.9" y1="262" x2="462.9" y2="274" stroke="#111827" stroke-width="2"/>
+<line x1="463.1" y1="262" x2="463.1" y2="274" stroke="#111827" stroke-width="2"/>
+<text x="470.1" y="274" font-size="16" font-weight="700" fill="#db2777">3,035</text>
+<rect x="599.3" y="259" width="1.5" height="18" rx="3" fill="#0d9488"/>
+<line x1="600.4" y1="268.0" x2="600.4" y2="268.0" stroke="#111827" stroke-width="2"/>
+<line x1="600.4" y1="262" x2="600.4" y2="274" stroke="#111827" stroke-width="2"/>
+<line x1="600.4" y1="262" x2="600.4" y2="274" stroke="#111827" stroke-width="2"/>
+<text x="607.4" y="274" font-size="16" font-weight="700" fill="#0d9488">123</text>
+<line x1="32" y1="286" x2="768" y2="286" stroke="#e5e7eb"/>
+<text x="32" y="310" font-size="17" font-weight="700">4단계 액터 하이드레이션</text>
+<rect x="262.0" y="295" width="49.2" height="18" rx="3" fill="#2563eb"/>
+<line x1="310.4" y1="304.0" x2="315.9" y2="304.0" stroke="#111827" stroke-width="2"/>
+<line x1="310.4" y1="298" x2="310.4" y2="310" stroke="#111827" stroke-width="2"/>
+<line x1="315.9" y1="298" x2="315.9" y2="310" stroke="#111827" stroke-width="2"/>
+<text x="322.9" y="310" font-size="16" font-weight="700" fill="#2563eb">1,650</text>
+<rect x="430.7" y="295" width="33.3" height="18" rx="3" fill="#db2777"/>
+<line x1="463.9" y1="304.0" x2="464.0" y2="304.0" stroke="#111827" stroke-width="2"/>
+<line x1="463.9" y1="298" x2="463.9" y2="310" stroke="#111827" stroke-width="2"/>
+<line x1="464.0" y1="298" x2="464.0" y2="310" stroke="#111827" stroke-width="2"/>
+<text x="471.0" y="310" font-size="16" font-weight="700" fill="#db2777">3,125</text>
+<rect x="599.3" y="295" width="11.8" height="18" rx="3" fill="#0d9488"/>
+<line x1="611.2" y1="304.0" x2="611.2" y2="304.0" stroke="#111827" stroke-width="2"/>
+<line x1="611.2" y1="298" x2="611.2" y2="310" stroke="#111827" stroke-width="2"/>
+<line x1="611.2" y1="298" x2="611.2" y2="310" stroke="#111827" stroke-width="2"/>
+<text x="618.2" y="310" font-size="16" font-weight="700" fill="#0d9488">1,321</text>
+<line x1="32" y1="322" x2="768" y2="322" stroke="#e5e7eb"/>
+<text x="32" y="346" font-size="17" font-weight="700">5단계 Simulation LOD</text>
+<rect x="262.0" y="331" width="53.9" height="18" rx="3" fill="#2563eb"/>
+<line x1="311.5" y1="340.0" x2="316.0" y2="340.0" stroke="#111827" stroke-width="2"/>
+<line x1="311.5" y1="334" x2="311.5" y2="346" stroke="#111827" stroke-width="2"/>
+<line x1="316.0" y1="334" x2="316.0" y2="346" stroke="#111827" stroke-width="2"/>
+<text x="323.0" y="346" font-size="16" font-weight="700" fill="#2563eb">1,808</text>
+<rect x="430.7" y="331" width="33.3" height="18" rx="3" fill="#db2777"/>
+<line x1="463.9" y1="340.0" x2="463.9" y2="340.0" stroke="#111827" stroke-width="2"/>
+<line x1="463.9" y1="334" x2="463.9" y2="346" stroke="#111827" stroke-width="2"/>
+<line x1="463.9" y1="334" x2="463.9" y2="346" stroke="#111827" stroke-width="2"/>
+<text x="470.9" y="346" font-size="16" font-weight="700" fill="#db2777">3,125</text>
+<rect x="599.3" y="331" width="11.9" height="18" rx="3" fill="#0d9488"/>
+<line x1="611.2" y1="340.0" x2="611.2" y2="340.0" stroke="#111827" stroke-width="2"/>
+<line x1="611.2" y1="334" x2="611.2" y2="346" stroke="#111827" stroke-width="2"/>
+<line x1="611.2" y1="334" x2="611.2" y2="346" stroke="#111827" stroke-width="2"/>
+<text x="618.2" y="346" font-size="16" font-weight="700" fill="#0d9488">1,324</text>
+<line x1="32" y1="358" x2="768" y2="358" stroke="#e5e7eb"/>
+<text x="32" y="382" font-size="17" font-weight="700">6단계 ISKM</text>
+<rect x="262.0" y="367" width="52.8" height="18" rx="3" fill="#2563eb"/>
+<line x1="309.0" y1="376.0" x2="314.8" y2="376.0" stroke="#111827" stroke-width="2"/>
+<line x1="309.0" y1="370" x2="309.0" y2="382" stroke="#111827" stroke-width="2"/>
+<line x1="314.8" y1="370" x2="314.8" y2="382" stroke="#111827" stroke-width="2"/>
+<text x="321.8" y="382" font-size="16" font-weight="700" fill="#2563eb">1,768</text>
+<rect x="430.7" y="367" width="34.5" height="18" rx="3" fill="#db2777"/>
+<line x1="465.1" y1="376.0" x2="465.3" y2="376.0" stroke="#111827" stroke-width="2"/>
+<line x1="465.1" y1="370" x2="465.1" y2="382" stroke="#111827" stroke-width="2"/>
+<line x1="465.3" y1="370" x2="465.3" y2="382" stroke="#111827" stroke-width="2"/>
+<text x="472.3" y="382" font-size="16" font-weight="700" fill="#db2777">3,241</text>
+<rect x="599.3" y="367" width="12.1" height="18" rx="3" fill="#0d9488"/>
+<line x1="611.4" y1="376.0" x2="611.4" y2="376.0" stroke="#111827" stroke-width="2"/>
+<line x1="611.4" y1="370" x2="611.4" y2="382" stroke="#111827" stroke-width="2"/>
+<line x1="611.4" y1="370" x2="611.4" y2="382" stroke="#111827" stroke-width="2"/>
+<text x="618.4" y="382" font-size="16" font-weight="700" fill="#0d9488">1,349</text>
+<line x1="32" y1="394" x2="768" y2="394" stroke="#e5e7eb"/>
+<text x="32" y="418" font-size="17" font-weight="700">7단계 Niagara 배경 무리</text>
+<rect x="262.0" y="403" width="58.0" height="18" rx="3" fill="#2563eb"/>
+<line x1="319.3" y1="412.0" x2="320.5" y2="412.0" stroke="#111827" stroke-width="2"/>
+<line x1="319.3" y1="406" x2="319.3" y2="418" stroke="#111827" stroke-width="2"/>
+<line x1="320.5" y1="406" x2="320.5" y2="418" stroke="#111827" stroke-width="2"/>
+<text x="327.5" y="418" font-size="16" font-weight="700" fill="#2563eb">1,943</text>
+<rect x="430.7" y="403" width="35.7" height="18" rx="3" fill="#db2777"/>
+<line x1="466.4" y1="412.0" x2="466.4" y2="412.0" stroke="#111827" stroke-width="2"/>
+<line x1="466.4" y1="406" x2="466.4" y2="418" stroke="#111827" stroke-width="2"/>
+<line x1="466.4" y1="406" x2="466.4" y2="418" stroke="#111827" stroke-width="2"/>
+<text x="473.4" y="418" font-size="16" font-weight="700" fill="#db2777">3,356</text>
+<rect x="599.3" y="403" width="12.2" height="18" rx="3" fill="#0d9488"/>
+<line x1="611.5" y1="412.0" x2="611.5" y2="412.0" stroke="#111827" stroke-width="2"/>
+<line x1="611.5" y1="406" x2="611.5" y2="418" stroke="#111827" stroke-width="2"/>
+<line x1="611.5" y1="406" x2="611.5" y2="418" stroke="#111827" stroke-width="2"/>
+<text x="618.5" y="418" font-size="16" font-weight="700" fill="#0d9488">1,358</text>
+<line x1="32" y1="430" x2="768" y2="430" stroke="#e5e7eb"/>
+<text x="32" y="454" font-size="17" font-weight="700">8단계 품질 올리기</text>
+<rect x="262.0" y="439" width="57.8" height="18" rx="3" fill="#2563eb"/>
+<line x1="319.5" y1="448.0" x2="320.1" y2="448.0" stroke="#111827" stroke-width="2"/>
+<line x1="319.5" y1="442" x2="319.5" y2="454" stroke="#111827" stroke-width="2"/>
+<line x1="320.1" y1="442" x2="320.1" y2="454" stroke="#111827" stroke-width="2"/>
+<text x="327.1" y="454" font-size="16" font-weight="700" fill="#2563eb">1,936</text>
+<rect x="430.7" y="439" width="35.7" height="18" rx="3" fill="#db2777"/>
+<line x1="466.4" y1="448.0" x2="466.4" y2="448.0" stroke="#111827" stroke-width="2"/>
+<line x1="466.4" y1="442" x2="466.4" y2="454" stroke="#111827" stroke-width="2"/>
+<line x1="466.4" y1="442" x2="466.4" y2="454" stroke="#111827" stroke-width="2"/>
+<text x="473.4" y="454" font-size="16" font-weight="700" fill="#db2777">3,355</text>
+<rect x="599.3" y="439" width="15.3" height="18" rx="3" fill="#0d9488"/>
+<line x1="614.7" y1="448.0" x2="614.7" y2="448.0" stroke="#111827" stroke-width="2"/>
+<line x1="614.7" y1="442" x2="614.7" y2="454" stroke="#111827" stroke-width="2"/>
+<line x1="614.7" y1="442" x2="614.7" y2="454" stroke="#111827" stroke-width="2"/>
+<text x="621.7" y="454" font-size="16" font-weight="700" fill="#0d9488">1,713</text>
+<line x1="32" y1="466" x2="768" y2="466" stroke="#e5e7eb"/>
+<text x="32" y="498" font-size="16" font-weight="700">4단계부터 다시 느는 단계와 그 단계에서 바꾼 것</text>
+<text x="32" y="520" font-size="16" fill="#4b5563">GPU 메모리: 4단계(30m 안 액터), 6단계(ISKM), 7단계(Niagara 배경 무리)</text>
+<text x="32" y="542" font-size="16" fill="#4b5563">드로우 콜: 4단계(30m 안 액터), 8단계(액터 0~40m, 상한 1,000)</text>
+<text x="32" y="572" font-size="16" fill="#4b5563">프로세스 메모리는 같은 단계에서도 실행마다 최대 약 190MB 달랐다.</text>
+</svg>
