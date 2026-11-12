@@ -21,6 +21,7 @@ M0\~M5, M3b 완료(태그 `M0`\~`M5`, `M3b`). 품질 계획 Q1\~Q5 완료, Q6은
 ## 진행 중인 세션
 
 - `readme-resources-fig`: README에 단계별 프로세스 메모리, GPU 메모리, 드로우 콜 그림을 더한다(`Docs/figures/readme/resources.svg`. 평가 5번, 2026-11-12 사용자 결정). Opus high. 진행 중.
+- `readme-run-prereqs`: README "실행" 절 앞에 전제 세 줄(소스 빌드 엔진, Fab 에셋, 에셋 이전과 베이크)을 넣는다(평가 5번, 2026-11-12 사용자 결정). Sonnet medium. 진행 중.
 - `crowdfx-gpu-cause`: 최종 구성에서 200m 밖 입자의 GPU 비용 원인을 Development에서 가린다(조사만, 수정·재측정 없음. 2026-11-12 사용자 결정). 결과는 [Worklog/Q6.md](Worklog/Q6.md) "입자 GPU 비용 조사". Opus high. 조사 단계 끝, Development 트레이스 실행 중(시험 스위치와 `Content/LabTmp/`는 임시이고 끝나면 지운다). 이 세션이 Development 빌드와 `-game` 실행을 쓴다.
 
 세션을 띄우면 세션, 작업 단위, 모델과 추론 수준, 상태를 여기에 적고, 끝나서 확인한 세션은 보관 처리하고 지운다(AGENTS.md "여러 세션"의 코디네이터 항목).
