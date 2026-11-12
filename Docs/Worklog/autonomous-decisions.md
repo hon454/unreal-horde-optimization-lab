@@ -6,7 +6,34 @@
 
 ## 요약
 
-진행 중이다. 끝날 때 여기에 끝낸 것, 끝내지 못한 것, 사용자 판단이 필요한 결정, `Full1`의 핵심 수치, 확인하지 못한 것을 적는다.
+2026-11-12 `Full1`(Test 패키지 730ff18)이 끝나 채운 요약이다. 아래 D1\~D19의 본문은 결정 시점의 것이라 고치지 않았다. 수치는 `Measurements/Full1/summary.csv`의 세 회차 중앙값이고, 별말이 없으면 1만 P1이다.
+
+**끝낸 것.**
+
+- Q2 나머지\~Q5와 총괄 묶음 `Full1`이 끝났다. 21개 조건, 178회가 실패 0으로 돌았고 동등성 54조건 통과, 주기 스파이크 0건이다([ADR-0013](../Decisions/0013-full-batch-runner-and-condition-table.md)).
+- 사용자 판단이 필요했던 결정은 승인으로 정리됐다. D11·D12·D15는 D18·D19와 [ADR-0010](../Decisions/0010-final-representation-bands.md)(액터 0\~40m, 상한 1,000, 80m 밖 그림자 끔)으로, D6·D14는 D17과 [ADR-0011](../Decisions/0011-entity-driven-crowd-particles.md)(엔티티 구동 입자)로 바뀌었다.
+
+**`Full1`의 핵심 수치.**
+
+| 항목 | 값 |
+| --- | --- |
+| 최종 구성 `L8-q4final` 프레임 p50 / p95 | 11.12 / 11.64ms(여유 기준 13.3ms 안). Game p50 7.82, GPU p50 10.71, 병목 GPU |
+| 목표 총수 1만 사다리 프레임 p95 | L1 466.35, L2 10.29, L3 8.19, L4 9.41, L5 8.83, L6 8.84, L7 13.03, L8 11.64ms |
+| N@16.7ms(프레임 p95) | L1 797, L2 20,250, L4 26,154, L7 13,808, L8 16,826. L3·L5·L6은 3만에서도 안쪽 |
+| 원거리 그림자(D2, D14의 후속) | `A8-farshadow`(다시 켬) 12.52 / 13.01ms. 끄면 프레임 p50 −1.40ms |
+| 배경 무리(D1, D14) | `A8-crowdfx`(끔) 7.46 / 8.90ms. 입자 비용은 프레임 p50 +3.66ms, GPU p50 +5.53ms이고 Game은 0.49ms |
+| 입자 대 ISKM(D17) | `A8-farcull` 11.82 / 13.29ms, Game p50 11.60, GPU p50 7.70. 병목이 Game으로 옮겨 감 |
+| 애니 건너뜀 비율(D11, D18) | `L8` 1만 0.003, 2만 0.637, 3만 0.644. `L4` 2만 0.290 |
+
+**끝내지 못한 것.**
+
+- Development 전환 점수 묶음([ADR-0012](../Decisions/0012-ablation-switches-and-quality-metrics.md) 결정 4)과 GIF 촬영은 이 요약 시점에 하지 않았다.
+- 프레임 시간으로 구별되지 않는 빼 보기 다섯 행(`A8-hydrate`, `A8-budget`, `A8-fix`, `A8-pool`, `A8-simlod`)과 `S8-col`의 이점은 Game 열(`A8-hydrate` −4.07ms, `A8-budget` +0.82ms, `A8-simlod` +0.64ms, `S8-col` +1.18ms)로만 보인다. `A8-fix`·`A8-pool`은 Game에서도 갈리지 않아 전환 점수와 화면에서 찾아야 한다.
+
+**확인하지 못한 것.**
+
+- `L2-mass` 2만 P1은 세 회차 범위가 3.35ms(17.98 / 14.63 / 15.71)다. 첫 회차는 렌더 스레드의 `PrepareDistanceFieldScene`이 6.5ms 길었다. 원인은 잠금 경합이라는 후보까지만 소스에서 봤고 2만 트레이스가 없어 확정하지 못했다([Q6.md](Q6.md) "Full1 후속 분석").
+- 입자의 비용 분해는 GPU 패스 단위(`BasePass`, `RenderVelocities`, `LumenSceneLighting`)로 트레이스 한 회에서 읽었고, 프레임 CSV의 세 회차 값과 직접 견주지 않는다.
 
 ## 결정
 
