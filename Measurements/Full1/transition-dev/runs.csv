@@ -1,0 +1,13 @@
+﻿batch,cond,switches,seed,exit,respawns,kills,snipes,events,mean_excess,median_excess,noticeable
+Full1,iskm-fix,,20261106,0,1122,1207,50,290,4.63,3.77,8
+Full1,vat-fix,-LabIskm=0,20261106,0,1122,1207,50,290,5.25,4.28,9
+Full1,iskm-nofix,-LabHydrateFixMask=0,20261106,0,1122,1207,50,290,7.13,4.69,29
+Full1,vat-nofix,-LabIskm=0 -LabHydrateFixMask=0,20261106,0,1122,1207,50,290,7.58,4.42,26
+Full1,iskm-fix,,20261107,0,1090,1169,50,275,4.59,3.62,14
+Full1,vat-fix,-LabIskm=0,20261107,0,1090,1169,50,273,4.71,3.65,7
+Full1,iskm-nofix,-LabHydrateFixMask=0,20261107,0,1090,1169,50,275,7.46,5.18,31
+Full1,vat-nofix,-LabIskm=0 -LabHydrateFixMask=0,20261107,0,1090,1169,50,275,6.88,4.49,24
+Full1,iskm-fix,,20261108,0,1149,1219,50,268,4.82,3.94,9
+Full1,vat-fix,-LabIskm=0,20261108,0,1149,1219,50,268,5.22,4.01,7
+Full1,iskm-nofix,-LabHydrateFixMask=0,20261108,0,1149,1219,50,268,7.64,5.09,30
+Full1,vat-nofix,-LabIskm=0 -LabHydrateFixMask=0,20261108,0,1149,1219,50,268,7.55,5.31,24

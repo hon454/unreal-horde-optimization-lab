@@ -42,5 +42,6 @@
 | `trace-export.ps1`, `trace-report.py`, `trace-timeline.py`, `trace-order.py`, `trace-overlap.py` | Insights 트레이스에서 표 뽑기와 분석 |
 | `breakdown.py`, `noise-table.py`, `fg-probe.ps1` | 스탯 차이, 잡음, 앞 창 진단 |
 | `transition-score.py`, `transition-strips.py` | 전환(하이드레이션) 화질 점수와 비교 시트 |
+| `run-transition.ps1` | Development 전환 점수 묶음(네 조건 × 시드 셋, ADR-0012). 결과는 `Measurements/<묶음>/transition-dev/runs.csv` |
 | `run-flicker.ps1`, `flicker-scan.py` | 미니언 번쩍임 진단 |
 | `dump-death-clips.py`, `death-clip-sheet.py` | 죽기 클립 후보 비교 |
