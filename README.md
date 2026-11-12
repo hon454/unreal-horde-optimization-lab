@@ -6,7 +6,7 @@
 - **최적화**: Mass Entity(Fragment·Processor), Representation LOD(액터 / ISM+VAT / ISKM / 없음), 액터 하이드레이션과 풀링, Significance Manager → Animation Budget Allocator, URO, Simulation LOD(청크 단위 가변 틱), Niagara 배경 무리(엔티티 구동 입자).
 - **측정 도구**: Test 구성 패키지에서 `csvprofile`과 Unreal Insights.
 
-단계를 쌓은 뒤에는 목표 사양(호드 총수 1만, 60fps) 안에서 거리별 품질을 확보했다. 가까이는 액터 하이드레이션, 멀리는 ISKM, 그리는 끝(200m) 밖은 Niagara 배경 무리로 그리고, 그렇게 번 프레임 시간을 액터 수와 전환 거리에 쓴다. 최종 구성의 기법은 단계별 사다리와 "기법 하나를 뺀" 표로 이점을 확인했고, 이점이 보이지 않은 것도 그대로 적었다. 이 문서와 글의 수치는 마지막에 전 단계를 한 빌드에서 하루에 다시 잰 최종 측정의 값이다.
+단계를 쌓은 뒤에는 목표 사양(호드 총수 1만, 60fps) 안에서 거리별 품질을 확보했다. 가까이는 액터 하이드레이션, 멀리는 ISKM, 그리는 끝(200m) 밖은 Niagara 배경 무리로 그리고, 그렇게 번 프레임 시간을 액터 수와 전환 거리에 쓴다. 최종 구성의 기법은 단계별 사다리와 "기법 하나를 뺀" 표로 이점을 확인했고, 이점이 보이지 않은 것도 그대로 적었다.
 
 ## 시나리오
 
@@ -83,7 +83,7 @@ L7·L8은 앞 단계에서 번 프레임 시간을 배경 무리와 액터 수·
 - 측정 PC는 Ryzen 9 5950X, RTX 4090, 64GB, Windows 11, UE 5.8.4 소스 빌드다. 자세한 값은 [Docs/Reference/pc-specs.md](Docs/Reference/pc-specs.md)에 있다.
 - 고정 시드로 초기 조건을 재현한다. 개체는 정상 상태 분포(밀도 ∝ 1/r)로 미리 놓고 15초 뒤 60초를 잰다. 궤적은 비결정적이라 3회 실행의 중앙값과 범위를 함께 적는다.
 - 목표 총수 1만에서 사다리 전 단계(오브 시점·탑뷰)와 빼 보기 조건을 재고, 보조로 단계별 최대 개체 수를 잰다.
-- 수치는 Test 구성 패키지에서 `csvprofile`로 얻는다. Development 빌드의 수치는 비교에 쓰지 않는다.
+- 수치는 Test 구성 패키지에서 `csvprofile`로 얻는다.
 - 중앙값의 차이가 두 구성의 범위 중 큰 쪽보다 작으면 "구별되지 않았다"고 적는다.
 
 규약 전체는 [Docs/Guides/measurement.md](Docs/Guides/measurement.md)에 있다.
@@ -106,14 +106,14 @@ py -3 -I Scripts/summarize.py --batch Full1
 py -3 -I Scripts/plot.py --batch Full1
 ```
 
-Fab 에셋은 저장소에 없다. 준비와 나머지 명령은 [Docs/Guides/commands.md](Docs/Guides/commands.md)에 있다.
+나머지 명령은 [Docs/Guides/commands.md](Docs/Guides/commands.md)에 있다.
 
 ## 구조
 
 | 경로 | 내용 |
 | --- | --- |
-| `Source/HordeOptLab/` | C++ 모듈. 클래스 접두사 `Lab` |
-| `Content/Lab/` | 직접 만든 콘텐츠. Fab 에셋은 커밋하지 않는다 |
+| `Source/HordeOptLab/` | C++ 모듈 |
+| `Content/Lab/` | 직접 만든 콘텐츠 |
 | `Scripts/` | 빌드, 패키징, 벤치마크, 그래프 |
 | `Docs/` | 계획, 결정 기록(ADR), 측정 규약, 엔진 소스 확인 기록, 작업 기록(Worklog) |
 | `Docs/figures/` | 그래프(SVG)와 그 수치(CSV), 단계별 화면(`steps/`) |
