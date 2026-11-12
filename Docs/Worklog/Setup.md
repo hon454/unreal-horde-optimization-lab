@@ -24,3 +24,31 @@
 - README·스크립트 목록 끝(성공). README "실행" 절의 전제 2·3번과 첫 문장의 링크만 고쳤다(두 팩과 확인된 링크, `restore-assets.ps1`, `setup.md`). `Scripts/README.md` "에셋을 다시 만드는 것" 맨 위에 한 줄.
 - 남은 일: 작업 중 다른 세션이 `bake-vat.py`에 입자 전용 저폴리 굽기(`LAB_VAT_LOD=N`, 산출물 `*_Lod<N>`)를 더하고 있다(커밋 전). `NS_LabCrowd`가 그 산출물을 쓰게 되면 `restore-assets.ps1`에 `vat-lod-small`·`vat-lod-large` 단계(LOD0 굽기 뒤)와 대조 목록 줄을 더해야 한다.
 - 굽기 표 정리 끝(성공, 코디네이터 지시). `restore-assets.ps1`의 프로젝트 엔진 단계(정적 메시, VAT, ISKM, ISKM 확인)를 표 `$BakeSteps` 한 곳에 모았다. 입자 전용 저폴리 굽기는 `vat-small`·`vat-large` 뒤에 한 줄씩 더하고 산출물을 대조 목록에 더하면 된다. 이 체크아웃과 가짜 클론의 `-DryRun` 결과는 바꾸기 전과 같다(9단계 SKIP / 9단계 RUN, 종료 코드 0). 실제 복구 실행은 검증하지 않았다. 입자 메시 작업(`crowdfx-lowpoly`)이 끝난 뒤 코디네이터가 알리면 한다. 팩 폴더까지 옮기는 검증은 사용자 OK를 받은 뒤에 한다.
+
+### 팩까지 포함한 복구 검증 절차(준비만, 실행 전)
+
+사용자 결정(2026-11-12, 코디네이터 전달): "A. 팩도 검증". `Content/ParagonMinions`, `Content/NiagaraExamples`까지 옮기고(삭제 금지) 팩 이전부터 끝까지 돌린다. 시작은 `crowdfx-lowpoly`가 끝나고 코디네이터가 에디터를 닫은 뒤 "시작"을 알릴 때다. 입자 LOD 굽기 단계는 그 세션의 커밋 뒤에 `$BakeSteps`와 대조 목록에 더하고 나서 검증한다.
+
+- 호스트 확인(읽기만, 성공). `../unreal-horde-references/AssetHost/AssetHost.uproject`에 두 팩이 있다(시드 15개 모두 있음, `-DryRun` 검사 통과). `EngineAssociation` GUID `{31E80386…}`는 레지스트리에 없어 `-HostEngineRoot "G:\Epic Games\UE_5.8"`을 준다. 호스트의 C++ 모듈은 런처 엔진으로 컴파일돼 있다(`Binaries/Win64/UnrealEditor.modules` BuildId `55116800` = 런처 `UE_5.8`의 BuildId). 사용자가 따로 받을 것은 없다.
+- 지금 크기(기준): `Content/ParagonMinions` 292MB(61파일), `Content/NiagaraExamples` 30MB(47파일), `Content/Lab` 16MB. git 밖 파일 145개는 `Scripts/restore-assets.manifest.txt`.
+
+절차(`<시각>`은 한 번 정해 모든 줄에 같이 쓴다):
+
+1. 전제: `UnrealEditor`·`UnrealEditor-Cmd`·`HordeOptLab` 프로세스 없음, `git status`에 `Content/` 변경 없음, `Content/LabTmp/` 같은 다른 세션의 임시 폴더가 남아 있으면 코디네이터에 묻는다.
+2. 기준 목록: `Content/ParagonMinions`, `Content/NiagaraExamples`, `Content/Lab/{Derived,VAT/Baked,ISKM/Baked}`의 파일 경로·크기를 스크래치 패드 `before.csv`로 남긴다.
+3. 팩 폴더 옮기기(삭제 금지): `Content/ParagonMinions` → `Saved/RestoreBackup/<시각>/ParagonMinions`, `Content/NiagaraExamples` → `Saved/RestoreBackup/<시각>/NiagaraExamples`(`Move-Item`, 같은 드라이브라 이동만 한다).
+4. 건식: `restore-assets.ps1 -DryRun -Force -HostEngineRoot "G:\Epic Games\UE_5.8"`. 모든 단계가 RUN이고 검사가 통과하는지 본다.
+5. 실행: `restore-assets.ps1 -Force -HostEngineRoot "G:\Epic Games\UE_5.8"`. 스크립트가 `Lab/Derived`, `Lab/VAT/Baked`, `Lab/ISKM/Baked`를 `Saved/RestoreBackup/<스크립트 시각>/`으로 옮기고 이전·굽기를 돌린다. 단계별 초를 Worklog에 적는다(가이드의 소요 시간 근거).
+6. 비교: 새 파일의 `after.csv`를 만들어 `before.csv`와 경로·크기를 맞춘다. 경로가 빠지거나 더해진 것, 크기가 다른 것을 적는다(굽기 산출물은 저장 시점의 GUID 등으로 크기가 조금 다를 수 있어 차이만 기록하고 판단은 다음 단계 실행 결과로 한다). 끝줄 `Manifest: 145 files, missing 0 (required 0)`을 확인한다.
+7. 실행 확인: `build.ps1`(코드가 바뀌지 않았으면 빠르게 끝난다), `run-dev.ps1 -Small -Stage M5 -Variant q4final`이 `EXIT: 0`이고 로그 `lab_assets`의 값이 모두 1인지. 공용 경로이므로 `-Stage M2 -Variant m2mass`(VAT ISM)와 `-Stage M1 -Variant m1mass`(정적 메시)도 `-Small`로 돌린다. 스크린샷 한 장(`-ShotAt`)으로 미니언이 기본 머티리얼(회색 격자)로 그려지지 않는지 본다.
+8. 결과에 따라:
+   - 성공: 백업(`Saved/RestoreBackup/`)은 코디네이터에 알린 뒤 사용자 결정으로 지운다(스스로 지우지 않는다). 가이드에 소요 시간을 넣는다.
+   - 실패: 아래 되돌리기.
+
+되돌리기(복구가 실패하거나 실행 확인이 깨졌을 때):
+
+1. 프로세스가 모두 꺼졌는지 본다.
+2. 새로 만든 것을 지우지 않고 옆으로 옮긴다: `Content/ParagonMinions`, `Content/NiagaraExamples`, `Content/Lab/Derived`, `Content/Lab/VAT/Baked`, `Content/Lab/ISKM/Baked`(있는 것만) → `Saved/RestoreBackup/<시각>-failed/` 같은 상대 경로.
+3. 원본을 되돌린다: `Saved/RestoreBackup/<시각>/ParagonMinions`·`NiagaraExamples` → `Content/`, `Saved/RestoreBackup/<스크립트 시각>/Lab/...` → `Content/Lab/...`.
+4. `before.csv`와 다시 맞춰 경로·크기가 같은지 보고, `run-dev.ps1 -Small -Stage M5 -Variant q4final`이 `EXIT: 0`인지 본다.
+5. 실패 로그(`Saved/Logs/Restore/<단계>.log`)의 원인을 이 절에 적고 코디네이터에 알린다.
