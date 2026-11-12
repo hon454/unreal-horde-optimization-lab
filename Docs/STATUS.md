@@ -53,7 +53,7 @@ py -3 -I Scripts/plot.py --batch Full1
 - N@16.7ms(프레임 p95): L1 797, L2 20,250, L4 26,154, L7 13,808, L8 16,826. L3·L5·L6은 3만에서도 안쪽이다.
 - 빼 보기(프레임 p50, L8 대비): `A8-crowdfx` −3.66, `A8-farshadow` +1.40, `A8-iskm` +1.28, `A8-farcull` +0.70(병목이 Game으로 옮겨 간다). 나머지 다섯과 `S8-col`은 ±0.1 안이고 Game에서 갈린다(`A8-hydrate` Game −4.07).
 - 최종 구성의 대형 액터 애니 건너뜀 비율: 1만 0.003, 2만 0.637, 3만 0.644.
-- `L2-mass` 2만은 세 회차 범위가 3.35ms다. r1만 렌더 스레드의 `PrepareDistanceFieldScene`이 15.2ms였다(다른 회차 8.6, 8.8). 스태틱 메시 ISM을 쓰는 2\~5단계에만 드는 비용이라 최종 구성과 무관하다. 직접 원인은 확정하지 못했다.
+- `L2-mass` 2만은 세 회차 범위가 3.35ms다. r1만 렌더 스레드의 `PrepareDistanceFieldScene`이 15.2ms였다(다른 회차 8.6, 8.8). 스태틱 메시 ISM을 쓰는 2\~5단계에만 드는 비용이라 최종 구성과 무관하다. 직접 원인은 확정하지 못했고 더 파지 않는다. 글에는 범위와 원인 후보를 함께 적는다(2026-11-12 사용자 결정).
 - 트레이스 16개의 단계별 비용 출처는 [Worklog/Q6.md](Worklog/Q6.md) "Full1 후속 분석"에 있다(L1은 이동 컴포넌트가 72%, L7의 증가는 GPU의 `BasePass`·`RenderVelocities`·`LumenSceneLighting`).
 
 ## 막힌 것
