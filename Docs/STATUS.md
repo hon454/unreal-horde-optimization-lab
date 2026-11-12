@@ -1,38 +1,35 @@
 # 현재 상태
 
-마지막 갱신: 2026-11-12
+마지막 갱신: 2026-11-13
 
 ## 단계
 
 - 마일스톤 M0\~M5와 M3b는 끝났다. 태그는 `M0`\~`M5`, `M3b`다.
-- 품질 계획 Q1\~Q5는 끝났다. Q6은 총괄 묶음 `Full1`의 측정까지 끝났다.
-- 지금은 평가를 반영하고 글을 쓴다.
+- 품질 계획 Q1\~Q5는 끝났다. Q6은 총괄 묶음 `Full2`의 측정까지 끝났다.
+- 지금은 새 값으로 문서를 고치고 글을 쓴다.
 - 방향은 목표 사양(호드 총수 1만, 60fps) 안에서 거리별 품질을 확보하는 것이다([ADR-0009](Decisions/0009-flat-scenario-quality-by-distance.md)).
 - 계획은 [plan.md](plan.md) "품질 계획"에 있다. 경위는 `Worklog/M<N>.md`와 `Worklog/Q<N>.md`에 있다.
+- 사용자는 2026-11-12에 남은 작업을 코디네이터에게 맡겼다. 코디네이터는 결정을 [autonomous-decisions.md](Worklog/autonomous-decisions.md) D20부터 적는다.
 
 ## 다음 할 일
 
 순서대로 한다.
 
-1. **끝났다.** 에셋 복구 스크립트는 팩 이전부터 끝까지 검증됐다(7d9e546, [Worklog/Setup.md](Worklog/Setup.md)). 지금 `Content/`의 팩과 굽기 산출물은 스크립트로 다시 만든 것이다.
-2. **새 Test 패키지를 만들고 `Full2`로 전 조건을 다시 잰다.** 같은 날 같은 패키지에서 아래 두 묶음도 잰다.
-   - 참고 묶음: 해상도를 낮춰 게임 스레드를 병목으로 만든다. 조건은 8단계와 빼 보기 열 행이다(11조건 × 3회). 이 묶음 안에서만 비교한다. 낮추는 방법과 값은 측정 세션이 제안한다.
-   - 엔티티 풀: 16분 실행을 두 번 한다(풀 켬, 풀 끔). ISKM 트랙 수와 GPU 메모리를 시간에 따라 기록한다.
-3. **새 값으로 문서를 고친다.** 대상은 README 그림, 01번 글의 수치, 7·8단계 화면, ADR-0011 "결과"다. ADR-0011에 덧붙일 문장의 초안은 [Worklog/Q6.md](Worklog/Q6.md) "코디네이터용 요약"에 있다.
-4. **Test 패키지를 GitHub Releases에 올린다.** 2번의 패키지를 쓴다. 조건은 "사용자에게 요청한 일"에 있다.
-5. **글 00\~09를 쓴다.** 대기열은 [backlog.md](backlog.md)에 있다.
-   - 시범 글 01은 [Posts/01-actor-baseline](../Posts/01-actor-baseline/README.md)에 있다. 사용자의 두 번째 검토를 기다린다.
+1. **새 값으로 문서를 고친다.** 대상은 README 그림과 문장, measurement.md, 01번 글의 수치, ADR-0011 "결과"다. 근거는 [Worklog/Q6.md](Worklog/Q6.md) "Full2 재측정"이다.
+2. **7·8단계 화면을 다시 찍는다.** 촬영 묶음은 `Pre6`이다.
+3. **Test 패키지를 GitHub Releases에 올린다.** 패키지는 08e45f2다. 코디네이터는 먼저 Epic 콘텐츠 라이선스 원문을 확인한다.
+4. **글 00\~09를 쓴다.** 대기열은 [backlog.md](backlog.md)에 있다.
+   - 시범 글 01은 [Posts/01-actor-baseline](../Posts/01-actor-baseline/README.md)에 있다.
    - 글 규칙은 [posting.md](Guides/posting.md), [ADR-0014](Decisions/0014-post-format.md), [ADR-0015](Decisions/0015-readme-figures.md)에 있다.
    - 글 재료의 사실 확인 결과는 [post-review.md](post-review.md)에 있다. 재료의 측정값은 옛 묶음의 값이다. 경위는 수치 없이 방향만 쓴다.
+   - 엔진 문제를 쓸 때는 이슈 링크와 이 레포의 해결 코드 블록을 함께 보인다.
    - 남은 질문 넷은 [Worklog/Posts.md](Worklog/Posts.md) "코디네이터용"에 있다.
    - 글을 다 쓰면 한눈에 보는 사이트를 만든다.
-
-끝난 평가 항목의 경위는 [Worklog/Posts.md](Worklog/Posts.md) "평가 반영 가운데 끝난 것"에 있다.
+5. **푸시한다.** 사용자가 2026-11-12에 푸시를 승인했다. 294a762까지 푸시했다.
 
 ## 진행 중인 세션
 
-- `full2-remeasure`: 새 Test 패키지, `Full2`, 참고 묶음, 엔티티 풀 실행. Opus high. 진행 중.
-- 이 세션이 끝날 때까지 다른 세션과 사용자는 에디터, 빌드, 게임을 띄우지 않는다.
+없다.
 
 코디네이터는 세션을 띄우면 여기에 적는다. 끝난 세션은 결과를 확인하고 보관한 뒤 지운다.
 
@@ -46,15 +43,16 @@
   - 0\~40m: 액터(상한 1,000).
   - 40\~80m: ISKM, 그림자 켬.
   - 80\~200m: ISKM, 그림자 끔.
-  - 200m 밖: 엔티티 구동 입자.
+  - 200m 밖: 엔티티 구동 입자. 입자 메시는 원본 스켈레탈 LOD4로 구운 메시다(bf1a4c8).
 - 사다리 1\~7단계는 액터 0\~30m(상한 500), 그림자 켬이다.
 - 켠 것: 화면 크기 Budget, 전환 대책 다섯 가지.
 - 끈 것: 미니언끼리 비켜 가기, 하이드레이션 액터의 캡슐 콜리전.
 - 모션 블러는 엔진 기본값이다([ADR-0007](Decisions/0007-keep-default-motion-blur.md)).
-- 비교는 같은 묶음에서 잰 값끼리만 한다. 글과 README의 수치는 총괄 묶음에서만 만든다.
+- 비교는 같은 묶음에서 잰 값끼리만 한다. 글과 README의 수치는 총괄 묶음 `Full2`에서만 만든다.
 - 조건이 바뀌거나 묶음이 오염되면 전 조건을 새 묶음으로 다시 잰다. 같은 라벨과 묶음 이름은 다시 쓰지 않는다.
 - README와 글 본문에는 묶음 이름을 쓰지 않는다.
-- 단계별 화면은 움직이는 WebP다(960폭, 15fps, 8초). 촬영 러너는 `Scripts/capture-full.ps1`이다. Chrome이 떠 있으면 러너가 거부한다. 다음 촬영 묶음은 `Pre6`이다.
+- 단계별 화면은 움직이는 WebP다(960폭, 15fps, 8초). 촬영 러너는 `Scripts/capture-full.ps1`이다. Chrome이 떠 있으면 러너가 거부한다.
+- 새 체크아웃은 `Scripts/restore-assets.ps1`로 에셋을 복구한다([setup.md](Guides/setup.md)).
 
 ## 명령
 
@@ -63,8 +61,8 @@ powershell -ExecutionPolicy Bypass -File Scripts/build.ps1
 powershell -ExecutionPolicy Bypass -File Scripts/run-dev.ps1 -Small -Stage M5 -Variant q4final
 powershell -ExecutionPolicy Bypass -File Scripts/package.ps1
 powershell -ExecutionPolicy Bypass -File Scripts/run-full.ps1 -DryRun
-py -3 -I Scripts/summarize.py --batch Full1
-py -3 -I Scripts/plot.py --batch Full1
+py -3 -I Scripts/summarize.py --batch Full2
+py -3 -I Scripts/plot.py --batch Full2
 py -3 -I Scripts/plot-readme.py
 ```
 
@@ -72,48 +70,60 @@ py -3 -I Scripts/plot-readme.py
 
 ## 측정 결과
 
-총괄 묶음 `Full1`의 값이다. 입자 메시를 고치기 전의 값이다. `Full2`를 재면 그 값으로 바꾼다.
+총괄 묶음 `Full2`의 값이다([Worklog/Q6.md](Worklog/Q6.md) "Full2 재측정").
 
-- 입자 메시는 원본 스켈레탈 LOD4로 구운 메시로 바꿨다(bf1a4c8). 삼각형은 소형 586, 대형 621이다.
-- Development 참고값(1만, P1): GPU p50이 11.75ms에서 6.56ms로 줄었다. 입자를 끄면 6.01ms다([Worklog/Q6.md](Worklog/Q6.md) "입자 전용 저폴리 VAT 메시").
-- 새 체크아웃은 `bake-vat.py --lod 4` 굽기가 필요하다.
+- 빌드는 Test 패키지 08e45f2다. 측정일은 2026-11-12\~13이다. 178회 가운데 실패는 0회다.
+- 표는 `Measurements/Full2/summary.csv`에 있다. 그래프는 `Docs/figures/full2/`에 있다.
+- 약어: P1은 오브 시점 카메라다. p50은 중앙값이다. p95는 느린 쪽 5% 경계다. Game은 게임 스레드다.
 
-- 빌드는 Test 패키지 730ff18이다. 측정일은 2026-11-12다. 178회 가운데 실패는 0회다.
-- 표는 `Measurements/Full1/summary.csv`에 있다. 그래프는 `Docs/figures/full1/`에 있다.
-- 약어: P1은 오브 시점 카메라다. p50은 중앙값이다. p95는 느린 쪽 5% 경계다.
+호드 1만, P1의 값(ms):
 
-호드 1만, P1의 프레임 시간(ms):
+| 조건 | 프레임 p50 | 프레임 p95 | Game p50 | GPU p50 |
+| --- | --- | --- | --- | --- |
+| `L1` | 439.96 | 463.58 | 424.87 | 50.23 |
+| `L2` | 10.31 | 10.93 | 6.30 | 10.02 |
+| `L3` | 7.91 | 8.47 | 3.21 | 7.54 |
+| `L4` | 8.16 | 9.60 | 7.87 | 6.94 |
+| `L5` | 7.65 | 9.12 | 7.33 | 6.97 |
+| `L6` | 7.51 | 9.19 | 7.34 | 5.36 |
+| `L7` | 7.79 | 9.34 | 7.63 | 6.10 |
+| `L8` | 7.78 | 9.42 | 7.65 | 5.72 |
 
-| 조건 | p50 | p95 |
+- `L4`\~`L8`의 병목은 Game이다. `Full1`에서 `L7`과 `L8`의 병목은 GPU였다.
+- 60fps를 지키는 최대 개체 수(프레임 p95 기준): `L1` 774, `L2` 20,753, `L4` 25,636, `L6` 29,799, `L7` 26,587, `L8` 25,958. `L3`과 `L5`는 3만에서도 16.7ms 안이다.
+- 빼 보기의 프레임 p50 변화(`L8` 대비, ms): `A8-farcull` +4.30, `S8-col` +2.01, `A8-budget` +1.75, `A8-hydrate` −1.59, `A8-simlod` +1.04, `A8-bounds` +0.77, `A8-crowdfx` −0.27, `A8-iskm` −0.21.
+- `A8-fix`, `A8-pool`, `A8-farshadow`는 프레임 시간이 세 실행 범위 안이다.
+- `A8-iskm`은 GPU p50이 +1.23ms이고 Game p50이 −0.33ms다. ISKM의 이점은 GPU 시간으로 적는다.
+- `A8-farshadow`는 GPU p50만 +0.39ms다.
+- `L8`의 대형 액터 애니메이션 건너뜀 비율: 1만 0.207, 2만 0.573, 3만 0.557. 1만의 값은 `Full1`의 0.003보다 크다. 원인은 확인하지 않았다.
+- `L1`\~`L6`은 `Full1`보다 프레임 p50이 0.1\~0.6ms 길다. 원인은 확인하지 않았다.
+
+참고 묶음 `Ref1`(1280×720, 빼 보기 열 행과 `L8`, [D21](Worklog/autonomous-decisions.md)):
+
+- 모든 행의 병목이 Game이다. 이 묶음 안에서만 비교한다.
+- `A8-hydrate`는 프레임 p50이 −3.73ms다. 나머지 행은 `Full2`와 0.2ms 안에서 같다.
+
+엔티티 풀 묶음 `Pool1`(16분 실행 두 번):
+
+| 항목 | 풀 켬 | 풀 끔 |
 | --- | --- | --- |
-| `L1` | 441.5 | 466.4 |
-| `L2` | 9.69 | 10.29 |
-| `L3` | 7.71 | 8.19 |
-| `L4` | 8.07 | 9.41 |
-| `L5` | 7.51 | 8.83 |
-| `L6` | 7.38 | 8.84 |
-| `L7` | 12.51 | 13.03 |
-| `L8` | 11.12 | 11.64 |
+| ISKM 트랙 수(16분) | 20,053 | 119,473 |
+| GPU 메모리(1분 → 16분, MB) | 3,339 → 3,342 | 3,310 → 5,063 |
+| 프레임 p50(1분 → 16분, ms) | 7.81 → 8.08 | 7.74 → 9.64 |
 
-- `L8`의 병목은 GPU다. 게임 스레드 p50은 7.82ms이고 GPU p50은 10.71ms다.
-- 60fps를 지키는 최대 개체 수(프레임 p95 기준): `L1` 797, `L2` 20,250, `L4` 26,154, `L7` 13,808, `L8` 16,826. `L3`, `L5`, `L6`은 3만에서도 16.7ms 안이다.
-- 빼 보기의 프레임 p50 변화(`L8` 대비, ms): `A8-crowdfx` −3.66, `A8-farshadow` +1.40, `A8-iskm` +1.28, `A8-farcull` +0.70.
-- 나머지 빼 보기 다섯 행과 `S8-col`은 프레임 시간이 ±0.1ms 안이다. 차이는 게임 스레드에 나온다(`A8-hydrate` −4.07ms).
-- `L8`의 대형 액터 애니메이션 건너뜀 비율: 1만 0.003, 2만 0.637, 3만 0.644.
-- `L2` 2만은 세 실행의 범위가 3.35ms다. 원인은 확정하지 못했다. 글에는 범위와 원인 후보를 함께 적는다([Worklog/Q6.md](Worklog/Q6.md) "Full1 후속 분석").
-- Development 전환 점수는 참고값이다(`Measurements/Full1/transition-dev/runs.csv`).
-  - 튐 평균: 최종 구성 4.63, VAT 5.22, 전환 대책 끔 7.46, 둘 다 끔 7.55.
-  - 전환 대책의 이점은 세 시드 모두에서 보인다.
-  - ISKM과 VAT의 차이는 시드 범위 안이다. ISKM의 이점은 프레임 시간으로 적는다.
+- 60초 실행에서는 `A8-pool`과 `L8`이 구별되지 않는다.
+
+Development 전환 점수는 `Full1` 때의 참고값이다(`Measurements/Full1/transition-dev/runs.csv`).
+
+- 튐 평균: 최종 구성 4.63, VAT 5.22, 전환 대책 끔 7.46, 둘 다 끔 7.55.
+- ISKM과 VAT의 차이는 시드 범위 안이다.
 
 ## 막힌 것
 
-없다.
+- 코디네이터는 복구 백업 `Saved/RestoreBackup/`을 지우지 못했다. 권한 검사가 삭제 명령을 거부했다.
 
 ## 사용자에게 요청한 일
 
-- **측정 중에는 PC를 쓰지 않는다.** 사용자가 2026-11-12에 재측정 시작을 승인했다.
-- **복구 백업을 지울지.** `Saved/RestoreBackup/20261112-packs2`(322MB)와 `20261112-201344`(14MB)에 옛 파일 169개가 있다.
-- **Releases 올리기 전의 OK.** 코디네이터가 Epic 콘텐츠 라이선스 원문을 확인한다. 그 뒤 파일 목록과 태그 이름을 사용자에게 보인다. 사용자가 OK하면 올린다.
+- **복구 백업 삭제.** 사용자가 `Saved/RestoreBackup/` 폴더를 직접 지운다(약 336MB, git 밖).
 - **01번 글의 두 번째 검토.**
-- **[autonomous-decisions.md](Worklog/autonomous-decisions.md)의 "사용자 판단 필요" 항목 검토.**
+- **[autonomous-decisions.md](Worklog/autonomous-decisions.md)의 D20 뒤 결정과 "사용자 판단 필요" 항목 검토.**
