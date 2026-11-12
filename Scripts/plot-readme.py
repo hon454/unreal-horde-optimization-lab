@@ -141,9 +141,36 @@ def legend(o, y, items):
         x += 22 + len(name) * 16 + 28 if not name.isascii() else 22 + len(name) * 10 + 28
 
 
+# Steps 1-6 add a technique each and earn frame time; steps 7-8 spend it on quality (README "결과 한눈에 보기").
+SPEND_FROM = 7
+GROUPS = {1: "1–6단계 · 기법을 더해 프레임 시간을 버는 단계", SPEND_FROM: "7·8단계 · 번 시간을 품질에 쓰는 단계"}
+HATCH = ('<defs><pattern id="spend" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(45)">'
+         '<rect width="3" height="7" fill="#ffffff" fill-opacity="0.55"/></pattern></defs>')
+
+
+def bar(o, x, y, w, h, c, num, rx=3):
+    """A bar; steps that spend frame time get diagonal stripes on the same colour (not colour alone)."""
+    o.append(f'<rect x="{x:.1f}" y="{y}" width="{w:.1f}" height="{h}" rx="{rx}" fill="{c}"/>')
+    if num >= SPEND_FROM:
+        o.append(f'<rect x="{x:.1f}" y="{y}" width="{w:.1f}" height="{h}" rx="{rx}" fill="url(#spend)"/>')
+
+
+def group_head(o, y, num):
+    """Group name above the first step of a group; a heavier rule above the spending group."""
+    if num == SPEND_FROM:
+        o.append(f'<line x1="32" y1="{y - 20}" x2="{W - 32}" y2="{y - 20}" stroke="{SUB}" stroke-width="1.5"/>')
+    o.append(f'<text x="32" y="{y}" font-size="16" font-weight="700" fill="{SUB}">{esc(GROUPS[num])}</text>')
+
+
+def hatch_key(o, y):
+    o.append(f'<rect x="32" y="{y - 13}" width="34" height="16" rx="3" fill="{GRAY}"/>')
+    o.append(f'<rect x="32" y="{y - 13}" width="34" height="16" rx="3" fill="url(#spend)"/>')
+    o.append(f'<text x="74" y="{y}" font-size="16" fill="{SUB}">빗금 막대: 번 시간을 품질에 쓰는 단계(7·8단계)</text>')
+
+
 # ---------- 1. ladder ----------
 def ladder():
-    o = []
+    o = [HATCH]
     y = title(o, "단계마다 기법 하나를 더했을 때의 프레임 시간",
               ["호드 총수 1만, 오브 시점 카메라, 60초씩 세 번 잰 중앙값(ms)"])
     y += 34
@@ -160,7 +187,7 @@ def ladder():
         for mname, col, c in METRICS:
             v = val(cond, col)
             w = v * scale
-            o.append(f'<rect x="{BX}" y="{by}" width="{w:.1f}" height="{BAR}" rx="3" fill="{c}"/>')
+            bar(o, BX, by, w, BAR, c, num)
             tag = ""
             if BOTTLENECK_COL.get(bot) == col:
                 tag = f'<tspan font-weight="700" fill="{AMBER}"> 병목</tspan>'
@@ -175,6 +202,8 @@ def ladder():
         o.append(f'<text x="{x - 6:.1f}" y="{y0 + 4}" text-anchor="end" font-size="16" font-weight="700" fill="{AMBER}">{note}</text>')
 
     # Panel 1: step 1 on its own scale, so the four bars keep their true ratio.
+    y += 30
+    group_head(o, y, 1)
     y += 26
     o.append(f'<text x="{LX}" y="{y}" font-size="16" fill="{SUB}">축척 A: 0–450ms</text>')
     s1 = (680 - BX) / 450.0
@@ -189,12 +218,17 @@ def ladder():
     y0 = y + 12
     yy = y0
     for st in STEPS[1:]:
+        if st[1] == SPEND_FROM:
+            yy += 22
+            group_head(o, yy, SPEND_FROM)
+            yy += 14
         yy = block(yy, *st, s2)
     target_line(y0 - 26, yy - 10, s2, "16.7ms")
     y = yy + 6
     o.append(f'<line x1="32" y1="{y - 14}" x2="{W - 32}" y2="{y - 14}" stroke="{LINE}"/>')
     o.append(f'<text x="32" y="{y + 12}" font-size="16" fill="{SUB}">프레임 시간은 게임 스레드, 렌더 스레드, GPU 가운데 가장 느린 쪽(병목)이 정한다.</text>')
-    write("ladder.svg", svg(y + 34, o))
+    hatch_key(o, y + 38)
+    write("ladder.svg", svg(y + 60, o))
 
 
 # ---------- 1b. resources per step ----------
@@ -236,7 +270,7 @@ def resources():
             assert val(b, col) - val(a, col) > max(width(a, col), width(b, col)), (col, num)
     mem_spread = max(width(c, "mem_total_mb") for c, *_ in STEPS)
 
-    o = []
+    o = [HATCH]
     y = title(o, "단계마다 쓰는 메모리와 드로우 콜",
               ["호드 총수 1만, 오브 시점 카메라, 60초씩 세 번 잰 중앙값",
                "막대 끝의 가는 선: 세 번 잰 범위"])
@@ -251,6 +285,10 @@ def resources():
     y += 38
     RH, BAR = 36, 18
     for cond, num, name, _ in STEPS:
+        if num in GROUPS:
+            y += 24 if num == 1 else 30
+            group_head(o, y, num)
+            y += 10
         o.append(f'<line x1="32" y1="{y}" x2="{W - 32}" y2="{y}" stroke="{LINE}"/>')
         o.append(f'<text x="{LX}" y="{y + 24}" font-size="17" font-weight="700">{num}단계 {esc(name)}</text>')
         for i, (_, _, col, c) in enumerate(RESOURCES):
@@ -259,7 +297,7 @@ def resources():
             v = val(cond, col)
             lo, hi = span[cond, col]
             by = y + 9
-            o.append(f'<rect x="{x:.1f}" y="{by}" width="{max(v * sc, 1.5):.1f}" height="{BAR}" rx="3" fill="{c}"/>')
+            bar(o, x, by, max(v * sc, 1.5), BAR, c, num)
             o.append(f'<line x1="{x + lo * sc:.1f}" y1="{by + BAR / 2}" x2="{x + hi * sc:.1f}" y2="{by + BAR / 2}" stroke="{INK}" stroke-width="2"/>')
             for e in (lo, hi):
                 o.append(f'<line x1="{x + e * sc:.1f}" y1="{by + 3}" x2="{x + e * sc:.1f}" y2="{by + BAR - 3}" stroke="{INK}" stroke-width="2"/>')
@@ -276,7 +314,8 @@ def resources():
                  + ", ".join(f"{n}단계({esc(t)})" for n, t in rises) + "</text>")
     y += 30
     o.append(f'<text x="32" y="{y}" font-size="16" fill="{SUB}">프로세스 메모리는 같은 단계에서도 실행마다 최대 약 {round(mem_spread, -1):.0f}MB 달랐다.</text>')
-    write("resources.svg", svg(y + 30, o))
+    hatch_key(o, y + 30)
+    write("resources.svg", svg(y + 52, o))
 
 
 # ---------- 2. max entities at 60 fps ----------
@@ -285,7 +324,7 @@ def max_entities():
     with open(os.path.join(ROOT, "Docs", "figures", "full1", "full-n-at-60fps.csv"), encoding="utf-8") as f:
         for r in csv.DictReader(f):
             data[r["series"].split(" ", 1)[1]] = (int(r["n_p95"]), r["note_p95"] == "above range")
-    o = []
+    o = [HATCH]
     y = title(o, "60fps를 지키는 최대 개체 수",
               ["프레임 시간(느린 쪽 5% 경계)이 16.7ms 이하인 가장 큰 호드 총수",
                "오브 시점 카메라, 단계마다 네 가지 호드 총수에서 잰 값 사이를 보간"])
@@ -294,8 +333,14 @@ def max_entities():
     scale = (BR - BX) / NMAX
     y += 40
     top = y - 18
-    RH = 44
+    RH = 40
     for cond, num, name, _ in STEPS:
+        if num in GROUPS:
+            y += 22 if num == SPEND_FROM else 0
+            group_head(o, y, num)
+            y += 18
+            if num == 1:
+                top = y - 10  # the target line starts under the first group name
         n, above = data[cond]
         o.append(f'<text x="{LX}" y="{y + 15}" font-size="17" font-weight="700">{num}단계 {esc(name)}</text>')
         w = n * scale
@@ -304,7 +349,7 @@ def max_entities():
             o.append(f'<path d="M{BX + w + 4:.1f} {y + 1} L{BX + w + 16:.1f} {y + 11} L{BX + w + 4:.1f} {y + 21}" fill="{BLUE}"/>')
             o.append(f'<text x="{BX + w + 24:.1f}" y="{y + 17}" font-size="16" font-weight="700" fill="{BLUE}">{n // 10000}만 이상</text>')
         else:
-            o.append(f'<rect x="{BX}" y="{y}" width="{max(w, 2):.1f}" height="22" rx="3" fill="{BLUE}"/>')
+            bar(o, BX, y, max(w, 2), 22, BLUE, num)
             o.append(f'<text x="{BX + max(w, 2) + 8:.1f}" y="{y + 17}" font-size="16" font-weight="700">{n:,}</text>')
         y += RH
     x = BX + N * scale
@@ -313,7 +358,8 @@ def max_entities():
     y += 30
     o.append(f'<line x1="32" y1="{y - 14}" x2="{W - 32}" y2="{y - 14}" stroke="{LINE}"/>')
     o.append(f'<text x="32" y="{y + 12}" font-size="16" fill="{SUB}">점선 막대: 잰 범위의 끝인 3만에서도 16.7ms 안이라 실제 최대는 더 크다.</text>')
-    write("max-entities.svg", svg(y + 34, o))
+    hatch_key(o, y + 38)
+    write("max-entities.svg", svg(y + 60, o))
 
 
 # ---------- 3. ablation ----------

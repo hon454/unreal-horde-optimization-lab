@@ -94,3 +94,9 @@
 - README 끝(성공). "결과 한눈에 보기"의 단계별 화면 표 바로 아래(최대 개체 수 그림 앞)에 그림, alt 텍스트, 두 문장(같은 실행에서 잰 값, 4단계부터 다시 늘고 그 단계는 그림에 적음)을 넣었다. 수치는 글로 되풀이하지 않았다. 다른 절은 건드리지 않았다. `Scripts/README.md`의 `plot-readme.py` 설명에 이 그림을 더했다.
 - 확인 끝(성공). Edge 헤드리스로 흰 배경과 #0d1117 위에 800px 폭으로 렌더링해 겹침·잘림이 없음을 눈으로 확인했다. 확인용 PNG는 저장소 밖 `C:/Users/hon45/AppData/Local/Temp/claude/596429fce533a335/64ef7ba8-383f-405e-b020-8c8cb70db270/scratchpad/png/resources-{light,dark}.png`다.
 - 커밋 끝(성공). cfe50de(`Scripts/plot-readme.py`, `Docs/figures/readme/resources.svg`, `README.md`, `Scripts/README.md`, 이 절). 이 절의 첫 두 줄(제목, 조사 끝)은 다른 세션의 커밋 108e00c에 먼저 들어갔다. 푸시하지 않았다.
+
+## README 사다리 단계 구분(2026-11-12)
+
+- 그림 끝(성공). `Scripts/plot-readme.py`의 `ladder()`, `max_entities()`, `resources()`에서 1\~6단계와 7·8단계를 나눴다. 묶음 이름은 "1–6단계 · 기법을 더해 프레임 시간을 버는 단계"와 "7·8단계 · 번 시간을 품질에 쓰는 단계"이고(README의 품질 단계 문장과 같은 뜻), 7단계 앞에 진한 구분선을 둔다. 7·8단계 막대는 같은 색 위에 흰 빗금 무늬를 얹어 색만으로 구분하지 않게 했고, 그림마다 아래에 빗금 범례를 넣었다(공용 `SPEND_FROM`, `GROUPS`, `HATCH`, `bar()`, `group_head()`, `hatch_key()`). 사다리의 16.7ms 선은 이미 두 칸(축척 A 0\~450ms, 축척 B 0\~17ms)에 있어 그대로 두었고, 7·8단계 막대가 선 안쪽임이 그림에서 읽힌다. 최대 개체 수 그림은 2단계(20,250)와 8단계(16,826)가 다른 묶음에 들어가는 것으로 그쳤고 원인은 적지 않았다. 목표 1만 선이 첫 묶음 이름을 지나가던 것을 이름 아래에서 시작하게 고쳤다. 빼 보기·전환·시나리오 그림은 바뀌지 않았다.
+- README 끝(성공). 최대 개체 수 그림 아래 문장 "7단계와 8단계는 앞 단계에서 번 프레임 시간을 … 쓰는 품질 단계다"를, 그림이 말하게 된 구분을 빼고 "7·8단계는 번 시간을 배경 무리와 액터 수, 전환 거리에 쓴다"로 줄였다. 다른 절은 건드리지 않았다.
+- 확인 끝(성공). Edge 헤드리스로 세 그림을 흰 배경과 #0d1117 위에 800px 폭으로 렌더링해 겹침·잘림이 없음을 눈으로 확인했다. 글자는 16·17·22px만. 확인용 PNG는 저장소 밖 `C:/Users/hon45/AppData/Local/Temp/claude/596429fce533a335/64ef7ba8-383f-405e-b020-8c8cb70db270/scratchpad/png/stage-{ladder,max-entities,resources}-{light,dark}.png`다.
