@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="684" viewBox="0 0 800 684" font-family="Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Segoe UI, sans-serif" font-size="16" fill="#111827">
+<rect x="0.5" y="0.5" width="799" height="683" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+<text x="32" y="46" font-size="22" font-weight="700">먼 개체 하나를 움직이는 두 길</text>
+<text x="32" y="74" font-size="16" fill="#4b5563">위는 5단계의 VAT 인스턴스, 아래는 6단계의 ISKM. 칸마다 누가 일하는지 적었다</text>
+<text x="32" y="108" font-size="18" font-weight="700">5단계 · VAT 인스턴스</text>
+<rect x="32" y="122" width="228" height="148" rx="10" fill="#f8fafc" stroke="#e5e7eb"/>
+<rect x="32" y="122" width="228" height="6" rx="3" fill="#9333ea"/>
+<text x="46" y="156" font-size="17" font-weight="700" fill="#9333ea">에디터에서 한 번</text>
+<text x="46" y="188" font-size="16">AnimToTexture가 클립을</text>
+<text x="46" y="212" font-size="16">텍스처로 굽는다</text>
+<text x="46" y="236" font-size="16">메시 LOD는 하나</text>
+<path d="M262 196.0 L275 196.0" stroke="#4b5563" stroke-width="2"/>
+<path d="M269 190.0 L277 196.0 L269 202.0" fill="none" stroke="#4b5563" stroke-width="2"/>
+<rect x="278" y="122" width="228" height="148" rx="10" fill="#f8fafc" stroke="#e5e7eb"/>
+<rect x="278" y="122" width="228" height="6" rx="3" fill="#2563eb"/>
+<text x="292" y="156" font-size="17" font-weight="700" fill="#2563eb">게임 스레드, 매 프레임</text>
+<text x="292" y="188" font-size="16">인스턴스마다 프레임</text>
+<text x="292" y="212" font-size="16">번호 두 개를</text>
+<text x="292" y="236" font-size="16">커스텀 데이터로 쌓는다</text>
+<path d="M508 196.0 L521 196.0" stroke="#4b5563" stroke-width="2"/>
+<path d="M515 190.0 L523 196.0 L515 202.0" fill="none" stroke="#4b5563" stroke-width="2"/>
+<rect x="524" y="122" width="228" height="148" rx="10" fill="#f8fafc" stroke="#e5e7eb"/>
+<rect x="524" y="122" width="228" height="6" rx="3" fill="#db2777"/>
+<text x="538" y="156" font-size="17" font-weight="700" fill="#db2777">GPU, 매 프레임</text>
+<text x="538" y="188" font-size="16">텍스처를 읽어 정점을</text>
+<text x="538" y="212" font-size="16">옮긴다. 정적 메시라</text>
+<text x="538" y="236" font-size="16">디스턴스 필드도 갱신</text>
+<text x="32" y="308" font-size="18" font-weight="700">6단계 · ISKM</text>
+<rect x="32" y="322" width="228" height="148" rx="10" fill="#f8fafc" stroke="#e5e7eb"/>
+<rect x="32" y="322" width="228" height="6" rx="3" fill="#9333ea"/>
+<text x="46" y="356" font-size="17" font-weight="700" fill="#9333ea">에셋 하나</text>
+<text x="46" y="388" font-size="16">ASTPD에 AnimSequence</text>
+<text x="46" y="412" font-size="16">세 개를 넣는다</text>
+<text x="46" y="436" font-size="16">메시 LOD는 원본 다섯</text>
+<path d="M262 396.0 L275 396.0" stroke="#4b5563" stroke-width="2"/>
+<path d="M269 390.0 L277 396.0 L269 402.0" fill="none" stroke="#4b5563" stroke-width="2"/>
+<rect x="278" y="322" width="228" height="148" rx="10" fill="#f8fafc" stroke="#e5e7eb"/>
+<rect x="278" y="322" width="228" height="6" rx="3" fill="#2563eb"/>
+<text x="292" y="356" font-size="17" font-weight="700" fill="#2563eb">게임 스레드, 매 프레임</text>
+<text x="292" y="388" font-size="16">위치를 쌓고, 상태가</text>
+<text x="292" y="412" font-size="16">바뀐 개체만 트랙에</text>
+<text x="292" y="436" font-size="16">클립·시작 위치를 쓴다</text>
+<path d="M508 396.0 L521 396.0" stroke="#4b5563" stroke-width="2"/>
+<path d="M515 390.0 L523 396.0 L515 402.0" fill="none" stroke="#4b5563" stroke-width="2"/>
+<rect x="524" y="322" width="228" height="148" rx="10" fill="#f8fafc" stroke="#e5e7eb"/>
+<rect x="524" y="322" width="228" height="6" rx="3" fill="#db2777"/>
+<text x="538" y="356" font-size="17" font-weight="700" fill="#db2777">GPU, 매 프레임</text>
+<text x="538" y="388" font-size="16">뼈 자세로 스키닝한다</text>
+<text x="538" y="412" font-size="16">인스턴스마다 메시</text>
+<text x="538" y="436" font-size="16">LOD를 고른다</text>
+<rect x="32" y="488" width="736" height="112" rx="10" fill="white" stroke="#b45309" stroke-width="1.5" stroke-dasharray="6 4"/>
+<text x="48" y="520" font-size="17" font-weight="700" fill="#b45309">ISKM만 · 프레임 끝, 인스턴스가 바뀐 프레임마다</text>
+<text x="48" y="550" font-size="16">엔진이 모든 인스턴스의 클립 바운드를 합쳐 컴포넌트 바운드를 다시 만든다.</text>
+<text x="48" y="576" font-size="16">6단계는 오브를 덮는 상자를 미리 넣어 이 반복을 건너뛴다(고정 바운드).</text>
+<text x="32" y="636" font-size="16" fill="#4b5563">줄어드는 곳은 GPU다: 디스턴스 필드 갱신이 빠진다.</text>
+<text x="32" y="660" font-size="16" fill="#4b5563">늘어날 수 있는 곳은 게임 스레드와 프레임 끝이다: 트랙과 바운드를 엔진이 챙긴다.</text>
+</svg>

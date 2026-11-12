@@ -325,6 +325,41 @@
 ### 진행(06)
 
 - 조사 끝(성공). 읽은 것: AGENTS.md, STATUS.md, posting.md, ADR-0014, backlog.md, post-review.md(핵심 인사이트 5, 06 항목, 07 ISKM vs VAT 사실 확인), post-material.md "07 ISKM vs VAT", measurement.md(최대 개체 수, 차이 판정), engine-notes.md 3·14·15절, references.md, ADR-0007·0010, D22, code-tour.md, Worklog M5.md(설계 조사, 구현, `m5bounds`, 트레이스 분석·검토, 고정 바운드 실험·판단, 깜빡임 진단)·Q3.md, `full-conditions.json`(`L5`·`L6`·`L8`·`A8-iskm`·`A8-bounds`), 03번 글 세 파일, `Source/HordeOptLab/`(LabIskmProcessor.cpp, LabCrowdSubsystem.cpp, LabConfig.h/.cpp, HordeOptLab.cpp, LabMinion.h), `Scripts/create-iskm.py`. 엔진 소스: `MassVisualizationComponent.cpp:756-800,812-827,849-866,1126-1160,1323-1340,1536-1545`, `InstancedSkinnedMeshComponent.cpp:468-503,1249-1253`, `InstancedSkinnedMeshComponentHelper.h:188-236`, `InstancedSkinnedMeshSceneProxy.cpp:76`, `AnimSequenceTransformProviderData.h:104-127`, `StaticMeshSceneProxy.cpp:340`, `PrimitiveSceneProxy.cpp:394`. 다음은 초안.
+- 그림 끝(성공). `make-figures.py`가 SVG 다섯 개를 만든다(요약, 원리 도식, 문제, 6단계 − 5단계 변화, 빼 보기). 값은 `summary.csv`·`full-n-at-60fps.csv`에서 읽고, 변화 그림의 "흔들림 안" 판정도 `_min`·`_max` 열로 계산한다. 트레이스 값은 쓰지 않았다. 반올림은 `Decimal` 반올림, 음수는 U+2212다. SVG의 숫자 글자를 측정 기록 표와 대조했다. 다음은 초안.
+- 초안 끝(성공). `README.md`: 요약, 시나리오 카드, 배경 지식(ISKM, ASTPD와 트랙, 컴포넌트 바운드, 619자), 문제, 원리(엔진 발췌와 예상), 바꾼 것(Lab 코드 넷, 엔진 트랙 문제 소절), 결과(Insights 자리 주석, 빼 보기 소절, 화면 소절), 틀렸던 가설(세 문단), 한 문장으로. 본문은 표·코드·그림·제목·주석과 배경 지식을 빼고 약 4,260자다(같은 셈법으로 03번 글은 4,002자). 처음 초안이 5,860자라 줄였다. 다음은 측정 기록.
+- 측정 기록 끝(성공). `measurements.md`: 빌드와 묶음, 6단계 구현 위치, 본문 수치 표(1만 네 값, 5단계 호드 총수별, 6단계 − 5단계 변화와 판정, 최대 개체 수와 탑뷰, 빼 보기, 설정·코드 값), 엔진 소스(파일:줄), 공개 이슈, 발췌 줄, 코디네이터가 찍을 Insights 화면, 그림, HUD 차이, 경위의 근거, 확인하지 않은 것. 다음은 확인.
+- 확인 끝(성공). 두 파일의 상대 링크가 모두 실제 파일을 가리킨다(주석 안의 `images/iskm-insights-distance-field.jpg`만 아직 없다). 코드 스팬 밖 `~`는 없다. 독자용 문장에 묶음 이름·조건 라벨·마일스톤 이름은 없다(이미지 경로에만 있다). 본문 수치는 모두 측정 기록 표에 있다. 엔진 코드 발췌는 25줄, Lab 코드 발췌는 블록마다 15줄 이하다. 측정 기록 표는 다섯 열 이하다. 다음은 커밋.
+
+### 결정(06)
+
+- **사다리 6단계가 두 변수(ISKM, 고정 바운드)를 함께 바꾼 것을 본문에 밝히고, 최종 구성의 빼 보기 두 행으로 가른다.** `A8-iskm`(VAT)과 `A8-bounds`(기본 바운드 ISKM)의 차이는 표현 하나라(VAT에는 고정 바운드를 넣을 컴포넌트가 없다, `LabIskmBounds` 0) 한 변수 비교로 썼다. 버린 대안: 옛 M5 묶음의 `m5iskm`(기본 바운드) 값을 쓰기(묶음이 다르다), 빼 보기를 09번 글에 미루기(06의 틀렸던 가설이 최종 측정의 근거를 잃는다).
+- **결과 그림을 "6단계 − 5단계의 호드 총수별 변화"로 그린다.** GPU는 N이 클수록 더 줄고 게임 스레드는 N이 클수록 더 느는 것이 이 단계의 핵심이고, 최대 개체 수가 30,000 이상에서 29,799로 준 이유도 이 그림이 보인다. 흔들림보다 작은 칸(5천·1만 게임 스레드, 2만 프레임)은 점선으로 그렸다. 버린 대안: 03번 글처럼 최대 개체 수 선 그림(값 하나만 갈려 변화 그림보다 정보가 적다), 트레이스 타이머의 예상과 실제(최종 측정 트레이스를 읽을 수 없다).
+- **예상은 "프레임은 많아야 5단계의 프레임 − 게임 스레드 간격(0.321ms)만큼 준다"로 세운다.** 트레이스 없이 최종 측정 값만으로 세울 수 있는 예상이고, 실제 −0.148ms와 대조된다. 버린 대안: 디스턴스 필드 몫으로 GPU 감소를 예상(최종 측정 트레이스 값이 없다).
+- **ISKM의 이점은 D22대로 GPU와 기능으로 적고, 프레임만 보면 VAT가 0.206ms 빠르다는 것을 결과에 그대로 적는다.** 3만에서 프레임이 0.615ms 길고 최대 개체 수가 준 것도 숨기지 않았다(한 문장으로의 세 번째 줄).
+- **틀렸던 가설은 "ISKM이 GPU를 줄이면 프레임도 줄 줄 알았다"로 쓴다.** backlog의 방향(GPU는 줄었는데 프레임이 늘었고, 바운드를 고정하자 뒤집혔다)을 옛 M5 묶음·트레이스의 방향만으로 쓰고, 최종 측정이 받치는 값(기본 바운드 ISKM 대 VAT: GPU −1.22, 프레임 +0.977ms)만 수치로 썼다. 최종 측정에서는 "뒤집힘"이 1만까지만 성립하고 2만부터 다시 갈린다는 점을 고친 설명에 넣었다. posting.md가 적은 06의 가설(전환 우위가 다시 나오지 않았다)은 마지막 문장 하나로 받았다(Development 전환 점수는 옛 빌드의 참고값이라 수치 없이).
+- **엔진 트랙 문제 둘은 "바꾼 것" 아래 소절로 둔다.** 둘 다 이 단계의 코드(`ULabIskmProcessor`의 트랙 다시 쓰기, 엔티티 풀)를 정한 이유라서다. 풀은 05번 글 몫이라 문제, 엔진 줄, 풀 재사용 블록 하나만 보였다. 엔진 발췌 하나(8줄)로 두 문제(클립 번호 조건, 돌려받는 곳 하나)를 함께 보였다.
+- **공개 이슈 링크는 달지 않았다.** references.md "포럼 스레드"의 "Mass crowds using SkinnedMeshInstance leak GPU memory"는 제목만 있고 주소가 없다. engine-notes.md에도 URL이 없다. 링크를 지어내지 않고 본문에 "공개 이슈를 찾지 못했다"고 적고, 측정 기록에 포럼 글 제목과 엔진 파일·줄을 적었다. 웹 검색은 하지 않았다.
+- **모션 블러 번짐은 이 글의 "결과 > 화면" 소절에 짧게 넣는다.** ADR-0007이 ISKM 글(당시 번호 07)에 "개발 빌드에서 관찰한 현상과 원인 미확정"을 적기로 정했다. 원인 미확정, Lab의 `PrevTransform`은 정상, 모션 블러 기본값 유지를 적고 캡처는 측정 기록에 링크했다(Development 캡처라 본문 그림으로 넣지 않았다). 37\~66초 구간 한정은 측정 기록에만 적었다.
+- **본문 수치는 유효 숫자 세 자리로 쓴다.** 그래서 브리프의 −0.21 / +0.77 / −0.33ms는 −0.206 / +0.771 / −0.327ms로 썼다(posting.md "수치는 유효 숫자 세 자리").
+- **디스턴스 필드가 빠지는 원리는 엔진 소스로만 적는다.** 정적 메시 프록시만 표현을 켜고(`StaticMeshSceneProxy.cpp:340`, 기본값 `PrimitiveSceneProxy.cpp:394`), 그림자를 그리면 Lumen에서 빼도 장면에 남는다(`SceneManagement.h:1069-1082`, `LabMinion.h:39-42`). 크기는 Insights 화면 자리로 남겼다.
+
+### 확인하지 못한 것(06)
+
+- 최종 측정 트레이스(`Full2trace-L5/L6`, `Full2traceser-L5/L6`)의 값. 디스턴스 필드가 실제로 얼마나 빠졌는지, 2만·3만에서 게임 스레드가 늘어난 타이머.
+- `A8-bounds`의 프레임 증가 가운데 게임 스레드 밖 몫(0.472ms)이 프레임 끝 바운드 계산인지(트레이스 없음).
+- 옛 고정 바운드 묶음(20k에서 게임 스레드가 VAT와 같음)과 최종 측정(2만 +0.545ms)이 갈린 이유.
+- Test 패키지의 ASTPD 애니메이션 바운드 유무(로그 없음. 없어도 메시 바운드로 같은 반복이라 본문 설명은 같다).
+- 모션 블러 번짐의 원인과 최종 측정 빌드에서도 나는지.
+- SVG와 움직이는 WebP를 화면에 그려 보지 않았다(브라우저 금지). 글자 겹침은 좌표와 글자 수로만 확인했다.
+
+### 코디네이터용(06)
+
+- Insights 화면 하나를 찍어 넣는다: `Full2trace-L5-m4offpool-*`와 `Full2trace-L6-m5bounds-*`(병렬)의 렌더 스레드 `PrepareDistanceFieldScene`. 자세한 것은 `Posts/06-iskm/measurements.md` "코디네이터가 찍을 Insights 화면". 01·03번 글처럼 `Scripts/trace-export.ps1`로 값을 뽑으면 README의 주석 처리된 이미지 자리와 캡션의 `OO`를 채우고, 원하면 "원리"의 예상에 디스턴스 필드 몫 한 줄을 더한다.
+- 05번 글이 커밋되면 이 글의 "5단계(05번 글)"와 "(05번 글)" 두 곳에 `../05-simulation-lod-entity-pool/README.md` 링크를 단다(폴더는 체크아웃에 있으나 커밋 전이다). 07번 글이 생기면 끝 문단("다음 글에서는…")에 `../07-niagara-crowd/README.md` 링크를 단다.
+- 루트 README "글" 표에 06번 행을 더한다.
+- engine-notes.md 고칠 것: 3절 "ISKM 블렌딩" 행의 파일을 `Engine/Classes/Animation/AnimSequenceTransformProviderData.h:104-127,152-174`로(지금은 `InstancedSkinnedMeshComponent.h`, post-review.md도 지적). 더할 것: `InstancedSkinnedMeshComponent.cpp:495-497`(프레임 끝 `FlushChanges` → `UpdateBounds`), `InstancedSkinnedMeshComponentHelper.h:202,227-235,245-251`(`bFastBuild = false`, 인스턴스 반복, 애니메이션 바운드가 없을 때의 메시 바운드 반복), `MassVisualizationComponent.cpp:777-787,868-878`(UAF 인계용 재생 상태 읽기, 끌 수 없음), `PrimitiveSceneProxy.cpp:394`·`StaticMeshSceneProxy.cpp:340`·`SceneManagement.h:1069-1082`(디스턴스 필드 장면 조건. 11절 "스플라인" 오류와 같은 절), `AnimToTextureBPLibrary.cpp:851-868`(LOD 하나만 옮김), `InstancedSkinnedMeshSceneProxy.cpp:76`(GPU 메시 LOD 선택 조건).
+- references.md의 포럼 글 세 개에 주소를 더하면 06번 글 본문의 "공개 이슈를 찾지 못했다"를 링크로 바꿀 수 있다.
+- STATUS.md "측정 결과"에 적을 만한 것: `L6` 2만·3만에서 게임 스레드가 `L5`보다 +0.545 / +1.13ms(흔들림보다 크다). 옛 M5 고정 바운드 묶음의 "게임 스레드가 같다"와 다르다.
 
 ## 05 Simulation LOD와 엔티티 풀(2026-11-13)
 
@@ -374,3 +409,11 @@
 - 01번: 446.43 / 323.49 / 27.24 / 14.70 → 446.43 / 322.20 / 27.31 / 15.71(프레임 112). 합 41.94 → 43.02, 나머지 81.00 → 81.21, 남는 몫 404.49 → 403.41, 72.46% → 72.17%, 9.39% → 9.64%, 개체당 32.35 → 32.22µs. `make-figures.py`, `measurements.md`, `README.md`를 고쳤다.
 - 03번: 프레임 수(직렬 5,038 / 6,412, 병렬 5,055 / 6,423) 기준으로 EndVisualChanges 2.47/1.21 → 2.52/1.23, 디스턴스 필드 2.61/1.35 → 2.65/1.36, 그림자 2.53/1.62 → 2.51/1.66, 색과 재질 1.41/0.83 → 1.40/0.83, 움직임 벡터 1.46/0.68 → 1.43/0.68, VAT 프로세서 0.451 → 0.458, 엔진 ISM 프로세서 0.569 → 0.573ms. 다섯 칸 모두 실제가 예상보다 크다는 결론은 그대로다.
 - 남은 일: 01번 `images/insights-gamethread.jpg`와 캡션(448 / 322ms / 10,048회)은 옛 트레이스의 값이다. 코디네이터가 새 트레이스로 다시 찍는다.
+
+## 07 Niagara 배경 무리(2026-11-13)
+
+하위 에이전트(Opus)가 `Posts/07-niagara-crowd/`를 쓴다. 수치는 최종 측정(Test 패키지 08e45f2)에서만 만든다.
+
+### 진행
+
+- 조사 끝(성공). `full-conditions.json`의 `L6`→`L7`은 `LabCrowdFx` 0→1 하나만 다르다. 7단계는 원거리 그림자 켬(`LabFarShadow=1`)이라 엔티티 구동 입자가 그림자를 그린다(`SetupCrowdFx`, Q2.md "Q2c"). 다음은 트레이스 내보내기와 초안.
