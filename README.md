@@ -1,6 +1,6 @@
 # Unreal 호드 최적화 실험실
 
-`ACharacter` 액터로 만든 호드 1만은 한 프레임에 441ms가 걸린다. 이 프로젝트는 같은 호드를 Unreal Engine 5.8의 Mass Entity로 다시 짓고, 60fps의 한 프레임인 16.7ms 안에 들어올 때까지 거리별로 비용을 덜어내며 단계마다 잰 기록이다. 액터 군중에서 시작해 Mass 로직, ISM + VAT, 액터 하이드레이션과 애니메이션 예산, Simulation LOD, ISKM을 한 번에 하나씩 적용하고, 같은 시나리오를 같은 방법으로 다시 잰다.
+`ACharacter` 액터로 호드 1만을 만들면 한 프레임에 441ms가 걸린다. 이 호드를 Unreal Engine 5.8의 Mass Entity로 다시 만들고, 60fps(한 프레임 16.7ms)가 나올 때까지 최적화 기법을 하나씩 적용했다. 순서는 Mass 로직, ISM + VAT, 액터 하이드레이션과 애니메이션 예산, Simulation LOD, ISKM이다. 기법을 하나 적용할 때마다 같은 시나리오를 같은 방법으로 다시 재서 얼마나 달라졌는지 확인했다.
 
 - **대상**: 클라이언트 한 대에서 그리고 움직이는 군중의 비용. Game Thread, Render Thread, GPU, 메모리.
 - **최적화**: Mass Entity(Fragment·Processor), Representation LOD(액터 / ISM+VAT / ISKM / 없음), 액터 하이드레이션과 풀링, Significance Manager → Animation Budget Allocator, URO, Simulation LOD(청크 단위 가변 틱), Niagara 배경 무리(엔티티 구동 입자).
