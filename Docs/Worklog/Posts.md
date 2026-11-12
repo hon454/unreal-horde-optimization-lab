@@ -317,3 +317,26 @@
 - 05번 글이 생기면 04번 README 끝 문단("다음 글에서는…")에 `../05-simulation-lod-entity-pool/README.md` 링크를 단다. 08번 글이 생기면 "최종 구성은 … (08번 글)"에도 링크를 단다.
 - 루트 README "글" 표에 04번 행을 더한다(코디네이터 몫).
 - engine-notes.md에 더할 것: `AnimationBudgetAllocator.cpp:558,561,566`(예산 ÷ 평균 갱신 시간, 넘는 몫이 있을 때만 줄임), `:339`(정렬, 3절의 `:327`은 주석 줄), `AnimationBudgetAllocatorParameters.h:19` `BudgetInMs = 1.0f`(CVar 도움말도 Default 1.0), `MassActorSpawnerSubsystem.cpp:252-255`(풀에서 꺼내자마자 보이게 함, 4절에 줄 번호가 없다), `MassRepresentationActorManagement.cpp:47-56`(`TeleportActor` 기본 구현), `:58-61`(준비됨 기본 참), `MassRepresentationProcessor.cpp:275-298`(준비 대기 조건), `MassRepresentationFragments.h:202,211`(두 플래그 기본 거짓), `Character.cpp:78`(캡슐 34 × 88).
+
+## 06 ISKM(2026-11-13)
+
+`Posts/06-iskm/`를 쓴다. 수치는 최종 측정(Test 패키지 08e45f2)의 `L5-m4offpool`·`L6-m5bounds`·`L8-q4final`·`A8-iskm`·`A8-bounds` 행과 `full-n-at-60fps.csv`에서만 만든다. 에디터, 빌드, 패키징, 게임, 브라우저, Insights는 띄우지 않았다.
+
+### 진행(06)
+
+- 조사 끝(성공). 읽은 것: AGENTS.md, STATUS.md, posting.md, ADR-0014, backlog.md, post-review.md(핵심 인사이트 5, 06 항목, 07 ISKM vs VAT 사실 확인), post-material.md "07 ISKM vs VAT", measurement.md(최대 개체 수, 차이 판정), engine-notes.md 3·14·15절, references.md, ADR-0007·0010, D22, code-tour.md, Worklog M5.md(설계 조사, 구현, `m5bounds`, 트레이스 분석·검토, 고정 바운드 실험·판단, 깜빡임 진단)·Q3.md, `full-conditions.json`(`L5`·`L6`·`L8`·`A8-iskm`·`A8-bounds`), 03번 글 세 파일, `Source/HordeOptLab/`(LabIskmProcessor.cpp, LabCrowdSubsystem.cpp, LabConfig.h/.cpp, HordeOptLab.cpp, LabMinion.h), `Scripts/create-iskm.py`. 엔진 소스: `MassVisualizationComponent.cpp:756-800,812-827,849-866,1126-1160,1323-1340,1536-1545`, `InstancedSkinnedMeshComponent.cpp:468-503,1249-1253`, `InstancedSkinnedMeshComponentHelper.h:188-236`, `InstancedSkinnedMeshSceneProxy.cpp:76`, `AnimSequenceTransformProviderData.h:104-127`, `StaticMeshSceneProxy.cpp:340`, `PrimitiveSceneProxy.cpp:394`. 다음은 초안.
+
+## 05 Simulation LOD와 엔티티 풀(2026-11-13)
+
+`Posts/05-simulation-lod-entity-pool/`를 쓴다. 수치는 최종 측정(Test 패키지 08e45f2)의 `L4-mass`·`L5-m4offpool`·`L8-q4final`·`A8-simlod`·`A8-pool` 행, `full-n-at-60fps.csv`, 16분 실행 묶음(`Measurements/Pool1/timeline.csv`)에서만 만든다. 에디터, 빌드, 패키징, 게임, 브라우저, Insights는 띄우지 않았다.
+
+### 진행(05)
+
+- 조사 끝(성공). 읽은 것: AGENTS.md, STATUS.md, posting.md, backlog.md, post-review.md(핵심 인사이트 4·9, 06 Simulation LOD 사실 확인), post-material.md "06 Simulation LOD", measurement.md("확정값", "총괄 묶음 규약", "엔티티 풀 묶음 규약"), engine-notes.md 3·5절, references.md, code-tour.md, plan.md M4·M5, Q6.md "Full2 재측정"·"Pre6 촬영과 풀 끔 떨림 확인", 03번 글 세 파일, `full-conditions.json`(`L4`·`L5`·`A8-simlod`·`A8-pool`). 소스: HordeOptLab.cpp, LabConfig.h/.cpp(`SimLod`, `UsesSimLod`, `bEntityPool`), LabMassProcessors.cpp(접근·Off 이동·관찰자·상태 프로세서), LabCrowdSubsystem.cpp(`SpawnEntities`, `RecycleAndRespawn`, `ReinitPooledEntity`). 엔진: `MassVisualizationComponent.cpp:754-775,812-827,849-866,1126-1158,1537-1547`, `MassSkinnedMeshRepresentationTypes.h:700-706`, ISKM `RemoveInstance` 호출자 검색(정지 표현 프로세서뿐). 다음은 초안.
+
+## 01·03 트레이스 값 재추출(2026-11-13)
+
+- 끝(성공). 최종 측정 빌드(08e45f2)의 트레이스 `Full2traceser-L1~L3`, `Full2trace-L1~L3`에서 `Scripts/trace-export.ps1 -Command TimerStatistics`(스레드 `GameThread`, `RenderThread*`, `GPU0-Graphics0`, 구간 25\~75초)로 다시 뽑았다. 같은 방법으로 옛 `Full1*` 내보내기를 다시 계산하면 옛 값과 일치했다.
+- 01번: 446.43 / 323.49 / 27.24 / 14.70 → 446.43 / 322.20 / 27.31 / 15.71(프레임 112). 합 41.94 → 43.02, 나머지 81.00 → 81.21, 남는 몫 404.49 → 403.41, 72.46% → 72.17%, 9.39% → 9.64%, 개체당 32.35 → 32.22µs. `make-figures.py`, `measurements.md`, `README.md`를 고쳤다.
+- 03번: 프레임 수(직렬 5,038 / 6,412, 병렬 5,055 / 6,423) 기준으로 EndVisualChanges 2.47/1.21 → 2.52/1.23, 디스턴스 필드 2.61/1.35 → 2.65/1.36, 그림자 2.53/1.62 → 2.51/1.66, 색과 재질 1.41/0.83 → 1.40/0.83, 움직임 벡터 1.46/0.68 → 1.43/0.68, VAT 프로세서 0.451 → 0.458, 엔진 ISM 프로세서 0.569 → 0.573ms. 다섯 칸 모두 실제가 예상보다 크다는 결론은 그대로다.
+- 남은 일: 01번 `images/insights-gamethread.jpg`와 캡션(448 / 322ms / 10,048회)은 옛 트레이스의 값이다. 코디네이터가 새 트레이스로 다시 찍는다.

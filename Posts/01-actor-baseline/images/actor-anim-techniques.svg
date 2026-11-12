@@ -16,7 +16,7 @@
 <text x="40" y="320" font-size="16" fill="#4b5563">덧댄 뒤의 프레임 시간 400ms</text>
 <line x1="32" y1="336" x2="768" y2="336" stroke="#e5e7eb"/>
 <text x="40" y="364" font-size="17" font-weight="700">비교: 애니메이션 쪽 두 타이머의 합</text>
-<rect x="40" y="376" width="484.6" height="22" rx="3" fill="#9333ea" fill-opacity="0.25" stroke="#9333ea" stroke-dasharray="4 3"/>
-<text x="532.6" y="393" font-size="16"><tspan font-weight="700" fill="#9333ea">41.9</tspan><tspan fill="#4b5563"> 게임 스레드, 트레이스 한 회</tspan></text>
+<rect x="40" y="376" width="497.1" height="22" rx="3" fill="#9333ea" fill-opacity="0.25" stroke="#9333ea" stroke-dasharray="4 3"/>
+<text x="545.1" y="393" font-size="16"><tspan font-weight="700" fill="#9333ea">43.0</tspan><tspan fill="#4b5563"> 게임 스레드, 트레이스 한 회</tspan></text>
 <text x="32" y="428" font-size="16" fill="#4b5563">애니메이션을 모두 지워도 줄일 수 있는 몫은 이 크기다.</text>
 </svg>

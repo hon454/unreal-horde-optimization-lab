@@ -4,59 +4,59 @@
 <text x="32" y="74" font-size="16" fill="#4b5563">호드 총수 1만, 오브 시점 카메라, 트레이스 한 회의 프레임당 시간(ms)</text>
 <text x="40" y="116" font-size="17" font-weight="700">쌓은 위치를 ISM 컴포넌트에 넣는다</text>
 <text x="768" y="116" text-anchor="end" font-family="Consolas, SFMono-Regular, Menlo, monospace" font-size="16" fill="#4b5563">게임 스레드 · EndVisualChanges</text>
-<rect x="110" y="126" width="414.0" height="18" rx="3" fill="#9ca3af"/>
+<rect x="110" y="126" width="422.2" height="18" rx="3" fill="#9ca3af"/>
 <text x="40" y="141" font-size="16" fill="#4b5563">2단계</text>
-<text x="532.0" y="141" font-size="16" font-weight="700" fill="#4b5563">2.47</text>
-<rect x="110" y="149" width="165.6" height="18" rx="3" fill="white" stroke="#374151" stroke-width="1.5" stroke-dasharray="4 3"/>
+<text x="540.2" y="141" font-size="16" font-weight="700" fill="#4b5563">2.52</text>
+<rect x="110" y="149" width="168.9" height="18" rx="3" fill="white" stroke="#374151" stroke-width="1.5" stroke-dasharray="4 3"/>
 <text x="40" y="164" font-size="16" fill="#374151">예상</text>
-<text x="283.6" y="164" font-size="16" font-weight="700" fill="#374151">0.99</text>
-<rect x="110" y="172" width="203.6" height="18" rx="3" fill="#2563eb"/>
+<text x="286.9" y="164" font-size="16" font-weight="700" fill="#374151">1.01</text>
+<rect x="110" y="172" width="206.9" height="18" rx="3" fill="#2563eb"/>
 <text x="40" y="187" font-size="16" fill="#2563eb">3단계</text>
-<text x="321.6" y="187" font-size="16" font-weight="700" fill="#2563eb">1.21</text>
+<text x="324.9" y="187" font-size="16" font-weight="700" fill="#2563eb">1.23</text>
 <text x="40" y="217" font-size="17" font-weight="700">디스턴스 필드 장면을 갱신한다</text>
 <text x="768" y="217" text-anchor="end" font-family="Consolas, SFMono-Regular, Menlo, monospace" font-size="16" fill="#4b5563">렌더 스레드 · PrepareDistanceFieldScene</text>
-<rect x="110" y="227" width="438.4" height="18" rx="3" fill="#9ca3af"/>
+<rect x="110" y="227" width="444.3" height="18" rx="3" fill="#9ca3af"/>
 <text x="40" y="242" font-size="16" fill="#4b5563">2단계</text>
-<text x="556.4" y="242" font-size="16" font-weight="700" fill="#4b5563">2.61</text>
-<rect x="110" y="250" width="175.3" height="18" rx="3" fill="white" stroke="#374151" stroke-width="1.5" stroke-dasharray="4 3"/>
+<text x="562.3" y="242" font-size="16" font-weight="700" fill="#4b5563">2.65</text>
+<rect x="110" y="250" width="177.7" height="18" rx="3" fill="white" stroke="#374151" stroke-width="1.5" stroke-dasharray="4 3"/>
 <text x="40" y="265" font-size="16" fill="#374151">예상</text>
-<text x="293.3" y="265" font-size="16" font-weight="700" fill="#374151">1.04</text>
-<rect x="110" y="273" width="226.3" height="18" rx="3" fill="#2563eb"/>
+<text x="295.7" y="265" font-size="16" font-weight="700" fill="#374151">1.06</text>
+<rect x="110" y="273" width="227.9" height="18" rx="3" fill="#2563eb"/>
 <text x="40" y="288" font-size="16" fill="#2563eb">3단계</text>
-<text x="344.3" y="288" font-size="16" font-weight="700" fill="#2563eb">1.35</text>
+<text x="345.9" y="288" font-size="16" font-weight="700" fill="#2563eb">1.36</text>
 <text x="40" y="318" font-size="17" font-weight="700">그림자를 그린다</text>
 <text x="768" y="318" text-anchor="end" font-family="Consolas, SFMono-Regular, Menlo, monospace" font-size="16" fill="#4b5563">GPU · ShadowDepths</text>
-<rect x="110" y="328" width="424.8" height="18" rx="3" fill="#9ca3af"/>
+<rect x="110" y="328" width="422.0" height="18" rx="3" fill="#9ca3af"/>
 <text x="40" y="343" font-size="16" fill="#4b5563">2단계</text>
-<text x="542.8" y="343" font-size="16" font-weight="700" fill="#4b5563">2.53</text>
-<rect x="110" y="351" width="169.9" height="18" rx="3" fill="white" stroke="#374151" stroke-width="1.5" stroke-dasharray="4 3"/>
+<text x="540.0" y="343" font-size="16" font-weight="700" fill="#4b5563">2.51</text>
+<rect x="110" y="351" width="168.8" height="18" rx="3" fill="white" stroke="#374151" stroke-width="1.5" stroke-dasharray="4 3"/>
 <text x="40" y="366" font-size="16" fill="#374151">예상</text>
-<text x="287.9" y="366" font-size="16" font-weight="700" fill="#374151">1.01</text>
-<rect x="110" y="374" width="272.2" height="18" rx="3" fill="#2563eb"/>
+<text x="286.8" y="366" font-size="16" font-weight="700" fill="#374151">1.01</text>
+<rect x="110" y="374" width="277.8" height="18" rx="3" fill="#2563eb"/>
 <text x="40" y="389" font-size="16" fill="#2563eb">3단계</text>
-<text x="390.2" y="389" font-size="16" font-weight="700" fill="#2563eb">1.62</text>
+<text x="395.8" y="389" font-size="16" font-weight="700" fill="#2563eb">1.66</text>
 <text x="40" y="419" font-size="17" font-weight="700">색과 재질을 그린다</text>
 <text x="768" y="419" text-anchor="end" font-family="Consolas, SFMono-Regular, Menlo, monospace" font-size="16" fill="#4b5563">GPU · BasePass</text>
-<rect x="110" y="429" width="236.8" height="18" rx="3" fill="#9ca3af"/>
+<rect x="110" y="429" width="234.7" height="18" rx="3" fill="#9ca3af"/>
 <text x="40" y="444" font-size="16" fill="#4b5563">2단계</text>
-<text x="354.8" y="444" font-size="16" font-weight="700" fill="#4b5563">1.41</text>
-<rect x="110" y="452" width="94.7" height="18" rx="3" fill="white" stroke="#374151" stroke-width="1.5" stroke-dasharray="4 3"/>
+<text x="352.7" y="444" font-size="16" font-weight="700" fill="#4b5563">1.40</text>
+<rect x="110" y="452" width="93.9" height="18" rx="3" fill="white" stroke="#374151" stroke-width="1.5" stroke-dasharray="4 3"/>
 <text x="40" y="467" font-size="16" fill="#374151">예상</text>
-<text x="212.7" y="467" font-size="16" font-weight="700" fill="#374151">0.56</text>
-<rect x="110" y="475" width="138.7" height="18" rx="3" fill="#2563eb"/>
+<text x="211.9" y="467" font-size="16" font-weight="700" fill="#374151">0.56</text>
+<rect x="110" y="475" width="138.8" height="18" rx="3" fill="#2563eb"/>
 <text x="40" y="490" font-size="16" fill="#2563eb">3단계</text>
-<text x="256.7" y="490" font-size="16" font-weight="700" fill="#2563eb">0.83</text>
+<text x="256.8" y="490" font-size="16" font-weight="700" fill="#2563eb">0.83</text>
 <text x="40" y="520" font-size="17" font-weight="700">움직임 벡터를 그린다</text>
 <text x="768" y="520" text-anchor="end" font-family="Consolas, SFMono-Regular, Menlo, monospace" font-size="16" fill="#4b5563">GPU · RenderVelocities</text>
-<rect x="110" y="530" width="244.9" height="18" rx="3" fill="#9ca3af"/>
+<rect x="110" y="530" width="239.8" height="18" rx="3" fill="#9ca3af"/>
 <text x="40" y="545" font-size="16" fill="#4b5563">2단계</text>
-<text x="362.9" y="545" font-size="16" font-weight="700" fill="#4b5563">1.46</text>
-<rect x="110" y="553" width="98.0" height="18" rx="3" fill="white" stroke="#374151" stroke-width="1.5" stroke-dasharray="4 3"/>
+<text x="357.8" y="545" font-size="16" font-weight="700" fill="#4b5563">1.43</text>
+<rect x="110" y="553" width="95.9" height="18" rx="3" fill="white" stroke="#374151" stroke-width="1.5" stroke-dasharray="4 3"/>
 <text x="40" y="568" font-size="16" fill="#374151">예상</text>
-<text x="216.0" y="568" font-size="16" font-weight="700" fill="#374151">0.58</text>
-<rect x="110" y="576" width="113.8" height="18" rx="3" fill="#2563eb"/>
+<text x="213.9" y="568" font-size="16" font-weight="700" fill="#374151">0.57</text>
+<rect x="110" y="576" width="114.1" height="18" rx="3" fill="#2563eb"/>
 <text x="40" y="591" font-size="16" fill="#2563eb">3단계</text>
-<text x="231.8" y="591" font-size="16" font-weight="700" fill="#2563eb">0.68</text>
+<text x="232.1" y="591" font-size="16" font-weight="700" fill="#2563eb">0.68</text>
 <line x1="32" y1="609" x2="768" y2="609" stroke="#e5e7eb"/>
 <text x="32" y="635" font-size="16" fill="#4b5563">예상 = 2단계 × 0.4. 200m 밖 60%를 지워 인스턴스가 40%로 준다고 본 값이다.</text>
 <text x="32" y="659" font-size="16" fill="#4b5563">실제로 올린 인스턴스는 프레임 평균 3,761개였다. 다섯 칸 모두 실제가 예상보다 크다.</text>

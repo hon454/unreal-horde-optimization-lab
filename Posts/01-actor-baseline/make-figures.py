@@ -19,8 +19,8 @@ def v(variant, n, col):
 with open(os.path.join(ROOT, "Docs", "figures", "full2", "full-n-at-60fps.csv"), encoding="utf-8") as f:
     N_AT_60 = int(next(r for r in csv.DictReader(f) if r["series"] == "1 L1-full")["n_p95"])
 
-# Serial trace Full1traceser-L1-full (build 730ff18, kept: the Full2 traces are not exported), 10000 P1, 25-75 s, per frame (ms). measurements.md "두 트레이스".
-T_FRAME, T_CMC, T_SKIN, T_ANIMEVAL = 446.43, 323.49, 27.24, 14.70
+# Serial trace Full2traceser-L1-full (build 08e45f2), 10000 P1, 25-75 s, per frame (ms). measurements.md "두 트레이스".
+T_FRAME, T_CMC, T_SKIN, T_ANIMEVAL = 446.43, 322.20, 27.31, 15.71
 T_REST = T_FRAME - T_CMC - T_SKIN - T_ANIMEVAL
 
 FONT = "Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Segoe UI, sans-serif"

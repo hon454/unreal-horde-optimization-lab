@@ -37,11 +37,11 @@ KEEP = 200.0 / 500.0
 # (label, thread, step 2, step 3). Game thread from the serial traces, render thread and GPU from the parallel traces.
 # Each value is the timer's total in the window (seconds, Incl for the game thread, Excl otherwise) x 1000 / frames in the window.
 TRACE = [
-    ("쌓은 위치를 ISM 컴포넌트에 넣는다", "게임 스레드 · EndVisualChanges", 12353.637 / 5009, 7858.386 / 6479),
-    ("디스턴스 필드 장면을 갱신한다", "렌더 스레드 · PrepareDistanceFieldScene", 13130.746 / 5028, 8734.699 / 6480),
-    ("그림자를 그린다", "GPU · ShadowDepths", 12724.638 / 5028, 10507.680 / 6480),
-    ("색과 재질을 그린다", "GPU · BasePass", 7094.243 / 5028, 5353.503 / 6480),
-    ("움직임 벡터를 그린다", "GPU · RenderVelocities", 7335.218 / 5028, 4394.279 / 6480),
+    ("쌓은 위치를 ISM 컴포넌트에 넣는다", "게임 스레드 · EndVisualChanges", 12671.333 / 5038, 7901.813 / 6412),
+    ("디스턴스 필드 장면을 갱신한다", "렌더 스레드 · PrepareDistanceFieldScene", 13378.891 / 5055, 8719.137 / 6423),
+    ("그림자를 그린다", "GPU · ShadowDepths", 12709.799 / 5055, 10630.309 / 6423),
+    ("색과 재질을 그린다", "GPU · BasePass", 7067.248 / 5055, 5311.380 / 6423),
+    ("움직임 벡터를 그린다", "GPU · RenderVelocities", 7222.490 / 5055, 4364.974 / 6423),
 ]
 
 FONT = "Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Segoe UI, sans-serif"
