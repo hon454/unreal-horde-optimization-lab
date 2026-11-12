@@ -1,0 +1,18 @@
+label,args,frames,frame_p50_ms,game_p50_ms,render_p50_ms,gpu_p50_ms,gpu_p95_ms,crowd_recs_mean,trace_frames,basepass_ms,velocities_ms,paralleldraw_ms,lumenscenelighting_ms,lumenscreenprobegather_ms,shadowdepths_ms,fxsystemprerender_ms
+CFX1-base,"",2667,14.63,14.62,8.01,12.00,12.54,6215,,,,,,,,
+CFX1-base2,"",3222,12.33,12.04,10.61,11.79,12.14,6214,2416,3.00,3.17,5.94,1.72,3.84,0.98,1.87
+CFX1-nofx,"-LabCrowdFx=0",3515,11.18,11.21,6.23,6.03,6.44,0,2642,0.45,0.34,0.57,0.39,2.41,1.02,0.62
+CFX1-noouter,"-LabCrowdFxOuter=0",3460,11.35,11.35,6.45,9.25,9.64,6217,2596,1.92,1.95,3.65,0.54,3.89,1.01,0.55
+CFX1-noent,"(temp) -LabFxTest=noent",3452,11.44,11.44,6.38,8.37,8.76,0,2583,1.53,1.51,2.83,0.55,3.48,1.03,0.36
+CFX1-half,"(temp) -LabFxTest=half",3489,11.35,11.34,6.31,10.03,10.40,3110,2621,2.28,2.34,4.40,0.57,4.23,1.01,0.51
+CFX1-defmat,"(temp) -LabFxTest=defmat",3370,11.74,11.76,6.62,9.68,10.06,6215,2527,2.20,2.09,4.06,0.44,4.27,1.02,0.42
+CFX1-novel,"(temp) -LabFxTest=novel",3238,12.28,11.64,12.03,11.83,12.18,6216,,,,,,,,
+CFX1-novel2,"(temp) -LabFxTest=novel",3231,12.29,11.77,11.95,11.81,12.15,6215,2422,3.00,3.18,5.95,1.86,3.69,0.98,2.00
+CFX1-nolumen,"(temp) -LabFxTest=nolumen",3218,12.33,11.54,12.15,11.83,12.19,6220,,,,,,,,
+CFX1-nolumen2,"(temp) -LabFxTest=nolumen",3218,12.37,12.02,11.29,11.82,12.16,6214,2413,3.01,3.18,5.95,1.70,3.87,0.98,1.91
+CFX1-lod3,"(temp) -LabFxTest=lod3",3235,12.30,11.63,12.08,11.82,12.18,6218,,,,,,,,
+CFX1-lod3b,"(temp) -LabFxTest=lod3",3232,12.32,11.56,12.14,11.85,12.20,6214,2423,3.01,3.19,5.95,1.75,3.80,0.98,2.11
+CFX1-lodpp,"(temp) -LabFxTest=lodpp",3481,11.35,11.34,6.48,6.43,6.84,6216,,,,,,,,
+CFX1-lodpp2,"(temp) -LabFxTest=lodpp",3478,11.26,11.30,6.36,6.40,6.80,6215,2608,0.59,0.46,0.82,0.46,2.54,1.02,0.37
+CFX1-syncbase,"-ExecCmds=r.LumenScene.Lighting.AsyncCompute 0",3193,12.44,11.61,12.23,11.94,12.31,6220,2401,2.95,3.18,5.89,0.22,5.64,0.97,2.12
+CFX1-syncnofx,"-LabCrowdFx=0 -ExecCmds=r.LumenScene.Lighting.AsyncCompute 0",3601,10.99,11.00,6.11,6.16,6.60,0,2701,0.42,0.33,0.54,0.21,2.94,1.01,0.60

@@ -341,3 +341,17 @@
 | 항목 | 확인한 것 | 위치 |
 | --- | --- | --- |
 | `ALabCameraRig`의 가로 FOV | `ACameraActor`의 카메라 컴포넌트 기본값 90도 그대로다(리그는 FOV를 바꾸지 않는다). 저격의 화면 안 판정도 이 값과 16:9를 쓴다 | `Engine/Source/Runtime/Engine/Private/Camera/CameraComponent.cpp:78`, `Source/HordeOptLab/LabOrb.cpp:155` |
+
+
+## 26. Niagara 메시 입자의 GPU 비용 경로(2026-11-12, 입자 GPU 비용 조사)
+
+줄임말: **NI** = `Engine/Plugins/FX/Niagara/Source/Niagara`, **RD** = `Engine/Source/Runtime/Renderer/Private`. 실행 결과는 [Worklog/Q6.md](../Worklog/Q6.md) "입자 GPU 비용 조사".
+
+| 항목 | 확인한 것 | 위치 |
+| --- | --- | --- |
+| 메시 렌더러의 LOD 방식 기본값 | `FNiagaraMeshRendererMeshProperties::LODMode` 기본은 `LODLevel`, `LODLevel` 기본 0이다. 지정하지 않으면 모든 입자가 LOD0을 그린다. `PerParticle`이면 메시의 LOD 범위 전부를 메시 데이터로 만들고 입자마다 화면 크기로 LOD를 고른다(LOD가 둘 이상일 때 `bEnableLODCulling`) | `NI/Public/NiagaraMeshRendererMeshProperties.h:29-65, 126, 139`, `NI/Private/NiagaraRendererMeshes.cpp:234-275` |
+| 모션 벡터 끔이 속도 패스를 빼지 않는다 | Niagara 프록시의 속도 관련성은 `DrawsVelocity()`다. `DrawsVelocity()`는 `HasDynamicTransform()`(= Movable)이나 WPO 속도(`bHasWorldPositionOffsetVelocity`, WPO 머티리얼이고 `r.Velocity.EnableVertexDeformation`이 켜져 있으면)만으로도 참이다. 렌더러 `MotionVectorSetting` = Disable은 `bAlwaysHasVelocity`(시스템의 어느 렌더러든 모션 블러를 쓰면 참)만 끈다. 그래서 Movable 컴포넌트에 VAT(WPO) 머티리얼을 쓰는 입자는 설정과 무관하게 속도 패스에서 다시 그려진다 | `NI/Private/NiagaraComponent.cpp:303, 393`, `NI/Private/NiagaraSystemRenderData.cpp:297`, `Engine/Source/Runtime/Engine/Public/PrimitiveSceneProxy.h:923-927`, `Engine/Source/Runtime/Engine/Private/PrimitiveSceneProxy.cpp:620-624` |
+| Lumen 카드 캡처 대상 | 카드 캡처는 `AffectsDynamicIndirectLighting()`이고 카드 OBB와 겹치는 프리미티브 그룹에 대해 돈다. 메시 카드가 있는 프리미티브의 경로라 Niagara 메시 입자는 카드 캡처 비용을 만들지 않는다(입자 컴포넌트의 `AffectDynamicIndirectLighting`을 꺼도 GPU 시간이 같았다) | `RD/Lumen/LumenSceneCardCapture.cpp:770-795`, `RD/Lumen/LumenSceneRendering.cpp:397-403` |
+| `LumenSceneLighting`은 비동기 계산 큐에서 돈다 | `r.Lumen.AsyncCompute`(기본 1)와 `r.LumenScene.Lighting.AsyncCompute`(기본 1)가 모두 켜져 있으면 비동기 계산 큐에서 돈다. 그래픽 큐가 바쁘면 타이머의 시작\~끝 구간이 길어져 패스 자체 비용보다 크게 잰다 | `RD/Lumen/Lumen.cpp:24-29`, `RD/Lumen/LumenSceneLighting.cpp:64-68, 209-212` |
+| AnimToTexture는 LOD를 골라 굽는다 | 데이터 에셋의 `SkeletalLODIndex`(구울 스켈레탈 LOD), `StaticLODIndex`(구워 넣을 스태틱 LOD), 둘 다 기본 0이다. 저폴리 VAT 메시는 원본 스켈레탈 LOD를 골라 따로 구우면 UV 채널 매핑이 맞는다. 스태틱 메시를 감축해 만든 LOD는 정점이 굽기와 대응하지 않아 모양이 깨진다(이번 시험에서 확인) | `Engine/Plugins/Experimental/AnimToTexture/Source/AnimToTexture/Public/AnimToTextureDataAsset.h:124-139` |
+| 에디터 스크립트의 LOD 만들기 | `UStaticMeshEditorSubsystem::SetLods`(Python `EditorStaticMeshLibrary.set_lods`)는 `-run=pythonscript` 커맨들릿에서 -1을 돌려주고 아무것도 하지 않는다(`CheckIfInEditorAndPIE`). 에디터를 `-ExecutePythonScript=`로 띄우면 된다. 커맨들릿에서는 `get_editor_subsystem(StaticMeshEditorSubsystem)`도 None이다 | `Engine/Source/Editor/StaticMeshEditor/Private/StaticMeshEditorSubsystem.cpp:358-362` |
