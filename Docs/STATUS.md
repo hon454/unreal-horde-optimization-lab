@@ -11,15 +11,14 @@ M0\~M5, M3b 완료(태그 `M0`\~`M5`, `M3b`). 품질 계획 Q1\~Q5 완료, Q6은
 ## 다음 할 일
 
 - [ ] **Q6 마무리.** 측정·검사·요약·그래프는 끝났다([Worklog/Q6.md](Worklog/Q6.md) "총괄 묶음 Full1").
-  - 문서를 `Full1` 값으로: ADR 0010\~0013 "결과" 덧붙임, [autonomous-decisions.md](Worklog/autonomous-decisions.md) 맨 위 요약, README·[measurement.md](Guides/measurement.md) 수치, [post-material.md](post-material.md) "08"의 잠정값.
-  - 사다리 표와 빼 보기 표는 프레임 시간 옆에 Game p50, GPU p50을 둔다(Render는 측정 기록에만). 조건은 늘리지 않는다(2026-11-12 사용자 결정).
+  - 문서는 `Full1` 값으로 맞췄다(README, ADR 0010\~0013 "결과", autonomous-decisions 요약, measurement.md, post-material "08". 9be3056). 표는 프레임 시간 옆에 Game p50, GPU p50을 두고 조건은 늘리지 않는다(2026-11-12 사용자 결정). 남은 것: [post-material.md](post-material.md) 01\~07절의 옛 묶음 값, 08절 "4K" 표기 확인(실행은 2560x1440).
   - Development 전환 점수 묶음([ADR-0012](Decisions/0012-ablation-switches-and-quality-metrics.md)).
   - GIF 촬영(아래 "막힌 것"의 둘을 먼저 고친다).
 - [ ] **글 00\~09.** [backlog.md](backlog.md) "글 대기열". 수치는 `Full1`에서만 만든다.
 
 ## 진행 중인 세션
 
-- `docs-full1`(local_9a80969a): 문서를 `Full1` 값으로 맞추기(ADR 0010\~0013 "결과", autonomous-decisions 요약, README 표·그래프, measurement.md, post-material "08"). Sonnet medium. 시작함(2026-11-12).
+없다.
 
 세션을 띄우면 세션, 작업 단위, 모델과 추론 수준, 상태를 여기에 적고, 끝나서 확인한 세션은 보관 처리하고 지운다(AGENTS.md "작업 세션은 작게 나눠 띄우고").
 
@@ -61,7 +60,6 @@ py -3 -I Scripts/plot.py --batch Full1
 
 - 촬영 전에 고칠 것 둘(측정과 무관): 엔진의 "CsvProfiler Frame" 화면 메시지가 HUD 글자에 겹친다. GIF 하나가 41MB다(960x540 150프레임). 반드시 줄이고 이런 크기는 레포에 올리지 않는다(2026-11-12 사용자 지시).
 - 독자용 HUD는 Test 패키지에서 8단계 화면만 확인했다(`Measurements/Q5/shots/hud-test-step8.jpg`).
-- README의 수치 표와 `Docs/figures/n-at-60fps.svg`는 아직 마일스톤 묶음의 값이다.
 
 ## 사용자에게 요청한 일
 
