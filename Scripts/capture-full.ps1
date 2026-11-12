@@ -1,6 +1,8 @@
 ﻿# 총괄 묶음 촬영(Docs/Worklog/Q5.md "2단위", plan.md "HUD와 촬영"). 측정이 끝난 뒤 따로 돈다. 사다리 8단계 x 목표 총수 x P1을 HUD 켜고 띄워 ffmpeg(gdigrab)로 게임 창의 한 구간을 녹화해 GIF로 만든다.
 # 라벨: <Batch>shot-<단계>-<변형>-N<N>-P1-r<Run>. 접두사가 <Batch>-가 아니라 summarize.py·spikes.py·equivalence-check.py의 글롭에 잡히지 않는다. 측정 CSV는 건드리지 않는다.
 # 결과는 git 밖 Saved/Capture/<Batch>/<라벨>.gif이고 경로·크기·시각은 Measurements/<Batch>/captures.csv에 적는다(경로만 커밋). 한 단계가 실패해도 다음으로 넘어가고, 종료 코드는 늘 0이며 끝에 실패 수를 출력한다.
+# 영역: 창 제목으로 찍는 gdigrab(title=)은 DPI 가상화를 받는 ffmpeg가 창 크기를 논리 픽셀(배율 150%면 2/3)로 읽고 화면 DC에서는 물리 픽셀을 복사해 왼쪽 위 일부만 담는다(Pre1).
+# 그래서 ffmpeg를 DPI 인식 상태로 띄우고(__COMPAT_LAYER=HighDpiAware) 게임 창 클라이언트 영역의 물리 화면 좌표를 구해 -f gdigrab -i desktop -offset_x/-offset_y/-video_size로 그 영역만 찍는다. 영역이 가상 화면 밖으로 넘치면 실패다.
 # 녹화 구간: 게임 창이 뜬 뒤 -RecordDelaySec초 기다렸다가 -Seconds초 녹화한다(기본 24초 뒤 10초: 워밍업 15초 + 시작 지연 여유). 게임은 -LabDuration으로 측정 구간을 줄이고
 # -LabShotAt(기본 45초)로 끝에 스크린샷 한 장을 찍어 ablation-check.py --shot 대조를 통과시킨다(LabHud 1, LabShotAt > 0). 녹화 부하로 HUD 숫자가 측정 실행보다 높을 수 있다(글 캡션).
 # 사다리 단계는 Scripts/full-conditions.json의 group ladder 조건이다(이름을 박지 않는다).
@@ -43,8 +45,8 @@ function Get-GameArgs($c, $label) {
 # Start-Process -ArgumentList는 배열 원소를 따옴표로 감싸 주지 않으므로 공백이 든 경로·창 제목은 직접 감싼다
 function Q($s) { return "`"$s`"" }
 # 1패스 캡처(거의 무손실 mkv) -> 2패스 팔레트 GIF
-function Get-CaptureArgs($title, $mkv) {
-    return @("-y", "-hide_banner", "-loglevel", "warning", "-f", "gdigrab", "-framerate", "$Fps", "-draw_mouse", "0", "-t", "$Seconds", "-i", (Q "title=$title"), "-c:v", "libx264", "-qp", "0", "-preset", "ultrafast", "-pix_fmt", "yuv444p", (Q $mkv))
+function Get-CaptureArgs($rect, $mkv) {
+    return @("-y", "-hide_banner", "-loglevel", "warning", "-f", "gdigrab", "-framerate", "$Fps", "-draw_mouse", "0", "-offset_x", "$($rect.X)", "-offset_y", "$($rect.Y)", "-video_size", "$($rect.W)x$($rect.H)", "-t", "$Seconds", "-i", "desktop", "-c:v", "libx264", "-qp", "0", "-preset", "ultrafast", "-pix_fmt", "yuv444p", (Q $mkv))
 }
 function Get-PaletteArgs($mkv, $pal) {
     return @("-y", "-hide_banner", "-loglevel", "warning", "-i", (Q $mkv), "-vf", "fps=$Fps,scale=${Width}:-1:flags=lanczos,palettegen=stats_mode=diff", (Q $pal))
@@ -64,7 +66,7 @@ if ($DryRun) {
         Write-Host "    game: `"$Exe`" $((Get-GameArgs $c $l) -join ' ')"
     }
     $c0 = $Ladder[0]; $l0 = Get-Label $c0
-    Write-Host "  ffmpeg capture: `"$Ffmpeg`" $((Get-CaptureArgs '<window title>' "$CapDir\$l0.mkv") -join ' ')"
+    Write-Host "  ffmpeg capture: `"$Ffmpeg`" $((Get-CaptureArgs @{ X = '<x>'; Y = '<y>'; W = '<w>'; H = '<h>' } "$CapDir\$l0.mkv") -join ' ')"
     Write-Host "  ffmpeg palette: `"$Ffmpeg`" $((Get-PaletteArgs "$CapDir\$l0.mkv" "$CapDir\$l0.png") -join ' ')"
     Write-Host "  ffmpeg gif:     `"$Ffmpeg`" $((Get-GifArgs "$CapDir\$l0.mkv" "$CapDir\$l0.png" "$CapDir\$l0.gif") -join ' ')"
     Write-Host "  check:          py -3 -I Scripts/ablation-check.py <csv> --cond <name> --shot"
@@ -85,8 +87,30 @@ public static class FgWin {
     [DllImport("user32.dll")] public static extern uint GetWindowThreadProcessId(IntPtr h, out uint pid);
     [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr h);
     [DllImport("user32.dll")] public static extern void keybd_event(byte vk, byte scan, uint flags, UIntPtr extra);
+    [DllImport("user32.dll")] public static extern bool SetProcessDPIAware();
+    [DllImport("user32.dll")] public static extern bool GetClientRect(IntPtr h, out RECT r);
+    [DllImport("user32.dll")] public static extern bool ClientToScreen(IntPtr h, ref POINT p);
+    [DllImport("user32.dll")] public static extern int GetSystemMetrics(int i);
+    [StructLayout(LayoutKind.Sequential)] public struct RECT { public int Left, Top, Right, Bottom; }
+    [StructLayout(LayoutKind.Sequential)] public struct POINT { public int X, Y; }
 }
 "@
+}
+# 이 PowerShell 프로세스를 DPI 인식으로 바꾼다(창 좌표가 물리 픽셀로 나온다). Add-Type 직후 한 번
+[void][FgWin]::SetProcessDPIAware()
+# 게임 창 클라이언트 영역의 물리 화면 좌표. 가상 화면(모든 모니터)에 다 들어오지 않으면 $null과 이유를 돌려준다
+function Get-ClientRegion($H) {
+    $r = New-Object FgWin+RECT
+    $pt = New-Object FgWin+POINT
+    if (-not [FgWin]::GetClientRect($H, [ref]$r)) { return @{ Err = "GetClientRect failed" } }
+    if (-not [FgWin]::ClientToScreen($H, [ref]$pt)) { return @{ Err = "ClientToScreen failed" } }
+    $reg = @{ X = $pt.X; Y = $pt.Y; W = $r.Right - $r.Left; H = $r.Bottom - $r.Top }
+    $vx = [FgWin]::GetSystemMetrics(76); $vy = [FgWin]::GetSystemMetrics(77); $vw = [FgWin]::GetSystemMetrics(78); $vh = [FgWin]::GetSystemMetrics(79)
+    if ($reg.W -le 0 -or $reg.H -le 0) { return @{ Err = "empty client rect $($reg.W)x$($reg.H)" } }
+    if ($reg.X -lt $vx -or $reg.Y -lt $vy -or ($reg.X + $reg.W) -gt ($vx + $vw) -or ($reg.Y + $reg.H) -gt ($vy + $vh)) {
+        return @{ Err = "window region $($reg.W)x$($reg.H)@$($reg.X),$($reg.Y) is outside the screen ${vw}x${vh}@${vx},${vy}" }
+    }
+    return $reg
 }
 function Get-FgPid { $p = [uint32]0; [void][FgWin]::GetWindowThreadProcessId([FgWin]::GetForegroundWindow(), [ref]$p); return [int]$p }
 function Set-GameForeground($Proc) {
@@ -128,13 +152,18 @@ function Capture-One($c) {
         Write-Host $focus
         if ($focus -notmatch "^focus=(ok|appactivate|altkey)$") { $res.Note = $focus; return $res }
         $Proc.Refresh()
-        $title = $Proc.MainWindowTitle
-        if (-not $title) { $res.Note = "empty window title"; return $res }
         Start-Sleep -Seconds $RecordDelaySec
         if ($Proc.HasExited) { $res.Note = "game exited before recording"; return $res }
+        $Proc.Refresh()
+        $reg = Get-ClientRegion $Proc.MainWindowHandle
+        if ($reg.Err) { $res.Note = $reg.Err; return $res }
+        Write-Host "region $($reg.W)x$($reg.H) at $($reg.X),$($reg.Y)"
         $errLog = "$CapDir\$label.ffmpeg.log"
-        $p = Start-Process -FilePath $Ffmpeg -ArgumentList (Get-CaptureArgs $title $mkv) -Wait -PassThru -NoNewWindow -RedirectStandardError $errLog
+        $env:__COMPAT_LAYER = "HighDpiAware"
+        try { $p = Start-Process -FilePath $Ffmpeg -ArgumentList (Get-CaptureArgs $reg $mkv) -Wait -PassThru -NoNewWindow -RedirectStandardError $errLog }
+        finally { Remove-Item Env:\__COMPAT_LAYER -ErrorAction SilentlyContinue }
         if ($p.ExitCode -ne 0 -or -not (Test-Path $mkv)) { $res.Note = "ffmpeg capture exit $($p.ExitCode) (see $errLog)"; return $res }
+        $res.Note = "region $($reg.W)x$($reg.H)@$($reg.X),$($reg.Y); "
         $p = Start-Process -FilePath $Ffmpeg -ArgumentList (Get-PaletteArgs $mkv $pal) -Wait -PassThru -NoNewWindow -RedirectStandardError "$errLog.pal"
         if ($p.ExitCode -ne 0) { $res.Note = "ffmpeg palette exit $($p.ExitCode)"; return $res }
         $p = Start-Process -FilePath $Ffmpeg -ArgumentList (Get-GifArgs $mkv $pal $gif) -Wait -PassThru -NoNewWindow -RedirectStandardError "$errLog.gif"

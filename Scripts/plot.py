@@ -18,6 +18,7 @@
 """
 import argparse
 import csv
+import json
 import math
 from pathlib import Path
 
@@ -190,12 +191,31 @@ def hbar_chart(items, title, subtitle, path, lines):
     path.write_text(svg(W, H, "\n".join(body)), encoding="utf-8")
 
 
-def full_main(batch):
+def full_target(batch, rows, override):
+    # 목표 총수: --target-n > batch.json의 target_n(run-full.ps1이 적는다) > A/A 행이 있는 N > L8 P1 행의 최대 N
+    if override:
+        return override, "--target-n"
+    bj = ROOT / "Measurements" / batch / "batch.json"
+    if bj.exists():
+        try:
+            t = json.loads(bj.read_text(encoding="utf-8-sig")).get("target_n")
+            if t:
+                return int(t), "batch.json"
+        except (ValueError, OSError):
+            pass
+    aa = sorted({n for (v, n, p) in rows if v == FULL_BASELINE + "-aa" and p == "P1"})
+    if aa:
+        return aa[-1], "A/A row"
+    have = {n for (v, n, p) in rows if v == FULL_BASELINE and p == "P1"}
+    return (max(have) if have else None), "max N"
+
+
+def full_main(batch, target_n=None):
     rows = full_load(batch)
     out = OUT / batch.lower()
     out.mkdir(parents=True, exist_ok=True)
     ns = sorted({n for (_, n, _) in rows})
-    target = max((n for (v, n, p) in rows if v == FULL_BASELINE and p == "P1"), default=None)
+    target, target_src = full_target(batch, rows, target_n)
     if target is None:
         raise SystemExit(f"no {FULL_BASELINE} P1 rows in Measurements/{batch}/summary.csv")
     aa = rows.get((FULL_BASELINE + "-aa", target, "P1"))
@@ -267,7 +287,7 @@ def full_main(batch):
     multi = {k: sorted(v) for k, v in p95.items() if len(v) >= 2}
     if multi:
         line_chart(multi, f"Frame p95 vs N ({batch}, P1)", out / "full-maxn-P1.svg", {k: sorted(v) for k, v in p50.items() if k in multi})
-    print(f"{batch}: target N={target:,} {aa_note}")
+    print(f"{batch}: target N={target:,} (from {target_src}) {aa_note}")
     for t in table:
         print(f'{t["series"]}: N@16.7ms p95 = {t["n_p95"]} {t["note_p95"]} | p50 = {t["n_p50"]} {t["note_p50"]}')
     print(f"wrote {out}")
@@ -276,9 +296,10 @@ def full_main(batch):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--batch", help="총괄 묶음 이름(예: Full1). 주면 Measurements/<묶음>/만 읽어 Docs/figures/<묶음>/에 그린다")
+    ap.add_argument("--target-n", type=int, help="--batch의 목표 총수를 직접 정한다(기본: batch.json의 target_n)")
     args = ap.parse_args()
     if args.batch:
-        full_main(args.batch)
+        full_main(args.batch, args.target_n)
         return
     OUT.mkdir(parents=True, exist_ok=True)
     rows = load()
