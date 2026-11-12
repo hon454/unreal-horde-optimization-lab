@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="476" viewBox="0 0 800 476" font-family="Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Segoe UI, sans-serif" font-size="16" fill="#111827">
+<rect x="0.5" y="0.5" width="799" height="475" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+<text x="32" y="46" font-size="22" font-weight="700">호드 총수 1만에서 2단계와 3단계가 쓰는 시간</text>
+<text x="32" y="74" font-size="16" fill="#4b5563">오브 시점 카메라, 60초씩 세 번 잰 중앙값(ms)</text>
+<text x="40" y="120" font-size="17" font-weight="700">2단계: 로직을 Mass로, 정지 인스턴스</text>
+<rect x="40" y="132" width="353.4" height="20" rx="3" fill="#374151"/>
+<text x="401.4" y="148" font-size="16"><tspan font-weight="700" fill="#374151">10.3</tspan><tspan fill="#4b5563"> 프레임 시간</tspan></text>
+<rect x="40" y="158" width="216.1" height="20" rx="3" fill="#2563eb"/>
+<text x="264.1" y="174" font-size="16"><tspan font-weight="700" fill="#2563eb">6.30</tspan><tspan fill="#4b5563"> 게임 스레드</tspan></text>
+<rect x="40" y="184" width="222.2" height="20" rx="3" fill="#0d9488"/>
+<text x="270.2" y="200" font-size="16"><tspan font-weight="700" fill="#0d9488">6.48</tspan><tspan fill="#4b5563"> 렌더 스레드</tspan></text>
+<rect x="40" y="210" width="343.6" height="20" rx="3" fill="#db2777"/>
+<text x="391.6" y="226" font-size="16"><tspan font-weight="700" fill="#db2777">10.0</tspan><tspan fill="#4b5563"> GPU</tspan></text>
+<text x="40" y="266" font-size="17" font-weight="700">3단계: VAT 인스턴스, 200m 밖 지우기</text>
+<rect x="40" y="278" width="271.3" height="20" rx="3" fill="#374151"/>
+<text x="319.3" y="294" font-size="16"><tspan font-weight="700" fill="#374151">7.91</tspan><tspan fill="#4b5563"> 프레임 시간</tspan></text>
+<rect x="40" y="304" width="109.9" height="20" rx="3" fill="#2563eb"/>
+<text x="157.9" y="320" font-size="16"><tspan font-weight="700" fill="#2563eb">3.21</tspan><tspan fill="#4b5563"> 게임 스레드</tspan></text>
+<rect x="40" y="330" width="141.3" height="20" rx="3" fill="#0d9488"/>
+<text x="189.3" y="346" font-size="16"><tspan font-weight="700" fill="#0d9488">4.12</tspan><tspan fill="#4b5563"> 렌더 스레드</tspan></text>
+<rect x="40" y="356" width="258.3" height="20" rx="3" fill="#db2777"/>
+<text x="306.3" y="372" font-size="16"><tspan font-weight="700" fill="#db2777">7.54</tspan><tspan fill="#4b5563"> GPU</tspan></text>
+<line x1="611.4" y1="126" x2="611.4" y2="398" stroke="#b45309" stroke-width="2" stroke-dasharray="5 4"/>
+<text x="605.4" y="410" text-anchor="end" font-size="16" font-weight="700" fill="#b45309">16.7ms(60fps)</text>
+<line x1="32" y1="428" x2="768" y2="428" stroke="#e5e7eb"/>
+<text x="32" y="454" font-size="16" fill="#4b5563">프레임 시간은 셋 가운데 가장 느린 쪽이 정한다. 두 단계 모두 GPU다.</text>
+</svg>

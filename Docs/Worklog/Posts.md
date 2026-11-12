@@ -157,3 +157,92 @@
 - README와 01번 글의 독자용 문장에서 묶음 이름을 "최종 측정"으로 바꿨다. 링크 글자에는 경로를 두지 않는다(`[최종 측정의 표](…)`). README "실행"의 명령은 `-Batch <묶음>`으로 썼다. 01번 측정 기록에는 실행 라벨(`Full2-…`, `Full1trace…`)만 남았다. `S1-budget` r3 GPU 튐 문장 둘은 옛 측정과 견주는 문장이라 지웠다.
 - 확인: README에서 링크 주소 밖의 `Full`은 0건이다. 상대 링크는 모두 살아 있다.
 - 01번 글 트레이스: 코디네이터가 `Full2trace-*`·`Full2traceser-*`로 다시 뽑으라고 했다. `Scripts/trace-export.ps1`은 Unreal Insights를 띄우고 스크린샷 값은 Insights 화면에서 읽은 값이라 촬영 중에는 할 수 없다. 730ff18 트레이스 값 그대로 두고, 어느 트레이스의 값인지와 이유를 측정 기록 "측정 기록의 변경"에 적었다. 촬영이 끝난 뒤 다시 뽑을 일로 남긴다.
+
+## 02 Mass 로직(2026-11-13)
+
+`Posts/02-mass-logic/`를 쓴다. 수치는 최종 측정(Test 패키지 08e45f2)의 `L1-full`·`L2-mass` 행과 `full-n-at-60fps.csv`에서만 만든다.
+
+### 진행
+
+- 조사 끝(성공). 읽은 것: AGENTS.md, STATUS.md, posting.md, ADR-0014, backlog.md, post-review.md "02 Mass 코어", post-material.md "02", measurement.md, engine-notes.md 1·3·11·12·13·27절, 01번 글 전체, `full-conditions.json` `L2-mass`(note "로직을 Mass로, 표현은 애니 없는 ISM"), plan.md M1과 사다리, code-tour.md, `Source/HordeOptLab/`(LabMassTypes.h, LabMassTraits.cpp, LabCrowdSubsystem.cpp, LabMassProcessors.cpp, HordeOptLab.cpp, LabMinion.cpp/.h, LabOrb.cpp), `Config/DefaultMass.ini`. 엔진 소스: `MassMovementProcessors.cpp:41,100`, `MassRepresentationTypes.h:105`, `MassUpdateISMProcessor.cpp`, 기본으로 꺼진 프로세서 셋. 다음은 초안.
+- 그림 끝(성공). `make-figures.py`가 SVG 넷(`mass-summary`, `mass-processors`, `mass-draw-calls`, `mass-frame-vs-n`)을 만든다. 입력은 `summary.csv`와 `full-n-at-60fps.csv`뿐이고 트레이스 값은 없다. 다음은 초안.
+- 초안 끝(성공). `README.md`를 posting.md 틀(요약, 시나리오 카드, 배경 지식 셋, 문제, 원리, 바꾼 것, 결과, 한 문장으로)로 썼다. 본문은 코드·그림·제목을 빼고 약 4,000자(공백 포함, 시나리오 카드 포함)다. 엔진 코드 발췌는 14줄 하나(`UMassApplyMovementProcessor::Execute`)다. Insights 자리는 주석으로 두었다. 다음은 측정 기록.
+
+## 00 목적·목표 사양·측정 방법(2026-11-13)
+
+`Posts/00-goals-and-method/`를 쓴다. 수치는 최종 측정(Test 패키지 08e45f2)의 `summary.csv`·`runs.csv`·`full-n-at-60fps.csv`에서만 만든다. 에디터, 빌드, 패키징, 게임, 브라우저는 띄우지 않았다.
+
+### 진행(00)
+
+- 조사 끝(성공). 읽은 것: AGENTS.md, STATUS.md, posting.md, ADR-0001·0014·0015, backlog.md, post-review.md "핵심 인사이트"·"재료 선별"·"00" 항목, post-material.md "01 프레임 시간"·"02 Game Thread 시간"·"00", measurement.md, plan.md "품질 계획", README.md, 01번 글 전체, pc-specs.md, `full-conditions.json`, `Source/HordeOptLab/LabHud.cpp`, `Scripts/plot.py` `n_at_budget`. 엔진 소스: `LaunchEngineLoop.cpp:1518-1520`, `UnrealClient.cpp:1842-1845`, `CsvProfiler.cpp:4383-4390`, `RenderingThread.cpp:2435-2450,2505-2510`. 다음은 초안.
+- 그림 끝(성공). `make-figures.py`가 SVG 넷을 만든다: `frame-pipeline.svg`(개념도, 값 없음), `judging-difference.svg`, `max-entities-method.svg`, `stage-map.svg`(설정값만). 글자 폭을 어림해 오른쪽 끝을 넘는 글자를 고쳤다. 요약과 시나리오는 README 그림 `ladder.svg`, `scenario.svg`를 상대 경로로 쓴다. 다음은 초안.
+- 초안 끝(성공). `README.md`: 요약, 시나리오 카드, 배경 지식 셋(Test 구성, CSV 프로파일러, Unreal Insights), 목적, 목표 사양, 시나리오, 측정 방법 여섯 소절, 여덟 단계의 지도, 한 문장으로. 엔진 발췌 17줄. 첫 초안이 본문 약 5,700자라 줄여 약 4,300자(배경 지식 제외)로 맞췄다. 다음은 측정 기록.
+- 측정 기록 끝(성공). `measurements.md`: 빌드와 묶음, 본문의 수치와 출처(세 회차 값), 그림의 값(그림마다 표), 시나리오와 절차의 출처(설정 파일과 줄), 엔진 소스, 발췌 원본 줄, 경위의 근거, 확인하지 않은 것. 다음은 확인.
+- 확인 끝(성공). 상대 링크 26개가 모두 실제 파일을 가리킨다. 코드 스팬 밖 `~`는 모두 `\~`다. README 산문에 묶음 이름·조건 라벨·마일스톤 이름·측정 약어가 없다(링크 주소 안의 파일 이름만 있다). 본문 수치를 측정 기록 표와 하나씩 대조했다. SVG 넷의 글자를 `summary.csv`·`full-n-at-60fps.csv`와 대조했다. 다음은 커밋.
+
+### 결정(00)
+
+- **요약 그림은 README의 `ladder.svg`를 가져다 쓴다.** 대안은 글 전용 요약 그림을 새로 그리는 것이다. 00번 글의 요약은 연재 전체의 결과라 사다리 그림이 맞고, 브리프가 맞는 README 그림의 재사용을 권했다. 그림의 32개 값은 측정 기록 "그림의 값"에 표로 옮겼다.
+- **"가장 느린 쪽" 설명은 엔진 코드 둘과 개념도 하나로 한다.** 게임 스레드 시간의 정의(`UnrealClient.cpp`)와 프레임 동기화(`RenderingThread.cpp` `FFrameEndSync`)가 원리를 정하는 코드라 발췌했다(합 17줄, 한도 30줄). 데이터 예는 새 그림 대신 요약 그림의 3·4단계를 문장으로 짚었다. 대안(별도 막대 그림)은 요약 그림과 같은 값을 되풀이한다.
+- **차이 판정 그림의 예는 A/A, `A8-fix`, `A8-budget`이다.** "구별되지 않음" 둘과 "차이 있음" 하나를 같은 축에 둔다. 측정 끝 A/A는 재현성의 증거도 겸한다. 대안 `A8-hydrate`는 병목이 바뀌어 판정 규칙보다 병목 설명이 앞선다.
+- **최대 개체 수 그림은 최종 구성 한 계열만 그린다.** 단계별 값은 README `max-entities.svg`에 있고, 이 그림은 읽는 법(보간과 p50·p95의 차이)이 요점이다.
+- **여덟 단계의 지도는 거리별 표현 구성 그림으로 그린다.** 단계마다 바꾼 것이 대부분 "어느 거리를 무엇으로 그리나"라서 한 장에 모인다. 표현과 무관한 변경(애니메이션 예산, Simulation LOD, 엔티티 풀, 고정 바운드)은 줄마다 한 줄 문장으로 적었다. 링크는 그림 안에 걸 수 없어 아래 목록에 둔다.
+- **HUD 읽는 법을 넣었다.** backlog의 00번 항목에 "HUD 읽는 법"이 있다. `LabHud.cpp`에서 배치와 색 규칙을 확인해 한 문단으로 적었다. 화면의 숫자는 인용하지 않는다(8단계 화면은 다시 찍는 중이다).
+- **환경이 수치를 흔든 사례는 수치 없이 방향만 적었다.** 옛 묶음의 값이고 최종 측정에 대응 조건이 없다. 대신 지금의 장치(러너 검사, 스파이크 0건, A/A)를 최종 측정의 값으로 적었다. 에디터 사례는 글에서 빼고 러너 검사 문장에만 남겼다(분량).
+- **"여유분 20%(13.3ms)"는 쓰지 않았다.** plan.md에서 잠정값이고 확정 기록을 찾지 못했다.
+- **본문 분량.** 공통 지표 설명을 모두 이 글에 두라는 규칙 때문에 배경 지식을 빼고 약 4,300자로 4,000자를 조금 넘는다. 시나리오 카드와 목록 글자를 빼면 약 4,100자다.
+- **최대 개체 수는 25,958로 적었다.** posting.md "개수는 줄이지 않는다"와 01번 글(774)을 따랐다. measurement.md의 "유효 숫자 둘"과 README의 "약 2만 6천"과는 표기가 다르다.
+
+### 확인하지 못한 것(00)
+
+- SVG를 화면에서 보지 않았다(브라우저 금지). 글자 폭은 어림 스크립트로만 확인했다. `max-entities-method.svg`의 값 글자와 곡선의 겹침, `frame-pipeline.svg`의 빗금 모양, `stage-map.svg`의 빗금(그림자 끔) 대비는 화면에서 봐야 한다.
+- `Waits`에 들어가지 않는 기다림이 게임 스레드 시간에 얼마나 섞이는지는 보지 않았다(measurement.md "함정"의 사례). 본문은 "잠든 시간이 빠진다"까지만 적었다.
+- 프레임 시간이 가장 느린 스레드보다 조금 긴 이유는 가르지 않았다.
+- 8단계 화면 `step8-L8-q4final.webp`는 촬영 세션이 다시 찍는 중이다. 새 화면의 HUD 배치가 본문 설명과 맞는지 보지 않았다.
+
+### 코디네이터용(00)
+
+- **글 링크:** 02\~09번 글은 아직 커밋되지 않아 "여덟 단계의 지도" 목록에 제목만 적었다(`Posts/00-goals-and-method/README.md` 143\~150행). 글이 커밋되면 `../02-mass-logic/README.md`처럼 링크를 건다. 제목은 backlog의 이름을 줄여 썼으니 실제 글 제목으로 맞춘다.
+- **README "글" 표와 `Posts/README.md`:** 00번 행을 더한다.
+- **backlog.md 13행:** 00번 글 상태를 바꾼다.
+- **01번 글:** "지표의 자세한 설명은 00번 글에 둔다"를 `../00-goals-and-method/README.md` 링크로 바꿀 수 있다.
+- **표기 맞추기:** 최대 개체 수의 표기(25,958 대 "약 2만 6천")를 글 사이에서 정한다.
+- **engine-notes.md:** CSV 스레드 시간의 정의(`UnrealClient.cpp:1842-1844`, `SlateRHIRenderer.cpp:1359`, `FScopeIdle` `WindowsPlatformProcess.cpp:1870,1940`)와 `FFrameEndSync`(`RenderingThread.cpp:2458-2478`, `r.OneFrameThreadLag` 1, `r.GTSyncType` 0)가 없으면 더한다(이 세션은 그 파일을 고치지 않는다).
+
+## 03 ISM + VAT(2026-11-13)
+
+`Posts/03-ism-vat/`를 쓴다. 수치는 최종 측정(Test 패키지 08e45f2)의 `L2-mass`·`L3-vatcull` 행과 `full-n-at-60fps.csv`에서만 만든다. 에디터, 빌드, 패키징, 게임, 브라우저, Insights는 띄우지 않았다.
+
+### 진행(03)
+
+- 조사 끝(성공). 읽은 것: AGENTS.md, STATUS.md, posting.md, backlog.md, post-review.md "03 ISM + VAT"와 "02 움직이는 ISM과 Lumen", post-material.md "02 움직이는 ISM과 Lumen"·"03", measurement.md "확정값", engine-notes.md 3·11절, references.md, 01번 글 전체, `full-conditions.json` `L3-vatcull`(note "ISM + VAT, 200m 밖 Off"), plan.md M2와 사다리, code-tour.md, Worklog M2.md·M3.md·Q6.md 트레이스 절, `Measurements/M3/shots/vat-shadow/README.md`, `Source/HordeOptLab/`(LabVatProcessor.cpp/.h, LabCrowdSubsystem.cpp, LabMassTraits.cpp, LabMassTypes.h, HordeOptLab.cpp, LabConfig.cpp, LabCrowdSpawner.cpp), `Scripts/bake-vat.py`. 엔진 소스: `AnimToTextureBPLibrary.cpp:245,290,1108`, `MassUpdateISMProcessor.cpp:15-37`, `MassRepresentationTypes.h:105`. 다음은 초안.
+- 초안 끝(성공). `README.md`: 요약, 시나리오 카드, 배경 지식(VAT, 인스턴스 커스텀 데이터, Representation LOD, 650자), 문제, 원리(예상 포함), 바꾼 것, 결과(화면 소절 포함), 틀렸던 가설(세 문단), 한 문장으로. 본문은 표·코드·그림·제목과 배경 지식을 빼고 약 3,770자다. 다음은 그림.
+- 그림 끝(성공). `make-figures.py`가 SVG 다섯 개를 만든다(요약, 원리 도식, 문제, 예상과 실제, 최대 개체 수). 값은 `summary.csv`·`full-n-at-60fps.csv`에서 읽고 트레이스 값은 내보낸 표(`%TEMP%\horde-trace\F1-*`)의 타이머 합 ÷ 프레임 수를 상수로 둔다. 반올림은 CSV 문자열에서 반올림(12.35 → 12.4)이 되게 `Decimal`로 했다. SVG의 숫자 글자를 측정 기록 표와 하나씩 대조했다. 다음은 측정 기록.
+- 측정 기록 끝(성공). `measurements.md`: 빌드와 묶음, 3단계 구현 위치(파일:줄), 본문 수치 표(1만 네 값, 인스턴스 수와 거리, 2단계 호드 총수별, 느린 쪽 5% 경계, 트레이스, 탑뷰), 트레이스 파일과 프레임 수, 측정 기록의 변경, HUD 차이, 그림, 엔진 소스, 발췌 줄, 경위의 근거, 확인하지 않은 것. 다음은 확인.
+
+### 결정(03)
+
+- **3단계가 두 변수를 함께 바꾼 것을 본문에 밝힌다.** 사다리의 3단계(`L3-vatcull`)는 VAT와 200m 밖 지우기를 함께 바꿨고 최종 측정에 VAT만 바꾼 조건이 없다. "바뀐 변수가 하나임을 명시"를 지킬 수 없어 "바뀐 변수는 둘"과 "따로 잰 값이 없다"를 바꾼 것 절과 한 문장으로 절에 적었다. 버린 대안: 옛 M2 묶음의 VAT만 바꾼 값을 쓰기(묶음이 달라 규칙 위반), 빼 보기 `A8-farcull`로 200m 밖 지우기의 몫을 보이기(최종 구성 위의 값이라 3단계와 바탕이 다르다. 09번 글의 몫).
+- **결과 그림을 "인스턴스 수에 비례하는 일의 예상과 실제"로 그린다.** 기하 계산(200m 안 40%)으로 예상을 세우고 트레이스 타이머 다섯 개(EndVisualChanges, PrepareDistanceFieldScene, ShadowDepths, BasePass, RenderVelocities)와 대조했다. 실제가 모두 예상보다 커서 "VAT가 더한 일 + 비례하지 않는 몫"을 말할 수 있다. 버린 대안: 프레임 시간만으로 예상(프레임은 비례하지 않는 고정 비용이 섞여 예상선을 세울 근거가 없다).
+- **트레이스 값은 730ff18의 트레이스(`Full1trace*`)에서 쓴다.** 01번 글과 같은 이유다(Insights를 띄워야 내보낼 수 있고 촬영 중이다, 두 빌드의 `Source/`·`Config/`가 같다). 측정 기록 "측정 기록의 변경"에 적었다.
+- **Lumen 항목(backlog "글에 넣을 것")은 이 글에서 다루지 않는다.** 미니언을 Lumen 장면에서 빼는 일은 2단계부터 모든 Mass 단계에 같고(`ExcludeVisualsFromLumen`, measurement.md "미니언과 Lumen, 그림자"), 02번 글이 이미 다룬다. 3단계에서 바뀐 것이 아니다. Mass ISM 그림자 기본값(`bCastShadows`)도 같은 이유로 02번 글의 몫이고, 이 글은 측정 기록의 엔진 소스 표에만 적었다.
+- **칼날 그림자(바운드) 이야기를 결과의 "화면" 소절에 넣는다.** VAT가 들여온 품질 문제이고 엔진 소스로 원인을 댈 수 있다(`AnimToTextureBPLibrary.cpp:245,290`). 공개 이슈는 찾지 못해 그렇게 적었다. 해결 코드는 `Source/HordeOptLab/`가 아니라 `Scripts/bake-vat.py`에 있어 그 블록을 보였다(바운드는 굽기 산출물의 속성이다).
+- **틀렸던 가설은 "VAT 비용의 자리를 두 번 잘못 짚었다"로 쓴다.** 옛 묶음 값(M2 E2, M3 `diag-vt*`)은 방향만 쓰고, 최종 측정이 받치는 값(직렬 트레이스의 프로세서 0.451 / 0.569ms, 탑뷰 GPU 6.51 → 7.20ms)만 수치로 썼다. M3b 프래그먼트 분리는 A/B가 갈리지 않아 본문에 쓰지 않고 측정 기록에만 적었다. 탑뷰 GPU 증가도 두 변수가 섞인 값이라 "방향 근거"로만 썼다.
+- **2단계의 인스턴스 수 "1만"은 설정에서 적는다.** 2단계는 엔진 프로세서라 `Lab/IsmBand*`가 없다. 3단계의 37.6%가 기하 예상 40%와 맞아 청크 필터가 건너뛴 청크가 적다고 보고, 확인하지 않은 것에 적었다.
+- **00·02번 글을 상대 링크로 잇는다.** 두 폴더(`Posts/00-goals-and-method/`, `Posts/02-mass-logic/`)의 README가 체크아웃에 있다(아직 커밋 전). 폴더 이름은 두 글의 Worklog 절을 따랐다.
+
+### 확인하지 못한 것(03)
+
+- SVG와 움직이는 WebP를 화면에 그려 보지 않았다(브라우저 금지). 글자 겹침은 좌표와 글자 수로만 확인했다.
+- 3단계 화면에서 피격·죽기 동작이 보이는지. 이미지 설명은 "걷는다"까지만 적었다.
+- 최종 측정 패키지의 VAT 메시 바운드가 수정 뒤 값인지(굽기 산출물은 git 밖).
+- VAT만의 비용, 예상과 실제의 차이의 분해, 2단계가 실제로 올린 인스턴스 수, `L3-vatcull` 1만 P1 r1의 게임 스레드 4.14ms.
+- 최종 측정 빌드의 트레이스(`Full2trace-L2/L3-*`)로 다시 뽑은 값.
+
+### 코디네이터용(03)
+
+- 촬영이 끝나면 03번 글의 트레이스 값도 `Full2trace-L2-mass-*`, `Full2trace-L3-vatcull-*`(병렬, 렌더 스레드·GPU)와 `Full2traceser-*`(직렬, 게임 스레드)에서 다시 뽑아 `make-figures.py`의 `TRACE` 상수와 측정 기록 "트레이스 값" 표를 고친다. 01번 글과 같은 일이다.
+- 00·02번 글의 폴더 이름이 바뀌면 이 글의 상대 링크 둘(`../00-goals-and-method/README.md`, `../02-mass-logic/README.md`)을 고친다.
+- 루트 README "글" 표에 03번 행을 더한다(코디네이터 몫).
+- backlog.md "글에 넣을 것"의 Lumen 항목은 02번 글이 맡는다고 적어 두면 좋다. 03번 글은 다루지 않는다(위 결정).
+- engine-notes.md에 더할 것: `MassRepresentationFragments.h:309` `BufferHysteresisOnDistancePercentage = 10.0f`(표현 LOD 경계 히스테리시스 기본값), `MassVisualizationComponent.cpp:566-571`(커스텀 데이터 개수 검사, 3절에 있으나 줄 범위만), `AnimToTextureBPLibrary.cpp:33`(`AnimationToTexture`가 두 `SetBoundsExtensions` 호출을 감싼다).

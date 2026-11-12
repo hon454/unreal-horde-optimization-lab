@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="864" viewBox="0 0 800 864" font-family="Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Segoe UI, sans-serif" font-size="16" fill="#111827">
+<rect x="0.5" y="0.5" width="799" height="863" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+<text x="32" y="46" font-size="22" font-weight="700">VAT 인스턴스 하나가 움직이는 길</text>
+<text x="32" y="74" font-size="16" fill="#4b5563">굽기는 에디터에서 한 번, 나머지 두 칸은 매 프레임 돈다</text>
+<rect x="32" y="104" width="736" height="150" rx="10" fill="#f8fafc" stroke="#e5e7eb"/>
+<rect x="32" y="104" width="6" height="150" rx="3" fill="#9333ea"/>
+<text x="56" y="136" font-size="18" font-weight="700" fill="#9333ea">굽기 · 에디터에서 한 번</text>
+<text x="750" y="136" text-anchor="end" font-family="Consolas, SFMono-Regular, Menlo, monospace" font-size="16" fill="#4b5563">AnimToTexture, Bone 모드</text>
+<text x="56" y="166" font-size="17">걷기·피격·죽기 클립을 초당 30프레임으로 굽는다</text>
+<text x="56" y="192" font-size="17">프레임마다 뼈의 위치·회전을 텍스처 한 줄에 쓴다</text>
+<text x="56" y="218" font-size="17">정점마다 붙은 뼈와 가중치를 따로 쓴다</text>
+<text x="750" y="240" text-anchor="end" font-family="Consolas, SFMono-Regular, Menlo, monospace" font-size="16" fill="#4b5563">Scripts/bake-vat.py</text>
+<path d="M400.0 257 L400.0 275" stroke="#4b5563" stroke-width="2"/>
+<path d="M394.0 269 L400.0 277 L406.0 269" fill="none" stroke="#4b5563" stroke-width="2"/>
+<rect x="32" y="280" width="736" height="150" rx="10" fill="#f8fafc" stroke="#e5e7eb"/>
+<rect x="32" y="280" width="6" height="150" rx="3" fill="#2563eb"/>
+<text x="56" y="312" font-size="18" font-weight="700" fill="#2563eb">매 프레임 · 게임 스레드</text>
+<text x="750" y="312" text-anchor="end" font-family="Consolas, SFMono-Regular, Menlo, monospace" font-size="16" fill="#4b5563">ULabVatISMProcessor</text>
+<text x="56" y="342" font-size="17">개체의 상태와 그 상태에 들어간 시각을 읽는다</text>
+<text x="56" y="368" font-size="17">재생할 프레임 번호 Frame, PrevFrame을 계산한다</text>
+<text x="56" y="394" font-size="17">위치와 함께 인스턴스 커스텀 데이터로 쌓는다</text>
+<text x="750" y="416" text-anchor="end" font-family="Consolas, SFMono-Regular, Menlo, monospace" font-size="16" fill="#4b5563">LabVatProcessor.cpp</text>
+<path d="M400.0 433 L400.0 451" stroke="#4b5563" stroke-width="2"/>
+<path d="M394.0 445 L400.0 453 L406.0 445" fill="none" stroke="#4b5563" stroke-width="2"/>
+<rect x="32" y="456" width="736" height="150" rx="10" fill="#f8fafc" stroke="#e5e7eb"/>
+<rect x="32" y="456" width="6" height="150" rx="3" fill="#db2777"/>
+<text x="56" y="488" font-size="18" font-weight="700" fill="#db2777">매 프레임 · GPU</text>
+<text x="750" y="488" text-anchor="end" font-family="Consolas, SFMono-Regular, Menlo, monospace" font-size="16" fill="#4b5563">머티리얼 함수 MF_BoneAnimation</text>
+<text x="56" y="518" font-size="17">커스텀 데이터의 Frame으로 텍스처의 줄을 고른다</text>
+<text x="56" y="544" font-size="17">그 줄의 뼈 자세로 정점을 옮긴다</text>
+<text x="56" y="570" font-size="17">스켈레탈 메시와 AnimBP 없이 정적 메시가 움직인다</text>
+<text x="750" y="592" text-anchor="end" font-family="Consolas, SFMono-Regular, Menlo, monospace" font-size="16" fill="#4b5563">MI_LabMinionVAT_Bone</text>
+<text x="32" y="642" font-size="18" font-weight="700">거리에 따라 무엇으로 그리나(Representation LOD)</text>
+<text x="32" y="689" font-size="17" font-weight="700">2단계</text>
+<rect x="120.0" y="664" width="648.0" height="38" rx="4" fill="#9ca3af"/>
+<text x="444.0" y="689" text-anchor="middle" font-size="16" font-weight="700" fill="white">정지 인스턴스(애니메이션 없음)</text>
+<text x="32" y="739" font-size="17" font-weight="700">3단계</text>
+<rect x="120.0" y="714" width="259.2" height="38" rx="4" fill="#2563eb"/>
+<text x="249.6" y="739" text-anchor="middle" font-size="16" font-weight="700" fill="white">VAT 인스턴스</text>
+<rect x="379.2" y="714" width="388.8" height="38" rx="4" fill="white" stroke="#9ca3af" stroke-dasharray="5 4"/>
+<text x="573.6" y="739" text-anchor="middle" font-size="16" font-weight="700" fill="#4b5563">그리지 않는다</text>
+<line x1="120.0" y1="756" x2="120.0" y2="764" stroke="#4b5563"/>
+<text x="120.0" y="784" text-anchor="start" font-size="16" fill="#4b5563">0m</text>
+<line x1="158.9" y1="756" x2="158.9" y2="764" stroke="#4b5563"/>
+<text x="158.9" y="784" text-anchor="middle" font-size="16" fill="#4b5563">30m</text>
+<line x1="223.7" y1="756" x2="223.7" y2="764" stroke="#4b5563"/>
+<text x="223.7" y="784" text-anchor="middle" font-size="16" fill="#4b5563">80m</text>
+<line x1="379.2" y1="756" x2="379.2" y2="764" stroke="#4b5563"/>
+<text x="379.2" y="784" text-anchor="middle" font-size="16" fill="#4b5563">200m</text>
+<line x1="768.0" y1="756" x2="768.0" y2="764" stroke="#4b5563"/>
+<text x="768.0" y="784" text-anchor="end" font-size="16" fill="#4b5563">500m</text>
+<text x="32" y="814" font-size="16" fill="#4b5563">거리는 카메라에서 잰다. 맵 반경 500m에서 개체의 60%가 200m 밖에 있다.</text>
+<text x="32" y="838" font-size="16" fill="#4b5563">3단계는 30m·80m 경계를 두지만 세 구간 모두 VAT 인스턴스로 그린다.</text>
+</svg>
