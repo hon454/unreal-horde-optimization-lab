@@ -19,7 +19,7 @@ M0\~M5, M3b 완료(태그 `M0`\~`M5`, `M3b`). 품질 계획 Q1\~Q5 완료, Q6은
 
 ## 진행 중인 세션
 
-없다.
+- `docs-full1`(local_9a80969a): 문서를 `Full1` 값으로 맞추기(ADR 0010\~0013 "결과", autonomous-decisions 요약, README 표·그래프, measurement.md, post-material "08"). Sonnet medium. 시작함(2026-11-12).
 
 세션을 띄우면 세션, 작업 단위, 모델과 추론 수준, 상태를 여기에 적고, 끝나서 확인한 세션은 보관 처리하고 지운다(AGENTS.md "작업 세션은 작게 나눠 띄우고").
 
