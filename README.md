@@ -22,7 +22,7 @@
 
 같은 호드 총수 1만, 같은 오브 시점 카메라다. 화면 왼쪽 위 HUD에 단계 이름, 프레임 시간, 거리별 개체 수가 나온다.
 
-아래 값은 최종 측정이다. 여덟 단계와 빼 보기 조건을 Test 패키지 하나(08e45f2)에서 연달아 쟀다(2026-11-12\~13). 단계마다 기법 하나를 더한다. 정확한 값은 [summary.csv](Measurements/Full2/summary.csv)와 [Docs/figures/full2/](Docs/figures/full2/)의 CSV에 있다.
+아래 값은 최종 측정이다. 여덟 단계와 빼 보기 조건을 Test 패키지 하나(08e45f2)에서 연달아 쟀다(2026-11-12\~13). 단계마다 기법 하나를 더한다. 정확한 값은 [최종 측정의 표](Measurements/Full2/summary.csv)와 [그래프의 CSV](Docs/figures/full2/)에 있다.
 
 ![단계마다 기법 하나를 더했을 때의 프레임 시간, 게임 스레드, 렌더 스레드, GPU 시간](Docs/figures/readme/ladder.svg)
 
@@ -105,14 +105,14 @@ ISKM의 이점은 프레임 시간이 아니라 GPU 시간이다. ISKM을 VAT로
 2. Fab의 [Paragon: Minions](https://www.fab.com/listings/039ea035-9360-4e76-ad06-5d3a92da6f65)와 [Niagara Examples Pack](https://www.fab.com/listings/0e188eca-4e54-4fb2-a9ed-d8b8a565e600). 런처 엔진의 빈 프로젝트에 받는다.
 3. `Scripts/restore-assets.ps1` 한 번. 두 팩에서 쓰는 에셋을 옮기고 VAT·ISKM 같은 파생 에셋을 만든다.
 
-단계는 한 빌드 안의 실행 모드다(`-LabStage=M0`\~`M5`). Test 패키지를 만들고 묶음 스크립트로 잰다.
+단계는 한 빌드 안의 실행 모드다(`-LabStage=M0`\~`M5`). Test 패키지를 만들고 묶음 스크립트로 잰다. `<묶음>`은 새 측정의 이름이다(이미 쓴 이름은 다시 쓰지 않는다).
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File Scripts/package.ps1
 powershell -ExecutionPolicy Bypass -File Scripts/run-full.ps1 -DryRun
-powershell -ExecutionPolicy Bypass -File Scripts/run-full.ps1 -Batch Full2
-py -3 -I Scripts/summarize.py --batch Full2
-py -3 -I Scripts/plot.py --batch Full2
+powershell -ExecutionPolicy Bypass -File Scripts/run-full.ps1 -Batch <묶음>
+py -3 -I Scripts/summarize.py --batch <묶음>
+py -3 -I Scripts/plot.py --batch <묶음>
 ```
 
 나머지 명령은 [Docs/Guides/commands.md](Docs/Guides/commands.md)에 있다.
@@ -127,4 +127,4 @@ py -3 -I Scripts/plot.py --batch Full2
 | `Docs/` | 계획, 결정 기록(ADR), 측정 규약, 엔진 소스 확인 기록, 작업 기록(Worklog) |
 | `Docs/figures/` | 그래프(SVG)와 그 수치(CSV), 단계별 화면(`steps/`) |
 | `Posts/` | 글과 측정 기록 |
-| `Measurements/` | 묶음별 수치와 대표 스크린샷. 최종 측정은 `Full2/`, 개발 중의 측정은 `M<N>/`·`Q<N>/` |
+| `Measurements/` | 묶음별 수치와 대표 스크린샷. [최종 측정](Measurements/Full2/), 개발 중의 측정은 `M<N>/`·`Q<N>/` |

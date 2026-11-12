@@ -6,13 +6,13 @@
 
 | 항목 | 값 |
 | --- | --- |
-| 묶음 | 총괄 묶음 `Full2`(2026-11-12 20:34\~11-13 00:39). 경위는 [Worklog/Q6.md](../../Docs/Worklog/Q6.md) "Full2 재측정" |
+| 묶음 | 최종 측정(2026-11-12 20:34\~11-13 00:39). 경위는 [작업 기록의 재측정 절](../../Docs/Worklog/Q6.md#full2-재측정2026-11-12) |
 | 빌드 | Test 패키지 08e45f2, CSV 메타데이터 `labbuild=08e45f24a5e5` |
 | 조건 | 2560x1440 Epic, `r.VSync=0`, `t.MaxFPS=0`, Lumen·VSM 켬, `mass.FullyParallel=true`. 2종(소형 90%, 대형 10%), 체력 60\~240(시드 20261106). 오브 시점(P1). 측정 창 60초, 세 회차 중앙값 |
 | 단계와 변형 | `L1-full`(`-LabStage=M0 -LabVariant=full`), `S1-uro`(`-LabVariant=uro`), `S1-budget`(`-LabVariant=budget`). 인자와 기대 메타데이터는 `Scripts/full-conditions.json` |
-| 요약 파일 | `Measurements/Full2/summary.csv`(세 회차 중앙값과 범위), `Measurements/Full2/runs.csv`(회차별 한 행) |
-| 60fps를 지키는 최대 개체 수(`N@16.7ms`) | `Docs/figures/full2/full-n-at-60fps.csv`(`Scripts/plot.py`가 측정 N 사이를 로그 보간) |
-| 트레이스 | 옛 총괄 묶음 `Full1`(Test 패키지 730ff18)의 트레이스를 그대로 쓴다. 아래 "측정 기록의 변경" 참고. `Saved/Traces/Full1traceser-L1-full-*`(직렬, 1만 P1, 한 회). 25\~75초 창을 `Scripts/trace-export.ps1 -Command TimerStatistics`로 내보냈다(저장소 밖 `%TEMP%\horde-trace\F1-traceser-L1-full-GT.csv`). 표는 [Worklog/Q6.md](../../Docs/Worklog/Q6.md) "Full1 후속 분석"의 "트레이스 16개" |
+| 요약 파일 | [최종 측정의 요약 표](../../Measurements/Full2/summary.csv)(세 회차 중앙값과 범위), [실행별 값](../../Measurements/Full2/runs.csv)(회차별 한 행) |
+| 60fps를 지키는 최대 개체 수(`N@16.7ms`) | [최대 개체 수 CSV](../../Docs/figures/full2/full-n-at-60fps.csv)(`Scripts/plot.py`가 측정 N 사이를 로그 보간) |
+| 트레이스 | 이전 측정(Test 패키지 730ff18)에서 뜬 트레이스를 그대로 쓴다. 아래 "측정 기록의 변경" 참고. 실행 라벨 `Full1traceser-L1-full-*`(`Saved/Traces/`, 직렬, 1만 P1, 한 회). 25\~75초 창을 `Scripts/trace-export.ps1 -Command TimerStatistics`로 내보냈다(저장소 밖 `%TEMP%\horde-trace\F1-traceser-L1-full-GT.csv`). 표는 [작업 기록의 트레이스 16개 절](../../Docs/Worklog/Q6.md#트레이스-16개사다리-여덟-단계-1만-p1-병렬직렬-한-회씩) |
 
 변형의 구현: URO는 메시의 `bEnableUpdateRateOptimizations = true`이고 간격은 `FAnimUpdateRateParameters` 기본값이다(`Source/HordeOptLab/LabMinion.cpp:80-83` `ALabMinion::SetupVisual`). Budget은 메시를 `USkeletalMeshComponentBudgeted`로 바꾸고(`ALabMinionBudget` 생성자 `LabMinion.cpp:244-247`), Significance Manager가 시점에서의 거리 25 / 50 / 100 / 250m 안에 중요도 1 / 0.75 / 0.5 / 0.25, 그 밖에 0을 준다(`LabTierSignificance` `LabMinion.cpp:229-241`, `FLabScenario::BudgetTiers` `LabConfig.h:161`). 시점은 게임 모드가 매 틱 넘기는 카메라 트랜스폼이다(`LabGameMode.cpp:595-601` `Sig->Update`). 그래서 본문은 "카메라와의 거리"로 적었다(P1 카메라는 오브 위 9m에서 제자리 회전한다). 예산은 `a.Budget.BudgetMs 2`(`FLabScenario::BudgetMs` `LabConfig.h:162`, `LabGameMode.cpp:363-364`에서 `a.Budget.Enabled 1`과 함께 설정).
 
@@ -81,9 +81,8 @@
 
 ## 측정 기록의 변경
 
-- 2026-11-13: 측정값을 총괄 묶음 `Full1`(730ff18)에서 `Full2`(08e45f2)로 바꿨다. 200m 밖 입자 메시를 원본 LOD4로 바꿔(bf1a4c8) 측정 조건이 달라졌고, 규약대로 전 조건을 새 묶음으로 다시 쟀기 때문이다. 1단계의 값은 0.5\~5ms쯤 바뀌었고 본문의 서술은 그대로 성립한다.
-- 트레이스 값(446.43 / 323.49 / 27.24 / 14.70, 스크린샷의 448 / 322ms)은 `Full1` 트레이스 그대로다. 두 빌드 사이에 `Source/`와 `Config/`는 같고, 바뀐 것은 `Content/Lab/FX/`의 배경 무리 에셋 셋뿐이다(`git diff --stat 730ff18 08e45f2`). 1단계는 배경 무리를 쓰지 않는다. `Full2` 트레이스는 내보내지 않았다.
-- `Full1`에서 있던 `S1-budget` r3의 GPU 튐(112.456ms)은 `Full2`에 없다(세 회차 48.9\~50.5ms).
+- 2026-11-13: 측정값을 Test 패키지 730ff18의 측정에서 08e45f2의 최종 측정으로 바꿨다. 200m 밖 입자 메시를 원본 LOD4로 바꿔(bf1a4c8) 측정 조건이 달라졌고, 규약대로 전 조건을 다시 쟀기 때문이다.
+- 트레이스 값(446.43 / 323.49 / 27.24 / 14.70, 스크린샷의 448 / 322ms)은 730ff18에서 뜬 트레이스(라벨 `Full1traceser-L1-full-*`, `Full1trace-L1-full-N10000-P1-r1`)의 값 그대로다. 값을 뽑는 `Scripts/trace-export.ps1`은 Unreal Insights를 띄우고, 스크린샷 값은 Insights 화면에서 읽었다. 같은 PC에서 촬영이 도는 동안이라 최종 측정의 트레이스(`Full2trace-*`, `Full2traceser-*`)로 다시 뽑지 않았다. 두 빌드 사이에 `Source/`와 `Config/`는 같고, 바뀐 것은 `Content/Lab/FX/`의 배경 무리 에셋 셋뿐이다(`git diff --stat 730ff18 08e45f2`). 1단계는 배경 무리를 쓰지 않는다.
 
 ## 화면의 HUD와 표의 차이
 
@@ -153,9 +152,9 @@ SVG 네 개는 [make-figures.py](make-figures.py)가 만든다(저장소 루트�
 ## 확인하지 않은 것
 
 - 하위 스텝을 끄고(`MaxSimulationIterations` 1 등) 다시 잰 직접 실험은 없다. "1만에서 8회"는 엔진 소스의 규칙과 0.4초 상한으로 계산한 값이고, 실행에서 횟수를 세지 않았다.
-- 0.4초 상한 때문에 1만 실행에서는 게임 시간이 실제 시간보다 느리게 흐른다(440ms 프레임에 0.4초). 사망 수가 2단계 1만과 약 0.3% 차이로 맞는 이유(`Full2` 초당 사망 62.18 / 61.99)(동등성 검사 통과)와 이 상한의 관계는 보지 않았다.
+- 0.4초 상한 때문에 1만 실행에서는 게임 시간이 실제 시간보다 느리게 흐른다(440ms 프레임에 0.4초). 사망 수가 2단계 1만과 약 0.3% 차이로 맞는 이유(최종 측정의 초당 사망 62.18 / 61.99)(동등성 검사 통과)와 이 상한의 관계는 보지 않았다.
 - Budget·URO 실행의 트레이스는 없다. Budget이 줄인 40.0ms가 애니메이션 타이머에서 났는지, URO가 Budget의 절반쯤만 줄인 이유는 확인하지 않았다. 글 재료의 "포즈 계산이 워커에서 돌아서" 설명은 쓰지 않았다.
-- `Full1`의 `S1-budget` r3 GPU 튐(112.456ms)의 원인. `Full2`에서는 다시 나오지 않았다.
+- 최종 측정의 트레이스로 다시 뽑은 1단계 트레이스 값. 위 "측정 기록의 변경" 참고.
 - URO 실행에서 개체마다 실제로 고른 갱신 간격(화면 크기 분포)은 세지 않았다. 본문의 URO 설명은 엔진 기본값의 규칙이다.
 - 트레이스는 직렬(`mass.FullyParallel` 끔) 실행이다. 1단계는 Mass 프로세서가 거의 돌지 않아(`PrePhysics` 0.05ms) 병렬 트레이스와 값이 같다(병렬 `F1-trace-L1-full-GT.csv`: `FEngineLoop::Tick` 446.43, CharacterMovement 323.06).
 - 그림의 "AnimBP 갱신이 스켈레탈 메시 틱 안에 있다"는 Incl − Excl(27.24 − 11.33 = 15.91)이 `USkeletalMeshComponent_TickAnimation` 14.90과 맞는 것으로 판단했다. 트레이스에서 부모 관계를 직접 펼쳐 보지는 않았다.
