@@ -6,7 +6,7 @@
 #include "LabIskmProcessor.generated.h"
 
 /**
- * M5 ISKM 갱신(plan.md "M5" 결정 2·4, 2026-11-11 사용자 결정). M5 ISKM 변형에서 ULabVatISMProcessor 자리에 하나만 돈다(HordeOptLab.cpp).
+ * M5 ISKM 갱신(plan.md "M5" 결정 2·4). M5 ISKM 변형에서 ULabVatISMProcessor 자리에 하나만 돈다(HordeOptLab.cpp).
  * 엔진 표현 경로(UMassMovableVisualizationTrait, 표현 LOD, 액터 전환)는 그대로고, 엔진 ISKM 프로세서 둘(UMassUpdateInstancedSkinnedMeshProcessor,
  * UMassConsumeInstancedSkinnedMeshAnimationProcessor)은 쓰지 않는다. 두 프로세서는 위치와 애니 데이터를 같은 배열에 순서로만 맞춰 쌓는데
  * 쿼리와 청크 필터가 달라 순서가 맞는다는 보장이 없다(MassVisualizationComponent.cpp:704-754, Docs/Worklog/M5.md "설계 조사").

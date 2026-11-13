@@ -83,7 +83,7 @@ void ALabCrowdSpawner::LoadAssets()
 		}
 		else if (!Large.ActorMaterial.IsEmpty())
 		{
-			// M0 대형 액터도 M2~M4와 같은 짙은 회색으로 그린다(2026-11-10 사용자 결정). 소형은 Paragon 원본 머티리얼 그대로다.
+			// M0 대형 액터도 M2~M4와 같은 짙은 회색으로 그린다. 소형은 Paragon 원본 머티리얼 그대로다.
 			LargeAssets.ActorMaterial = LoadObject<UMaterialInterface>(nullptr, *Large.ActorMaterial, nullptr, LOAD_Quiet | LOAD_NoWarn);
 		}
 		UE_LOG(LogLab, Log, TEXT("lab_types types=2 large_assets=%s large_radius=%.0f small_radius=%.0f"),
@@ -145,7 +145,13 @@ void ALabCrowdSpawner::SpawnInitial()
 				const FLabUnitAssetPaths& Paths = FLabUnitAssetPaths::Get(FLabUnitTypes::AssetType(Type)); // 대체 중이면 대형도 소형 VAT
 				UStaticMesh* VatMesh = LoadObject<UStaticMesh>(nullptr, *Paths.VatMeshPath(Mode));
 				const UAnimToTextureDataAsset* VatData = LoadObject<UAnimToTextureDataAsset>(nullptr, *Paths.VatDataPath(Mode));
-				checkf(VatMesh && VatData && VatData->Animations.Num() == 3, TEXT("VAT assets missing: run Scripts/bake-vat.py"));
+				if (!VatMesh || !VatData || VatData->Animations.Num() != 3)
+				{
+					// checkf는 Test 빌드에서 빠진다(DO_CHECK 0). 측정 패키지에서도 멈추도록 로그를 남기고 종료 코드 3으로 끝낸다.
+					UE_LOG(LogLab, Error, TEXT("lab_assets_missing what=vat type=%d mode=%s (run Scripts/bake-vat.py)"), Type, Mode);
+					LabRequestExit(3, TEXT("LabAssets"));
+					return;
+				}
 				FLabVatClips& Clips = Crowd->VatClipsByType[Type];
 				FLabVatClip* Targets[3] = { &Clips.Walk, &Clips.Hit, &Clips.Death };
 				for (int32 i = 0; i < 3; ++i)
@@ -170,7 +176,12 @@ void ALabCrowdSpawner::SpawnInitial()
 				const FLabUnitAssetPaths& Paths = FLabUnitAssetPaths::Get(FLabUnitTypes::AssetType(Type));
 				USkeletalMesh* IskmMesh = Paths.IskmMesh.IsEmpty() ? nullptr : LoadObject<USkeletalMesh>(nullptr, *Paths.IskmMesh);
 				UAnimSequenceTransformProviderData* Provider = Paths.IskmProvider.IsEmpty() ? nullptr : LoadObject<UAnimSequenceTransformProviderData>(nullptr, *Paths.IskmProvider);
-				checkf(IskmMesh && Provider && Provider->GetSequences().Num() == 3, TEXT("ISKM assets missing: run Scripts/create-iskm.py (type %d)"), Type);
+				if (!IskmMesh || !Provider || Provider->GetSequences().Num() != 3)
+				{
+					UE_LOG(LogLab, Error, TEXT("lab_assets_missing what=iskm type=%d (run Scripts/create-iskm.py)"), Type);
+					LabRequestExit(3, TEXT("LabAssets"));
+					return;
+				}
 				Crowd->IskmMeshes[Type] = IskmMesh;
 				Crowd->IskmProviders[Type] = Provider;
 				Crowd->WalkLengthByType[Type] = Provider->GetSequencePlayLength(0);

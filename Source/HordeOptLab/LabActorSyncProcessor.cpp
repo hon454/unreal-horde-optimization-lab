@@ -47,7 +47,7 @@ void ULabActorManagement::TeleportActor(const FTransform& Transform, AActor& Act
 {
 	// 엔진은 액터를 붙일 때와 준비가 끝날 때 엔티티 변환(발밑, z=0)으로 액터를 옮긴다(MassRepresentationProcessor.cpp:272, 428).
 	// 우리 액터의 원점은 캡슐 중심이라 그대로 두면 그 프레임에 88cm 가라앉았다가 다음 프레임 동기화에서 올라온다.
-	// 그 수직 이동이 모션 블러로 세로 줄무늬 잔상을 만들었다(2026-11-08 60fps 연속 캡처). 동기화 프로세서와 같은 높이로 옮긴다.
+	// 그 수직 이동이 모션 블러로 세로 줄무늬 잔상을 만들었다(60fps 연속 캡처). 동기화 프로세서와 같은 높이로 옮긴다.
 	FTransform Lifted = Transform;
 	// 엔티티 변환의 스케일은 1이다. 대형 액터의 스케일(LabUnitAssets.h)이 SetActorTransform으로 지워지지 않게 종류의 배율을 넣는다(소형은 1이라 전과 같다).
 	// 액터의 지금 스케일이 아니라 종류에서 읽는다: 풀에서 막 나온 액터는 엔진이 이미 스케일을 1로 되돌렸을 수 있다(MassActorSpawnerSubsystem.cpp:253).
@@ -87,7 +87,7 @@ ULabActorSyncProcessor::ULabActorSyncProcessor()
 	ExecutionOrder.ExecuteAfter.Add(UE::Mass::ProcessorGroupNames::Representation);
 	if (LabExplicitLogicOrder())
 	{
-		ExecutionOrder.ExecuteAfter.Add(LabLogicGroupName); // A/B m3order만. 기본은 프래그먼트 접근 순서만(결정 4, 2026-11-09)
+		ExecutionOrder.ExecuteAfter.Add(LabLogicGroupName); // A/B m3order만. 기본은 로직과의 선후가 없다(LabMassProcessors.h LabExplicitLogicOrder)
 	}
 	bRequiresGameThreadExecution = true;
 	// M3부터만 돈다. 게임 모듈이 단계를 보고 켠다(HordeOptLab.cpp). M1·M2 실행에 빈 순회 비용을 더하지 않는다.
@@ -118,7 +118,7 @@ void ULabActorSyncProcessor::ConfigureQueries(const TSharedRef<FMassEntityManage
 
 void ULabActorSyncProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context)
 {
-	CSV_SCOPED_TIMING_STAT(Lab, ActorSync); // 병목 분석용(Exclusive/GameThread/TickActors를 나눠 보려고, 2026-11-09)
+	CSV_SCOPED_TIMING_STAT(Lab, ActorSync); // 병목 분석용(Exclusive/GameThread/TickActors를 나눠 보려고)
 	UWorld* World = Context.GetWorld();
 	const ULabCrowdSubsystem* Crowd = World ? World->GetSubsystem<ULabCrowdSubsystem>() : nullptr;
 	if (!Crowd || !Crowd->IsActive())
@@ -129,9 +129,11 @@ void ULabActorSyncProcessor::Execute(FMassEntityManager& EntityManager, FMassExe
 	const float HitDuration = Crowd->HitDuration;
 	const float DeathDuration = Crowd->DeathDuration;
 	const bool bSigBudget = FLabConfig::Get().Variant == ELabVariant::M3BudgetSig;
-	const bool bScreenSig = FLabConfig::Get().bScreenSigBudget; // E3 (3c). M3~M5 단계 기본 켬(2026-11-11)
+	const bool bScreenSig = FLabConfig::Get().bScreenSigBudget; // E3 (3c). M3~M5 단계 기본 켬
 	const FVector CameraLocation = Crowd->SnipeView.Location;
-	int32 LargeActors = 0, LargeSkips = 0;
+	// 애니 갱신 통계(종류별): 동기화한 액터 수, 그중 이번 프레임 애니 갱신을 하지 않은 수(보간 + 건너뜀), 그중 보간한 수
+	int32 LargeActors = 0, LargeSkips = 0, LargeInterps = 0;
+	int32 SmallActors = 0, SmallSkips = 0, SmallInterps = 0;
 	const bool bFixStartTime = FLabConfig::Get().HasFix(FLabConfig::FixStartTime);
 	const bool bFixWait = FLabConfig::Get().HasFix(FLabConfig::FixWait);
 	const bool bOld = LabUseOldQueries();
@@ -143,7 +145,7 @@ void ULabActorSyncProcessor::Execute(FMassEntityManager& EntityManager, FMassExe
 	int32 Rebinds = 0;
 	int32 TagsRemoved = 0;
 	int32 DbgHoles = 0, DbgOverlaps = 0, DbgSwitches = 0;
-	// 진단(-LabVatTiming): 액터 이동(SetActorLocationAndRotation)만 따로 잰다(2026-11-09, ActorSync 비용 나누기)
+	// 진단(-LabVatTiming): 액터 이동(SetActorLocationAndRotation)만 따로 잰다(ActorSync 비용 나누기)
 	static const bool bTiming = FParse::Param(FCommandLine::Get(), TEXT("LabVatTiming"));
 	uint64 CyMove = 0;
 #if !UE_BUILD_TEST
@@ -345,19 +347,28 @@ void ULabActorSyncProcessor::Execute(FMassEntityManager& EntityManager, FMassExe
 			}
 			else if (bScreenSig)
 			{
-				// E3 (3c)(2026-11-09 사용자 결정): 중요도 = 화면 크기 = 바운드 반경 ÷ 카메라 거리(Significance Manager의 기본형). 크기와 거리를 한 수로 합친다.
+				// E3 (3c): 중요도 = 화면 크기 = 바운드 반경 ÷ 카메라 거리(Significance Manager의 기본형). 크기와 거리를 한 수로 합친다.
 				// 할당기는 큰 값을 먼저 틱하고 절대값은 쓰지 않는다(AnimationBudgetAllocator.cpp:327-342). 비교 상대는 (3a) 거리 단계(m3budgetdist).
 				if (USkeletalMeshComponentBudgeted* Budgeted = Cast<USkeletalMeshComponentBudgeted>(SkelMesh))
 				{
 					Budgeted->SetComponentSignificance(TypeParams.BoundRadius / FMath::Max(FVector::Dist(Xf.GetLocation(), CameraLocation), 1.f));
 				}
 			}
-			if (bLargeChunk)
 			{
-				// E3 (3c) 스탯: 대형 액터 수와 그중 이번 프레임 애니 틱을 건너뛴 수. 할당기가 외부 틱 제어로 둔 컴포넌트는 ShouldTickAnimation()이 bExternalUpdate를
-				// 돌려준다(SkeletalMeshComponent.cpp:1918-1923). 할당기 갱신 전후 어느 쪽 값인지는 틱 순서에 달려 한 프레임 어긋날 수 있다. 예산 변형이 아니면 0이다.
-				++LargeActors;
-				if (SkelMesh->IsUsingExternalTickRateControl() && !SkelMesh->ShouldTickAnimation()) { ++LargeSkips; }
+				// 애니 갱신 통계. 할당기는 매 프레임 액터 틱보다 먼저(OnWorldPreActorTick, LevelTick.cpp:1675) 컴포넌트마다 세 가지를 정한다(AnimationBudgetAllocator.cpp:465-500).
+				// 갱신: EnableExternalUpdate(true)라 ShouldTickAnimation()이 참이다(SkeletalMeshComponent.cpp:1918-1923).
+				// 보간: 틱은 켜고 갱신은 끈다. 틱 간격이 2 이상이고 bInterpolate면 EnableExternalInterpolation(true)라 이전 두 포즈 사이를 잇는다(SkeletalMeshComponent.cpp:2909-2911).
+				// 건너뜀: 틱을 끄고 갱신도 끈다. 포즈가 그대로 멈춘다.
+				// Mass PrePhysics 단계는 OnWorldPreActorTick 뒤라 이 값은 이번 프레임의 결정이다. 예산이 꺼져 있으면(외부 틱 제어 없음) 셋 다 0이다.
+				const bool bExternal = SkelMesh->IsUsingExternalTickRateControl();
+				const bool bNoUpdate = bExternal && !SkelMesh->ShouldTickAnimation();
+				const bool bInterp = bNoUpdate && SkelMesh->IsUsingExternalInterpolation() && SkelMesh->PrimaryComponentTick.IsTickFunctionEnabled();
+				int32& Count = bLargeChunk ? LargeActors : SmallActors;
+				int32& Skips = bLargeChunk ? LargeSkips : SmallSkips;
+				int32& Interps = bLargeChunk ? LargeInterps : SmallInterps;
+				++Count;
+				if (bNoUpdate) { ++Skips; }
+				if (bInterp) { ++Interps; }
 			}
 
 			// 죽기 진홍색: VAT 머티리얼과 같은 곡선(진행도 x 2.5, 0~1로 자름, Scripts/bake-vat.py)
@@ -376,9 +387,17 @@ void ULabActorSyncProcessor::Execute(FMassEntityManager& EntityManager, FMassExe
 	CSV_CUSTOM_STAT(Lab, ViewActors30, ViewActors30, ECsvCustomStatOp::Set); // Q4 (나) 대체 지표의 분자: 그중 카메라 30m 안
 	CSV_CUSTOM_STAT(Lab, ActorTagsRemoved, TagsRemoved, ECsvCustomStatOp::Set); // 태그 필터 확인용: 떼어진 액터 수와 맞아야 한다
 	CSV_CUSTOM_STAT(Lab, LargeActors, LargeActors, ECsvCustomStatOp::Set);         // 2종: 이 프레임 동기화한 대형 액터 수
-	CSV_CUSTOM_STAT(Lab, LargeActorSkips, LargeSkips, ECsvCustomStatOp::Set);      // E3 (3c): 그중 애니 틱을 건너뛴 수
+	CSV_CUSTOM_STAT(Lab, LargeActorSkips, LargeSkips, ECsvCustomStatOp::Set);      // 그중 애니 갱신을 하지 않은 수(보간 + 건너뜀)
+	CSV_CUSTOM_STAT(Lab, LargeActorInterps, LargeInterps, ECsvCustomStatOp::Set);  // 그중 보간한 수. 건너뜀 = Skips - Interps
+	CSV_CUSTOM_STAT(Lab, SmallActors, SmallActors, ECsvCustomStatOp::Set);         // 소형도 같은 셋
+	CSV_CUSTOM_STAT(Lab, SmallActorSkips, SmallSkips, ECsvCustomStatOp::Set);
+	CSV_CUSTOM_STAT(Lab, SmallActorInterps, SmallInterps, ECsvCustomStatOp::Set);
 	Crowd->LargeActorFrames += LargeActors;
 	Crowd->LargeActorSkips += LargeSkips;
+	Crowd->LargeActorInterps += LargeInterps;
+	Crowd->SmallActorFrames += SmallActors;
+	Crowd->SmallActorSkips += SmallSkips;
+	Crowd->SmallActorInterps += SmallInterps;
 	Crowd->ActorCount.store(Actors); // Q5 HUD
 	if (bTiming)
 	{
@@ -394,7 +413,7 @@ void ULabActorSyncProcessor::Execute(FMassEntityManager& EntityManager, FMassExe
 			++Total;
 			if (AIt->GetUnitType() == LabUnitLarge && !AIt->IsHidden())
 			{
-				// 대형 배율 확인(2026-11-10): 풀에서 재사용된 액터의 스케일이 1로 돌아가 있지 않은지 센다
+				// 대형 배율 확인: 풀에서 재사용된 액터의 스케일이 1로 돌아가 있지 않은지 센다
 				++LargeShown;
 				if (!FMath::IsNearlyEqual(float(AIt->GetActorScale3D().X), FLabUnitAssetPaths::Get(LabUnitLarge).Scale, 0.01f)) { ++LargeWrongScale; }
 			}

@@ -11,7 +11,7 @@ class UStaticMeshComponent;
 
 /**
  * 맵 중앙의 목표(테슬라 코일 타워). 피해 범위(보라색 원기둥) 안의 개체는 중심에 가까울수록 센 피해(초당 ZoneDpsEdge~ZoneDpsCenter)를 받고, 저격 간격마다 먼 개체 K개를 쏜다.
- * 저격 대상은 화면 안의 산 개체 중 거리 구간마다 결정적 해시(스폰 일련번호 + 저격 틱)가 가장 작은 개체다(LabSnipe.h, 2026-11-07 사용자 결정).
+ * 저격 대상은 화면 안의 산 개체 중 거리 구간마다 결정적 해시(스폰 일련번호 + 저격 틱)가 가장 작은 개체다(LabSnipe.h).
  * 겉모습은 Niagara Examples Pack의 BP_TeslaCoil 구성(타워 메시, 구체, NS_TeslaCoil, NS_Boundary_Cylinder)을 같은 배치로 옮긴 것이다.
  * BP는 GAS 상태 효과를 끌고 와서 쓰지 않는다. 타워 이펙트는 모든 실행에서 상시로 돈다. 저격은 대상마다 구체에서 대상까지 곧은 보라 선 하나
  * (엔진 DynamicBeam 기반 NS_LabBolt)로 그린다. 측정 실행에서도 그린다(시나리오의 일부).
@@ -26,6 +26,7 @@ public:
 
 	void SetSpawner(ALabCrowdSpawner* InSpawner) { Spawner = InSpawner; }
 	virtual void BeginPlay() override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 	virtual void Tick(float DeltaSeconds) override;
 
 	int32 GetKillCount() const;
@@ -36,6 +37,13 @@ protected:
 	struct FLabSnipeView GetSnipeView() const;
 	/** M1부터: 피해와 저격은 프로세서(LabMassProcessors)가 하고, 오브는 저격 틱을 올리고 이펙트만 그린다. */
 	void TickMass(float DeltaSeconds, class ULabCrowdSubsystem* Crowd);
+	/**
+	 * Mass PrePhysics 단계 시작(게임 스레드, 프로세서를 띄우기 전, MassProcessingPhaseManager.cpp:79-83)에 오브 중심·화면 판정 카메라를 찍고 저격 시간을 누적한다.
+	 * 오브 틱은 같은 TG_PrePhysics에서 Mass 워커와 동시에 돌 수 있어(선후 선언 없음) 여기서 쓴다. 그래서 모든 프로세서가 같은 값, 곧 직전 프레임에 그린 카메라를 본다
+	 * (카메라 캐시는 TG_PostPhysics 뒤 UpdateCameraManager에서만 바뀐다, LevelTick.cpp:1847). 저격 요청도 늘 이 프레임 처리에서 가져간다.
+	 */
+	void OnMassPrePhysicsStart(float DeltaSeconds);
+	FDelegateHandle PhaseStartHandle;
 	void SpawnStrikeFx(const FVector& Target);
 	void TickStrikes(float DeltaSeconds);
 

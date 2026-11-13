@@ -97,8 +97,9 @@ const FLabConfig& FLabConfig::Get()
 			else if (Variant == TEXT("m3nocol")) { C.Variant = ELabVariant::M3NoCol; }
 			else if (Variant == TEXT("m3hyd15")) { C.Variant = ELabVariant::M3Hyd15; }
 			else if (Variant == TEXT("m3hyd50")) { C.Variant = ELabVariant::M3Hyd50; }
+			else { C.bVariantValid = false; } // 모르는 이름. 게임 모드가 종료 코드 2로 끝낸다(전에는 full로 조용히 돌았다)
 		}
-		// Budget Allocator(중요도 = 화면 크기) 기본값(2026-11-11 사용자 결정 A안): M3·M4·M5 단계는 켜고 그 밖은 끈다. 변형 m3sig는 항상 켠다(이름 호환).
+		// Budget Allocator(중요도 = 화면 크기) 기본값: M3·M4·M5 단계는 켜고 그 밖은 끈다. 변형 m3sig는 항상 켠다(이름 호환).
 		// 켜지 않는 변형은 비교 상대라 Budget 없이 또는 자기 방식으로 남는다: m3mass·m3base·m3colbase·m3hydbase(M3 Budget 없음 기준 라벨),
 		// m3uro(URO)·m3budgetdist·m3budgetsig(자기 중요도 방식)·m3lowres(저품질 액터가 URO)·m3noactor(액터 없음), M3 하위 실험·진단 변형(그 기준점이 m3mass다).
 		// M0 계열(budget·uro 등)은 M3 이전 단계라 어차피 꺼진다.
@@ -126,6 +127,13 @@ const FLabConfig& FLabConfig::Get()
 				if ((ScreenSig != 0) != C.bScreenSigBudget) { NoteOverride(FString::Printf(TEXT("screensig_budget=%d"), ScreenSig != 0 ? 1 : 0)); }
 				C.bScreenSigBudget = ScreenSig != 0;
 			}
+		}
+		// 애니메이션 예산 값(LabConfig.h BudgetMs). 0 이하는 예산 끔이고 A8-budget과 같은 길(bScreenSigBudget 거짓)을 쓴다.
+		C.BudgetMs = FLabScenario::BudgetMs;
+		if (FParse::Value(Cmd, TEXT("-LabBudgetMs="), C.BudgetMs))
+		{
+			if (C.BudgetMs != FLabScenario::BudgetMs) { NoteOverride(TEXT("budget_ms=") + FString::SanitizeFloat(C.BudgetMs, 0)); } // 4 → "4", 2.5 → "2.5"
+			if (C.BudgetMs <= 0.f) { C.bScreenSigBudget = false; }
 		}
 		// M5 엔티티 풀링 기본값(plan.md "M5" 결정 1): M5 단계는 켜고 다른 단계는 끈다. m4offpool은 어느 단계에서든 켜고, m4offmove·m5destroy는 끈다.
 		C.bEntityPool = C.Variant == ELabVariant::M4OffPool

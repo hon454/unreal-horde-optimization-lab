@@ -53,7 +53,7 @@ protected:
 	void ApplyBenchCVars();
 	void TickBench();
 	/**
-	 * 결정 6 바닥 띠(개발 전용 -LabBandFloor, 2026-11-09, backlog.md). L_Bench의 Floor 머티리얼을 M_LabBandFloor(에셋 세션 245cc35, Scripts/create-band-floor.md)의 MID로 바꾸고
+	 * 결정 6 바닥 띠(개발 전용 -LabBandFloor, backlog.md). L_Bench의 Floor 머티리얼을 M_LabBandFloor(에셋 세션 245cc35, Scripts/create-band-floor.md)의 MID로 바꾸고
 	 * 띠 반경은 저격 구간 FLabSnipeBands(30/80/200m)에서, 중심(BandCenter)은 오브 위치에서 매 프레임 넣는다. P2(탑뷰)에서는 켜지 않는다(3D 거리라 200m 경계가 XY 173m).
 	 * 켜짐은 CVar lab.BandFloor=1로 CSV 메타데이터 LabCVars에 남아 실수로 켜고 잰 실행을 걸러낸다. Test 빌드에는 코드가 없다.
 	 */
@@ -95,8 +95,9 @@ protected:
 	float BenchPhaseTime = 0.f;
 	int32 BenchFrames = 0;
 	int32 RespawnsAtStart = 0;
-	int64 LargeActorFramesAtStart = 0; // E3 (3c) 스탯의 측정 시작 값(ULabCrowdSubsystem::LargeActorFrames·Skips)
-	int64 LargeActorSkipsAtStart = 0;
+	/** 애니 갱신 통계의 측정 시작 값(ULabCrowdSubsystem::LargeActor*·SmallActor*). 순서: Frames, Skips, Interps */
+	int64 LargeActorAtStart[3] = {};
+	int64 SmallActorAtStart[3] = {};
 	int32 BenchExitCode = 0;
 	// Q5 동등성 통계: 이번 프레임 값과 측정 구간 집계
 	int32 LastAlive = 0;

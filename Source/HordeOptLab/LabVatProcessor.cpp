@@ -35,7 +35,7 @@ ULabVatISMProcessor::ULabVatISMProcessor()
 	bAutoRegisterWithProcessingPhases = false;
 	if (LabExplicitLogicOrder())
 	{
-		// A/B m3order만: 로직 그룹 뒤 선언. 기본은 FLabAnimStateFragment 접근으로 정해지는 순서만 쓴다(결정 4). 엔진의 Representation 뒤 선언은 부모 생성자가 더한다(MassUpdateISMProcessor.cpp:20).
+		// A/B m3order만: 로직 그룹 뒤 선언. 기본은 로직과의 선후가 없다(FLabAnimStateFragment 겹침은 청크 단위 충돌일 뿐이다, LabMassProcessors.h LabExplicitLogicOrder). 엔진의 Representation 뒤 선언은 부모 생성자가 더한다(MassUpdateISMProcessor.cpp:20).
 		ExecutionOrder.ExecuteAfter.Add(LabLogicGroupName);
 	}
 }
@@ -56,7 +56,7 @@ void ULabVatISMProcessor::ConfigureQueries(const TSharedRef<FMassEntityManager>&
 
 void ULabVatISMProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context)
 {
-	CSV_SCOPED_TIMING_STAT(Lab, VatIsm); // 병목 분석용(2026-11-09)
+	CSV_SCOPED_TIMING_STAT(Lab, VatIsm); // 병목 분석용
 	UWorld* World = Context.GetWorld();
 	const ULabCrowdSubsystem* Crowd = World ? World->GetSubsystem<ULabCrowdSubsystem>() : nullptr;
 	if (!Crowd || !Crowd->IsActive())
@@ -82,7 +82,7 @@ void ULabVatISMProcessor::Execute(FMassEntityManager& EntityManager, FMassExecut
 	const FLabSnipeView FrameView = Crowd->SnipeView;
 	std::atomic<int32>* NearVatCounter = bFrameLog ? &Crowd->FrameDiag[GFrameCounter & 1].NearVat : nullptr;
 #endif
-	// 진단(-LabVatTiming): 처리 안쪽을 나눠 잰다. 액터가 있을 때만 이 프로세서가 2.3ms 느려지는 원인 찾기(2026-11-09)
+	// 진단(-LabVatTiming): 처리 안쪽을 나눠 잰다. 액터가 있을 때만 이 프로세서가 2.3ms 느려지는 원인 찾기
 	static const bool bTiming = FParse::Param(FCommandLine::Get(), TEXT("LabVatTiming"));
 	uint64 CyXf = 0, CyCustom = 0, CyChunkSetup = 0;
 	int32 Chunks = 0, Entities = 0, IsmEntities = 0;

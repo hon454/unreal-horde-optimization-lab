@@ -11,9 +11,9 @@
  * M1 Mass 코어의 프로세서. M0 액터(ALabMinion, ALabOrb)의 이동·피해·사망 로직을 그대로 옮긴다. plan.md "M1".
  * 미니언 태그(FLabMinionTag)가 있는 엔티티만 다루므로 M0 실행에서는 대상이 없어 일하지 않는다.
  * 순서: 접근(Tasks 그룹, 엔진 조향 앞) → 엔진 조향·이동 → 그룹 LabLogic(범위 피해 → 저격 → 상태 타이머 → 피해 발생·적용) → 표현(VAT·ActorSync. 순서 선언은 변형 m3order에서만 하고 기본은 솔버가 정한다).
- * M3b 정비(Docs/Worklog/M3b.md "코드 정비", 2026-11-09 사용자 결정): 로직은 상태 전환 때 FLabAnimStateFragment를 쓰고 표현은 그것만 읽는다.
+ * M3b 정비(Docs/Worklog/M3b.md "코드 정비"): 로직은 상태 전환 때 FLabAnimStateFragment를 쓰고 표현은 그것만 읽는다.
  * 엔진 조향은 Tasks 뒤에 돌아야 하므로 접근만 Tasks 그룹에 남긴다. 그룹 이름 의존성은 솔버가 자식 노드 전부로 펼친다(MassProcessorDependencySolver.cpp:680-719).
- * M4(Docs/Worklog/M4.md, 2026-11-10 사용자 결정): 접근·범위 피해 둘은 M4부터 청크 필터 ShouldTickChunkThisFrame를 걸어 80m 밖 청크를 틱 간격마다만 돈다.
+ * M4(Docs/Worklog/M4.md): 접근·범위 피해 둘은 M4부터 청크 필터 ShouldTickChunkThisFrame를 걸어 80m 밖 청크를 틱 간격마다만 돈다.
  * 범위 피해는 엔진 누적 델타(FMassSimulationVariableTickFragment::DeltaTime)로 건너뛴 시간을 보상한다. 상태 타이머는 필터 없이 매 프레임 돈다(LabMassProcessors.cpp의 상태 프로세서 주석).
  * 저격은 오브의 이벤트성 질의라 필터를 걸지 않는다. M3까지의 쿼리와 계산은 그대로다.
  */
@@ -28,9 +28,10 @@ inline bool LabUseOldQueries()
 }
 
 /**
- * A/B 변형 m3order만 표현 프로세서(VatISM·ActorSync)에 ExecuteAfter(LabLogic)를 선언한다(결정 4, 2026-11-09).
- * 기본은 선언 없음: 솔버가 프래그먼트 접근(FLabAnimStateFragment 쓰기 → 읽기)으로만 순서를 정한다.
- * 20k P1에서 선언이 0.4~0.7ms 느렸다(m3noorder 15.52 vs m3mass 16.12ms, Docs/Worklog/M3b.md "코드 A/B(D안)").
+ * A/B 변형 m3order만 표현 프로세서(VatISM·ActorSync)에 ExecuteAfter(LabLogic)를 선언한다.
+ * 기본은 선언 없음: 로직과 표현 사이에 선후가 없다. 로직이 FLabAnimStateFragment를 쓰고 표현이 읽는 겹침은 청크 단위 접근 충돌일 뿐 프로세서의 선후를 만들지 않는다
+ * (MassProcessingQueueTypes.cpp:203-254, engine-notes.md 13절). 표현이 같은 프레임 로직보다 먼저 돌면 상태 변화가 한 프레임 늦게 보인다(Docs/Guides/code-tour.md "순서가 정해져 있지 않은 곳").
+ * 20k P1에서 선언이 0.4~0.7ms 느렸다(m3noorder 15.52 vs m3mass 16.12ms, Docs/Worklog/M3b.md "코드 A/B").
  */
 inline bool LabExplicitLogicOrder()
 {

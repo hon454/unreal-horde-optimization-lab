@@ -110,7 +110,7 @@ UMassEntityConfigAsset* ULabCrowdSubsystem::BuildEntityConfig(int32 UnitType, US
 		}
 		// m3noactor와 Q3 빼 보기 -LabHydrate=0은 0~30m도 인스턴스다(M5 ISKM이면 아래에서 ISKM으로 바뀐다). 밴드·상한은 그대로 둔다
 		Visual->Params.LODRepresentation[EMassLOD::High] = FLabConfig::Get().UsesHydration() ? EMassRepresentationType::HighResSpawnedActor : EMassRepresentationType::StaticMeshInstance;
-		// 전환 팝핑 대책(2026-11-08 사용자 결정). VAT → 액터: 액터의 포즈가 준비될 때까지 VAT 인스턴스를 그린다.
+		// 전환 팝핑 대책. VAT → 액터: 액터의 포즈가 준비될 때까지 VAT 인스턴스를 그린다.
 		// 액터 → VAT: 액터를 한 프레임 더 남긴다(엔진 군중 기본값도 켠다, MassCrowdVisualizationTrait.cpp:22). bKeepLowResActors가 켜져 있어야 동작한다(MassRepresentationProcessor.h:27-30).
 		Visual->Params.RepresentationActorManagementClass = ULabActorManagement::StaticClass();
 		Visual->Params.bWaitForActorVisualReadiness = FLabConfig::Get().HasFix(FLabConfig::FixWait);
@@ -118,7 +118,7 @@ UMassEntityConfigAsset* ULabCrowdSubsystem::BuildEntityConfig(int32 UnitType, US
 	}
 	if (bM3 || Variant == ELabVariant::VatCull || Variant == ELabVariant::VatCullVis)
 	{
-		// E3 (7): 하이드레이션 거리(화면 안 Visible)만 바꾼다(대표 30m). 80m·200m 밴드와 상한은 그대로(2026-11-09 사용자 결정 A)
+		// E3 (7): 하이드레이션 거리(화면 안 Visible)만 바꾼다(대표 30m). 80m·200m 밴드와 상한은 그대로
 		// Q4: 전환 거리와 액터 상한은 FLabConfig가 정한다(기본 30m·500, m3hyd15·m3hyd50은 15·50m, q4final과 -LabHydrateM·-LabActorCap). 80m·200m 밴드와 Medium 상한은 그대로
 		const float HydrateCm = FLabConfig::Get().HydrateCm();
 		// Off 거리: 기본 200m, -LabFarM=으로 옮긴다. Q3 빼 보기 -LabFarCull=0이면 1,000m라 맵 끝까지 그린다(RepOffCm)
@@ -136,7 +136,7 @@ UMassEntityConfigAsset* ULabCrowdSubsystem::BuildEntityConfig(int32 UnitType, US
 		}
 		Visual->Params.LODRepresentation[EMassLOD::Off] = EMassRepresentationType::None;
 		// E3b (8) 표현 LOD 값(plan.md "M3b"). BaseLODDistance는 화면 밖(카메라 뒤 포함), VisibleLODDistance는 화면 안의 밴드 경계다. 히스테리시스 10%(엔진 기본, MassRepresentationFragments.h:309).
-		// M3 대표(m3mass, 별칭 m3vis15)는 결정 1(2026-11-09, 20k·5k 빠른 회전 캡처)로 화면 밖 Base 15m, 화면 안 Visible 30m다. 그 전 대표(30/30m)는 m3vis30으로 잰다.
+		// M3 대표(m3mass, 별칭 m3vis15)는 결정 1(20k·5k 빠른 회전 캡처)로 화면 밖 Base 15m, 화면 안 Visible 30m다. 그 전 대표(30/30m)는 m3vis30으로 잰다.
 		// Base를 자기 정의로 고정한 변형(m3vis0 0m, m3vis30·m3hys20·m3hyd15·m3hyd50은 Visible과 같게)만 빼고 M3 변형은 모두 15m다. M2의 vatcull·vatcullvis는 bM3가 아니라 닿지 않는다.
 		if (bM3)
 		{
@@ -403,7 +403,7 @@ void ULabCrowdSubsystem::ApplyFixedIskmBounds(UInstancedSkinnedMeshComponent& Co
 
 void ULabCrowdSubsystem::ExcludeVisualsFromLumen()
 {
-	// ISM 컴포넌트는 표현 프로세서가 필요할 때 만든다. 처음 한 개만 고치면 뒤에 생긴 컴포넌트가 빠져서(2026-11-08 그림자 캐시 수정이
+	// ISM 컴포넌트는 표현 프로세서가 필요할 때 만든다. 처음 한 개만 고치면 뒤에 생긴 컴포넌트가 빠져서(그림자 캐시 수정이
 	// 듣지 않았다), 매 틱 컴포넌트를 훑어 아직 설정되지 않은 것만 고친다(비주얼라이저 하나, 컴포넌트 몇 개).
 	for (TActorIterator<AMassVisualizer> It(GetWorld()); It; ++It)
 	{
@@ -436,7 +436,7 @@ void ULabCrowdSubsystem::ExcludeVisualsFromLumen()
 			if (bWantAlways)
 			{
 				// VAT 인스턴스는 셰이더(WPO)로 모양이 바뀐다. 죽기 애니 중에는 제자리에 멈춰 위치 변화가 없어서 Virtual Shadow Map이
-				// 그림자를 캐시해 쓰러지기 전 자세(칼날 끝)의 그림자가 바닥에 남았다(2026-11-08 사용자 관찰, M2 N=1000).
+				// 그림자를 캐시해 쓰러지기 전 자세(칼날 끝)의 그림자가 바닥에 남았다.
 				// 엔진 설명대로 "시스템이 모르는 방식으로 움직이는" 프리미티브라 항상 다시 그리게 한다(Engine/Public/SceneTypes.h:222-235).
 				Component->ShadowCacheInvalidationBehavior = EShadowCacheInvalidationBehavior::Always;
 				Component->MarkRenderStateDirty();

@@ -28,6 +28,7 @@ public class HordeOptLab : ModuleRules
 			"MassMovement",
 			"MassNavigation",           // 엔진 조향, FMassMoveTargetFragment
 			"MassLOD",
+			"MassSimulation",           // UMassSimulationSubsystem::GetOnProcessingPhaseStarted(오브 상태를 PrePhysics 단계 시작에 찍는다)
 			"MassRepresentation",       // UMassMovableVisualizationTrait
 			"MassActors",               // FMassActorFragment
 			// M2 VAT

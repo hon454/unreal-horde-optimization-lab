@@ -101,6 +101,7 @@ py -3 -I Scripts/turn-fill.py Saved/Logs/LabDev-q4final-N10000-P1.log
 | `-LabHud` | 상태 오버레이를 켠다. Q5부터 `-LabBench`와 함께 줘도 켜진다(촬영 실행). 메타데이터 `LabHud` |
 | `-LabShotAt=<초>` + `-LabBench` | 게임 시작부터 그 초에 창 해상도 스크린샷 한 장(`Saved/Screenshots/Lab/<라벨>-t<초>.png`, HUD 포함). 메타데이터 `LabShotAt`. 측정 실행은 주지 않는다 |
 | `-LabActorCollision=1` | 하이드레이션 액터의 캡슐 콜리전을 켠다(`Pawn` 프로필 그대로, 하위 실험 `S8-col`). 기본은 끔(`m3nocol`과 같은 처리, Q5 1b단위부터)이고 `=0`은 기본과 같다. `m3colquery`는 QueryOnly, 라벨 `m3colbase`는 켬. M0 액터는 늘 켬이다. 메타데이터 `LabActorCollision`(적용값 `0`·`1`·`query`, 액터가 없으면 `-`) |
+| `-LabBudgetMs=<ms>` | 애니메이션 예산 값(`a.Budget.BudgetMs`, 기본 2). 0 이하는 예산 끔이고 `-LabScreenSigBudget=0`(빼 보기 `A8-budget`)과 같은 길이다. 변형이 스스로 켜는 예산(M0 `budget`, `m3budgetdist`, `m3budgetsig`)은 0 이하를 받아도 기본값 2로 켜진다. 2와 다르면 `LabOverrides`에 `budget_ms=<값>`이 붙는다. 메타데이터 `LabBudgetMs`(실제 걸린 CVar 값, 예산이 꺼져 있으면 `-`). 참고 묶음 `Budget1`([Worklog/Q7.md](../Worklog/Q7.md)) |
 
 동등성 통계: CSV 스탯 `Lab/Alive`(살아 있는 총수, 사망 중 포함), `Lab/Deaths`(누적 사망 = 범위 피해 사망 + 저격), `Lab/Near30`(오브 수평 30m 안 개체 수). 실행 끝 메타데이터 `LabDeaths`·`LabZoneKills`·`LabSnipes`·`LabDeathRate`·`LabNear30Mean`·`LabAliveMin`·`LabAliveMax`, 같은 값이 `Saved/Lab/<라벨>.summary.txt`의 `lab_summary` 줄 끝에 있다. 시작 메타데이터 `LabLadder`(사다리 단계), `LabOverrides`(변형 기본값과 다르게 준 인자, `|`로 잇는다, 없으면 `-`).
 

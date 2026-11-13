@@ -35,7 +35,7 @@ namespace
 	/**
 	 * 가변 틱 청크 필터를 쓰는 프로세서는 그 값을 쓰는 UMassSimulationLODProcessor(LOD 그룹) 뒤에 돌아야 한다(M4부터).
 	 * 순서를 적지 않으면 두 프로세서의 순서가 프레임마다 바뀔 수 있고, "이 프레임에 돈다"는 값은 LOD 프로세서의 한 번과 다음 번 사이에만 참이라
-	 * 그 사이에 읽지 못하면 한 주기를 통째로 건너뛴다(2026-11-10 lab_chunk 진단 로그, Docs/Worklog/M4.md "사망 전환 지연").
+	 * 그 사이에 읽지 못하면 한 주기를 통째로 건너뛴다(lab_chunk 진단 로그, Docs/Worklog/M4.md "사망 전환 지연").
 	 * 엔진에서 같은 필터를 쓰는 프로세서도 이렇게 적는다(MassStateTreeProcessors.cpp:165, MassAvoidanceProcessors.cpp:288).
 	 */
 	void LabRunAfterSimLod(FMassProcessorExecutionOrder& Order)
@@ -148,7 +148,7 @@ void ULabApproachProcessor::Execute(FMassEntityManager& EntityManager, FMassExec
 		CSV_CUSTOM_STAT(Lab, SimTickOff, Ticked[EMassLOD::Off], ECsvCustomStatOp::Set); // m4offmove만: 200m 밖이 Low 대신 Off다. 다른 변형에는 이 열이 없다
 	}
 
-	// 밴드별 걷는 개체 수(필터 없는 같은 쿼리, 청크의 개체 수만 읽는다). 실제 틱 주기 = 평균 프레임 시간 × SimBand ÷ SimTick(2026-11-10 사용자 승인, Docs/Worklog/M4.md).
+	// 밴드별 걷는 개체 수(필터 없는 같은 쿼리, 청크의 개체 수만 읽는다). 실제 틱 주기 = 평균 프레임 시간 × SimBand ÷ SimTick.
 	int32 Band[5] = {};
 	int32 BandChunks[5] = {};
 	CountQuery.ForEachEntityChunk(Context, [&Band, &BandChunks](FMassExecutionContext& Context)
@@ -495,7 +495,7 @@ void ULabOrbSnipeProcessor::ConfigureQueries(const TSharedRef<FMassEntityManager
 	// 순회에서는 Serial만 읽지만 고른 대상의 StateTimeLeft와 표현 상태를 바꾸므로 쓰기로 선언한다(Shabel 12:32, talk-notes.md).
 	EntityQuery.AddRequirement<FLabMinionFragment>(EMassFragmentAccess::ReadWrite);
 	EntityQuery.AddRequirement<FLabAnimStateFragment>(EMassFragmentAccess::ReadWrite);
-	EntityQuery.AddConstSharedRequirement<FLabUnitTypeParams>(EMassFragmentPresence::All); // 2종: 청크의 종류(대형 예약 발, LabSnipe.h E안)
+	EntityQuery.AddConstSharedRequirement<FLabUnitTypeParams>(EMassFragmentPresence::All); // 2종: 청크의 종류(대형 예약 발, LabSnipe.h)
 	EntityQuery.AddTagRequirement<FLabMinionTag>(EMassFragmentPresence::All);
 	EntityQuery.AddTagRequirement<FLabHitTag>(EMassFragmentPresence::None);
 	EntityQuery.AddTagRequirement<FLabDeadTag>(EMassFragmentPresence::None);
@@ -508,7 +508,7 @@ void ULabOrbSnipeProcessor::Execute(FMassEntityManager& EntityManager, FMassExec
 	{
 		return;
 	}
-	const uint32 SnipeTick = Crowd->PendingSnipeTick.exchange(0); // 오브 틱이 쓴 값을 한 번만 가져간다(std::atomic, M3b 정비)
+	const uint32 SnipeTick = Crowd->PendingSnipeTick.exchange(0); // 오브가 단계 시작에 쓴 값을 한 번만 가져간다(std::atomic, ALabOrb::OnMassPrePhysicsStart)
 	if (SnipeTick == 0)
 	{
 		return;
@@ -524,7 +524,7 @@ void ULabOrbSnipeProcessor::Execute(FMassEntityManager& EntityManager, FMassExec
 		return;
 	}
 
-	// M0 ALabOrb::Snipe와 같은 선택: 화면 안의 산 개체를 거리 구간별로 나눠 구간마다 해시가 가장 작은 개체(LabSnipe.h). 2종은 예약 발만 대형(E안).
+	// M0 ALabOrb::Snipe와 같은 선택: 화면 안의 산 개체를 거리 구간별로 나눠 구간마다 해시가 가장 작은 개체(LabSnipe.h). 2종은 예약 발만 대형.
 	TLabSnipeSelector<FMassEntityHandle> Picker(SnipeTick);
 	EntityQuery.ForEachEntityChunk(Context, [&](FMassExecutionContext& Context)
 	{
@@ -646,7 +646,7 @@ void ULabMinionStateProcessor::ConfigureQueries(const TSharedRef<FMassEntityMana
 	{
 		EntityQuery.AddTagRequirement<FLabPooledTag>(EMassFragmentPresence::None); // M5 엔티티 풀링: 풀에서 기다리는 엔티티(사망 태그가 남아 있다)는 타이머를 돌리지 않는다
 	}
-	// M4에서도 청크 필터를 걸지 않는다(2026-11-10 사용자 결정 "원인 확인 후 수정"). 피격·사망 타이머를 Medium·Low 간격으로 돌리면 피격이 끝난 시각과
+	// M4에서도 청크 필터를 걸지 않는다. 피격·사망 타이머를 Medium·Low 간격으로 돌리면 피격이 끝난 시각과
 	// 다음 틱 사이만큼 마지막 자세로 멈춘다(피격 0.667초, 틱은 저격 뒤 0.53초와 1.03초라 0.38초. Docs/Worklog/M4.md "사망 전환 지연").
 	// 대상은 저격당한 개체(2초에 5건)와 사망 중인 개체뿐이라 매 프레임 돌려도 수백 개체다. 저격 프로세서에 필터를 걸지 않은 것과 같은 이유다:
 	// 줄이는 것은 걷는 개체가 스스로 하는 갱신(이동 목표, 범위 피해)이고, 사건으로 시작된 짧은 상태는 줄이지 않는다.
@@ -677,7 +677,7 @@ void ULabMinionStateProcessor::Execute(FMassEntityManager& EntityManager, FMassE
 			float DeadStart = Now; // 피격이 끝나 사망이 시작된 시각
 			if (bSimLod)
 			{
-				// M4부터: 절대 시각으로 판정한다(2026-11-10 사용자 결정). 청크가 늦게 돌아도 상태가 끝난 시각은 "시작 + 길이"로 정확히 안다.
+				// M4부터: 절대 시각으로 판정한다. 청크가 늦게 돌아도 상태가 끝난 시각은 "시작 + 길이"로 정확히 안다.
 				// 엔진 누적 델타는 청크를 옮긴 직후 이전 상태의 시간이 섞여(MassLODTickRateController.h:157-171) 타이머에 쓰지 않는다.
 				const float EndTime = AnimStates[It].StateStartTime + (bDead ? DeathDuration : HitDuration);
 				Minion.StateTimeLeft = EndTime - Now;

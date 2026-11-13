@@ -41,20 +41,20 @@ enum class ELabVariant : uint8
 	M3QOld,      // 진단: 정비 전 구조. VAT·ActorSync가 로직 프래그먼트와 태그를 읽고, 저격이 쿼리 밖에서 쓰고, 로직 뒤 순서 선언 없음(코드 정비 1·2 A/B)
 	M3SyncAll,   // 진단: ActorSync가 액터 태그 필터 없이 전 엔티티를 순회(코드 정비 4 A/B)
 	M3Vis0,      // E3b (8): 화면 밖 High 밴드 0m(카메라 뒤는 액터로 만들지 않음), 화면 안 30m. 대조군
-	M3Vis15,     // E3b (8): 화면 밖 High 밴드 15m, 화면 안 30m(MetaHuman Crowd 비율). 결정 1(2026-11-09)로 M3 기본값이 되어 m3mass와 같다. run-m3b.ps1이 쓰는 이름이라 남긴다
+	M3Vis15,     // E3b (8): 화면 밖 High 밴드 15m, 화면 안 30m(MetaHuman Crowd 비율). 결정 1로 M3 기본값이 되어 m3mass와 같다. run-m3b.ps1이 쓰는 이름이라 남긴다
 	M3Vis30,     // E3b (8) 기준점: 결정 1 전의 M3 대표값(화면 밖 Base 30m, 화면 안 Visible 30m)
 	M3Hys20,     // E3b (8): 30/30m에 히스테리시스 20%(엔진 기본 10)
-	M3Lock0,     // 진단(2026-11-09 D안): 정비 코드 그대로, mass.commands.LockObserversDuringFlushing만 0(ini의 1을 이 변형에서만 덮는다). m3mass가 M3 묶음보다 0.7ms 느린 원인 가르기
-	M3Sig,       // E3 (3c)(2026-11-09 사용자 결정): Budget Allocator, 중요도는 화면 크기(바운드 반경 ÷ 카메라 거리). 비교 상대는 (3a) m3budgetdist. 새 스탯 LargeActorSkips
-	M3Order,     // A/B(결정 4, 2026-11-09): VatISM·ActorSync에 ExecuteAfter(LabLogic)를 선언한 쪽. 기본(m3mass)은 선언 없음(옛 m3noorder 동작). 20k P1 m3noorder 15.52 vs m3mass 16.12ms
-	// M4 E4(-LabStage=M4와 함께, plan.md "M4"). 대표는 Mass(별칭 m4mass): Simulation LOD 80/200m, 로직 틱 Medium 0.5초 / Low 1.0초(2026-11-10 사용자 결정)
+	M3Lock0,     // 진단: 정비 코드 그대로, mass.commands.LockObserversDuringFlushing만 0(ini의 1을 이 변형에서만 덮는다). m3mass가 M3 묶음보다 0.7ms 느린 원인 가르기
+	M3Sig,       // E3 (3c): Budget Allocator, 중요도는 화면 크기(바운드 반경 ÷ 카메라 거리). 비교 상대는 (3a) m3budgetdist. 새 스탯 LargeActorSkips
+	M3Order,     // A/B: VatISM·ActorSync에 ExecuteAfter(LabLogic)를 선언한 쪽. 기본(m3mass)은 선언 없음(옛 m3noorder 동작). 20k P1 m3noorder 15.52 vs m3mass 16.12ms
+	// M4 E4(-LabStage=M4와 함께, plan.md "M4"). 대표는 Mass(별칭 m4mass): Simulation LOD 80/200m, 로직 틱 Medium 0.5초 / Low 1.0초
 	M4Off,       // E4 (a) 끔: Trait과 LOD 태그는 그대로, 틱 간격만 전부 0(매 프레임). m3mass → m4off는 태그로 아키타입이 늘어난 비용, m4off → m4mass는 틱 간격의 효과
 	M4M25L50,    // E4 (b): Medium 0.25초 / Low 0.5초
 	M4M25L100,   // E4 (b): Medium 0.25초 / Low 1.0초
 	M4M50L50,    // E4 (b): Medium 0.5초 / Low 0.5초
 	M4OffMove,   // E4 (d): 200m 밖을 Simulation LOD의 Off로 두어 엔진 이동·조향 넷에서 빼고(넷 모두 FMassOffLODTag를 None으로 요구한다) ULabOffMoveProcessor가 틱이 온 프레임에 흐른 시간만큼 오브로 직진시킨다. Docs/Worklog/M4.md "E4 (d) Low 밴드 이동"
 	M4Avoid,     // E4 (c): 대표 + 엔진 회피 Trait. 회피 프로세서는 High 태그만 처리하므로(MassAvoidanceProcessors.cpp:301-303) 80m 안만 비켜 간다
-	// M5 E5(-LabStage=M5와 함께, plan.md "M5", 2026-11-11 사용자 결정). M5 단계의 Simulation LOD는 모두 m4offmove 구성(200m 밖 Off + Lab 이동 프로세서)이다.
+	// M5 E5(-LabStage=M5와 함께, plan.md "M5"). M5 단계의 Simulation LOD는 모두 m4offmove 구성(200m 밖 Off + Lab 이동 프로세서)이다.
 	// 별칭 m5mass = M5Iskm. m4offmove는 M5 단계에서도 지난 묶음과 같은 구성(VAT, 엔티티 풀링 없음)이다.
 	M4OffPool,   // 기준점: m4offmove + 엔티티 풀링(원거리 표현은 VAT)
 	M5Iskm,      // M5 대표: 원거리 표현 ISKM(BlendTime 0, AnimationMinScreenSize -1, 그림자 켬) + 엔티티 풀링
@@ -80,7 +80,7 @@ struct FLabQuality
 	static constexpr float MaxHydrateM = 79.f;      // 80m(Medium/Low 경계, 확정값)를 넘지 않는다
 	// Q4 묶음에서 고른 값(Docs/Worklog/Q4.md "최종 구성"): 1만 P1 프레임 p95 11.98ms(13.3ms 안), 액터 평균 709개. 1만에서는 상한이 걸리지 않고 2만에서 1,000개로 막는다
 	static constexpr int32 Q4FinalActorCap = 1000;
-	// Q4b 표현 LOD 재편(2026-11-12 사용자 승인, Docs/Worklog/Q4.md "Q4b"): 79m → 40m. Q4 묶음에서 대형 액터의 애니 갱신 건너뜀 비율이 40m 0.03~0.07, 50m 0.25~0.31, 79m 0.66이었다
+	// Q4b 표현 LOD 재편: 79m → 40m. Q4 묶음에서 대형 액터의 애니 갱신 건너뜀 비율이 40m 0.03~0.07, 50m 0.25~0.31, 79m 0.66이었다
 	static constexpr float Q4FinalHydrateM = 40.f;
 };
 
@@ -95,11 +95,11 @@ struct FLabEquivalence
 
 /**
  * Q2 Niagara 배경 무리(/Game/Lab/FX/NS_LabCrowd, Docs/Worklog/Q2.md). 그리는 끝 밖을 실제 미니언과 연결되지 않은 GPU 입자로 채운다.
- * 입자는 바깥 고리에서 생겨 미니언과 같은 속도로 오브를 향해 걷고, 수명이 끝나는 안쪽 반경에서 사라진다(페이드 없음, 2026-11-12 코디네이터 결정).
+ * 입자는 바깥 고리에서 생겨 미니언과 같은 속도로 오브를 향해 걷고, 수명이 끝나는 안쪽 반경에서 사라진다(페이드 없음).
  */
 struct FLabCrowdFx
 {
-	static constexpr float OuterRadius = 100000.f; // 1,000m(2026-11-12 사용자 결정). 바닥 반쪽 길이 1,020m(Scripts/create-bench-map.py)
+	static constexpr float OuterRadius = 100000.f; // 1,000m. 바닥 반쪽 길이 1,020m(Scripts/create-bench-map.py)
 	static constexpr float LargeShare = 0.1f;      // 2종의 대형 비율(일련번호 10의 배수가 대형, LabUnitAssets.h). 1종이면 0
 	// 실제 미니언이 Off에서 그려지기 시작하는 카메라 거리 = Lerp(Low 경계 80m, 그리는 끝, 1 − 히스테리시스 10%)(MassLODCalculator.h:864-886, 표현 LOD 기본 히스테리시스 10%,
 	// MassRepresentationFragments.h:309). 그리는 끝 200m면 188m다. 밴드 80m는 LabCrowdSubsystem.cpp의 표현 LOD 밴드와 같은 값이다.
@@ -117,7 +117,7 @@ struct FLabCrowdFx
 };
 
 /**
- * M4 Simulation LOD 설정(2026-11-10 사용자 결정, Docs/Worklog/M4.md). 거리는 카메라 기준이고 화면 안팎을 가리지 않는다(MassLODLogic.h:42).
+ * M4 Simulation LOD 설정. 거리는 카메라 기준이고 화면 안팎을 가리지 않는다(MassLODLogic.h:42).
  * 기본은 Off 밴드를 두지 않는다: 엔진의 Off는 위치를 이동 목표(오브)로 옮기고 이동·조향에서 뺀다(engine-notes.md 5절).
  * bOffMove(m4offmove·m4offpool과 M5 단계)만 200m 밖을 Off로 둔다. 순간 이동 프로세서는 M4부터 등록하지 않고(HordeOptLab.cpp) Lab 프로세서가 대신 옮긴다.
  */
@@ -139,23 +139,23 @@ struct FLabScenario
 {
 	static constexpr float MapRadius = 50000.f;      // R 500m
 	static constexpr float RespawnRingWidth = 1000.f; // 재생성 링 [R-10m, R]
-	static constexpr float ZoneRadius = 800.f;       // 오브 피해 범위 8m(보라색 원기둥). 10m는 컸고 6m는 작았다(2026-11-06~07 사용자 의견)
+	static constexpr float ZoneRadius = 800.f;       // 오브 피해 범위 8m(보라색 원기둥). 10m는 컸고 6m는 작았다
 	static constexpr float ZoneDpsEdge = 100.f;      // 범위 가장자리 초당 피해. 체력 100이면 1초
 	static constexpr float ZoneDpsCenter = 300.f;    // 중심 초당 피해. 안으로 갈수록 선형으로 세진다
 	static constexpr float MinionHealth = 100.f;     // 공칭값. Q1부터 개체 체력은 FLabConfig::HealthFor가 정한다(MaxHealth 공유 조각에만 남아 있고 쓰이지 않는다)
 	static constexpr float HealthMin = 60.f;         // Q1 체력 분산 범위(균등). 한 곳의 상수(ADR-0009, measurement.md "품질 계획에서 바뀌는 값")
 	static constexpr float HealthMax = 240.f;
 	static constexpr float MoveSpeed = 300.f;        // 이동 속도 3m/s
-	static constexpr float SnipeInterval = 2.f;      // 저격 간격(0.5초 10발은 화면에서 너무 잦았다, 2026-11-06 사용자 확인)
+	static constexpr float SnipeInterval = 2.f;      // 저격 간격(0.5초 10발은 화면에서 너무 잦았다)
 	static constexpr int32 SnipeCount = 5;           // 저격당 대상 수 K
-	// 저격 대상은 화면 안에서 거리 구간별로 고른다(LabSnipe.h FLabSnipeBands, 2026-11-07 사용자 결정. 그전에는 80m 밖 전체에서 5명)
+	// 저격 대상은 화면 안에서 거리 구간별로 고른다(LabSnipe.h FLabSnipeBands. 그전에는 80m 밖 전체에서 5명)
 
-	// 카메라 프리셋. 오브(중앙)에서 바깥을 본다. 근거리 액터부터 지평선 원거리까지 한 화면에 들어온다(2026-11-06 사용자 의견으로 궤도에서 변경).
-	static constexpr float OrbViewBack = 1500.f;     // P1 오브 뒤 15m. 오브가 화면 아래 가운데에 보이게 한다(2026-11-06 사용자 의견)
+	// 카메라 프리셋. 오브(중앙)에서 바깥을 본다. 근거리 액터부터 지평선 원거리까지 한 화면에 들어온다.
+	static constexpr float OrbViewBack = 1500.f;     // P1 오브 뒤 15m. 오브가 화면 아래 가운데에 보이게 한다
 	static constexpr float OrbViewHeight = 900.f;    // P1 높이 9m
 	static constexpr float OrbViewPitch = -12.f;     // P1 내려다보는 각
 	static constexpr float OrbViewPeriod = 60.f;     // P1 1rpm으로 제자리 회전, 측정 60초에 한 바퀴
-	static constexpr float TopDownHeight = 10000.f;  // P2 탑뷰 100m. 가장 가까운 개체도 100m 떨어져 근거리 밴드(초안 30m)에 들지 않는다. 300m는 너무 멀었다(2026-11-06 사용자 의견)
+	static constexpr float TopDownHeight = 10000.f;  // P2 탑뷰 100m. 가장 가까운 개체도 100m 떨어져 근거리 밴드(초안 30m)에 들지 않는다. 300m는 너무 멀었다
 
 	// budget 변형의 Significance 거리 단계(25/50/100/250m). plan.md "M0"
 	static constexpr float BudgetTiers[4] = { 2500.f, 5000.f, 10000.f, 25000.f };
@@ -191,6 +191,7 @@ struct FLabConfig
 {
 	ELabStage Stage = ELabStage::M0;
 	bool bStageValid = true;   // 아직 없는 단계를 고르면 false. 게임 모드가 종료 코드 2로 끝낸다
+	bool bVariantValid = true; // 모르는 -LabVariant 이름이면 false. 게임 모드가 종료 코드 2로 끝낸다
 	/**
 	 * -LabHud: 상태 오버레이를 켠 채 시작(F1로도 토글). Q5부터 -LabBench와 함께 줘도 켜진다(촬영 실행 = 측정과 같은 조건 + HUD).
 	 * 측정 실행은 주지 않는다. 켜졌는지는 CSV 메타데이터 LabHud로 남아 러너가 거른다(Docs/Worklog/Q5.md "HUD").
@@ -217,20 +218,20 @@ struct FLabConfig
 	 */
 	int32 HydrateFix = 4;
 	/**
-	 * 전환 대책을 하나씩 따로 켜고 끈다(-LabHydrateFixMask=, 기본 31 = 전부). 문제 크기를 대책마다 따로 재려고 둔다(2026-11-09 사용자 요청).
+	 * 전환 대책을 하나씩 따로 켜고 끈다(-LabHydrateFixMask=, 기본 31 = 전부). 문제 크기를 대책마다 따로 재려고 둔다.
 	 * -LabHydrateFix=L을 주면 단계 L에 맞는 마스크가 된다(0→0, 1→1, 2→3, 3→7, 4→31).
 	 */
 	int32 HydrateFixMask = 31;
 	/**
-	 * 개체 종류 수(-LabTypes=, 기본 2. M4부터 기본 시나리오가 2종이다, 2026-11-10 사용자 결정 C1, plan.md "M4"). 2면 일련번호 10의 배수가 대형이다
-	 * (소형 90 / 대형 10, plan.md "M3b" 2종). 아키타입·VAT·ISM·액터 풀이 종류별로 갈리고 저격은 예약 발에서만 대형을 쏜다(LabSnipe.h E안).
+	 * 개체 종류 수(-LabTypes=, 기본 2. M4부터 기본 시나리오가 2종이다, plan.md "M4"). 2면 일련번호 10의 배수가 대형이다
+	 * (소형 90 / 대형 10, plan.md "M3b" 2종). 아키타입·VAT·ISM·액터 풀이 종류별로 갈리고 저격은 예약 발에서만 대형을 쏜다(LabSnipe.h).
 	 * -LabTypes=1이면 M3b까지의 1종 결과가 그대로다(LabUnitAssets.h).
 	 */
 	int32 Types = 2;
 	/** -LabFullyParallel=0이면 mass.FullyParallel을 0으로 둔다(직렬 트레이스, run-m3b.ps1 -SerialArgs). -1은 건드리지 않음. massst 변형과 같은 경로 */
 	int32 FullyParallel = -1;
 	/**
-	 * 그리는 거리 실험(-LabFarM=<미터>, 기본 200 = 확정값. 2026-11-11 사용자 결정 "먼저 재고 정한다", Docs/Worklog/M4.md "그리는 거리 인자").
+	 * 그리는 거리 실험(-LabFarM=<미터>, 기본 200 = 확정값, Docs/Worklog/M4.md "그리는 거리 인자").
 	 * 표현 LOD의 Off 거리(이 밖은 그리지 않는다)와 m4offmove의 Simulation LOD Off 거리를 함께 옮긴다. 30m·80m 경계, Simulation LOD의 Low 경계(200m), 저격 구간, 밴드 집계 경계는 그대로다.
 	 * 200보다 작은 값은 200으로 올린다(Low 경계보다 안쪽의 Off는 다루지 않는다).
 	 */
@@ -242,11 +243,17 @@ struct FLabConfig
 	 */
 	bool bEntityPool = false;
 	/**
-	 * Budget Allocator, 중요도 = 화면 크기(-LabScreenSigBudget=0/1, 2026-11-11 사용자 결정 A안). 액터를 Budget 템플릿으로 만들고 ActorSync가 화면 크기를 중요도로 넣는다.
+	 * Budget Allocator, 중요도 = 화면 크기(-LabScreenSigBudget=0/1). 액터를 Budget 템플릿으로 만들고 ActorSync가 화면 크기를 중요도로 넣는다.
 	 * 기본: M3·M4·M5 단계 1, 그 밖 0. 변형 m3sig는 항상 1. 비교 상대인 m3mass(와 m3base·m3colbase·m3hydbase)·m3uro·m3budgetdist·m3budgetsig·m3lowres·m3noactor와
 	 * M3 하위 실험·진단 변형은 0. 인자를 주면 그 값이 이긴다. M3 이상 단계에서만 뜻이 있다.
 	 */
 	bool bScreenSigBudget = false;
+	/**
+	 * 애니메이션 예산(ms, -LabBudgetMs=<값>, 기본 FLabScenario::BudgetMs = 2). 할당기를 켜는 실행에서 a.Budget.BudgetMs에 넣는다(ALabGameMode::ApplyVariantCVars).
+	 * 0 이하면 예산을 끈다. 끄는 길은 빼 보기 A8-budget(-LabScreenSigBudget=0)과 같다: bScreenSigBudget을 거짓으로 둬 액터를 Budget 템플릿으로 만들지 않는다.
+	 * 변형이 스스로 정하는 예산(M0 budget, m3budgetdist, m3budgetsig)은 0 이하를 받아도 켜진 채로 남는다. 기본값과 다르면 LabOverrides에 budget_ms=<값>으로 남는다.
+	 */
+	float BudgetMs = 2.f;
 	/**
 	 * Q2 Niagara 배경 무리(-LabCrowdFx=0/1). 기본: 변형 q2crowd만 1, 그 밖 0(기존 단계·변형의 동작은 그대로). 인자를 주면 그 값이 이긴다.
 	 * 단계와 기본값의 연결은 Q3·Q5에서 단계 이름과 함께 정한다(Docs/Worklog/Q2.md (마)).
@@ -271,7 +278,7 @@ struct FLabConfig
 	float CrowdFxLargeRate() const;
 	/**
 	 * 독립 입자가 사라지는 안쪽 반경(오브 기준, cm). 수명은 이 값을 따라간다.
-	 * 엔티티 구동(bCrowdFxEntity, 기본)이면 맵 반경 500m다. 그 안은 엔티티가 있고 그려지지 않는 엔티티는 엔티티 구동 이미터가 그린다(2026-11-12 코디네이터 결정).
+	 * 엔티티 구동(bCrowdFxEntity, 기본)이면 맵 반경 500m다. 그 안은 엔티티가 있고 그려지지 않는 엔티티는 엔티티 구동 이미터가 그린다.
 	 * 옛 방식(-LabCrowdFxEntity=0)은 P1 카메라 앞에서 실제 미니언이 나타나는 자리다:
 	 * 카메라 거리 H = Lerp(80m, 그리는 끝, 0.9)를 높이 9m로 수평 거리로 바꾸고 카메라가 오브 뒤 15m인 만큼 뺀다. 그리는 끝 200m면 172.8m(Docs/Worklog/Q2.md "200m 경계의 위치").
 	 * P2에서도 같은 값을 쓴다(P2는 입자가 화면에 없고, 프리셋에 따라 입자 수가 바뀌지 않게 한다).
@@ -309,7 +316,7 @@ struct FLabConfig
 	/** CSV 메타데이터 LabFarShadow: "1" 켬, "0" 끔, M3 미만 단계 "-" */
 	const TCHAR* FarShadowString() const { return Stage < ELabStage::M3 ? TEXT("-") : bFarShadow ? TEXT("1") : TEXT("0"); }
 	/**
-	 * 하이드레이션 액터(M3 이상, ALabMinionMassActor 계열)의 캡슐 콜리전. 기본은 끔이다(plan.md M3b "함께 바꾸는 설정", 2026-11-09 사용자 결정, Q5 1b단위에서 코드에 넣었다).
+	 * 하이드레이션 액터(M3 이상, ALabMinionMassActor 계열)의 캡슐 콜리전. 기본은 끔이다(plan.md M3b "함께 바꾸는 설정", Q5 1b단위에서 코드에 넣었다).
 	 * Off: NoCollision + 오버랩·물리 볼륨 갱신 끔(옛 m3nocol 처리). QueryOnly: 같은 두 갱신 끔 + QueryOnly(m3colquery). On: ACharacter 캡슐의 Pawn 프로필 그대로
 	 * (Mass 액터 풀이 꺼낼 때 SetActorEnableCollision(true)를 부른다, MassActorSpawnerSubsystem.cpp:327).
 	 * 변형 기본값: m3colquery는 QueryOnly, 라벨 m3colbase는 On(E3 (6)의 "그대로" 기준점의 뜻을 지킨다), 그 밖은 Off. -LabActorCollision=1이 켜고 =0이 끈다(인자가 이긴다).

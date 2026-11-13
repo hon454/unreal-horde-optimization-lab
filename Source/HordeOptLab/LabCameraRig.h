@@ -26,7 +26,7 @@ protected:
 	float Elapsed = 0.f;
 #if !UE_BUILD_TEST
 	/**
-	 * 개발 전용 빠른 회전(-LabCamTurn, E3b (8) 화질 캡처 2026-11-09): P1과 같은 위치·높이·피치에서 5초마다 요 90도를 0.5초에 돌고 4.5초 멈춘다(60초에 12회, 한 방향).
+	 * 개발 전용 빠른 회전(-LabCamTurn, E3b (8) 화질 캡처): P1과 같은 위치·높이·피치에서 5초마다 요 90도를 0.5초에 돌고 4.5초 멈춘다(60초에 12회, 한 방향).
 	 * 측정 프리셋 P1/P2는 그대로다. 회전이 끝난 프레임에 lab_turn 한 줄(k, 시작·끝 프레임)을 남긴다. Test 빌드에는 없다.
 	 */
 	static constexpr float TurnPeriod = 5.f;

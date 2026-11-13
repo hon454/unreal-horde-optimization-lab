@@ -403,3 +403,63 @@
 | 예산을 넘을 때의 배분 | 매 프레임 갱신하는 수는 `WorkUnitBudget − WorkUnitsExcess × AlwaysTickFalloffAggression(0.8)`이다. 나머지는 간격이 늘고 상한은 `MaxTickRate`(10)다 | `AnimationBudgetAllocator.cpp:567`, `AnimationBudgetAllocatorParameters.h:34,49` |
 | 그려지지 않은 메시 | 최근 1초 동안 그려지지 않은 메시는 틱하지 않는다(`bTickEvenIfNotRendered`가 꺼져 있을 때) | `AnimationBudgetAllocator.cpp:174,256` |
 | 1만에서의 예산 사용 | 엔진 통계 `AnimationBudget/GameThread/BudgetedAnimation`의 실행별 중앙값이 4단계 1.96\~1.98ms, 7단계 2.01\~2.02ms, 8단계 1.86\~1.88ms다(호드 1만, 오브 시점). 예산 2ms에 닿아 있다 | 프레임 CSV `Saved/Profiling/CSV/Full2-L4-mass-N10000-P1-r<N>.csv` 등(git 밖) |
+
+## 29. Animation Budget Allocator의 한 프레임(2026-11-13, Q7 코드 세션)
+
+줄임말: **ABA** = `Engine/Plugins/Runtime/AnimationBudgetAllocator/Source/AnimationBudgetAllocator`, **ENG** = `Engine/Source/Runtime/Engine`. 28절을 넓힌다. 줄 번호는 5.8.4 소스에서 다시 열어 확인했다.
+
+| 항목 | 확인한 것 | 위치 |
+| --- | --- | --- |
+| 갱신 시점 | 할당기는 `FWorldDelegates::OnWorldPreActorTick`에서 `Update`를 부른다. 이 대리자는 틱 그룹보다 먼저 방송된다. 그래서 그 프레임의 갱신·보간·건너뜀은 `TG_PrePhysics`의 액터 틱과 Mass PrePhysics 처리보다 먼저 정해진다 | `ABA/Private/AnimationBudgetAllocator.cpp:797-803`, `ENG/Private/LevelTick.cpp:1675,1750` |
+| 수요(틱할 메시) | 등록된 메시 중 최근 1초 안에 그려진 것만 센다(`World->TimeSeconds − 1.0`과 `GetLastRenderTime`을 견준다). `bTickEvenIfNotRendered`가 꺼져 있으면 그려지지 않은 메시는 틱을 끈다(`DisableComponentTick`). 켜져 있으면 중요도 순으로 `MaxTickedOffsreenComponents`(4)개까지만 틱한다 | `AnimationBudgetAllocator.cpp:174,254-263,279-301,346-395` |
+| 정렬 | `bAlwaysTick`이 먼저, 그다음 중요도가 큰 순이다 | `AnimationBudgetAllocator.cpp:327-342` |
+| 메시 하나의 시간 | `USkeletalMeshComponentBudgeted::TickComponent`와 `CompleteParallelAnimationEvaluation`이 게임 스레드에서 걸린 시간을 각각 재서 넘긴다. 워커 스레드의 병렬 애니메이션 평가 시간은 들어가지 않는다. 엔진 CSV 통계 `AnimationBudget/BudgetedAnimation`도 같은 두 구간을 잰다 | `ABA/Private/SkeletalMeshComponentBudgeted.cpp:91-157`(재는 줄 `:94,99,127,139,144,150`) |
+| 평균 작업 단위 | 지난 프레임의 메시별 시간(틱 + 완료)의 평균을 `WorkUnitSmoothingSpeed`(5)로 부드럽게 따라간다. 처음 값은 `InitialEstimatedWorkUnitTimeMs`(0.08ms)다 | `AnimationBudgetAllocator.cpp:202-203,549-550`, `AnimationBudgetAllocatorParameters.h:41,87` |
+| 매 프레임 갱신하는 수 | 작업 단위 예산 = `max((BudgetInMs − 외부 애니 시간) / 평균 작업 단위, 수요 × MinQuality)`. 넘은 몫 = `max(0, 수요 − 작업 단위 예산)`. 매 프레임 갱신 수 = `clamp(작업 단위 예산 − 넘은 몫 × AlwaysTickFalloffAggression(0.8), bAlwaysTick 수, 수요)` | `AnimationBudgetAllocator.cpp:558-570` |
+| 보간 몫 | 남은 예산 = `max(0, 작업 단위 예산 − 매 프레임 갱신 메시의 실제 시간 / 평균)`. 보간 수 = `min(max(남은 예산 − 넘은 몫 × InterpolationFalloffAggression(0.4), min(MaxInterpolatedComponents(16), bNeverThrottle 수)), 남은 수요)`. 보간 메시의 틱 간격은 순위에 따라 2에서 `InterpolationMaxRate`(6)까지 선형이다 | `AnimationBudgetAllocator.cpp:574-591,621-631` |
+| 나머지(건너뜀) | 남은 메시는 간격을 2에서 `min(ceil(max(1, 남은 수요 / 남은 예산) × 2), MaxTickRate(10))`까지 순위에 따라 늘린다. 보간은 하지 않는다 | `AnimationBudgetAllocator.cpp:593-607,633-643` |
+| 프레임마다 갱신·보간·건너뜀 | 메시는 `(GFrameCounter + FrameOffset) % TickRate == 0`인 프레임에 갱신한다(`EnableExternalUpdate(true)`). 보간 메시는 그 밖의 프레임에도 화면 안이면 틱을 켜고 갱신은 끈다(이전 두 포즈 사이를 잇는다). 건너뛰는 메시는 틱을 끄고 갱신도 끈다. 새 간격은 갱신하는 프레임에만, `StateChangeThrottle`이 음수일 때만 반영된다 | `AnimationBudgetAllocator.cpp:440,454-500`, `ENG/Private/Components/SkeletalMeshComponent.cpp:1918-1923,2909-2911` |
+| `ShouldTickAnimation()`의 뜻 | 외부 틱 제어 중이면 `bExternalUpdate`를 그대로 돌려준다. 보간 프레임과 건너뛴 프레임 모두 거짓이다. 보간 여부는 `IsUsingExternalInterpolation()`(`bExternalInterpolate && bExternalEvaluationRateLimited`)과 틱 함수 켬으로 가른다 | `ENG/Private/Components/SkeletalMeshComponent.cpp:1918-1923`, `ENG/Classes/Components/SkinnedMeshComponent.h:1015-1039` |
+| 등록 때 바뀌는 것 | 할당기가 켜져 있으면 등록하는 메시의 URO를 끄고(`bEnableUpdateRateOptimizations = false`) 외부 틱 제어를 켠다 | `AnimationBudgetAllocator.cpp:1191-1197` |
+| `SetComponentSignificance` 기본 인자 | `bNeverSkip = false`, `bTickEvenIfNotRendered = false`, `bAllowReducedWork = true`, `bForceInterpolate = false`. 마지막 인자가 컴포넌트 데이터의 `bNeverThrottle`이 된다. 등록 때 기본값은 `bNeverThrottle = true`지만 이 함수를 기본 인자로 부르면 거짓이 된다 | `ABA/Public/SkeletalMeshComponentBudgeted.h:36`, `AnimationBudgetAllocator.cpp:54,151-165` |
+| 예산 값의 하한 | `a.Budget.BudgetMs`는 0.1보다 작게 넣으면 0.1로 올린다. 예산을 끄는 길은 이 값이 아니라 `a.Budget.Enabled`와 월드 할당기의 `SetEnabled`다 | `ABA/Private/AnimationBudgetAllocatorCVars.cpp:195-203`, 28절 위 `LabGameMode.cpp` `IsBudgetActive` |
+| 추가 CSV 통계 | `NumAlwaysTicked`, `NumInterpolated`, `NumThrottled`, `NumTicked`, `AnimQuality`, `AverageTickRate`는 `WITH_EXTRA_BUDGET_CSV_STATS`(= `WITH_TICK_DEBUG` = 0)일 때만 CSV에 남는다. 기본 빌드에 남는 것은 `AverageWorkUnitTimeMs`와 `BudgetedAnimation`, `Exclusive/GameThread/AnimationBudgetAllocator`다 | `ABA/Private/AnimationBudgetAllocator.h:15-24`, `AnimationBudgetAllocator.cpp:553,808` |
+
+`a.Budget.*` CVar의 엔진 기본값(`FAnimationBudgetAllocatorParameters`와 CVar 파일)이다. 이 프로젝트가 바꾸는 것은 `a.Budget.Enabled`(1)와 `a.Budget.BudgetMs`(기본 2, `-LabBudgetMs=`)뿐이다.
+
+| CVar | 기본값 | 위치 |
+| --- | --- | --- |
+| `a.Budget.Enabled` | 0 | `AnimationBudgetAllocatorCVars.cpp:7-14` |
+| `a.Budget.BudgetMs` | 1.0(하한 0.1) | `AnimationBudgetAllocatorParameters.h:19`, `AnimationBudgetAllocatorCVars.cpp:195-203` |
+| `a.Budget.MinQuality` | 0.0 | `AnimationBudgetAllocatorParameters.h:27` |
+| `a.Budget.MaxTickRate` | 10 | `:34` |
+| `a.Budget.WorkUnitSmoothingSpeed` | 5.0 | `:41` |
+| `a.Budget.AlwaysTickFalloffAggression` | 0.8(범위 0.1\~0.9) | `:49` |
+| `a.Budget.InterpolationFalloffAggression` | 0.4 | `:58` |
+| `a.Budget.InterpolationMaxRate` | 6 | `:65` |
+| `a.Budget.MaxInterpolatedComponents` | 16 | `:72` |
+| `a.Budget.InterpolationTickMultiplier` | 0.75 | `:79` |
+| `a.Budget.InitialEstimatedWorkUnitTime` | 0.08ms | `:87` |
+| `a.Budget.MaxTickedOffsreen` | 4 | `:94` |
+| `a.Budget.StateChangeThrottleInFrames` | 30 | `:101` |
+| `a.Budget.BudgetFactorBeforeReducedWork` | 1.5 | `:108` |
+| `a.Budget.BudgetFactorBeforeReducedWorkEpsilon` | 0.25 | `:115` |
+| `a.Budget.BudgetPressureSmoothingSpeed` | 3.0 | `:122` |
+| `a.Budget.ReducedWorkThrottleMinInFrames` | 2 | `:129` |
+| `a.Budget.ReducedWorkThrottleMaxInFrames` | 20 | `:136` |
+| `a.Budget.BudgetFactorBeforeAggressiveReducedWork` | 2.0 | `:143` |
+| `a.Budget.ReducedWorkThrottleMaxPerFrame` | 4 | `:150` |
+| `a.Budget.BudgetPressureBeforeEmergencyReducedWork` | 2.5 | `:157` |
+| `a.Budget.AutoCalculatedSignificanceMaxDistance` | 30000(300m) | `:165` |
+| `a.Budget.MaintainReduceWorkWhenOffScreen` | 0 | `AnimationBudgetAllocatorCVars.cpp:18-25` |
+| `a.Budget.ComponentsWithZeroSigAreNonRendered` | 0 | `:27-34` |
+| `a.Budget.ForceTickWhenComponentExitsOffScreen` | 0 | `:36-43` |
+| `a.Budget.EmergencyReduceWorkDisabled` | 0 | `:45-52` |
+
+## 30. Windows에서 게임 프로세스의 종료 코드(2026-11-13, Q7 코드 세션)
+
+| 항목 | 확인한 것 | 위치 |
+| --- | --- | --- |
+| 비강제 종료의 코드 | `FWindowsPlatformMisc::RequestExitWithStatus(false, 코드)`는 엔진 종료를 요청하고 `PostQuitMessage(코드)`를 부를 뿐이다. `GuardedMain`은 틱 루프가 끝나면 초기화 때의 `ErrorLevel`(보통 0)을 돌려주고, 실행 경로에서 `WM_QUIT`의 코드를 읽는 곳이 없다. 그래서 프로세스 종료 코드는 0이다 | `Engine/Source/Runtime/Core/Private/Windows/WindowsPlatformMisc.cpp:1474-1522`(1520줄), `Engine/Source/Runtime/Launch/Private/Launch.cpp:188-204` |
+| 강제 종료의 코드 | `RequestExitWithStatus(true, 코드)`는 로그를 비운 뒤 `TerminateProcess(코드)`다. `WindowsPlatform.RaiseExceptionOnFaultTermination`(기본 거짓)이 참이면 코드가 0이 아닐 때 먼저 예외를 던진다 | `WindowsPlatformMisc.cpp:1493-1515`, `:140-144` |
+| 이 프로젝트에 주는 뜻 | 설정·에셋 오류는 강제 종료로 코드 2·3을 낸다(`LabRequestExit`). 벤치 끝의 비강제 종료(`BenchExitCode`)는 늘 0이라 실패는 `LabOk`와 CSV 유무로 잡는다 | `Source/HordeOptLab/HordeOptLab.h`, Worklog/Q7.md "종료 코드" |

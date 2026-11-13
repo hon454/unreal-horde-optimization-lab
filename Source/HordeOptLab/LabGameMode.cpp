@@ -166,7 +166,16 @@ void ALabGameMode::StartPlay()
 	{
 		// 아직 구현하지 않은 단계. 러너가 실패로 알아보도록 종료 코드 2로 끝낸다.
 		UE_LOG(LogLab, Error, TEXT("lab_stage_unknown"));
-		FPlatformMisc::RequestExitWithStatus(false, 2, TEXT("LabStage"));
+		LabRequestExit(2, TEXT("LabStage"));
+		return;
+	}
+	if (!Config.bVariantValid)
+	{
+		// 모르는 변형 이름. 단계와 같이 러너가 실패로 알아보도록 종료 코드 2로 끝낸다.
+		FString Variant;
+		FParse::Value(FCommandLine::Get(), TEXT("-LabVariant="), Variant);
+		UE_LOG(LogLab, Error, TEXT("lab_variant_unknown variant=%s"), *Variant);
+		LabRequestExit(2, TEXT("LabVariant"));
 		return;
 	}
 
@@ -179,7 +188,7 @@ void ALabGameMode::StartPlay()
 	}
 	if (Config.Variant == ELabVariant::M3Lock0)
 	{
-		// 진단 D안(2026-11-09): DefaultEngine.ini의 1을 이 변형에서만 0으로 덮는다. LabFixedCVarString이 실제 값을 읽어 LabCVars 메타데이터에 0으로 찍힌다.
+		// 진단 D안: DefaultEngine.ini의 1을 이 변형에서만 0으로 덮는다. LabFixedCVarString이 실제 값을 읽어 LabCVars 메타데이터에 0으로 찍힌다.
 		LabSetCVar(TEXT("mass.commands.LockObserversDuringFlushing"), TEXT("0"));
 	}
 #if !UE_BUILD_TEST
@@ -361,7 +370,9 @@ void ALabGameMode::ApplyVariantCVars()
 	}
 	// a.Budget.Enabled 기본값은 0이다(AnimationBudgetAllocatorCVars.cpp:7).
 	LabSetCVar(TEXT("a.Budget.Enabled"), TEXT("1"));
-	LabSetCVar(TEXT("a.Budget.BudgetMs"), *FString::SanitizeFloat(FLabScenario::BudgetMs));
+	// 예산 값은 -LabBudgetMs=로 바꾼다(기본 2). 0 이하는 FLabConfig가 이미 화면 크기 Budget을 껐으므로 여기 오는 것은 변형이 정한 예산뿐이다. 그때는 기본값을 쓴다.
+	const float BudgetMs = FLabConfig::Get().BudgetMs > 0.f ? FLabConfig::Get().BudgetMs : FLabScenario::BudgetMs;
+	LabSetCVar(TEXT("a.Budget.BudgetMs"), *FString::SanitizeFloat(BudgetMs));
 	// CVar만으로는 켜지지 않는다. 월드마다 만들어지는 할당기는 bEnabled(false)로 시작한다(AnimationBudgetAllocator.cpp:71).
 	// 이걸 빠뜨린 2026-11-07 첫 E0의 budget 3조건은 무효로 하고 다시 쟀다.
 	if (IAnimationBudgetAllocator* Allocator = IAnimationBudgetAllocator::Get(GetWorld()))
@@ -416,6 +427,11 @@ void ALabGameMode::TickBench()
 			// 아홉 기법의 설정 켬·끔(LabTech*, FLabConfig::TechList). 러너가 실행마다 기대값과 대조한다.
 			CSV_METADATA(TEXT("LabStage"), FLabConfig::StageName(Config.Stage));
 			CSV_METADATA(TEXT("LabBudget"), IsBudgetActive() ? TEXT("1") : TEXT("0"));
+			// 실제로 걸린 예산(a.Budget.BudgetMs의 값). 할당기가 꺼져 있으면 "-". 참고 묶음 Budget1이 조건을 가리는 키다
+			{
+				const IConsoleVariable* BudgetVar = IConsoleManager::Get().FindConsoleVariable(TEXT("a.Budget.BudgetMs"));
+				CSV_METADATA(TEXT("LabBudgetMs"), IsBudgetActive() && BudgetVar ? *BudgetVar->GetString() : TEXT("-"));
+			}
 			CSV_METADATA(TEXT("LabPool"), Config.bEntityPool ? TEXT("1") : TEXT("0"));
 			{
 				const ULabCrowdSubsystem* Crowd = GetWorld()->GetSubsystem<ULabCrowdSubsystem>();
@@ -451,8 +467,12 @@ void ALabGameMode::TickBench()
 			AliveMax = 0;
 			if (ULabCrowdSubsystem* Crowd = GetWorld()->GetSubsystem<ULabCrowdSubsystem>(); Crowd && Crowd->IsActive())
 			{
-				LargeActorFramesAtStart = Crowd->LargeActorFrames.load();
-				LargeActorSkipsAtStart = Crowd->LargeActorSkips.load();
+				LargeActorAtStart[0] = Crowd->LargeActorFrames.load();
+				LargeActorAtStart[1] = Crowd->LargeActorSkips.load();
+				LargeActorAtStart[2] = Crowd->LargeActorInterps.load();
+				SmallActorAtStart[0] = Crowd->SmallActorFrames.load();
+				SmallActorAtStart[1] = Crowd->SmallActorSkips.load();
+				SmallActorAtStart[2] = Crowd->SmallActorInterps.load();
 			}
 			BenchPhase = ELabBenchPhase::Measure;
 			BenchPhaseTime = 0.f;
@@ -495,9 +515,15 @@ void ALabGameMode::TickBench()
 			CSV_METADATA(TEXT("LabAliveMax"), *FString::FromInt(AliveMax));
 			if (ULabCrowdSubsystem* Crowd = GetWorld()->GetSubsystem<ULabCrowdSubsystem>(); Crowd && Crowd->IsActive())
 			{
-				// E3 (3c) 지표: 측정 구간에서 대형 액터가 있었던 프레임 합(액터×프레임)과 그중 애니 틱을 건너뛴 수(ULabActorSyncProcessor). 비율 = Skips / Frames
-				CSV_METADATA(TEXT("LabLargeActorFrames"), *FString::Printf(TEXT("%lld"), (long long)(Crowd->LargeActorFrames.load() - LargeActorFramesAtStart)));
-				CSV_METADATA(TEXT("LabLargeActorSkips"), *FString::Printf(TEXT("%lld"), (long long)(Crowd->LargeActorSkips.load() - LargeActorSkipsAtStart)));
+				// 애니 갱신 지표(종류별): 측정 구간의 액터×프레임 합, 그중 애니 갱신을 하지 않은 수(보간 + 건너뜀), 그중 보간한 수(ULabActorSyncProcessor).
+				// LabLargeActorFrames·Skips는 전과 같은 키와 뜻이다. 건너뜀 비율 = (Skips - Interps) / Frames
+				auto Delta = [](const std::atomic<int64>& Now, int64 Start) { return FString::Printf(TEXT("%lld"), (long long)(Now.load() - Start)); };
+				CSV_METADATA(TEXT("LabLargeActorFrames"), *Delta(Crowd->LargeActorFrames, LargeActorAtStart[0]));
+				CSV_METADATA(TEXT("LabLargeActorSkips"), *Delta(Crowd->LargeActorSkips, LargeActorAtStart[1]));
+				CSV_METADATA(TEXT("LabLargeActorInterps"), *Delta(Crowd->LargeActorInterps, LargeActorAtStart[2]));
+				CSV_METADATA(TEXT("LabSmallActorFrames"), *Delta(Crowd->SmallActorFrames, SmallActorAtStart[0]));
+				CSV_METADATA(TEXT("LabSmallActorSkips"), *Delta(Crowd->SmallActorSkips, SmallActorAtStart[1]));
+				CSV_METADATA(TEXT("LabSmallActorInterps"), *Delta(Crowd->SmallActorInterps, SmallActorAtStart[2]));
 			}
 			FCsvProfiler::Get()->EndCapture();
 #endif
@@ -539,6 +565,16 @@ void ALabGameMode::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 	Elapsed += DeltaSeconds;
+	// 설정·에셋 오류의 종료 요청(LabRequestExit). 비강제 종료는 종료 코드가 0이 되므로 강제 종료한다(HordeOptLab.h). CSV 캡처는 아직 열리지 않았다
+	{
+		uint8 ExitCode = 0;
+		const TCHAR* CallSite = nullptr;
+		if (LabConsumePendingExit(ExitCode, CallSite))
+		{
+			FPlatformMisc::RequestExitWithStatus(true, ExitCode, CallSite);
+			return;
+		}
+	}
 	if (!Spawner)
 	{
 		return;
@@ -627,7 +663,7 @@ void ALabGameMode::Tick(float DeltaSeconds)
 	}
 
 #if !UE_BUILD_TEST
-	// 개발용 연속 캡처(-LabShotBurst=N): ShotAt부터 N프레임을 창 해상도로 한 장씩 남긴다. 전환 깜빡임 진단용(2026-11-08).
+	// 개발용 연속 캡처(-LabShotBurst=N): ShotAt부터 N프레임을 창 해상도로 한 장씩 남긴다. 전환 깜빡임 진단용.
 	static int32 BurstLeft = -1;
 	int32 Burst = 0;
 	if (ShotAt > 0.f && Elapsed >= ShotAt && FParse::Value(FCommandLine::Get(), TEXT("-LabShotBurst="), Burst))

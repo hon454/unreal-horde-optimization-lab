@@ -10,7 +10,7 @@
  * M1 Mass 코어의 Fragment와 Tag. plan.md "M1".
  * 위치·속도·이동 목표는 엔진 Fragment(FTransformFragment, FMassVelocityFragment, FMassMoveTargetFragment)를 쓴다.
  * M3b 정비: 로직 데이터(FLabMinionFragment, FLabHealthFragment)는 로직 프로세서만 읽고 쓰고, 표현(VAT·ActorSync)은 FLabAnimStateFragment만 읽는다
- * (Docs/Worklog/M3b.md "코드 정비", 2026-11-09 사용자 결정 A안).
+ * (Docs/Worklog/M3b.md "코드 정비").
  */
 
 /** 로직 전용. 오브 저격 대상 선택(결정적 해시)에 쓰는 스폰 일련번호와, 피격·사망 상태에 남은 시간. */

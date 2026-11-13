@@ -47,7 +47,7 @@ Avoidance 그룹과 `SyncWorldToMass` 그룹에는 최종 구성의 엔티티를
 
 - **로직과 표현 사이.** 7\~10(LabLogic)과 11\~13(표현)을 잇는 선언이 없다. 로직이 상태를 쓰고(`FLabAnimStateFragment` 쓰기) 표현이 읽지만, 이 겹침은 청크 단위의 접근 충돌일 뿐 프로세서 전체의 선후를 만들지 않는다(engine-notes 13절). 표현이 같은 프레임 로직보다 먼저 돌면 상태 변화가 한 프레임 늦게 보인다. 선언을 넣은 변형은 2만 개체에서 0.4\~0.7ms 느려 넣지 않았다(`LabExplicitLogicOrder()`, [LabMassProcessors.h](../../Source/HordeOptLab/LabMassProcessors.h)).
 - **액터 동기화와 표현 프로세서.** `ULabActorSyncProcessor`는 `ExecuteAfter(Representation)`을 선언한다. 의존성 해결기는 이 이름을 하위 그룹까지 펼치지만 실행 큐는 그룹 이름이 정확히 같은 프로세서만 기다린다(engine-notes 13절). 그래서 실행 때는 그룹이 정확히 `Representation`인 12의 두 프로세서를 기다리고, 그 둘이 11 뒤라 결과적으로 11 뒤에 온다.
-- **오브 틱과 Mass 처리.** `ALabOrb`, `ALabCameraRig`, `ALabGameMode`의 액터 틱은 틱 그룹을 바꾸지 않아 기본값 `TG_PrePhysics`이고, Mass PrePhysics 틱 함수와 같은 그룹이다. 둘 사이의 선후 선언은 없다. 엔진은 Mass PrePhysics 틱 함수를 높은 우선순위로 올리지만(`mass.MakePrePhysicsTickFunctionHighPriority` 기본 1) 이것은 선후 보장이 아니다. 오브가 올린 저격 요청은 원자 변수에 남아 그 프레임이나 다음 프레임의 저격 프로세서가 한 번만 가져간다.
+- **오브 틱과 Mass 처리.** `ALabOrb`, `ALabCameraRig`, `ALabGameMode`의 액터 틱은 틱 그룹을 바꾸지 않아 기본값 `TG_PrePhysics`이고, Mass PrePhysics 틱 함수와 같은 그룹이다. 둘 사이의 선후 선언은 없다. 엔진은 Mass PrePhysics 틱 함수를 높은 우선순위로 올리지만(`mass.MakePrePhysicsTickFunctionHighPriority` 기본 1) 이것은 선후 보장이 아니다. 그래서 오브는 Mass 처리에 넘기는 값(오브 위치, 화면 판정 카메라, 저격 요청)을 자기 틱에서 쓰지 않는다. `ALabOrb::OnMassPrePhysicsStart`가 Mass PrePhysics 단계가 시작할 때(게임 스레드, 프로세서를 띄우기 전) 쓴다. 카메라 캐시는 PostPhysics 뒤에만 바뀌므로 모든 프로세서가 직전 프레임에 그린 카메라를 보고, 저격 요청은 늘 그 프레임의 저격 프로세서가 한 번 가져간다.
 
 ### 스폰과 재생성
 
@@ -82,7 +82,7 @@ Avoidance 그룹과 `SyncWorldToMass` 그룹에는 최종 구성의 엔티티를
 
 ### 오브의 피해와 저격
 
-- **오브 틱.** `ALabOrb::TickMass`가 오브 위치와 카메라 시야를 `ULabCrowdSubsystem`에 쓰고, 지난 처리의 저격 대상과 번개 대상을 읽어 이펙트를 그리고, 2초마다 `PendingSnipeTick`을 올린다([LabOrb.cpp](../../Source/HordeOptLab/LabOrb.cpp)).
+- **오브.** Mass PrePhysics 단계가 시작할 때 `ALabOrb::OnMassPrePhysicsStart`가 오브 위치와 카메라 시야를 `ULabCrowdSubsystem`에 쓰고 2초마다 `PendingSnipeTick`을 올린다. 오브 틱 `ALabOrb::TickMass`는 지난 처리의 저격 대상과 번개 대상을 읽어 이펙트만 그린다([LabOrb.cpp](../../Source/HordeOptLab/LabOrb.cpp)).
 - **범위 피해.** `ULabOrbContactProcessor`가 오브 8m 안 엔티티의 체력을 깎고, 0 이하면 상태를 사망으로 바꾸고(`FLabAnimStateFragment::Set`) `FLabDeadTag`를 붙이고 `FMassCodeDrivenMovementTag`를 떼어 멈춘다. 5단계부터 80m 밖 청크는 틱 간격마다만 돌고 건너뛴 시간은 엔진 누적 델타로 보상한다.
 - **저격.** `ULabOrbSnipeProcessor`가 저격 요청이 있을 때만 화면 안의 산 엔티티를 거리 구간별로 골라(`TLabSnipeSelector`, [LabSnipe.h](../../Source/HordeOptLab/LabSnipe.h)) 피격 상태와 `FLabHitTag`를 지연 명령으로 넣는다.
 - **상태 타이머.** `ULabMinionStateProcessor`가 피격·사망 엔티티의 남은 시간을 절대 시각으로 판정한다. 피격이 끝나면 사망으로, 사망이 끝나면 풀과 재생성으로 넘긴다. 청크 필터를 걸지 않아 매 프레임 돈다.

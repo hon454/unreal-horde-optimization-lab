@@ -10,7 +10,7 @@
 #include "Modules/ModuleManager.h"
 
 /**
- * 단계에 따라 ISM 갱신 프로세서를 고른다(plan.md "M2", 2026-11-08 사용자 결정).
+ * 단계에 따라 ISM 갱신 프로세서를 고른다(plan.md "M2").
  * M1까지는 엔진 UMassUpdateISMProcessor 그대로, M2부터는 VAT 커스텀 데이터를 같이 쓰는 ULabVatISMProcessor만 돈다.
  * 자동 등록 여부(bAutoRegisterWithProcessingPhases)는 CDO 값이고, Mass가 월드를 시작하며 프로세서 목록을 만들기 전에 바꿔야 해서 게임 모듈 시작 때 한다.
  * 엔진의 SetShouldAutoRegisterWithGlobalList(MassProcessor.h:180-185)는 에디터 빌드에서 값을 Config/DefaultMass.ini에 써 버리므로
@@ -58,3 +58,30 @@ public:
 IMPLEMENT_PRIMARY_GAME_MODULE(FLabGameModule, HordeOptLab, "HordeOptLab");
 
 DEFINE_LOG_CATEGORY(LogLab);
+
+namespace
+{
+	int32 GLabPendingExitCode = -1;
+	const TCHAR* GLabPendingExitSite = nullptr;
+}
+
+void LabRequestExit(uint8 ExitCode, const TCHAR* CallSite)
+{
+	if (GLabPendingExitCode < 0)
+	{
+		GLabPendingExitCode = ExitCode;
+		GLabPendingExitSite = CallSite;
+	}
+}
+
+bool LabConsumePendingExit(uint8& OutExitCode, const TCHAR*& OutCallSite)
+{
+	if (GLabPendingExitCode < 0)
+	{
+		return false;
+	}
+	OutExitCode = uint8(GLabPendingExitCode);
+	OutCallSite = GLabPendingExitSite;
+	GLabPendingExitCode = -1;
+	return true;
+}

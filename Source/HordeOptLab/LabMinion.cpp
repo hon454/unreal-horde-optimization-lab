@@ -350,7 +350,7 @@ void ALabMinionMassActor::PrepareForPooling_Implementation()
 {
 	GetMesh()->SetComponentTickEnabled(false);
 	BoundEntity.Reset();
-	// 죽은 채 풀에 들어온 액터의 진홍색을 지운다. 숨긴 동안 바꾼 커스텀 프리미티브 데이터는 보이는 첫 프레임에 반영되지 않는 것을 연속 캡처로 봤다(2026-11-08).
+	// 죽은 채 풀에 들어온 액터의 진홍색을 지운다. 숨긴 동안 바꾼 커스텀 프리미티브 데이터는 보이는 첫 프레임에 반영되지 않는 것을 연속 캡처로 봤다.
 	if (FLabConfig::Get().HasFix(FLabConfig::FixTintReset))
 	{
 		GetMesh()->SetCustomPrimitiveDataFloat(0, 0.f);
@@ -361,7 +361,7 @@ void ALabMinionMassActor::PrepareForPooling_Implementation()
 void ALabMinionMassActor::PrepareForGame_Implementation()
 {
 	// 엔진은 풀에서 꺼낸 액터를 스폰 요청의 변환(엔티티 변환, 스케일 1)으로 SetActorTransform한 바로 다음에 이 함수를 부른다
-	// (MassActorSpawnerSubsystem.cpp:253-255). 재사용된 대형 액터가 소형 크기로 돌아가지 않게 배율을 다시 넣는다(2026-11-10 사용자가 본 증상).
+	// (MassActorSpawnerSubsystem.cpp:253-255). 재사용된 대형 액터가 소형 크기로 돌아가지 않게 배율을 다시 넣는다.
 	// 풀은 클래스가 키라 대형 액터가 소형으로 재사용되는 일은 없다(:239).
 	if (const float Scale = FLabUnitAssetPaths::Get(UnitType).Scale; Scale != 1.f)
 	{

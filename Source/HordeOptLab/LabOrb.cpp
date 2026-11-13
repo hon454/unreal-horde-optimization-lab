@@ -5,6 +5,7 @@
 #include "LabCrowdSubsystem.h"
 #include "LabSnipe.h"
 #include "LabUnitAssets.h"
+#include "MassSimulationSubsystem.h"
 #include "Camera/PlayerCameraManager.h"
 #include "GameFramework/PlayerController.h"
 #include "Components/StaticMeshComponent.h"
@@ -67,7 +68,7 @@ void ALabOrb::BeginPlay()
 	// BP_TeslaCoil은 구체에 보라색 오버레이 머티리얼을 씌운다(BP 문자열의 OverlayMaterial, MI_Mesh_Overlay_TeslaCoil).
 	if (UMaterialInterface* Overlay = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/NiagaraExamples/Materials/MI_Mesh_Overlay_TeslaCoil.MI_Mesh_Overlay_TeslaCoil"), nullptr, LOAD_Quiet | LOAD_NoWarn))
 	{
-		// 한낮 조명에서는 자동 노출 때문에 발광이 묻힌다. 조명 대신 이 오브의 발광만 키운다(2026-11-07 사용자 의견).
+		// 한낮 조명에서는 자동 노출 때문에 발광이 묻힌다. 조명 대신 이 오브의 발광만 키운다.
 		// 파라미터 이름과 기본값은 MI_Mesh_Overlay_TeslaCoil에서 읽었다(Base/Secondary Color = (0.4, 0, 4), Flicker Low = 0.1).
 		UMaterialInstanceDynamic* OverlayMid = UMaterialInstanceDynamic::Create(Overlay, this);
 		OverlayMid->SetVectorParameterValue(TEXT("Base Color"), FLinearColor(0.25f, 0.f, 4.f) * OrbGlowBoost);
@@ -84,6 +85,11 @@ void ALabOrb::BeginPlay()
 	}
 	StrikeSystem = LoadObject<UNiagaraSystem>(nullptr, TEXT("/Game/Lab/FX/NS_LabBolt.NS_LabBolt"), nullptr, LOAD_Quiet | LOAD_NoWarn);
 
+	if (UMassSimulationSubsystem* Simulation = GetWorld()->GetSubsystem<UMassSimulationSubsystem>())
+	{
+		PhaseStartHandle = Simulation->GetOnProcessingPhaseStarted(EMassProcessingPhase::PrePhysics).AddUObject(this, &ALabOrb::OnMassPrePhysicsStart);
+	}
+
 	if (UNiagaraSystem* Zone = LoadObject<UNiagaraSystem>(nullptr, TEXT("/Game/NiagaraExamples/FX_Misc/NS_Boundary_Cylinder.NS_Boundary_Cylinder"), nullptr, LOAD_Quiet | LOAD_NoWarn))
 	{
 		// User.Radius·User.Height·User.Color는 이 시스템의 사용자 파라미터다(에셋 문자열에서 확인).
@@ -92,6 +98,34 @@ void ALabOrb::BeginPlay()
 		ZoneFx->SetVariableFloat(TEXT("User.Height"), 400.f);
 		ZoneFx->SetVariableLinearColor(TEXT("User.Color"), FLinearColor(0.8f, 0.05f, 6.f) * OrbGlowBoost); // 보라. 기본값은 초록이다
 		ZoneFx->Activate(true);
+	}
+}
+
+void ALabOrb::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	if (UMassSimulationSubsystem* Simulation = GetWorld()->GetSubsystem<UMassSimulationSubsystem>(); Simulation && PhaseStartHandle.IsValid())
+	{
+		Simulation->GetOnProcessingPhaseStarted(EMassProcessingPhase::PrePhysics).Remove(PhaseStartHandle);
+	}
+	PhaseStartHandle.Reset();
+	Super::EndPlay(EndPlayReason);
+}
+
+void ALabOrb::OnMassPrePhysicsStart(float DeltaSeconds)
+{
+	ULabCrowdSubsystem* Crowd = GetWorld()->GetSubsystem<ULabCrowdSubsystem>();
+	if (!Spawner || !Crowd || !Crowd->IsActive())
+	{
+		return; // M0 액터 단계는 오브 틱이 직접 피해·저격을 한다
+	}
+	Crowd->OrbCenter = GetActorLocation();
+	Crowd->SnipeView = GetSnipeView();
+	// 저격 시점은 M0과 같은 누적 시간으로 정하고, 대상 선택은 이 단계의 저격 프로세서가 한다.
+	SnipeAccumulator += DeltaSeconds;
+	while (SnipeAccumulator >= FLabScenario::SnipeInterval)
+	{
+		SnipeAccumulator -= FLabScenario::SnipeInterval;
+		Crowd->PendingSnipeTick.store(++SnipeTick);
 	}
 }
 
@@ -161,7 +195,7 @@ void ALabOrb::Snipe()
 	const FVector Center = GetActorLocation();
 	const FLabSnipeView View = GetSnipeView();
 
-	// 화면 안의 산 개체를 거리 구간별로 나눠, 구간마다 해시(일련번호, 저격 틱)가 가장 작은 개체를 고른다(LabSnipe.h). 2종은 예약 발만 대형(E안).
+	// 화면 안의 산 개체를 거리 구간별로 나눠, 구간마다 해시(일련번호, 저격 틱)가 가장 작은 개체를 고른다(LabSnipe.h). 2종은 예약 발만 대형.
 	TLabSnipeSelector<ALabMinion*> Picker(SnipeTick);
 	for (ALabMinion* Minion : Spawner->GetMinions())
 	{
@@ -188,9 +222,9 @@ void ALabOrb::Snipe()
 
 void ALabOrb::SpawnStrikeFx(const FVector& Target)
 {
-	// 측정 실행을 포함해 언제나 그린다. 이펙트는 시나리오의 고정된 일부이고 모든 단계에서 같은 비용이다(2026-11-07 사용자 결정).
+	// 측정 실행을 포함해 언제나 그린다. 이펙트는 시나리오의 고정된 일부이고 모든 단계에서 같은 비용이다.
 	// 저격 궤적은 구체에서 대상까지 곧은 보라 선 하나다. 디버그 라인은 Test 빌드에서 그려지지 않아서, 엔진 DynamicBeam 템플릿으로 만든
-	// /Game/Lab/FX/NS_LabBolt(빔 점 2개, 리본 하나)로 그린다(Scripts/create-bolt-fx.md). 번개 표현은 화면에서 읽기 어려워 접었다(2026-11-07 사용자 결정).
+	// /Game/Lab/FX/NS_LabBolt(빔 점 2개, 리본 하나)로 그린다(Scripts/create-bolt-fx.md). 번개 표현은 화면에서 읽기 어려워 접었다.
 	if (!StrikeSystem)
 	{
 		return;
@@ -228,19 +262,18 @@ void ALabOrb::TickStrikes(float DeltaSeconds)
 int32 ALabOrb::GetKillCount() const
 {
 	const ULabCrowdSubsystem* Crowd = GetWorld()->GetSubsystem<ULabCrowdSubsystem>();
-	return Crowd && Crowd->IsActive() ? Crowd->KillCount : KillCount;
+	return Crowd && Crowd->IsActive() ? Crowd->KillCount.load() : KillCount;
 }
 
 int32 ALabOrb::GetSnipeCount() const
 {
 	const ULabCrowdSubsystem* Crowd = GetWorld()->GetSubsystem<ULabCrowdSubsystem>();
-	return Crowd && Crowd->IsActive() ? Crowd->SnipeCount : SnipeCount;
+	return Crowd && Crowd->IsActive() ? Crowd->SnipeCount.load() : SnipeCount;
 }
 
 void ALabOrb::TickMass(float DeltaSeconds, ULabCrowdSubsystem* Crowd)
 {
-	Crowd->OrbCenter = GetActorLocation();
-	Crowd->SnipeView = GetSnipeView();
+	// 오브 중심·화면 판정 카메라·저격 요청은 OnMassPrePhysicsStart가 쓴다(Mass 워커와의 경합을 피한다). 여기는 이펙트만 다룬다.
 	Crowd->ExcludeVisualsFromLumen();
 
 	TArray<FVector> Targets;
@@ -261,12 +294,4 @@ void ALabOrb::TickMass(float DeltaSeconds, ULabCrowdSubsystem* Crowd)
 		SpawnStrikeFx(Target);
 	}
 	TickStrikes(DeltaSeconds);
-
-	// 저격 시점은 M0과 같은 누적 시간으로 정하고, 대상 선택은 저격 프로세서가 다음 Mass 처리에서 한다.
-	SnipeAccumulator += DeltaSeconds;
-	while (SnipeAccumulator >= FLabScenario::SnipeInterval)
-	{
-		SnipeAccumulator -= FLabScenario::SnipeInterval;
-		Crowd->PendingSnipeTick.store(++SnipeTick);
-	}
 }

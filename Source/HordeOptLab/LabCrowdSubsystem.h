@@ -59,14 +59,14 @@ public:
 
 	/**
 	 * 미니언 ISM을 Lumen 장면에서 뺀다. ISM 컴포넌트는 표현 프로세서가 첫 갱신 때 만들므로 오브가 매 틱 부르고, 이미 적용된 컴포넌트는 건너뛴다.
-	 * 이유: 매 프레임 움직이는 인스턴스 2,000개가 Lumen 장면에 들어가면 GPU가 29ms가 된다(2026-11-07 시험). 스켈레탈 메시 캐릭터는 원래 Lumen 장면 밖이다.
+	 * 이유: 매 프레임 움직이는 인스턴스 2,000개가 Lumen 장면에 들어가면 GPU가 29ms가 된다(시험). 스켈레탈 메시 캐릭터는 원래 Lumen 장면 밖이다.
 	 */
 	void ExcludeVisualsFromLumen();
 
-	// 오브 상태. 오브가 쓰고 프로세서가 읽는다.
+	// 오브 상태. 오브가 Mass PrePhysics 단계 시작(게임 스레드, 프로세서 전)에 쓰고 프로세서가 읽는다(ALabOrb::OnMassPrePhysicsStart).
 	FVector OrbCenter = FVector::ZeroVector;
-	std::atomic<uint32> PendingSnipeTick{0}; // 0이 아니면 이번 처리에서 저격한다. 오브 틱(게임 스레드)이 쓰고 저격 프로세서(워커일 수 있음)가 exchange(0)으로 가져간다(M3b 정비)
-	FLabSnipeView SnipeView;     // 화면 판정용 카메라(오브가 매 틱 갱신)
+	std::atomic<uint32> PendingSnipeTick{0}; // 0이 아니면 이번 처리에서 저격한다. 오브가 단계 시작에 쓰고 저격 프로세서(워커일 수 있음)가 exchange(0)으로 가져간다
+	FLabSnipeView SnipeView;     // 화면 판정용 카메라(직전 프레임에 그린 카메라, 오브가 단계 시작마다 갱신)
 	float HitDuration = 0.5f;
 	float DeathDuration = 1.f;
 	FLabVatClips VatClipsByType[LabUnitTypeMax]; // M2부터, 종류별(2종). Activate 전에 스포너가 채운다. 1종은 [0]만 쓴다
@@ -93,12 +93,20 @@ public:
 	float NearestDistSq = 0.f;
 	FVector Nearest = FVector::ZeroVector;
 	float NearestHoldUntil = 0.f;    // M4: 이 시각까지는 범위 피해가 돌지 않은 프레임에도 번개 대상을 지우지 않는다(LabMassProcessors.cpp)
-	int32 KillCount = 0;
-	int32 SnipeCount = 0;
+	// 누적 사망 수. 프로세서(워커일 수 있음)가 ResultLock 안에서 더하고 게임 스레드(게임 모드·HUD)가 잠금 없이 읽으므로 원자 변수다
+	std::atomic<int32> KillCount{0};
+	std::atomic<int32> SnipeCount{0};
 	std::atomic<int64> DamageHits{0}; // E1 (d): 체력에 실제로 적용된 비치명 피해 건수(확인용)
-	// E3 (3c) 스탯(2종): 대형 액터가 있었던 액터×프레임 합과 그중 애니 틱을 건너뛴 수. ULabActorSyncProcessor가 더하고 게임 모드가 측정 구간 차이를 CSV 메타데이터로 쓴다
+	/**
+	 * 애니 갱신 통계(종류별): 액터×프레임 합, 그중 애니 갱신을 하지 않은 수(보간 + 건너뜀), 그중 보간한 수. 건너뜀 = Skips − Interps.
+	 * ULabActorSyncProcessor가 더하고 게임 모드가 측정 구간 차이를 CSV 메타데이터 LabLargeActor*·LabSmallActor*로 쓴다.
+	 */
 	mutable std::atomic<int64> LargeActorFrames{0};
 	mutable std::atomic<int64> LargeActorSkips{0};
+	mutable std::atomic<int64> LargeActorInterps{0};
+	mutable std::atomic<int64> SmallActorFrames{0};
+	mutable std::atomic<int64> SmallActorSkips{0};
+	mutable std::atomic<int64> SmallActorInterps{0};
 	/** Q5 동등성 통계: 오브 수평 30m 안 엔티티 수(ULabNearOrbCountProcessor가 매 프레임 쓴다, FLabEquivalence). 게임 모드가 CSV 스탯 Lab/Near30으로 남긴다 */
 	mutable std::atomic<int32> Near30{0};
 	/** Q5 HUD: 이 프레임 동기화한 하이드레이션 액터 수(CSV 스탯 Lab/Actors와 같은 값, ULabActorSyncProcessor가 쓴다) */
@@ -130,7 +138,7 @@ public:
 	int32 GetIskmBoundsApplied() const { return IskmBoundsAssets.Num(); }
 #if !UE_BUILD_TEST
 	/**
-	 * 개발용 프레임 진단(-LabFrameLog, E3b (8) 화질 캡처 2026-11-09): 화면 안 30m에서 아직 VAT 인스턴스로 그리는 개체 수와 보이는 액터 수를 프레임마다 로그에 남긴다.
+	 * 개발용 프레임 진단(-LabFrameLog, E3b (8) 화질 캡처): 화면 안 30m에서 아직 VAT 인스턴스로 그리는 개체 수와 보이는 액터 수를 프레임마다 로그에 남긴다.
 	 * VAT·ActorSync 프로세서가 GFrameCounter&1 슬롯에 더하고, 게임 모드 Tick이 다음 프레임에 이전 슬롯을 읽고 비운다(두 프로세서의 실행 순서와 무관).
 	 */
 	struct FFrameDiag { std::atomic<int32> NearVat{0}; std::atomic<int32> NearActors{0}; std::atomic<int32> ViewActors{0}; };
