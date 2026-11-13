@@ -22,8 +22,8 @@
 5. 끝났다(98dd60f, 1d25a55, 3339b42, 5b85c35). 공개 문서의 수치, 트레이스 값, Insights 스크린샷은 `Full3` 값이다.
 6. 끝났다. 사이트는 `Full3` 값이다(2026-11-13 배포).
 7. 끝났다. 사용자가 사이트를 검토했다. 코디네이터가 `Docs/post-review.md`를 지웠다.
-8. 코드 세션이 변형 `manager`를 만든다([plan.md](plan.md) "참고 묶음 `Mgr1`"). 틱 없는 액터가 데이터를 들고 매니저가 계산해 공유 ISM에 쓴다.
-9. 측정 세션이 다시 패키지한다. 측정 세션이 `manager`와 2단계를 참고 묶음 `Mgr1`로 잰다.
+8. 끝났다(83ffcbd). 변형 `manager`의 인자는 `-LabStage=M1 -LabVariant=manager`다([Worklog/Q8.md](Worklog/Q8.md)).
+9. 측정 세션이 다시 패키지한다. 측정 세션이 `manager`, 2단계, 2단계 직렬을 참고 묶음 `Mgr1`로 잰다([plan.md](plan.md) "참고 묶음 `Mgr1`").
 10. 글 세션이 글 02에 결과를 "참고"로 적는다.
 
 사용자가 측정을 허락했다. 코디네이터는 뒤의 측정과 촬영을 허락 없이 시작한다.
@@ -46,7 +46,7 @@
 
 | 세션 | 작업 단위 | 모델 | 상태 |
 | --- | --- | --- | --- |
-| `manager-code` | 변형 `manager` 구현, 빌드, 작은 실행 | Opus high | 시작함 |
+| `manager-measure` | 재패키지, 참고 묶음 `Mgr1` 18회, 요약 | Sonnet medium | 시작함 |
 
 벤치 끝의 종료 코드는 늘 0이다. 러너는 실패를 `LabOk`와 CSV 유무로 판정한다([Worklog/Q7.md](Worklog/Q7.md) "종료 코드").
 
