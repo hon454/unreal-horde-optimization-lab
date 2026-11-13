@@ -4,7 +4,7 @@
 
 ## 단계
 
-- 마일스톤 M0\~M5, M3b와 품질 계획 Q1\~Q6은 끝났다. 총괄 묶음은 `Full2`다.
+- 마일스톤 M0\~M5, M3b와 품질 계획 Q1\~Q6은 끝났다. 총괄 묶음은 `Full3`이다.
 - 글 00\~09의 초안, Releases, 사이트는 끝났다. 경위는 [Worklog/Posts.md](Worklog/Posts.md)에 있다.
 - 지금은 사용자 검토에서 나온 수정을 한다.
 - 방향은 목표 사양(호드 총수 1만, 60fps) 안에서 거리별 품질을 확보하는 것이다([ADR-0009](Decisions/0009-flat-scenario-quality-by-distance.md)).
@@ -16,9 +16,9 @@
 사용자가 2026-11-13에 정했다. Animation Budget Allocator의 예산 값을 측정으로 다시 정한다. 오브 `SnipeView` 경합을 고친다. 전 조건을 새 총괄 묶음 `Full3`으로 다시 잰다. 경위는 [Worklog/Q7.md](Worklog/Q7.md)에 적는다.
 
 1. 끝났다(62b6a42).
-2. 끝났다(5762e49). `Budget1`은 36회, 실패 0회다. 기준을 만족하는 값은 4ms 하나다([Worklog/Q7.md](Worklog/Q7.md) "측정: Budget1").
-3. 끝났다. 사용자가 4ms를 골랐다([ADR-0016](Decisions/0016-animation-budget-value.md)). 제외한 두 수정은 넣지 않는다.
-4. 코드 세션이 기본값을 4ms로 바꿨다(53f1dfb). 측정 세션이 다시 패키지하고 `Full3`을 잰다.
+2. 끝났다(5762e49).
+3. 끝났다. 사용자가 4ms를 골랐다([ADR-0016](Decisions/0016-animation-budget-value.md)).
+4. 끝났다(53f1dfb, 1be346f). `Full3`은 178회다. 재측정 2회 뒤 실패는 0회다.
 5. 글 세션이 글 04에 예산을 정한 절을 쓴다. 넘길 내용은 [Worklog/Q7.md](Worklog/Q7.md) "글 세션에 넘길 것"에 있다. 글 세션이 공개 문서의 수치를 `Full3` 값으로 바꾼다.
 6. 코디네이터가 멈춘다. 사용자가 글과 사이트를 검토한다.
 7. 사용자가 글 검토를 끝내면 코디네이터가 `Docs/post-review.md`를 지운다.
@@ -45,7 +45,7 @@
 
 | 세션 | 작업 단위 | 모델 | 상태 |
 | --- | --- | --- | --- |
-| `budget-measure` | 재패키지, `Full3` 178회, 단계별 화면 | Sonnet medium | 시작함 |
+| 글 세션 | 글 04의 예산 절, 공개 문서의 수치를 `Full3` 값으로 | Opus high | 아직 띄우지 않았다 |
 
 벤치 끝의 종료 코드는 늘 0이다. 러너는 실패를 `LabOk`와 CSV 유무로 판정한다([Worklog/Q7.md](Worklog/Q7.md) "종료 코드").
 
@@ -64,13 +64,14 @@
   - 200m 밖: 엔티티 구동 입자. 입자 메시는 원본 스켈레탈 LOD4로 구운 메시다(bf1a4c8).
 - 사다리 1\~7단계는 액터 0\~30m(상한 500), 그림자 켬이다.
 - 켠 것: 화면 크기 Budget, 전환 대책 다섯 가지.
+- Animation Budget Allocator의 예산은 4ms다([ADR-0016](Decisions/0016-animation-budget-value.md)).
 - 끈 것: 미니언끼리 비켜 가기, 하이드레이션 액터의 캡슐 콜리전.
 - 모션 블러는 엔진 기본값이다([ADR-0007](Decisions/0007-keep-default-motion-blur.md)).
-- 비교는 같은 묶음에서 잰 값끼리만 한다. 글과 README의 수치는 총괄 묶음 `Full2`에서만 만든다.
+- 비교는 같은 묶음에서 잰 값끼리만 한다. 글과 README의 수치는 총괄 묶음 `Full3`에서만 만든다. 글 세션이 바꾸기 전의 공개 문서는 `Full2` 값이다.
 - 조건이 바뀌거나 묶음이 오염되면 전 조건을 새 묶음으로 다시 잰다. 같은 라벨과 묶음 이름은 다시 쓰지 않는다.
 - README와 글 본문에는 묶음 이름을 쓰지 않는다.
 - 단계별 화면은 움직이는 WebP다(960폭, 15fps, 8초). 촬영 러너는 `Scripts/capture-full.ps1`이다. Chrome이 떠 있으면 러너가 거부한다.
-- Test 패키지 08e45f2는 Releases에 있다(태그 `test-package-08e45f2`, [D30](Worklog/autonomous-decisions.md)).
+- `Full3`의 Test 패키지는 df41c13이다. Releases에는 `Full2`의 패키지 08e45f2가 있다(태그 `test-package-08e45f2`, [D30](Worklog/autonomous-decisions.md)).
 - 새 체크아웃은 `Scripts/restore-assets.ps1`로 에셋을 복구한다([setup.md](Guides/setup.md)).
 
 ## 명령
@@ -80,8 +81,8 @@ powershell -ExecutionPolicy Bypass -File Scripts/build.ps1
 powershell -ExecutionPolicy Bypass -File Scripts/run-dev.ps1 -Small -Stage M5 -Variant q4final
 powershell -ExecutionPolicy Bypass -File Scripts/package.ps1
 powershell -ExecutionPolicy Bypass -File Scripts/run-full.ps1 -DryRun
-py -3 -I Scripts/summarize.py --batch Full2
-py -3 -I Scripts/plot.py --batch Full2
+py -3 -I Scripts/summarize.py --batch Full3
+py -3 -I Scripts/plot.py --batch Full3
 py -3 -I Scripts/plot-readme.py
 ```
 
@@ -89,38 +90,40 @@ py -3 -I Scripts/plot-readme.py
 
 ## 측정 결과
 
-총괄 묶음 `Full2`의 값이다([Worklog/Q6.md](Worklog/Q6.md) "Full2 재측정").
+총괄 묶음 `Full3`의 값이다([Worklog/Q7.md](Worklog/Q7.md) "측정: Full3").
 
-- 빌드는 Test 패키지 08e45f2다. 측정일은 2026-11-12\~13이다. 178회 가운데 실패는 0회다.
-- 표는 `Measurements/Full2/summary.csv`에 있다. 그래프는 `Docs/figures/full2/`에 있다.
+- 빌드는 Test 패키지 df41c13이다. 측정일은 2026-11-13이다. 178회 가운데 실패는 0회다.
+- 표는 `Measurements/Full3/summary.csv`에 있다. 그래프는 `Docs/figures/full3/`에 있다.
 - 약어: P1은 오브 시점 카메라다. p50은 중앙값이다. p95는 느린 쪽 5% 경계다. Game은 게임 스레드다.
+- `Full2`와 달라진 것은 둘이다. 예산이 2ms에서 4ms로 올랐다. 오브 `SnipeView` 경합을 고쳤다(62b6a42).
 
 호드 1만, P1의 값(ms):
 
 | 조건 | 프레임 p50 | 프레임 p95 | Game p50 | GPU p50 |
 | --- | --- | --- | --- | --- |
-| `L1` | 439.96 | 463.58 | 424.87 | 50.23 |
-| `L2` | 10.31 | 10.93 | 6.30 | 10.02 |
-| `L3` | 7.91 | 8.47 | 3.21 | 7.54 |
-| `L4` | 8.16 | 9.60 | 7.87 | 6.94 |
-| `L5` | 7.65 | 9.12 | 7.33 | 6.97 |
-| `L6` | 7.51 | 9.19 | 7.34 | 5.36 |
-| `L7` | 7.79 | 9.34 | 7.63 | 6.10 |
-| `L8` | 7.78 | 9.42 | 7.65 | 5.72 |
+| `L1` | 444.28 | 469.66 | 429.44 | 50.17 |
+| `L2` | 10.19 | 10.84 | 6.24 | 9.90 |
+| `L3` | 7.91 | 8.48 | 4.16 | 7.53 |
+| `L4` | 9.42 | 10.98 | 9.14 | 6.93 |
+| `L5` | 8.57 | 10.34 | 8.25 | 6.97 |
+| `L6` | 8.45 | 10.14 | 8.29 | 5.37 |
+| `L7` | 8.73 | 10.57 | 8.57 | 6.06 |
+| `L8` | 9.75 | 11.49 | 9.59 | 5.75 |
 
-- `L4`\~`L8`의 병목은 Game이다. `Full1`에서 `L7`과 `L8`의 병목은 GPU였다.
-- 60fps를 지키는 최대 개체 수(프레임 p95 기준): `L1` 774, `L2` 20,753, `L4` 25,636, `L6` 29,799, `L7` 26,587, `L8` 25,958. `L3`과 `L5`는 3만에서도 16.7ms 안이다.
-- 빼 보기의 프레임 p50 변화(`L8` 대비, ms): `A8-farcull` +4.30, `S8-col` +2.01, `A8-budget` +1.75, `A8-hydrate` −1.59, `A8-simlod` +1.04, `A8-bounds` +0.77, `A8-crowdfx` −0.27, `A8-iskm` −0.21.
-- `A8-fix`, `A8-pool`, `A8-farshadow`는 프레임 시간이 세 실행 범위 안이다.
-- `A8-iskm`은 GPU p50이 +1.23ms이고 Game p50이 −0.33ms다. ISKM의 이점은 GPU 시간으로 적는다.
-- `A8-farshadow`는 GPU p50만 +0.39ms다.
-- `L8`의 대형 액터 애니메이션 건너뜀 비율: 1만 0.207, 2만 0.573, 3만 0.557. 1만의 값은 `Full1`의 0.003보다 크다. 원인은 확인하지 않았다.
-- `L1`\~`L6`은 `Full1`보다 프레임 p50이 0.1\~0.6ms 길다. 원인은 확인하지 않았다.
+- `L4`\~`L8`의 병목은 Game이다.
+- `L1`\~`L3`의 프레임 p50은 `Full2`와 세 실행 범위 안에서 같다. `L4`\~`L8`은 0.9\~2ms 길다.
+- 60fps를 지키는 최대 개체 수(프레임 p95 기준): `L1` 766, `L2` 19,554, `L4` 19,952, `L5` 22,857, `L6` 23,774, `L7` 22,033, `L8` 20,037. `L3`은 3만에서도 16.7ms 안이다.
+- `L8`의 2만 P1 프레임 p95는 16.68ms다. 16.7ms와의 여유는 0.02ms다.
+- `L2`의 최대 개체 수는 `Full2`보다 약 1,200 적다. 원인은 확인하지 않았다.
+- 빼 보기의 프레임 p50 변화(`L8` 대비, ms): `A8-farcull` +4.00, `A8-hydrate` −3.57, `S8-col` +1.60, `A8-simlod` +0.75, `A8-bounds` +0.54, `A8-crowdfx` −0.40, `A8-budget` −0.29, `A8-iskm` −0.13, `A8-farshadow` +0.13.
+- `A8-fix`와 `A8-pool`은 프레임 시간이 세 실행 범위 안이다.
+- `A8-iskm`은 GPU p50이 +1.13ms다. ISKM의 이점은 GPU 시간으로 적는다.
+- `L8`의 건너뜀 비율(갱신도 보간도 하지 않은 프레임): 1만은 대형 0, 소형 0이다. 2만은 대형 0.004, 소형 0.42다. 3만은 대형 0, 소형 0.48이다.
 
 참고 묶음 `Ref1`(1280×720, 빼 보기 열 행과 `L8`, [D21](Worklog/autonomous-decisions.md)):
 
 - 모든 행의 병목이 Game이다. 이 묶음 안에서만 비교한다.
-- `A8-hydrate`는 프레임 p50이 −3.73ms다. 나머지 행은 `Full2`와 0.2ms 안에서 같다.
+- `A8-hydrate`는 프레임 p50이 −3.73ms다. `Full2` 때의 참고값이다.
 
 엔티티 풀 묶음 `Pool1`(16분 실행 두 번):
 
