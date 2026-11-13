@@ -70,13 +70,13 @@ def frame_flow():
     # Actor ticks in the same tick group as the Mass PrePhysics phase.
     y = 98
     h = card(o, 32, y, W - 64, "액터 틱(틱 그룹 PrePhysics)",
-             ["ALabOrb: 저격 요청과 이펙트 · ALabCameraRig · ALabGameMode: CSV 기록",
+             ["ALabOrb: 이펙트 · ALabCameraRig · ALabGameMode: CSV 기록",
               "Mass 처리와 같은 틱 그룹이고 둘 사이의 순서 선언은 없다"])
     y += h + 26
 
     # Mass PrePhysics frame.
     fy = y
-    o.append(f'<text x="24" y="{fy + 4}" font-size="17" font-weight="700">Mass 처리(PrePhysics 단계)</text>')
+    o.append(f'<text x="24" y="{fy + 4}" font-size="17" font-weight="700">Mass 처리(PrePhysics 단계). 시작할 때 오브 위치·카메라·저격 요청을 받는다</text>')
     y = fy + 22
     lx, rx, cw = 44, 410, 346
     h = card(o, lx, y, rx + cw - lx, "1 거리 판정(LOD 그룹)",

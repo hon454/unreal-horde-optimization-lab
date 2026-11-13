@@ -5,9 +5,9 @@
 <text x="32" y="74" font-size="16" fill="#4b5563">화살표는 코드에 선언된 실행 순서다. 칩은 그 코드가 들어온 사다리 단계다.</text>
 <rect x="32" y="98" width="736" height="88" rx="10" fill="#f8fafc" stroke="#e5e7eb"/>
 <text x="48" y="126" font-size="17" font-weight="700">액터 틱(틱 그룹 PrePhysics)</text>
-<text x="48" y="152" font-size="16" fill="#4b5563">ALabOrb: 저격 요청과 이펙트 · ALabCameraRig · ALabGameMode: CSV 기록</text>
+<text x="48" y="152" font-size="16" fill="#4b5563">ALabOrb: 이펙트 · ALabCameraRig · ALabGameMode: CSV 기록</text>
 <text x="48" y="174" font-size="16" fill="#4b5563">Mass 처리와 같은 틱 그룹이고 둘 사이의 순서 선언은 없다</text>
-<text x="24" y="216" font-size="17" font-weight="700">Mass 처리(PrePhysics 단계)</text>
+<text x="24" y="216" font-size="17" font-weight="700">Mass 처리(PrePhysics 단계). 시작할 때 오브 위치·카메라·저격 요청을 받는다</text>
 <rect x="44" y="234" width="712" height="88" rx="10" fill="#f8fafc" stroke="#e5e7eb"/>
 <text x="60" y="262" font-size="17" font-weight="700">1 거리 판정(LOD 그룹)</text>
 <rect x="685" y="245" width="59" height="22" rx="11" fill="#2563eb" fill-opacity="0.12" stroke="#2563eb"/>
