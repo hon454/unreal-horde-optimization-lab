@@ -481,3 +481,8 @@
 | 조향 파라미터 기본값 | `ReactionTime 0.3`, `LookAheadTime 1.0`, `bAllowSpeedVariance true` | `MN/Public/Steering/MassSteeringFragments.h:66-78` |
 | 힘과 이동 | 힘 적용: `DesiredVelocity = (DesiredVelocity + 힘 × dt)`를 `MaxSpeed`로 자른다. 이동: `Velocity = DesiredVelocity`, 위치에 `Velocity × dt`를 더한다. 두 dt는 0.1초 상한이다. 이동만 코드 구동 태그를 요구한다 | `Engine/Plugins/Runtime/MassGameplay/Source/MassMovement/Private/MassMovementProcessors.cpp:41,56-57,88,100,115-128` |
 | 회전 | 바라는 방향 = `LerpAngle(DesiredVelocity의 방위, MoveTarget.Forward의 방위, 이동 목표 가중치 ÷ 두 가중치의 합)`. 새 방위 = `ExponentialSmoothingAngle(지금 방위, 바라는 방향, dt, OrientationSmoothingTime)`. dt는 0.1초 상한이다. 기본값은 이동 중 가중치 0.4 / 0.6, 평활 시간 0.3초다 | `MN/Private/MassSmoothOrientationProcessors.cpp:47,72-112`, `MN/Public/SmoothOrientation/MassSmoothOrientationFragments.h:39-51`, `MN/Public/MassNavigationUtils.h:19-51` |
+
+## 32. Mass Chunk 크기(2026-11-14, 글 02)
+
+- `UMassEntitySettings::ChunkMemorySize`의 기본값은 `128 * 1024`다(`Engine/Source/Runtime/MassEntity/Public/MassEntitySettings.h:92`).
+- Archetype은 만들 때 값이 0이면 이 기본값을 쓰고, 1KB\~512KB로 자른다(`Private/MassArchetypeData.cpp:19-25, 227`).

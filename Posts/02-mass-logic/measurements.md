@@ -236,6 +236,7 @@
 | 쌓은 ISM 데이터는 PostPhysics 단계가 끝날 때 `EndVisualChanges`가 컴포넌트에 올린다 | [engine-notes.md](../../Docs/Reference/engine-notes.md) 27절(`MassRepresentationSubsystem.cpp:444-445,526-540`). 이번에 다시 열지 않았다 |
 | 컴포넌트는 메시 설명자마다 하나다(종류 둘 = ISM 컴포넌트 둘) | engine-notes.md 22절(`MassVisualizationComponent.cpp:259`). 이번에 다시 열지 않았다 |
 | 소프트웨어 Lumen 장면은 동적 간접광에 영향을 주고 거리 필드가 있는 프리미티브만 넣는다 | engine-notes.md 11절(`PrimitiveSceneProxy.cpp:1701-1734`). 이번에 다시 열지 않았다 |
+| Chunk 크기의 기본값 `ChunkMemorySize = 128 * 1024`. 프로젝트 `Config/`는 이 값을 바꾸지 않는다 | `Source/Runtime/MassEntity/Public/MassEntitySettings.h:92`(`UMassEntitySettings`), `Private/MassArchetypeData.cpp:227` |
 | Processor 기본 처리 단계 PrePhysics | engine-notes.md 27절(`MassEntity/Public/MassProcessor.h:244`) |
 
 ### 본문에 넣은 발췌
@@ -309,6 +310,7 @@
 
 ## 측정 기록의 변경
 
+- 2026-11-14: 배경 지식 "Mass Entity와 Fragment"에 Mass의 장단점을 더했다(사용자 지시). 캐시 설명은 원리이고 측정값이 아니다. 캐시 라인 64바이트는 x86-64 CPU의 일반 사실이며 이 PC에서 확인하지 않았다. 캐시 미스는 재지 않았다.
 - 2026-11-14: 본문의 매니저 절 셋을 "참고" 절 하나로 합치고 매니저 방식의 설명을 앞에 두었다. 한 스레드 2단계는 본문과 그림 둘(`manager-times`, `manager-gamethread`)에서 뺐다. 그 값은 이 기록의 표에 남긴다. 표에서 "(그림)"이라 적은 한 스레드 행은 이제 그림에 없다. 측정값은 바뀌지 않았다.
 - 2026-11-14: 매니저 방식 트레이스의 Insights 화면을 넣었다(코디네이터). 본문 캡션은 화면 값이다.
 - 2026-11-14: 참고 측정(매니저 방식)을 더했다. 사용자가 Mass가 번 몫과 액터의 틱을 없애서 번 몫을 가르는 측정을 정했기 때문이다. 최종 측정의 값은 그대로다. 본문 "한 문장으로"의 첫 문단과 셋째 글머리표를 참고 측정에 맞춰 고쳤다. 그림 넷(`mass-gain`, `manager-diagram`, `manager-times`, `manager-gamethread`)을 더했다.
