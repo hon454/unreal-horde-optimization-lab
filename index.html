@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Unreal 호드 최적화 실험실</title>
+<meta name="description" content="액터로 만들면 60fps를 못 지키는 호드 1만을 UE5 Mass Entity로 다시 만들고, 최적화 기법을 여덟 단계로 하나씩 더하며 잰 결과">
+<meta name="color-scheme" content="light dark">
+<link rel="stylesheet" href="site.css">
+</head>
+<body>
+<a class="skip" href="#steps">단계 선택으로 건너뛰기</a>
+
+<header class="wrap hero">
+  <p class="eyebrow">Unreal Engine 5.8 · Mass Entity</p>
+  <h1>Unreal 호드 최적화 실험실</h1>
+  <p class="lead" id="lead"></p>
+  <div class="hero-grid">
+    <div class="card spec">
+      <p class="card-label">목표 사양</p>
+      <p class="spec-line"><span class="big num" id="spec-n"></span><span class="spec-unit">호드 총수</span></p>
+      <p class="spec-line"><span class="big num">60fps</span><span class="spec-unit" id="spec-ms"></span></p>
+    </div>
+    <div class="card result">
+      <p class="card-label">결과 · 호드 총수 1만, 프레임 시간 중앙값</p>
+      <div class="result-row">
+        <div><p class="big num" id="res-first"></p><p class="muted">1단계 액터 군중</p></div>
+        <span class="arrow" aria-hidden="true">→</span>
+        <div><p class="big num accent" id="res-final"></p><p class="muted">8단계 최종 구성</p></div>
+      </div>
+      <p class="muted small" id="res-note"></p>
+    </div>
+  </div>
+  <p class="links">
+    <a class="btn" id="link-repo" href="#">GitHub 레포</a>
+    <a class="btn" id="link-release" href="#">Test 패키지 받기 <span class="muted">(빌드 없이 실행)</span></a>
+  </p>
+</header>
+
+<main>
+<section class="wrap" id="steps" aria-labelledby="steps-h">
+  <h2 id="steps-h">단계를 골라 보기</h2>
+  <p class="muted">단계를 고르면 화면과 측정값이 바뀐다. 좌우 화살표 키나 화면을 옆으로 밀어도 단계가 바뀐다.</p>
+  <div class="tabs" role="tablist" aria-label="단계" id="tabs"></div>
+
+  <div class="panel card" role="tabpanel" id="panel" aria-labelledby="">
+    <div class="panel-top">
+      <figure class="media" id="media">
+        <div class="frame">
+          <img id="clip" width="960" height="540" alt="" decoding="async" draggable="false">
+          <div class="frame-msg" id="clip-msg" aria-live="polite"></div>
+          <button type="button" class="btn load-btn" id="clip-load" hidden></button>
+        </div>
+        <figcaption class="muted small" id="clip-cap"></figcaption>
+      </figure>
+      <div class="about">
+        <div class="step-head">
+          <button type="button" class="nav-btn" id="prev" aria-label="앞 단계">‹</button>
+          <h3 id="step-title"></h3>
+          <button type="button" class="nav-btn" id="next" aria-label="다음 단계">›</button>
+        </div>
+        <p class="tag" id="step-group"></p>
+        <h4>바꾼 것</h4>
+        <p id="step-changed"></p>
+        <h4>알게 된 것</h4>
+        <p id="step-learned"></p>
+        <p><a id="step-post" href="#"></a></p>
+      </div>
+    </div>
+
+    <div class="panel-bottom">
+      <div class="nsel">
+        <span class="nsel-label" id="nsel-label">호드 총수</span>
+        <div class="seg" role="group" aria-labelledby="nsel-label" id="nsel"></div>
+      </div>
+      <div class="metrics" id="metrics"></div>
+      <div class="cols">
+        <div>
+          <h4>16.7ms 예산 대비</h4>
+          <div class="budget" id="budget"></div>
+        </div>
+        <div>
+          <h4 id="delta-h">앞 단계 대비</h4>
+          <div id="delta"></div>
+          <h4>60fps를 지키는 최대 개체 수</h4>
+          <p class="max60" id="max60"></p>
+          <p class="muted small">프레임 시간의 느린 쪽 5% 경계가 16.7ms 이하인 가장 큰 호드 총수. 단계마다 네 가지 호드 총수에서 잰 값 사이를 보간했다.</p>
+        </div>
+      </div>
+    </div>
+    <p class="sr-only" aria-live="polite" id="announce"></p>
+  </div>
+</section>
+
+<section class="wrap" aria-labelledby="ladder-h">
+  <h2 id="ladder-h">여덟 단계 한눈에</h2>
+  <p class="muted">호드 총수 1만, 오브 시점 카메라. 막대는 프레임 시간 중앙값, 옅은 연장은 느린 쪽 5% 경계다. 1단계는 축척 밖이라 막대를 잘랐다. 줄을 누르면 위의 단계가 바뀐다.</p>
+  <div class="card chart" id="ladder"></div>
+</section>
+
+<section class="wrap" aria-labelledby="maxn-h">
+  <h2 id="maxn-h">60fps를 지키는 최대 개체 수</h2>
+  <p class="muted">오브 시점 카메라. 프레임 시간의 느린 쪽 5% 경계가 16.7ms 이하인 가장 큰 호드 총수다. 점선 막대는 잰 범위의 끝인 3만에서도 16.7ms 안이라 실제 최대가 더 크다.</p>
+  <div class="card chart" id="maxn"></div>
+</section>
+
+<section class="wrap" aria-labelledby="abl-h">
+  <h2 id="abl-h">최종 구성에서 기법 하나를 뺀 값</h2>
+  <p class="muted" id="abl-intro"></p>
+  <div class="card chart" id="ablation"></div>
+  <ul class="notes" id="abl-notes"></ul>
+</section>
+
+<section class="wrap" aria-labelledby="pool-h">
+  <h2 id="pool-h">엔티티 풀: 오래 돌 때의 차이</h2>
+  <ul class="notes" id="pool-notes"></ul>
+  <div class="card chart" id="pool"></div>
+</section>
+
+<section class="wrap" aria-labelledby="method-h">
+  <h2 id="method-h">재는 법</h2>
+  <ul class="notes" id="method"></ul>
+</section>
+
+<section class="wrap" aria-labelledby="posts-h">
+  <h2 id="posts-h">글 열 편</h2>
+  <ol class="posts" id="posts"></ol>
+</section>
+</main>
+
+<footer class="wrap foot">
+  <p><a id="foot-repo" href="#">GitHub 레포</a> · <a id="foot-release" href="#">Test 패키지(Releases)</a> · <a id="foot-csv" href="#">최종 측정의 표(CSV)</a></p>
+  <p class="muted small">이 페이지의 수치는 모두 최종 측정의 CSV에서 스크립트로 만들었다.</p>
+</footer>
+
+<noscript><p class="wrap">이 페이지는 수치와 그림을 JavaScript로 그린다. 같은 내용은 GitHub 레포의 README에 있다.</p></noscript>
+<script src="data.js"></script>
+<script src="site.js"></script>
+</body>
+</html>
