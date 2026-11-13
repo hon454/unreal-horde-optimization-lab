@@ -14,7 +14,7 @@
 | 잰 호드 총수 | 1단계 500 / 1천 / 2천 / 1만, 2단계 5천 / 1만 / 2만 / 3만. 두 단계가 함께 잰 점은 1만뿐이다 |
 | 요약 파일 | [최종 측정의 요약 표](../../Measurements/Full3/summary.csv)(세 회차 중앙값과 범위), [실행별 값](../../Measurements/Full3/runs.csv)(회차별 한 행), [동등성 검사](../../Measurements/Full3/equivalence.csv) |
 | 60fps를 지키는 최대 개체 수(`N@16.7ms`) | [최대 개체 수 CSV](../../Docs/figures/full3/full-n-at-60fps.csv)(`Scripts/plot.py` `n_at_budget`: 프레임 p95가 16.7을 넘는 두 측정점 사이에서 ms는 선형, N은 로그로 보간) |
-| 트레이스 | 본문 "결과" 끝 문단의 값은 아래 "트레이스 값"이다. 이전 총괄 측정 빌드(08e45f2)의 직렬 트레이스 한 회다. 새 빌드(df41c13)의 트레이스에서 다시 뽑지 않았다 |
+| 트레이스 | 본문 "결과" 끝 문단의 값은 아래 "트레이스 값"이다. 같은 빌드(df41c13)의 직렬 트레이스 한 회다 |
 
 실행 라벨은 `Full3-L1-full-N<N>-P1-r<i>`, `Full3-L2-mass-N<N>-P1-r<i>`다. `L1-full` 1만 P1에는 버리는 첫 실행 `r0`이 `runs.csv`에 있고 요약은 r1\~r3만 쓴다. `L2-mass`에는 `r0`이 없다.
 
@@ -97,27 +97,27 @@ SVG 넷은 [make-figures.py](make-figures.py)가 만든다(저장소 루트에�
 
 ## 트레이스 값
 
-본문 "결과" 끝 문단의 값이다. 값은 명령줄 내보내기로 뽑았다. 이 트레이스는 이전 총괄 측정 빌드(08e45f2)에서 떴고 새 빌드에서 다시 뽑지 않았다. 같은 트레이스의 Insights 화면은 아래 "Insights 화면"에 있다.
+본문 "결과" 끝 문단의 값이다. 값은 명령줄 내보내기로 뽑았다. 같은 트레이스의 Insights 화면은 아래 "Insights 화면"에 있다.
 
 | 항목 | 값 |
 | --- | --- |
-| 트레이스 | `Saved/Traces/Full2traceser-L2-mass-N10000-P1-r1.utrace`(직렬, `mass.FullyParallel` 끔, 저장소 밖) |
-| 내보낸 표 | `%TEMP%\horde-trace\F2-traceser-L2-mass-GT.csv`(`Scripts/trace-export.ps1 -Command TimerStatistics`, 스레드 `GameThread`, 구간 25\~75초, 저장소 밖) |
-| 프레임 수 | 5,038(`FEngineLoop::Tick` 횟수). `FEngineLoop::Tick` Incl 49.998456초 |
-| 식 | 타이머의 합(초) × 1000 ÷ 5,038 = 프레임당 ms. 모두 게임 스레드, 구간 안 평균이다. 화면에서 고른 프레임 하나가 아니다 |
+| 트레이스 | `Saved/Traces/Full3traceser-L2-mass-N10000-P1-r1.utrace`(직렬, `mass.FullyParallel` 끔, 저장소 밖) |
+| 내보낸 표 | `%TEMP%\horde-trace\F3-traceser-L2-mass-GT.csv`(`Scripts/trace-export.ps1 -Command TimerStatistics`, 스레드 `GameThread`, 구간 25\~75초, 저장소 밖) |
+| 프레임 수 | 5,008(`FEngineLoop::Tick` 횟수). `FEngineLoop::Tick` Incl 49.998327초 |
+| 식 | 타이머의 합(초) × 1000 ÷ 5,008 = 프레임당 ms. 모두 게임 스레드, 구간 안 평균이다. 화면에서 고른 프레임 하나가 아니다 |
 | 주의 | 직렬 실행이라 게임 스레드 값이 병렬 측정(6.24ms)과 다르다. 본문과 이 표는 "직렬 트레이스"로만 적고 측정값과 견주지 않는다 |
 
 | 본문 값 | 정밀한 값 | 타이머 | 합(초) |
 | --- | --- | --- | --- |
-| 프레임 평균 9.92ms | 9.9244 | `FEngineLoop::Tick` Incl | 49.998456 |
-| Mass 처리 단계 3.01ms | 3.0122 | `FMassProcessingPhase::ExecuteTick EMassProcessingPhase::PrePhysics` Incl(횟수 5,037) | 15.175215 |
-| `EndVisualChanges` 2.52ms | 2.5152 | `MassVisualizationComponent EndVisualChanges` Incl = Excl | 12.671333 |
-| 가장 긴 Processor 0.925ms | 0.9251 | `MassSmoothOrientationProcessor_2147482251` Incl = Excl | 4.660537 |
-| 그다음 0.440ms | 0.4398 | `MassSteerToMoveTargetProcessor_2147482252` Incl = Excl | 2.215693 |
-| `UMassUpdateISMProcessor` 0.573ms | 0.5729 | `MassUpdateISMProcessor_2147482256` Incl = Excl | 2.886137 |
+| 프레임 평균 9.98ms | 9.9837 | `FEngineLoop::Tick` Incl | 49.998327 |
+| Mass 처리 단계 3.11ms | 3.1119 | `FMassProcessingPhase::ExecuteTick EMassProcessingPhase::PrePhysics` Incl(횟수 5,008) | 15.584146 |
+| `EndVisualChanges` 2.48ms | 2.4801 | `MassVisualizationComponent EndVisualChanges` Incl = Excl | 12.420331 |
+| 가장 긴 Processor 0.950ms | 0.9496 | `MassSmoothOrientationProcessor_2147482251` Incl = Excl | 4.755656 |
+| 그다음 0.443ms | 0.4435 | `MassSteerToMoveTargetProcessor_2147482252` Incl = Excl | 2.220999 |
+| `UMassUpdateISMProcessor` 0.576ms | 0.5755 | `MassUpdateISMProcessor_2147482256` Incl = Excl | 2.882257 |
 | `UCharacterMovementComponent_TickComponent` 없음 | 표에 행 없음(`Character`로 찾은 행은 `FActorComponentTickFunction::ExecuteTick`뿐) | 304행 전체 | |
 
-참고(본문에 쓰지 않았다): `Sync_RenderingThread` 2.7704ms(13.957100초), `MassApplyMovementProcessor` 0.1506, `LabApproachProcessor` 0.1297, `MassApplyForceProcessor` 0.1077ms. 타이머 이름 끝의 숫자는 Processor 인스턴스 번호다.
+참고(본문에 쓰지 않았다): `Sync_RenderingThread` 2.7107ms(13.575097초), `MassApplyMovementProcessor` 0.1594, `LabApproachProcessor` 0.1339, `MassApplyForceProcessor` 0.1149ms. 타이머 이름 끝의 숫자는 Processor 인스턴스 번호다.
 
 ## 엔진 소스
 
@@ -170,18 +170,20 @@ SVG 넷은 [make-figures.py](make-figures.py)가 만든다(저장소 루트에�
 
 ## Insights 화면
 
-본문의 Insights 스크린샷이다. 2026-11-13에 찍었다. 값의 계산은 위 트레이스 표가 근거이고, 화면은 같은 트레이스에서 같은 타이머의 구간 합계를 보인다.
+본문의 Insights 스크린샷이다. 지금 파일은 08e45f2의 직렬 트레이스에서 찍은 옛 화면이고, 코디네이터가 아래 트레이스로 다시 찍는다. 값의 계산은 위 트레이스 표가 근거이고, 화면은 같은 트레이스에서 같은 타이머의 구간 합계를 보인다.
 
 | 항목 | 내용 |
 | --- | --- |
 | 파일 | `images/insights-mass-processors.jpg` |
-| 트레이스 | `Full2traceser-L2-mass-N10000-P1-r1`(직렬) |
+| 트레이스 | `Full3traceser-L2-mass-N10000-P1-r1`(직렬) |
 | 거른 말 | Timers 목록 `Mass`, CPU 타이머만 |
-| 표시한 행(Count, Incl) | PrePhysics 5,037 / 15.18s, `MassVisualizationComponent EndVisualChanges` 5,038 / 12.67s, `MassSmoothOrientationProcessor` 5,037 / 4.66s, `MassUpdateISMProcessor` 5,037 / 2.89s, `MassSteerToMoveTargetProcessor` 5,037 / 2.22s |
-| 화면에 없는 값 | 프레임 평균 9.92ms(`FEngineLoop::Tick`)는 거른 목록에 없다 |
+| 표시할 행(Count, Incl). 찍을 화면에서 읽힐 값(내보내기 기준) | PrePhysics 5,008 / 15.58s, `MassVisualizationComponent EndVisualChanges` 5,008 / 12.42s, `MassSmoothOrientationProcessor` 5,008 / 4.76s, `MassUpdateISMProcessor` 5,008 / 2.88s, `MassSteerToMoveTargetProcessor` 5,008 / 2.22s. 옛 화면의 값은 PrePhysics 5,037 / 15.18s, EndVisualChanges 5,038 / 12.67s, SmoothOrientation 4.66s, UpdateISM 2.89s, SteerToMoveTarget 2.22s였다 |
+| 화면에 없는 값 | 프레임 평균 9.98ms(`FEngineLoop::Tick`)는 거른 목록에 없다 |
 | 구간 | Timing 뷰의 시간 눈금자를 끌어 25초부터 75초까지(길이 표시 50s)를 골랐다. 손으로 고른 구간이라 내보내기의 창과 프레임이 한두 개 다를 수 있다. 화면의 합계는 표시 자릿수까지 내보낸 값과 같다 |
 | 가공 | 화면 캡처 둘(왼쪽 절반, 오른쪽 절반)을 이어 붙였다. 트레이스 파일 이름이 보이는 제목 줄은 잘라 냈다. 빨간 상자와 단계 이름을 그렸다. 두 트레이스를 견주는 그림은 위아래로 붙였다 |
 
 ## 측정 기록의 변경
+
+- 2026-11-13: 트레이스 값을 Full3 트레이스(df41c13)에서 다시 뽑았다. 직렬 `Full3traceser-L2-mass-N10000-P1-r1`에서 프레임 평균 9.92 → 9.98ms, PrePhysics 3.01 → 3.11, `EndVisualChanges` 2.52 → 2.48, SmoothOrientation 0.925 → 0.950, SteerToMoveTarget 0.440 → 0.443, UpdateISM 0.573 → 0.576ms다. 스크린샷 캡션의 구간 합계도 새 내보내기 값으로 바꿨다. 화면 파일은 아직 옛 화면이다.
 
 - 2026-11-13: 측정값을 Test 패키지 08e45f2의 측정에서 df41c13의 최종 측정으로 바꿨다. 애니메이션 예산 기본값을 2ms에서 4ms로 올리고(ADR-0016) 오브의 저격 시점 경합을 고쳐(62b6a42) 전 조건을 다시 쟀기 때문이다. 바뀐 값은 이 글의 모든 측정 수치(2단계 프레임 시간 10.3 → 10.2ms, 최대 개체 수 20,753 → 19,554 등)이고, 트레이스 값과 스크린샷은 그대로다.

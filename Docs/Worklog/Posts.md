@@ -704,3 +704,27 @@
 - `AGENTS.md`의 예시 문장 "예산을 2ms로 두었다"는 고치지 않았다(코디네이터 몫).
 - SVG는 `hyd-budget.svg`, `hyd-maxn.svg`, `q-tradeoff.svg`만 브라우저로 그려 보았다.
 - 커밋 끝(성공). 98dd60f. 푸시와 gh-pages 배포는 코디네이터가 한다.
+
+### 트레이스 값을 Full3에서 다시 뽑음(코디네이터 결정)
+
+- 내보내기 끝(성공). 코디네이터가 같은 묶음 규칙으로 Full3 트레이스에서 다시 뽑으라고 답했다. `trace-export.ps1 -Command TimerStatistics`(25\~75초)로 20개를 뽑았다: 직렬 L1·L2·L3(r2)·L4·L5의 `GameThread`, 병렬 L1 `GameThread`, L2·L3·L5·L6의 `GameThread`·`RenderThread*`·`GPU0-Graphics0`, L7의 `GameThread`·`GPU0-Graphics0`. 표는 `%TEMP%\horde-trace\F3-*.csv`(저장소 밖)이고 모두 exit=0이다. 3단계 직렬은 r1이 실패(`fg=14/30`)해서 r2를 썼다.
+- 글 04 끝(성공). 메시 틱 1.05ms·257번 → 1.57ms·371번(액터 평균 373과 거의 같다), 평가 완료 0.828 → 1.11, 동기화 0.510 → 0.489, `Sync_RenderingThread` 2.75 → 2.73 / 0.005 → 0.004, `Tick_Engine` 4.68 → 4.65 / 8.37 → 9.41ms. 글 01\~03과 05\~07은 서브에이전트 둘이 브리프(공유 노트 폴더 `brief-trace-swap.md`)로 바꾼다.
+- 글 01\~03, 05\~07 끝(성공). 서브에이전트 둘이 바꿨다. 뜻이 바뀐 곳: 05번의 엔진 이동 Processor 감소가 39.7%에서 44.1%가 되어 "개체 비율 39%와 거의 같다"를 "예상보다 조금 덜 줄었다"로 고쳤다. 03번 디스턴스 필드 3단계 1.36 → 1.71ms(가장 크게 움직임, 결론 그대로). 01번 Budget이 줄인 33.7ms는 새 애니메이션 몫 42.1ms보다 여전히 작다. 06번 본문의 나눗셈 줄(8.92초 ÷ 6,312)이 남아 있어 8.22초 ÷ 5,585 = 1.47ms로 고쳤다. 사이트를 다시 만들었다.
+
+### 코디네이터가 다시 찍을 Insights 화면
+
+구간은 모두 25\~75초다. 값은 내보내기 CSV(`F3-*.csv`) 기준이고 캡션과 본문은 이미 이 값이다. 한 프레임 값만 지금 이미지의 값으로 두었다.
+
+| 글 | 이미지 | 열 트레이스 | 화면 구성 | 캡션·본문이 읽는 값 |
+| --- | --- | --- | --- | --- |
+| 01 | `insights-gamethread.jpg` | `Full3trace-L1-full-N10000-P1-r1`(병렬) | Timing 뷰에서 프레임 하나를 고르고 Timers를 `CharacterMovement`로 거름 | **한 프레임 값이라 그대로 둠**: 449ms, 323ms, 72%, 10,052회. 찍으면서 채운다 |
+| 02 | `insights-mass-processors.jpg` | `Full3traceser-L2-mass-N10000-P1-r1` | Timers `Mass`, CPU만 | Count 5,008, PrePhysics 15.58s, `EndVisualChanges` 12.42s, SmoothOrientation 4.76s, UpdateISM 2.88s, Steer 2.22s |
+| 03 | `insights-gpu-passes.jpg` | `Full3trace-L2-mass`·`-L3-vatcull` r1(병렬) | GPU 타이머, Excl | ShadowDepths 12.76 / 10.46s, BasePass 6.68 / 5.34s, RenderVelocities 7.06 / 4.36s, ShadowDepths Count 5,156 / 6,471 |
+| 03 | `insights-distance-field.jpg` | 같은 병렬 트레이스 | Timers `DistanceField` | PrepareDistanceFieldScene Excl 13.86 / 11.04s |
+| 03 | `insights-gamethread-ism.jpg` | `Full3traceser-L2-mass-r1`, `Full3traceser-L3-vatcull-r2` | Timers `Mass` | `EndVisualChanges` Incl 12.42s(5,008) / 7.97s(6,454) |
+| 04 | `insights-mesh-tick.jpg` | `Full3traceser-L4-mass-N10000-P1-r1` | Timers `MeshComponent`, CPU만. 프레임 수는 `Mass`로 걸러 `LabActorSyncProcessor` Count | 메시 틱 1,879,220 / 7.96s, 평가 완료 1,879,016 / 5.65s, 프레임 5,071 |
+| 05 | `insights-movement-processors.jpg` | `Full3traceser-L4-mass-r1`(위), `Full3traceser-L5-m4offpool-r1`(아래) | Timers `Mass`, CPU만 | 4단계 Count 5,070: Smooth 4.68s, Steer 2.30s, Movement 820.72ms, Force 794.20ms, 합 8.60s. 5단계 Count 5,285(Force 5,284): 2.01s, 1.11s, Force 495.91ms, Movement 331.92ms, 합 3.95s |
+| 06 | `insights-distance-field.jpg` | `Full3trace-L5-m4offpool`·`-L6-m5bounds` r1 | Timers `DistanceField`, GPU와 CPU | RT PrepareDistanceFieldScene Excl 8.22s(5,584) / 214.37ms(5,729), GPU GlobalDistanceFieldUpdate Incl 1.65s(5,584) / 17.69ms(135). 프레임 5,585 / 5,730 |
+| 07 | `insights-gpu-passes.jpg` | `Full3trace-L6-m5bounds`·`-L7-q2crowd` r1 | GPU 타이머만, 거르기 없음 | Lumen gather 12.28 / 14.09s, ShadowDepths 6.43 / 7.61s, BasePass 1.41 / 2.65s, Velocities 1.05 / 2.33s, Count 5,729 / 5,476(Velocities 6,569 / 6,272) |
+
+다시 찍은 뒤 지울 문장: 01 `measurements.md` 71·122행, 02 173행, 03 217행의 "옛 화면(08e45f2)" 설명, 04 `measurements.md` "표시한 행"의 옛 값 괄호.

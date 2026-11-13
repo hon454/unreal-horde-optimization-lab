@@ -65,7 +65,7 @@ Visual->Params.LODRepresentation[EMassLOD::Off] = EMassRepresentationType::None;
 
 `Bands`는 구간이 시작하는 거리(cm)이고, 3단계에서 Off 구간은 200m에서 시작한다. 마지막 줄이 Off 구간을 "없음"으로 둔다. 나머지 세 구간은 2단계와 같은 인스턴스 표현 그대로다.
 
-**예상.** 그리는 인스턴스는 200m 안의 40%로 준다. 인스턴스 수에 비례하는 일도 40%로 줄 것이다. 2단계의 그림자 그리기는 GPU 2.51ms다. 그 40%인 1.01ms가 예상이다. VAT가 더하는 일이 있으므로 실제 값은 이보다 클 것이다.
+**예상.** 그리는 인스턴스는 200m 안의 40%로 준다. 인스턴스 수에 비례하는 일도 40%로 줄 것이다. 2단계의 그림자 그리기는 GPU 2.47ms다. 그 40%인 0.990ms가 예상이다. VAT가 더하는 일이 있으므로 실제 값은 이보다 클 것이다.
 
 ## 바꾼 것: 메시, ISM 갱신 프로세서, Off 구간
 
@@ -105,15 +105,15 @@ ISMInfo[ISMInfoIndex].AddBatchedCustomData<FLabVatFrameData>(Data, Representatio
 
 ![인스턴스 수에 비례하는 다섯 일의 2단계 값, 예상(2단계 × 0.4), 3단계 값. 다섯 칸 모두 실제가 예상보다 크다](images/vat-expected.svg)
 
-위 그림은 각 단계를 따로 뜬 트레이스에서 읽은 값이다. 그림자 그리기는 예상 1.01ms, 실제 1.66ms다. 차이는 VAT가 더한 일과 인스턴스 수에 비례하지 않는 몫이다. 둘을 가르지는 않았다.
+위 그림은 각 단계를 따로 뜬 트레이스에서 읽은 값이다. 그림자 그리기는 예상 0.990ms, 실제 1.62ms다. 차이는 VAT가 더한 일과 인스턴스 수에 비례하지 않는 몫이다. 둘을 가르지는 않았다.
 
 아래 세 화면이 그 트레이스다. Unreal Insights에서 25초부터 75초까지를 고른 구간의 합계이고, 프레임 수로 나누면 위 그림의 값이 된다. 위가 2단계, 아래가 3단계다.
 
-![GPU 타이머. 빨간 상자의 구간 합계는 ShadowDepths 12.71초에서 10.63초, BasePass 7.07초에서 5.31초, RenderVelocities 7.22초에서 4.37초다. 프레임은 2단계 5,054개, 3단계 6,422개다](images/insights-gpu-passes.jpg)
+![GPU 타이머. 빨간 상자의 구간 합계는 ShadowDepths 12.76초에서 10.46초, BasePass 6.68초에서 5.34초, RenderVelocities 7.06초에서 4.36초다. 프레임은 2단계 5,156개, 3단계 6,471개다](images/insights-gpu-passes.jpg)
 
-![Timers 목록을 DistanceField로 거른 화면. 렌더 스레드의 PrepareDistanceFieldScene은 구간 합계(Excl)가 13.38초에서 8.72초다](images/insights-distance-field.jpg)
+![Timers 목록을 DistanceField로 거른 화면. 렌더 스레드의 PrepareDistanceFieldScene은 구간 합계(Excl)가 13.86초에서 11.04초다](images/insights-distance-field.jpg)
 
-![Processor를 한 스레드에 돌린 트레이스의 게임 스레드. EndVisualChanges의 구간 합계는 12.67초(프레임 5,038개)에서 7.90초(6,412개)다](images/insights-gamethread-ism.jpg)
+![Processor를 한 스레드에 돌린 트레이스의 게임 스레드. EndVisualChanges의 구간 합계는 12.42초(프레임 5,008개)에서 7.97초(6,454개)다](images/insights-gamethread-ism.jpg)
 
 60fps를 지키는 최대 개체 수는 2단계가 약 2만이다. 프레임 시간의 느린 쪽 5% 경계가 16.7ms에 닿는 호드 총수를, 잰 개체 수 사이에서 보간한 값이다. 3단계는 잰 가장 큰 호드 총수 3만에서도 그 경계가 15.3ms라 한계에 닿지 않았다.
 
@@ -159,7 +159,7 @@ elif VERTEX_BBOX and not os.environ.get("LAB_VAT_TIGHT"):
 
 두 번째 설명은 게임 스레드가 인스턴스마다 커스텀 데이터를 쓰는 비용이었다. 다음 단계에서 VAT 프로세서가 느려졌을 때 안쪽을 나눠 쟀다. 반복 안의 위치·커스텀 데이터 쓰기는 그대로였다. 늘어난 시간은 첫 청크 전에 다른 프로세서가 쥔 데이터를 기다리는 스핀 대기였다. Mass의 병렬 처리를 끄면 이 대기가 사라졌다.
 
-고친 설명에서는 VAT 프로세서의 게임 스레드 시간을 쓰기보다 기다림이 크게 정한다. 병렬 처리를 끈 트레이스에서 VAT 프로세서는 0.458ms다(호드 총수 1만). 2단계의 엔진 ISM 프로세서 0.573ms보다 작다. GPU 비용은 있지만 오브 시점에서는 지운 인스턴스의 몫에 가려진다. 먼 개체가 화면에 없는 탑뷰 카메라에서는 GPU 시간이 6.47ms에서 7.05ms로 늘었다.
+고친 설명에서는 VAT 프로세서의 게임 스레드 시간을 쓰기보다 기다림이 크게 정한다. 병렬 처리를 끈 트레이스에서 VAT 프로세서는 0.462ms다(호드 총수 1만). 2단계의 엔진 ISM 프로세서 0.576ms보다 작다. GPU 비용은 있지만 오브 시점에서는 지운 인스턴스의 몫에 가려진다. 먼 개체가 화면에 없는 탑뷰 카메라에서는 GPU 시간이 6.47ms에서 7.05ms로 늘었다.
 
 ## 한 문장으로
 

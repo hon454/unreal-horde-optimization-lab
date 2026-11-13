@@ -16,7 +16,7 @@
 | 기대 메타데이터 | `Scripts/full-conditions.json`. `L6`과 `L7`은 `LabCrowdFx`·`LabCrowdFxActive`·`LabTechCrowdFx`만 0 → 1로 다르다. 둘 다 `LabFarShadow=1`, `LabActorCap=500`, `LabHydrateM=30` |
 | 요약 파일 | [최종 측정의 요약 표](../../Measurements/Full3/summary.csv)(세 회차 중앙값과 범위), [실행별 값](../../Measurements/Full3/runs.csv)(회차별 한 행), [빼 보기 표](../../Docs/figures/full3/full-ablation.csv) |
 | 60fps를 지키는 최대 개체 수(`N@16.7ms`) | [최대 개체 수 CSV](../../Docs/figures/full3/full-n-at-60fps.csv)(`Scripts/plot.py`가 측정 N 사이를 로그 보간) |
-| 트레이스 | 앞 묶음 `Full2` 패키지(08e45f2)의 병렬 트레이스 한 회씩. `Full3`으로 다시 뽑지 않았다. 아래 "트레이스 값" |
+| 트레이스 | `Full3` 패키지(df41c13)의 병렬 트레이스 한 회씩. 아래 "트레이스 값" |
 
 ## 7단계의 구현(6단계와 다른 곳)
 
@@ -106,7 +106,7 @@
 
 `A8-farcull`(`-LabFarCull=0`)은 표현 LOD의 Off 거리와 ISKM 바운드 범위만 바꾼다(Simulation LOD의 Off 거리는 그대로). 엔티티 구동 입자의 원소는 0이고, 500m 밖 독립 입자는 그대로 그린다([Worklog/Q2.md](../../Docs/Worklog/Q2.md) "Q2c" 진행 마지막 항, `LabConfig.h:295,340`, `LabConfig.cpp:348-351`). 그래서 본문은 "ISKM(500m까지)"와 "500m 밖은 이 구성에서도 입자"로 적었다.
 
-"최종 구성은 입자의 그림자를 끄므로 GPU가 덜 주는 것과 방향이 맞는다": 최종 구성은 `LabFarShadow=0`이라 `SetupCrowdFx`가 컴포넌트 그림자를 끈다(`LabGameMode.cpp:311`). 7단계 트레이스의 그림자 깊이 패스 증가(아래 0.252ms, 앞 빌드 08e45f2의 트레이스)를 6→7단계 GPU 증가 0.688ms에서 빼면 0.436ms이고, `A8-crowdfx`의 0.465ms와 비슷하다. 트레이스와 `summary.csv`를 섞은 다른 실행끼리의 비교라 본문에는 수치로 쓰지 않았다.
+"최종 구성은 입자의 그림자를 끄므로 GPU가 덜 주는 것과 방향이 맞는다": 최종 구성은 `LabFarShadow=0`이라 `SetupCrowdFx`가 컴포넌트 그림자를 끈다(`LabGameMode.cpp:311`). 7단계 트레이스의 그림자 깊이 패스 증가(아래 0.267ms)를 6→7단계 GPU 증가 0.688ms에서 빼면 0.421ms이고, `A8-crowdfx`의 0.465ms와 비슷하다(차 0.044ms). 앞 빌드의 트레이스로는 0.252ms를 빼 0.436ms였다. 트레이스와 `summary.csv`를 섞은 다른 실행끼리의 비교라 본문에는 수치로 쓰지 않았다.
 
 "6단계에서 7단계로 갈 때보다 조금 더 준다": `A8-crowdfx`의 프레임 −0.398, 게임 스레드 −0.385와 6→7단계의 +0.276, +0.277을 견준 것이다. 다른 두 쌍의 차이라 차이 판정을 하지 않았다. 앞 측정에서는 두 쌍이 −0.268 / −0.271과 +0.279 / +0.284로 같은 크기였다.
 
@@ -118,22 +118,22 @@
 
 | 쓰인 곳 | 파일(`Saved/Traces/`, 저장소 밖) | 내보낸 표(`%TEMP%\horde-trace\`, 저장소 밖) | 창 안 프레임 수 |
 | --- | --- | --- | --- |
-| 6단계 GPU | `Full2trace-L6-m5bounds-N10000-P1-r1.utrace`(병렬) | `F2-trace-L6-m5bounds-GPU.csv`(`GPU0-Graphics0`) | 6,515(`BasePass` 횟수) |
-| 7단계 GPU | `Full2trace-L7-q2crowd-N10000-P1-r1.utrace`(병렬) | `F2-trace-L7-q2crowd-GPU.csv` | 6,330 |
-| 6단계 게임 스레드 | 6단계와 같은 파일 | `F2-trace-L6-m5bounds-GT.csv`(`GameThread`) | 6,515(`FEngineLoop::Tick` 횟수) |
-| 7단계 게임 스레드 | 7단계와 같은 파일 | `F2-trace-L7-q2crowd-GT.csv` | 6,331 |
+| 6단계 GPU | `Full3trace-L6-m5bounds-N10000-P1-r1.utrace`(병렬) | `F3-trace-L6-m5bounds-GPU.csv`(`GPU0-Graphics0`) | 5,729(`BasePass` 횟수) |
+| 7단계 GPU | `Full3trace-L7-q2crowd-N10000-P1-r1.utrace`(병렬) | `F3-trace-L7-q2crowd-GPU.csv` | 5,476 |
+| 6단계 게임 스레드 | 6단계와 같은 파일 | `F3-trace-L6-m5bounds-GT.csv`(`GameThread`) | 5,730(`FEngineLoop::Tick` 횟수) |
+| 7단계 게임 스레드 | 7단계와 같은 파일 | `F3-trace-L7-q2crowd-GT.csv` | 5,477 |
 
 | 본문 값 | 타이머 | 6단계(초, 프레임당 ms) | 7단계(초, 프레임당 ms) | 차 |
 | --- | --- | --- | --- | --- |
-| 모으기 프로세서 0.199ms | `LabCrowdFxGatherProcessor_*` | 없음 | 1.258121, 0.199 | |
-| BasePass +0.243ms | `BasePass` | 1.616661, 0.248 | 3.110305, 0.491 | 0.243 |
-| 속도 패스 +0.243ms | `RenderVelocities(%s)` | 1.205691, 0.185 | 2.709501, 0.428 | 0.243 |
-| 그림자 깊이 +0.252ms | `ShadowDepths` | 7.247518, 1.112 | 8.638312, 1.365 | 0.252 |
-| Lumen 화면 프로브 수집 +0.420ms | `LumenScreenProbeGather`(큰 행) | 14.013078, 2.151 | 16.272711, 2.571 | 0.420 |
+| 모으기 프로세서 0.205ms | `LabCrowdFxGatherProcessor_*` | 없음 | 1.122249, 0.205 | |
+| BasePass +0.236ms | `BasePass` | 1.414528, 0.247 | 2.646427, 0.483 | 0.236 |
+| 속도 패스 +0.242ms | `RenderVelocities(%s)` | 1.049967, 0.183 | 2.327121, 0.425 | 0.242 |
+| 그림자 깊이 +0.267ms | `ShadowDepths` | 6.429782, 1.122 | 7.608169, 1.389 | 0.267 |
+| Lumen 화면 프로브 수집 +0.429ms | `LumenScreenProbeGather`(큰 행) | 12.282826, 2.144 | 14.088101, 2.573 | 0.429 |
 
-- 같은 내보내기의 다른 차(참고): `FEngineLoop::Tick` 7.674 → 7.897ms(+0.223), `FMassProcessingPhase::ExecuteTick EMassProcessingPhase::PrePhysics` 2.228 → 2.418ms, `FXSystemPreRender`(GPU) 0.472 → 0.309ms. 게임 스레드 내보내기에도 GPU 타이머가 섞여 나온다(스레드 필터의 동작은 보지 않았다).
-- `LumenScreenProbeGather`는 같은 이름의 행이 둘이다. 본문 값은 큰 행(6단계 14.01초)이다. 작은 행은 0.03초 남짓으로 두 단계가 같다.
-- `RenderVelocities(%s)`는 호출이 프레임보다 많아(7,465 / 7,254) `BasePass` 횟수로 나눴다.
+- 같은 내보내기의 다른 차(참고): `FEngineLoop::Tick` 8.726 → 9.129ms(+0.403), `FMassProcessingPhase::ExecuteTick EMassProcessingPhase::PrePhysics` 2.184 → 2.429ms, `FXSystemPreRender`(GPU) 0.455 → 0.332ms. 게임 스레드 내보내기에도 GPU 타이머가 섞여 나온다(스레드 필터의 동작은 보지 않았다).
+- `LumenScreenProbeGather`는 같은 이름의 행이 둘이다. 본문 값은 큰 행(6단계 12.28초)이다. 작은 행은 0.03초 남짓으로 두 단계가 같다.
+- `RenderVelocities(%s)`는 호출이 프레임보다 많아(6,569 / 6,272) `BasePass` 횟수로 나눴다.
 
 ## 설정값과 계산값
 
@@ -169,20 +169,21 @@
 
 ## Insights 화면
 
-본문의 Insights 스크린샷이다. 2026-11-13에 찍었다. 값의 계산은 위 트레이스 표가 근거이고, 화면은 같은 트레이스에서 같은 타이머의 구간 합계를 보인다.
+본문의 Insights 스크린샷이다. 코디네이터가 Full3 트레이스로 다시 찍는다. 값의 계산은 위 트레이스 표가 근거이고, 화면은 같은 트레이스에서 같은 타이머의 구간 합계를 보인다.
 
 | 항목 | 내용 |
 | --- | --- |
 | 파일 | `images/insights-gpu-passes.jpg`. 위가 6단계, 아래가 7단계다 |
-| 트레이스 | `Full2trace-L6-m5bounds-N10000-P1-r1`, `Full2trace-L7-q2crowd-N10000-P1-r1`(병렬) |
+| 트레이스 | `Full3trace-L6-m5bounds-N10000-P1-r1`, `Full3trace-L7-q2crowd-N10000-P1-r1`(병렬) |
 | 거른 말 | 거르지 않고 GPU 타이머만 |
-| 표시한 행(Incl) | `LumenScreenProbeGather` 14.01s / 16.27s, `ShadowDepths` 7.25s / 8.64s, `BasePass` 1.62s / 3.11s, `RenderVelocities(%s)` 1.21s / 2.71s. Count 6,515 / 6,330 |
-| 화면에 없는 값 | 게임 스레드의 모으기 프로세서 0.199ms는 찍지 않았다 |
-| 본문의 나눗셈 | "BasePass는 1.617초를 6,515로 나눈 0.248ms에서 3.110초를 6,330으로 나눈 0.491ms": 1.616661 × 1000 ÷ 6,515 = 0.2481, 3.110305 × 1000 ÷ 6,330 = 0.4914. 화면 표시값 1.62초로 나누면 0.2487이라 0.249가 되어 표의 0.248과 어긋난다. 그래서 본문은 내보낸 합을 넷째 자리까지 적는다 |
+| 표시한 행(Incl) | 찍을 화면에서 읽힐 값(내보내기 기준). `LumenScreenProbeGather` 12.28s / 14.09s, `ShadowDepths` 6.43s / 7.61s, `BasePass` 1.41s / 2.65s, `RenderVelocities(%s)` 1.05s / 2.33s. Count 5,729 / 5,476(`RenderVelocities(%s)`는 6,569 / 6,272) |
+| 화면에 없는 값 | 게임 스레드의 모으기 프로세서 0.205ms는 찍지 않았다 |
+| 본문의 나눗셈 | "BasePass는 1.415초를 5,729로 나눈 0.247ms에서 2.646초를 5,476으로 나눈 0.483ms": 1.414528 × 1000 ÷ 5,729 = 0.2469, 2.646427 × 1000 ÷ 5,476 = 0.4833. 화면 표시값 1.41초로 나누면 0.2461이라 0.246이 되어 표의 0.247과 어긋난다. 그래서 본문은 내보낸 합을 넷째 자리까지 적는다 |
 | 바뀐 것 | 처음 계획은 프레임 하나의 GPU 트랙이었다. 본문 값이 구간 평균이라 구간 합계 화면으로 바꿨다 |
 | 구간 | Timing 뷰의 시간 눈금자를 끌어 25초부터 75초까지(길이 표시 50s)를 골랐다. 손으로 고른 구간이라 내보내기의 창과 프레임이 한두 개 다를 수 있다. 화면의 합계는 표시 자릿수까지 내보낸 값과 같다 |
 | 가공 | 화면 캡처 둘(왼쪽 절반, 오른쪽 절반)을 이어 붙였다. 트레이스 파일 이름이 보이는 제목 줄은 잘라 냈다. 빨간 상자와 단계 이름을 그렸다. 두 트레이스를 견주는 그림은 위아래로 붙였다 |
 
 ## 측정 기록의 변경
 
-- 2026-11-13: 수치를 총괄 묶음 `Full2`(08e45f2)에서 `Full3`(df41c13)으로 바꿨다. 애니메이션 예산 2ms → 4ms(ADR-0016)와 `SnipeView` 경합 수정(62b6a42)으로 전 조건을 다시 쟀기 때문이다. ISKM으로 그린 빼 보기의 GPU 차이가 범위 안이 되어 그 문장을 고쳤다. BasePass 나눗셈의 반올림을 내보낸 합으로 맞췄다. 트레이스 값과 Insights 화면은 앞 빌드의 것 그대로다.
+- 2026-11-13: 수치를 총괄 묶음 `Full2`(08e45f2)에서 `Full3`(df41c13)으로 바꿨다. 애니메이션 예산 2ms → 4ms(ADR-0016)와 `SnipeView` 경합 수정(62b6a42)으로 전 조건을 다시 쟀기 때문이다. ISKM으로 그린 빼 보기의 GPU 차이가 범위 안이 되어 그 문장을 고쳤다. BasePass 나눗셈의 반올림을 내보낸 합으로 맞췄다. Insights 화면은 앞 빌드의 것 그대로다.
+- 2026-11-13: 트레이스 값을 Full3 트레이스(df41c13)에서 다시 뽑았다. BasePass와 속도 패스의 증가가 같은 값(0.243)에서 0.236 / 0.242로 갈려 본문 문장을 "각각"에서 두 값으로 고쳤다. 그림자 깊이 차감 비교(0.421 대 0.465)는 여전히 비슷하다. Insights 화면은 코디네이터가 Full3 트레이스로 다시 찍는다.

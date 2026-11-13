@@ -20,8 +20,8 @@ def v(variant, n, col):
 with open(os.path.join(ROOT, "Docs", "figures", "full3", "full-n-at-60fps.csv"), encoding="utf-8") as f:
     N_AT_60 = int(next(r for r in csv.DictReader(f) if r["series"] == "1 L1-full")["n_p95"])
 
-# Serial trace Full2traceser-L1-full (build 08e45f2, not re-extracted from the Full3 trace), 10000 P1, 25-75 s, per frame (ms). measurements.md "두 트레이스".
-T_FRAME, T_CMC, T_SKIN, T_ANIMEVAL = 446.43, 322.20, 27.31, 15.71
+# Serial trace Full3traceser-L1-full-N10000-P1-r1 (build df41c13), 10000 P1, 25-75 s, per frame (ms). measurements.md "두 트레이스".
+T_FRAME, T_CMC, T_SKIN, T_ANIMEVAL = 454.55, 329.43, 27.57, 14.53
 T_REST = T_FRAME - T_CMC - T_SKIN - T_ANIMEVAL
 
 FONT = "Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Segoe UI, sans-serif"
@@ -229,7 +229,7 @@ def techniques():
     title(o, "애니메이션 기법을 덧대 줄어든 시간",
           "호드 총수 1만, 오브 시점 카메라, 세 번 잰 중앙값을 액터 군중과 비교(ms)")
     base_f, base_g = v("L1-full", 10000, "frame_p50_ms"), v("L1-full", 10000, "game_p50_ms")
-    X0, scale = 40, 440 / 45.0  # the longest bar (43.0) plus its label must stay inside the right margin
+    X0, scale = 40, 440 / 45.0  # the longest bar (42.1) plus its label must stay inside the right margin
     y = 120
     for name, var in [("URO", "S1-uro"), ("Animation Budget Allocator(예산 4ms)", "S1-budget")]:
         f, g = v(var, 10000, "frame_p50_ms"), v(var, 10000, "game_p50_ms")

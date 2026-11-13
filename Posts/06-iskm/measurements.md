@@ -14,7 +14,7 @@
 | 빼 보기 조건 | `L8-q4final`(`-LabStage=M5 -LabVariant=q4final`), `A8-iskm`(+ `-LabIskm=0`, `LabTechIskm` 0, `LabIskmBounds` 0), `A8-bounds`(+ `-LabFixedBounds=0`, `LabTechFixedBounds` 0, `LabIskmBounds` 0). 인자와 기대값은 `Scripts/full-conditions.json` |
 | 요약 파일 | [최종 측정의 요약 표](../../Measurements/Full3/summary.csv)(세 회차 중앙값과 범위), [실행별 값](../../Measurements/Full3/runs.csv)(회차별 한 행) |
 | 60fps를 지키는 최대 개체 수(`N@16.7ms`) | [최대 개체 수 CSV](../../Docs/figures/full3/full-n-at-60fps.csv)(`Scripts/plot.py`가 측정 N 사이를 로그 보간) |
-| 트레이스 | 본문 "결과"의 트레이스 문단 값은 아래 "트레이스 값"이다. 앞 묶음 `Full2` 빌드(08e45f2)의 병렬 트레이스 한 회씩이다. `Full3`으로 다시 뽑지 않았다 |
+| 트레이스 | 본문 "결과"의 트레이스 문단 값은 아래 "트레이스 값"이다. `Full3` 빌드(df41c13)의 병렬 트레이스 한 회씩이다 |
 
 6단계의 구현(5단계와 다른 곳):
 
@@ -218,19 +218,19 @@
 
 | 항목 | 값 |
 | --- | --- |
-| 트레이스 | `Saved/Traces/Full2trace-L5-m4offpool-N10000-P1-r1.utrace`(5단계), `Full2trace-L6-m5bounds-N10000-P1-r1.utrace`(6단계). 병렬, 같은 패키지 08e45f2, 저장소 밖 |
-| 내보낸 표 | `%TEMP%\horde-trace\F2-trace-L5-m4offpool-RT.csv`, `F2-trace-L6-m5bounds-RT.csv`(스레드 `RenderThread*`), `-GPU.csv`(`GPU0-Graphics0`, 5단계만 새로 뽑음), `-GT.csv`(프레임 수). `Scripts/trace-export.ps1 -Command TimerStatistics`, 구간 25\~75초, 저장소 밖 |
-| 프레임 수 | 5단계 6,313, 6단계 6,515(`FEngineLoop::Tick` 횟수) |
+| 트레이스 | `Saved/Traces/Full3trace-L5-m4offpool-N10000-P1-r1.utrace`(5단계), `Full3trace-L6-m5bounds-N10000-P1-r1.utrace`(6단계). 병렬, 같은 패키지 df41c13, 저장소 밖 |
+| 내보낸 표 | `%TEMP%\horde-trace\F3-trace-L5-m4offpool-RT.csv`, `F3-trace-L6-m5bounds-RT.csv`(스레드 `RenderThread*`), `-GPU.csv`(`GPU0-Graphics0`), `-GT.csv`(프레임 수). `Scripts/trace-export.ps1 -Command TimerStatistics`, 구간 25\~75초, 저장소 밖 |
+| 프레임 수 | 5단계 5,585, 6단계 5,730(`FEngineLoop::Tick` 횟수) |
 | 식 | 타이머의 합(초) × 1000 ÷ 프레임 수 = 프레임당 ms (03번 글과 같다) |
 
 | 본문 값 | 정밀한 값(5단계 / 6단계) | 타이머 | 합(초) |
 | --- | --- | --- | --- |
-| `PrepareDistanceFieldScene` 1.41 / 0.0368ms | 1.4124 / 0.0368 | 렌더 스레드 `FSceneRenderer::PrepareDistanceFieldScene` Excl(횟수 6,312 / 6,514) | 8.916218 / 0.239721 |
-| `GlobalDistanceFieldUpdate` 0.302 / 0.003ms | 0.3022 / 0.0026 | GPU `GlobalDistanceFieldUpdate` Excl(횟수 6,312 / 135) | 1.907774 / 0.016782 |
+| `PrepareDistanceFieldScene` 1.47 / 0.0374ms | 1.4723 / 0.0374 | 렌더 스레드 `FSceneRenderer::PrepareDistanceFieldScene` Excl(횟수 5,584 / 5,729) | 8.222933 / 0.214371 |
+| `GlobalDistanceFieldUpdate` 0.296 / 0.003ms | 0.2960 / 0.0031 | GPU `GlobalDistanceFieldUpdate` Excl(횟수 5,584 / 135) | 1.653418 / 0.017689 |
 
-참고(본문에 쓰지 않았다): `PrepareDistanceFieldScene` Incl 1.9154 / 0.0600ms. GPU `ShadowDepths` Excl 1.5667 / 1.0911, `BasePass` 0.7552 / 0.2481, `RenderVelocities(%s)` 0.5843 / 0.1851ms. 트레이스를 켠 한 회라 `summary.csv`의 값과 직접 견주지 않는다. GPU 값은 큐 여럿의 합이라 더해도 GPU 프레임 시간이 되지 않는다.
+참고(본문에 쓰지 않았다): `PrepareDistanceFieldScene` Incl 1.9744 / 0.0655ms. GPU `ShadowDepths` Excl 1.5692 / 1.1011, `BasePass` 0.7523 / 0.2469, `RenderVelocities(%s)` 0.5905 / 0.1832ms. 트레이스를 켠 한 회라 `summary.csv`의 값과 직접 견주지 않는다. GPU 값은 큐 여럿의 합이라 더해도 GPU 프레임 시간이 되지 않는다.
 
-게임 스레드 쪽 직렬 트레이스(`Full2traceser-L5-*`, `Full2traceser-L6-*`)의 `LabVatISMProcessor`·`LabIskmProcessor` 값은 뽑지 않았다. 본문 "남은 비용"은 소스 확인만 적었다.
+게임 스레드 쪽 직렬 트레이스(`Full3traceser-L5-*`, `Full3traceser-L6-*`)의 `LabVatISMProcessor`·`LabIskmProcessor` 값은 뽑지 않았다. 본문 "남은 비용"은 소스 확인만 적었다.
 
 ## 그림
 
@@ -274,17 +274,18 @@ SVG 다섯 개는 [make-figures.py](make-figures.py)가 만든다(저장소 루�
 
 ## 측정 기록의 변경
 
-- 2026-11-13: 수치를 총괄 묶음 `Full2`(08e45f2)에서 `Full3`(df41c13)으로 바꿨다. 애니메이션 예산 2ms → 4ms(ADR-0016)와 `SnipeView` 경합 수정(62b6a42)으로 전 조건을 다시 쟀기 때문이다. 게임 스레드가 모든 호드 총수에서 5단계와 같아져 결과·틀렸던 가설·한 문장으로의 문장을 고쳤다. 트레이스 값과 Insights 화면은 앞 빌드의 것 그대로다.
+- 2026-11-13: 수치를 총괄 묶음 `Full2`(08e45f2)에서 `Full3`(df41c13)으로 바꿨다. 애니메이션 예산 2ms → 4ms(ADR-0016)와 `SnipeView` 경합 수정(62b6a42)으로 전 조건을 다시 쟀기 때문이다. 게임 스레드가 모든 호드 총수에서 5단계와 같아져 결과·틀렸던 가설·한 문장으로의 문장을 고쳤다. Insights 화면은 앞 빌드의 것 그대로다.
+- 2026-11-13: 트레이스 값을 Full3 트레이스(df41c13)에서 다시 뽑았다. 줄어드는 방향과 크기는 같아 본문 문장은 값만 바꿨다. Insights 화면은 코디네이터가 Full3 트레이스로 다시 찍는다.
 
 ## Insights 화면
 
-본문의 Insights 스크린샷이다. 2026-11-13에 찍었다. 값의 계산은 위 트레이스 표가 근거이고, 화면은 같은 트레이스에서 같은 타이머의 구간 합계를 보인다.
+본문의 Insights 스크린샷이다. 코디네이터가 Full3 트레이스로 다시 찍는다. 값의 계산은 위 트레이스 표가 근거이고, 화면은 같은 트레이스에서 같은 타이머의 구간 합계를 보인다.
 
 | 항목 | 내용 |
 | --- | --- |
 | 파일 | `images/insights-distance-field.jpg`. 위가 5단계, 아래가 6단계다 |
-| 트레이스 | `Full2trace-L5-m4offpool-N10000-P1-r1`, `Full2trace-L6-m5bounds-N10000-P1-r1`(병렬) |
+| 트레이스 | `Full3trace-L5-m4offpool-N10000-P1-r1`, `Full3trace-L6-m5bounds-N10000-P1-r1`(병렬) |
 | 거른 말 | Timers 목록 `DistanceField`, GPU와 CPU 타이머 |
-| 표시한 행 | 렌더 스레드(Excl): `FSceneRenderer::PrepareDistanceFieldScene` 8.92s(Count 6,312) / 239.74ms(6,515). GPU(Incl): `GlobalDistanceFieldUpdate` 1.91s(6,312) / 16.78ms(135). 6단계에는 같은 이름의 행이 하나 더 있다(20.4µs, 6,515) |
+| 표시한 행 | 찍을 화면에서 읽힐 값(내보내기 기준). 렌더 스레드(Excl): `FSceneRenderer::PrepareDistanceFieldScene` 8.22s(Count 5,584) / 214.37ms(5,729). GPU(Incl): `GlobalDistanceFieldUpdate` 1.65s(5,584) / 17.69ms(135). 6단계에는 같은 이름의 행이 하나 더 있다(24µs, 5,728). 5단계에도 같은 이름의 작은 행이 있다(5.75ms, 5,584) |
 | 구간 | Timing 뷰의 시간 눈금자를 끌어 25초부터 75초까지(길이 표시 50s)를 골랐다. 손으로 고른 구간이라 내보내기의 창과 프레임이 한두 개 다를 수 있다. 화면의 합계는 표시 자릿수까지 내보낸 값과 같다 |
 | 가공 | 화면 캡처 둘(왼쪽 절반, 오른쪽 절반)을 이어 붙였다. 트레이스 파일 이름이 보이는 제목 줄은 잘라 냈다. 빨간 상자와 단계 이름을 그렸다. 두 트레이스를 견주는 그림은 위아래로 붙였다 |

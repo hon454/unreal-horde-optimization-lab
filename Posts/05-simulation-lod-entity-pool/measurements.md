@@ -14,7 +14,7 @@
 | 단계와 변형 | `L4-mass`(`-LabStage=M3 -LabVariant=mass`), `L5-m4offpool`(`-LabStage=M5 -LabVariant=m4offpool`), 빼 보기 `L8-q4final`, `A8-simlod`(`-LabSimLod=0`), `A8-pool`(`-LabEntityPool=0`). 인자와 기대 메타데이터는 `Scripts/full-conditions.json` |
 | 요약 파일 | [최종 측정의 요약 표](../../Measurements/Full3/summary.csv)(세 회차 중앙값과 범위), [실행별 값](../../Measurements/Full3/runs.csv), [16분 실행의 1분 구간 값](../../Measurements/Pool1/timeline.csv), [16분 실행의 전체 값](../../Measurements/Pool1/summary.csv) |
 | 60fps를 지키는 최대 개체 수(`N@16.7ms`) | [최대 개체 수 CSV](../../Docs/figures/full3/full-n-at-60fps.csv)(`Scripts/plot.py`가 측정 N 사이를 로그 보간) |
-| 트레이스 | 본문 "결과"의 트레이스 문단 값은 아래 "트레이스 값"이다. 앞 묶음 `Full2` 빌드(08e45f2)의 직렬 트레이스 한 회씩이다. `Full3`으로 다시 뽑지 않았다 |
+| 트레이스 | 본문 "결과"의 트레이스 문단 값은 아래 "트레이스 값"이다. `Full3` 빌드(df41c13)의 직렬 트레이스 한 회씩이다 |
 
 ### 4단계와 5단계의 차이(코드)
 
@@ -186,29 +186,29 @@ engine-notes.md 3절 "ISKM 트랙 풀 누수"(773·864·1156)와 5절과 같은 
 
 | 항목 | 값 |
 | --- | --- |
-| 트레이스 | `Saved/Traces/Full2traceser-L4-mass-N10000-P1-r1.utrace`(4단계), `Full2traceser-L5-m4offpool-N10000-P1-r1.utrace`(5단계). 둘 다 직렬(`mass.FullyParallel` 끔), 저장소 밖 |
-| 내보낸 표 | `%TEMP%\horde-trace\F2-traceser-L4-mass-GT.csv`, `F2-traceser-L5-m4offpool-GT.csv`(`Scripts/trace-export.ps1 -Command TimerStatistics`, 스레드 `GameThread`, 구간 25\~75초, 저장소 밖) |
-| 프레임 수 | 4단계 5,674, 5단계 6,286(`FEngineLoop::Tick` 횟수) |
+| 트레이스 | `Saved/Traces/Full3traceser-L4-mass-N10000-P1-r1.utrace`(4단계), `Full3traceser-L5-m4offpool-N10000-P1-r1.utrace`(5단계). 둘 다 직렬(`mass.FullyParallel` 끔), 저장소 밖 |
+| 내보낸 표 | `%TEMP%\horde-trace\F3-traceser-L4-mass-GT.csv`, `F3-traceser-L5-m4offpool-GT.csv`(`Scripts/trace-export.ps1 -Command TimerStatistics`, 스레드 `GameThread`, 구간 25\~75초, 저장소 밖) |
+| 프레임 수 | 4단계 5,071, 5단계 5,285(`FEngineLoop::Tick` 횟수) |
 | 식 | 타이머의 합(초) × 1000 ÷ 프레임 수 = 프레임당 ms. 모두 Incl이고 이 Processor들은 Incl = Excl이다 |
 
 | Processor(타이머 이름 접두) | 4단계 합(초) → 프레임당 ms | 5단계 합(초) → 프레임당 ms |
 | --- | --- | --- |
-| `MassApplyForceProcessor` | 0.847657 → 0.1494 | 0.450729 → 0.0717 |
-| `MassApplyMovementProcessor` | 0.740211 → 0.1305 | 0.217270 → 0.0346 |
-| `MassSteerToMoveTargetProcessor` | 2.654627 → 0.4679 | 1.226173 → 0.1951 |
-| `MassSmoothOrientationProcessor` | 5.311797 → 0.9362 | 2.310555 → 0.3676 |
-| 넷의 합 | 9.554292 → 1.6839 | 4.204727 → 0.6689 |
-| `LabOffMoveProcessor` | (없음) | 0.040224 → 0.0064 |
+| `MassApplyForceProcessor` | 0.794198 → 0.1566 | 0.495914 → 0.0938 |
+| `MassApplyMovementProcessor` | 0.820718 → 0.1618 | 0.331917 → 0.0628 |
+| `MassSteerToMoveTargetProcessor` | 2.298443 → 0.4533 | 1.110605 → 0.2101 |
+| `MassSmoothOrientationProcessor` | 4.683971 → 0.9237 | 2.014514 → 0.3812 |
+| 넷의 합 | 8.597330 → 1.6954 | 3.952950 → 0.7480 |
+| `LabOffMoveProcessor` | (없음) | 0.042688 → 0.0081 |
 
 | 본문 값 | 정밀한 값 | 식 |
 | --- | --- | --- |
-| 넷의 합 1.68ms → 0.669ms | 1.6839 → 0.6689 | 위 표 |
-| 화면 문단 "9.55초를 5,672로 나누면 1.68ms" | 1.6837 | 9.55 × 1000 ÷ 5,672(화면의 구간 합계와 Count) |
-| 화면 문단 "4.205초를 6,284로 나누면 0.669ms" | 0.6692 | 4.205 × 1000 ÷ 6,284. 화면 표시값 4.21초로 나누면 0.66996이라 0.670이 된다. 그래서 본문은 내보낸 합 4.204727을 넷째 자리에서 반올림한 4.205를 쓴다 |
-| 실제 39.7% | 39.72% | 0.6689 ÷ 1.6839 |
-| `LabOffMoveProcessor` 0.006ms | 0.0064 | 0.040224 × 1000 ÷ 6,286 |
+| 넷의 합 1.70ms → 0.748ms | 1.6954 → 0.7480 | 위 표 |
+| 화면 문단 "8.60초를 5,070으로 나누면 1.70ms" | 1.6963 | 8.60 × 1000 ÷ 5,070(화면의 구간 합계와 `MassSteerToMoveTargetProcessor`의 Count) |
+| 화면 문단 "3.953초를 5,285로 나누면 0.748ms" | 0.7480 | 3.953 × 1000 ÷ 5,285. 화면 표시값 3.95초로 나누면 0.7474라 0.747이 된다. 그래서 본문은 내보낸 합 3.952950을 넷째 자리에서 반올림한 3.953을 쓴다 |
+| 실제 44.1% | 44.12% | 0.7480 ÷ 1.6954 |
+| `LabOffMoveProcessor` 0.008ms | 0.0081 | 0.042688 × 1000 ÷ 5,285 |
 
-참고(본문에 쓰지 않았다): `LabApproachProcessor` 0.1100 → 0.0237ms, `MassSimulationLODProcessor` 5단계 0.0671ms(0.421803초), `LabOffMoveEnterObserver` 5단계 0.0008ms(2,543번). 직렬 트레이스 한 회라 `summary.csv`의 값과 직접 견주지 않는다. 예상 39%(위 3,869 ÷ 9,866)는 개체 수 비율이고, 실제 39.7%는 시간 비율이다. 5단계에서 `MassSmoothOrientationProcessor`가 예상보다 덜 줄었다는 징후는 없었다(Off 개체 쿼리, `MassSmoothOrientationProcessors.cpp:38`).
+참고(본문에 쓰지 않았다): `LabApproachProcessor` 0.1214 → 0.0322ms, `MassSimulationLODProcessor` 5단계 0.0759ms(0.401024초), `LabOffMoveEnterObserver` 5단계 0.0009ms(2,474번). 직렬 트레이스 한 회라 `summary.csv`의 값과 직접 견주지 않는다. 예상 39%(위 3,869 ÷ 9,866)는 개체 수 비율이고, 실제 44.1%는 시간 비율이다. 앞 빌드의 트레이스에서는 39.7%로 예상과 거의 같았다. 이번에는 5%포인트 크다. 그래서 본문 문장을 "예상보다 조금 덜 줄었다"로 고쳤다. Processor별 비율(5단계 ÷ 4단계)은 `MassApplyForceProcessor` 59.9%, `MassApplyMovementProcessor` 38.8%, `MassSteerToMoveTargetProcessor` 46.4%, `MassSmoothOrientationProcessor` 41.3%다. 개체 수에 비례하지 않는 고정 비용이 있는지는 확인하지 않았다(Off 개체 쿼리, `MassSmoothOrientationProcessors.cpp:38`).
 
 ## 화면
 
@@ -247,7 +247,7 @@ SVG 다섯 개는 [make-figures.py](make-figures.py)가 만든다(저장소 루�
 ## 확인하지 않은 것
 
 - 5단계에서 엔티티 풀만의 몫. 최종 측정의 사다리에 풀만 뺀 5단계가 없다. `A8-pool`은 최종 구성(ISKM, 입자)에서 뺀 값이다.
-- 엔진 이동·조향 넷의 시간이 39% 근처로 줄었는지는 직렬 트레이스 한 회로 확인했다(39.7%, 위 "트레이스 값"). 병렬 실행에서의 값은 보지 않았다.
+- 엔진 이동·조향 넷의 시간은 직렬 트레이스 한 회로만 확인했다(44.1%, 위 "트레이스 값"). 개체 수 비율 39%보다 큰 원인과 병렬 실행에서의 값은 보지 않았다.
 - 풀 켬에서 트랙이 약 2만에서 멈추는 이유. 위 "16분 실행"의 추정(컴포넌트 둘)은 코드로 확인하지 않았다.
 - 풀 끔 13분째 GPU 메모리 계단(약 1.15GB)의 원인.
 - 풀 끔에서 시간이 갈수록 프레임 시간 변동(느린 쪽)이 커지는지. `timeline.csv`는 p50만 있다. 풀 끔에서 미니언이 떨려 보인다는 관찰은 화면 근거가 없어 본문에 쓰지 않았다(9분 시점 녹화 4건에서 재현하지 못했다, Worklog/Q6.md "Pre6 촬영과 풀 끔 떨림 확인").
@@ -260,18 +260,19 @@ SVG 다섯 개는 [make-figures.py](make-figures.py)가 만든다(저장소 루�
 ## 측정 기록의 변경
 
 - 2026-11-13(처음 씀).
-- 2026-11-13: 수치를 총괄 묶음 `Full2`(08e45f2)에서 `Full3`(df41c13)으로 바꿨다. 애니메이션 예산 2ms → 4ms(ADR-0016)와 `SnipeView` 경합 수정(62b6a42)으로 전 조건을 다시 쟀기 때문이다. 5단계 3만이 60fps 한계에 닿아 요약과 결과의 최대 개체 수 문장을 고쳤다. 트레이스 값, Insights 화면, `Pool1` 16분 실행은 앞 빌드의 것 그대로다.
+- 2026-11-13: 수치를 총괄 묶음 `Full2`(08e45f2)에서 `Full3`(df41c13)으로 바꿨다. 애니메이션 예산 2ms → 4ms(ADR-0016)와 `SnipeView` 경합 수정(62b6a42)으로 전 조건을 다시 쟀기 때문이다. 5단계 3만이 60fps 한계에 닿아 요약과 결과의 최대 개체 수 문장을 고쳤다. Insights 화면과 `Pool1` 16분 실행은 앞 빌드의 것 그대로다.
+- 2026-11-13: 트레이스 값을 Full3 트레이스(df41c13)에서 다시 뽑았다. 엔진 이동·조향 넷의 비율이 39.7%에서 44.1%로 바뀌어 본문의 결과 문장을 "예상보다 조금 덜 줄었다"로 고쳤다. Insights 화면은 코디네이터가 Full3 트레이스로 다시 찍는다.
 
 ## Insights 화면
 
-본문의 Insights 스크린샷이다. 2026-11-13에 찍었다. 값의 계산은 위 트레이스 표가 근거이고, 화면은 같은 트레이스에서 같은 타이머의 구간 합계를 보인다.
+본문의 Insights 스크린샷이다. 코디네이터가 Full3 트레이스로 다시 찍는다. 값의 계산은 위 트레이스 표가 근거이고, 화면은 같은 트레이스에서 같은 타이머의 구간 합계를 보인다.
 
 | 항목 | 내용 |
 | --- | --- |
 | 파일 | `images/insights-movement-processors.jpg`. 위가 4단계, 아래가 5단계다 |
-| 트레이스 | `Full2traceser-L4-mass-N10000-P1-r1`, `Full2traceser-L5-m4offpool-N10000-P1-r1`(직렬) |
+| 트레이스 | `Full3traceser-L4-mass-N10000-P1-r1`, `Full3traceser-L5-m4offpool-N10000-P1-r1`(직렬) |
 | 거른 말 | Timers 목록 `Mass`, CPU 타이머만 |
-| 표시한 행(Incl) | 4단계(Count 5,672): `MassSmoothOrientationProcessor` 5.31s, `MassSteerToMoveTargetProcessor` 2.65s, `MassApplyForceProcessor` 847.57ms, `MassApplyMovementProcessor` 739.88ms. 합 9.55s. 5단계(Count 6,284): 2.31s, 1.23s, 450.57ms, 217.21ms. 합 4.21s |
-| 화면에 없는 값 | `LabOffMoveProcessor` 0.006ms는 `Mass`로 거른 목록에 없다 |
+| 표시한 행(Incl) | 찍을 화면에서 읽힐 값(내보내기 기준). 4단계(Count 5,070): `MassSmoothOrientationProcessor` 4.68s, `MassSteerToMoveTargetProcessor` 2.30s, `MassApplyMovementProcessor` 820.72ms, `MassApplyForceProcessor` 794.20ms. 합 8.60s. 5단계(Count 5,285, `MassApplyForceProcessor`만 5,284): 2.01s, 1.11s, 495.91ms, 331.92ms(`MassApplyForceProcessor`, `MassApplyMovementProcessor` 순). 합 3.95s |
+| 화면에 없는 값 | `LabOffMoveProcessor` 0.008ms는 `Mass`로 거른 목록에 없다 |
 | 구간 | Timing 뷰의 시간 눈금자를 끌어 25초부터 75초까지(길이 표시 50s)를 골랐다. 손으로 고른 구간이라 내보내기의 창과 프레임이 한두 개 다를 수 있다. 화면의 합계는 표시 자릿수까지 내보낸 값과 같다 |
 | 가공 | 화면 캡처 둘(왼쪽 절반, 오른쪽 절반)을 이어 붙였다. 트레이스 파일 이름이 보이는 제목 줄은 잘라 냈다. 빨간 상자와 단계 이름을 그렸다. 두 트레이스를 견주는 그림은 위아래로 붙였다 |

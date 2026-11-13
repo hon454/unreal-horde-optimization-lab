@@ -199,11 +199,11 @@ void ALabMinionMassActor::HideUntilPoseReady()
 
 같은 단계에서 GPU 시간은 0.603ms 줄었다. 그래도 게임 스레드가 GPU를 넘어서서 프레임 시간은 1.51ms 늘었다. GPU가 줄어든 원인은 가르지 않았다. 렌더 스레드는 0.695ms 늘었다. 액터는 메시마다 따로 그려서 드로우 콜이 123에서 1,320이 됐다.
 
-트레이스에서 게임 스레드의 프레임 평균을 읽었다(Unreal Insights, 호드 총수 1만, Processor를 한 스레드에 돌린 실행이라 위의 측정값과 견주지 않는다). 4단계에서 스켈레탈 메시 틱(`USkinnedMeshComponent_TickComponent`)은 프레임당 1.05ms를 쓰고 257번 불린다. 애니메이션 평가를 마치는 일(`USkeletalMeshComponent_CompleteParallelAnimationEvaluation`)은 0.828ms, 액터 동기화 Processor(`ULabActorSyncProcessor`)는 0.510ms다. 3단계에서 게임 스레드가 렌더 스레드를 기다리던 `Sync_RenderingThread`는 2.75ms였고, 4단계에서는 0.005ms로 사라진다. 엔진 틱(`Tick_Engine`)은 3단계의 4.68ms에서 4단계의 8.37ms로 늘었다.
+트레이스에서 게임 스레드의 프레임 평균을 읽었다(Unreal Insights, 호드 총수 1만, Processor를 한 스레드에 돌린 실행이라 위의 측정값과 견주지 않는다). 4단계에서 스켈레탈 메시 틱(`USkinnedMeshComponent_TickComponent`)은 프레임당 1.57ms를 쓰고 371번 불린다. 액터 프레임 평균 373개와 거의 같은 횟수다. 애니메이션 평가를 마치는 일(`USkeletalMeshComponent_CompleteParallelAnimationEvaluation`)은 1.11ms, 액터 동기화 Processor(`ULabActorSyncProcessor`)는 0.489ms다. 3단계에서 게임 스레드가 렌더 스레드를 기다리던 `Sync_RenderingThread`는 2.73ms였고, 4단계에서는 0.004ms로 사라진다. 엔진 틱(`Tick_Engine`)은 3단계의 4.65ms에서 4단계의 9.41ms로 늘었다.
 
-![Unreal Insights에서 4단계 트레이스의 25초부터 75초까지를 고르고 Timers 목록을 MeshComponent로 거른 화면. 빨간 상자의 스켈레탈 메시 틱은 1,458,813번 불리고 구간 합계가 5.98초다. 애니메이션 평가를 마치는 일은 4.70초다. 프레임은 5,672개다](images/insights-mesh-tick.jpg)
+![Unreal Insights에서 4단계 트레이스의 25초부터 75초까지를 고르고 Timers 목록을 MeshComponent로 거른 화면. 빨간 상자의 스켈레탈 메시 틱은 1,879,220번 불리고 구간 합계가 7.96초다. 애니메이션 평가를 마치는 일은 5.65초다. 프레임은 5,071개다](images/insights-mesh-tick.jpg)
 
-위 문단의 값은 이 합계를 고른 구간의 프레임 수로 나눈 값이다. 5.98초를 5,672로 나누면 1.05ms이고, 1,458,813번을 5,672로 나누면 257번이다.
+위 문단의 값은 이 합계를 고른 구간의 프레임 수로 나눈 값이다. 7.96초를 5,071로 나누면 1.57ms이고, 1,879,220번을 5,071로 나누면 371번이다.
 
 60fps를 지키는 최대 개체 수는 3단계가 잰 범위 3만 안에서 한계에 닿지 않았다. 4단계는 약 2만이다. 프레임 시간의 느린 쪽 5% 경계가 16.7ms에 닿는 호드 총수를, 잰 개체 수 사이에서 보간한 값이다. 이 단계가 품질을 사는 대신 내는 값이다.
 

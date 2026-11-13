@@ -13,7 +13,7 @@
 | 단계와 변형 | `L2-mass`(`-LabStage=M1 -LabVariant=mass`), `L3-vatcull`(`-LabStage=M2 -LabVariant=vatcull`). 인자와 기대 메타데이터는 `Scripts/full-conditions.json`. `L3`의 기대값은 `LabTechFarCull=1`, 나머지 기법 0 |
 | 요약 파일 | [최종 측정의 요약 표](../../Measurements/Full3/summary.csv)(세 회차 중앙값과 범위), [실행별 값](../../Measurements/Full3/runs.csv)(회차별 한 행) |
 | 60fps를 지키는 최대 개체 수(`N@16.7ms`) | [최대 개체 수 CSV](../../Docs/figures/full3/full-n-at-60fps.csv)(`Scripts/plot.py`가 측정 N 사이를 로그 보간). `3 L3-vatcull`은 `n_p95` 30000, `note_p95` = `above range` |
-| 트레이스 | 아래 "트레이스". 이전 총괄 측정 빌드(Test 패키지 08e45f2)에서 뜬 1만 P1 트레이스 한 회씩이다. 새 빌드(df41c13)의 트레이스에서 다시 뽑지 않았다 |
+| 트레이스 | 아래 "트레이스". 같은 빌드(Test 패키지 df41c13)에서 뜬 1만 P1 트레이스 한 회씩이다 |
 
 3단계의 구현(2단계와 다른 곳):
 
@@ -105,12 +105,12 @@
 
 | 본문 값 | 정밀한 값(2단계 / 3단계) | 트레이스 | 타이머(열) | 예상 = 2단계 × 0.4 |
 | --- | --- | --- | --- | --- |
-| 쌓은 위치를 ISM 컴포넌트에 넣는다 2.52 / 1.23 | 2.5152 / 1.2323 | 직렬, 게임 스레드 | `MassVisualizationComponent EndVisualChanges` Incl(12.671333 / 7.901813초) | 1.0061 → 1.01 |
-| 디스턴스 필드 장면 2.65 / 1.36 | 2.6467 / 1.3575 | 병렬, 렌더 스레드 | `FSceneRenderer::PrepareDistanceFieldScene` Excl(13.378891 / 8.719137초) | 1.0587 → 1.06 |
-| 그림자 그리기 2.51 / 1.66 | 2.5143 / 1.6550 | 병렬, GPU | `ShadowDepths` Excl(12.709799 / 10.630309초) | 1.0057 → 1.01 |
-| 색과 재질 1.40 / 0.83 | 1.3981 / 0.8269 | 병렬, GPU | `BasePass` Excl(7.067248 / 5.311380초) | 0.5592 → 0.56 |
-| 움직임 벡터 1.43 / 0.68 | 1.4288 / 0.6796 | 병렬, GPU | `RenderVelocities(%s)` Excl(7.222490 / 4.364974초) | 0.5715 → 0.57 |
-| VAT 프로세서 0.458ms / 엔진 ISM 프로세서 0.573ms | 0.5729(2단계 `MassUpdateISMProcessor_*`) / 0.4579(3단계 `LabVatISMProcessor_*`) | 직렬, 게임 스레드 | Incl(2.886137 / 2.935854초) | |
+| 쌓은 위치를 ISM 컴포넌트에 넣는다 2.48 / 1.23 | 2.4801 / 1.2341 | 직렬, 게임 스레드 | `MassVisualizationComponent EndVisualChanges` Incl(12.420331 / 7.965183초) | 0.9920 → 0.99 |
+| 디스턴스 필드 장면 2.69 / 1.71 | 2.6870 / 1.7066 | 병렬, 렌더 스레드 | `FSceneRenderer::PrepareDistanceFieldScene` Excl(13.856630 / 11.044924초) | 1.0748 → 1.07 |
+| 그림자 그리기 2.47 / 1.62(본문 2.47, 예상 0.990, 실제 1.62ms) | 2.4740 / 1.6162 | 병렬, GPU | `ShadowDepths` Excl(12.758173 / 10.460254초) | 0.9896 → 0.99(본문 0.990) |
+| 색과 재질 1.29 / 0.83 | 1.2946 / 0.8253 | 병렬, GPU | `BasePass` Excl(6.676235 / 5.341201초) | 0.5178 → 0.52 |
+| 움직임 벡터 1.37 / 0.67 | 1.3684 / 0.6732 | 병렬, GPU | `RenderVelocities(%s)` Excl(7.057009 / 4.356847초) | 0.5474 → 0.55 |
+| VAT 프로세서 0.462ms / 엔진 ISM 프로세서 0.576ms | 0.5755(2단계 `MassUpdateISMProcessor_*`) / 0.4621(3단계 `LabVatISMProcessor_*`) | 직렬, 게임 스레드 | Incl(2.882257 / 2.982695초). 3단계는 `FEngineLoop::Tick` 6,454 프레임으로 나눴다(타이머 횟수 6,453) | |
 
 "실제가 예상보다 크다"는 다섯 행 모두 3단계 값이 예상 값보다 크다는 비교다(트레이스 한 회라 범위가 없다).
 
@@ -129,14 +129,18 @@ P2의 다른 값(참고): 프레임 p50 7.211 → 7.4, 게임 스레드 6.357 �
 
 | 쓰인 곳 | 파일(`Saved/Traces/`, 저장소 밖) | 내보낸 표(`%TEMP%\horde-trace\`, 저장소 밖) | 창 안 프레임 수 |
 | --- | --- | --- | --- |
-| 게임 스레드 값(2단계) | `Full2traceser-L2-mass-N10000-P1-r1.utrace`(직렬) | `F2-traceser-L2-mass-GT.csv` | 5,038 |
-| 게임 스레드 값(3단계) | `Full2traceser-L3-vatcull-N10000-P1-r1.utrace`(직렬) | `F2-traceser-L3-vatcull-GT.csv` | 6,412 |
-| 렌더 스레드·GPU 값(2단계) | `Full2trace-L2-mass-N10000-P1-r1.utrace`(병렬) | `F2-trace-L2-mass-RT.csv`, `-GPU.csv`, `-GT.csv`(프레임 수) | 5,055 |
-| 렌더 스레드·GPU 값(3단계) | `Full2trace-L3-vatcull-N10000-P1-r1.utrace`(병렬) | `F2-trace-L3-vatcull-RT.csv`, `-GPU.csv`, `-GT.csv`(프레임 수) | 6,423 |
+| 게임 스레드 값(2단계) | `Full3traceser-L2-mass-N10000-P1-r1.utrace`(직렬) | `F3-traceser-L2-mass-GT.csv` | 5,008 |
+| 게임 스레드 값(3단계) | `Full3traceser-L3-vatcull-N10000-P1-r2.utrace`(직렬) | `F3-traceser-L3-vatcull-GT.csv` | 6,454 |
+| 렌더 스레드·GPU 값(2단계) | `Full3trace-L2-mass-N10000-P1-r1.utrace`(병렬) | `F3-trace-L2-mass-RT.csv`, `-GPU.csv`, `-GT.csv`(프레임 수) | 5,157 |
+| 렌더 스레드·GPU 값(3단계) | `Full3trace-L3-vatcull-N10000-P1-r1.utrace`(병렬) | `F3-trace-L3-vatcull-RT.csv`, `-GPU.csv`, `-GT.csv`(프레임 수) | 6,472 |
 
-내보낸 방법은 `Scripts/trace-export.ps1 -Command TimerStatistics -Extra "-threads=<스레드> -startTime=25 -endTime=75 -columns=*"`다. 표 전체와 단계별 해석은 [작업 기록의 트레이스 16개 절](../../Docs/Worklog/Q6.md#트레이스-16개사다리-여덟-단계-1만-p1-병렬직렬-한-회씩)에 있다. GPU 값은 큐 여럿의 합이라 패스 값을 더해도 GPU 프레임 시간이 되지 않는다. 트레이스를 켠 한 회라 `summary.csv`의 값과 직접 견주지 않는다.
+3단계 직렬 트레이스는 r2다. 처음 실행 `Full3traceser-L3-vatcull-N10000-P1-r1`은 게임 창이 앞에 있지 않아(앞 창 표본 30개 중 14개) 실패로 보고 다시 쟀다. 실패한 r1의 값은 쓰지 않는다([작업 기록의 측정 절](../../Docs/Worklog/Q7.md#2026-11-13-측정-full3)).
+
+내보낸 방법은 `Scripts/trace-export.ps1 -Command TimerStatistics -Extra "-threads=<스레드> -startTime=25 -endTime=75 -columns=*"`다. 트레이스 실행의 경위는 [작업 기록의 측정 절](../../Docs/Worklog/Q7.md#2026-11-13-측정-full3)에 있다. GPU 값은 큐 여럿의 합이라 패스 값을 더해도 GPU 프레임 시간이 되지 않는다. 트레이스를 켠 한 회라 `summary.csv`의 값과 직접 견주지 않는다.
 
 ## 측정 기록의 변경
+
+- 2026-11-13: 트레이스 값을 Full3 트레이스(df41c13)에서 다시 뽑았다. 3단계 직렬은 `Full3traceser-L3-vatcull-N10000-P1-r2`다. 다섯 타이머(2단계 / 3단계)는 2.52 / 1.23 → 2.48 / 1.23, 2.65 / 1.36 → 2.69 / 1.71, 2.51 / 1.66 → 2.47 / 1.62, 1.40 / 0.83 → 1.29 / 0.83, 1.43 / 0.68 → 1.37 / 0.67이다. VAT 프로세서는 0.458 → 0.462ms, 엔진 ISM 프로세서는 0.573 → 0.576ms다. 다섯 칸 모두 3단계 값이 예상보다 크다는 결론과, VAT 프로세서가 엔진 ISM 프로세서보다 작다는 결론은 그대로다. 디스턴스 필드 장면의 3단계 값이 1.36에서 1.71ms로 가장 크게 바뀌었다. 스크린샷 캡션의 구간 합계도 새 내보내기 값으로 바꿨다. 화면 파일은 아직 옛 화면이다.
 
 - 2026-11-13(예산 4ms 묶음): 측정값을 Test 패키지 08e45f2의 측정에서 df41c13의 최종 측정으로 바꿨다. 애니메이션 예산 기본값을 2ms에서 4ms로 올리고(ADR-0016) 오브의 저격 시점 경합을 고쳐(62b6a42) 전 조건을 다시 쟀기 때문이다. 바뀐 값은 이 글의 모든 측정 수치(프레임 시간 10.3 → 10.2ms, 줄어든 시간 2.39 → 2.28ms, 인스턴스 3,761 → 3,762, 2단계 최대 개체 수 20,753 → 19,554 등)이다. 트레이스 값(예상과 실제 그림, 본문의 0.458 / 0.573ms)과 Insights 스크린샷은 이전 총괄 측정 빌드(08e45f2)의 트레이스에서 온 값이라 그대로다.
 - 2026-11-13(처음 씀): 트레이스 값은 730ff18에서 뜬 트레이스(`Full1trace*`)의 값이다. 최종 측정 빌드의 트레이스(`Full2trace-L2-mass-*`, `Full2trace-L3-vatcull-*`, 직렬 `Full2traceser-*`)는 `Saved/Traces/`에 있지만 내보내지 않았다. 내보내는 `Scripts/trace-export.ps1`이 Unreal Insights를 띄우고, 같은 PC에서 촬영이 도는 중이었다. 두 빌드 사이에 `Source/`와 `Config/`는 같고, 바뀐 것은 `Content/Lab/FX/`의 배경 무리 에셋 셋뿐이다(01번 글의 측정 기록과 같은 확인). 2·3단계는 배경 무리를 쓰지 않는다.
@@ -159,7 +163,7 @@ P2의 다른 값(참고): 프레임 p50 7.211 → 7.4, 게임 스레드 6.357 �
 
 SVG 다섯 개는 [make-figures.py](make-figures.py)가 만든다(저장소 루트에서 `py -3 -I Posts/03-ism-vat/make-figures.py`). 측정값은 `summary.csv`와 `full-n-at-60fps.csv`에서 읽고, 트레이스 값은 위 표의 타이머 합과 프레임 수를 스크립트의 상수로 둔다. 폭 800 기준으로 글자는 16px 이상이고, 자기 흰 배경을 가진다.
 
-그림 글자는 소수 둘째 자리, 본문은 유효 숫자 세 자리다. 같은 값이다(엔진 ISM 프로세서 그림 0.57, 본문 0.573ms).
+그림 글자는 소수 둘째 자리, 본문은 유효 숫자 세 자리다. 같은 값이다(그림자 그리기의 예상: 그림 0.99, 본문 0.990ms).
 
 ## 엔진 소스
 
@@ -210,14 +214,14 @@ SVG 다섯 개는 [make-figures.py](make-figures.py)가 만든다(저장소 루�
 
 ## Insights 화면
 
-본문의 Insights 스크린샷이다. 2026-11-13에 찍었다. 값의 계산은 위 트레이스 표가 근거이고, 화면은 같은 트레이스에서 같은 타이머의 구간 합계를 보인다.
+본문의 Insights 스크린샷이다. 지금 파일은 08e45f2의 트레이스에서 찍은 옛 화면이고, 코디네이터가 아래 트레이스로 다시 찍는다. 값의 계산은 위 트레이스 표가 근거이고, 화면은 같은 트레이스에서 같은 타이머의 구간 합계를 보인다.
 
 | 항목 | 내용 |
 | --- | --- |
 | 파일 | `images/insights-gpu-passes.jpg`, `images/insights-distance-field.jpg`, `images/insights-gamethread-ism.jpg`. 각각 위가 2단계, 아래가 3단계다 |
-| 트레이스 | GPU와 디스턴스 필드: `Full2trace-L2-mass-N10000-P1-r1`, `Full2trace-L3-vatcull-N10000-P1-r1`(병렬). 게임 스레드: `Full2traceser-L2-mass-N10000-P1-r1`, `Full2traceser-L3-vatcull-N10000-P1-r1`(직렬) |
+| 트레이스 | GPU와 디스턴스 필드: `Full3trace-L2-mass-N10000-P1-r1`, `Full3trace-L3-vatcull-N10000-P1-r1`(병렬). 게임 스레드: `Full3traceser-L2-mass-N10000-P1-r1`, `Full3traceser-L3-vatcull-N10000-P1-r2`(직렬) |
 | 거른 말 | GPU: 거르지 않고 GPU 타이머만. 디스턴스 필드: `DistanceField`. 게임 스레드: `Mass`, CPU 타이머만 |
-| 표시한 행 | GPU(Excl): `ShadowDepths` 12.71s / 10.63s, `BasePass` 7.07s / 5.31s, `RenderVelocities(%s)` 7.22s / 4.37s, Count 5,054 / 6,422. 렌더 스레드(Excl): `FSceneRenderer::PrepareDistanceFieldScene` 13.38s / 8.72s. 게임 스레드(Incl): `MassVisualizationComponent EndVisualChanges` 12.67s / 7.9s, Count 5,038 / 6,412 |
-| 화면에 없는 값 | VAT 프로세서 0.458ms(`LabVatISMProcessor`)는 `Mass`로 거른 목록에 없다. 엔진 ISM 프로세서(`MassUpdateISMProcessor` 2.89s)는 2단계 화면에 보이지만 표시하지 않았다 |
+| 표시할 행. 찍을 화면에서 읽힐 값(내보내기 기준) | GPU(Excl): `ShadowDepths` 12.76s / 10.46s, `BasePass` 6.68s / 5.34s, `RenderVelocities(%s)` 7.06s / 4.36s, `ShadowDepths` Count 5,156 / 6,471. 렌더 스레드(Excl): `FSceneRenderer::PrepareDistanceFieldScene` 13.86s / 11.04s. 게임 스레드(Incl): `MassVisualizationComponent EndVisualChanges` 12.42s / 7.97s, Count 5,008 / 6,454. 옛 화면의 값은 GPU 12.71 / 10.63, 7.07 / 5.31, 7.22 / 4.37s(Count 5,054 / 6,422), 디스턴스 필드 13.38 / 8.72s, 게임 스레드 12.67 / 7.9s(Count 5,038 / 6,412)였다 |
+| 화면에 없는 값 | VAT 프로세서 0.462ms(`LabVatISMProcessor`)는 `Mass`로 거른 목록에 없다. 엔진 ISM 프로세서(`MassUpdateISMProcessor` 2.88s)는 2단계 화면에 보이지만 표시하지 않는다 |
 | 구간 | Timing 뷰의 시간 눈금자를 끌어 25초부터 75초까지(길이 표시 50s)를 골랐다. 손으로 고른 구간이라 내보내기의 창과 프레임이 한두 개 다를 수 있다. 화면의 합계는 표시 자릿수까지 내보낸 값과 같다 |
 | 가공 | 화면 캡처 둘(왼쪽 절반, 오른쪽 절반)을 이어 붙였다. 트레이스 파일 이름이 보이는 제목 줄은 잘라 냈다. 빨간 상자와 단계 이름을 그렸다. 두 트레이스를 견주는 그림은 위아래로 붙였다 |

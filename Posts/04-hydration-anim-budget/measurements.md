@@ -16,7 +16,7 @@
 | 요약 파일 | [최종 측정의 요약 표](../../Measurements/Full3/summary.csv)(세 회차 중앙값과 범위), [실행별 값](../../Measurements/Full3/runs.csv)(회차별 한 행), [빼 보기 표](../../Docs/figures/full3/full-ablation.csv) |
 | 60fps를 지키는 최대 개체 수(`N@16.7ms`) | [최대 개체 수 CSV](../../Docs/figures/full3/full-n-at-60fps.csv)(`Scripts/plot.py`가 측정 N 사이를 로그 보간) |
 | 예산 값 비교 | 본문 "예산을 어떻게 정했나"는 참고 묶음 `Budget1`의 값이다. 아래 "예산 값 비교" 절에 따로 적는다. 최종 측정과 이어 읽지 않는다 |
-| 트레이스 | 본문 "결과"의 트레이스 문단 값은 아래 "트레이스 값"이다. 앞선 측정 빌드의 직렬 트레이스 한 회씩이다 |
+| 트레이스 | 본문 "결과"의 트레이스 문단 값은 아래 "트레이스 값"이다. 최종 측정 빌드(df41c13)의 직렬 트레이스 한 회씩이다 |
 
 ## 4단계의 구현(3단계와 다른 곳)
 
@@ -211,24 +211,25 @@
 
 | 항목 | 값 |
 | --- | --- |
-| 트레이스 | `Saved/Traces/Full2traceser-L4-mass-N10000-P1-r1.utrace`(4단계), `Full2traceser-L3-vatcull-N10000-P1-r1.utrace`(3단계). 둘 다 직렬(`mass.FullyParallel` 끔), 저장소 밖 |
-| 내보낸 표 | `%TEMP%\horde-trace\F2-traceser-L4-mass-GT.csv`, `F2-traceser-L3-vatcull-GT.csv`(`Scripts/trace-export.ps1 -Command TimerStatistics`, 스레드 `GameThread`, 구간 25\~75초, 저장소 밖) |
-| 프레임 수 | 4단계 5,674, 3단계 6,412(`FEngineLoop::Tick` 횟수) |
+| 트레이스 | `Saved/Traces/Full3traceser-L4-mass-N10000-P1-r1.utrace`(4단계), `Full3traceser-L3-vatcull-N10000-P1-r2.utrace`(3단계). 둘 다 직렬(`mass.FullyParallel` 끔), 저장소 밖. 3단계는 r2다. 첫 시도 r1은 앞 창 표본이 모자라(`fg=14/30`) 실패로 처리하고 다시 쟀다([Worklog/Q7.md](../../Docs/Worklog/Q7.md) "측정: Full3") |
+| 내보낸 표 | `%TEMP%\horde-trace\F3-traceser-L4-mass-GT.csv`, `F3-traceser-L3-vatcull-GT.csv`(`Scripts/trace-export.ps1 -Command TimerStatistics`, 스레드 `GameThread`, 구간 25\~75초, 저장소 밖) |
+| 프레임 수 | 4단계 5,071, 3단계 6,454(`FEngineLoop::Tick` 횟수) |
 | 식 | 타이머의 합(초) × 1000 ÷ 프레임 수 = 프레임당 ms. 구간 안 평균이다 |
 | 주의 | 직렬 실행이라 게임 스레드 값이 병렬 측정과 다르다. 본문은 "견주지 않는다"고 적었다 |
 
 | 본문 값 | 정밀한 값 | 타이머 | 합(초) / 횟수 |
 | --- | --- | --- | --- |
-| 스켈레탈 메시 틱 1.05ms, 257번 | 1.0543ms, 프레임당 257.1번 | `USkinnedMeshComponent_TickComponent` Incl(4단계) | 5.981948 / 1,458,570 |
-| 애니메이션 평가 완료 0.828ms | 0.8279 | `USkeletalMeshComponent_CompleteParallelAnimationEvaluation` Incl | 4.697633 / 1,451,822 |
-| 액터 동기화 0.510ms | 0.5098 | `LabActorSyncProcessor_2147482256` Incl(Excl 2.854808) | 2.892495 / 5,672 |
-| `Sync_RenderingThread` 3단계 2.75ms | 2.7488 | 3단계 Incl | 17.625474 / 6,412 |
-| `Sync_RenderingThread` 4단계 0.005ms | 0.0045 | 4단계 Incl | 0.025783 / 5,673 |
-| `Tick_Engine` 4.68 → 8.37ms | 4.6766 → 8.3672 | 3단계 29.986314초 → 4단계 47.475477초 | |
+| 스켈레탈 메시 틱 1.57ms, 371번 | 1.5696ms, 프레임당 370.6번 | `USkinnedMeshComponent_TickComponent` Incl(4단계) | 7.959645 / 1,879,220 |
+| 애니메이션 평가 완료 1.11ms | 1.1134 | `USkeletalMeshComponent_CompleteParallelAnimationEvaluation` Incl | 5.645868 / 1,879,016 |
+| 액터 동기화 0.489ms | 0.4887 | `LabActorSyncProcessor_2147482256` Incl(Excl 2.445283) | 2.478145 / 5,071 |
+| `Sync_RenderingThread` 3단계 2.73ms | 2.7339 | 3단계 Incl | 17.644781 / 6,454 |
+| `Sync_RenderingThread` 4단계 0.004ms | 0.0041 | 4단계 Incl | 0.020845 / 5,070 |
+| `Tick_Engine` 4.65 → 9.41ms | 4.6481 → 9.4054 | 3단계 29.998791초 → 4단계 47.694881초 | |
+| 액터 프레임 평균 373개와 거의 같은 횟수 | 370.6 대 372.73 | 위 메시 틱 횟수, `L4-mass` 10000 `actors_mean` | |
 
-참고(본문에 쓰지 않았다): `USkeletalMeshComponent_TickAnimation` 0.4894ms(1,205,457번), 프레임 평균 `FEngineLoop::Tick` 3단계 7.7976 → 4단계 8.8117ms. 3단계 표에는 위 세 타이머(스켈레탈 메시 틱, 평가 완료, 액터 동기화)가 없다.
+참고(본문에 쓰지 않았다): `USkeletalMeshComponent_TickAnimation` 0.8121ms(1,879,231번), 프레임 평균 `FEngineLoop::Tick` 3단계 7.7469 → 4단계 9.8596ms. 3단계 표에는 위 세 타이머(스켈레탈 메시 틱, 평가 완료, 액터 동기화)가 없다.
 
-스켈레탈 메시 틱의 호출 수는 프레임당 257번으로, 액터 프레임 평균 373(`actors_mean`)보다 작다. 이 차이의 원인은 보지 않았다(트레이스 한 회, `actors_mean`은 측정 실행의 값). 본문은 "액터 수와 같다"고 쓰지 않았다.
+스켈레탈 메시 틱의 호출 수는 프레임당 371번으로, 액터 프레임 평균 373(`actors_mean`)과 거의 같다. 앞선 측정(예산 2ms)의 트레이스에서는 257번이었다. 예산 2ms는 메시 약 250개의 갱신 분량이라 나머지를 건너뛰었다([Worklog/Q7.md](../../Docs/Worklog/Q7.md) "9."). 화면 밖 액터까지 틱 횟수에 들어가는 이유는 보지 않았다(화면 안 액터는 약 279).
 
 ## 화면의 HUD와 표의 차이
 
@@ -290,24 +291,27 @@ SVG 일곱 개는 [make-figures.py](make-figures.py)가 만든다(저장소 루�
 ## 확인하지 않은 것
 
 - 4단계에서 GPU가 0.603ms 준 원인. 가까운 VAT 인스턴스가 액터로 바뀐 몫으로 짐작하지만, 패스별 값을 새 트레이스로 가르지 않았다.
-- 액터 하나 13.4µs의 내역. 직렬 트레이스에서 메시 틱 1.05, 평가 완료 0.828, 동기화 0.510ms(프레임당)를 읽었지만 병렬 측정과 직접 맞춰 합치지 않았다. 호출 수 257이 `actors_mean` 373과 다른 이유도 보지 않았다.
+- 액터 하나 13.4µs의 내역. 직렬 트레이스에서 메시 틱 1.57, 평가 완료 1.11, 동기화 0.489ms(프레임당)를 읽었지만 병렬 측정과 직접 맞춰 합치지 않았다.
 - `S8-col`에서 프레임 시간(+1.60)이 게임 스레드(+1.10)보다 더 는 이유.
 - `A8-budget`의 −0.292ms가 무엇에서 나는지. 예산을 빼면 액터 클래스가 `ALabMinionMassActor`(일반 스켈레탈 메시)로 바뀐다(`LabCrowdSubsystem.cpp:101,109`). 4단계에서 예산만 끈 측정은 최종 측정에 없다.
-- 트레이스 값(아래 "트레이스 값")은 앞선 측정 빌드의 트레이스다. 최종 측정의 표와 빌드가 다르다.
 - 전환 대책의 화면 효과를 최종 측정 빌드에서 다시 잰 값. 본문은 옛 개발 빌드 기록의 방향만 썼다.
 - 4단계 화면에서 액터의 AnimBP 동작과 전환이 실제로 보이는지. 움직이는 WebP를 열어 보지 않았다(브라우저 금지). 이미지 설명은 "액터다"까지만 적었다.
 - SVG는 `hyd-budget.svg`와 `hyd-maxn.svg`만 브라우저로 그려 보았다. 나머지는 좌표와 글자 수로만 확인했다.
 
 ## Insights 화면
 
-본문의 Insights 스크린샷이다. 2026-11-13에 찍었다. 값의 계산은 위 트레이스 표가 근거이고, 화면은 같은 트레이스에서 같은 타이머의 구간 합계를 보인다.
+본문의 Insights 스크린샷이다. 처음 2026-11-13에 앞선 트레이스로 찍었고, 새 트레이스로 다시 찍는다. 값의 계산은 위 트레이스 표가 근거이고, 화면은 같은 트레이스에서 같은 타이머의 구간 합계를 보인다.
 
 | 항목 | 내용 |
 | --- | --- |
 | 파일 | `images/insights-mesh-tick.jpg` |
-| 트레이스 | `Full2traceser-L4-mass-N10000-P1-r1`(직렬) |
+| 트레이스 | `Full3traceser-L4-mass-N10000-P1-r1`(직렬) |
 | 거른 말 | Timers 목록 `MeshComponent`, CPU 타이머만 |
-| 표시한 행(Count, Incl) | `USkinnedMeshComponent_TickComponent` 1,458,813 / 5.98s, `USkeletalMeshComponent_CompleteParallelAnimationEvaluation` 1,451,827 / 4.7s. 프레임 수 5,672는 같은 구간을 `Mass`로 걸렀을 때 Processor 행의 Count다 |
+| 표시한 행(Count, Incl) | 내보내기 기준으로 화면에서 읽힐 값: `USkinnedMeshComponent_TickComponent` 1,879,220 / 7.96s, `USkeletalMeshComponent_CompleteParallelAnimationEvaluation` 1,879,016 / 5.65s. 프레임 수 5,071은 같은 구간을 `Mass`로 걸렀을 때 `LabActorSyncProcessor` 행의 Count다. 지금 이미지는 앞선 트레이스(`Full2traceser-L4-mass`, 1,458,813 / 5.98s, 4.7s, 5,672)를 찍은 것이고, 코디네이터가 새 트레이스로 다시 찍는다 |
 | 화면에 없는 값 | `ULabActorSyncProcessor`, `Sync_RenderingThread`, `Tick_Engine`과 3단계 트레이스의 값은 찍지 않았다 |
 | 구간 | Timing 뷰의 시간 눈금자를 끌어 25초부터 75초까지(길이 표시 50s)를 골랐다. 손으로 고른 구간이라 내보내기의 창과 프레임이 한두 개 다를 수 있다. 화면의 합계는 표시 자릿수까지 내보낸 값과 같다 |
 | 가공 | 화면 캡처 둘(왼쪽 절반, 오른쪽 절반)을 이어 붙였다. 트레이스 파일 이름이 보이는 제목 줄은 잘라 냈다. 빨간 상자와 단계 이름을 그렸다. 두 트레이스를 견주는 그림은 위아래로 붙였다 |
+
+## 변경 기록
+
+- 2026-11-13: 트레이스 값을 Full3 트레이스(df41c13)에서 다시 뽑았다(4단계 `Full3traceser-L4-mass-N10000-P1-r1`, 3단계 `Full3traceser-L3-vatcull-N10000-P1-r2`).
