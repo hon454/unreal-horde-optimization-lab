@@ -15,12 +15,7 @@
 
 사용자가 2026-11-13에 정했다. Animation Budget Allocator의 예산 값을 측정으로 다시 정한다. 오브 `SnipeView` 경합을 고친다. 전 조건을 새 총괄 묶음 `Full3`으로 다시 잰다. 경위는 [Worklog/Q7.md](Worklog/Q7.md)에 적는다.
 
-1. 끝났다(62b6a42).
-2. 끝났다(5762e49).
-3. 끝났다. 사용자가 4ms를 골랐다([ADR-0016](Decisions/0016-animation-budget-value.md)).
-4. 끝났다(53f1dfb, 1be346f). `Full3`은 178회다. 재측정 2회 뒤 실패는 0회다.
-5. 끝났다(98dd60f, 1d25a55, 3339b42, 5b85c35). 공개 문서의 수치, 트레이스 값, Insights 스크린샷은 `Full3` 값이다.
-6. 끝났다. 사이트는 `Full3` 값이다(2026-11-13 배포).
+1\~6. 끝났다. 예산은 4ms다([ADR-0016](Decisions/0016-animation-budget-value.md)). 공개 문서와 사이트는 `Full3` 값이다.
 7. 끝났다. 사용자가 사이트를 검토했다. 코디네이터가 `Docs/post-review.md`를 지웠다.
 8. 끝났다(83ffcbd). 변형 `manager`의 인자는 `-LabStage=M1 -LabVariant=manager`다([Worklog/Q8.md](Worklog/Q8.md)).
 9. 끝났다(47394de). 참고 묶음 `Mgr1`은 18회이고 실패는 0회다. 값은 아래 "측정 결과"에 있다.
