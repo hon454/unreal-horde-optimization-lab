@@ -7,7 +7,7 @@ enum class ELabVariant : uint8
 {
 	Full,   // ACharacter + 스켈레탈 메시 + 애니메이션
 	Static, // 같은 ACharacter + UStaticMeshComponent, 애니메이션 없음
-	Budget, // Full + USkeletalMeshComponentBudgeted + Significance 거리 단계 + a.Budget.BudgetMs 2
+	Budget, // Full + USkeletalMeshComponentBudgeted + Significance 거리 단계 + a.Budget.BudgetMs FLabScenario::BudgetMs
 	Uro,    // Full + URO만
 	Pawn,   // Full에서 CharacterMovement 틱을 끄고 위치를 직접 이동
 	Mass,   // M1부터의 기본. 단계가 표현을 정하므로 M0에서는 Full과 같다
@@ -159,7 +159,8 @@ struct FLabScenario
 
 	// budget 변형의 Significance 거리 단계(25/50/100/250m). plan.md "M0"
 	static constexpr float BudgetTiers[4] = { 2500.f, 5000.f, 10000.f, 25000.f };
-	static constexpr float BudgetMs = 2.f;
+	// 애니메이션 예산 기본값(ms). 할당기를 켜는 모든 실행이 쓰고, -LabBudgetMs= 비교도 이 값과 한다. 4ms 근거: Docs/Decisions/0016-animation-budget-value.md
+	static constexpr float BudgetMs = 4.f;
 };
 
 /**
@@ -249,11 +250,11 @@ struct FLabConfig
 	 */
 	bool bScreenSigBudget = false;
 	/**
-	 * 애니메이션 예산(ms, -LabBudgetMs=<값>, 기본 FLabScenario::BudgetMs = 2). 할당기를 켜는 실행에서 a.Budget.BudgetMs에 넣는다(ALabGameMode::ApplyVariantCVars).
+	 * 애니메이션 예산(ms, -LabBudgetMs=<값>, 기본 FLabScenario::BudgetMs = 4, ADR-0016). 할당기를 켜는 실행에서 a.Budget.BudgetMs에 넣는다(ALabGameMode::ApplyVariantCVars).
 	 * 0 이하면 예산을 끈다. 끄는 길은 빼 보기 A8-budget(-LabScreenSigBudget=0)과 같다: bScreenSigBudget을 거짓으로 둬 액터를 Budget 템플릿으로 만들지 않는다.
 	 * 변형이 스스로 정하는 예산(M0 budget, m3budgetdist, m3budgetsig)은 0 이하를 받아도 켜진 채로 남는다. 기본값과 다르면 LabOverrides에 budget_ms=<값>으로 남는다.
 	 */
-	float BudgetMs = 2.f;
+	float BudgetMs = FLabScenario::BudgetMs;
 	/**
 	 * Q2 Niagara 배경 무리(-LabCrowdFx=0/1). 기본: 변형 q2crowd만 1, 그 밖 0(기존 단계·변형의 동작은 그대로). 인자를 주면 그 값이 이긴다.
 	 * 단계와 기본값의 연결은 Q3·Q5에서 단계 이름과 함께 정한다(Docs/Worklog/Q2.md (마)).

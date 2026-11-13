@@ -370,7 +370,7 @@ void ALabGameMode::ApplyVariantCVars()
 	}
 	// a.Budget.Enabled 기본값은 0이다(AnimationBudgetAllocatorCVars.cpp:7).
 	LabSetCVar(TEXT("a.Budget.Enabled"), TEXT("1"));
-	// 예산 값은 -LabBudgetMs=로 바꾼다(기본 2). 0 이하는 FLabConfig가 이미 화면 크기 Budget을 껐으므로 여기 오는 것은 변형이 정한 예산뿐이다. 그때는 기본값을 쓴다.
+	// 예산 값은 -LabBudgetMs=로 바꾼다(기본 FLabScenario::BudgetMs = 4, ADR-0016). 0 이하는 FLabConfig가 이미 화면 크기 Budget을 껐으므로 여기 오는 것은 변형이 정한 예산뿐이다. 그때는 기본값을 쓴다.
 	const float BudgetMs = FLabConfig::Get().BudgetMs > 0.f ? FLabConfig::Get().BudgetMs : FLabScenario::BudgetMs;
 	LabSetCVar(TEXT("a.Budget.BudgetMs"), *FString::SanitizeFloat(BudgetMs));
 	// CVar만으로는 켜지지 않는다. 월드마다 만들어지는 할당기는 bEnabled(false)로 시작한다(AnimationBudgetAllocator.cpp:71).
