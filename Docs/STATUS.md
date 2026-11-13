@@ -46,7 +46,7 @@
 
 | 세션 | 작업 단위 | 모델 | 상태 |
 | --- | --- | --- | --- |
-| `manager-measure` | 재패키지, 참고 묶음 `Mgr1` 18회, 요약 | Sonnet medium | 아직 띄우지 않았다 |
+| `manager-measure` | 재패키지, 참고 묶음 `Mgr1` 18회, 요약 | Sonnet medium | 시작함 |
 
 벤치 끝의 종료 코드는 늘 0이다. 러너는 실패를 `LabOk`와 CSV 유무로 판정한다([Worklog/Q7.md](Worklog/Q7.md) "종료 코드").
 
