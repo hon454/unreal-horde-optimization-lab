@@ -728,3 +728,4 @@
 | 07 | `insights-gpu-passes.jpg` | `Full3trace-L6-m5bounds`·`-L7-q2crowd` r1 | GPU 타이머만, 거르기 없음 | Lumen gather 12.28 / 14.09s, ShadowDepths 6.43 / 7.61s, BasePass 1.41 / 2.65s, Velocities 1.05 / 2.33s, Count 5,729 / 5,476(Velocities 6,569 / 6,272) |
 
 다시 찍은 뒤 지울 문장: 01 `measurements.md` 71·122행, 02 173행, 03 217행의 "옛 화면(08e45f2)" 설명, 04 `measurements.md` "표시한 행"의 옛 값 괄호.
+- Insights 화면 9장(코디네이터가 Full3 트레이스로 다시 찍음)을 넣었다. 01번 캡션의 한 프레임 값을 455 / 325ms / 9,985회(71.6%)로 고쳤다. 02\~07의 "표시한 행"을 화면 값으로 맞추고, 화면과 내보내기가 다른 곳(03 3단계 7.96s·6,453회, 04 횟수, 05 ms 행과 Count, 02·07 Count 하나)을 "구간" 행에 사실대로 적었다. "가공" 행을 창 캡처(PrintWindow, 2304폭)로 고치고 "옛 화면" 문장을 지웠다. 본문은 내보내기 값 그대로다.

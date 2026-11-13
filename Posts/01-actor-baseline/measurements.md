@@ -68,10 +68,10 @@
 | Budget이 줄인 게임 스레드 33.7ms는 이 몫(42.1ms)보다 작다 | 33.678 < 42.10 | 계산 | 측정 실행의 중앙값(`S1-budget` − `L1-full` `game_p50_ms`)과 트레이스 한 회의 합을 견준 어림이다 | |
 | (그림) 나머지 83ms · 18% | 83.02 | 계산 | 454.55 − 329.43 − 27.57 − 14.53. 18.26% | |
 | 개체당 CharacterMovement 32.9µs | 32.94 | 계산 | 329.43 ms ÷ 10000. 실제 호출은 프레임당 9,992회(1,099,110 ÷ 110)라 호출당은 33.0µs | |
-| 스크린샷의 프레임 하나 449ms | 448.71 | 병렬 트레이스 `Full3trace-L1-full-N10000-P1-r1`, 프레임 하나. 이 값은 옛 화면(08e45f2의 병렬 트레이스, 약 56초 지점)의 값이고 다시 찍을 때 고친다 | Timing 뷰의 선택 구간 길이 | 한 프레임 |
-| 스크린샷의 CharacterMovement 323ms | 322.94 | 같음(옛 화면의 값) | Timers 패널 `UCharacterMovementComponent_TickComponent` Incl(Excl 321.72) | 한 프레임 |
-| 스크린샷의 호출 수 10,052회 | 10,052 | 같음(옛 화면의 값) | Timers 패널 Count | 한 프레임 |
-| 72.0% | 71.97% | 계산 | 322.94 ÷ 448.71 | |
+| 스크린샷의 프레임 하나 455ms | 454.55 | 병렬 트레이스 `Full3trace-L1-full-N10000-P1-r1`, 약 49.4\~49.9초 지점의 프레임 하나 | Timing 뷰의 선택 구간 길이(Callees 패널의 `FEngineLoop::Tick` 454.55, `Tick_Engine` 453.92) | 한 프레임 |
+| 스크린샷의 CharacterMovement 325ms | 325.49 | 같음 | Timers 패널 `UCharacterMovementComponent_TickComponent` Incl(Excl 324.29) | 한 프레임 |
+| 스크린샷의 호출 수 9,985회 | 9,985 | 같음 | Timers 패널 Count | 한 프레임 |
+| 71.6% | 71.61% | 계산 | 325.49 ÷ 454.55 | |
 | 하위 스텝 1회 / 8회 | | 계산 | 아래 "엔진 소스". 프레임 50ms 미만이면 1회. 1만은 델타가 0.4초로 잘려 0.4 ÷ 0.05 = 8회(일곱 번째까지 `Min(0.05, 남은 시간 × 0.5)` = 0.05, 여덟 번째는 남은 0.05초를 모두 쓴다) | |
 | 60ms면 30ms씩 두 번 | | 계산 | `Min(0.05, 0.06 × 0.5)` = 0.03, 남은 0.03은 50ms 이하라 그대로 쓴다 | |
 | 기본값 0.05초, 8회 | | 엔진 소스 | 아래 "엔진 소스" | |
@@ -86,7 +86,8 @@
 
 ## 측정 기록의 변경
 
-- 2026-11-13: 트레이스 값을 Full3 트레이스(df41c13)에서 다시 뽑았다. 직렬 `Full3traceser-L1-full-N10000-P1-r1`에서 446.43 / 322.20 / 27.31 / 15.71이 454.55 / 329.43 / 27.57 / 14.53이 됐다. 애니메이션 쪽 두 타이머의 합은 42.10이고, Budget이 줄인 게임 스레드 33.7ms는 여전히 그보다 작다. 스크린샷과 캡션의 한 프레임 값은 아직 옛 화면의 값이다.
+- 2026-11-13: 트레이스 값을 Full3 트레이스(df41c13)에서 다시 뽑았다. 직렬 `Full3traceser-L1-full-N10000-P1-r1`에서 446.43 / 322.20 / 27.31 / 15.71이 454.55 / 329.43 / 27.57 / 14.53이 됐다. 애니메이션 쪽 두 타이머의 합은 42.10이고, Budget이 줄인 게임 스레드 33.7ms는 여전히 그보다 작다.
+- 2026-11-13: Insights 스크린샷을 Full3 병렬 트레이스로 다시 찍었다(코디네이터). 캡션의 한 프레임 값이 449 / 323ms / 10,052회(72%)에서 455 / 325ms / 9,985회(71.6%)가 됐다.
 
 - 2026-11-13: 측정값을 Test 패키지 08e45f2의 측정에서 df41c13의 최종 측정으로 바꿨다. 애니메이션 예산 기본값을 2ms에서 4ms로 올리고(ADR-0016) 오브의 저격 시점 경합을 고쳐(62b6a42) 전 조건을 다시 쟀기 때문이다. 바뀐 값은 이 글의 모든 수치(1단계 444ms, 최대 개체 수 766, URO −14.6ms, Budget −32.7ms 등)이고, 트레이스 값과 스크린샷은 그대로다.
 - 2026-11-13: 측정값을 Test 패키지 730ff18의 측정에서 08e45f2의 최종 측정으로 바꿨다. 200m 밖 입자 메시를 원본 LOD4로 바꿔(bf1a4c8) 측정 조건이 달라졌고, 규약대로 전 조건을 다시 쟀기 때문이다.
@@ -105,11 +106,11 @@
 | 쓰인 곳 | 트레이스 | 구간 | 값 |
 | --- | --- | --- | --- |
 | 그림 `actor-frame-flow.svg`의 막대, 본문 455 / 329 / 42.1ms | 직렬 실행 `Full3traceser-L1-full-N10000-P1-r1`(`mass.FullyParallel` 끔) | 25\~75초, 110프레임의 프레임당 평균 | `FEngineLoop::Tick` 454.55, CharacterMovement 329.43 |
-| 스크린샷, 캡션, 스크린샷 아래 문장 449 / 323ms / 10,052회 | 병렬 실행 `Full3trace-L1-full-N10000-P1-r1` | 프레임 하나 | 선택 구간 448.71, CharacterMovement 322.94. 옛 화면의 한 프레임 값이고 다시 찍을 때 고친다 |
+| 스크린샷, 캡션, 스크린샷 아래 문장 455 / 325ms / 9,985회 | 병렬 실행 `Full3trace-L1-full-N10000-P1-r1` | 약 49.4\~49.9초 지점의 프레임 하나 | 선택 구간 454.55, CharacterMovement 325.49 |
 
 병렬 트레이스 `Full3trace-L1-full-N10000-P1-r1`의 같은 25\~75초 구간 평균(110프레임)은 `FEngineLoop::Tick` 454.55, CharacterMovement 328.39ms다(`%TEMP%\horde-trace\F3-trace-L1-full-GT.csv`). 직렬 트레이스와 0.00ms, 1.0ms 차이다. 1단계는 Mass 프로세서가 거의 돌지 않아(`PrePhysics` 0.09ms) 직렬·병렬 설정이 액터 비용에 닿지 않고, 차이는 실행 사이의 흔들림이다. 그래서 스크린샷은 병렬 트레이스로 찍는다.
 
-찍을 화면에서 읽힐 값(내보내기 기준, 25\~75초 구간 합): `FEngineLoop::Tick` 50.00초(110회), `UCharacterMovementComponent_TickComponent` Incl 36.12초(1,094,284회, 프레임당 9,948회). 캡션의 한 프레임 값(448.71, 322.94, 10,052회)은 옛 화면의 값이다. 코디네이터가 다시 찍을 때 고른 프레임의 값으로 고친다.
+같은 트레이스의 25\~75초 구간 합(내보내기)은 `FEngineLoop::Tick` 50.00초(110회), `UCharacterMovementComponent_TickComponent` Incl 36.12초(1,094,284회, 프레임당 9,948회)다. 스크린샷의 프레임 하나는 이 구간 안의 한 프레임이고, 길이 454.55ms는 구간 평균(454.55ms)과 같다.
 
 ## 그림
 
@@ -119,7 +120,7 @@
 | `images/actor-anim-techniques.svg` | 결과 그림. URO와 Budget(예산 4ms)이 줄인 프레임·게임 스레드 시간, 덧댄 뒤의 프레임 시간, 비교용 애니메이션 쪽 두 타이머의 합 42.10(점선). 막대는 측정 실행 세 회차의 중앙값이고, 점선은 같은 빌드의 직렬 트레이스 한 회의 값이다 | 위 변화 행, 트레이스 행 |
 | `images/actor-frame-flow.svg` | 한 개체가 한 프레임에 하는 일 네 칸(이동 컴포넌트 틱, 스켈레탈 메시 틱과 AnimBP 갱신, 애니메이션 평가 마무리, 프레임 끝 렌더 갱신)과 칸마다 엔진 타이머 이름. 오른쪽 막대 길이가 1만의 프레임당 시간(329.43, 27.57, 14.53). 네 번째 칸 `UWorld_SendAllEndOfFrameUpdates`의 값은 따로 읽지 않아, 나머지 83.02ms(이 칸과 그 밖의 일)를 점선 막대로 보였다. 맨 아래 16.7ms 막대는 같은 축척 | 위 트레이스 행 |
 | `images/actor-frame-vs-n.svg` | 위: 프레임 시간 중앙값·느린 쪽 5% 경계(로그-로그), 16.7ms 선, 50ms 선, 60fps를 지키는 최대 개체 수 766. 아래: 개체당 게임 스레드 시간(µs)과 하위 스텝 횟수, 예상선(1천의 17.02µs로 일정) | 위 `L1-full` 행 |
-| `images/insights-gamethread.jpg` | Unreal Insights에서 `Full3trace-L1-full-N10000-P1-r1`을 연 화면이다. 왼쪽 빨간 상자는 Timing 뷰에서 고른 프레임 하나다. 오른쪽 빨간 상자는 Timers 패널을 "CharacterMovement"로 거른 결과다(`UCharacterMovementComponent_TickComponent` Count, Incl, Excl). 화면 캡처 둘(왼쪽 절반, 오른쪽 절반)을 이어 붙이고 빨간 상자를 그린다. 지금 파일은 08e45f2의 병렬 트레이스에서 찍은 옛 화면이다(약 56초 지점, 448.71ms, Count 10,052, Incl 322.94ms, Excl 321.72ms). 새 트레이스로 다시 찍는다 | 위 "두 트레이스" |
+| `images/insights-gamethread.jpg` | Unreal Insights에서 `Full3trace-L1-full-N10000-P1-r1`을 연 화면이다. 왼쪽 빨간 상자는 Timing 뷰에서 고른 프레임 하나(약 49.4\~49.9초 지점, 454.55ms)다. 오른쪽 빨간 상자는 Timers 패널을 "CharacterMovement"로 거른 결과다(`UCharacterMovementComponent_TickComponent` Count 9,985, Incl 325.49ms, Excl 324.29ms). Callees 패널이 켜져 있어 `FEngineLoop::Tick` 454.55ms, `Tick_Engine` 453.92ms 등이 보인다. 창을 최대화하고 창 캡처(PrintWindow)로 한 번에 찍어 2304폭으로 줄였다. 트레이스 파일 이름이 보이는 제목 줄은 잘라 내고 빨간 상자와 단계 이름을 그렸다. 2026-11-13에 새 트레이스로 다시 찍었다 | 위 "두 트레이스" |
 | `../../Docs/figures/steps/step1-L1-full.webp` | 1단계 화면(HUD 켬). HUD 값은 위 "화면의 HUD와 표의 차이" | 촬영 경위는 [Worklog/Q7.md](../../Docs/Worklog/Q7.md#2026-11-13-측정-full3)의 "촬영 끝" 줄 |
 
 SVG 네 개는 [make-figures.py](make-figures.py)가 만든다(저장소 루트에서 `py -3 -I Posts/01-actor-baseline/make-figures.py`). 측정값은 `summary.csv`와 `full-n-at-60fps.csv`에서 읽고, 트레이스 값 네 개(454.55 / 329.43 / 27.57 / 14.53)는 스크립트의 상수다. 폭 800 기준으로 글자는 16px 이상이고, 자기 흰 배경을 가져 GitHub의 밝은·어두운 테마 모두에서 같은 색으로 보인다. 처음 글의 `actor-gamethread-breakdown.svg`(같은 네 값의 가로 막대)는 `actor-frame-flow.svg`에 합쳐 지웠다.

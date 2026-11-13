@@ -170,20 +170,21 @@ SVG 넷은 [make-figures.py](make-figures.py)가 만든다(저장소 루트에�
 
 ## Insights 화면
 
-본문의 Insights 스크린샷이다. 지금 파일은 08e45f2의 직렬 트레이스에서 찍은 옛 화면이고, 코디네이터가 아래 트레이스로 다시 찍는다. 값의 계산은 위 트레이스 표가 근거이고, 화면은 같은 트레이스에서 같은 타이머의 구간 합계를 보인다.
+본문의 Insights 스크린샷이다. 2026-11-13에 아래 트레이스로 다시 찍었다. 값의 계산은 위 트레이스 표가 근거이고, 화면은 같은 트레이스에서 같은 타이머의 구간 합계를 보인다.
 
 | 항목 | 내용 |
 | --- | --- |
 | 파일 | `images/insights-mass-processors.jpg` |
 | 트레이스 | `Full3traceser-L2-mass-N10000-P1-r1`(직렬) |
 | 거른 말 | Timers 목록 `Mass`, CPU 타이머만 |
-| 표시할 행(Count, Incl). 찍을 화면에서 읽힐 값(내보내기 기준) | PrePhysics 5,008 / 15.58s, `MassVisualizationComponent EndVisualChanges` 5,008 / 12.42s, `MassSmoothOrientationProcessor` 5,008 / 4.76s, `MassUpdateISMProcessor` 5,008 / 2.88s, `MassSteerToMoveTargetProcessor` 5,008 / 2.22s. 옛 화면의 값은 PrePhysics 5,037 / 15.18s, EndVisualChanges 5,038 / 12.67s, SmoothOrientation 4.66s, UpdateISM 2.89s, SteerToMoveTarget 2.22s였다 |
+| 표시한 행(Count, Incl) | PrePhysics 5,009 / 15.58s, `MassVisualizationComponent EndVisualChanges` 5,008 / 12.42s, `MassSmoothOrientationProcessor` 4.76s, `MassUpdateISMProcessor` 2.88s, `MassSteerToMoveTargetProcessor` 2.22s |
 | 화면에 없는 값 | 프레임 평균 9.98ms(`FEngineLoop::Tick`)는 거른 목록에 없다 |
-| 구간 | Timing 뷰의 시간 눈금자를 끌어 25초부터 75초까지(길이 표시 50s)를 골랐다. 손으로 고른 구간이라 내보내기의 창과 프레임이 한두 개 다를 수 있다. 화면의 합계는 표시 자릿수까지 내보낸 값과 같다 |
-| 가공 | 화면 캡처 둘(왼쪽 절반, 오른쪽 절반)을 이어 붙였다. 트레이스 파일 이름이 보이는 제목 줄은 잘라 냈다. 빨간 상자와 단계 이름을 그렸다. 두 트레이스를 견주는 그림은 위아래로 붙였다 |
+| 구간 | Timing 뷰의 시간 눈금자를 끌어 25초부터 75초까지(길이 표시 50s)를 골랐다. 손으로 고른 구간이라 내보내기의 창과 프레임이 한두 개 다를 수 있다. 화면의 합계는 표시 자릿수까지 내보낸 값과 같다. PrePhysics의 Count만 화면이 하나 많다(5,009 대 내보내기 5,008) |
+| 가공 | 창을 최대화하고 Timing 뷰를 한 칸 축소한 뒤, 창 캡처(PrintWindow)로 화면 전체를 한 번에 찍어 2304폭으로 줄였다. 트레이스 파일 이름이 보이는 제목 줄은 잘라 냈다. 빨간 상자와 단계 이름을 그렸다. 두 트레이스를 견주는 그림은 위아래로 붙였다 |
 
 ## 측정 기록의 변경
 
-- 2026-11-13: 트레이스 값을 Full3 트레이스(df41c13)에서 다시 뽑았다. 직렬 `Full3traceser-L2-mass-N10000-P1-r1`에서 프레임 평균 9.92 → 9.98ms, PrePhysics 3.01 → 3.11, `EndVisualChanges` 2.52 → 2.48, SmoothOrientation 0.925 → 0.950, SteerToMoveTarget 0.440 → 0.443, UpdateISM 0.573 → 0.576ms다. 스크린샷 캡션의 구간 합계도 새 내보내기 값으로 바꿨다. 화면 파일은 아직 옛 화면이다.
+- 2026-11-13: 트레이스 값을 Full3 트레이스(df41c13)에서 다시 뽑았다. 직렬 `Full3traceser-L2-mass-N10000-P1-r1`에서 프레임 평균 9.92 → 9.98ms, PrePhysics 3.01 → 3.11, `EndVisualChanges` 2.52 → 2.48, SmoothOrientation 0.925 → 0.950, SteerToMoveTarget 0.440 → 0.443, UpdateISM 0.573 → 0.576ms다. 스크린샷 캡션의 구간 합계도 새 내보내기 값으로 바꿨다.
+- 2026-11-13: Insights 스크린샷을 Full3 트레이스로 다시 찍었다(코디네이터). "표시한 행"은 새 화면의 값이다.
 
 - 2026-11-13: 측정값을 Test 패키지 08e45f2의 측정에서 df41c13의 최종 측정으로 바꿨다. 애니메이션 예산 기본값을 2ms에서 4ms로 올리고(ADR-0016) 오브의 저격 시점 경합을 고쳐(62b6a42) 전 조건을 다시 쟀기 때문이다. 바뀐 값은 이 글의 모든 측정 수치(2단계 프레임 시간 10.3 → 10.2ms, 최대 개체 수 20,753 → 19,554 등)이고, 트레이스 값과 스크린샷은 그대로다.

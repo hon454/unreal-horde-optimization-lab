@@ -300,18 +300,19 @@ SVG 일곱 개는 [make-figures.py](make-figures.py)가 만든다(저장소 루�
 
 ## Insights 화면
 
-본문의 Insights 스크린샷이다. 처음 2026-11-13에 앞선 트레이스로 찍었고, 새 트레이스로 다시 찍는다. 값의 계산은 위 트레이스 표가 근거이고, 화면은 같은 트레이스에서 같은 타이머의 구간 합계를 보인다.
+본문의 Insights 스크린샷이다. 2026-11-13에 Full3 트레이스로 다시 찍었다. 값의 계산은 위 트레이스 표가 근거이고, 화면은 같은 트레이스에서 같은 타이머의 구간 합계를 보인다.
 
 | 항목 | 내용 |
 | --- | --- |
 | 파일 | `images/insights-mesh-tick.jpg` |
 | 트레이스 | `Full3traceser-L4-mass-N10000-P1-r1`(직렬) |
 | 거른 말 | Timers 목록 `MeshComponent`, CPU 타이머만 |
-| 표시한 행(Count, Incl) | 내보내기 기준으로 화면에서 읽힐 값: `USkinnedMeshComponent_TickComponent` 1,879,220 / 7.96s, `USkeletalMeshComponent_CompleteParallelAnimationEvaluation` 1,879,016 / 5.65s. 프레임 수 5,071은 같은 구간을 `Mass`로 걸렀을 때 `LabActorSyncProcessor` 행의 Count다. 지금 이미지는 앞선 트레이스(`Full2traceser-L4-mass`, 1,458,813 / 5.98s, 4.7s, 5,672)를 찍은 것이고, 코디네이터가 새 트레이스로 다시 찍는다 |
+| 표시한 행(Count, Incl) | `USkinnedMeshComponent_TickComponent` 1,879,305 / 7.96s, `USkeletalMeshComponent_CompleteParallelAnimationEvaluation` 1,878,954 / 5.65s. 같은 구간을 `Mass`로 걸렀을 때 Processor 행의 Count는 5,070이다 |
 | 화면에 없는 값 | `ULabActorSyncProcessor`, `Sync_RenderingThread`, `Tick_Engine`과 3단계 트레이스의 값은 찍지 않았다 |
-| 구간 | Timing 뷰의 시간 눈금자를 끌어 25초부터 75초까지(길이 표시 50s)를 골랐다. 손으로 고른 구간이라 내보내기의 창과 프레임이 한두 개 다를 수 있다. 화면의 합계는 표시 자릿수까지 내보낸 값과 같다 |
-| 가공 | 화면 캡처 둘(왼쪽 절반, 오른쪽 절반)을 이어 붙였다. 트레이스 파일 이름이 보이는 제목 줄은 잘라 냈다. 빨간 상자와 단계 이름을 그렸다. 두 트레이스를 견주는 그림은 위아래로 붙였다 |
+| 구간 | Timing 뷰의 시간 눈금자를 끌어 25초부터 75초까지(길이 표시 50s)를 골랐다. 손으로 고른 구간이라 내보내기의 창과 프레임이 한두 개 다를 수 있다. 초 단위 합계는 표시 자릿수까지 내보낸 값과 같다. 횟수는 조금 다르다: 내보낸 값은 메시 틱 1,879,220회, 평가 완료 1,879,016회, 프레임 5,071(`FEngineLoop::Tick`과 `LabActorSyncProcessor` 횟수)이다. 본문과 캡션은 내보낸 값을 쓴다 |
+| 가공 | 창을 최대화하고 Timing 뷰를 한 칸 축소한 뒤, 창 캡처(PrintWindow)로 화면 전체를 한 번에 찍어 2304폭으로 줄였다. 트레이스 파일 이름이 보이는 제목 줄은 잘라 냈다. 빨간 상자와 단계 이름을 그렸다 |
 
 ## 변경 기록
 
 - 2026-11-13: 트레이스 값을 Full3 트레이스(df41c13)에서 다시 뽑았다(4단계 `Full3traceser-L4-mass-N10000-P1-r1`, 3단계 `Full3traceser-L3-vatcull-N10000-P1-r2`).
+- 2026-11-13: Insights 스크린샷을 Full3 직렬 트레이스로 다시 찍었다(코디네이터).

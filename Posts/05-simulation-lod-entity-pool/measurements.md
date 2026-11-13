@@ -261,18 +261,19 @@ SVG 다섯 개는 [make-figures.py](make-figures.py)가 만든다(저장소 루�
 
 - 2026-11-13(처음 씀).
 - 2026-11-13: 수치를 총괄 묶음 `Full2`(08e45f2)에서 `Full3`(df41c13)으로 바꿨다. 애니메이션 예산 2ms → 4ms(ADR-0016)와 `SnipeView` 경합 수정(62b6a42)으로 전 조건을 다시 쟀기 때문이다. 5단계 3만이 60fps 한계에 닿아 요약과 결과의 최대 개체 수 문장을 고쳤다. Insights 화면과 `Pool1` 16분 실행은 앞 빌드의 것 그대로다.
-- 2026-11-13: 트레이스 값을 Full3 트레이스(df41c13)에서 다시 뽑았다. 엔진 이동·조향 넷의 비율이 39.7%에서 44.1%로 바뀌어 본문의 결과 문장을 "예상보다 조금 덜 줄었다"로 고쳤다. Insights 화면은 코디네이터가 Full3 트레이스로 다시 찍는다.
+- 2026-11-13: 트레이스 값을 Full3 트레이스(df41c13)에서 다시 뽑았다. 엔진 이동·조향 넷의 비율이 39.7%에서 44.1%로 바뀌어 본문의 결과 문장을 "예상보다 조금 덜 줄었다"로 고쳤다.
+- 2026-11-13: Insights 스크린샷을 Full3 트레이스로 다시 찍었다(코디네이터). "표시한 행"은 새 화면의 값이다.
 
 ## Insights 화면
 
-본문의 Insights 스크린샷이다. 코디네이터가 Full3 트레이스로 다시 찍는다. 값의 계산은 위 트레이스 표가 근거이고, 화면은 같은 트레이스에서 같은 타이머의 구간 합계를 보인다.
+본문의 Insights 스크린샷이다. 2026-11-13에 Full3 트레이스로 다시 찍었다. 값의 계산은 위 트레이스 표가 근거이고, 화면은 같은 트레이스에서 같은 타이머의 구간 합계를 보인다.
 
 | 항목 | 내용 |
 | --- | --- |
 | 파일 | `images/insights-movement-processors.jpg`. 위가 4단계, 아래가 5단계다 |
 | 트레이스 | `Full3traceser-L4-mass-N10000-P1-r1`, `Full3traceser-L5-m4offpool-N10000-P1-r1`(직렬) |
 | 거른 말 | Timers 목록 `Mass`, CPU 타이머만 |
-| 표시한 행(Incl) | 찍을 화면에서 읽힐 값(내보내기 기준). 4단계(Count 5,070): `MassSmoothOrientationProcessor` 4.68s, `MassSteerToMoveTargetProcessor` 2.30s, `MassApplyMovementProcessor` 820.72ms, `MassApplyForceProcessor` 794.20ms. 합 8.60s. 5단계(Count 5,285, `MassApplyForceProcessor`만 5,284): 2.01s, 1.11s, 495.91ms, 331.92ms(`MassApplyForceProcessor`, `MassApplyMovementProcessor` 순). 합 3.95s |
+| 표시한 행(Incl) | 4단계(Count 5,070): `MassSmoothOrientationProcessor` 4.68s, `MassSteerToMoveTargetProcessor` 2.3s, `MassApplyMovementProcessor` 820.68ms, `MassApplyForceProcessor` 794.24ms. 5단계(Count 5,284): 2.01s, 1.11s, `MassApplyForceProcessor` 495.91ms, `MassApplyMovementProcessor` 331.84ms |
 | 화면에 없는 값 | `LabOffMoveProcessor` 0.008ms는 `Mass`로 거른 목록에 없다 |
-| 구간 | Timing 뷰의 시간 눈금자를 끌어 25초부터 75초까지(길이 표시 50s)를 골랐다. 손으로 고른 구간이라 내보내기의 창과 프레임이 한두 개 다를 수 있다. 화면의 합계는 표시 자릿수까지 내보낸 값과 같다 |
-| 가공 | 화면 캡처 둘(왼쪽 절반, 오른쪽 절반)을 이어 붙였다. 트레이스 파일 이름이 보이는 제목 줄은 잘라 냈다. 빨간 상자와 단계 이름을 그렸다. 두 트레이스를 견주는 그림은 위아래로 붙였다 |
+| 구간 | Timing 뷰의 시간 눈금자를 끌어 25초부터 75초까지(길이 표시 50s)를 골랐다. 손으로 고른 구간이라 내보내기의 창과 프레임이 한두 개 다를 수 있다. 초 단위 합계는 표시 자릿수까지 내보낸 값과 같다. ms로 보이는 행과 Count는 조금 다르다. 내보낸 값은 4단계 `MassApplyMovementProcessor` 820.72ms, `MassApplyForceProcessor` 794.20ms, 5단계 Count 5,285(`MassApplyForceProcessor`만 5,284), `MassApplyMovementProcessor` 331.92ms다. 본문과 캡션은 내보낸 값을 쓴다 |
+| 가공 | 창을 최대화하고 Timing 뷰를 한 칸 축소한 뒤, 창 캡처(PrintWindow)로 화면 전체를 한 번에 찍어 2304폭으로 줄였다. 트레이스 파일 이름이 보이는 제목 줄은 잘라 냈다. 빨간 상자와 단계 이름을 그렸다. 두 트레이스를 견주는 그림은 위아래로 붙였다 |
