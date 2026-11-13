@@ -20,7 +20,7 @@
 | 07 | Niagara 배경 무리 — 200m 밖을 입자로 채우기 | 단계 7, Q2 | 초안(2026-11-13), 사용자 검토 대기 |
 | 08 | 품질 올리기 — 남은 예산을 액터 수와 전환 거리에 쓰기 | 단계 8, Q4 | 초안(2026-11-13), 사용자 검토 대기 |
 | 09 | 총괄 — 사다리와 빼 보기 표, 최대 N, 목표 총수 재검토 | `Full2` | 초안(2026-11-13), 사용자 검토 대기 |
-| 사이트 | 글이 모두 끝나면 한눈에 보는 웹 페이지(GitHub Pages). 형제 프로젝트의 <https://hon454.github.io/ue-dedicated-server-optimization-lab/>처럼 단계를 고르면 화면과 측정값이 바뀐다(2026-11-12 사용자 결정) | 글 00\~09, `Docs/figures/` | 만들었다(`Site/`, `gh-pages` 브랜치, 2026-11-13). 사용자가 Pages를 켜면 열린다 |
+| 사이트 | 글이 모두 끝나면 한눈에 보는 웹 페이지(GitHub Pages). 형제 프로젝트의 <https://hon454.github.io/ue-dedicated-server-optimization-lab/>처럼 단계를 고르면 화면과 측정값이 바뀐다(2026-11-12 사용자 결정) | 글 00\~09, `Docs/figures/` | 만들었다(`Site/`, `gh-pages` 브랜치, 2026-11-13). 주소는 <https://hon454.github.io/unreal-horde-optimization-lab/> |
 
 글을 쓰기 전에 [post-review.md](post-review.md)를 본다(핵심 인사이트, 글별로 쓸 재료와 버릴 재료, 틀린 문장). 경위에는 수치를 쓰지 않는다([posting.md](Guides/posting.md) "본문과 측정 기록").
 

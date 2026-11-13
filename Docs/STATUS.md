@@ -13,13 +13,13 @@
 
 ## 다음 할 일
 
-1. 사용자가 여유 기준 13.3ms의 처리를 정한다. 코디네이터는 그 뒤에 08번과 09번 글을 고친다.
-2. 사용자가 GitHub Pages를 켜면 코디네이터가 README와 backlog.md에 사이트 주소를 넣는다.
-3. 사용자가 글 검토를 끝내면 코디네이터가 `Docs/post-review.md`를 지운다.
+1. 사용자가 글 검토를 끝내면 코디네이터가 `Docs/post-review.md`를 지운다.
+
+사이트 주소는 <https://hon454.github.io/unreal-horde-optimization-lab/>다. 글이나 CSV가 바뀌면 `py -3 -I Scripts/build-site.py`를 다시 돌리고 `gh-pages` 브랜치에 다시 올린다.
+
+공개 글은 여유 기준 13.3ms를 쓰지 않는다. 기준은 16.7ms 하나이고, 남는 시간은 잰 비용과 견주어 적는다([plan.md](plan.md) "목표 사양").
 
 글 02\~07에는 Unreal Insights 스크린샷이 있다([Worklog/Posts.md](Worklog/Posts.md) "Insights 스크린샷"). 트레이스 값을 새로 쓰는 글에는 같은 방법으로 스크린샷을 넣는다.
-
-글이나 CSV가 바뀌면 `py -3 -I Scripts/build-site.py`를 다시 돌리고 `gh-pages` 브랜치에 다시 올린다.
 
 ## 진행 중인 세션
 
@@ -119,8 +119,6 @@ Development 전환 점수는 `Full1` 때의 참고값이다(`Measurements/Full1/
 
 ## 사용자에게 요청한 일
 
-- **여유 기준 13.3ms의 처리 결정.** 코디네이터가 채팅에 수정안을 냈다(2026-11-13).
-- **GitHub Pages 켜기.** 레포 Settings → Pages에서 Source를 "Deploy from a branch", 브랜치 `gh-pages`, 폴더 `/`로 고른다.
-- **글 00\~09 초안과 사이트의 검토.** 글은 `Posts/`에 있다. 사이트는 `Site/index.html`이다.
+- **글 00\~09 초안과 사이트의 검토.** 글은 `Posts/`에 있다. 사이트 주소는 위 "다음 할 일"에 있다.
 - **[autonomous-decisions.md](Worklog/autonomous-decisions.md)의 D20\~D32 검토.** "사용자가 볼 것" 줄이 판단이 필요한 곳이다.
 - **`Packaged/Release/` 삭제의 허락.** 릴리스 스테이징 폴더다(약 1.7GB, git 밖). 코디네이터가 작업을 모두 끝낸 뒤에 묻는다.

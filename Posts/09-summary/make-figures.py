@@ -34,7 +34,6 @@ L8 = STEPS[-1]
 NS = [5000, 10000, 20000, 30000]
 NLAB = ["5천", "1만", "2만", "3만"]
 BUDGET = 16.7          # 60fps line, same value as Scripts/plot.py BUDGET_MS
-MARGIN = 13.3          # Docs/plan.md "품질 계획": target is frame p95 inside 16.7ms minus a 20% margin (13.3ms)
 
 FONT = "Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Segoe UI, sans-serif"
 INK, SUB, LINE, BG, CARD = "#111827", "#4b5563", "#e5e7eb", "#ffffff", "#f8fafc"
@@ -200,10 +199,9 @@ def headroom():
     o.append(f'<line x1="{xn:.1f}" y1="{Y(BUDGET):.1f}" x2="{xn:.1f}" y2="{B}" stroke="{AMBER}" stroke-width="1.5" stroke-dasharray="3 3"/>')
     o.append(f'<text x="{xn - 6:.1f}" y="{B - 10}" text-anchor="end" font-size="16" font-weight="700" fill="{AMBER}">{N_AT_60_L8:,}</text>')
     # budget lines
-    for val, lab, col in [(BUDGET, "16.7ms(60fps)", AMBER), (MARGIN, "13.3ms(16.7ms에서 20% 여유)", GRAY)]:
+    for val, lab, col in [(BUDGET, "16.7ms(60fps)", AMBER)]:
         o.append(f'<line x1="{L}" y1="{Y(val):.1f}" x2="{R}" y2="{Y(val):.1f}" stroke="{col}" stroke-dasharray="6 4" stroke-width="1.5"/>')
     o.append(f'<text x="{L + 8}" y="{Y(BUDGET) - 8:.1f}" font-size="16" font-weight="700" fill="{AMBER}">16.7ms(60fps)</text>')
-    o.append(f'<text x="{L + 8}" y="{Y(MARGIN) - 8:.1f}" font-size="16" fill="{SUB}">13.3ms(여유 기준)</text>')
     series = [("프레임 시간(느린 쪽 5% 경계)", "frame_p95_ms", DARK),
               ("게임 스레드(중앙값)", "game_p50_ms", BLUE),
               ("GPU(중앙값)", "gpu_p50_ms", PINK),
@@ -252,10 +250,9 @@ def headroom():
         o.append(f'<text x="{X(n):.1f}" y="{yq + 34}" text-anchor="middle" font-size="16" font-weight="700" fill="{PURPLE}">{fmt(sk * 100) if sk else "0"}%</text>')
     yb = yq + 76
     o.append(f'<line x1="32" y1="{yb - 18}" x2="{W - 32}" y2="{yb - 18}" stroke="{LINE}"/>')
-    o.append(f'<text x="32" y="{yb + 6}" font-size="16" fill="{SUB}">2만은 16.7ms 안이지만 여유 기준 13.3ms 위이고, 대형 액터 갱신의 절반 넘게 건너뛴다.</text>')
+    o.append(f'<text x="32" y="{yb + 6}" font-size="16" fill="{SUB}">2만은 16.7ms 안이지만 대형 액터 갱신의 절반 넘게 건너뛴다.</text>')
     o.append(f'<text x="32" y="{yb + 30}" font-size="16" fill="{SUB}">1만의 GPU는 {fmt(v(L8, 10000, "gpu_p50_ms"))}ms다. 남은 여유는 GPU 쪽이 더 크다.</text>')
-    o.append(f'<text x="32" y="{yb + 54}" font-size="16" fill="{SUB}">여유 기준 13.3ms는 목표 사양에서 16.7ms의 80%로 둔 선이다.</text>')
-    write("target-headroom.svg", svg(yb + 78, o))
+    write("target-headroom.svg", svg(yb + 54, o))
 
 
 waterfall()
@@ -268,7 +265,6 @@ print("L1->L2 frame", round(v("L2-mass", 10000, "frame_p50_ms") - v("L1-full", 1
 for col in ("frame_p50_ms", "game_p50_ms", "gpu_p50_ms"):
     print("L2->L8", col, round(v(L8, 10000, col) - v("L2-mass", 10000, col), 3))
 print("N@60 L8:", N_AT_60_L8, "check:", round(n_at(p95_points(), BUDGET)))
-print("N@13.3 L8:", round(n_at(p95_points(), MARGIN)))
 print("headroom at 1만:", round(BUDGET - v(L8, 10000, "frame_p95_ms"), 3))
 for n in NS:
     print("L8", n, {c: v(L8, n, c) for c in ("frame_p95_ms", "game_p50_ms", "gpu_p50_ms", "render_p50_ms", "large_skip_ratio")}, rows[(L8, n, "P1")]["bottleneck"])

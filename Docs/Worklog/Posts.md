@@ -661,3 +661,12 @@
 - 화면에 없는 값이 있다: 02번 글의 프레임 평균 9.92ms, 03번 글의 VAT 프로세서 0.458ms, 04번 글의 `ULabActorSyncProcessor`·`Sync_RenderingThread`·`Tick_Engine`과 3단계 값, 05번 글의 `LabOffMoveProcessor`, 07번 글의 모으기 프로세서 0.199ms. 이 값들은 내보낸 표가 근거다.
 - 구간은 손으로 끌어 골랐다. 내보내기의 창과 프레임이 한두 개 다를 수 있다.
 - GitHub에서 그림이 줄어 보일 때 글자가 읽히는지는 보지 않았다. 원본은 2304폭이다.
+
+## 2026-11-13: 여유 기준 13.3ms를 뺐다, 사이트 주소
+
+- 사용자 결정(2026-11-13): 공개 글에서 "잠정으로 둔 기준" 13.3ms를 뺀다. 기준은 60fps의 16.7ms 하나로 두고, 남는 시간은 같은 측정에서 잰 비용과 견준다.
+- 고친 곳: 08번 글 네 문장과 `q-headroom.svg`, 09번 글 "목표 총수 재검토"의 세 문장과 `target-headroom.svg`, 두 측정 기록, plan.md "목표 사양". 09번 글의 17,721(13.3ms 교차)은 빠졌다.
+- 견주는 비용은 캡슐 콜리전 +2.01ms다(하위 실험, 프레임 p50). 프레임 p95로는 +1.80ms다.
+- 버린 대안: 15.0ms(엔진 `r.DynamicRes.TargetedGPUHeadRoomPercentage` 기본값 10%, `Engine/Source/Runtime/Engine/Private/DynamicResolution.cpp`). GPU 예산용 값이라 프레임 전체의 기준으로는 어림이다.
+- ADR-0010 결정 6과 지난 Worklog 절의 13.3ms는 그대로 둔다(승인된 본문, 지난 기록).
+- 사용자가 GitHub Pages를 켰다. 주소가 열리고 1단계 화면(WebP)이 뜨는 것을 브라우저로 확인했다. README와 backlog.md에 주소를 넣었다.

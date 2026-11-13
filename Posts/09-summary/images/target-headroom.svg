@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="800" height="766" viewBox="0 0 800 766" font-family="Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Segoe UI, sans-serif" font-size="16" fill="#111827">
-<rect x="0.5" y="0.5" width="799" height="765" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="742" viewBox="0 0 800 742" font-family="Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Segoe UI, sans-serif" font-size="16" fill="#111827">
+<rect x="0.5" y="0.5" width="799" height="741" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
 <text x="32" y="46" font-size="22" font-weight="700">최종 구성은 호드 총수 1만에서 16.7ms까지 얼마가 남나</text>
 <text x="32" y="74" font-size="16" fill="#4b5563">8단계, 오브 시점 카메라, 세 번 잰 중앙값. 네 가지 호드 총수에서 쟀다</text>
 <text x="32" y="102" font-size="18" font-weight="700">시간(ms)</text>
@@ -29,9 +29,7 @@
 <line x1="467.5" y1="186.0" x2="467.5" y2="520" stroke="#b45309" stroke-width="1.5" stroke-dasharray="3 3"/>
 <text x="461.5" y="510" text-anchor="end" font-size="16" font-weight="700" fill="#b45309">25,958</text>
 <line x1="70" y1="186.0" x2="560" y2="186.0" stroke="#b45309" stroke-dasharray="6 4" stroke-width="1.5"/>
-<line x1="70" y1="254.0" x2="560" y2="254.0" stroke="#9ca3af" stroke-dasharray="6 4" stroke-width="1.5"/>
 <text x="78" y="178.0" font-size="16" font-weight="700" fill="#b45309">16.7ms(60fps)</text>
-<text x="78" y="246.0" font-size="16" fill="#4b5563">13.3ms(여유 기준)</text>
 <polyline points="146.6,381.4 223.1,331.6 376.2,237.6 529.4,157.4" fill="none" stroke="#374151" stroke-width="2.5"/>
 <circle cx="146.6" cy="381.4" r="4.5" fill="#374151"/>
 <circle cx="223.1" cy="331.6" r="4.5" fill="#374151"/>
@@ -86,7 +84,6 @@
 <text x="376.2" y="646" text-anchor="middle" font-size="16" font-weight="700" fill="#9333ea">57.3%</text>
 <text x="529.4" y="646" text-anchor="middle" font-size="16" font-weight="700" fill="#9333ea">55.7%</text>
 <line x1="32" y1="670" x2="768" y2="670" stroke="#e5e7eb"/>
-<text x="32" y="694" font-size="16" fill="#4b5563">2만은 16.7ms 안이지만 여유 기준 13.3ms 위이고, 대형 액터 갱신의 절반 넘게 건너뛴다.</text>
+<text x="32" y="694" font-size="16" fill="#4b5563">2만은 16.7ms 안이지만 대형 액터 갱신의 절반 넘게 건너뛴다.</text>
 <text x="32" y="718" font-size="16" fill="#4b5563">1만의 GPU는 5.72ms다. 남은 여유는 GPU 쪽이 더 크다.</text>
-<text x="32" y="742" font-size="16" fill="#4b5563">여유 기준 13.3ms는 목표 사양에서 16.7ms의 80%로 둔 선이다.</text>
 </svg>

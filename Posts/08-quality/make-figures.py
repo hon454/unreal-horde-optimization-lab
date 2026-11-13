@@ -46,7 +46,6 @@ N = 10000
 NS3 = [10000, 20000, 30000]
 NLAB3 = ["1만", "2만", "3만"]
 BUDGET = 1000.0 / 60.0          # 16.7ms (60fps)
-MARGIN = BUDGET * 0.8           # 13.3ms, 20% margin of the target spec (ADR-0010 decision 6)
 
 # Derived values (formulas are in measurements.md).
 ADD_ACTORS = v(L8, N, "actors_mean") - v(L7, N, "actors_mean")
@@ -169,15 +168,15 @@ def headroom():
         o.append(f'<rect x="{X0}" y="{y}" width="{w:.1f}" height="24" rx="3" fill="{c}"/>')
         o.append(f'<text x="{X0 + w + 8:.1f}" y="{y + 18}" font-size="17" font-weight="700" fill="{c}">{fmt(val)}</text>')
         y += 58
-    # the two lines are 60px apart, so the left label ends at its line and the right label starts at its line
-    for val, lab, anc, dx in [(MARGIN, "13.3ms(여유 20%)", "end", 6), (BUDGET, "16.7ms(60fps)", "start", -6)]:
+    # the label ends at the 60fps line
+    for val, lab, anc, dx in [(BUDGET, "16.7ms(60fps)", "end", -6)]:
         x = X0 + val * scale
         o.append(f'<line x1="{x:.1f}" y1="{top}" x2="{x:.1f}" y2="{y - 26}" stroke="{AMBER}" stroke-width="2" stroke-dasharray="5 4"/>')
         o.append(f'<text x="{x + dx:.1f}" y="{y - 6}" text-anchor="{anc}" font-size="16" font-weight="700" fill="{AMBER}">{lab}</text>')
     y += 34
     p95 = v(L7, N, "frame_p95_ms")
     gap = v(L7, N, "game_p50_ms") - v(L7, N, "gpu_p50_ms")
-    y = foot(o, y, [f"느린 쪽 5% 경계는 13.3ms까지 {fmt(MARGIN - p95)}ms, 16.7ms까지 {fmt(BUDGET - p95)}ms가 남는다.",
+    y = foot(o, y, [f"느린 쪽 5% 경계는 16.7ms까지 {fmt(BUDGET - p95)}ms가 남는다.",
                     f"GPU는 게임 스레드보다 {fmt(gap)}ms 짧다. 병목은 게임 스레드다.",
                     f"대형 액터의 애니메이션 갱신 가운데 건너뛴 것은 {pct(v(L7, N, 'large_skip_ratio'))}%다. 예산 2ms가 거의 쉰다."])
     write("q-headroom.svg", svg(y + 24, o))
@@ -372,7 +371,7 @@ ablation()
 lowres()
 print("wrote", sorted(os.listdir(OUT)))
 print(f"addActors {ADD_ACTORS:.4f} unitL4 {UNIT_L4_US:.4f}us expectGame {EXPECT_GAME:.4f} dGame {D_GAME:+.4f} dGPU {D_GPU:+.4f} dFrame {D_FRAME:+.4f} shadowGPU {SHADOW_GPU:+.4f}")
-print("N@60 L7/L8:", N_AT_60_L7, N_AT_60_L8, "margin", round(MARGIN, 4))
+print("N@60 L7/L8:", N_AT_60_L7, N_AT_60_L8)
 for lab, cond in ABL:
     print(cond, *[f"{m[0]} {v(cond, N, m[1]) - v(L8, N, m[1]):+.4f}" for m in METRICS], s(cond, N, "bottleneck"),
           "rng", round(max(rng(cond, N, 'frame_p50_ms'), rng(L8, N, 'frame_p50_ms')), 4))
