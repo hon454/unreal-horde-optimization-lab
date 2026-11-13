@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="816" viewBox="0 0 800 816" font-family="Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Segoe UI, sans-serif" font-size="16" fill="#111827">
+<rect x="0.5" y="0.5" width="799" height="815" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+<text x="32" y="46" font-size="22" font-weight="700">참고 측정: 매니저 방식과 2단계</text>
+<text x="32" y="74" font-size="16" fill="#4b5563">오브 시점 카메라, 같은 빌드에서 따로 잰 참고 측정. 세 번 잰 중앙값과 최소–최대(ms)</text>
+<text x="32" y="112" font-size="18" font-weight="700">게임 스레드 시간(중앙값)</text>
+<text x="40" y="144" font-size="16" fill="#4b5563">호드 총수 1만</text>
+<rect x="40" y="154" width="163.2" height="24" rx="3" fill="#9333ea"/>
+<path d="M201.8 166 L204.6 166 M201.8 160 L201.8 172 M204.6 160 L204.6 172" stroke="#111827" stroke-width="2" fill="none"/>
+<text x="214.6" y="172" font-size="16" fill="#9333ea"><tspan font-weight="700">5.27</tspan> (5.22–5.31)</text>
+<rect x="40" y="184" width="192.8" height="24" rx="3" fill="#2563eb"/>
+<path d="M229.1 196 L236.6 196 M229.1 190 L229.1 202 M236.6 190 L236.6 202" stroke="#111827" stroke-width="2" fill="none"/>
+<text x="246.6" y="202" font-size="16" fill="#2563eb"><tspan font-weight="700">6.22</tspan> (6.10–6.34)</text>
+<rect x="40" y="214" width="200.3" height="24" rx="3" fill="#0369a1"/>
+<path d="M236.8 226 L243.9 226 M236.8 220 L236.8 232 M243.9 220 L243.9 232" stroke="#111827" stroke-width="2" fill="none"/>
+<text x="50" y="232" font-size="16" fill="#ffffff"><tspan font-weight="700">6.46</tspan> (6.35–6.58)</text>
+<text x="40" y="268" font-size="16" fill="#4b5563">호드 총수 2만</text>
+<rect x="40" y="278" width="306.7" height="24" rx="3" fill="#9333ea"/>
+<path d="M346.2 290 L349.3 290 M346.2 284 L346.2 296 M349.3 284 L349.3 296" stroke="#111827" stroke-width="2" fill="none"/>
+<text x="50" y="296" font-size="16" fill="#ffffff"><tspan font-weight="700">9.89</tspan> (9.88–9.98)</text>
+<rect x="40" y="308" width="377.5" height="24" rx="3" fill="#2563eb"/>
+<path d="M414.4 320 L419.2 320 M414.4 314 L414.4 326 M419.2 314 L419.2 326" stroke="#111827" stroke-width="2" fill="none"/>
+<text x="50" y="326" font-size="16" fill="#ffffff"><tspan font-weight="700">12.2</tspan> (12.1–12.2)</text>
+<rect x="40" y="338" width="398.9" height="24" rx="3" fill="#0369a1"/>
+<path d="M406.7 350 L441.9 350 M406.7 344 L406.7 356 M441.9 344 L441.9 356" stroke="#111827" stroke-width="2" fill="none"/>
+<text x="50" y="356" font-size="16" fill="#ffffff"><tspan font-weight="700">12.9</tspan> (11.8–13)</text>
+<line x1="32" y1="380" x2="768" y2="380" stroke="#e5e7eb"/>
+<text x="32" y="414" font-size="18" font-weight="700">프레임 시간(중앙값)</text>
+<text x="40" y="446" font-size="16" fill="#4b5563">호드 총수 1만</text>
+<rect x="40" y="456" width="314.3" height="24" rx="3" fill="#9333ea"/>
+<path d="M351.1 468 L365.8 468 M351.1 462 L351.1 474 M365.8 462 L365.8 474" stroke="#111827" stroke-width="2" fill="none"/>
+<text x="50" y="474" font-size="16" fill="#ffffff"><tspan font-weight="700">10.1</tspan> (10–10.5)</text>
+<rect x="40" y="486" width="306.6" height="24" rx="3" fill="#2563eb"/>
+<path d="M342.6 498 L350.7 498 M342.6 492 L342.6 504 M350.7 492 L350.7 504" stroke="#111827" stroke-width="2" fill="none"/>
+<text x="50" y="504" font-size="16" fill="#ffffff"><tspan font-weight="700">9.89</tspan> (9.76–10)</text>
+<rect x="40" y="516" width="309.8" height="24" rx="3" fill="#0369a1"/>
+<path d="M347.5 528 L350.7 528 M347.5 522 L347.5 534 M350.7 522 L350.7 534" stroke="#111827" stroke-width="2" fill="none"/>
+<text x="50" y="534" font-size="16" fill="#ffffff"><tspan font-weight="700">10</tspan> (9.92–10)</text>
+<text x="40" y="570" font-size="16" fill="#4b5563">호드 총수 2만</text>
+<rect x="40" y="580" width="464.4" height="24" rx="3" fill="#9333ea"/>
+<path d="M503.0 592 L505.3 592 M503.0 586 L503.0 598 M505.3 586 L505.3 598" stroke="#111827" stroke-width="2" fill="none"/>
+<text x="50" y="598" font-size="16" fill="#ffffff"><tspan font-weight="700">15</tspan> (14.9–15)</text>
+<rect x="40" y="610" width="467.9" height="24" rx="3" fill="#2563eb"/>
+<path d="M489.1 622 L512.5 622 M489.1 616 L489.1 628 M512.5 616 L512.5 628" stroke="#111827" stroke-width="2" fill="none"/>
+<text x="50" y="628" font-size="16" fill="#ffffff"><tspan font-weight="700">15.1</tspan> (14.5–15.2)</text>
+<rect x="40" y="640" width="459.7" height="24" rx="3" fill="#0369a1"/>
+<path d="M486.7 652 L511.2 652 M486.7 646 L486.7 658 M511.2 646 L511.2 658" stroke="#111827" stroke-width="2" fill="none"/>
+<text x="50" y="658" font-size="16" fill="#ffffff"><tspan font-weight="700">14.8</tspan> (14.4–15.2)</text>
+<line x1="556.7" y1="430" x2="556.7" y2="674" stroke="#b45309" stroke-width="2" stroke-dasharray="5 4"/>
+<text x="562.7" y="444" font-size="16" font-weight="700" fill="#b45309">16.7ms</text>
+<line x1="32" y1="682" x2="768" y2="682" stroke="#e5e7eb"/>
+<rect x="40" y="696" width="18" height="18" rx="3" fill="#9333ea"/>
+<text x="68" y="710" font-size="16">틱 없는 액터와 매니저</text>
+<rect x="40" y="722" width="18" height="18" rx="3" fill="#2563eb"/>
+<text x="68" y="736" font-size="16">2단계 Mass 로직</text>
+<rect x="40" y="748" width="18" height="18" rx="3" fill="#0369a1"/>
+<text x="68" y="762" font-size="16">2단계, Processor를 한 스레드에</text>
+<text x="40" y="794" font-size="16" fill="#4b5563">세 조건 모두 GPU가 가장 느리다. 프레임 시간의 차이는 세 번 잰 값의 흔들림보다 작다.</text>
+</svg>

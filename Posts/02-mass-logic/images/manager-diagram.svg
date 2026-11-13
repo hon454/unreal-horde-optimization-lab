@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="728" viewBox="0 0 800 728" font-family="Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Segoe UI, sans-serif" font-size="16" fill="#111827">
+<rect x="0.5" y="0.5" width="799" height="727" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+<text x="32" y="46" font-size="22" font-weight="700">같은 2단계 화면을 만드는 두 방식</text>
+<text x="32" y="74" font-size="16" fill="#4b5563">개체의 데이터를 두는 곳과 그것을 도는 코드가 다르다. 이동·피해의 식과 ISM 설정은 같다</text>
+<text x="32" y="114" font-size="18" font-weight="700" fill="#9333ea">참고: 틱 없는 액터와 매니저 하나</text>
+<text x="416" y="114" font-size="18" font-weight="700" fill="#2563eb">2단계: Mass</text>
+<rect x="32" y="132" width="352" height="94" rx="10" fill="#f8fafc" stroke="#e5e7eb"/>
+<rect x="32" y="132" width="6" height="94" rx="3" fill="#9333ea"/>
+<text x="50" y="158" font-size="17" font-weight="700">액터, 개체마다 하나</text>
+<text x="50" y="184" font-size="16" fill="#4b5563">틱 함수도 컴포넌트도 없다</text>
+<text x="50" y="208" font-size="16" fill="#4b5563">위치·속도·체력·상태를 멤버로 든다</text>
+<path d="M208.0 230 L208.0 244 M202.0 238 L208.0 246 L214.0 238" stroke="#4b5563" stroke-width="2" fill="none"/>
+<rect x="32" y="252" width="352" height="142" rx="10" fill="#f8fafc" stroke="#e5e7eb"/>
+<rect x="32" y="252" width="6" height="142" rx="3" fill="#9333ea"/>
+<text x="50" y="278" font-size="17" font-weight="700">매니저의 틱 하나</text>
+<text x="372" y="278" text-anchor="end" font-size="16" font-weight="700" fill="#9333ea">게임 스레드</text>
+<text x="50" y="304" font-size="16" fill="#4b5563">액터 포인터 배열을 한 번 돈다</text>
+<text x="50" y="328" font-size="16" fill="#4b5563">개체마다 접근·조향·이동·회전,</text>
+<text x="50" y="352" font-size="16" fill="#4b5563">피해, 상태 시간을 차례로 계산한다</text>
+<text x="50" y="376" font-size="16" fill="#4b5563">끝에 그 개체의 ISM 위치를 바로 쓴다</text>
+<path d="M208.0 398 L208.0 412 M202.0 406 L208.0 414 L214.0 406" stroke="#4b5563" stroke-width="2" fill="none"/>
+<rect x="32" y="420" width="352" height="70" rx="10" fill="#f8fafc" stroke="#e5e7eb"/>
+<rect x="32" y="420" width="6" height="70" rx="3" fill="#9ca3af"/>
+<text x="50" y="446" font-size="17" font-weight="700">ISM 컴포넌트 둘</text>
+<text x="50" y="472" font-size="16" fill="#4b5563">종류마다 하나. 2단계와 같은 설정</text>
+<rect x="416" y="132" width="352" height="94" rx="10" fill="#f8fafc" stroke="#e5e7eb"/>
+<rect x="416" y="132" width="6" height="94" rx="3" fill="#2563eb"/>
+<text x="434" y="158" font-size="17" font-weight="700">엔티티</text>
+<text x="434" y="184" font-size="16" fill="#4b5563">번호일 뿐이다</text>
+<text x="434" y="208" font-size="16" fill="#4b5563">데이터는 Chunk의 Fragment 배열에 있다</text>
+<path d="M592.0 230 L592.0 244 M586.0 238 L592.0 246 L598.0 238" stroke="#4b5563" stroke-width="2" fill="none"/>
+<rect x="416" y="252" width="352" height="94" rx="10" fill="#f8fafc" stroke="#e5e7eb"/>
+<rect x="416" y="252" width="6" height="94" rx="3" fill="#0d9488"/>
+<text x="434" y="278" font-size="17" font-weight="700">로직 Processor</text>
+<text x="756" y="278" text-anchor="end" font-size="16" font-weight="700" fill="#0d9488">워커 스레드</text>
+<text x="434" y="304" font-size="16" fill="#4b5563">접근·조향·이동·회전, 범위 피해</text>
+<text x="434" y="328" font-size="16" fill="#4b5563">Processor마다 Chunk를 따로 돈다</text>
+<path d="M592.0 350 L592.0 364 M586.0 358 L592.0 366 L598.0 358" stroke="#4b5563" stroke-width="2" fill="none"/>
+<rect x="416" y="372" width="352" height="94" rx="10" fill="#f8fafc" stroke="#e5e7eb"/>
+<rect x="416" y="372" width="6" height="94" rx="3" fill="#2563eb"/>
+<text x="434" y="398" font-size="17" font-weight="700">표현 쪽 Processor 넷</text>
+<text x="756" y="398" text-anchor="end" font-size="16" font-weight="700" fill="#2563eb">게임 스레드</text>
+<text x="434" y="424" font-size="16" fill="#4b5563">카메라 거리 수집, 표현 LOD 계산,</text>
+<text x="434" y="448" font-size="16" fill="#4b5563">표현 전환, ISM 위치 쌓기</text>
+<path d="M592.0 470 L592.0 484 M586.0 478 L592.0 486 L598.0 478" stroke="#4b5563" stroke-width="2" fill="none"/>
+<rect x="416" y="492" width="352" height="70" rx="10" fill="#f8fafc" stroke="#e5e7eb"/>
+<rect x="416" y="492" width="6" height="70" rx="3" fill="#db2777"/>
+<text x="434" y="518" font-size="17" font-weight="700">쌓은 위치를 올린다</text>
+<text x="756" y="518" text-anchor="end" font-size="16" font-weight="700" fill="#db2777">게임 스레드</text>
+<text x="434" y="544" font-size="16" fill="#4b5563">처리 단계가 끝날 때 컴포넌트에 한 번</text>
+<path d="M592.0 566 L592.0 580 M586.0 574 L592.0 582 L598.0 574" stroke="#4b5563" stroke-width="2" fill="none"/>
+<rect x="416" y="588" width="352" height="70" rx="10" fill="#f8fafc" stroke="#e5e7eb"/>
+<rect x="416" y="588" width="6" height="70" rx="3" fill="#9ca3af"/>
+<text x="434" y="614" font-size="17" font-weight="700">ISM 컴포넌트 둘</text>
+<text x="434" y="640" font-size="16" fill="#4b5563">종류마다 하나</text>
+<line x1="32" y1="678" x2="768" y2="678" stroke="#e5e7eb"/>
+<text x="32" y="708" font-size="16" fill="#4b5563">표현 LOD 계산과 표현 전환이 없다</text>
+<text x="416" y="708" font-size="16" fill="#4b5563">뒤 단계의 표현 전환이 이 경로를 쓴다</text>
+</svg>

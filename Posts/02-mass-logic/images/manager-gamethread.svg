@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="502" viewBox="0 0 800 502" font-family="Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Segoe UI, sans-serif" font-size="16" fill="#111827">
+<rect x="0.5" y="0.5" width="799" height="501" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+<text x="32" y="46" font-size="22" font-weight="700">게임 스레드가 군중을 갱신하는 데 쓴 시간</text>
+<text x="32" y="74" font-size="16" fill="#4b5563">호드 총수 2만, 오브 시점 카메라, 조건마다 트레이스 한 번. 프레임 평균(ms)</text>
+<text x="40" y="124" font-size="17" font-weight="700">2단계 Mass 로직</text>
+<rect x="40.0" y="136" width="272.5" height="40" fill="#2563eb"/>
+<text x="48.0" y="154" font-size="16" fill="#ffffff">표현 쪽 Processor 넷</text>
+<text x="48.0" y="172" font-size="16" font-weight="700" fill="#ffffff">5.45</text>
+<rect x="312.5" y="136" width="7.3" height="40" fill="#9ca3af"/>
+<rect x="319.8" y="136" width="272.0" height="40" fill="#db2777"/>
+<text x="327.8" y="154" font-size="16" fill="#ffffff">ISM 위치를 컴포넌트에 올린다</text>
+<text x="327.8" y="172" font-size="16" font-weight="700" fill="#ffffff">5.44</text>
+<text x="601.8" y="162" font-size="18" font-weight="700">11</text>
+<text x="40" y="194" font-size="16" fill="#4b5563">로직 Processor는 워커 스레드에서 돌아 이 막대에 없다.</text>
+<text x="40" y="240" font-size="17" font-weight="700">2단계, Processor를 한 스레드에</text>
+<rect x="40.0" y="252" width="178.9" height="40" fill="#0d9488"/>
+<text x="48.0" y="270" font-size="16" fill="#ffffff">로직 Processor</text>
+<text x="48.0" y="288" font-size="16" font-weight="700" fill="#ffffff">3.58</text>
+<rect x="218.9" y="252" width="106.4" height="40" fill="#2563eb"/>
+<text x="226.9" y="270" font-size="16" fill="#ffffff">표현 쪽</text>
+<text x="226.9" y="288" font-size="16" font-weight="700" fill="#ffffff">2.13</text>
+<rect x="325.3" y="252" width="10.2" height="40" fill="#9ca3af"/>
+<rect x="335.5" y="252" width="265.7" height="40" fill="#db2777"/>
+<text x="343.5" y="270" font-size="16" fill="#ffffff">ISM 위치를 컴포넌트에 올린다</text>
+<text x="343.5" y="288" font-size="16" font-weight="700" fill="#ffffff">5.31</text>
+<text x="611.2" y="278" font-size="18" font-weight="700">11.2</text>
+<text x="40" y="338" font-size="17" font-weight="700">틱 없는 액터와 매니저</text>
+<rect x="40.0" y="350" width="419.9" height="40" fill="#9333ea"/>
+<text x="48.0" y="368" font-size="16" fill="#ffffff">매니저의 틱 하나(로직과 ISM 위치 쓰기)</text>
+<text x="48.0" y="386" font-size="16" font-weight="700" fill="#ffffff">8.40</text>
+<text x="469.9" y="376" font-size="18" font-weight="700">8.40</text>
+<text x="40" y="408" font-size="16" fill="#4b5563">틱 안을 나눠 재지 못했다. 표현 LOD 계산과 표현 전환은 없다.</text>
+<line x1="32" y1="430" x2="768" y2="430" stroke="#e5e7eb"/>
+<text x="40" y="458" font-size="16" fill="#4b5563">표현 쪽 Processor 넷: 카메라 거리 수집, 표현 LOD 계산, 표현 전환, ISM 위치 쌓기.</text>
+<text x="40" y="482" font-size="16" fill="#4b5563">회색은 처리 단계의 나머지 시간이다.</text>
+</svg>

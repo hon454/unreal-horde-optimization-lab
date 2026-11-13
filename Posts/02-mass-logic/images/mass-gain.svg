@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="590" viewBox="0 0 800 590" font-family="Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Segoe UI, sans-serif" font-size="16" fill="#111827">
+<rect x="0.5" y="0.5" width="799" height="589" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+<text x="32" y="46" font-size="22" font-weight="700">1단계 액터 군중과 2단계 Mass 로직</text>
+<text x="32" y="74" font-size="16" fill="#4b5563">오브 시점 카메라, 최종 측정, 세 번 잰 중앙값. 막대 길이는 값에 비례한다</text>
+<text x="32" y="118" font-size="18" font-weight="700">60fps를 지키는 최대 개체 수</text>
+<text x="32" y="142" font-size="16" fill="#4b5563">프레임 시간의 느린 쪽 5% 경계가 16.7ms 안에 드는 가장 큰 호드 총수</text>
+<text x="40" y="176" font-size="16">1단계 액터 군중</text>
+<rect x="40" y="184" width="21.4" height="30" rx="4" fill="#dc2626"/>
+<text x="71.4" y="206" font-size="20" font-weight="700" fill="#dc2626">766</text>
+<text x="40" y="244" font-size="16">2단계 Mass 로직</text>
+<rect x="40" y="252" width="547.5" height="30" rx="4" fill="#2563eb"/>
+<text x="597.5" y="274" font-size="20" font-weight="700" fill="#2563eb">19,554</text>
+<text x="40" y="308" font-size="18" font-weight="700">25.5배</text>
+<line x1="32" y1="332" x2="768" y2="332" stroke="#e5e7eb"/>
+<text x="32" y="370" font-size="18" font-weight="700">개체 하나당 게임 스레드 시간(µs)</text>
+<text x="32" y="394" font-size="16" fill="#4b5563">게임 스레드 시간 ÷ 호드 총수. 1단계는 호드 총수 1천, 2단계는 1만의 값</text>
+<text x="40" y="428" font-size="16">1단계 액터 군중</text>
+<rect x="40" y="436" width="529.4" height="30" rx="4" fill="#dc2626"/>
+<text x="579.4" y="458" font-size="20" font-weight="700" fill="#dc2626">17</text>
+<text x="40" y="496" font-size="16">2단계 Mass 로직</text>
+<rect x="40" y="504" width="19.4" height="30" rx="4" fill="#2563eb"/>
+<text x="69.4" y="526" font-size="20" font-weight="700" fill="#2563eb">0.624</text>
+<text x="40" y="560" font-size="18" font-weight="700">27분의 1</text>
+</svg>
