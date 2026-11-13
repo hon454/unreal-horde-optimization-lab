@@ -2,7 +2,7 @@
 <rect x="0.5" y="0.5" width="799" height="727" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
 <text x="32" y="46" font-size="22" font-weight="700">같은 2단계 화면을 만드는 두 방식</text>
 <text x="32" y="74" font-size="16" fill="#4b5563">개체의 데이터를 두는 곳과 그것을 도는 코드가 다르다. 이동·피해의 식과 ISM 설정은 같다</text>
-<text x="32" y="114" font-size="18" font-weight="700" fill="#9333ea">참고: 틱 없는 액터와 매니저 하나</text>
+<text x="32" y="114" font-size="18" font-weight="700" fill="#9333ea">매니저 방식: 틱 없는 액터와 매니저 하나</text>
 <text x="416" y="114" font-size="18" font-weight="700" fill="#2563eb">2단계: Mass</text>
 <rect x="32" y="132" width="352" height="94" rx="10" fill="#f8fafc" stroke="#e5e7eb"/>
 <rect x="32" y="132" width="6" height="94" rx="3" fill="#9333ea"/>

@@ -100,7 +100,7 @@
 
 `mass-summary`·`mass-draw-calls`·`mass-processors`·`mass-frame-vs-n` 넷은 [make-figures.py](make-figures.py)가 만든다(저장소 루트에서 `py -3 -I Posts/02-mass-logic/make-figures.py`). 측정값은 `summary.csv`와 `full-n-at-60fps.csv`에서 읽고 상수로 넣은 측정값은 없다. 스크립트는 끝에 계산값(배율, 개체당 시간, 기울기)을 출력한다. 폭 800 기준으로 글자는 16px 이상이고, 자기 흰 배경을 가진다. 색은 01번 글과 같다(1단계 빨강, 2단계 파랑, 16.7ms 호박색).
 
-`mass-gain`·`manager-diagram`·`manager-times`·`manager-gamethread` 넷은 [Scripts/plot-post02-manager.py](../../Scripts/plot-post02-manager.py)가 만든다(저장소 루트에서 `py -3 -I Scripts/plot-post02-manager.py`). 입력은 `Measurements/Full3/summary.csv`, `Docs/figures/full3/full-n-at-60fps.csv`, `Measurements/Mgr1/summary.csv`, `Measurements/MgrT1/timers.csv`이고 상수로 넣은 측정값은 없다. 스크립트는 끝에 계산값(차이, 비율, 처리 단계의 구성)을 출력한다. 반올림은 반올림-위로다(5.265 → 5.27). 매니저 방식은 보라, 한 스레드 2단계는 짙은 하늘색이다. 넷은 2026-11-14에 브라우저에서 그려 보았다.
+`mass-gain`·`manager-diagram`·`manager-times`·`manager-gamethread` 넷은 [Scripts/plot-post02-manager.py](../../Scripts/plot-post02-manager.py)가 만든다(저장소 루트에서 `py -3 -I Scripts/plot-post02-manager.py`). 입력은 `Measurements/Full3/summary.csv`, `Docs/figures/full3/full-n-at-60fps.csv`, `Measurements/Mgr1/summary.csv`, `Measurements/MgrT1/timers.csv`이고 상수로 넣은 측정값은 없다. 스크립트는 끝에 계산값(차이, 비율, 처리 단계의 구성)을 출력한다. 반올림은 반올림-위로다(5.265 → 5.27). 매니저 방식은 보라, 2단계는 파랑이다. 한 스레드 2단계는 그리지 않고 끝의 출력에만 낸다. 넷은 2026-11-14에 브라우저에서 그려 보았다.
 
 ## 트레이스 값
 
@@ -309,6 +309,7 @@
 
 ## 측정 기록의 변경
 
+- 2026-11-14: 본문의 매니저 절 셋을 "참고" 절 하나로 합치고 매니저 방식의 설명을 앞에 두었다. 한 스레드 2단계는 본문과 그림 둘(`manager-times`, `manager-gamethread`)에서 뺐다. 그 값은 이 기록의 표에 남긴다. 표에서 "(그림)"이라 적은 한 스레드 행은 이제 그림에 없다. 측정값은 바뀌지 않았다.
 - 2026-11-14: 매니저 방식 트레이스의 Insights 화면을 넣었다(코디네이터). 본문 캡션은 화면 값이다.
 - 2026-11-14: 참고 측정(매니저 방식)을 더했다. 사용자가 Mass가 번 몫과 액터의 틱을 없애서 번 몫을 가르는 측정을 정했기 때문이다. 최종 측정의 값은 그대로다. 본문 "한 문장으로"의 첫 문단과 셋째 글머리표를 참고 측정에 맞춰 고쳤다. 그림 넷(`mass-gain`, `manager-diagram`, `manager-times`, `manager-gamethread`)을 더했다.
 

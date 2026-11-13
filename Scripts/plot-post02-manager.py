@@ -99,7 +99,7 @@ def diagram():
     o = []
     title(o, "같은 2단계 화면을 만드는 두 방식", "개체의 데이터를 두는 곳과 그것을 도는 코드가 다르다. 이동·피해의 식과 ISM 설정은 같다")
     LX, RX, CW = 32, 416, 352
-    o.append(f'<text x="{LX}" y="114" font-size="18" font-weight="700" fill="{PURPLE}">참고: 틱 없는 액터와 매니저 하나</text>')
+    o.append(f'<text x="{LX}" y="114" font-size="18" font-weight="700" fill="{PURPLE}">매니저 방식: 틱 없는 액터와 매니저 하나</text>')
     o.append(f'<text x="{RX}" y="114" font-size="18" font-weight="700" fill="{BLUE}">2단계: Mass</text>')
 
     def box(x, y, head, lines, col, tag=None):
@@ -143,9 +143,10 @@ def diagram():
     write("manager-diagram.svg", svg(y + 50, o))
 
 
-CONDS = [("L2-manager", "틱 없는 액터와 매니저", PURPLE),
-         ("L2-mass", "2단계 Mass 로직", BLUE),
-         ("L2-massserial", "2단계, Processor를 한 스레드에", SKY)]
+CONDS = [("L2-manager", "매니저 방식", PURPLE),
+         ("L2-mass", "2단계 Mass 로직", BLUE)]
+# The one-thread run of stage 2 stays in measurements.md. The figures do not draw it.
+REPORT_CONDS = CONDS + [("L2-massserial", "2단계, Processor를 한 스레드에", SKY)]
 
 
 # ---------- 3. reference measurement: game thread and frame time, three conditions ----------
@@ -192,7 +193,7 @@ def times():
         o.append(f'<rect x="{X0}" y="{y - 14 + 26 * k}" width="18" height="18" rx="3" fill="{col}"/>')
         o.append(f'<text x="{X0 + 28}" y="{y + 26 * k}" font-size="16">{lab}</text>')
     y += 26 * len(CONDS) + 6
-    o.append(f'<text x="{X0}" y="{y}" font-size="16" fill="{SUB}">세 조건 모두 GPU가 가장 느리다. 프레임 시간의 차이는 세 번 잰 값의 흔들림보다 작다.</text>')
+    o.append(f'<text x="{X0}" y="{y}" font-size="16" fill="{SUB}">두 방식 모두 GPU가 가장 느리다. 프레임 시간의 차이는 세 번 잰 값의 흔들림보다 작다.</text>')
     write("manager-times.svg", svg(y + 22, o))
 
 
@@ -221,7 +222,7 @@ def trace_parts(n):
 def gamethread():
     o = []
     p = trace_parts(20000)
-    title(o, "게임 스레드가 군중을 갱신하는 데 쓴 시간", "호드 총수 2만, 오브 시점 카메라, 조건마다 트레이스 한 번. 프레임 평균(ms)")
+    title(o, "게임 스레드가 군중을 갱신하는 데 쓴 시간", "호드 총수 2만, 오브 시점 카메라, 방식마다 트레이스 한 번. 프레임 평균(ms)")
     X0, SC = 40, 600 / 12.0
     y = 108
 
@@ -243,10 +244,7 @@ def gamethread():
                                ("ISM 위치를 컴포넌트에 올린다", m["end"], PINK)], m["total"])
     o.append(f'<text x="{X0}" y="{y - 8}" font-size="16" fill="{SUB}">로직 Processor는 워커 스레드에서 돌아 이 막대에 없다.</text>')
     y += 22
-    y = bar(y, "2단계, Processor를 한 스레드에", [("로직 Processor", s["logic"], TEAL), ("표현 쪽", s["rep"], BLUE), (None, s["other"], GRAY),
-                                         ("ISM 위치를 컴포넌트에 올린다", s["end"], PINK)], s["total"])
-    y += 4
-    y = bar(y, "틱 없는 액터와 매니저", [("매니저의 틱 하나(로직과 ISM 위치 쓰기)", p["manager"]["tick"], PURPLE)], p["manager"]["tick"])
+    y = bar(y, "매니저 방식", [("매니저의 틱 하나(로직과 ISM 위치 쓰기)", p["manager"]["tick"], PURPLE)], p["manager"]["tick"])
     o.append(f'<text x="{X0}" y="{y - 8}" font-size="16" fill="{SUB}">틱 안을 나눠 재지 못했다. 표현 LOD 계산과 표현 전환은 없다.</text>')
     y += 14
     o.append(f'<line x1="32" y1="{y}" x2="{W - 32}" y2="{y}" stroke="{LINE}"/>')
@@ -259,12 +257,12 @@ def gamethread():
 def report(ratios, p):
     print(f"n60 ratio {ratios[0]:.2f}, per-entity ratio {ratios[1]:.2f}")
     for n in (10000, 20000):
-        g = {v: float(MGR[(v, n)]["game_p50_ms"]) for v, _, _ in CONDS}
-        f = {v: float(MGR[(v, n)]["frame_p50_ms"]) for v, _, _ in CONDS}
+        g = {v: float(MGR[(v, n)]["game_p50_ms"]) for v, _, _ in REPORT_CONDS}
+        f = {v: float(MGR[(v, n)]["frame_p50_ms"]) for v, _, _ in REPORT_CONDS}
         print(n, "game manager-mass", round(g["L2-manager"] - g["L2-mass"], 3), "serial-mass", round(g["L2-massserial"] - g["L2-mass"], 3),
               "frame spread", round(max(f.values()) - min(f.values()), 3),
               "per-entity us manager/mass", round(g["L2-manager"] / n * 1000, 4), round(g["L2-mass"] / n * 1000, 4),
-              "bottleneck", [MGR[(v, n)]["bottleneck"] for v, _, _ in CONDS])
+              "bottleneck", [MGR[(v, n)]["bottleneck"] for v, _, _ in REPORT_CONDS])
         q = trace_parts(n)
         d_tick = q["manager"]["tick"] - q["mass"]["total"]
         d_eng = q["manager"]["tick_engine"] - q["mass"]["tick_engine"]
