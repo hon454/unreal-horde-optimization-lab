@@ -30,8 +30,6 @@
 
 코디네이터는 커밋한 뒤 main을 푸시한다([AGENTS.md](../AGENTS.md) "진행 방식").
 
-2026-11-13 검토에서 글과 README의 틀린 서술을 고쳤다. 고친 사실은 [engine-notes.md](Reference/engine-notes.md) 28절에 있다.
-
 사이트 주소는 <https://hon454.github.io/unreal-horde-optimization-lab/>다. 글이나 CSV가 바뀌면 `py -3 -I Scripts/build-site.py`를 다시 돌리고 `gh-pages` 브랜치에 다시 올린다.
 
 끝난 묶음의 러너는 `Scripts/Archive/`에 있다. 그 자리에서는 돌지 않는다([Scripts/README.md](../Scripts/README.md)).
