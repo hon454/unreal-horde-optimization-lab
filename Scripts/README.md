@@ -16,6 +16,7 @@
 | `run-pool.ps1`, `pool-timeline.py` | 엔티티 풀 묶음(16분 실행 두 번)과 1분 구간 정리 |
 | `run-budget.ps1`, `check-budget.py`, `plot-budget.py` | 참고 묶음 `Budget1`(예산 값 6 × 호드 2 × 3회)의 러너, 메타데이터 대조, 그림(`Docs/figures/budget1/`) |
 | `run-mgr.ps1`, `check-mgr.py` | 참고 묶음 `Mgr1`(변형 `manager`, 2단계, 2단계 직렬 × 호드 1만·2만 × 3회)의 러너와 메타데이터 대조 |
+| `mgr-trace-table.py` | 참고 묶음 `MgrT1`(`run-mgr.ps1 -Trace`)의 트레이스 내보내기 CSV → `Measurements/MgrT1/timers.csv`(스레드별 타이머, 프레임당 ms) |
 | `capture-full.ps1` | 단계별 화면 촬영(움직이는 WebP). 측정이 끝난 뒤 따로 돈다 |
 | `summarize.py` | 프레임 CSV → `Measurements/<묶음>/runs.csv`, `summary.csv` |
 | `spikes.py` | 묶음의 주기 스파이크 검사 |

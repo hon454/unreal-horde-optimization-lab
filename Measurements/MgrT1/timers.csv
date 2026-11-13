@@ -1,0 +1,1505 @@
+cond,n,thread,name,calls_per_frame,incl_ms,excl_ms
+manager,10000,GT,Frame,3.0,29.5759,3.1243
+manager,10000,GT,ExponentialHeightFog,1.0,0.0229,0.0229
+manager,10000,GT,NiagaraStateless,4.0,0.0268,0.0268
+manager,10000,GT,RenderTranslucency,1.0,0.0504,0.0504
+manager,10000,GT,PostProcessing,2.0,1.8066,0.1819
+manager,10000,GT,TemporalSuperResolution(sg.AntiAliasingQuality=%d%s) %dx%d -> %dx%d,2.0,1.5317,1.5317
+manager,10000,GT,MotionBlur,1.0,0.093,0.093
+manager,10000,GT,DistanceFields,2.0,0.76,0.206
+manager,10000,GT,GlobalDistanceFieldUpdate,2.0,0.554,0.554
+manager,10000,GT,GPUSceneUpdate,2.0,0.0314,0.0314
+manager,10000,GT,FXSystemPreRender,2.0,2.0964,2.0964
+manager,10000,GT,BuildRenderingCommandsDeferred(Culling=%s),2.0,0.0386,0.0386
+manager,10000,GT,PrePass %s %s,1.0,0.0299,0.0299
+manager,10000,GT,RenderVelocities(%s),1.146,1.4603,1.4603
+manager,10000,GT,HZB,2.0,0.0327,0.0279
+manager,10000,GT,ComputeLightGrid,1.0,0.0261,0.0261
+manager,10000,GT,SkyAtmosphereLUTs,1.0,0.0434,0.0434
+manager,10000,GT,CaptureConvolveSkyEnvMap,1.626,0.1136,0.1136
+manager,10000,GT,LumenSceneUpdate: %u card captures %.3fM texels,2.0,0.0992,0.0958
+manager,10000,GT,LumenScreenProbeGather,2.0,3.6335,3.6335
+manager,10000,GT,BasePass,1.0,1.3922,1.3922
+manager,10000,GT,StochasticLighting,1.0,0.091,0.091
+manager,10000,GT,VirtualShadowMapMarkPages,1.0,0.0964,0.0964
+manager,10000,GT,ShadowDepths,1.0,2.5322,2.508
+manager,10000,GT,LightCompositionTasks_PreLighting,1.0,0.0236,0.0236
+manager,10000,GT,RenderDeferredLighting,2.0,1.4149,0.1364
+manager,10000,GT,LumenReflections,1.0,0.8905,0.8905
+manager,10000,GT,Lights,1.0,0.3684,0.0498
+manager,10000,GT,ShadowProjectionOnOpaque,1.0,0.3186,0.3186
+manager,10000,GT,LumenSceneLighting%s,1.0,0.7312,0.7312
+manager,10000,GT,FEngineLoop::Tick,1.0,9.8636,0.0034
+manager,10000,GT,Tick_Engine,1.0,5.244,0.017
+manager,10000,GT,FViewport_Draw,1.0,0.7896,0.1139
+manager,10000,GT,BeginRenderingViewFamily,1.0,0.6706,0.0346
+manager,10000,GT,SendAllEndOfFrameUpdates,1.0,0.6306,0.0032
+manager,10000,GT,UWorld_SendAllEndOfFrameUpdates,1.0,0.6273,0.0064
+manager,10000,GT,ParallelFor,1.001,0.6191,0.0045
+manager,10000,GT,EndOfFrameUpdate,1.0,0.27,0.0001
+manager,10000,GT,DeferredRenderUpdates,1.012,0.2699,0.1053
+manager,10000,GT,UInstancedStaticMeshComponent::CalcBoundsImpl,1.001,0.1609,0.1609
+manager,10000,GT,ParallelFor.Wait,0.653,0.3394,0.3394
+manager,10000,GT,FStreamingManagerCollection::UpdateResourceStreaming,1.0,0.0313,0.0155
+manager,10000,GT,FWaitingQueue_Unpark_SignalWaitingThread,6.534,0.0231,0.0231
+manager,10000,GT,Slate::Tick (Platform and Input),1.0,0.1036,0.0004
+manager,10000,GT,Slate::TickPlatform,1.0,0.1032,0.1006
+manager,10000,GT,Slate::Tick (Time and Widgets),1.0,0.084,0.0031
+manager,10000,GT,Slate::DrawWindows,1.0,0.0808,0.0116
+manager,10000,GT,Slate::DrawWindow,1.0,0.0467,0.0134
+manager,10000,GT,Slate_PaintSlowPath,1.0,0.0333,0.0129
+manager,10000,GT,SViewport_OnPaint,1.0,0.0204,0.0108
+manager,10000,GT,Sync_RenderingThread,1.0,4.2245,0.0034
+manager,10000,GT,GameThreadWaitForTask,0.999,4.2187,4.2187
+manager,10000,GT,UpdateCoreCsvStats_BeginFrame,1.0,0.0876,0.0876
+manager,10000,GT,FEngineLoop_PumpMessages,1.0,0.0202,0.0011
+manager,10000,GT,UWorld_Tick,1.0,4.3923,0.1004
+manager,10000,GT,TickCompletionEvents,6.999,4.2658,0.0032
+manager,10000,GT,ProcessUntilTasksComplete,6.999,4.2626,0.1201
+manager,10000,GT,FMassProcessingPhase::ExecuteTick EMassProcessingPhase::PrePhysics,1.0,0.0541,0.0129
+manager,10000,GT,Mass FProcessingQueue::Execute,1.0,0.0375,0.0053
+manager,10000,GT,MassProcessingQueue Main-Thread Runner Task,1.0,0.0294,0.015
+manager,10000,GT,LabCrowdManager Tick,1.0,3.9953,3.9943
+manager,10000,GT,WaitForTasks,1.989,0.0627,0.0627
+manager,10000,RT,Frame,2.0,19.7163,3.1089
+manager,10000,RT,ExponentialHeightFog,1.0,0.0229,0.0229
+manager,10000,RT,NiagaraStateless,4.0,0.0268,0.0268
+manager,10000,RT,RenderTranslucency,3.145,0.0675,0.0664
+manager,10000,RT,PostProcessing,3.0,1.9058,0.2711
+manager,10000,RT,TemporalSuperResolution(sg.AntiAliasingQuality=%d%s) %dx%d -> %dx%d,2.0,1.5317,1.5317
+manager,10000,RT,MotionBlur,1.0,0.093,0.093
+manager,10000,RT,DistanceFields,2.0,0.76,0.206
+manager,10000,RT,GlobalDistanceFieldUpdate,2.0,0.554,0.554
+manager,10000,RT,GPUSceneUpdate,2.0,0.0314,0.0314
+manager,10000,RT,FXSystemPreRender,2.0,2.0964,2.0964
+manager,10000,RT,BuildRenderingCommandsDeferred(Culling=%s),2.0,0.0386,0.0386
+manager,10000,RT,PrePass %s %s,1.0,0.0299,0.0299
+manager,10000,RT,RenderVelocities(%s),1.146,1.4603,1.4603
+manager,10000,RT,HZB,2.0,0.0327,0.0279
+manager,10000,RT,ComputeLightGrid,1.0,0.0261,0.0261
+manager,10000,RT,SkyAtmosphereLUTs,1.0,0.0434,0.0434
+manager,10000,RT,CaptureConvolveSkyEnvMap,1.626,0.1136,0.1136
+manager,10000,RT,LumenSceneUpdate: %u card captures %.3fM texels,2.0,0.0992,0.0958
+manager,10000,RT,LumenScreenProbeGather,2.0,3.6335,3.6335
+manager,10000,RT,BasePass,1.0,1.3922,1.3922
+manager,10000,RT,StochasticLighting,1.0,0.091,0.091
+manager,10000,RT,VirtualShadowMapMarkPages,1.0,0.0964,0.0964
+manager,10000,RT,ShadowDepths,1.0,2.5322,2.508
+manager,10000,RT,LightCompositionTasks_PreLighting,1.0,0.0236,0.0236
+manager,10000,RT,RenderDeferredLighting,2.0,1.4149,0.1364
+manager,10000,RT,LumenReflections,1.0,0.8905,0.8905
+manager,10000,RT,Lights,1.0,0.3684,0.0498
+manager,10000,RT,ShadowProjectionOnOpaque,1.0,0.3186,0.3186
+manager,10000,RT,LumenSceneLighting%s,1.0,0.7312,0.7312
+manager,10000,RT,FDeferredShadingSceneRenderer_Render,1.0,9.0042,0.2912
+manager,10000,RT,FDeferredShadingSceneRenderer_InitViews,1.0,3.8927,0.0547
+manager,10000,RT,ProcessVisibilityTasks,1.0,3.8253,0.0025
+manager,10000,RT,WaitForVisibilityTasks,1.0,3.8178,0.0014
+manager,10000,RT,WaitUntilTasksComplete,6.002,4.3316,0.0074
+manager,10000,RT,WaitForTasks,2.001,4.324,4.324
+manager,10000,RT,RHICmdList_Submit,41.015,0.1501,0.1191
+manager,10000,RT,FinishDynamicMeshElements,1.0,0.0946,0.0131
+manager,10000,RT,FTaskBase::WaitImpl_StateChangeEvent_WaitFor,3.387,0.2581,0.2581
+manager,10000,RT,FWaitingQueue_Unpark_SignalWaitingThread,36.227,0.1219,0.1219
+manager,10000,RT,FGPUScene_UploadDynamicPrimitiveShaderDataForView,2.0,0.0354,0.021
+manager,10000,RT,UpdateGPUScene,2.925,0.0262,0.0138
+manager,10000,RT,CreateCommandList,8.022,0.0373,0.0081
+manager,10000,RT,Tasks::Wait,7.997,0.1488,0.0088
+manager,10000,RT,FInstanceCullingManager::BeginDeferredCulling,2.0,0.0502,0.0499
+manager,10000,RT,FSceneRenderer::FinishInitDynamicShadows,1.0,0.0485,0.0005
+manager,10000,RT,FShadowSceneRenderer_DispatchVirtualShadowMapViewAndCullingSetup,1.0,0.0465,0.0396
+manager,10000,RT,AllocateAndCaptureFrameSkyEnvMap,1.0,0.0312,0.0257
+manager,10000,RT,FDeferredShadingSceneRenderer::UpdateLumenScene,1.0,0.0561,0.0523
+manager,10000,RT,FDeferredShadingSceneRenderer::RenderLumenSceneLighting,1.0,0.0442,0.0001
+manager,10000,RT,RenderLumenSceneLighting,1.0,0.0441,0.0332
+manager,10000,RT,DispatchAsyncLumenIndirectLightingWork,1.0,0.1279,0.1279
+manager,10000,RT,FVirtualShadowMapArray_BeginMarkPages,1.0,0.0238,0.0174
+manager,10000,RT,FSceneRenderer::RenderShadowDepthMaps,1.0,0.0645,0.0001
+manager,10000,RT,FSceneRenderer_RenderShadowDepthMaps,1.0,0.0645,0.0026
+manager,10000,RT,FShadowSceneRenderer::RenderVirtualShadowMaps,1.0,0.0248,0.0039
+manager,10000,RT,FVirtualShadowMapArray::RenderVirtualShadowMapsNonNanite,1.0,0.0208,0.0159
+manager,10000,RT,RenderLighting,2.0,0.0787,0.0193
+manager,10000,RT,FDeferredShadingSceneRenderer::RenderDiffuseIndirectAndAmbientOcclusion,2.0,0.038,0.038
+manager,10000,RT,FDeferredShadingSceneRenderer_RenderLights,1.0,0.0214,0.0137
+manager,10000,RT,FRDGBuilder::CollectResources,2.0,0.2684,0.0881
+manager,10000,RT,FRDGBuilder::AllocateTransientResources,2.0,0.1584,0.1397
+manager,10000,RT,FRDGBuilder::ExecutePasses,2.0,0.1252,0.0694
+manager,10000,RT,ParallelFor,2.0,1.4391,1.4391
+manager,10000,RT,LaunchVisibilityTasks,1.0,0.5403,0.0154
+manager,10000,RT,FSceneRenderer::PrepareDistanceFieldScene,1.0,3.3031,1.8418
+manager,10000,WK,Frame,2.0,19.7163,3.1089
+manager,10000,WK,ExponentialHeightFog,1.0,0.0229,0.0229
+manager,10000,WK,NiagaraStateless,4.0,0.0268,0.0268
+manager,10000,WK,RenderTranslucency,1.0,0.0504,0.0504
+manager,10000,WK,PostProcessing,2.0,1.8066,0.1819
+manager,10000,WK,TemporalSuperResolution(sg.AntiAliasingQuality=%d%s) %dx%d -> %dx%d,2.0,1.5317,1.5317
+manager,10000,WK,MotionBlur,1.0,0.093,0.093
+manager,10000,WK,DistanceFields,2.0,0.76,0.206
+manager,10000,WK,GlobalDistanceFieldUpdate,2.0,0.554,0.554
+manager,10000,WK,GPUSceneUpdate,2.0,0.0314,0.0314
+manager,10000,WK,FXSystemPreRender,2.0,2.0964,2.0964
+manager,10000,WK,BuildRenderingCommandsDeferred(Culling=%s),2.0,0.0386,0.0386
+manager,10000,WK,PrePass %s %s,1.0,0.0299,0.0299
+manager,10000,WK,RenderVelocities(%s),1.146,1.4603,1.4603
+manager,10000,WK,HZB,2.0,0.0327,0.0279
+manager,10000,WK,ComputeLightGrid,1.0,0.0261,0.0261
+manager,10000,WK,SkyAtmosphereLUTs,1.0,0.0434,0.0434
+manager,10000,WK,CaptureConvolveSkyEnvMap,1.626,0.1136,0.1136
+manager,10000,WK,LumenSceneUpdate: %u card captures %.3fM texels,2.0,0.0992,0.0958
+manager,10000,WK,LumenScreenProbeGather,2.0,3.6335,3.6335
+manager,10000,WK,BasePass,1.0,1.3922,1.3922
+manager,10000,WK,StochasticLighting,1.0,0.091,0.091
+manager,10000,WK,VirtualShadowMapMarkPages,1.0,0.0964,0.0964
+manager,10000,WK,ShadowDepths,1.0,2.5322,2.508
+manager,10000,WK,LightCompositionTasks_PreLighting,1.0,0.0236,0.0236
+manager,10000,WK,RenderDeferredLighting,2.0,1.4149,0.1364
+manager,10000,WK,LumenReflections,1.0,0.8905,0.8905
+manager,10000,WK,Lights,1.0,0.3684,0.0498
+manager,10000,WK,ShadowProjectionOnOpaque,1.0,0.3186,0.3186
+manager,10000,WK,LumenSceneLighting%s,1.0,0.7312,0.7312
+manager,10000,WK,TaskWorkerIsLookingForWork,253.22,3.5561,3.5561
+manager,10000,WK,ExecuteForegroundTask,238.672,21.6946,0.7631
+manager,10000,WK,FWaitingQueue_Unpark_SignalWaitingThread,77.037,0.2919,0.2919
+manager,10000,WK,GPUScene Upload Instances Task,19.319,1.4075,1.4075
+manager,10000,WK,MeshDrawCommandPassSetupTask,8.144,0.1186,0.1186
+manager,10000,WK,RHI_Dispatch,103.134,0.1919,0.1669
+manager,10000,WK,RHI_CloseChain,41.197,0.6746,0.6746
+manager,10000,WK,FRDGBuilder::CreatePassBarriers,8.525,0.1233,0.1233
+manager,10000,WK,ParallelExecute (Async),18.666,0.7542,0.7383
+manager,10000,WK,SceneCulling_Update_Post,1.0,0.5975,0.0123
+manager,10000,WK,SceneCulling_Post_UpdateInstances,1.0,0.5623,0.3045
+manager,10000,WK,FTaskBase::WaitImpl_StateChangeEvent_WaitFor,2.02,7.431,0.0013
+manager,10000,WK,Oversubscription,18.711,7.4744,7.4594
+manager,10000,WK,BuildHierarchy_FinalizeGrid,1.0,0.0228,0.003
+manager,10000,WK,RHI_Translate,56.467,6.0238,6.0041
+manager,10000,WK,DrawVisibleMeshCommandsAnyThreadTask,6.145,0.042,0.0419
+manager,10000,WK,VectorVM_Experimental,6.007,0.0714,0.0714
+manager,10000,WK,EndOfFrameUpdate,4.2,0.4855,0.0032
+manager,10000,WK,DeferredRenderUpdates,7.791,0.4823,0.2227
+manager,10000,WK,ExecuteBackgroundTask,3.0,0.0438,0.0406
+manager,10000,WK,GatherDynamicMeshElements,3.999,0.1329,0.0012
+manager,10000,WK,DynamicPrimitive,6.703,0.1317,0.0041
+manager,10000,WK,FD3D12UploadHeapAllocator::AllocUploadResource,112.841,0.035,0.0305
+manager,10000,WK,UpdateGPUScene_Primitives,1.925,0.1982,0.0114
+manager,10000,WK,ParallelFor,7.945,0.2641,0.0513
+manager,10000,WK,ParallelFor.Wait,2.091,0.026,0.0006
+manager,10000,WK,Instances,1.0,0.162,0.0003
+manager,10000,WK,SetupParallelExecute,1.0,0.0267,0.0267
+manager,10000,WK,FRDGBuilder::AllocatePooledBuffers,1.0,0.0252,0.0252
+manager,10000,WK,ParallelExecute (Await),4.998,0.045,0.045
+manager,10000,WK,AllocatePlacedBuffer,1.608,0.1838,0.0006
+manager,10000,WK,D3D12RHI::CreateRHIBuffer,6.921,0.1889,0.0039
+manager,10000,WK,D3D12RHI::AllocateBuffer,6.921,0.185,0.1823
+manager,10000,WK,AllocatePlacedTexture,1.353,0.2463,0.0004
+manager,10000,WK,D3D12RHI::CreateTextureInternal,1.353,0.2459,0.2386
+manager,10000,WK,CompileBarriers,1.0,0.0653,0.0653
+manager,10000,WK,FRDGBuilder::CollectBarriers,1.0,0.0883,0.0883
+manager,10000,WK,ParallelMdcDispatchPassSetup,8.144,0.0212,0.012
+manager,10000,WK,ParallelMdcDispatchDraw,7.144,0.0328,0.0202
+manager,10000,WK,GatherShadowDynamicMeshElements,1.0,0.0466,0.0086
+manager,10000,WK,NS_TeslaCoil,1.0,0.0758,0.0709
+manager,10000,WK,FRDGBuilder::CreateViews,1.0,0.0398,0.0398
+manager,10000,WK,FRDGBuilder::CreateUniformBuffers,0.998,0.0556,0.0556
+manager,10000,WK,MassProcessingQueue Async Runner Task,1.0,0.0273,0.0039
+manager,10000,WK,OcclusionCullPipe,1.0,7.1912,0.0084
+manager,10000,WK,GPUBound_WaitingForGPUForOcclusionQueries_SeeGPUTrack,1.0,7.1774,0.0004
+manager,10000,WK,RHIGetRenderQueryResult_GPU_Wait,4.629,7.1778,0.0018
+manager,10000,WK,SyncPoint_Wait,1.0,7.176,0.001
+manager,10000,WK,FTaskBase::WaitWithNamedThreadsSupport,1.0,7.175,0.0014
+manager,10000,WK,FRDGAllocator::ReleaseAll,5.999,0.0419,0.0394
+manager,10000,WK,FGatherShadowPrimitivesPrepareTask,1.0,0.074,0.0051
+manager,10000,WK,CreateDynamicShadows,1.0,0.0639,0.0639
+manager,10000,WK,NS_Boundary_Cylinder,0.925,0.0364,0.0341
+manager,10000,WK,FSceneRenderer::SetupMeshPass,1.0,0.0338,0.0161
+manager,10000,WK,EndOfPipeTask,2.049,0.3247,0.0008
+manager,10000,WK,EndOfPipeTask_RHIProcessDeleteQueue,1.049,0.0382,0.0382
+manager,10000,WK,EndOfPipeTask_RHIEndFrame,1.0,0.2857,0.0006
+manager,10000,WK,UE::RHI::GPUProfiler::ProcessEvents,1.0,0.2851,0.2851
+manager,10000,WK,FSceneRenderProcessor::DeleteSceneRenderers,1.0,0.0414,0.0414
+manager,10000,WK,FISMCInstanceDataSceneProxy_Update,2.0,0.3967,0.3967
+manager,10000,WK,FRDGBuilder::SetupDispatchPassExecute,1.0,0.0568,0.0306
+manager,10000,WK,FRDGBuilder::SubmitBufferUploads,1.0,0.1264,0.0039
+manager,10000,WK,Allocate,1.0,0.0353,0.0347
+manager,10000,WK,Upload_Multiple,1.0,0.0872,0.0684
+manager,10000,WK,FRDGBuilder::FinalizeResources,1.0,0.1582,0.0017
+manager,10000,WK,Textures,1.0,0.0597,0.0597
+manager,10000,WK,Buffers,1.0,0.0505,0.0505
+manager,10000,WK,FRDGBuilder::ProcessAsyncSetupQueue,2.659,0.4637,0.4637
+manager,10000,WK,GatherDynamicMeshElementsPipe,1.0,0.0215,0.0103
+manager,10000,WK,FMallocBinnedCommonUtils::FlushCurrentThreadCache,0.006,0.036,0.0
+manager,10000,WK,FMallocBinnedCommonUtils::TrimThreadFreeBlockLists,0.006,0.036,0.036
+manager,10000,WK,UInstancedStaticMeshComponent::CalcBoundsImpl,0.999,0.2563,0.2563
+manager,20000,GT,Frame,3.0,43.1243,5.0466
+manager,20000,GT,BasePass,1.0,2.4946,2.4946
+manager,20000,GT,StochasticLighting,1.0,0.0962,0.0962
+manager,20000,GT,VirtualShadowMapMarkPages,1.0,0.1087,0.1087
+manager,20000,GT,ShadowDepths,1.0,4.2932,4.27
+manager,20000,GT,BuildRenderingCommandsDeferred(Culling=%s),2.0,0.0411,0.0411
+manager,20000,GT,RenderDeferredLighting,2.0,1.0298,0.1424
+manager,20000,GT,LumenReflections,1.0,0.5214,0.5214
+manager,20000,GT,Lights,1.0,0.3458,0.045
+manager,20000,GT,ShadowProjectionOnOpaque,1.0,0.3009,0.3009
+manager,20000,GT,FilterTranslucentVolume %dx%dx%d Cascades:%d,1.0,0.0201,0.0201
+manager,20000,GT,RenderVelocities(%s),1.144,2.7605,2.7605
+manager,20000,GT,ExponentialHeightFog,1.0,0.0234,0.0234
+manager,20000,GT,NiagaraStateless,3.999,0.0292,0.0292
+manager,20000,GT,RenderTranslucency,1.0,0.0508,0.0508
+manager,20000,GT,PostProcessing,2.0,2.1549,0.1838
+manager,20000,GT,TemporalSuperResolution(sg.AntiAliasingQuality=%d%s) %dx%d -> %dx%d,2.0,1.8753,1.8753
+manager,20000,GT,MotionBlur,1.0,0.0958,0.0958
+manager,20000,GT,DistanceFields,1.999,1.3543,0.3767
+manager,20000,GT,GlobalDistanceFieldUpdate,1.999,0.9776,0.9776
+manager,20000,GT,GPUSceneUpdate,1.999,0.0309,0.0309
+manager,20000,GT,FXSystemPreRender,1.999,3.0014,3.0014
+manager,20000,GT,PrePass %s %s,1.0,0.0312,0.0312
+manager,20000,GT,HZB,1.999,0.0329,0.0281
+manager,20000,GT,ComputeLightGrid,1.0,0.0276,0.0276
+manager,20000,GT,SkyAtmosphereLUTs,1.0,0.0405,0.0405
+manager,20000,GT,CaptureConvolveSkyEnvMap,1.625,0.1096,0.1096
+manager,20000,GT,LumenSceneUpdate: %u card captures %.3fM texels,1.999,0.0999,0.0962
+manager,20000,GT,LumenScreenProbeGather,2.0,5.0862,5.0862
+manager,20000,GT,LumenSceneLighting%s,1.0,0.7451,0.7451
+manager,20000,GT,FEngineLoop::Tick,1.0,14.3799,0.0038
+manager,20000,GT,Tick_Engine,1.0,10.2394,0.02
+manager,20000,GT,UWorld_Tick,1.0,8.855,0.1157
+manager,20000,GT,TickCompletionEvents,6.998,8.7041,0.0039
+manager,20000,GT,ProcessUntilTasksComplete,6.998,8.7002,0.1396
+manager,20000,GT,LabCrowdManager Tick,1.0,8.3984,8.3961
+manager,20000,GT,FWaitingQueue_Unpark_SignalWaitingThread,6.964,0.0233,0.0233
+manager,20000,GT,WaitForTasks,1.985,0.0697,0.0697
+manager,20000,GT,FViewport_Draw,1.0,1.3205,0.1206
+manager,20000,GT,BeginRenderingViewFamily,1.0,1.195,0.0343
+manager,20000,GT,SendAllEndOfFrameUpdates,1.0,1.1555,0.0029
+manager,20000,GT,UWorld_SendAllEndOfFrameUpdates,1.0,1.1526,0.0062
+manager,20000,GT,ParallelFor,1.001,1.1446,0.005
+manager,20000,GT,EndOfFrameUpdate,1.0,0.4948,0.0001
+manager,20000,GT,DeferredRenderUpdates,1.004,0.4947,0.1957
+manager,20000,GT,UInstancedStaticMeshComponent::CalcBoundsImpl,0.997,0.2951,0.2951
+manager,20000,GT,ParallelFor.Wait,0.654,0.6396,0.6396
+manager,20000,GT,FStreamingManagerCollection::UpdateResourceStreaming,1.0,0.0285,0.0141
+manager,20000,GT,Slate::Tick (Platform and Input),1.0,0.0956,0.0004
+manager,20000,GT,Slate::TickPlatform,1.0,0.0952,0.0927
+manager,20000,GT,Slate::Tick (Time and Widgets),1.0,0.0798,0.0031
+manager,20000,GT,Slate::DrawWindows,1.0,0.0766,0.011
+manager,20000,GT,Slate::DrawWindow,1.0,0.0432,0.0113
+manager,20000,GT,Slate_PaintSlowPath,1.0,0.0319,0.0121
+manager,20000,GT,Sync_RenderingThread,1.0,3.7424,0.0038
+manager,20000,GT,GameThreadWaitForTask,0.984,3.7365,3.7365
+manager,20000,GT,UpdateCoreCsvStats_BeginFrame,1.0,0.0886,0.0886
+manager,20000,GT,FEngineLoop_PumpMessages,1.0,0.0285,0.001
+manager,20000,GT,WinPumpMessages,1.0,0.0259,0.0259
+manager,20000,GT,FMassProcessingPhase::ExecuteTick EMassProcessingPhase::PrePhysics,1.0,0.0569,0.0141
+manager,20000,GT,Mass FProcessingQueue::Execute,1.0,0.0389,0.0059
+manager,20000,GT,MassProcessingQueue Main-Thread Runner Task,1.0,0.0301,0.0149
+manager,20000,RT,Frame,2.0,28.7488,5.0304
+manager,20000,RT,BasePass,1.0,2.4946,2.4946
+manager,20000,RT,StochasticLighting,1.0,0.0962,0.0962
+manager,20000,RT,VirtualShadowMapMarkPages,1.0,0.1087,0.1087
+manager,20000,RT,ShadowDepths,1.0,4.2932,4.27
+manager,20000,RT,BuildRenderingCommandsDeferred(Culling=%s),2.0,0.0411,0.0411
+manager,20000,RT,RenderDeferredLighting,2.0,1.0298,0.1424
+manager,20000,RT,LumenReflections,1.0,0.5214,0.5214
+manager,20000,RT,Lights,1.0,0.3458,0.045
+manager,20000,RT,ShadowProjectionOnOpaque,1.0,0.3009,0.3009
+manager,20000,RT,FilterTranslucentVolume %dx%dx%d Cascades:%d,1.0,0.0201,0.0201
+manager,20000,RT,RenderVelocities(%s),1.144,2.7605,2.7605
+manager,20000,RT,ExponentialHeightFog,1.0,0.0234,0.0234
+manager,20000,RT,NiagaraStateless,3.999,0.0292,0.0292
+manager,20000,RT,RenderTranslucency,3.143,0.0689,0.0678
+manager,20000,RT,PostProcessing,2.999,2.2584,0.2774
+manager,20000,RT,TemporalSuperResolution(sg.AntiAliasingQuality=%d%s) %dx%d -> %dx%d,2.0,1.8753,1.8753
+manager,20000,RT,MotionBlur,1.0,0.0958,0.0958
+manager,20000,RT,DistanceFields,1.999,1.3543,0.3767
+manager,20000,RT,GlobalDistanceFieldUpdate,1.999,0.9776,0.9776
+manager,20000,RT,GPUSceneUpdate,1.999,0.0309,0.0309
+manager,20000,RT,FXSystemPreRender,1.999,3.0014,3.0014
+manager,20000,RT,PrePass %s %s,1.0,0.0312,0.0312
+manager,20000,RT,HZB,1.999,0.0329,0.0281
+manager,20000,RT,ComputeLightGrid,1.0,0.0276,0.0276
+manager,20000,RT,SkyAtmosphereLUTs,1.0,0.0405,0.0405
+manager,20000,RT,CaptureConvolveSkyEnvMap,1.625,0.1096,0.1096
+manager,20000,RT,LumenSceneUpdate: %u card captures %.3fM texels,1.999,0.0999,0.0962
+manager,20000,RT,LumenScreenProbeGather,2.0,5.0862,5.0862
+manager,20000,RT,LumenSceneLighting%s,1.0,0.7451,0.7451
+manager,20000,RT,FDeferredShadingSceneRenderer_Render,1.0,13.4769,0.338
+manager,20000,RT,LaunchVisibilityTasks,1.0,0.5702,0.0165
+manager,20000,RT,RHICmdList_Submit,40.944,0.1592,0.1263
+manager,20000,RT,WaitUntilTasksComplete,5.988,5.322,0.008
+manager,20000,RT,WaitForTasks,2.026,5.3293,5.3293
+manager,20000,RT,FWaitingQueue_Unpark_SignalWaitingThread,37.127,0.127,0.127
+manager,20000,RT,CreateCommandList,7.962,0.0412,0.009
+manager,20000,RT,Tasks::Wait,7.997,0.1351,0.0096
+manager,20000,RT,UpdateGPUScene,2.714,0.0315,0.0165
+manager,20000,RT,FSceneRenderer::PrepareDistanceFieldScene,1.0,6.5991,4.2253
+manager,20000,RT,ParallelFor,2.0,2.3328,2.3328
+manager,20000,RT,FDeferredShadingSceneRenderer_InitViews,1.0,4.8772,0.0733
+manager,20000,RT,ProcessVisibilityTasks,1.0,4.788,0.0026
+manager,20000,RT,WaitForVisibilityTasks,1.0,4.7795,0.0013
+manager,20000,RT,FinishDynamicMeshElements,1.0,0.1049,0.0152
+manager,20000,RT,FTaskBase::WaitImpl_StateChangeEvent_WaitFor,3.414,0.2766,0.2766
+manager,20000,RT,FGPUScene_UploadDynamicPrimitiveShaderDataForView,1.999,0.0489,0.0311
+manager,20000,RT,FSkinningSceneExtension_FRenderer_UpdateViewData,1.0,0.0345,0.0085
+manager,20000,RT,SceneCulling_Update_FinalizeAndClear,1.0,0.026,0.026
+manager,20000,RT,FInstanceCullingManager::BeginDeferredCulling,1.999,0.076,0.0754
+manager,20000,RT,FSceneRenderer::FinishInitDynamicShadows,1.0,0.0561,0.0006
+manager,20000,RT,FShadowSceneRenderer_DispatchVirtualShadowMapViewAndCullingSetup,1.0,0.0539,0.0475
+manager,20000,RT,AllocateAndCaptureFrameSkyEnvMap,1.0,0.0311,0.0255
+manager,20000,RT,FDeferredShadingSceneRenderer::UpdateLumenScene,1.0,0.0597,0.0535
+manager,20000,RT,FDeferredShadingSceneRenderer::RenderLumenSceneLighting,1.0,0.0459,0.0001
+manager,20000,RT,RenderLumenSceneLighting,1.0,0.0458,0.0349
+manager,20000,RT,DispatchAsyncLumenIndirectLightingWork,1.0,0.1362,0.1362
+manager,20000,RT,FVirtualShadowMapArray_BeginMarkPages,1.0,0.025,0.0184
+manager,20000,RT,FSceneRenderer::RenderShadowDepthMaps,1.0,0.0688,0.0001
+manager,20000,RT,FSceneRenderer_RenderShadowDepthMaps,1.0,0.0688,0.0026
+manager,20000,RT,FShadowSceneRenderer::RenderVirtualShadowMaps,1.0,0.0265,0.0043
+manager,20000,RT,FVirtualShadowMapArray::RenderVirtualShadowMapsNonNanite,1.0,0.0221,0.017
+manager,20000,RT,RenderLighting,1.999,0.0831,0.0209
+manager,20000,RT,FDeferredShadingSceneRenderer::RenderDiffuseIndirectAndAmbientOcclusion,1.999,0.0402,0.0402
+manager,20000,RT,FDeferredShadingSceneRenderer_RenderLights,1.0,0.022,0.0142
+manager,20000,RT,FRDGBuilder::CollectResources,1.999,0.2613,0.0822
+manager,20000,RT,FRDGBuilder::AllocateTransientResources,1.999,0.1577,0.1365
+manager,20000,RT,FRDGBuilder::ExecutePasses,1.999,0.1224,0.0689
+manager,20000,WK,Frame,2.0,28.7488,5.0304
+manager,20000,WK,BasePass,1.0,2.4946,2.4946
+manager,20000,WK,StochasticLighting,1.0,0.0962,0.0962
+manager,20000,WK,VirtualShadowMapMarkPages,1.0,0.1087,0.1087
+manager,20000,WK,ShadowDepths,1.0,4.2932,4.27
+manager,20000,WK,BuildRenderingCommandsDeferred(Culling=%s),2.0,0.0411,0.0411
+manager,20000,WK,RenderDeferredLighting,2.0,1.0298,0.1424
+manager,20000,WK,LumenReflections,1.0,0.5214,0.5214
+manager,20000,WK,Lights,1.0,0.3458,0.045
+manager,20000,WK,ShadowProjectionOnOpaque,1.0,0.3009,0.3009
+manager,20000,WK,FilterTranslucentVolume %dx%dx%d Cascades:%d,1.0,0.0201,0.0201
+manager,20000,WK,RenderVelocities(%s),1.144,2.7605,2.7605
+manager,20000,WK,ExponentialHeightFog,1.0,0.0234,0.0234
+manager,20000,WK,NiagaraStateless,3.999,0.0292,0.0292
+manager,20000,WK,RenderTranslucency,1.0,0.0508,0.0508
+manager,20000,WK,PostProcessing,2.0,2.1549,0.1838
+manager,20000,WK,TemporalSuperResolution(sg.AntiAliasingQuality=%d%s) %dx%d -> %dx%d,2.0,1.8753,1.8753
+manager,20000,WK,MotionBlur,1.0,0.0958,0.0958
+manager,20000,WK,DistanceFields,1.999,1.3543,0.3767
+manager,20000,WK,GlobalDistanceFieldUpdate,1.999,0.9776,0.9776
+manager,20000,WK,GPUSceneUpdate,1.999,0.0309,0.0309
+manager,20000,WK,FXSystemPreRender,1.999,3.0014,3.0014
+manager,20000,WK,PrePass %s %s,1.0,0.0312,0.0312
+manager,20000,WK,HZB,1.999,0.0329,0.0281
+manager,20000,WK,ComputeLightGrid,1.0,0.0276,0.0276
+manager,20000,WK,SkyAtmosphereLUTs,1.0,0.0405,0.0405
+manager,20000,WK,CaptureConvolveSkyEnvMap,1.625,0.1096,0.1096
+manager,20000,WK,LumenSceneUpdate: %u card captures %.3fM texels,1.999,0.0999,0.0962
+manager,20000,WK,LumenScreenProbeGather,2.0,5.0862,5.0862
+manager,20000,WK,LumenSceneLighting%s,1.0,0.7451,0.7451
+manager,20000,WK,TaskWorkerIsLookingForWork,254.652,3.724,3.724
+manager,20000,WK,ExecuteForegroundTask,248.789,32.0158,0.9232
+manager,20000,WK,RHI_Translate,56.427,6.5864,6.5638
+manager,20000,WK,RHI_CloseChain,40.999,0.7324,0.7324
+manager,20000,WK,FWaitingQueue_Unpark_SignalWaitingThread,82.118,0.3385,0.3385
+manager,20000,WK,GPUScene Upload Instances Task,29.221,4.6065,4.6065
+manager,20000,WK,GatherShadowDynamicMeshElements,1.0,0.0664,0.0138
+manager,20000,WK,ParallelFor,7.743,0.443,0.0657
+manager,20000,WK,AllocatePlacedBuffer,1.597,0.1761,0.0005
+manager,20000,WK,D3D12RHI::CreateRHIBuffer,7.468,0.1825,0.0044
+manager,20000,WK,D3D12RHI::AllocateBuffer,7.468,0.1781,0.1748
+manager,20000,WK,AllocatePlacedTexture,1.594,0.3296,0.0005
+manager,20000,WK,D3D12RHI::CreateTextureInternal,1.594,0.3291,0.3213
+manager,20000,WK,ParallelExecute (Async),18.701,0.7619,0.746
+manager,20000,WK,RHI_Dispatch,103.029,0.1895,0.1667
+manager,20000,WK,MeshDrawCommandPassSetupTask,8.142,0.2021,0.2021
+manager,20000,WK,FRDGBuilder::CreatePassBarriers,8.516,0.1136,0.1136
+manager,20000,WK,DrawVisibleMeshCommandsAnyThreadTask,6.142,0.0441,0.0441
+manager,20000,WK,VectorVM_Experimental,6.079,0.0755,0.0755
+manager,20000,WK,OcclusionCullPipe,1.0,11.4768,0.0131
+manager,20000,WK,GPUBound_WaitingForGPUForOcclusionQueries_SeeGPUTrack,1.0,11.4558,0.0007
+manager,20000,WK,RHIGetRenderQueryResult_GPU_Wait,4.631,11.4572,0.0038
+manager,20000,WK,SyncPoint_Wait,1.0,11.4534,0.0013
+manager,20000,WK,FTaskBase::WaitWithNamedThreadsSupport,1.0,11.4521,0.0019
+manager,20000,WK,FTaskBase::WaitImpl_StateChangeEvent_WaitFor,2.05,12.0776,0.0017
+manager,20000,WK,Oversubscription,19.736,12.1396,12.1244
+manager,20000,WK,FD3D12UploadHeapAllocator::AllocUploadResource,112.323,0.0355,0.0307
+manager,20000,WK,GatherDynamicMeshElements,3.998,0.1323,0.0012
+manager,20000,WK,DynamicPrimitive,6.505,0.1311,0.0039
+manager,20000,WK,NS_Boundary_Cylinder,0.714,0.0308,0.0288
+manager,20000,WK,ParallelExecute (Await),4.999,0.0472,0.0472
+manager,20000,WK,EndOfFrameUpdate,4.238,0.8863,0.0032
+manager,20000,WK,DeferredRenderUpdates,7.822,0.8831,0.3964
+manager,20000,WK,ExecuteBackgroundTask,2.999,0.0403,0.0373
+manager,20000,WK,NS_TeslaCoil,1.0,0.0799,0.0742
+manager,20000,WK,SceneCulling_Update_Post,1.0,1.4059,0.0231
+manager,20000,WK,SceneCulling_Post_UpdateInstances,1.0,1.3159,0.6882
+manager,20000,WK,BuildHierarchy_FinalizeGrid,1.0,0.0669,0.0028
+manager,20000,WK,BuildHierarchy_FinalizeChunks,1.0,0.0551,0.0551
+manager,20000,WK,ParallelMdcDispatchDraw,7.142,0.0316,0.0205
+manager,20000,WK,FGatherShadowPrimitivesPrepareTask,1.0,0.0834,0.0058
+manager,20000,WK,CreateDynamicShadows,1.0,0.0723,0.0723
+manager,20000,WK,UpdateGPUScene_Primitives,1.714,0.3697,0.0132
+manager,20000,WK,Instances,1.0,0.3305,0.0002
+manager,20000,WK,ParallelFor.Wait,2.267,0.0443,0.0006
+manager,20000,WK,FRDGBuilder::CreateViews,1.0,0.0377,0.0377
+manager,20000,WK,FRDGBuilder::CreateUniformBuffers,0.998,0.0546,0.0546
+manager,20000,WK,FRDGAllocator::ReleaseAll,5.998,0.051,0.0486
+manager,20000,WK,MassProcessingQueue Async Runner Task,1.0,0.028,0.004
+manager,20000,WK,FSceneRenderer::SetupMeshPass,1.0,0.0665,0.0322
+manager,20000,WK,ParallelMdcDispatchPassSetup,8.142,0.0382,0.0212
+manager,20000,WK,SetupParallelExecute,1.0,0.0263,0.0263
+manager,20000,WK,FRDGBuilder::AllocatePooledBuffers,1.0,0.0248,0.0248
+manager,20000,WK,FISMCInstanceDataSceneProxy_Update,2.0,0.7834,0.7834
+manager,20000,WK,CompileBarriers,1.0,0.0619,0.0619
+manager,20000,WK,FRDGBuilder::CollectBarriers,1.0,0.0831,0.0831
+manager,20000,WK,FSceneRenderProcessor::DeleteSceneRenderers,1.0,0.052,0.052
+manager,20000,WK,AddNaniteRenderViews,1.0,0.0209,0.0209
+manager,20000,WK,ComputeViewRelevance,1.0,0.0218,0.0218
+manager,20000,WK,FRDGBuilder::ProcessAsyncSetupQueue,2.666,0.5056,0.5056
+manager,20000,WK,EndOfPipeTask,2.059,0.4137,0.0009
+manager,20000,WK,EndOfPipeTask_RHIEndFrame,1.0,0.3628,0.0007
+manager,20000,WK,UE::RHI::GPUProfiler::ProcessEvents,1.0,0.362,0.362
+manager,20000,WK,FRDGBuilder::FinalizeResources,1.0,0.1459,0.0017
+manager,20000,WK,Textures,1.0,0.0558,0.0558
+manager,20000,WK,Buffers,1.0,0.0466,0.0466
+manager,20000,WK,EndOfPipeTask_RHIProcessDeleteQueue,1.06,0.05,0.05
+manager,20000,WK,FRDGBuilder::SubmitBufferUploads,1.0,0.1306,0.0038
+manager,20000,WK,Allocate,1.0,0.0353,0.0345
+manager,20000,WK,Upload_Multiple,1.0,0.0915,0.0729
+manager,20000,WK,FRDGBuilder::SetupDispatchPassExecute,1.0,0.0563,0.0313
+manager,20000,WK,FMallocBinnedCommonUtils::FlushCurrentThreadCache,0.009,0.0542,0.0
+manager,20000,WK,FMallocBinnedCommonUtils::TrimThreadFreeBlockLists,0.009,0.0542,0.0542
+manager,20000,WK,UInstancedStaticMeshComponent::CalcBoundsImpl,1.002,0.4833,0.4833
+manager,20000,WK,FRDGBuilder::FinalizeDescs,1.0,0.0207,0.0207
+manager,20000,WK,FRDGScatterUploadBuilder,0.25,0.0223,0.0219
+mass,10000,GT,Frame,3.0,29.1779,3.0631
+mass,10000,GT,RenderDeferredLighting,2.0,1.4458,0.1367
+mass,10000,GT,LumenReflections,1.0,0.8986,0.8986
+mass,10000,GT,Lights,1.0,0.3905,0.0516
+mass,10000,GT,ShadowProjectionOnOpaque,1.0,0.3389,0.3389
+mass,10000,GT,RenderVelocities(%s),1.146,1.3475,1.3475
+mass,10000,GT,ExponentialHeightFog,1.0,0.023,0.023
+mass,10000,GT,NiagaraStateless,3.999,0.0236,0.0236
+mass,10000,GT,RenderTranslucency,1.0,0.05,0.05
+mass,10000,GT,PostProcessing,2.0,1.8285,0.1866
+mass,10000,GT,TemporalSuperResolution(sg.AntiAliasingQuality=%d%s) %dx%d -> %dx%d,2.0,1.5477,1.5477
+mass,10000,GT,MotionBlur,1.0,0.0942,0.0942
+mass,10000,GT,DistanceFields,2.0,0.7674,0.2077
+mass,10000,GT,GlobalDistanceFieldUpdate,2.0,0.5597,0.5597
+mass,10000,GT,GPUSceneUpdate,2.0,0.0315,0.0315
+mass,10000,GT,FXSystemPreRender,2.0,2.1148,2.1148
+mass,10000,GT,BuildRenderingCommandsDeferred(Culling=%s),2.0,0.0413,0.0413
+mass,10000,GT,PrePass %s %s,1.0,0.0352,0.0352
+mass,10000,GT,HZB,2.0,0.0331,0.0284
+mass,10000,GT,ComputeLightGrid,1.0,0.0263,0.0263
+mass,10000,GT,SkyAtmosphereLUTs,1.0,0.0406,0.0406
+mass,10000,GT,CaptureConvolveSkyEnvMap,1.625,0.1057,0.1057
+mass,10000,GT,LumenSceneUpdate: %u card captures %.3fM texels,2.0,0.1,0.0957
+mass,10000,GT,LumenScreenProbeGather,2.0,3.5882,3.5882
+mass,10000,GT,BasePass,1.0,1.3159,1.3159
+mass,10000,GT,StochasticLighting,1.0,0.0944,0.0944
+mass,10000,GT,VirtualShadowMapMarkPages,1.0,0.1021,0.1021
+mass,10000,GT,ShadowDepths,1.0,2.4867,2.461
+mass,10000,GT,LightCompositionTasks_PreLighting,1.0,0.0217,0.0217
+mass,10000,GT,LumenSceneLighting%s,1.0,0.7168,0.7168
+mass,10000,GT,FEngineLoop::Tick,1.0,9.7311,0.0034
+mass,10000,GT,Tick_Engine,1.0,6.5421,0.0186
+mass,10000,GT,UWorld_Tick,1.0,5.6759,0.1166
+mass,10000,GT,TickCompletionEvents,7.0,5.53,0.0041
+mass,10000,GT,ProcessUntilTasksComplete,7.0,5.5258,0.144
+mass,10000,GT,FMassProcessingPhase::ExecuteTick EMassProcessingPhase::PrePhysics,1.0,2.8156,0.0134
+mass,10000,GT,Mass FProcessingQueue::Execute,1.0,2.7867,0.007
+mass,10000,GT,MassProcessingQueue Main-Thread Runner Task,1.0,2.7767,0.0232
+mass,10000,GT,UE::Mass::FProcessorWorker::ExecuteProcessor: MassVisualizationProcessor,1.0,0.3546,0.0015
+mass,10000,GT,MassVisualizationProcessor,1.0,0.3531,0.3531
+mass,10000,GT,UE::Mass::FProcessorWorker::ExecuteProcessor: MassInstantiateStaticMeshAndCreateISMRenderStateProcessor,1.0,0.036,0.0011
+mass,10000,GT,MassInstantiateStaticMeshAndCreateISMRenderStateProcessor,1.0,0.0349,0.0349
+mass,10000,GT,FWaitingQueue_Unpark_SignalWaitingThread,7.086,0.0248,0.0248
+mass,10000,GT,MassProcessingQueue GT Cleanup,1.0,0.0465,0.0097
+mass,10000,GT,WaitForTasks,2.135,0.0807,0.0807
+mass,10000,GT,FMassProcessingPhase::ExecuteTick EMassProcessingPhase::PostPhysics,1.0,2.4122,0.0026
+mass,10000,GT,MassVisualizationComponent EndVisualChanges,1.0,2.4096,2.4096
+mass,10000,GT,FViewport_Draw,1.0,0.804,0.1122
+mass,10000,GT,BeginRenderingViewFamily,1.0,0.6871,0.0343
+mass,10000,GT,SendAllEndOfFrameUpdates,1.0,0.6471,0.0032
+mass,10000,GT,UWorld_SendAllEndOfFrameUpdates,1.0,0.6439,0.0065
+mass,10000,GT,ParallelFor,1.001,0.6355,0.0047
+mass,10000,GT,EndOfFrameUpdate,1.0,0.0958,0.0003
+mass,10000,GT,DeferredRenderUpdates,3.96,0.0955,0.0646
+mass,10000,GT,ParallelFor.Wait,0.922,0.5298,0.5298
+mass,10000,GT,FStreamingManagerCollection::UpdateResourceStreaming,1.0,0.0294,0.0149
+mass,10000,GT,Slate::Tick (Platform and Input),1.0,0.0935,0.0004
+mass,10000,GT,Slate::TickPlatform,1.0,0.0931,0.0905
+mass,10000,GT,Slate::Tick (Time and Widgets),1.0,0.0764,0.0029
+mass,10000,GT,Slate::DrawWindows,1.0,0.0735,0.0104
+mass,10000,GT,Slate::DrawWindow,1.0,0.0425,0.0113
+mass,10000,GT,Slate_PaintSlowPath,1.0,0.0312,0.012
+mass,10000,GT,Sync_RenderingThread,1.0,2.8079,0.0035
+mass,10000,GT,GameThreadWaitForTask,0.988,2.8022,2.8022
+mass,10000,GT,UpdateCoreCsvStats_BeginFrame,1.0,0.0894,0.0894
+mass,10000,GT,FEngineLoop_PumpMessages,1.0,0.0206,0.001
+mass,10000,GT,UE::Mass::FProcessorWorker::ExecuteProcessor: MassLODCollectorProcessor,1.0,0.198,0.0028
+mass,10000,GT,MassLODCollectorProcessor,1.0,0.1952,0.0047
+mass,10000,GT,Close,1.0,0.1856,0.1856
+mass,10000,GT,UE::Mass::FProcessorWorker::ExecuteProcessor: MassUpdateISMProcessor,1.0,0.7965,0.0018
+mass,10000,GT,MassUpdateISMProcessor,1.0,0.7947,0.7947
+mass,10000,GT,UE::Mass::FProcessorWorker::ExecuteProcessor: MassVisualizationLODProcessor,1.0,1.357,0.0017
+mass,10000,GT,MassVisualizationLODProcessor,1.0,1.3554,0.0019
+mass,10000,GT,CalculateLOD,1.0,1.2385,1.2385
+mass,10000,GT,AdjustDistanceAndLODFromCount,1.0,0.1098,0.1098
+mass,10000,GT,UInstancedStaticMeshComponent::CalcBoundsImpl,0.125,0.0304,0.0304
+mass,10000,RT,Frame,2.0,19.4508,3.0477
+mass,10000,RT,RenderDeferredLighting,2.0,1.4458,0.1367
+mass,10000,RT,LumenReflections,1.0,0.8986,0.8986
+mass,10000,RT,Lights,1.0,0.3905,0.0516
+mass,10000,RT,ShadowProjectionOnOpaque,1.0,0.3389,0.3389
+mass,10000,RT,RenderVelocities(%s),1.146,1.3475,1.3475
+mass,10000,RT,ExponentialHeightFog,1.0,0.023,0.023
+mass,10000,RT,NiagaraStateless,3.999,0.0236,0.0236
+mass,10000,RT,RenderTranslucency,3.145,0.0675,0.0663
+mass,10000,RT,PostProcessing,3.0,1.9321,0.2801
+mass,10000,RT,TemporalSuperResolution(sg.AntiAliasingQuality=%d%s) %dx%d -> %dx%d,2.0,1.5477,1.5477
+mass,10000,RT,MotionBlur,1.0,0.0942,0.0942
+mass,10000,RT,DistanceFields,2.0,0.7674,0.2077
+mass,10000,RT,GlobalDistanceFieldUpdate,2.0,0.5597,0.5597
+mass,10000,RT,GPUSceneUpdate,2.0,0.0315,0.0315
+mass,10000,RT,FXSystemPreRender,2.0,2.1148,2.1148
+mass,10000,RT,BuildRenderingCommandsDeferred(Culling=%s),2.0,0.0413,0.0413
+mass,10000,RT,PrePass %s %s,1.0,0.0352,0.0352
+mass,10000,RT,HZB,2.0,0.0331,0.0284
+mass,10000,RT,ComputeLightGrid,1.0,0.0263,0.0263
+mass,10000,RT,SkyAtmosphereLUTs,1.0,0.0406,0.0406
+mass,10000,RT,CaptureConvolveSkyEnvMap,1.625,0.1057,0.1057
+mass,10000,RT,LumenSceneUpdate: %u card captures %.3fM texels,2.0,0.1,0.0957
+mass,10000,RT,LumenScreenProbeGather,2.0,3.5882,3.5882
+mass,10000,RT,BasePass,1.0,1.3159,1.3159
+mass,10000,RT,StochasticLighting,1.0,0.0944,0.0944
+mass,10000,RT,VirtualShadowMapMarkPages,1.0,0.1021,0.1021
+mass,10000,RT,ShadowDepths,1.0,2.4867,2.461
+mass,10000,RT,LightCompositionTasks_PreLighting,1.0,0.0217,0.0217
+mass,10000,RT,LumenSceneLighting%s,1.0,0.7168,0.7168
+mass,10000,RT,FDeferredShadingSceneRenderer_Render,1.0,8.7992,0.3418
+mass,10000,RT,FSceneRenderer::PrepareDistanceFieldScene,1.0,4.162,2.6477
+mass,10000,RT,ParallelFor,2.0,1.49,1.49
+mass,10000,RT,FDeferredShadingSceneRenderer_InitViews,1.0,2.6788,0.0624
+mass,10000,RT,FWaitingQueue_Unpark_SignalWaitingThread,38.576,0.1349,0.1349
+mass,10000,RT,ProcessVisibilityTasks,1.0,2.601,0.0026
+mass,10000,RT,WaitForVisibilityTasks,1.0,2.5933,0.0011
+mass,10000,RT,WaitUntilTasksComplete,5.987,3.148,0.0075
+mass,10000,RT,WaitForTasks,1.974,3.1461,3.1461
+mass,10000,RT,RHICmdList_Submit,41.328,0.1607,0.1265
+mass,10000,RT,FinishDynamicMeshElements,1.0,0.0965,0.0137
+mass,10000,RT,FTaskBase::WaitImpl_StateChangeEvent_WaitFor,3.396,0.2585,0.2585
+mass,10000,RT,FGPUScene_UploadDynamicPrimitiveShaderDataForView,2.0,0.0353,0.0214
+mass,10000,RT,UpdateGPUScene,2.923,0.0285,0.0144
+mass,10000,RT,CreateCommandList,8.348,0.0449,0.0092
+mass,10000,RT,Tasks::Wait,7.992,0.1554,0.009
+mass,10000,RT,FInstanceCullingManager::BeginDeferredCulling,2.0,0.0498,0.0495
+mass,10000,RT,FSceneRenderer::FinishInitDynamicShadows,1.0,0.0516,0.0006
+mass,10000,RT,FShadowSceneRenderer_DispatchVirtualShadowMapViewAndCullingSetup,1.0,0.0496,0.0427
+mass,10000,RT,AllocateAndCaptureFrameSkyEnvMap,1.0,0.0318,0.0261
+mass,10000,RT,FDeferredShadingSceneRenderer::UpdateLumenScene,1.0,0.065,0.0553
+mass,10000,RT,FDeferredShadingSceneRenderer::RenderLumenSceneLighting,1.0,0.0468,0.0001
+mass,10000,RT,RenderLumenSceneLighting,1.0,0.0467,0.0355
+mass,10000,RT,DispatchAsyncLumenIndirectLightingWork,1.0,0.1319,0.1319
+mass,10000,RT,FVirtualShadowMapArray_BeginMarkPages,1.0,0.024,0.0176
+mass,10000,RT,FSceneRenderer::RenderShadowDepthMaps,1.0,0.066,0.0001
+mass,10000,RT,FSceneRenderer_RenderShadowDepthMaps,1.0,0.0659,0.0027
+mass,10000,RT,FShadowSceneRenderer::RenderVirtualShadowMaps,1.0,0.0254,0.0041
+mass,10000,RT,FVirtualShadowMapArray::RenderVirtualShadowMapsNonNanite,1.0,0.0213,0.0163
+mass,10000,RT,RenderLighting,2.0,0.0814,0.0199
+mass,10000,RT,FDeferredShadingSceneRenderer::RenderDiffuseIndirectAndAmbientOcclusion,2.0,0.0391,0.0391
+mass,10000,RT,FDeferredShadingSceneRenderer_RenderLights,1.0,0.0224,0.0144
+mass,10000,RT,FRDGBuilder::CollectResources,2.0,0.2979,0.0973
+mass,10000,RT,FRDGBuilder::AllocateTransientResources,2.0,0.1772,0.1533
+mass,10000,RT,FRDGBuilder::ExecutePasses,2.0,0.1299,0.073
+mass,10000,RT,LaunchVisibilityTasks,1.0,0.5861,0.0186
+mass,10000,WK,Frame,2.0,19.4508,3.0477
+mass,10000,WK,RenderDeferredLighting,2.0,1.4458,0.1367
+mass,10000,WK,LumenReflections,1.0,0.8986,0.8986
+mass,10000,WK,Lights,1.0,0.3905,0.0516
+mass,10000,WK,ShadowProjectionOnOpaque,1.0,0.3389,0.3389
+mass,10000,WK,RenderVelocities(%s),1.146,1.3475,1.3475
+mass,10000,WK,ExponentialHeightFog,1.0,0.023,0.023
+mass,10000,WK,NiagaraStateless,3.999,0.0236,0.0236
+mass,10000,WK,RenderTranslucency,1.0,0.05,0.05
+mass,10000,WK,PostProcessing,2.0,1.8285,0.1866
+mass,10000,WK,TemporalSuperResolution(sg.AntiAliasingQuality=%d%s) %dx%d -> %dx%d,2.0,1.5477,1.5477
+mass,10000,WK,MotionBlur,1.0,0.0942,0.0942
+mass,10000,WK,DistanceFields,2.0,0.7674,0.2077
+mass,10000,WK,GlobalDistanceFieldUpdate,2.0,0.5597,0.5597
+mass,10000,WK,GPUSceneUpdate,2.0,0.0315,0.0315
+mass,10000,WK,FXSystemPreRender,2.0,2.1148,2.1148
+mass,10000,WK,BuildRenderingCommandsDeferred(Culling=%s),2.0,0.0413,0.0413
+mass,10000,WK,PrePass %s %s,1.0,0.0352,0.0352
+mass,10000,WK,HZB,2.0,0.0331,0.0284
+mass,10000,WK,ComputeLightGrid,1.0,0.0263,0.0263
+mass,10000,WK,SkyAtmosphereLUTs,1.0,0.0406,0.0406
+mass,10000,WK,CaptureConvolveSkyEnvMap,1.625,0.1057,0.1057
+mass,10000,WK,LumenSceneUpdate: %u card captures %.3fM texels,2.0,0.1,0.0957
+mass,10000,WK,LumenScreenProbeGather,2.0,3.5882,3.5882
+mass,10000,WK,BasePass,1.0,1.3159,1.3159
+mass,10000,WK,StochasticLighting,1.0,0.0944,0.0944
+mass,10000,WK,VirtualShadowMapMarkPages,1.0,0.1021,0.1021
+mass,10000,WK,ShadowDepths,1.0,2.4867,2.461
+mass,10000,WK,LightCompositionTasks_PreLighting,1.0,0.0217,0.0217
+mass,10000,WK,LumenSceneLighting%s,1.0,0.7168,0.7168
+mass,10000,WK,ExecuteForegroundTask,251.704,31.5435,0.9477
+mass,10000,WK,FWaitingQueue_Unpark_SignalWaitingThread,114.676,0.4097,0.4097
+mass,10000,WK,GPUScene Upload Instances Task,19.495,1.4344,1.4344
+mass,10000,WK,TaskWorkerIsLookingForWork,343.611,4.5127,4.5127
+mass,10000,WK,MeshDrawCommandPassSetupTask,8.144,0.1161,0.1161
+mass,10000,WK,AllocatePlacedBuffer,2.944,0.2643,0.0011
+mass,10000,WK,D3D12RHI::CreateRHIBuffer,8.293,0.2692,0.005
+mass,10000,WK,D3D12RHI::AllocateBuffer,8.293,0.2642,0.261
+mass,10000,WK,FRDGBuilder::CreatePassBarriers,8.27,0.123,0.123
+mass,10000,WK,ParallelExecute (Await),4.999,0.046,0.046
+mass,10000,WK,ParallelExecute (Async),18.732,0.7784,0.7622
+mass,10000,WK,RHI_Dispatch,103.838,0.1986,0.1747
+mass,10000,WK,Mass Processor Worker Task,12.998,5.4838,0.0436
+mass,10000,WK,RHI_Translate,56.455,7.0772,7.0569
+mass,10000,WK,RHI_CloseChain,41.114,0.7555,0.7555
+mass,10000,WK,FGatherShadowPrimitivesPrepareTask,1.0,0.0752,0.0054
+mass,10000,WK,CreateDynamicShadows,1.0,0.0651,0.0651
+mass,10000,WK,FRDGBuilder::AllocatePooledBuffers,0.999,0.0252,0.0252
+mass,10000,WK,DrawVisibleMeshCommandsAnyThreadTask,6.145,0.0425,0.0425
+mass,10000,WK,AllocatePlacedTexture,1.352,0.2091,0.0004
+mass,10000,WK,D3D12RHI::CreateTextureInternal,1.352,0.2086,0.2011
+mass,10000,WK,UE::Mass::FProcessorWorker::ExecuteProcessor: LabOrbContactProcessor,1.0,0.0809,0.0018
+mass,10000,WK,LabOrbContactProcessor,1.0,0.0791,0.0791
+mass,10000,WK,GatherDynamicMeshElements,3.998,0.1336,0.0011
+mass,10000,WK,DynamicPrimitive,6.675,0.1324,0.0042
+mass,10000,WK,FD3D12UploadHeapAllocator::AllocUploadResource,115.431,0.0362,0.0316
+mass,10000,WK,UE::Mass::FProcessorWorker::ExecuteProcessor: LabNearOrbCountProcessor,1.0,0.1429,0.0034
+mass,10000,WK,LabNearOrbCountProcessor,1.0,0.1395,0.1385
+mass,10000,WK,FSceneRenderer::SetupMeshPass,1.0,0.0324,0.016
+mass,10000,WK,MassProcessingQueue Async Runner Task,1.0,2.8073,0.0196
+mass,10000,WK,Oversubscription,114.469,12.709,12.5772
+mass,10000,WK,VectorVM_Experimental,6.011,0.0756,0.0756
+mass,10000,WK,ExecuteBackgroundTask,3.0,0.0396,0.0365
+mass,10000,WK,EndOfFrameUpdate,3.631,0.6681,0.0039
+mass,10000,WK,DeferredRenderUpdates,4.816,0.6641,0.2766
+mass,10000,WK,ParallelMdcDispatchDraw,7.144,0.0338,0.0209
+mass,10000,WK,UE::Mass::FProcessorWorker::ExecuteProcessor: MassApplyForceProcessor,1.0,0.1683,0.0031
+mass,10000,WK,MassApplyForceProcessor,1.0,0.1652,0.1641
+mass,10000,WK,UE::Mass::FProcessorWorker::ExecuteProcessor: MassApplyMovementProcessor,1.0,1.6865,0.0027
+mass,10000,WK,MassApplyMovementProcessor,1.0,1.6838,0.2121
+mass,10000,WK,EndOfPipeTask,2.076,0.3738,0.0008
+mass,10000,WK,EndOfPipeTask_RHIEndFrame,1.0,0.3145,0.0006
+mass,10000,WK,UE::RHI::GPUProfiler::ProcessEvents,1.0,0.3139,0.3139
+mass,10000,WK,NS_TeslaCoil,1.0,0.0754,0.0707
+mass,10000,WK,EndOfPipeTask_RHIProcessDeleteQueue,1.076,0.0585,0.0585
+mass,10000,WK,CompileBarriers,1.0,0.0674,0.0674
+mass,10000,WK,FRDGBuilder::CollectBarriers,1.0,0.0914,0.0914
+mass,10000,WK,FRDGBuilder::CreateViews,1.0,0.0469,0.0469
+mass,10000,WK,FRDGBuilder::CreateUniformBuffers,0.999,0.0573,0.0573
+mass,10000,WK,UInstancedStaticMeshComponent::CalcBoundsImpl,1.874,0.3801,0.3801
+mass,10000,WK,NS_Boundary_Cylinder,0.923,0.0375,0.0353
+mass,10000,WK,FDeferredShadingSceneRenderer_BeginUpdateLumenSceneTasks,1.0,0.0226,0.0151
+mass,10000,WK,ParallelFor,7.942,0.2836,0.0529
+mass,10000,WK,UpdateGPUScene_Primitives,1.923,0.2133,0.0113
+mass,10000,WK,ParallelFor.Wait,2.277,0.0448,0.0006
+mass,10000,WK,Instances,1.0,0.1779,0.0002
+mass,10000,WK,UE::Mass::FProcessorWorker::ExecuteProcessor: MassSmoothOrientationProcessor,1.0,2.5409,0.0032
+mass,10000,WK,MassSmoothOrientationProcessor,1.0,2.5377,1.2929
+mass,10000,WK,OcclusionCullPipe,1.0,6.8088,0.0083
+mass,10000,WK,GPUBound_WaitingForGPUForOcclusionQueries_SeeGPUTrack,1.0,6.7958,0.0005
+mass,10000,WK,RHIGetRenderQueryResult_GPU_Wait,4.609,6.7966,0.0025
+mass,10000,WK,SyncPoint_Wait,1.0,6.7941,0.0011
+mass,10000,WK,FTaskBase::WaitWithNamedThreadsSupport,1.0,6.793,0.0015
+mass,10000,WK,FTaskBase::WaitImpl_StateChangeEvent_WaitFor,2.068,7.1349,0.0015
+mass,10000,WK,SetupParallelExecute,1.0,0.0273,0.0273
+mass,10000,WK,UE::Mass::FProcessorWorker::ExecuteProcessor: LabApproachProcessor,1.0,0.2272,0.0032
+mass,10000,WK,LabApproachProcessor,1.0,0.224,0.2228
+mass,10000,WK,UE::Mass::FProcessorWorker::ExecuteProcessor: MassSteerToMoveTargetProcessor,1.0,0.5676,0.0024
+mass,10000,WK,MassSteerToMoveTargetProcessor,1.0,0.5651,0.5198
+mass,10000,WK,FRDGAllocator::ReleaseAll,5.999,0.046,0.0435
+mass,10000,WK,GatherShadowDynamicMeshElements,1.0,0.0477,0.0085
+mass,10000,WK,FSceneRenderProcessor::DeleteSceneRenderers,1.0,0.0445,0.0445
+mass,10000,WK,SceneCulling_Update_Post,1.0,0.7732,0.0173
+mass,10000,WK,SceneCulling_Post_UpdateInstances,1.0,0.722,0.3782
+mass,10000,WK,BuildHierarchy_FinalizeGrid,1.0,0.0338,0.0051
+mass,10000,WK,BuildHierarchy_FinalizeChunks,1.0,0.0234,0.0234
+mass,10000,WK,FISMCInstanceDataSceneProxy_Update,2.0,0.4493,0.4493
+mass,10000,WK,FWaitingQueue_SignalStandbyThread,10.359,0.0338,0.0338
+mass,10000,WK,GatherDynamicMeshElementsPipe,1.0,0.0214,0.0104
+mass,10000,WK,FRDGScatterUploadBuilder,0.426,0.0455,0.045
+mass,10000,WK,FRDGBuilder::SubmitBufferUploads,1.0,0.133,0.0042
+mass,10000,WK,Allocate,1.0,0.0359,0.0345
+mass,10000,WK,Upload_Multiple,1.0,0.0929,0.0733
+mass,10000,WK,FRDGBuilder::ProcessAsyncSetupQueue,2.899,0.4533,0.4533
+mass,10000,WK,FRDGBuilder::FinalizeResources,1.0,0.1686,0.0017
+mass,10000,WK,Textures,1.0,0.0641,0.0641
+mass,10000,WK,Buffers,1.0,0.0543,0.0543
+mass,10000,WK,FMallocBinnedCommonUtils::FlushCurrentThreadCache,0.007,0.0437,0.0
+mass,10000,WK,FMallocBinnedCommonUtils::TrimThreadFreeBlockLists,0.007,0.0437,0.0437
+mass,10000,WK,FRDGBuilder::SetupDispatchPassExecute,1.0,0.0579,0.0309
+mass,20000,GT,Frame,3.001,44.1785,5.592
+mass,20000,GT,RenderDeferredLighting,2.0,1.002,0.1402
+mass,20000,GT,Lights,1.0,0.3262,0.0457
+mass,20000,GT,ShadowProjectionOnOpaque,1.0,0.2805,0.2805
+mass,20000,GT,FilterTranslucentVolume %dx%dx%d Cascades:%d,1.0,0.0203,0.0203
+mass,20000,GT,RenderVelocities(%s),1.147,2.9912,2.9912
+mass,20000,GT,ExponentialHeightFog,1.0,0.0243,0.0243
+mass,20000,GT,NiagaraStateless,4.0,0.0278,0.0278
+mass,20000,GT,RenderTranslucency,1.0,0.0486,0.0486
+mass,20000,GT,PostProcessing,2.0,2.1767,0.188
+mass,20000,GT,TemporalSuperResolution(sg.AntiAliasingQuality=%d%s) %dx%d -> %dx%d,2.0,1.8909,1.8909
+mass,20000,GT,MotionBlur,1.0,0.0979,0.0979
+mass,20000,GT,DistanceFields,2.0,1.3631,0.3798
+mass,20000,GT,GlobalDistanceFieldUpdate,2.0,0.9833,0.9833
+mass,20000,GT,GPUSceneUpdate,2.0,0.0332,0.0332
+mass,20000,GT,FXSystemPreRender,2.0,2.9615,2.9615
+mass,20000,GT,BuildRenderingCommandsDeferred(Culling=%s),2.0,0.0399,0.0399
+mass,20000,GT,PrePass %s %s,1.0,0.0373,0.0373
+mass,20000,GT,HZB,2.0,0.0336,0.0287
+mass,20000,GT,ComputeLightGrid,1.0,0.0263,0.0263
+mass,20000,GT,SkyAtmosphereLUTs,1.0,0.045,0.045
+mass,20000,GT,CaptureConvolveSkyEnvMap,1.625,0.1074,0.1074
+mass,20000,GT,LumenSceneUpdate: %u card captures %.3fM texels,2.0,0.1047,0.0995
+mass,20000,GT,LumenScreenProbeGather,2.0,5.0591,5.0591
+mass,20000,GT,BasePass,1.0,2.4385,2.4385
+mass,20000,GT,StochasticLighting,1.0,0.0965,0.0965
+mass,20000,GT,VirtualShadowMapMarkPages,1.0,0.1077,0.1077
+mass,20000,GT,ShadowDepths,1.0,4.3552,4.3336
+mass,20000,GT,LumenReflections,1.0,0.5153,0.5153
+mass,20000,GT,LumenSceneLighting%s,1.0,0.7048,0.7048
+mass,20000,GT,FEngineLoop::Tick,1.0,14.7315,0.0039
+mass,20000,GT,Tick_Engine,1.0,13.141,0.0237
+mass,20000,GT,UWorld_Tick,1.0,11.5948,0.1279
+mass,20000,GT,TickCompletionEvents,6.999,11.4304,0.0049
+mass,20000,GT,ProcessUntilTasksComplete,6.999,11.4255,0.1791
+mass,20000,GT,FMassProcessingPhase::ExecuteTick EMassProcessingPhase::PrePhysics,1.0,5.5924,0.0157
+mass,20000,GT,Mass FProcessingQueue::Execute,1.0,5.5342,0.0088
+mass,20000,GT,MassProcessingQueue Main-Thread Runner Task,1.0,5.5218,0.0278
+mass,20000,GT,UE::Mass::FProcessorWorker::ExecuteProcessor: MassVisualizationProcessor,1.0,0.5908,0.0016
+mass,20000,GT,MassVisualizationProcessor,1.0,0.5892,0.5892
+mass,20000,GT,UE::Mass::FProcessorWorker::ExecuteProcessor: MassInstantiateStaticMeshAndCreateISMRenderStateProcessor,1.0,0.0232,0.0013
+mass,20000,GT,MassInstantiateStaticMeshAndCreateISMRenderStateProcessor,1.0,0.0219,0.0219
+mass,20000,GT,FWaitingQueue_Unpark_SignalWaitingThread,7.095,0.0274,0.0274
+mass,20000,GT,MassProcessingQueue GT Cleanup,1.0,0.0839,0.0138
+mass,20000,GT,Mass_BatchChangeCompositionForEntitiesWithSharedFragments,1.876,0.0227,0.0227
+mass,20000,GT,WaitForTasks,2.161,0.0951,0.0951
+mass,20000,GT,FMassProcessingPhase::ExecuteTick EMassProcessingPhase::PostPhysics,1.0,5.4431,0.0032
+mass,20000,GT,MassVisualizationComponent EndVisualChanges,1.0,5.44,5.44
+mass,20000,GT,FViewport_Draw,1.0,1.469,0.1457
+mass,20000,GT,BeginRenderingViewFamily,1.0,1.3173,0.0445
+mass,20000,GT,SendAllEndOfFrameUpdates,1.0,1.2654,0.0042
+mass,20000,GT,UWorld_SendAllEndOfFrameUpdates,1.0,1.2611,0.0091
+mass,20000,GT,ParallelFor,1.001,1.2496,0.0051
+mass,20000,GT,EndOfFrameUpdate,1.0,0.1057,0.0003
+mass,20000,GT,DeferredRenderUpdates,3.601,0.1055,0.0721
+mass,20000,GT,UInstancedStaticMeshComponent::CalcBoundsImpl,0.067,0.0331,0.0331
+mass,20000,GT,FStreamingManagerCollection::UpdateResourceStreaming,1.0,0.0366,0.0187
+mass,20000,GT,Slate::Tick (Platform and Input),1.0,0.1252,0.0005
+mass,20000,GT,Slate::TickPlatform,1.0,0.1246,0.1223
+mass,20000,GT,Slate::Tick (Time and Widgets),1.0,0.0973,0.0037
+mass,20000,GT,Slate::DrawWindows,1.0,0.0936,0.0134
+mass,20000,GT,Slate::DrawWindow,1.0,0.0539,0.0142
+mass,20000,GT,Slate_PaintSlowPath,1.0,0.0397,0.0154
+mass,20000,GT,SViewport_OnPaint,1.0,0.0243,0.013
+mass,20000,GT,Sync_RenderingThread,1.0,1.1241,0.0042
+mass,20000,GT,GameThreadWaitForTask,0.714,1.1178,1.1178
+mass,20000,GT,UpdateCoreCsvStats_BeginFrame,1.0,0.0941,0.0941
+mass,20000,GT,FEngineLoop_PumpMessages,1.0,0.0304,0.0011
+mass,20000,GT,WinPumpMessages,1.0,0.0276,0.0276
+mass,20000,GT,DoEntityCompaction,1.0,0.0409,0.0409
+mass,20000,GT,UE::Mass::FProcessorWorker::ExecuteProcessor: MassLODCollectorProcessor,1.0,0.6389,0.0035
+mass,20000,GT,MassLODCollectorProcessor,1.0,0.6354,0.0064
+mass,20000,GT,Close,1.0,0.6033,0.6033
+mass,20000,GT,Far,1.0,0.0257,0.0257
+mass,20000,GT,UE::Mass::FProcessorWorker::ExecuteProcessor: MassUpdateISMProcessor,1.0,1.6613,0.0024
+mass,20000,GT,MassUpdateISMProcessor,1.0,1.6589,1.6589
+mass,20000,GT,UE::Mass::FProcessorWorker::ExecuteProcessor: MassVisualizationLODProcessor,1.0,2.5675,0.0016
+mass,20000,GT,MassVisualizationLODProcessor,1.0,2.5659,0.0029
+mass,20000,GT,CalculateLOD,1.0,2.3405,2.3405
+mass,20000,GT,AdjustDistanceAndLODFromCount,1.0,0.2161,0.2161
+mass,20000,GT,ParallelFor.Wait,0.957,1.1334,1.1334
+mass,20000,RT,Frame,2.001,29.4517,5.5737
+mass,20000,RT,RenderDeferredLighting,2.0,1.002,0.1402
+mass,20000,RT,Lights,1.0,0.3262,0.0457
+mass,20000,RT,ShadowProjectionOnOpaque,1.0,0.2805,0.2805
+mass,20000,RT,FilterTranslucentVolume %dx%dx%d Cascades:%d,1.0,0.0203,0.0203
+mass,20000,RT,RenderVelocities(%s),1.147,2.9912,2.9912
+mass,20000,RT,ExponentialHeightFog,1.0,0.0243,0.0243
+mass,20000,RT,NiagaraStateless,4.0,0.0278,0.0278
+mass,20000,RT,RenderTranslucency,3.147,0.0674,0.0661
+mass,20000,RT,PostProcessing,3.0,2.2902,0.2914
+mass,20000,RT,TemporalSuperResolution(sg.AntiAliasingQuality=%d%s) %dx%d -> %dx%d,2.0,1.8909,1.8909
+mass,20000,RT,MotionBlur,1.0,0.0979,0.0979
+mass,20000,RT,DistanceFields,2.0,1.3631,0.3798
+mass,20000,RT,GlobalDistanceFieldUpdate,2.0,0.9833,0.9833
+mass,20000,RT,GPUSceneUpdate,2.0,0.0332,0.0332
+mass,20000,RT,FXSystemPreRender,2.0,2.9615,2.9615
+mass,20000,RT,BuildRenderingCommandsDeferred(Culling=%s),2.0,0.0399,0.0399
+mass,20000,RT,PrePass %s %s,1.0,0.0373,0.0373
+mass,20000,RT,HZB,2.0,0.0336,0.0287
+mass,20000,RT,ComputeLightGrid,1.0,0.0263,0.0263
+mass,20000,RT,SkyAtmosphereLUTs,1.0,0.045,0.045
+mass,20000,RT,CaptureConvolveSkyEnvMap,1.625,0.1074,0.1074
+mass,20000,RT,LumenSceneUpdate: %u card captures %.3fM texels,2.0,0.1047,0.0995
+mass,20000,RT,LumenScreenProbeGather,2.0,5.0591,5.0591
+mass,20000,RT,BasePass,1.0,2.4385,2.4385
+mass,20000,RT,StochasticLighting,1.0,0.0965,0.0965
+mass,20000,RT,VirtualShadowMapMarkPages,1.0,0.1077,0.1077
+mass,20000,RT,ShadowDepths,1.0,4.3552,4.3336
+mass,20000,RT,LumenReflections,1.0,0.5153,0.5153
+mass,20000,RT,LumenSceneLighting%s,1.0,0.7048,0.7048
+mass,20000,RT,FDeferredShadingSceneRenderer_Render,1.0,13.23,0.4129
+mass,20000,RT,FSceneRenderer::PrepareDistanceFieldScene,1.0,8.8051,6.3276
+mass,20000,RT,ParallelFor,2.0,2.4321,2.4321
+mass,20000,RT,FDeferredShadingSceneRenderer_InitViews,1.0,2.291,0.0798
+mass,20000,RT,FWaitingQueue_Unpark_SignalWaitingThread,41.504,0.1426,0.1426
+mass,20000,RT,ProcessVisibilityTasks,1.0,2.1925,0.0028
+mass,20000,RT,WaitForVisibilityTasks,1.0,2.1829,0.0012
+mass,20000,RT,WaitUntilTasksComplete,5.787,2.6997,0.0068
+mass,20000,RT,WaitForTasks,2.714,3.2128,3.2128
+mass,20000,RT,RHICmdList_Submit,41.292,0.1747,0.1376
+mass,20000,RT,FinishDynamicMeshElements,1.0,0.1111,0.017
+mass,20000,RT,FTaskBase::WaitImpl_StateChangeEvent_WaitFor,3.605,0.281,0.281
+mass,20000,RT,FGPUScene_UploadDynamicPrimitiveShaderDataForView,2.0,0.0485,0.031
+mass,20000,RT,UpdateGPUScene,2.736,0.0342,0.0169
+mass,20000,RT,CreateCommandList,8.512,0.0496,0.01
+mass,20000,RT,FSkinningSceneExtension_FRenderer_UpdateViewData,1.0,0.0347,0.0088
+mass,20000,RT,SceneCulling_Update_FinalizeAndClear,1.0,0.0259,0.0259
+mass,20000,RT,Tasks::Wait,7.996,0.1527,0.0097
+mass,20000,RT,FInstanceCullingManager::BeginDeferredCulling,2.0,0.0675,0.067
+mass,20000,RT,FSceneRenderer::FinishInitDynamicShadows,1.0,0.0578,0.0006
+mass,20000,RT,FShadowSceneRenderer_DispatchVirtualShadowMapViewAndCullingSetup,1.0,0.0556,0.049
+mass,20000,RT,AllocateAndCaptureFrameSkyEnvMap,1.0,0.0328,0.0266
+mass,20000,RT,FDeferredShadingSceneRenderer::UpdateLumenScene,1.0,0.0787,0.0623
+mass,20000,RT,FDeferredShadingSceneRenderer::RenderLumenSceneLighting,1.0,0.051,0.0001
+mass,20000,RT,RenderLumenSceneLighting,1.0,0.0509,0.0403
+mass,20000,RT,DispatchAsyncLumenIndirectLightingWork,1.0,0.145,0.145
+mass,20000,RT,FVirtualShadowMapArray_BeginMarkPages,1.0,0.0269,0.0195
+mass,20000,RT,FSceneRenderer::RenderShadowDepthMaps,1.0,0.0706,0.0001
+mass,20000,RT,FSceneRenderer_RenderShadowDepthMaps,1.0,0.0705,0.0028
+mass,20000,RT,FShadowSceneRenderer::RenderVirtualShadowMaps,1.0,0.0276,0.0047
+mass,20000,RT,FVirtualShadowMapArray::RenderVirtualShadowMapsNonNanite,1.0,0.0229,0.018
+mass,20000,RT,RenderLighting,2.0,0.0903,0.0227
+mass,20000,RT,FDeferredShadingSceneRenderer::RenderDiffuseIndirectAndAmbientOcclusion,2.0,0.0433,0.0433
+mass,20000,RT,FDeferredShadingSceneRenderer_RenderLights,1.0,0.0242,0.0155
+mass,20000,RT,FRDGBuilder::CollectResources,1.999,0.2924,0.0866
+mass,20000,RT,FRDGBuilder::AllocateTransientResources,1.999,0.1833,0.1516
+mass,20000,RT,FRDGBuilder::ExecutePasses,1.999,0.1332,0.0747
+mass,20000,RT,LaunchVisibilityTasks,1.0,0.5473,0.0189
+mass,20000,WK,Frame,2.001,29.4517,5.5737
+mass,20000,WK,RenderDeferredLighting,2.0,1.002,0.1402
+mass,20000,WK,Lights,1.0,0.3262,0.0457
+mass,20000,WK,ShadowProjectionOnOpaque,1.0,0.2805,0.2805
+mass,20000,WK,FilterTranslucentVolume %dx%dx%d Cascades:%d,1.0,0.0203,0.0203
+mass,20000,WK,RenderVelocities(%s),1.147,2.9912,2.9912
+mass,20000,WK,ExponentialHeightFog,1.0,0.0243,0.0243
+mass,20000,WK,NiagaraStateless,4.0,0.0278,0.0278
+mass,20000,WK,RenderTranslucency,1.0,0.0486,0.0486
+mass,20000,WK,PostProcessing,2.0,2.1767,0.188
+mass,20000,WK,TemporalSuperResolution(sg.AntiAliasingQuality=%d%s) %dx%d -> %dx%d,2.0,1.8909,1.8909
+mass,20000,WK,MotionBlur,1.0,0.0979,0.0979
+mass,20000,WK,DistanceFields,2.0,1.3631,0.3798
+mass,20000,WK,GlobalDistanceFieldUpdate,2.0,0.9833,0.9833
+mass,20000,WK,GPUSceneUpdate,2.0,0.0332,0.0332
+mass,20000,WK,FXSystemPreRender,2.0,2.9615,2.9615
+mass,20000,WK,BuildRenderingCommandsDeferred(Culling=%s),2.0,0.0399,0.0399
+mass,20000,WK,PrePass %s %s,1.0,0.0373,0.0373
+mass,20000,WK,HZB,2.0,0.0336,0.0287
+mass,20000,WK,ComputeLightGrid,1.0,0.0263,0.0263
+mass,20000,WK,SkyAtmosphereLUTs,1.0,0.045,0.045
+mass,20000,WK,CaptureConvolveSkyEnvMap,1.625,0.1074,0.1074
+mass,20000,WK,LumenSceneUpdate: %u card captures %.3fM texels,2.0,0.1047,0.0995
+mass,20000,WK,LumenScreenProbeGather,2.0,5.0591,5.0591
+mass,20000,WK,BasePass,1.0,2.4385,2.4385
+mass,20000,WK,StochasticLighting,1.0,0.0965,0.0965
+mass,20000,WK,VirtualShadowMapMarkPages,1.0,0.1077,0.1077
+mass,20000,WK,ShadowDepths,1.0,4.3552,4.3336
+mass,20000,WK,LumenReflections,1.0,0.5153,0.5153
+mass,20000,WK,LumenSceneLighting%s,1.0,0.7048,0.7048
+mass,20000,WK,ExecuteForegroundTask,262.381,49.9648,1.0504
+mass,20000,WK,FWaitingQueue_Unpark_SignalWaitingThread,129.68,0.5033,0.5033
+mass,20000,WK,GPUScene Upload Instances Task,26.312,3.7843,3.7843
+mass,20000,WK,TaskWorkerIsLookingForWork,357.203,4.8332,4.8332
+mass,20000,WK,ParallelExecute (Async),18.797,0.8274,0.8095
+mass,20000,WK,RHI_Dispatch,104.034,0.2146,0.1887
+mass,20000,WK,Mass Processor Worker Task,12.998,11.1173,0.0481
+mass,20000,WK,UE::Mass::FProcessorWorker::ExecuteProcessor: LabNearOrbCountProcessor,1.0,0.4196,0.0036
+mass,20000,WK,LabNearOrbCountProcessor,1.0,0.416,0.413
+mass,20000,WK,RHI_Translate,56.449,8.0808,8.0558
+mass,20000,WK,D3D12RHI::AcquireTransient,181.15,0.0221,0.0221
+mass,20000,WK,RHI_CloseChain,40.939,0.8484,0.8484
+mass,20000,WK,MeshDrawCommandPassSetupTask,8.147,0.1848,0.1848
+mass,20000,WK,AllocatePlacedBuffer,3.991,0.3811,0.0014
+mass,20000,WK,D3D12RHI::CreateRHIBuffer,9.904,0.3868,0.0068
+mass,20000,WK,D3D12RHI::AllocateBuffer,9.904,0.38,0.3763
+mass,20000,WK,FRDGBuilder::CreateViews,1.0,0.0497,0.0497
+mass,20000,WK,FRDGBuilder::CreateUniformBuffers,0.999,0.0585,0.0585
+mass,20000,WK,FRDGBuilder::CreatePassBarriers,8.214,0.1207,0.1207
+mass,20000,WK,DrawVisibleMeshCommandsAnyThreadTask,6.145,0.048,0.0479
+mass,20000,WK,MassProcessingQueue Async Runner Task,1.0,5.5542,0.0217
+mass,20000,WK,Oversubscription,120.92,22.3141,22.1571
+mass,20000,WK,FWaitingQueue_SignalStandbyThread,9.709,0.0331,0.0331
+mass,20000,WK,ExecuteBackgroundTask,2.999,0.0509,0.0464
+mass,20000,WK,EndOfFrameUpdate,3.887,1.3472,0.0049
+mass,20000,WK,DeferredRenderUpdates,5.204,1.3423,0.5278
+mass,20000,WK,FGatherShadowPrimitivesPrepareTask,1.0,0.0882,0.0061
+mass,20000,WK,CreateDynamicShadows,1.0,0.077,0.077
+mass,20000,WK,AddNaniteRenderViews,1.0,0.0201,0.0201
+mass,20000,WK,SetupParallelExecute,1.0,0.028,0.028
+mass,20000,WK,FRDGBuilder::AllocatePooledBuffers,1.0,0.0243,0.0243
+mass,20000,WK,AllocatePlacedTexture,1.714,0.3331,0.0005
+mass,20000,WK,D3D12RHI::CreateTextureInternal,1.714,0.3325,0.3241
+mass,20000,WK,UE::Mass::FProcessorWorker::ExecuteProcessor: MassApplyForceProcessor,1.0,0.3561,0.0038
+mass,20000,WK,MassApplyForceProcessor,1.0,0.3523,0.3493
+mass,20000,WK,UE::Mass::FProcessorWorker::ExecuteProcessor: MassApplyMovementProcessor,1.0,3.2435,0.0029
+mass,20000,WK,MassApplyMovementProcessor,1.0,3.2406,0.4133
+mass,20000,WK,FSceneRenderer::SetupMeshPass,1.0,0.0646,0.0324
+mass,20000,WK,ParallelMdcDispatchPassSetup,8.147,0.0361,0.0209
+mass,20000,WK,ParallelExecute (Await),4.999,0.0501,0.0501
+mass,20000,WK,OcclusionCullPipe,1.0,10.4166,0.0102
+mass,20000,WK,GPUBound_WaitingForGPUForOcclusionQueries_SeeGPUTrack,1.0,10.4004,0.0006
+mass,20000,WK,RHIGetRenderQueryResult_GPU_Wait,4.615,10.4009,0.0025
+mass,20000,WK,SyncPoint_Wait,0.996,10.3984,0.0013
+mass,20000,WK,FTaskBase::WaitWithNamedThreadsSupport,0.996,10.3971,0.0015
+mass,20000,WK,FTaskBase::WaitImpl_StateChangeEvent_WaitFor,2.027,11.0863,0.0016
+mass,20000,WK,FD3D12UploadHeapAllocator::AllocUploadResource,115.91,0.0385,0.0327
+mass,20000,WK,GatherDynamicMeshElements,4.0,0.1487,0.0012
+mass,20000,WK,DynamicPrimitive,6.509,0.1475,0.005
+mass,20000,WK,NS_TeslaCoil,1.0,0.0873,0.0815
+mass,20000,WK,ParallelMdcDispatchDraw,7.145,0.0353,0.0228
+mass,20000,WK,GatherShadowDynamicMeshElements,1.0,0.0659,0.013
+mass,20000,WK,ParallelFor,7.767,0.4159,0.0682
+mass,20000,WK,UE::Mass::FProcessorWorker::ExecuteProcessor: MassSmoothOrientationProcessor,1.0,5.0769,0.0035
+mass,20000,WK,MassSmoothOrientationProcessor,1.0,5.0733,2.4209
+mass,20000,WK,UE::Mass::FProcessorWorker::ExecuteProcessor: LabOrbContactProcessor,1.0,0.1435,0.0019
+mass,20000,WK,LabOrbContactProcessor,1.0,0.1415,0.1415
+mass,20000,WK,FDeferredShadingSceneRenderer_BeginUpdateLumenSceneTasks,1.0,0.0261,0.0176
+mass,20000,WK,CompileBarriers,1.0,0.06,0.06
+mass,20000,WK,FRDGBuilder::CollectBarriers,1.0,0.0881,0.0881
+mass,20000,WK,UpdateGPUScene_Primitives,1.737,0.3362,0.0142
+mass,20000,WK,Primitives,1.737,0.023,0.0039
+mass,20000,WK,NS_Boundary_Cylinder,0.737,0.0356,0.0333
+mass,20000,WK,FRDGBuilder::ProcessAsyncSetupQueue,3.434,0.475,0.475
+mass,20000,WK,UE::Mass::FProcessorWorker::ExecuteProcessor: LabApproachProcessor,1.0,0.5408,0.0036
+mass,20000,WK,LabApproachProcessor,1.0,0.5372,0.5343
+mass,20000,WK,ComputeViewRelevance,1.0,0.0247,0.0247
+mass,20000,WK,UE::Mass::FProcessorWorker::ExecuteProcessor: MassSteerToMoveTargetProcessor,1.0,1.2558,0.0027
+mass,20000,WK,MassSteerToMoveTargetProcessor,1.0,1.2531,1.0508
+mass,20000,WK,FRDGAllocator::ReleaseAll,5.998,0.0991,0.0965
+mass,20000,WK,FISMCInstanceDataSceneProxy_Update,1.999,0.8934,0.8934
+mass,20000,WK,UInstancedStaticMeshComponent::CalcBoundsImpl,1.932,0.8061,0.8061
+mass,20000,WK,VectorVM_Experimental,6.09,0.0809,0.0809
+mass,20000,WK,ParallelFor.Wait,1.975,0.0283,0.0006
+mass,20000,WK,Instances,1.0,0.2919,0.0003
+mass,20000,WK,SceneCulling_Update_Post,1.0,1.6842,0.0355
+mass,20000,WK,SceneCulling_Post_UpdateInstances,1.0,1.5588,0.8697
+mass,20000,WK,BuildHierarchy_FinalizeGrid,1.0,0.0898,0.0044
+mass,20000,WK,BuildHierarchy_FinalizeChunks,1.0,0.074,0.074
+mass,20000,WK,FRDGBuilder::FinalizeResources,1.0,0.1672,0.0018
+mass,20000,WK,Textures,1.0,0.0629,0.0629
+mass,20000,WK,Buffers,1.0,0.0543,0.0543
+mass,20000,WK,FSceneRenderProcessor::DeleteSceneRenderers,1.0,0.1089,0.1089
+mass,20000,WK,FRDGScatterUploadBuilder,0.778,0.0669,0.0655
+mass,20000,WK,FRDGBuilder::SubmitBufferUploads,1.0,0.1369,0.0036
+mass,20000,WK,Allocate,1.0,0.0352,0.0341
+mass,20000,WK,Upload_Multiple,1.0,0.098,0.0786
+mass,20000,WK,FRDGBuilder::SetupDispatchPassExecute,1.0,0.0614,0.0336
+mass,20000,WK,EndOfPipeTask,2.186,0.5147,0.0012
+mass,20000,WK,EndOfPipeTask_RHIEndFrame,1.0,0.4234,0.0009
+mass,20000,WK,UE::RHI::GPUProfiler::ProcessEvents,1.0,0.4225,0.4225
+mass,20000,WK,FRDGBuilder::FinalizeDescs,1.0,0.0202,0.0202
+mass,20000,WK,EndOfPipeTask_RHIProcessDeleteQueue,1.186,0.0902,0.0902
+mass,20000,WK,FMallocBinnedCommonUtils::FlushCurrentThreadCache,0.01,0.0546,0.0
+mass,20000,WK,FMallocBinnedCommonUtils::TrimThreadFreeBlockLists,0.01,0.0546,0.0546
+massserial,10000,GT,Frame,3.0,29.8401,3.1455
+massserial,10000,GT,BasePass,1.0,1.3806,1.3806
+massserial,10000,GT,StochasticLighting,1.0,0.0934,0.0934
+massserial,10000,GT,VirtualShadowMapMarkPages,1.0,0.0999,0.0999
+massserial,10000,GT,ShadowDepths,1.0,2.5447,2.5202
+massserial,10000,GT,BuildRenderingCommandsDeferred(Culling=%s),1.999,0.0392,0.0392
+massserial,10000,GT,LightCompositionTasks_PreLighting,1.0,0.0234,0.0234
+massserial,10000,GT,RenderDeferredLighting,2.0,1.4614,0.1374
+massserial,10000,GT,LumenReflections,1.0,0.9078,0.9078
+massserial,10000,GT,Lights,1.0,0.3963,0.0497
+massserial,10000,GT,ShadowProjectionOnOpaque,1.0,0.3465,0.3465
+massserial,10000,GT,RenderVelocities(%s),1.144,1.4227,1.4227
+massserial,10000,GT,ExponentialHeightFog,1.0,0.0228,0.0228
+massserial,10000,GT,NiagaraStateless,3.999,0.0258,0.0258
+massserial,10000,GT,RenderTranslucency,1.0,0.0505,0.0505
+massserial,10000,GT,PostProcessing,2.0,1.8567,0.1851
+massserial,10000,GT,TemporalSuperResolution(sg.AntiAliasingQuality=%d%s) %dx%d -> %dx%d,2.0,1.5773,1.5773
+massserial,10000,GT,MotionBlur,1.0,0.0943,0.0943
+massserial,10000,GT,DistanceFields,2.0,0.7722,0.2079
+massserial,10000,GT,GlobalDistanceFieldUpdate,2.0,0.5644,0.5644
+massserial,10000,GT,GPUSceneUpdate,1.999,0.0335,0.0335
+massserial,10000,GT,FXSystemPreRender,1.999,2.1545,2.1545
+massserial,10000,GT,PrePass %s %s,1.0,0.0357,0.0357
+massserial,10000,GT,HZB,1.999,0.0334,0.0287
+massserial,10000,GT,ComputeLightGrid,1.0,0.0262,0.0262
+massserial,10000,GT,SkyAtmosphereLUTs,1.0,0.0402,0.0402
+massserial,10000,GT,CaptureConvolveSkyEnvMap,1.624,0.1065,0.1065
+massserial,10000,GT,LumenSceneUpdate: %u card captures %.3fM texels,1.999,0.1006,0.0964
+massserial,10000,GT,LumenScreenProbeGather,1.999,3.7006,3.7006
+massserial,10000,GT,LumenSceneLighting%s,1.0,0.6749,0.6749
+massserial,10000,GT,FEngineLoop::Tick,1.0,9.952,0.0034
+massserial,10000,GT,Sync_RenderingThread,1.0,2.8867,0.0035
+massserial,10000,GT,GameThreadWaitForTask,0.983,2.8809,2.8809
+massserial,10000,GT,UpdateCoreCsvStats_BeginFrame,1.0,0.0904,0.0904
+massserial,10000,GT,FEngineLoop_PumpMessages,1.0,0.0209,0.001
+massserial,10000,GT,Tick_Engine,1.0,6.6814,0.0193
+massserial,10000,GT,UWorld_Tick,1.0,5.8231,0.1145
+massserial,10000,GT,TickCompletionEvents,6.999,5.6776,0.0043
+massserial,10000,GT,ProcessUntilTasksComplete,6.999,5.6733,0.1489
+massserial,10000,GT,FMassProcessingPhase::ExecuteTick EMassProcessingPhase::PrePhysics,1.0,2.9923,0.0218
+massserial,10000,GT,MassExecutor Run,5.999,2.9234,0.0005
+massserial,10000,GT,MassExecutor_RunProcessorsView,7.782,2.9294,0.0071
+massserial,10000,GT,PrePhysics Group,1.0,2.9167,0.0177
+massserial,10000,GT,MassApplyForceProcessor,1.0,0.0978,0.0978
+massserial,10000,GT,MassLODCollectorProcessor,1.0,0.1279,0.0053
+massserial,10000,GT,Close,1.0,0.1223,0.1223
+massserial,10000,GT,MassSmoothOrientationProcessor,1.0,0.9136,0.9136
+massserial,10000,GT,MassApplyMovementProcessor,1.0,0.1428,0.1428
+massserial,10000,GT,LabOrbContactProcessor,1.0,0.0716,0.0716
+massserial,10000,GT,MassVisualizationLODProcessor,1.0,0.1207,0.001
+massserial,10000,GT,CalculateLOD,1.0,0.1118,0.1118
+massserial,10000,GT,LabApproachProcessor,1.0,0.1315,0.1315
+massserial,10000,GT,MassVisualizationProcessor,1.0,0.2116,0.2116
+massserial,10000,GT,MassSteerToMoveTargetProcessor,1.0,0.4445,0.4445
+massserial,10000,GT,LabNearOrbCountProcessor,1.0,0.0371,0.0371
+massserial,10000,GT,MassUpdateISMProcessor,1.0,0.5839,0.5839
+massserial,10000,GT,FWaitingQueue_Unpark_SignalWaitingThread,6.911,0.0235,0.0235
+massserial,10000,GT,WaitForTasks,1.896,0.0634,0.0634
+massserial,10000,GT,FMassProcessingPhase::ExecuteTick EMassProcessingPhase::PostPhysics,1.0,2.4358,0.0028
+massserial,10000,GT,MassVisualizationComponent EndVisualChanges,1.0,2.4318,2.4318
+massserial,10000,GT,FViewport_Draw,1.0,0.7944,0.1118
+massserial,10000,GT,BeginRenderingViewFamily,1.0,0.6779,0.0328
+massserial,10000,GT,SendAllEndOfFrameUpdates,1.0,0.6397,0.0031
+massserial,10000,GT,UWorld_SendAllEndOfFrameUpdates,1.0,0.6365,0.0062
+massserial,10000,GT,ParallelFor,1.001,0.6285,0.0047
+massserial,10000,GT,EndOfFrameUpdate,1.0,0.1742,0.0003
+massserial,10000,GT,DeferredRenderUpdates,4.632,0.1739,0.09
+massserial,10000,GT,UInstancedStaticMeshComponent::CalcBoundsImpl,0.34,0.0828,0.0828
+massserial,10000,GT,FStreamingManagerCollection::UpdateResourceStreaming,1.0,0.0298,0.0148
+massserial,10000,GT,Slate::Tick (Platform and Input),1.0,0.0948,0.0004
+massserial,10000,GT,Slate::TickPlatform,1.0,0.0944,0.0919
+massserial,10000,GT,Slate::Tick (Time and Widgets),1.0,0.0778,0.0029
+massserial,10000,GT,Slate::DrawWindows,1.0,0.0749,0.0108
+massserial,10000,GT,Slate::DrawWindow,1.0,0.0429,0.0116
+massserial,10000,GT,Slate_PaintSlowPath,1.0,0.0313,0.0122
+massserial,10000,GT,ParallelFor.Wait,0.787,0.4444,0.4444
+massserial,10000,RT,Frame,2.0,19.8923,3.1304
+massserial,10000,RT,BasePass,1.0,1.3806,1.3806
+massserial,10000,RT,StochasticLighting,1.0,0.0934,0.0934
+massserial,10000,RT,VirtualShadowMapMarkPages,1.0,0.0999,0.0999
+massserial,10000,RT,ShadowDepths,1.0,2.5447,2.5202
+massserial,10000,RT,BuildRenderingCommandsDeferred(Culling=%s),1.999,0.0392,0.0392
+massserial,10000,RT,LightCompositionTasks_PreLighting,1.0,0.0234,0.0234
+massserial,10000,RT,RenderDeferredLighting,2.0,1.4614,0.1374
+massserial,10000,RT,LumenReflections,1.0,0.9078,0.9078
+massserial,10000,RT,Lights,1.0,0.3963,0.0497
+massserial,10000,RT,ShadowProjectionOnOpaque,1.0,0.3465,0.3465
+massserial,10000,RT,RenderVelocities(%s),1.144,1.4227,1.4227
+massserial,10000,RT,ExponentialHeightFog,1.0,0.0228,0.0228
+massserial,10000,RT,NiagaraStateless,3.999,0.0258,0.0258
+massserial,10000,RT,RenderTranslucency,3.144,0.0684,0.0673
+massserial,10000,RT,PostProcessing,2.999,1.9612,0.2796
+massserial,10000,RT,TemporalSuperResolution(sg.AntiAliasingQuality=%d%s) %dx%d -> %dx%d,2.0,1.5773,1.5773
+massserial,10000,RT,MotionBlur,1.0,0.0943,0.0943
+massserial,10000,RT,DistanceFields,2.0,0.7722,0.2079
+massserial,10000,RT,GlobalDistanceFieldUpdate,2.0,0.5644,0.5644
+massserial,10000,RT,GPUSceneUpdate,1.999,0.0335,0.0335
+massserial,10000,RT,FXSystemPreRender,1.999,2.1545,2.1545
+massserial,10000,RT,PrePass %s %s,1.0,0.0357,0.0357
+massserial,10000,RT,HZB,1.999,0.0334,0.0287
+massserial,10000,RT,ComputeLightGrid,1.0,0.0262,0.0262
+massserial,10000,RT,SkyAtmosphereLUTs,1.0,0.0402,0.0402
+massserial,10000,RT,CaptureConvolveSkyEnvMap,1.624,0.1065,0.1065
+massserial,10000,RT,LumenSceneUpdate: %u card captures %.3fM texels,1.999,0.1006,0.0964
+massserial,10000,RT,LumenScreenProbeGather,1.999,3.7006,3.7006
+massserial,10000,RT,LumenSceneLighting%s,1.0,0.6749,0.6749
+massserial,10000,RT,FDeferredShadingSceneRenderer_Render,1.0,9.0102,0.3183
+massserial,10000,RT,FDeferredShadingSceneRenderer::UpdateLumenScene,1.0,0.0627,0.0538
+massserial,10000,RT,FDeferredShadingSceneRenderer::RenderLumenSceneLighting,1.0,0.0443,0.0001
+massserial,10000,RT,RenderLumenSceneLighting,1.0,0.0442,0.0336
+massserial,10000,RT,FWaitingQueue_Unpark_SignalWaitingThread,38.22,0.1283,0.1283
+massserial,10000,RT,RHICmdList_Submit,41.312,0.1552,0.1231
+massserial,10000,RT,FGPUScene_UploadDynamicPrimitiveShaderDataForView,1.999,0.0349,0.0211
+massserial,10000,RT,DispatchAsyncLumenIndirectLightingWork,1.0,0.1373,0.1373
+massserial,10000,RT,FVirtualShadowMapArray_BeginMarkPages,1.0,0.0249,0.0184
+massserial,10000,RT,FSceneRenderer::RenderShadowDepthMaps,1.0,0.0682,0.0001
+massserial,10000,RT,FSceneRenderer_RenderShadowDepthMaps,1.0,0.0681,0.0026
+massserial,10000,RT,FInstanceCullingManager::BeginDeferredCulling,1.999,0.051,0.0507
+massserial,10000,RT,FShadowSceneRenderer::RenderVirtualShadowMaps,1.0,0.0261,0.0043
+massserial,10000,RT,FVirtualShadowMapArray::RenderVirtualShadowMapsNonNanite,1.0,0.0218,0.0167
+massserial,10000,RT,WaitUntilTasksComplete,5.989,3.6046,0.0077
+massserial,10000,RT,RenderLighting,2.0,0.0824,0.0206
+massserial,10000,RT,FDeferredShadingSceneRenderer::RenderDiffuseIndirectAndAmbientOcclusion,2.0,0.0398,0.0398
+massserial,10000,RT,FDeferredShadingSceneRenderer_RenderLights,1.0,0.0221,0.0143
+massserial,10000,RT,Tasks::Wait,7.993,0.1544,0.0088
+massserial,10000,RT,FTaskBase::WaitImpl_StateChangeEvent_WaitFor,3.503,0.2824,0.2824
+massserial,10000,RT,CreateCommandList,8.331,0.0413,0.0088
+massserial,10000,RT,FRDGBuilder::CollectResources,2.0,0.2867,0.0874
+massserial,10000,RT,FRDGBuilder::AllocateTransientResources,2.0,0.1771,0.1489
+massserial,10000,RT,FRDGBuilder::ExecutePasses,2.0,0.1285,0.0726
+massserial,10000,RT,ParallelFor,2.0,1.5423,1.5423
+massserial,10000,RT,LaunchVisibilityTasks,1.0,0.5261,0.0161
+massserial,10000,RT,WaitForTasks,2.016,3.6101,3.6101
+massserial,10000,RT,UpdateGPUScene,2.921,0.0254,0.0132
+massserial,10000,RT,FSceneRenderer::PrepareDistanceFieldScene,1.0,3.9664,2.3998
+massserial,10000,RT,FDeferredShadingSceneRenderer_InitViews,1.0,3.1899,0.0605
+massserial,10000,RT,ProcessVisibilityTasks,1.0,3.1156,0.0026
+massserial,10000,RT,WaitForVisibilityTasks,1.0,3.1062,0.0012
+massserial,10000,RT,FinishDynamicMeshElements,1.0,0.0928,0.0137
+massserial,10000,RT,FSceneRenderer::FinishInitDynamicShadows,1.0,0.0502,0.0005
+massserial,10000,RT,FShadowSceneRenderer_DispatchVirtualShadowMapViewAndCullingSetup,1.0,0.0483,0.0415
+massserial,10000,RT,AllocateAndCaptureFrameSkyEnvMap,1.0,0.031,0.0255
+massserial,10000,WK,Frame,2.0,19.8923,3.1304
+massserial,10000,WK,BasePass,1.0,1.3806,1.3806
+massserial,10000,WK,StochasticLighting,1.0,0.0934,0.0934
+massserial,10000,WK,VirtualShadowMapMarkPages,1.0,0.0999,0.0999
+massserial,10000,WK,ShadowDepths,1.0,2.5447,2.5202
+massserial,10000,WK,BuildRenderingCommandsDeferred(Culling=%s),1.999,0.0392,0.0392
+massserial,10000,WK,LightCompositionTasks_PreLighting,1.0,0.0234,0.0234
+massserial,10000,WK,RenderDeferredLighting,2.0,1.4614,0.1374
+massserial,10000,WK,LumenReflections,1.0,0.9078,0.9078
+massserial,10000,WK,Lights,1.0,0.3963,0.0497
+massserial,10000,WK,ShadowProjectionOnOpaque,1.0,0.3465,0.3465
+massserial,10000,WK,RenderVelocities(%s),1.144,1.4227,1.4227
+massserial,10000,WK,ExponentialHeightFog,1.0,0.0228,0.0228
+massserial,10000,WK,NiagaraStateless,3.999,0.0258,0.0258
+massserial,10000,WK,RenderTranslucency,1.0,0.0505,0.0505
+massserial,10000,WK,PostProcessing,2.0,1.8567,0.1851
+massserial,10000,WK,TemporalSuperResolution(sg.AntiAliasingQuality=%d%s) %dx%d -> %dx%d,2.0,1.5773,1.5773
+massserial,10000,WK,MotionBlur,1.0,0.0943,0.0943
+massserial,10000,WK,DistanceFields,2.0,0.7722,0.2079
+massserial,10000,WK,GlobalDistanceFieldUpdate,2.0,0.5644,0.5644
+massserial,10000,WK,GPUSceneUpdate,1.999,0.0335,0.0335
+massserial,10000,WK,FXSystemPreRender,1.999,2.1545,2.1545
+massserial,10000,WK,PrePass %s %s,1.0,0.0357,0.0357
+massserial,10000,WK,HZB,1.999,0.0334,0.0287
+massserial,10000,WK,ComputeLightGrid,1.0,0.0262,0.0262
+massserial,10000,WK,SkyAtmosphereLUTs,1.0,0.0402,0.0402
+massserial,10000,WK,CaptureConvolveSkyEnvMap,1.624,0.1065,0.1065
+massserial,10000,WK,LumenSceneUpdate: %u card captures %.3fM texels,1.999,0.1006,0.0964
+massserial,10000,WK,LumenScreenProbeGather,1.999,3.7006,3.7006
+massserial,10000,WK,LumenSceneLighting%s,1.0,0.6749,0.6749
+massserial,10000,WK,ExecuteForegroundTask,236.888,22.4405,0.8682
+massserial,10000,WK,FWaitingQueue_Unpark_SignalWaitingThread,74.719,0.2901,0.2901
+massserial,10000,WK,FRDGBuilder::CreatePassBarriers,8.734,0.1294,0.1294
+massserial,10000,WK,TaskWorkerIsLookingForWork,244.692,3.5119,3.5119
+massserial,10000,WK,ParallelExecute (Async),18.729,0.7835,0.7674
+massserial,10000,WK,RHI_Translate,56.449,6.21,6.1888
+massserial,10000,WK,RHI_CloseChain,41.143,0.7105,0.7105
+massserial,10000,WK,VectorVM_Experimental,5.992,0.0751,0.0751
+massserial,10000,WK,EndOfFrameUpdate,3.384,0.579,0.0034
+massserial,10000,WK,DeferredRenderUpdates,4.139,0.5756,0.2427
+massserial,10000,WK,UInstancedStaticMeshComponent::CalcBoundsImpl,1.659,0.3264,0.3264
+massserial,10000,WK,ExecuteBackgroundTask,2.999,0.0404,0.0372
+massserial,10000,WK,ComputeViewRelevance,1.0,0.0216,0.0216
+massserial,10000,WK,UpdateGPUScene_Primitives,1.921,0.2099,0.0114
+massserial,10000,WK,FD3D12UploadHeapAllocator::AllocUploadResource,115.036,0.0354,0.0311
+massserial,10000,WK,ParallelFor,7.94,0.2804,0.0516
+massserial,10000,WK,Instances,1.0,0.1752,0.0002
+massserial,10000,WK,GPUScene Upload Instances Task,19.325,1.4201,1.4201
+massserial,10000,WK,ParallelFor.Wait,2.296,0.0409,0.0006
+massserial,10000,WK,Oversubscription,4.43,7.4165,7.4074
+massserial,10000,WK,RHI_Dispatch,103.797,0.1942,0.1701
+massserial,10000,WK,ParallelExecute (Await),4.998,0.0468,0.0468
+massserial,10000,WK,DrawVisibleMeshCommandsAnyThreadTask,6.143,0.043,0.043
+massserial,10000,WK,MeshDrawCommandPassSetupTask,8.141,0.1169,0.1169
+massserial,10000,WK,AllocatePlacedBuffer,2.883,0.3028,0.0011
+massserial,10000,WK,D3D12RHI::CreateRHIBuffer,8.233,0.3082,0.0053
+massserial,10000,WK,D3D12RHI::AllocateBuffer,8.233,0.303,0.2994
+massserial,10000,WK,FGatherShadowPrimitivesPrepareTask,1.0,0.0753,0.0053
+massserial,10000,WK,CreateDynamicShadows,1.0,0.065,0.065
+massserial,10000,WK,GatherShadowDynamicMeshElements,1.0,0.0475,0.0085
+massserial,10000,WK,FRDGBuilder::CreateViews,1.0,0.0477,0.0477
+massserial,10000,WK,FRDGBuilder::CreateUniformBuffers,0.999,0.0589,0.0589
+massserial,10000,WK,GatherDynamicMeshElements,3.998,0.1293,0.0012
+massserial,10000,WK,DynamicPrimitive,6.666,0.1281,0.004
+massserial,10000,WK,SceneCulling_Update_Post,1.0,0.664,0.0136
+massserial,10000,WK,SceneCulling_Post_UpdateInstances,1.0,0.6256,0.3338
+massserial,10000,WK,FTaskBase::WaitImpl_StateChangeEvent_WaitFor,2.058,7.3774,0.0015
+massserial,10000,WK,BuildHierarchy_FinalizeGrid,1.0,0.0248,0.0029
+massserial,10000,WK,FSceneRenderProcessor::DeleteSceneRenderers,1.0,0.0436,0.0436
+massserial,10000,WK,FSceneRenderer::SetupMeshPass,0.999,0.033,0.0163
+massserial,10000,WK,ParallelMdcDispatchPassSetup,8.14,0.0201,0.0118
+massserial,10000,WK,NS_Boundary_Cylinder,0.922,0.0349,0.0331
+massserial,10000,WK,AllocatePlacedTexture,1.329,0.2917,0.0005
+massserial,10000,WK,D3D12RHI::CreateTextureInternal,1.329,0.2912,0.2824
+massserial,10000,WK,SetupParallelExecute,1.0,0.0266,0.0266
+massserial,10000,WK,FRDGBuilder::AllocatePooledBuffers,1.0,0.0243,0.0243
+massserial,10000,WK,ParallelMdcDispatchDraw,7.143,0.0335,0.0208
+massserial,10000,WK,FRDGAllocator::ReleaseAll,5.999,0.0474,0.0451
+massserial,10000,WK,FISMCInstanceDataSceneProxy_Update,2.0,0.3968,0.3968
+massserial,10000,WK,OcclusionCullPipe,1.0,7.1097,0.0116
+massserial,10000,WK,GPUBound_WaitingForGPUForOcclusionQueries_SeeGPUTrack,1.0,7.0904,0.0005
+massserial,10000,WK,RHIGetRenderQueryResult_GPU_Wait,4.603,7.0912,0.0025
+massserial,10000,WK,SyncPoint_Wait,1.0,7.0887,0.0011
+massserial,10000,WK,FTaskBase::WaitWithNamedThreadsSupport,1.0,7.0876,0.0017
+massserial,10000,WK,NS_TeslaCoil,1.0,0.0732,0.0682
+massserial,10000,WK,CompileBarriers,1.0,0.0649,0.0649
+massserial,10000,WK,FRDGBuilder::CollectBarriers,1.0,0.0869,0.0869
+massserial,10000,WK,FRDGBuilder::ProcessAsyncSetupQueue,2.576,0.5071,0.5071
+massserial,10000,WK,EndOfPipeTask,2.085,0.3568,0.0008
+massserial,10000,WK,EndOfPipeTask_RHIProcessDeleteQueue,1.085,0.0536,0.0536
+massserial,10000,WK,EndOfPipeTask_RHIEndFrame,1.0,0.3024,0.0006
+massserial,10000,WK,UE::RHI::GPUProfiler::ProcessEvents,1.0,0.3018,0.3018
+massserial,10000,WK,FRDGScatterUploadBuilder,0.41,0.0444,0.044
+massserial,10000,WK,FRDGBuilder::SubmitBufferUploads,1.0,0.1307,0.0043
+massserial,10000,WK,Allocate,1.0,0.0357,0.034
+massserial,10000,WK,Upload_Multiple,1.0,0.0906,0.0718
+massserial,10000,WK,FMallocBinnedCommonUtils::FlushCurrentThreadCache,0.006,0.0381,0.0
+massserial,10000,WK,FMallocBinnedCommonUtils::TrimThreadFreeBlockLists,0.006,0.0381,0.0381
+massserial,10000,WK,FRDGBuilder::FinalizeResources,0.999,0.1666,0.0018
+massserial,10000,WK,Textures,0.999,0.0626,0.0626
+massserial,10000,WK,Buffers,0.999,0.053,0.053
+massserial,10000,WK,FRDGBuilder::SetupDispatchPassExecute,1.0,0.0583,0.0313
+massserial,20000,GT,Frame,3.0,44.2178,5.2526
+massserial,20000,GT,RenderVelocities(%s),1.139,2.7296,2.7296
+massserial,20000,GT,HZB,1.999,0.0339,0.0291
+massserial,20000,GT,ComputeLightGrid,1.0,0.0266,0.0266
+massserial,20000,GT,SkyAtmosphereLUTs,1.0,0.0428,0.0428
+massserial,20000,GT,CaptureConvolveSkyEnvMap,1.624,0.1086,0.1086
+massserial,20000,GT,LumenSceneUpdate: %u card captures %.3fM texels,1.999,0.1042,0.0991
+massserial,20000,GT,LumenScreenProbeGather,1.999,5.1836,5.1836
+massserial,20000,GT,BasePass,1.0,2.4844,2.4844
+massserial,20000,GT,StochasticLighting,1.0,0.095,0.095
+massserial,20000,GT,VirtualShadowMapMarkPages,1.0,0.1086,0.1086
+massserial,20000,GT,ShadowDepths,1.0,4.5919,4.5698
+massserial,20000,GT,BuildRenderingCommandsDeferred(Culling=%s),1.999,0.0404,0.0404
+massserial,20000,GT,RenderDeferredLighting,1.999,1.0151,0.1413
+massserial,20000,GT,LumenReflections,1.0,0.5264,0.5264
+massserial,20000,GT,Lights,1.0,0.3271,0.0457
+massserial,20000,GT,ShadowProjectionOnOpaque,1.0,0.2814,0.2814
+massserial,20000,GT,FilterTranslucentVolume %dx%dx%d Cascades:%d,1.0,0.0203,0.0203
+massserial,20000,GT,ExponentialHeightFog,1.0,0.0236,0.0236
+massserial,20000,GT,NiagaraStateless,3.998,0.0278,0.0278
+massserial,20000,GT,RenderTranslucency,1.0,0.0498,0.0498
+massserial,20000,GT,PostProcessing,1.999,2.1793,0.1882
+massserial,20000,GT,TemporalSuperResolution(sg.AntiAliasingQuality=%d%s) %dx%d -> %dx%d,1.999,1.8933,1.8933
+massserial,20000,GT,MotionBlur,1.0,0.0977,0.0977
+massserial,20000,GT,DistanceFields,1.999,1.3682,0.3787
+massserial,20000,GT,GlobalDistanceFieldUpdate,1.999,0.9894,0.9894
+massserial,20000,GT,GPUSceneUpdate,1.999,0.0327,0.0327
+massserial,20000,GT,FXSystemPreRender,1.999,3.1699,3.1699
+massserial,20000,GT,PrePass %s %s,0.999,0.0372,0.0372
+massserial,20000,GT,LumenSceneLighting%s,1.0,0.6978,0.6978
+massserial,20000,GT,FEngineLoop::Tick,1.0,14.7445,0.0039
+massserial,20000,GT,Tick_Engine,1.0,13.2678,0.0228
+massserial,20000,GT,FViewport_Draw,1.0,1.4316,0.1449
+massserial,20000,GT,BeginRenderingViewFamily,1.0,1.2809,0.0441
+massserial,20000,GT,SendAllEndOfFrameUpdates,1.0,1.2303,0.0041
+massserial,20000,GT,UWorld_SendAllEndOfFrameUpdates,1.0,1.2262,0.0086
+massserial,20000,GT,ParallelFor,1.001,1.2152,0.0053
+massserial,20000,GT,EndOfFrameUpdate,1.0,0.1216,0.0003
+massserial,20000,GT,DeferredRenderUpdates,4.223,0.1214,0.0754
+massserial,20000,GT,UInstancedStaticMeshComponent::CalcBoundsImpl,0.111,0.0455,0.0455
+massserial,20000,GT,FStreamingManagerCollection::UpdateResourceStreaming,1.0,0.0364,0.0186
+massserial,20000,GT,FWaitingQueue_Unpark_SignalWaitingThread,6.333,0.025,0.025
+massserial,20000,GT,Slate::Tick (Platform and Input),1.0,0.1224,0.0005
+massserial,20000,GT,Slate::TickPlatform,1.0,0.1219,0.1196
+massserial,20000,GT,Slate::Tick (Time and Widgets),1.0,0.0969,0.0036
+massserial,20000,GT,Slate::DrawWindows,1.0,0.0933,0.0135
+massserial,20000,GT,Slate::DrawWindow,1.0,0.0534,0.0144
+massserial,20000,GT,Slate_PaintSlowPath,1.0,0.039,0.0152
+massserial,20000,GT,SViewport_OnPaint,1.0,0.0238,0.0126
+massserial,20000,GT,Sync_RenderingThread,1.0,1.0137,0.0042
+massserial,20000,GT,GameThreadWaitForTask,0.682,1.0074,1.0074
+massserial,20000,GT,UpdateCoreCsvStats_BeginFrame,1.0,0.0947,0.0947
+massserial,20000,GT,FEngineLoop_PumpMessages,1.0,0.0308,0.0011
+massserial,20000,GT,WinPumpMessages,1.0,0.028,0.028
+massserial,20000,GT,UWorld_Tick,1.0,11.76,0.1386
+massserial,20000,GT,TickCompletionEvents,6.997,11.582,0.0051
+massserial,20000,GT,ProcessUntilTasksComplete,6.997,11.5769,0.2238
+massserial,20000,GT,FMassProcessingPhase::ExecuteTick EMassProcessingPhase::PrePhysics,1.0,5.9046,0.0323
+massserial,20000,GT,DoEntityCompaction,1.0,0.0409,0.0409
+massserial,20000,GT,MassExecutor Run,5.998,5.7534,0.0006
+massserial,20000,GT,MassExecutor_RunProcessorsView,9.209,5.7678,0.0122
+massserial,20000,GT,PrePhysics Group,1.0,5.7445,0.018
+massserial,20000,GT,MassApplyForceProcessor,1.0,0.2341,0.2341
+massserial,20000,GT,MassLODCollectorProcessor,1.0,0.4423,0.0067
+massserial,20000,GT,Close,1.0,0.435,0.435
+massserial,20000,GT,MassSmoothOrientationProcessor,1.0,1.8761,1.8761
+massserial,20000,GT,MassApplyMovementProcessor,1.0,0.2675,0.2675
+massserial,20000,GT,LabOrbContactProcessor,1.0,0.1025,0.1025
+massserial,20000,GT,MassVisualizationLODProcessor,1.0,0.2259,0.0011
+massserial,20000,GT,CalculateLOD,1.0,0.2147,0.2147
+massserial,20000,GT,LabApproachProcessor,1.0,0.19,0.19
+massserial,20000,GT,MassVisualizationProcessor,1.0,0.3412,0.3412
+massserial,20000,GT,MassSteerToMoveTargetProcessor,1.0,0.8515,0.8515
+massserial,20000,GT,LabNearOrbCountProcessor,1.0,0.0557,0.0557
+massserial,20000,GT,MassUpdateISMProcessor,1.0,1.1195,1.1195
+massserial,20000,GT,MassDeferredCommand_Execute,0.81,0.0247,0.0075
+massserial,20000,GT,MassCommandAddElements_Execute,0.832,0.0212,0.0005
+massserial,20000,GT,Mass_BatchChangeCompositionForEntitiesWithSharedFragments,1.872,0.0259,0.0259
+massserial,20000,GT,WaitForTasks,1.623,0.0841,0.0841
+massserial,20000,GT,FMassProcessingPhase::ExecuteTick EMassProcessingPhase::PostPhysics,1.0,5.3191,0.0034
+massserial,20000,GT,MassVisualizationComponent EndVisualChanges,1.0,5.3142,5.3142
+massserial,20000,GT,ParallelFor.Wait,0.945,1.0833,1.0833
+massserial,20000,RT,Frame,2.0,29.478,5.2346
+massserial,20000,RT,RenderVelocities(%s),1.139,2.7296,2.7296
+massserial,20000,RT,HZB,1.999,0.0339,0.0291
+massserial,20000,RT,ComputeLightGrid,1.0,0.0266,0.0266
+massserial,20000,RT,SkyAtmosphereLUTs,1.0,0.0428,0.0428
+massserial,20000,RT,CaptureConvolveSkyEnvMap,1.624,0.1086,0.1086
+massserial,20000,RT,LumenSceneUpdate: %u card captures %.3fM texels,1.999,0.1042,0.0991
+massserial,20000,RT,LumenScreenProbeGather,1.999,5.1836,5.1836
+massserial,20000,RT,BasePass,1.0,2.4844,2.4844
+massserial,20000,RT,StochasticLighting,1.0,0.095,0.095
+massserial,20000,RT,VirtualShadowMapMarkPages,1.0,0.1086,0.1086
+massserial,20000,RT,ShadowDepths,1.0,4.5919,4.5698
+massserial,20000,RT,BuildRenderingCommandsDeferred(Culling=%s),1.999,0.0404,0.0404
+massserial,20000,RT,RenderDeferredLighting,1.999,1.0151,0.1413
+massserial,20000,RT,LumenReflections,1.0,0.5264,0.5264
+massserial,20000,RT,Lights,1.0,0.3271,0.0457
+massserial,20000,RT,ShadowProjectionOnOpaque,1.0,0.2814,0.2814
+massserial,20000,RT,FilterTranslucentVolume %dx%dx%d Cascades:%d,1.0,0.0203,0.0203
+massserial,20000,RT,ExponentialHeightFog,1.0,0.0236,0.0236
+massserial,20000,RT,NiagaraStateless,3.998,0.0278,0.0278
+massserial,20000,RT,RenderTranslucency,3.139,0.068,0.0668
+massserial,20000,RT,PostProcessing,2.999,2.2888,0.2876
+massserial,20000,RT,TemporalSuperResolution(sg.AntiAliasingQuality=%d%s) %dx%d -> %dx%d,1.999,1.8933,1.8933
+massserial,20000,RT,MotionBlur,1.0,0.0977,0.0977
+massserial,20000,RT,DistanceFields,1.999,1.3682,0.3787
+massserial,20000,RT,GlobalDistanceFieldUpdate,1.999,0.9894,0.9894
+massserial,20000,RT,GPUSceneUpdate,1.999,0.0327,0.0327
+massserial,20000,RT,FXSystemPreRender,1.999,3.1699,3.1699
+massserial,20000,RT,PrePass %s %s,0.999,0.0372,0.0372
+massserial,20000,RT,LumenSceneLighting%s,1.0,0.6978,0.6978
+massserial,20000,RT,FDeferredShadingSceneRenderer_Render,1.0,13.1009,0.3879
+massserial,20000,RT,FDeferredShadingSceneRenderer_InitViews,1.0,2.7148,0.0888
+massserial,20000,RT,ProcessVisibilityTasks,1.0,2.6057,0.0031
+massserial,20000,RT,WaitForVisibilityTasks,1.0,2.5958,0.0013
+massserial,20000,RT,WaitUntilTasksComplete,5.757,3.0198,0.007
+massserial,20000,RT,WaitForTasks,2.919,3.706,3.706
+massserial,20000,RT,RHICmdList_Submit,41.253,0.1704,0.135
+massserial,20000,RT,FinishDynamicMeshElements,1.0,0.1115,0.0164
+massserial,20000,RT,FGPUScene_UploadDynamicPrimitiveShaderDataForView,1.999,0.0476,0.0299
+massserial,20000,RT,UpdateGPUScene,2.732,0.0326,0.0164
+massserial,20000,RT,CreateCommandList,8.503,0.0468,0.0097
+massserial,20000,RT,FSkinningSceneExtension_FRenderer_UpdateViewData,1.0,0.0345,0.0085
+massserial,20000,RT,SceneCulling_Update_FinalizeAndClear,1.0,0.026,0.026
+massserial,20000,RT,Tasks::Wait,7.997,0.1506,0.0096
+massserial,20000,RT,FInstanceCullingManager::BeginDeferredCulling,1.999,0.0679,0.0674
+massserial,20000,RT,FWaitingQueue_Unpark_SignalWaitingThread,40.678,0.1374,0.1374
+massserial,20000,RT,FSceneRenderer::FinishInitDynamicShadows,1.0,0.0567,0.0006
+massserial,20000,RT,FShadowSceneRenderer_DispatchVirtualShadowMapViewAndCullingSetup,1.0,0.0546,0.0482
+massserial,20000,RT,AllocateAndCaptureFrameSkyEnvMap,1.0,0.0319,0.0261
+massserial,20000,RT,FDeferredShadingSceneRenderer::UpdateLumenScene,1.0,0.0745,0.0599
+massserial,20000,RT,FDeferredShadingSceneRenderer::RenderLumenSceneLighting,1.0,0.05,0.0001
+massserial,20000,RT,RenderLumenSceneLighting,1.0,0.0499,0.0393
+massserial,20000,RT,DispatchAsyncLumenIndirectLightingWork,1.0,0.1372,0.1372
+massserial,20000,RT,FVirtualShadowMapArray_BeginMarkPages,1.0,0.0259,0.0186
+massserial,20000,RT,FSceneRenderer::RenderShadowDepthMaps,1.0,0.068,0.0001
+massserial,20000,RT,FSceneRenderer_RenderShadowDepthMaps,1.0,0.0679,0.0026
+massserial,20000,RT,FShadowSceneRenderer::RenderVirtualShadowMaps,1.0,0.0266,0.0044
+massserial,20000,RT,FVirtualShadowMapArray::RenderVirtualShadowMapsNonNanite,1.0,0.0222,0.0174
+massserial,20000,RT,RenderLighting,1.999,0.0876,0.0224
+massserial,20000,RT,FDeferredShadingSceneRenderer::RenderDiffuseIndirectAndAmbientOcclusion,1.999,0.0415,0.0415
+massserial,20000,RT,FDeferredShadingSceneRenderer_RenderLights,1.0,0.0237,0.0153
+massserial,20000,RT,FTaskBase::WaitImpl_StateChangeEvent_WaitFor,3.618,0.2816,0.2816
+massserial,20000,RT,FRDGBuilder::CollectResources,1.999,0.2838,0.083
+massserial,20000,RT,FRDGBuilder::AllocateTransientResources,1.999,0.1794,0.1471
+massserial,20000,RT,FRDGBuilder::ExecutePasses,1.999,0.1299,0.0712
+massserial,20000,RT,ParallelFor,2.0,2.3722,2.3722
+massserial,20000,RT,LaunchVisibilityTasks,1.0,0.4513,0.0167
+massserial,20000,RT,FSceneRenderer::PrepareDistanceFieldScene,1.0,8.4149,5.9904
+massserial,20000,WK,Frame,2.0,29.478,5.2346
+massserial,20000,WK,RenderVelocities(%s),1.139,2.7296,2.7296
+massserial,20000,WK,HZB,1.999,0.0339,0.0291
+massserial,20000,WK,ComputeLightGrid,1.0,0.0266,0.0266
+massserial,20000,WK,SkyAtmosphereLUTs,1.0,0.0428,0.0428
+massserial,20000,WK,CaptureConvolveSkyEnvMap,1.624,0.1086,0.1086
+massserial,20000,WK,LumenSceneUpdate: %u card captures %.3fM texels,1.999,0.1042,0.0991
+massserial,20000,WK,LumenScreenProbeGather,1.999,5.1836,5.1836
+massserial,20000,WK,BasePass,1.0,2.4844,2.4844
+massserial,20000,WK,StochasticLighting,1.0,0.095,0.095
+massserial,20000,WK,VirtualShadowMapMarkPages,1.0,0.1086,0.1086
+massserial,20000,WK,ShadowDepths,1.0,4.5919,4.5698
+massserial,20000,WK,BuildRenderingCommandsDeferred(Culling=%s),1.999,0.0404,0.0404
+massserial,20000,WK,RenderDeferredLighting,1.999,1.0151,0.1413
+massserial,20000,WK,LumenReflections,1.0,0.5264,0.5264
+massserial,20000,WK,Lights,1.0,0.3271,0.0457
+massserial,20000,WK,ShadowProjectionOnOpaque,1.0,0.2814,0.2814
+massserial,20000,WK,FilterTranslucentVolume %dx%dx%d Cascades:%d,1.0,0.0203,0.0203
+massserial,20000,WK,ExponentialHeightFog,1.0,0.0236,0.0236
+massserial,20000,WK,NiagaraStateless,3.998,0.0278,0.0278
+massserial,20000,WK,RenderTranslucency,1.0,0.0498,0.0498
+massserial,20000,WK,PostProcessing,1.999,2.1793,0.1882
+massserial,20000,WK,TemporalSuperResolution(sg.AntiAliasingQuality=%d%s) %dx%d -> %dx%d,1.999,1.8933,1.8933
+massserial,20000,WK,MotionBlur,1.0,0.0977,0.0977
+massserial,20000,WK,DistanceFields,1.999,1.3682,0.3787
+massserial,20000,WK,GlobalDistanceFieldUpdate,1.999,0.9894,0.9894
+massserial,20000,WK,GPUSceneUpdate,1.999,0.0327,0.0327
+massserial,20000,WK,FXSystemPreRender,1.999,3.1699,3.1699
+massserial,20000,WK,PrePass %s %s,0.999,0.0372,0.0372
+massserial,20000,WK,LumenSceneLighting%s,1.0,0.6978,0.6978
+massserial,20000,WK,ExecuteForegroundTask,247.718,31.2711,0.9779
+massserial,20000,WK,FWaitingQueue_Unpark_SignalWaitingThread,80.121,0.3498,0.3498
+massserial,20000,WK,GPUScene Upload Instances Task,26.383,3.8699,3.8699
+massserial,20000,WK,TaskWorkerIsLookingForWork,246.456,3.7011,3.7011
+massserial,20000,WK,AllocatePlacedBuffer,3.861,0.3745,0.0015
+massserial,20000,WK,D3D12RHI::CreateRHIBuffer,9.758,0.3813,0.0069
+massserial,20000,WK,D3D12RHI::AllocateBuffer,9.758,0.3744,0.3697
+massserial,20000,WK,FRDGBuilder::CreatePassBarriers,7.976,0.1172,0.1172
+massserial,20000,WK,ParallelExecute (Async),18.788,0.8008,0.7836
+massserial,20000,WK,RHI_Translate,56.472,6.5548,6.5315
+massserial,20000,WK,RHI_CloseChain,40.977,0.7567,0.7567
+massserial,20000,WK,ParallelExecute (Await),4.999,0.0493,0.0493
+massserial,20000,WK,DrawVisibleMeshCommandsAnyThreadTask,6.138,0.0467,0.0467
+massserial,20000,WK,MeshDrawCommandPassSetupTask,8.137,0.1875,0.1875
+massserial,20000,WK,RHI_Dispatch,103.953,0.2071,0.1825
+massserial,20000,WK,D3D12RHI::AcquireTransient,181.148,0.0205,0.0205
+massserial,20000,WK,EndOfFrameUpdate,3.759,1.2857,0.0045
+massserial,20000,WK,UpdateGPUScene_Primitives,1.733,0.3576,0.0138
+massserial,20000,WK,FD3D12UploadHeapAllocator::AllocUploadResource,115.573,0.0388,0.0328
+massserial,20000,WK,Primitives,1.733,0.0241,0.0039
+massserial,20000,WK,ParallelFor,7.762,0.4348,0.0657
+massserial,20000,WK,Instances,1.0,0.3128,0.0003
+massserial,20000,WK,ParallelFor.Wait,2.124,0.0427,0.0006
+massserial,20000,WK,Oversubscription,4.217,11.0819,11.0726
+massserial,20000,WK,GatherDynamicMeshElements,3.999,0.1543,0.0013
+massserial,20000,WK,DynamicPrimitive,6.467,0.153,0.0048
+massserial,20000,WK,NS_LabBolt,0.736,0.0215,0.0192
+massserial,20000,WK,FISMCInstanceDataSceneProxy_Update,1.999,0.7987,0.7987
+massserial,20000,WK,ParallelMdcDispatchDraw,7.138,0.0346,0.0223
+massserial,20000,WK,OcclusionCullPipe,1.0,10.4571,0.0107
+massserial,20000,WK,GPUBound_WaitingForGPUForOcclusionQueries_SeeGPUTrack,1.0,10.4414,0.0006
+massserial,20000,WK,RHIGetRenderQueryResult_GPU_Wait,4.582,10.4423,0.003
+massserial,20000,WK,SyncPoint_Wait,0.991,10.4393,0.0013
+massserial,20000,WK,FTaskBase::WaitWithNamedThreadsSupport,0.991,10.4381,0.0017
+massserial,20000,WK,FTaskBase::WaitImpl_StateChangeEvent_WaitFor,2.022,11.0411,0.0016
+massserial,20000,WK,SetupParallelExecute,1.0,0.0282,0.0282
+massserial,20000,WK,FRDGBuilder::AllocatePooledBuffers,1.0,0.0243,0.0243
+massserial,20000,WK,AllocatePlacedTexture,1.706,0.3392,0.0005
+massserial,20000,WK,D3D12RHI::CreateTextureInternal,1.706,0.3387,0.33
+massserial,20000,WK,FRDGBuilder::CreateUniformBuffers,0.999,0.058,0.058
+massserial,20000,WK,FSceneRenderer::SetupMeshPass,1.0,0.0657,0.0328
+massserial,20000,WK,ParallelMdcDispatchPassSetup,8.137,0.0369,0.0208
+massserial,20000,WK,FRDGAllocator::ReleaseAll,5.998,0.0931,0.0906
+massserial,20000,WK,FRDGBuilder::CreateViews,1.0,0.0466,0.0466
+massserial,20000,WK,ExecuteBackgroundTask,2.999,0.0523,0.0481
+massserial,20000,WK,DeferredRenderUpdates,4.544,1.2811,0.4732
+massserial,20000,WK,ComputeViewRelevance,1.0,0.0244,0.0244
+massserial,20000,WK,UInstancedStaticMeshComponent::CalcBoundsImpl,1.888,0.7997,0.7997
+massserial,20000,WK,CompileBarriers,1.0,0.0537,0.0537
+massserial,20000,WK,FRDGBuilder::CollectBarriers,1.0,0.0887,0.0887
+massserial,20000,WK,NS_Boundary_Cylinder,0.733,0.0373,0.0344
+massserial,20000,WK,SceneCulling_Update_Post,1.0,1.4458,0.0243
+massserial,20000,WK,SceneCulling_Post_UpdateInstances,1.0,1.3542,0.7524
+massserial,20000,WK,BuildHierarchy_FinalizeGrid,1.0,0.0673,0.0025
+massserial,20000,WK,BuildHierarchy_FinalizeChunks,1.0,0.0559,0.0559
+massserial,20000,WK,GatherShadowDynamicMeshElements,1.0,0.0649,0.0131
+massserial,20000,WK,VectorVM_Experimental,6.049,0.096,0.096
+massserial,20000,WK,NS_TeslaCoil,1.0,0.0895,0.0833
+massserial,20000,WK,FGatherShadowPrimitivesPrepareTask,1.0,0.0909,0.0065
+massserial,20000,WK,CreateDynamicShadows,1.0,0.0788,0.0788
+massserial,20000,WK,GatherDynamicMeshElementsPipe,1.0,0.0206,0.0094
+massserial,20000,WK,FRDGBuilder::ProcessAsyncSetupQueue,3.572,0.4415,0.4415
+massserial,20000,WK,FSceneRenderProcessor::DeleteSceneRenderers,1.0,0.103,0.103
+massserial,20000,WK,BuildVisibleDecalList,0.999,0.0209,0.0209
+massserial,20000,WK,FRDGScatterUploadBuilder,0.772,0.0613,0.06
+massserial,20000,WK,EndOfPipeTask,2.223,0.5254,0.0013
+massserial,20000,WK,EndOfPipeTask_RHIEndFrame,0.999,0.436,0.0009
+massserial,20000,WK,UE::RHI::GPUProfiler::ProcessEvents,0.999,0.435,0.435
+massserial,20000,WK,FRDGBuilder::SetupDispatchPassExecute,1.0,0.0609,0.0333
+massserial,20000,WK,EndOfPipeTask_RHIProcessDeleteQueue,1.224,0.0882,0.0882
+massserial,20000,WK,FRDGBuilder::FinalizeResources,0.999,0.1641,0.0017
+massserial,20000,WK,Textures,0.999,0.0618,0.0618
+massserial,20000,WK,Buffers,0.999,0.0534,0.0534
+massserial,20000,WK,FRDGBuilder::SubmitBufferUploads,1.0,0.1353,0.0032
+massserial,20000,WK,Allocate,1.0,0.036,0.0342
+massserial,20000,WK,Upload_Multiple,1.0,0.0961,0.0767
+massserial,20000,WK,FMallocBinnedCommonUtils::FlushCurrentThreadCache,0.009,0.0246,0.0
+massserial,20000,WK,FMallocBinnedCommonUtils::TrimThreadFreeBlockLists,0.009,0.0246,0.0246

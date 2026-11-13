@@ -6,6 +6,7 @@
 # 라벨: <Batch>-L2-<manager|mass|massserial>-N<N>-P1-r<회차>. summarize.py의 총괄 묶음 라벨 형식(단계 L2)을 따른다.
 # 실행 순서(run-full.ps1과 같다): 회차가 바깥 루프(r1 전 조건 -> r2 -> r3), 짝수 회차는 조건 목록을 뒤집는다. 맨 앞에 r0 한 번(드라이버 PSO 캐시)을 돌려 버린다.
 # 실행마다 Scripts/check-mgr.py로 LabOk, CSV, 메타데이터(LabStage, LabVariant, LabOverrides)를 대조한다. 틀리면 실패다. 벤치 끝의 종료 코드는 늘 0이라 종료 코드는 판정에 약하다.
+# -Trace이면 run-full.ps1의 트레이스 실행과 같은 채널(-trace=cpu,gpu,frame,counters,mass)로 Saved/Traces/<라벨>.utrace를 남긴다(참고 묶음 MgrT1, 수치는 비교에 쓰지 않는다).
 # 진행은 Measurements/<Batch>/progress.log(탭 구분), 실패는 failures.csv. 실패분은 묶음 끝에서 새 회차 번호(회차 + Runs)로 한 번 다시 잰다. -Resume이면 progress.log에 있는 라벨은 건너뛴다.
 param(
     [string]$Batch = "Mgr1",
@@ -16,6 +17,7 @@ param(
     [int]$TimeoutFactor = 3,
     [switch]$Resume,
     [switch]$SkipR0,
+    [switch]$Trace,
     [switch]$DryRun
 )
 $env:LAB_NO_ENGINE = "1"
@@ -52,7 +54,9 @@ function Get-GameArgs($j) {
     $a = @($Doc.common_args) + @($Base.args)
     if ($j.Cond -eq "manager") { $a = @($Doc.common_args) + @("-LabStage=M1", "-LabVariant=manager") }
     if ($j.Cond -eq "massserial") { $a += @($Doc.serial_trace_args) }
-    return $a + @("-LabN=$($j.N)", "-LabPreset=1", "-LabLabel=$($j.Label)")
+    $a += @("-LabN=$($j.N)", "-LabPreset=1", "-LabLabel=$($j.Label)")
+    if ($Trace) { $a += @("-trace=cpu,gpu,frame,counters,mass", "-tracefile=`"$ProjectDir\Saved\Traces\$($j.Label).utrace`"") }
+    return $a
 }
 
 $Main = New-Object System.Collections.ArrayList
