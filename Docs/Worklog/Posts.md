@@ -670,3 +670,10 @@
 - 버린 대안: 15.0ms(엔진 `r.DynamicRes.TargetedGPUHeadRoomPercentage` 기본값 10%, `Engine/Source/Runtime/Engine/Private/DynamicResolution.cpp`). GPU 예산용 값이라 프레임 전체의 기준으로는 어림이다.
 - ADR-0010 결정 6과 지난 Worklog 절의 13.3ms는 그대로 둔다(승인된 본문, 지난 기록).
 - 사용자가 GitHub Pages를 켰다. 주소가 열리고 1단계 화면(WebP)이 뜨는 것을 브라우저로 확인했다. README와 backlog.md에 주소를 넣었다.
+
+## 2026-11-13: 빼 보기 그림의 행 이름
+
+- 사용자 지시(2026-11-13): 빼 보기의 항목이 무엇을 뺀 것인지 README에서 분명하지 않다. 행마다 최종 구성이 하는 일과, 뺀 실행이 대신 하는 일을 적는다.
+- 고친 곳: `Scripts/plot-readme.py`의 `ABLATIONS`(그림 `ablation.svg`), `Scripts/build-site.py`의 `ABLATIONS`(사이트), README "빼 보기"의 목록. 값은 그대로다.
+- 근거: `Source/HordeOptLab/LabConfig.h` 289\~295행의 스위치 주석, [commands.md](../Guides/commands.md) "빼 보기" 표, 글 04\~07.
+- 확인하지 않은 것: 사이트에서 길어진 행 이름의 줄바꿈(휴대폰 너비).

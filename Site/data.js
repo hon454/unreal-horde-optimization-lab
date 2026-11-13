@@ -34,7 +34,7 @@ window.SITE_DATA = {
      "pct": 0.7,
      "real": true
     },
-    "name": "200m 밖 지우기",
+    "name": "200m 밖 엔티티를 입자로",
     "sub": "빼면 입자 대신 ISKM으로 그림"
    },
    {
@@ -54,8 +54,8 @@ window.SITE_DATA = {
      "pct": 0.8,
      "real": true
     },
-    "name": "애니메이션 예산",
-    "sub": ""
+    "name": "Animation Budget Allocator",
+    "sub": "빼면 액터가 예산 없이 매 프레임 애니메이션을 평가"
    },
    {
     "bottleneck": "game",
@@ -75,7 +75,7 @@ window.SITE_DATA = {
      "real": false
     },
     "name": "Simulation LOD",
-    "sub": ""
+    "sub": "빼면 80m 밖도 접근·피해 로직을 매 프레임, 200m 밖도 엔진 이동·조향으로 옮김"
    },
    {
     "bottleneck": "game",
@@ -94,8 +94,8 @@ window.SITE_DATA = {
      "pct": 0.3,
      "real": true
     },
-    "name": "고정 바운드",
-    "sub": ""
+    "name": "ISKM 컴포넌트의 고정 바운드",
+    "sub": "빼면 엔진이 매 프레임 바운드를 다시 계산"
    },
    {
     "bottleneck": "game",
@@ -114,8 +114,8 @@ window.SITE_DATA = {
      "pct": 6.7,
      "real": true
     },
-    "name": "80m 밖 그림자 끔",
-    "sub": "빼면 그림자 켬"
+    "name": "80m 밖 인스턴스 그림자 끔",
+    "sub": "빼면 80m 밖도 그림자를 그림"
    },
    {
     "bottleneck": "game",
@@ -135,7 +135,7 @@ window.SITE_DATA = {
      "real": false
     },
     "name": "엔티티 풀",
-    "sub": ""
+    "sub": "빼면 죽은 개체의 엔티티를 파괴하고 새로 만듦"
    },
    {
     "bottleneck": "game",
@@ -154,8 +154,8 @@ window.SITE_DATA = {
      "pct": 0.2,
      "real": false
     },
-    "name": "전환 대책",
-    "sub": ""
+    "name": "액터 전환 대책 다섯 가지",
+    "sub": "빼면 인스턴스와 액터가 바뀔 때의 보정을 모두 끔"
    },
    {
     "bottleneck": "game",
@@ -174,8 +174,8 @@ window.SITE_DATA = {
      "pct": 21.6,
      "real": true
     },
-    "name": "ISKM",
-    "sub": "빼면 VAT로 그림"
+    "name": "40~200m를 ISKM으로",
+    "sub": "빼면 ISM + VAT로 그림"
    },
    {
     "bottleneck": "game",
@@ -195,7 +195,7 @@ window.SITE_DATA = {
      "real": true
     },
     "name": "Niagara 배경 무리",
-    "sub": ""
+    "sub": "빼면 200m 밖에 아무것도 그리지 않음"
    },
    {
     "bottleneck": "gpu",
@@ -214,8 +214,8 @@ window.SITE_DATA = {
      "pct": 0.6,
      "real": false
     },
-    "name": "액터 하이드레이션",
-    "sub": ""
+    "name": "가까운 개체를 액터로(하이드레이션)",
+    "sub": "빼면 가까운 개체도 ISKM으로 그림"
    }
   ]
  },

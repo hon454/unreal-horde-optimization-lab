@@ -33,16 +33,17 @@ STEPS = [
     ("L8-q4final", 8, "품질 올리기", ["액터 0~40m(상한 1,000)", "80m 밖 그림자 끔"]),
 ]
 ABLATIONS = [
-    ("A8-hydrate", "액터 하이드레이션", []),
-    ("A8-budget", "애니메이션 예산", []),
-    ("A8-simlod", "Simulation LOD", []),
-    ("A8-bounds", "고정 바운드", []),
-    ("A8-fix", "전환 대책", []),
-    ("A8-pool", "엔티티 풀", []),
-    ("A8-iskm", "ISKM", ["(VAT로 되돌림)"]),
-    ("A8-farshadow", "80m 밖 그림자 끔", ["(되돌려 그림자 켬)"]),
-    ("A8-farcull", "200m 밖을 입자 대신", ["ISKM으로 그림"]),
-    ("A8-crowdfx", "Niagara 배경 무리", []),
+    # (condition, what the final configuration does, what the run does instead)
+    ("A8-hydrate", "가까운 개체를 액터로(하이드레이션)", ["빼면: 가까운 개체도 ISKM으로 그림"]),
+    ("A8-budget", "Animation Budget Allocator", ["빼면: 액터가 예산 없이 매 프레임", "애니메이션을 평가"]),
+    ("A8-simlod", "Simulation LOD", ["빼면: 80m 밖도 접근·피해 로직을 매 프레임,", "200m 밖도 엔진 이동·조향으로 옮김"]),
+    ("A8-bounds", "ISKM 컴포넌트의 고정 바운드", ["빼면: 엔진이 매 프레임 바운드를 다시 계산"]),
+    ("A8-fix", "액터 전환 대책 다섯 가지", ["빼면: 인스턴스와 액터가 바뀔 때의", "보정을 모두 끔"]),
+    ("A8-pool", "엔티티 풀", ["빼면: 죽은 개체의 엔티티를 파괴하고", "새로 만듦"]),
+    ("A8-iskm", "40~200m를 ISKM으로", ["빼면: ISM + VAT로 그림"]),
+    ("A8-farshadow", "80m 밖 인스턴스 그림자 끔", ["빼면: 80m 밖도 그림자를 그림"]),
+    ("A8-farcull", "200m 밖 엔티티를 입자로", ["빼면: 입자 대신 ISKM으로 그림"]),
+    ("A8-crowdfx", "Niagara 배경 무리", ["빼면: 200m 밖에 아무것도 그리지 않음"]),
 ]
 BASE = "L8-q4final"
 TRANSITIONS = [
@@ -378,7 +379,8 @@ def ablation():
     y = title(o, "최종 구성(8단계)에서 기법 하나를 뺐을 때의 변화",
               ["호드 총수 1만, 오브 시점 카메라, 세 번 잰 중앙값의 차이(ms)",
                f"0은 최종 구성: 프레임 시간 {fmt(base['frame_p50_ms'])}, 게임 스레드 {fmt(base['game_p50_ms'])}, GPU {fmt(base['gpu_p50_ms'])}",
-               f"최종 구성의 병목은 {bot_name[base_bot]}다. 위에서부터 프레임 시간이 많이 느려지는 순"])
+               f"최종 구성의 병목은 {bot_name[base_bot]}다. 위에서부터 프레임 시간이 많이 느려지는 순",
+               "굵은 글씨는 최종 구성이 하는 일, 그 아래는 그것을 뺀 실행이 대신 하는 일"])
     y += 34
     legend(o, y, [(m[0], m[2]) for m in mets])
     y += 22
