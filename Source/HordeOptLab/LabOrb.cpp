@@ -141,6 +141,11 @@ void ALabOrb::Tick(float DeltaSeconds)
 		TickMass(DeltaSeconds, Crowd);
 		return;
 	}
+	if (FLabConfig::Get().UsesManager())
+	{
+		TickStrikes(DeltaSeconds); // 변형 manager: 피해·저격은 매니저가 하고 결과를 ShowManagerResults로 넘긴다
+		return;
+	}
 
 	const FVector Center = GetActorLocation();
 	// 피해는 중심에 가까울수록 세다: 가장자리 ZoneDpsEdge → 중심 ZoneDpsCenter.
@@ -178,6 +183,29 @@ void ALabOrb::Tick(float DeltaSeconds)
 	{
 		SnipeAccumulator -= FLabScenario::SnipeInterval;
 		Snipe();
+	}
+}
+
+uint32 ALabOrb::AdvanceSnipeClock(float DeltaSeconds)
+{
+	uint32 Fired = 0;
+	SnipeAccumulator += DeltaSeconds;
+	while (SnipeAccumulator >= FLabScenario::SnipeInterval)
+	{
+		SnipeAccumulator -= FLabScenario::SnipeInterval;
+		Fired = ++SnipeTick;
+	}
+	return Fired;
+}
+
+void ALabOrb::ShowManagerResults(const FVector& CoilTarget, TConstArrayView<FVector> SnipeTargets, int32 ZoneKills)
+{
+	KillCount += ZoneKills;
+	SnipeCount += SnipeTargets.Num();
+	CoilFx->SetVariablePosition(TEXT("User.PositionTarget"), CoilTarget);
+	for (const FVector& Target : SnipeTargets)
+	{
+		SpawnStrikeFx(Target);
 	}
 }
 

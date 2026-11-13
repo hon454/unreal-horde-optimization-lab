@@ -1,6 +1,7 @@
 #include "LabCrowdSpawner.h"
 #include "HordeOptLab.h"
 #include "LabConfig.h"
+#include "LabCrowdManager.h"
 #include "LabCrowdSubsystem.h"
 #include "LabUnitAssets.h"
 #include "Animation/AnimBlueprintGeneratedClass.h"
@@ -120,7 +121,16 @@ void ALabCrowdSpawner::SpawnInitial()
 		RadiusAngles.Emplace(Radius, Angle);
 	}
 
-	if (Config.Stage == ELabStage::M0)
+	if (Config.UsesManager())
+	{
+		// 변형 manager(Docs/Worklog/Q8.md): Mass 엔티티 대신 틱 없는 액터와 매니저 하나. 메시와 피격·사망 시간은 아래 M1 경로와 같은 값이다
+		Manager = GetWorld()->SpawnActor<ALabCrowdManager>();
+		UStaticMesh* ManagerMeshes[LabUnitTypeMax] = { Assets.StaticMesh, LargeAssets.StaticMesh };
+		Manager->Activate(this, OrbLocation, MakeArrayView(ManagerMeshes, FLabUnitTypes::Num()),
+			Assets.Hit ? Assets.Hit->GetPlayLength() : 0.5f, Assets.Death ? Assets.Death->GetPlayLength() : 1.f);
+		SpawnEntitiesAt(RadiusAngles);
+	}
+	else if (Config.Stage == ELabStage::M0)
 	{
 		Minions.Reserve(Config.N);
 		for (const FVector2D& RA : RadiusAngles)
@@ -226,7 +236,7 @@ void ALabCrowdSpawner::SpawnInitial()
 
 int32 ALabCrowdSpawner::GetAliveCount() const
 {
-	return Crowd ? Crowd->GetAliveCount() : Minions.Num();
+	return Manager ? Manager->GetAliveCount() : Crowd ? Crowd->GetAliveCount() : Minions.Num();
 }
 
 void ALabCrowdSpawner::SpawnEntitiesAt(TConstArrayView<FVector2D> RadiusAngles)
@@ -239,6 +249,11 @@ void ALabCrowdSpawner::SpawnEntitiesAt(TConstArrayView<FVector2D> RadiusAngles)
 	{
 		Locations.Emplace(RA.X * FMath::Cos(RA.Y), RA.X * FMath::Sin(RA.Y), 0.f); // 엔티티 위치는 발밑(지면)이다
 		Serials.Add(NextSerial++);
+	}
+	if (Manager)
+	{
+		Manager->SpawnMinions(Locations, Serials); // 변형 manager: 같은 위치·일련번호 열로 액터를 만든다
+		return;
 	}
 	Crowd->SpawnEntities(Locations, Serials);
 }

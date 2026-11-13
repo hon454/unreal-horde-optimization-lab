@@ -97,6 +97,7 @@ const FLabConfig& FLabConfig::Get()
 			else if (Variant == TEXT("m3nocol")) { C.Variant = ELabVariant::M3NoCol; }
 			else if (Variant == TEXT("m3hyd15")) { C.Variant = ELabVariant::M3Hyd15; }
 			else if (Variant == TEXT("m3hyd50")) { C.Variant = ELabVariant::M3Hyd50; }
+			else if (Variant == TEXT("manager")) { C.Variant = ELabVariant::Manager; C.bVariantValid = C.Stage == ELabStage::M1; } // M1 단계에서만 있다. 다른 단계와 함께 주면 모르는 변형으로 끝낸다
 			else { C.bVariantValid = false; } // 모르는 이름. 게임 모드가 종료 코드 2로 끝낸다(전에는 full로 조용히 돌았다)
 		}
 		// Budget Allocator(중요도 = 화면 크기) 기본값: M3·M4·M5 단계는 켜고 그 밖은 끈다. 변형 m3sig는 항상 켠다(이름 호환).
@@ -290,6 +291,7 @@ const TCHAR* FLabConfig::VariantName(ELabVariant V)
 	case ELabVariant::M5Bounds: return TEXT("m5bounds");
 	case ELabVariant::Q2Crowd: return TEXT("q2crowd");
 	case ELabVariant::Q4Final: return TEXT("q4final");
+	case ELabVariant::Manager: return TEXT("manager");
 	default: return TEXT("full");
 	}
 }

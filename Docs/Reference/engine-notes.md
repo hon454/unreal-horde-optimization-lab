@@ -463,3 +463,21 @@
 | 비강제 종료의 코드 | `FWindowsPlatformMisc::RequestExitWithStatus(false, 코드)`는 엔진 종료를 요청하고 `PostQuitMessage(코드)`를 부를 뿐이다. `GuardedMain`은 틱 루프가 끝나면 초기화 때의 `ErrorLevel`(보통 0)을 돌려주고, 실행 경로에서 `WM_QUIT`의 코드를 읽는 곳이 없다. 그래서 프로세스 종료 코드는 0이다 | `Engine/Source/Runtime/Core/Private/Windows/WindowsPlatformMisc.cpp:1474-1522`(1520줄), `Engine/Source/Runtime/Launch/Private/Launch.cpp:188-204` |
 | 강제 종료의 코드 | `RequestExitWithStatus(true, 코드)`는 로그를 비운 뒤 `TerminateProcess(코드)`다. `WindowsPlatform.RaiseExceptionOnFaultTermination`(기본 거짓)이 참이면 코드가 0이 아닐 때 먼저 예외를 던진다 | `WindowsPlatformMisc.cpp:1493-1515`, `:140-144` |
 | 이 프로젝트에 주는 뜻 | 설정·에셋 오류는 강제 종료로 코드 2·3을 낸다(`LabRequestExit`). 벤치 끝의 비강제 종료(`BenchExitCode`)는 늘 0이라 실패는 `LabOk`와 CSV 유무로 잡는다 | `Source/HordeOptLab/HordeOptLab.h`, Worklog/Q7.md "종료 코드" |
+
+## 31. 엔진 Mass가 ISM에 쓰는 호출과 이동 프로세서의 식(2026-11-13, 변형 `manager` 코드 세션)
+
+변형 `manager`가 2단계와 같은 결과를 내도록 옮긴 줄이다(Worklog/Q8.md "manager 변형: 코드"). `MR`은 `Engine/Plugins/Runtime/MassGameplay/Source/MassRepresentation`, `MN`은 `Engine/Plugins/AI/MassAI/Source/MassNavigation`이다.
+
+| 항목 | 확인한 것 | 위치 |
+| --- | --- | --- |
+| 표현이 있는 개체의 가시성 | `UpdateEntityVisibility`는 현재 표현이 `None`이 아니면 가시성을 `CanBeSeen`으로 둔다. 2단계는 모든 LOD가 `StaticMeshInstance`라 화면 밖 개체도 `CanBeSeen`이다. 그래서 `UMassUpdateISMProcessor`의 청크 필터(`AreAnyEntitiesVisibleInChunk`)가 아무 청크도 거르지 않고 전 개체의 변환을 매 프레임 쌓는다 | `MR/Private/MassRepresentationProcessor.cpp:601-610`, `MR/Private/MassUpdateISMProcessor.cpp:30,56-65` |
+| 쌓는 변환 | `AddBatchedTransform`은 `LocalTransform * 엔티티 변환`과 `LocalTransform * 지난 프레임 변환`을 쌓는다 | `MR/Private/MassVisualizationComponent.cpp:909-927` |
+| ISM에 쓰는 호출 | `EndVisualChanges`는 쌓인 개체마다 엔티티 → 인스턴스 ID 해시 맵을 찾는다. 있으면 `UpdateInstanceTransformById` + `SetPreviousTransformById`, 없으면 `AddInstanceById` + `SetPreviousTransformById`를 부른다. 그 프레임에 쌓이지 않은 인스턴스는 `RemoveInstancesById`로 뗀다. 매번 `SetNumCustomDataFloats`와 `SetHasPerInstancePrevTransforms(true)`도 부른다 | `MR/Private/MassVisualizationComponent.cpp:566-665`(갱신 617-621, 제거 647, 추가 652-658) |
+| ISM 컴포넌트를 만드는 설정 | `NewObject<UInstancedStaticMeshComponent>` 뒤에 `SetStaticMesh`, 머티리얼 덮어쓰기, `SetCullDistances(0, 1000000)`, `SetupAttachment(루트)`, `SetCanEverAffectNavigation(false)`, `NoCollision` 프로필, `SetCastShadow(설명자 값)`, `Mobility = 설명자 값`, `SetReceivesDecals(false)`, `RegisterComponent` 순이다. 설명자의 `Mobility` 기본값은 `Movable`이다 | `MR/Private/MassVisualizationComponent.cpp:238-262`, `MR/Public/MassRepresentationTypes.h:115` |
+| 비주얼라이저 액터의 루트 | `AMassVisualizer`의 루트는 `Static` 모빌리티의 `USceneComponent`다 | `MR/Private/MassVisualizer.cpp:8-12` |
+| `UpdateInstanceTransformById` | 인스턴스 ID를 색인으로 바꿔 `UpdateInstanceTransform`을 부른다. `SetPreviousTransformById`는 `bHasPreviousTransforms`를 `check`한다 | `Engine/Source/Runtime/Engine/Private/InstancedStaticMesh.cpp:3857-3876` |
+| 이동 목표의 기본 동작 | `FMassMoveTargetFragment::CurrentAction`의 기본값은 `Move`다. 새 동작을 만들지 않으면 조향은 Move 갈래를 탄다 | `MN/Public/MassNavigationFragments.h:79` |
+| 조향의 Move 갈래 | 조향 방향 = (`Center + Forward × Clamp(ForwardOffset + SteerForward, 0, 내다보는 거리)` − 위치)의 수평 방향. 속도 = `DesiredSpeed × CalcDirectionalSpeedScale(지금 방향, 조향 방향)`에 뒤처짐 보정(`Lerp(속도, MaxSpeed, min(−ForwardOffset ÷ 내다보는 거리, 1))`)을 건 값. 힘 = `(1 ÷ ReactionTime) × (조향 속도 − DesiredVelocity)`. 코드 구동 태그는 `Optional`이라 멈춘 개체도 돈다 | `MN/Private/MassSteeringProcessors.cpp:26-45,87,133-237` |
+| 조향 파라미터 기본값 | `ReactionTime 0.3`, `LookAheadTime 1.0`, `bAllowSpeedVariance true` | `MN/Public/Steering/MassSteeringFragments.h:66-78` |
+| 힘과 이동 | 힘 적용: `DesiredVelocity = (DesiredVelocity + 힘 × dt)`를 `MaxSpeed`로 자른다. 이동: `Velocity = DesiredVelocity`, 위치에 `Velocity × dt`를 더한다. 두 dt는 0.1초 상한이다. 이동만 코드 구동 태그를 요구한다 | `Engine/Plugins/Runtime/MassGameplay/Source/MassMovement/Private/MassMovementProcessors.cpp:41,56-57,88,100,115-128` |
+| 회전 | 바라는 방향 = `LerpAngle(DesiredVelocity의 방위, MoveTarget.Forward의 방위, 이동 목표 가중치 ÷ 두 가중치의 합)`. 새 방위 = `ExponentialSmoothingAngle(지금 방위, 바라는 방향, dt, OrientationSmoothingTime)`. dt는 0.1초 상한이다. 기본값은 이동 중 가중치 0.4 / 0.6, 평활 시간 0.3초다 | `MN/Private/MassSmoothOrientationProcessors.cpp:47,72-112`, `MN/Public/SmoothOrientation/MassSmoothOrientationFragments.h:39-51`, `MN/Public/MassNavigationUtils.h:19-51` |

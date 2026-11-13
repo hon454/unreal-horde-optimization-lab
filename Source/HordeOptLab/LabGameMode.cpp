@@ -2,6 +2,7 @@
 #include "HordeOptLab.h"
 #include "LabCameraRig.h"
 #include "LabConfig.h"
+#include "LabCrowdManager.h"
 #include "LabCrowdSpawner.h"
 #include "LabCrowdSubsystem.h"
 #include "LabUnitAssets.h"
@@ -108,6 +109,10 @@ int32 ALabGameMode::ComputeNear30() const
 	if (!Spawner || !Orb)
 	{
 		return 0;
+	}
+	if (const ALabCrowdManager* Manager = Spawner->GetManager())
+	{
+		return Manager->GetNear30(); // 변형 manager: 매니저가 같은 정의로 센다
 	}
 	// M0: ULabNearOrbCountProcessor와 같은 정의. 액터 위치는 캡슐 중심이라 높이를 빼고 수평 거리로 잰다
 	const FVector Center = Orb->GetActorLocation();
@@ -226,6 +231,10 @@ void ALabGameMode::StartPlay()
 		SetupCrowdFx();
 	}
 	Spawner->SpawnInitial();
+	if (ALabCrowdManager* Manager = Spawner->GetManager())
+	{
+		Manager->SetOrb(Orb); // 변형 manager: 매니저 틱이 오브의 저격 시계와 이펙트를 쓴다
+	}
 	StartFrame = GFrameCounter;
 
 	Camera = World->SpawnActor<ALabCameraRig>();

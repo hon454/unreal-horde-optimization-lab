@@ -18,8 +18,10 @@ public:
 
 	void SpawnInitial();
 	void OnMinionFinished(ALabMinion* Minion);
-	/** M1부터: 지워진 엔티티 수만큼 가장자리 링에서 새로 만든다. ULabCrowdSubsystem이 부른다. */
+	/** M1부터: 지워진 엔티티 수만큼 가장자리 링에서 새로 만든다. ULabCrowdSubsystem이 부른다. 변형 manager는 ALabCrowdManager가 부른다(같은 스트림) */
 	void RespawnEntities(int32 Count);
+	/** 변형 manager의 매니저. 다른 변형에서는 nullptr */
+	class ALabCrowdManager* GetManager() const { return Manager; }
 
 	FVector GetOrbLocation() const { return OrbLocation; }
 	const TArray<TObjectPtr<ALabMinion>>& GetMinions() const { return Minions; }
@@ -38,6 +40,7 @@ protected:
 	UPROPERTY() TArray<TObjectPtr<ALabMinion>> Minions;
 
 	UPROPERTY() TObjectPtr<class ULabCrowdSubsystem> Crowd; // M1부터
+	UPROPERTY() TObjectPtr<class ALabCrowdManager> Manager; // 변형 manager만(FLabConfig::UsesManager). 있으면 Crowd는 비어 있다
 	FRandomStream Stream;
 	FVector OrbLocation = FVector::ZeroVector;
 	uint32 NextSerial = 0;

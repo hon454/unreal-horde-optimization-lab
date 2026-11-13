@@ -32,9 +32,18 @@ public:
 	int32 GetKillCount() const;
 	int32 GetSnipeCount() const;
 
+	/** 화면 판정용 카메라(직전 프레임에 그린 카메라). 변형 manager의 매니저도 읽는다 */
+	struct FLabSnipeView GetSnipeView() const;
+	/**
+	 * 변형 manager(LabCrowdManager.h): 매니저 틱이 부른다. 오브 틱은 피해·저격을 하지 않고 저격 궤적 수명만 돌린다(FLabConfig::UsesManager).
+	 * AdvanceSnipeClock은 저격 시간을 누적하고 이 프레임에 쏠 저격 틱을 돌려준다(없으면 0). OnMassPrePhysicsStart와 같은 누적이다.
+	 * ShowManagerResults는 번개 대상과 저격 궤적을 그리고 사망 수를 더한다(저격 수는 대상 수).
+	 */
+	uint32 AdvanceSnipeClock(float DeltaSeconds);
+	void ShowManagerResults(const FVector& CoilTarget, TConstArrayView<FVector> SnipeTargets, int32 ZoneKills);
+
 protected:
 	void Snipe();
-	struct FLabSnipeView GetSnipeView() const;
 	/** M1부터: 피해와 저격은 프로세서(LabMassProcessors)가 하고, 오브는 저격 틱을 올리고 이펙트만 그린다. */
 	void TickMass(float DeltaSeconds, class ULabCrowdSubsystem* Crowd);
 	/**

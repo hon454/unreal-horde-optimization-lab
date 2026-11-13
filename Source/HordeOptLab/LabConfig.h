@@ -66,6 +66,8 @@ enum class ELabVariant : uint8
 	Q2Crowd,     // m5bounds + Niagara 배경 무리(-LabCrowdFx 기본 1). 표현·풀링·Budget은 m5bounds와 같다
 	// Q4(-LabStage=M5와 함께, plan.md "품질 계획" Q4, Docs/Worklog/Q4.md). 사다리 8단계 = 최종 구성 후보
 	Q4Final,     // q2crowd + Q4에서 고른 액터 상한·전환 거리(FLabQuality::Q4FinalActorCap·Q4FinalHydrateM). 나머지는 q2crowd와 같다
+	// 참고 묶음 Mgr1(-LabStage=M1과 함께, plan.md "참고 묶음 Mgr1", Docs/Worklog/Q8.md). 비교 상대는 M1 mass(사다리 2단계)다
+	Manager,     // 틱 없는 액터(ALabManagedMinion)가 개체 데이터를 들고 매니저 하나(ALabCrowdManager)가 매 프레임 모두 계산해 공유 ISM에 쓴다. Mass 엔티티를 만들지 않는다
 };
 
 /**
@@ -338,6 +340,8 @@ struct FLabConfig
 	 */
 	struct FLadder { FString Id; FString Name; };
 	FLadder Ladder() const;
+	/** 변형 manager(M1 단계에서만 유효). 참이면 스포너가 Mass 엔티티 대신 틱 없는 액터와 매니저를 만든다(LabCrowdManager.h) */
+	bool UsesManager() const { return Stage == ELabStage::M1 && Variant == ELabVariant::Manager; }
 	/** M3 이상 단계에서 0~30m를 액터로 바꾸는가(하이드레이션). m3noactor와 -LabHydrate=0은 거짓 */
 	bool UsesHydration() const;
 	/** 표현 LOD의 Off(그리는 끝 밖을 그리지 않음)가 있는가. M3 이상 단계와 M2의 vatcull·vatcullvis에서 참, -LabFarCull=0이면 거짓 */
