@@ -1027,7 +1027,7 @@ window.SITE_DATA = {
      }
     }
    },
-   "group": "earn",
+   "group": "spend",
    "learned": "가까운 개체를 진짜 액터로 바꾼 값은 프레임 0.249ms로 보였지만, 게임 스레드는 두 배 넘게 늘었다.",
    "max60": {
     "above": false,

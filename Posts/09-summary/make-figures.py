@@ -91,7 +91,7 @@ def bottleneck(var, n=10000):
 # ---------- 1. what each step earned and spent (waterfall of changes) ----------
 TRANS = [  # (from, to, name of the step that was added, group)
     ("L2-mass", "L3-vatcull", "3단계 ISM + VAT", "earn"),
-    ("L3-vatcull", "L4-mass", "4단계 액터 하이드레이션", "earn"),
+    ("L3-vatcull", "L4-mass", "4단계 액터 하이드레이션", "spend"),
     ("L4-mass", "L5-m4offpool", "5단계 Simulation LOD", "earn"),
     ("L5-m4offpool", "L6-m5bounds", "6단계 ISKM", "earn"),
     ("L6-m5bounds", "L7-q2crowd", "7단계 Niagara 배경 무리", "spend"),
@@ -117,9 +117,7 @@ def waterfall():
     title(o, "단계마다 번 시간과 쓴 시간",
           "호드 총수 1만, 오브 시점 카메라, 앞 단계 대비 변화(세 번 잰 중앙값의 차, ms)")
     d12 = v("L2-mass", 10000, "frame_p50_ms") - v("L1-full", 10000, "frame_p50_ms")
-    heads = {"earn": "1–6단계 · 기법을 더해 프레임 시간을 버는 단계", "spend": "7·8단계 · 번 시간을 품질에 쓰는 단계"}
-    o.append(f'<text x="32" y="114" font-size="17" font-weight="700" fill="{SUB}">{heads["earn"]}</text>')
-    y = 130
+    y = 108
     o.append(f'<rect x="32" y="{y}" width="{W - 64}" height="58" rx="8" fill="{CARD}" stroke="{LINE}"/>')
     o.append(f'<text x="48" y="{y + 24}" font-size="17" font-weight="700">2단계 Mass 로직: 프레임 시간 {sfmt(d12)}ms</text>')
     o.append(f'<text x="48" y="{y + 46}" font-size="16" fill="{SUB}">아래 막대의 약 90배라 그리지 않았다. 병목은 '
@@ -128,18 +126,13 @@ def waterfall():
     ZX, scale = 330, 300 / 5.0   # zero line; one bar unit = 60px per ms
     top = y - 18
     data = trans_rows()
-    shown = {"earn"}
     for a, b, name, grp, cells in data:
-        if grp not in shown:
-            shown.add(grp)
-            if grp == "spend":
-                y += 8
-            o.append(f'<text x="32" y="{y}" font-size="17" font-weight="700" fill="{SUB}">{heads[grp]}</text>')
-            y += 30
         o.append(f'<text x="32" y="{y + 16}" font-size="17" font-weight="700">{name}</text>')
         ba, bb = bottleneck(a), bottleneck(b)
         btxt = f"병목 {bb}" if ba == bb else f"병목 {ba} → {bb}"
         o.append(f'<text x="32" y="{y + 42}" font-size="16" fill="{RED if ba != bb else SUB}">{btxt}</text>')
+        if grp == "spend":
+            o.append(f'<text x="32" y="{y + 66}" font-size="16" fill="{SUB}">번 시간을 품질에 쓰는 단계</text>')
         for lab, col, c, d, real in cells:
             w = abs(d) * scale
             x = ZX - w if d < 0 else ZX

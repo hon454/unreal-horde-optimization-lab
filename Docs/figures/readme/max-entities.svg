@@ -1,45 +1,43 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="800" height="604" viewBox="0 0 800 604" font-family="Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Segoe UI, sans-serif" font-size="16" fill="#111827">
-<rect x="0.5" y="0.5" width="799" height="603" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="546" viewBox="0 0 800 546" font-family="Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Segoe UI, sans-serif" font-size="16" fill="#111827">
+<rect x="0.5" y="0.5" width="799" height="545" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
 <defs><pattern id="spend" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(45)"><rect width="3" height="7" fill="#ffffff" fill-opacity="0.55"/></pattern></defs>
 <text x="32" y="46" font-size="22" font-weight="700">60fps를 지키는 최대 개체 수</text>
 <text x="32" y="74" font-size="16" fill="#4b5563">프레임 시간(느린 쪽 5% 경계)이 16.7ms 이하인 가장 큰 호드 총수</text>
 <text x="32" y="96" font-size="16" fill="#4b5563">오브 시점 카메라, 단계마다 네 가지 호드 총수에서 잰 값 사이를 보간</text>
-<text x="32" y="136" font-size="16" font-weight="700" fill="#4b5563">1–6단계 · 기법을 더해 프레임 시간을 버는 단계</text>
-<text x="32" y="169" font-size="17" font-weight="700">1단계 액터 군중</text>
-<rect x="290.0" y="154" width="9.0" height="22" rx="3" fill="#2563eb"/>
-<text x="307.0" y="171" font-size="16" font-weight="700">774</text>
-<text x="32" y="209" font-size="17" font-weight="700">2단계 Mass 로직</text>
-<rect x="290.0" y="194" width="242.1" height="22" rx="3" fill="#2563eb"/>
-<text x="540.1" y="211" font-size="16" font-weight="700">20,753</text>
-<text x="32" y="249" font-size="17" font-weight="700">3단계 ISM + VAT</text>
-<rect x="290" y="234" width="350.0" height="22" rx="3" fill="#2563eb" fill-opacity="0.35" stroke="#2563eb" stroke-dasharray="5 3"/>
-<path d="M644.0 235 L656.0 245 L644.0 255" fill="#2563eb"/>
-<text x="664.0" y="251" font-size="16" font-weight="700" fill="#2563eb">3만 이상</text>
-<text x="32" y="289" font-size="17" font-weight="700">4단계 액터 하이드레이션</text>
-<rect x="290.0" y="274" width="299.1" height="22" rx="3" fill="#2563eb"/>
-<text x="597.1" y="291" font-size="16" font-weight="700">25,636</text>
-<text x="32" y="329" font-size="17" font-weight="700">5단계 Simulation LOD</text>
-<rect x="290" y="314" width="350.0" height="22" rx="3" fill="#2563eb" fill-opacity="0.35" stroke="#2563eb" stroke-dasharray="5 3"/>
-<path d="M644.0 315 L656.0 325 L644.0 335" fill="#2563eb"/>
-<text x="664.0" y="331" font-size="16" font-weight="700" fill="#2563eb">3만 이상</text>
-<text x="32" y="369" font-size="17" font-weight="700">6단계 ISKM</text>
-<rect x="290.0" y="354" width="347.7" height="22" rx="3" fill="#2563eb"/>
-<text x="645.7" y="371" font-size="16" font-weight="700">29,799</text>
-<line x1="32" y1="396" x2="768" y2="396" stroke="#4b5563" stroke-width="1.5"/>
-<text x="32" y="416" font-size="16" font-weight="700" fill="#4b5563">7·8단계 · 번 시간을 품질에 쓰는 단계</text>
-<text x="32" y="449" font-size="17" font-weight="700">7단계 Niagara 배경 무리</text>
-<rect x="290.0" y="434" width="310.2" height="22" rx="3" fill="#2563eb"/>
-<rect x="290.0" y="434" width="310.2" height="22" rx="3" fill="url(#spend)"/>
-<text x="608.2" y="451" font-size="16" font-weight="700">26,587</text>
-<text x="32" y="489" font-size="17" font-weight="700">8단계 품질 올리기</text>
-<rect x="290.0" y="474" width="302.8" height="22" rx="3" fill="#2563eb"/>
-<rect x="290.0" y="474" width="302.8" height="22" rx="3" fill="url(#spend)"/>
-<text x="600.8" y="491" font-size="16" font-weight="700">25,958</text>
-<line x1="406.7" y1="144" x2="406.7" y2="500" stroke="#b45309" stroke-width="2" stroke-dasharray="5 4"/>
-<text x="406.7" y="520" text-anchor="middle" font-size="16" font-weight="700" fill="#b45309">목표 1만</text>
-<line x1="32" y1="530" x2="768" y2="530" stroke="#e5e7eb"/>
-<text x="32" y="556" font-size="16" fill="#4b5563">점선 막대: 잰 범위의 끝인 3만에서도 16.7ms 안이라 실제 최대는 더 크다.</text>
-<rect x="32" y="569" width="34" height="16" rx="3" fill="#9ca3af"/>
-<rect x="32" y="569" width="34" height="16" rx="3" fill="url(#spend)"/>
-<text x="74" y="582" font-size="16" fill="#4b5563">빗금 막대: 번 시간을 품질에 쓰는 단계(7·8단계)</text>
+<text x="32" y="151" font-size="17" font-weight="700">1단계 액터 군중</text>
+<rect x="290.0" y="136" width="9.0" height="22" rx="3" fill="#2563eb"/>
+<text x="307.0" y="153" font-size="16" font-weight="700">774</text>
+<text x="32" y="191" font-size="17" font-weight="700">2단계 Mass 로직</text>
+<rect x="290.0" y="176" width="242.1" height="22" rx="3" fill="#2563eb"/>
+<text x="540.1" y="193" font-size="16" font-weight="700">20,753</text>
+<text x="32" y="231" font-size="17" font-weight="700">3단계 ISM + VAT</text>
+<rect x="290" y="216" width="350.0" height="22" rx="3" fill="#2563eb" fill-opacity="0.35" stroke="#2563eb" stroke-dasharray="5 3"/>
+<path d="M644.0 217 L656.0 227 L644.0 237" fill="#2563eb"/>
+<text x="664.0" y="233" font-size="16" font-weight="700" fill="#2563eb">3만 이상</text>
+<text x="32" y="271" font-size="17" font-weight="700">4단계 액터 하이드레이션</text>
+<rect x="290.0" y="256" width="299.1" height="22" rx="3" fill="#2563eb"/>
+<rect x="290.0" y="256" width="299.1" height="22" rx="3" fill="url(#spend)"/>
+<text x="597.1" y="273" font-size="16" font-weight="700">25,636</text>
+<text x="32" y="311" font-size="17" font-weight="700">5단계 Simulation LOD</text>
+<rect x="290" y="296" width="350.0" height="22" rx="3" fill="#2563eb" fill-opacity="0.35" stroke="#2563eb" stroke-dasharray="5 3"/>
+<path d="M644.0 297 L656.0 307 L644.0 317" fill="#2563eb"/>
+<text x="664.0" y="313" font-size="16" font-weight="700" fill="#2563eb">3만 이상</text>
+<text x="32" y="351" font-size="17" font-weight="700">6단계 ISKM</text>
+<rect x="290.0" y="336" width="347.7" height="22" rx="3" fill="#2563eb"/>
+<text x="645.7" y="353" font-size="16" font-weight="700">29,799</text>
+<text x="32" y="391" font-size="17" font-weight="700">7단계 Niagara 배경 무리</text>
+<rect x="290.0" y="376" width="310.2" height="22" rx="3" fill="#2563eb"/>
+<rect x="290.0" y="376" width="310.2" height="22" rx="3" fill="url(#spend)"/>
+<text x="608.2" y="393" font-size="16" font-weight="700">26,587</text>
+<text x="32" y="431" font-size="17" font-weight="700">8단계 품질 올리기</text>
+<rect x="290.0" y="416" width="302.8" height="22" rx="3" fill="#2563eb"/>
+<rect x="290.0" y="416" width="302.8" height="22" rx="3" fill="url(#spend)"/>
+<text x="600.8" y="433" font-size="16" font-weight="700">25,958</text>
+<line x1="406.7" y1="118" x2="406.7" y2="442" stroke="#b45309" stroke-width="2" stroke-dasharray="5 4"/>
+<text x="406.7" y="462" text-anchor="middle" font-size="16" font-weight="700" fill="#b45309">목표 1만</text>
+<line x1="32" y1="472" x2="768" y2="472" stroke="#e5e7eb"/>
+<text x="32" y="498" font-size="16" fill="#4b5563">점선 막대: 잰 범위의 끝인 3만에서도 16.7ms 안이라 실제 최대는 더 크다.</text>
+<rect x="32" y="511" width="34" height="16" rx="3" fill="#9ca3af"/>
+<rect x="32" y="511" width="34" height="16" rx="3" fill="url(#spend)"/>
+<text x="74" y="524" font-size="16" fill="#4b5563">빗금 막대: 번 시간을 품질에 쓰는 단계(4·7·8단계)</text>
 </svg>

@@ -33,7 +33,7 @@ STEPS = [
     (7, "L7-q2crowd", "Niagara 배경 무리"),
     (8, "L8-q4final", "품질 올리기"),
 ]
-SPEND_FROM = 7
+SPEND = {4, 7, 8}  # their posts say so, and their frame time did not fall
 GROUPS = {"earn": "기법을 더해 프레임 시간을 버는 단계", "spend": "번 시간을 품질에 쓰는 단계"}
 
 
@@ -331,7 +331,7 @@ def main():
         post = post_by[num]
         steps.append({
             "num": num, "name": name,
-            "group": "spend" if num >= SPEND_FROM else "earn",
+            "group": "spend" if num in SPEND else "earn",
             "changed": changed_text(num, s),
             "learned": post["sentence"],
             "post": {"title": post["title"], "url": post["url"], "num": num},

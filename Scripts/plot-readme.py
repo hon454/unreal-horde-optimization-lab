@@ -151,9 +151,8 @@ def legend(o, y, items):
         x += 22 + len(name) * 16 + 28 if not name.isascii() else 22 + len(name) * 10 + 28
 
 
-# Steps 1-6 add a technique each and earn frame time; steps 7-8 spend it on quality (README "결과 한눈에 보기").
-SPEND_FROM = 7
-GROUPS = {1: "1–6단계 · 기법을 더해 프레임 시간을 버는 단계", SPEND_FROM: "7·8단계 · 번 시간을 품질에 쓰는 단계"}
+# Steps 4, 7 and 8 spend earned frame time on quality: their posts say so, and their frame time did not fall.
+SPEND = {4, 7, 8}
 HATCH = ('<defs><pattern id="spend" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(45)">'
          '<rect width="3" height="7" fill="#ffffff" fill-opacity="0.55"/></pattern></defs>')
 
@@ -161,21 +160,14 @@ HATCH = ('<defs><pattern id="spend" patternUnits="userSpaceOnUse" width="7" heig
 def bar(o, x, y, w, h, c, num, rx=3):
     """A bar; steps that spend frame time get diagonal stripes on the same colour (not colour alone)."""
     o.append(f'<rect x="{x:.1f}" y="{y}" width="{w:.1f}" height="{h}" rx="{rx}" fill="{c}"/>')
-    if num >= SPEND_FROM:
+    if num in SPEND:
         o.append(f'<rect x="{x:.1f}" y="{y}" width="{w:.1f}" height="{h}" rx="{rx}" fill="url(#spend)"/>')
-
-
-def group_head(o, y, num):
-    """Group name above the first step of a group; a heavier rule above the spending group."""
-    if num == SPEND_FROM:
-        o.append(f'<line x1="32" y1="{y - 20}" x2="{W - 32}" y2="{y - 20}" stroke="{SUB}" stroke-width="1.5"/>')
-    o.append(f'<text x="32" y="{y}" font-size="16" font-weight="700" fill="{SUB}">{esc(GROUPS[num])}</text>')
 
 
 def hatch_key(o, y):
     o.append(f'<rect x="32" y="{y - 13}" width="34" height="16" rx="3" fill="{GRAY}"/>')
     o.append(f'<rect x="32" y="{y - 13}" width="34" height="16" rx="3" fill="url(#spend)"/>')
-    o.append(f'<text x="74" y="{y}" font-size="16" fill="{SUB}">빗금 막대: 번 시간을 품질에 쓰는 단계(7·8단계)</text>')
+    o.append(f'<text x="74" y="{y}" font-size="16" fill="{SUB}">빗금 막대: 번 시간을 품질에 쓰는 단계(4·7·8단계)</text>')
 
 
 # ---------- 1. ladder ----------
@@ -212,9 +204,7 @@ def ladder():
         o.append(f'<text x="{x - 6:.1f}" y="{y0 + 4}" text-anchor="end" font-size="16" font-weight="700" fill="{AMBER}">{note}</text>')
 
     # Panel 1: step 1 on its own scale, so the four bars keep their true ratio.
-    y += 30
-    group_head(o, y, 1)
-    y += 26
+    y += 34
     o.append(f'<text x="{LX}" y="{y}" font-size="16" fill="{SUB}">축척 A: 0–450ms</text>')
     s1 = (680 - BX) / 450.0
     y0 = y + 12
@@ -228,10 +218,6 @@ def ladder():
     y0 = y + 12
     yy = y0
     for st in STEPS[1:]:
-        if st[1] == SPEND_FROM:
-            yy += 22
-            group_head(o, yy, SPEND_FROM)
-            yy += 14
         yy = block(yy, *st, s2)
     target_line(y0 - 26, yy - 10, s2, "16.7ms")
     y = yy + 6
@@ -296,10 +282,6 @@ def resources():
     RH, BAR = 36, 18
     RANGE_MIN_PX = 2.0  # narrower ranges are not drawn (stated in the subtitle)
     for cond, num, name, _ in STEPS:
-        if num in GROUPS:
-            y += 24 if num == 1 else 30
-            group_head(o, y, num)
-            y += 10
         o.append(f'<line x1="32" y1="{y}" x2="{W - 32}" y2="{y}" stroke="{LINE}"/>')
         o.append(f'<text x="{LX}" y="{y + 24}" font-size="17" font-weight="700">{num}단계 {esc(name)}</text>')
         for i, (_, _, col, c) in enumerate(RESOURCES):
@@ -349,12 +331,6 @@ def max_entities():
     top = y - 18
     RH = 40
     for cond, num, name, _ in STEPS:
-        if num in GROUPS:
-            y += 22 if num == SPEND_FROM else 0
-            group_head(o, y, num)
-            y += 18
-            if num == 1:
-                top = y - 10  # the target line starts under the first group name
         n, above = data[cond]
         o.append(f'<text x="{LX}" y="{y + 15}" font-size="17" font-weight="700">{num}단계 {esc(name)}</text>')
         w = n * scale

@@ -63,8 +63,8 @@
 <path d="M583.0 608 L583.0 638" stroke="#4b5563" stroke-width="1.6" fill="none" marker-end="url(#arr)"/>
 <rect x="410" y="640" width="346" height="88" rx="10" fill="#f8fafc" stroke="#e5e7eb"/>
 <text x="426" y="668" font-size="17" font-weight="700">7 액터 동기화</text>
-<rect x="685" y="651" width="59" height="22" rx="11" fill="#2563eb" fill-opacity="0.12" stroke="#2563eb"/>
-<text x="714.5" y="667" text-anchor="middle" font-size="16" font-weight="700" fill="#2563eb">4단계</text>
+<rect x="685" y="651" width="59" height="22" rx="11" fill="#db2777" fill-opacity="0.12" stroke="#db2777"/>
+<text x="714.5" y="667" text-anchor="middle" font-size="16" font-weight="700" fill="#db2777">4단계</text>
 <text x="426" y="694" font-size="16" fill="#4b5563">ULabActorSyncProcessor</text>
 <text x="426" y="716" font-size="16" font-weight="700" fill="#b45309">게임 스레드</text>
 <text x="44" y="760" font-size="16" font-weight="700" fill="#b45309">왼쪽 열(로직)과 오른쪽 열(표현) 사이에는 순서 선언이 없다.</text>

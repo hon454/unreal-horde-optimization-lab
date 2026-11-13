@@ -250,18 +250,11 @@
   }
 
   // ---------- ladder chart ----------
-  function groupHead(s, prev) {
-    if (!prev || prev.group !== s.group) {
-      return '<p class="c-group' + (prev ? " spend" : "") + '">' + (s.group === "earn" ? "1–6단계 · " : "7·8단계 · ") + D.groups[s.group] + "</p>";
-    }
-    return "";
-  }
   function renderLadder() {
     var MAX = 18;
     var x = function (v) { return Math.min(v, MAX) / MAX * 100; };
     var html = "";
     steps.forEach(function (s, i) {
-      html += groupHead(s, steps[i - 1]);
       var r = s.by_n[String(D.meta.target_n)];
       var cut = r.frame_p50_ms > MAX;
       var sp = s.group === "spend" ? " spend" : "";
@@ -295,7 +288,6 @@
     var x = function (v) { return v / MAX * 100; };
     var html = "";
     steps.forEach(function (s, i) {
-      html += groupHead(s, steps[i - 1]);
       var m = s.max60, sp = s.group === "spend" ? " spend" : "";
       var bar = m.above ? '<div class="c-bar dashed" style="width:' + x(m.n).toFixed(2) + '%"></div>'
         : '<div class="c-bar' + sp + '" style="width:' + x(m.n).toFixed(2) + '%"></div>';

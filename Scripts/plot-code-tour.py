@@ -15,8 +15,8 @@ INK, SUB, LINE, BG, CARD = "#111827", "#4b5563", "#e5e7eb", "#ffffff", "#f8fafc"
 BLUE, TEAL, PINK, AMBER, DARK, GRAY = "#2563eb", "#0d9488", "#db2777", "#b45309", "#374151", "#9ca3af"
 W = 800
 
-# Ladder steps 1-6 earn frame time, 7-8 spend it on quality (same split as plot-readme.py).
-SPEND_FROM = 7
+# Ladder steps 4, 7 and 8 spend earned frame time on quality (same split as plot-readme.py).
+SPEND = {4, 7, 8}
 
 
 def esc(t):
@@ -39,7 +39,7 @@ def chips(o, right, y, steps):
         label = f"{s}단계"
         w = 18 + 9 * len(str(s)) + 32
         x -= w
-        c = PINK if s >= SPEND_FROM else BLUE
+        c = PINK if s in SPEND else BLUE
         o.append(f'<rect x="{x}" y="{y - 16}" width="{w}" height="22" rx="11" fill="{c}" fill-opacity="0.12" stroke="{c}"/>')
         o.append(f'<text x="{x + w / 2}" y="{y}" text-anchor="middle" font-size="16" font-weight="700" fill="{c}">{label}</text>')
         x -= 6
