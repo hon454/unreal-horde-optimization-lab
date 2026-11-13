@@ -819,7 +819,7 @@
     "LabTechFarCull": "0",
     "LabTechCrowdFx": "0"
    },
-   "note": "액터 + USkeletalMeshComponentBudgeted + 거리 단계 중요도, a.Budget.BudgetMs 2"
+   "note": "액터 + USkeletalMeshComponentBudgeted + 거리 단계 중요도, a.Budget.BudgetMs 4"
   },
   {
    "name": "S1-uro",

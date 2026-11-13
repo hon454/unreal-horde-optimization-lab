@@ -2,6 +2,7 @@
 # 예산 끔(0), 1, 2, 3, 4, 6ms x 호드 1만·2만 x 오브 시점(P1) x 3회. 조건 인자는 Scripts/full-conditions.json의 common_args와 L8-q4final 인자에 -LabBudgetMs=<x>를 더한 것이다.
 # run-bench.ps1은 -Variant 허용 목록에 q4final이 없고 라벨에 조건을 담을 수 없어 부르지 않는다. run-pool.ps1·run-full.ps1처럼 Test 패키지 exe를 직접 부르고 그 실행 절차(앞 창 검사, 메타데이터 대조, 실패 CSV 이동)를 옮겼다.
 # run-full.ps1, full-conditions.json, run-bench.ps1은 고치지 않는다.
+# 코드 기본값은 53f1dfb 이후 4ms다. 그래서 예산 4는 LabOverrides `-`, 나머지 값은 `budget_ms=<x>`가 붙는다. 이 러너는 Budget1(기본값 2ms 때 잰 묶음)용이고 -LabBudgetMs를 늘 명시하므로 기본값과 무관하게 돈다.
 # 라벨: <Batch>-B<예산>-q4final-N<N>-P1-r<회차>. 예산 0은 끔이다. summarize.py의 총괄 묶음 라벨 형식(단계 칸 B<예산>)을 따른다.
 # 실행 순서(run-full.ps1과 같다): 회차가 바깥 루프(r1 전 조건 -> r2 -> r3), 짝수 회차는 조건 목록을 뒤집는다. 맨 앞에 r0 한 번(드라이버 PSO 캐시)을 돌려 버린다.
 # 실행마다 Scripts/check-budget.py로 LabOk, CSV, 메타데이터(LabBudgetMs, LabOverrides, LabBudget)를 대조한다. 틀리면 실패다. 벤치 끝의 종료 코드는 늘 0이라 종료 코드는 판정에 약하다.

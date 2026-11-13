@@ -1,7 +1,7 @@
 """참고 묶음 Budget1 실행의 CSV 메타데이터를 기대값과 대조한다(Docs/Worklog/Q7.md "측정: Budget1").
 
 기준은 총괄 묶음 조건 L8-q4final(Scripts/full-conditions.json)이고, 예산 값 하나만 다르다.
-  예산 2(기본): LabOverrides `-`, LabBudget 1, LabBudgetMs 2
+  예산 4(기본): LabOverrides `-`, LabBudget 1, LabBudgetMs 4
   예산 0(끔):   LabOverrides `budget_ms=0`, LabBudget 0, LabTechAnimBudget 0, LabBudgetMs `-`
   그 밖의 x:    LabOverrides `budget_ms=<x>`, LabBudget 1, LabBudgetMs <x>
 LabOk 1, 살아 있는 총수 = N 등 나머지는 ablation-check.py의 L8-q4final 기대값을 그대로 쓴다.
@@ -45,8 +45,8 @@ def main():
     budget_ms_expect = None  # 숫자 비교
     if b <= 0:
         exp.update({"laboverrides": "budget_ms=0", "labbudget": "0", "labtechanimbudget": "0", "labbudgetms": "-"})
-    elif b == 2:
-        budget_ms_expect = 2.0
+    elif b == 4:
+        budget_ms_expect = 4.0
     else:
         exp.update({"laboverrides": f"budget_ms={b:g}"})
         budget_ms_expect = b
