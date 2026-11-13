@@ -2,8 +2,8 @@
 # Run from anywhere: py -3 -I Scripts/build-site.py
 # Writes Site/data.js (window.SITE_DATA) and copies the step clips to Site/assets/stepN.webp.
 # Every number on the page comes from these files; the page itself holds no measured value:
-#   Measurements/Full2/summary.csv           ladder (all horde sizes, P1) and ablation rows (10000, P1)
-#   Docs/figures/full2/full-n-at-60fps.csv   max entities at 60 fps (n_p95)
+#   Measurements/Full3/summary.csv           ladder (all horde sizes, P1) and ablation rows (10000, P1)
+#   Docs/figures/full3/full-n-at-60fps.csv   max entities at 60 fps (n_p95)
 #   Measurements/Pool1/timeline.csv          entity pool on/off over 16 minutes (one run each, 1-minute bins)
 #   Scripts/full-conditions.json             resolution and seed of the measurement
 #   Posts/NN-*/README.md                     post titles and the first paragraph of "한 문장으로"
@@ -16,7 +16,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.normpath(os.path.join(HERE, ".."))
 SITE = os.path.join(ROOT, "Site")
 ASSETS = os.path.join(SITE, "assets")
-BATCH = "Full2"
+BATCH = "Full3"
 PRESET = "P1"
 N0 = 10000
 TARGET_MS = 1000.0 / 60.0
@@ -50,7 +50,7 @@ def changed_text(num, s):
     if num == 4:
         hm, cap = fmt_int(s(STEPS[3][1], "hydrate_m")), fmt_int(s(STEPS[3][1], "actor_cap"))
         return (f"오브에서 {hm}m 안의 개체(상한 {cap})를 VAT 인스턴스에서 AnimBP로 움직이는 액터로 바꿨다. "
-                "액터 메시는 `USkeletalMeshComponentBudgeted`로 바꾸고 애니메이션 예산을 2ms로 두었다.")
+                "액터 메시는 `USkeletalMeshComponentBudgeted`로 바꾸고 애니메이션 예산을 4ms로 두었다.")
     if num == 5:
         return (f"카메라에서 먼 개체의 로직을 덜 자주 돌리고, {far}m 밖 개체는 엔진 이동·조향 대신 자체 프로세서로 옮겼다. "
                 "죽은 개체의 엔티티는 파괴하지 않고 풀에 두었다가 다시 쓴다.")
@@ -111,8 +111,9 @@ def _no_zero_decimals(f):
 @_no_zero_decimals
 def fmt(x, signed=False):
     """Three significant figures, as Scripts/plot-readme.py."""
-    a = abs(x)
-    s = f"{a:.0f}" if a >= 100 else f"{a:.1f}" if a >= 10 else f"{a:.2f}"
+    from decimal import Decimal, ROUND_HALF_UP
+    a = Decimal(repr(round(abs(x), 6)))  # half up from the decimal text (1.125 -> 1.13), as in the posts
+    s = str(a.quantize(Decimal("1" if a >= 100 else "0.1" if a >= 10 else "0.01"), rounding=ROUND_HALF_UP))
     if float(s) == 0:
         return s
     if signed:
@@ -263,14 +264,16 @@ def ablation_notes(rows_by):
     assert top is fc and fc["frame"]["real"] and fc["game"]["real"]
     assert hy["bottleneck"] == "gpu" and hy["game"]["d"] < 0 and hy["frame"]["d"] < 0 and -hy["frame"]["d"] < -hy["game"]["d"]
     assert ik["gpu"]["real"] and ik["gpu"]["d"] > 0 and ik["game"]["d"] < 0
-    assert fs["gpu"]["real"] and fs["gpu"]["d"] > 0 and not fs["frame"]["real"]
+    assert fs["gpu"]["real"] and fs["gpu"]["d"] > 0 and fs["gpu"]["d"] > fs["frame"]["d"]
     assert cf["frame"]["d"] < 0
     return [
         f"200m 밖을 입자 대신 ISKM으로 그리면 게임 스레드가 {fmt(fc['game']['d'])}ms 늘어 프레임 시간이 가장 크게 는다.",
         f"액터 하이드레이션을 빼면 게임 스레드는 {fmt(-hy['game']['d'])}ms 줄지만 병목이 GPU로 바뀌어 프레임 시간은 {fmt(-hy['frame']['d'])}ms만 준다.",
         f"ISKM을 VAT로 되돌리면 GPU 시간이 {fmt(ik['gpu']['d'])}ms 늘고 게임 스레드는 {fmt(-ik['game']['d'])}ms 준다. "
         "병목이 게임 스레드라 ISKM의 이점은 프레임 시간이 아니라 GPU 시간으로 남는다.",
-        f"80m 밖 그림자를 다시 켜면 GPU 시간만 {fmt(fs['gpu']['d'])}ms 늘고 프레임 시간은 구별되지 않는다.",
+        (f"80m 밖 그림자를 다시 켜면 GPU 시간이 {fmt(fs['gpu']['d'])}ms 늘고 프레임 시간은 {fmt(fs['frame']['d'])}ms 는다."
+         if fs["frame"]["real"] else
+         f"80m 밖 그림자를 다시 켜면 GPU 시간만 {fmt(fs['gpu']['d'])}ms 늘고 프레임 시간은 구별되지 않는다."),
         f"Niagara 배경 무리를 아예 끄면 프레임 시간이 {fmt(-cf['frame']['d'])}ms 짧아질 뿐이다.",
     ]
 

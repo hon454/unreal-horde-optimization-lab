@@ -4,34 +4,34 @@
 <text x="32" y="74" font-size="16" fill="#4b5563">오브 시점 카메라, 최종 측정, 60초씩 세 번 잰 중앙값(ms)</text>
 <text x="32" y="112" font-size="16" fill="#4b5563">같은 축척(0–450ms)</text>
 <text x="40" y="146" font-size="17" font-weight="700">1단계 액터 군중</text>
-<rect x="40" y="158" width="547.5" height="20" rx="3" fill="#374151"/>
-<text x="595.5" y="174" font-size="16"><tspan font-weight="700" fill="#374151">440</tspan><tspan fill="#4b5563"> 프레임 시간</tspan></text>
-<rect x="40" y="184" width="528.7" height="20" rx="3" fill="#2563eb"/>
-<text x="576.7" y="200" font-size="16"><tspan font-weight="700" fill="#2563eb">425</tspan><tspan fill="#4b5563"> 게임 스레드</tspan></text>
-<rect x="40" y="210" width="37.8" height="20" rx="3" fill="#0d9488"/>
-<text x="85.8" y="226" font-size="16"><tspan font-weight="700" fill="#0d9488">30.4</tspan><tspan fill="#4b5563"> 렌더 스레드</tspan></text>
-<rect x="40" y="236" width="62.5" height="20" rx="3" fill="#db2777"/>
-<text x="110.5" y="252" font-size="16"><tspan font-weight="700" fill="#db2777">50.2</tspan><tspan fill="#4b5563"> GPU</tspan></text>
+<rect x="40" y="158" width="552.9" height="20" rx="3" fill="#374151"/>
+<text x="600.9" y="174" font-size="16"><tspan font-weight="700" fill="#374151">444</tspan><tspan fill="#4b5563"> 프레임 시간</tspan></text>
+<rect x="40" y="184" width="534.4" height="20" rx="3" fill="#2563eb"/>
+<text x="582.4" y="200" font-size="16"><tspan font-weight="700" fill="#2563eb">429</tspan><tspan fill="#4b5563"> 게임 스레드</tspan></text>
+<rect x="40" y="210" width="37.1" height="20" rx="3" fill="#0d9488"/>
+<text x="85.1" y="226" font-size="16"><tspan font-weight="700" fill="#0d9488">29.8</tspan><tspan fill="#4b5563"> 렌더 스레드</tspan></text>
+<rect x="40" y="236" width="62.4" height="20" rx="3" fill="#db2777"/>
+<text x="110.4" y="252" font-size="16"><tspan font-weight="700" fill="#db2777">50.2</tspan><tspan fill="#4b5563"> GPU</tspan></text>
 <text x="40" y="288" font-size="17" font-weight="700">2단계 Mass 로직(표현은 애니메이션 없는 ISM)</text>
-<rect x="40" y="300" width="12.8" height="20" rx="3" fill="#374151"/>
-<text x="60.8" y="316" font-size="16"><tspan font-weight="700" fill="#374151">10.3</tspan><tspan fill="#4b5563"> 프레임 시간</tspan></text>
+<rect x="40" y="300" width="12.7" height="20" rx="3" fill="#374151"/>
+<text x="60.7" y="316" font-size="16"><tspan font-weight="700" fill="#374151">10.2</tspan><tspan fill="#4b5563"> 프레임 시간</tspan></text>
 <rect x="40" y="326" width="7.8" height="20" rx="3" fill="#2563eb"/>
-<text x="55.8" y="342" font-size="16"><tspan font-weight="700" fill="#2563eb">6.30</tspan><tspan fill="#4b5563"> 게임 스레드</tspan></text>
-<rect x="40" y="352" width="8.1" height="20" rx="3" fill="#0d9488"/>
-<text x="56.1" y="368" font-size="16"><tspan font-weight="700" fill="#0d9488">6.48</tspan><tspan fill="#4b5563"> 렌더 스레드</tspan></text>
-<rect x="40" y="378" width="12.5" height="20" rx="3" fill="#db2777"/>
-<text x="60.5" y="394" font-size="16"><tspan font-weight="700" fill="#db2777">10</tspan><tspan fill="#4b5563"> GPU</tspan></text>
+<text x="55.8" y="342" font-size="16"><tspan font-weight="700" fill="#2563eb">6.24</tspan><tspan fill="#4b5563"> 게임 스레드</tspan></text>
+<rect x="40" y="352" width="8.0" height="20" rx="3" fill="#0d9488"/>
+<text x="56.0" y="368" font-size="16"><tspan font-weight="700" fill="#0d9488">6.40</tspan><tspan fill="#4b5563"> 렌더 스레드</tspan></text>
+<rect x="40" y="378" width="12.3" height="20" rx="3" fill="#db2777"/>
+<text x="60.3" y="394" font-size="16"><tspan font-weight="700" fill="#db2777">9.90</tspan><tspan fill="#4b5563"> GPU</tspan></text>
 <line x1="32" y1="420" x2="768" y2="420" stroke="#e5e7eb"/>
 <text x="32" y="454" font-size="16" fill="#4b5563">2단계만 확대(0–20ms)</text>
 <text x="40" y="488" font-size="17" font-weight="700">2단계 Mass 로직</text>
-<rect x="40" y="500" width="288.6" height="20" rx="3" fill="#374151"/>
-<text x="336.6" y="516" font-size="16"><tspan font-weight="700" fill="#374151">10.3</tspan><tspan fill="#4b5563"> 프레임 시간</tspan></text>
-<rect x="40" y="526" width="176.5" height="20" rx="3" fill="#2563eb"/>
-<text x="224.5" y="542" font-size="16"><tspan font-weight="700" fill="#2563eb">6.30</tspan><tspan fill="#4b5563"> 게임 스레드</tspan></text>
-<rect x="40" y="552" width="181.5" height="20" rx="3" fill="#0d9488"/>
-<text x="229.5" y="568" font-size="16"><tspan font-weight="700" fill="#0d9488">6.48</tspan><tspan fill="#4b5563"> 렌더 스레드</tspan></text>
-<rect x="40" y="578" width="280.6" height="20" rx="3" fill="#db2777"/>
-<text x="328.6" y="594" font-size="16"><tspan font-weight="700" fill="#db2777">10</tspan><tspan fill="#4b5563"> GPU</tspan></text>
+<rect x="40" y="500" width="285.4" height="20" rx="3" fill="#374151"/>
+<text x="333.4" y="516" font-size="16"><tspan font-weight="700" fill="#374151">10.2</tspan><tspan fill="#4b5563"> 프레임 시간</tspan></text>
+<rect x="40" y="526" width="174.7" height="20" rx="3" fill="#2563eb"/>
+<text x="222.7" y="542" font-size="16"><tspan font-weight="700" fill="#2563eb">6.24</tspan><tspan fill="#4b5563"> 게임 스레드</tspan></text>
+<rect x="40" y="552" width="179.1" height="20" rx="3" fill="#0d9488"/>
+<text x="227.1" y="568" font-size="16"><tspan font-weight="700" fill="#0d9488">6.40</tspan><tspan fill="#4b5563"> 렌더 스레드</tspan></text>
+<rect x="40" y="578" width="277.3" height="20" rx="3" fill="#db2777"/>
+<text x="325.3" y="594" font-size="16"><tspan font-weight="700" fill="#db2777">9.90</tspan><tspan fill="#4b5563"> GPU</tspan></text>
 <line x1="506.7" y1="494" x2="506.7" y2="608" stroke="#b45309" stroke-width="2" stroke-dasharray="5 4"/>
 <text x="512.7" y="624" font-size="16" font-weight="700" fill="#b45309">16.7ms</text>
 <line x1="32" y1="640" x2="768" y2="640" stroke="#e5e7eb"/>

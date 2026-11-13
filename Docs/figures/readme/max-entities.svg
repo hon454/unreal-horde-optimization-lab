@@ -5,34 +5,33 @@
 <text x="32" y="74" font-size="16" fill="#4b5563">프레임 시간(느린 쪽 5% 경계)이 16.7ms 이하인 가장 큰 호드 총수</text>
 <text x="32" y="96" font-size="16" fill="#4b5563">오브 시점 카메라, 단계마다 네 가지 호드 총수에서 잰 값 사이를 보간</text>
 <text x="32" y="151" font-size="17" font-weight="700">1단계 액터 군중</text>
-<rect x="290.0" y="136" width="9.0" height="22" rx="3" fill="#2563eb"/>
-<text x="307.0" y="153" font-size="16" font-weight="700">774</text>
+<rect x="290.0" y="136" width="8.9" height="22" rx="3" fill="#2563eb"/>
+<text x="306.9" y="153" font-size="16" font-weight="700">766</text>
 <text x="32" y="191" font-size="17" font-weight="700">2단계 Mass 로직</text>
-<rect x="290.0" y="176" width="242.1" height="22" rx="3" fill="#2563eb"/>
-<text x="540.1" y="193" font-size="16" font-weight="700">20,753</text>
+<rect x="290.0" y="176" width="228.1" height="22" rx="3" fill="#2563eb"/>
+<text x="526.1" y="193" font-size="16" font-weight="700">19,554</text>
 <text x="32" y="231" font-size="17" font-weight="700">3단계 ISM + VAT</text>
 <rect x="290" y="216" width="350.0" height="22" rx="3" fill="#2563eb" fill-opacity="0.35" stroke="#2563eb" stroke-dasharray="5 3"/>
 <path d="M644.0 217 L656.0 227 L644.0 237" fill="#2563eb"/>
 <text x="664.0" y="233" font-size="16" font-weight="700" fill="#2563eb">3만 이상</text>
 <text x="32" y="271" font-size="17" font-weight="700">4단계 액터 하이드레이션</text>
-<rect x="290.0" y="256" width="299.1" height="22" rx="3" fill="#2563eb"/>
-<rect x="290.0" y="256" width="299.1" height="22" rx="3" fill="url(#spend)"/>
-<text x="597.1" y="273" font-size="16" font-weight="700">25,636</text>
+<rect x="290.0" y="256" width="232.8" height="22" rx="3" fill="#2563eb"/>
+<rect x="290.0" y="256" width="232.8" height="22" rx="3" fill="url(#spend)"/>
+<text x="530.8" y="273" font-size="16" font-weight="700">19,952</text>
 <text x="32" y="311" font-size="17" font-weight="700">5단계 Simulation LOD</text>
-<rect x="290" y="296" width="350.0" height="22" rx="3" fill="#2563eb" fill-opacity="0.35" stroke="#2563eb" stroke-dasharray="5 3"/>
-<path d="M644.0 297 L656.0 307 L644.0 317" fill="#2563eb"/>
-<text x="664.0" y="313" font-size="16" font-weight="700" fill="#2563eb">3만 이상</text>
+<rect x="290.0" y="296" width="266.7" height="22" rx="3" fill="#2563eb"/>
+<text x="564.7" y="313" font-size="16" font-weight="700">22,857</text>
 <text x="32" y="351" font-size="17" font-weight="700">6단계 ISKM</text>
-<rect x="290.0" y="336" width="347.7" height="22" rx="3" fill="#2563eb"/>
-<text x="645.7" y="353" font-size="16" font-weight="700">29,799</text>
+<rect x="290.0" y="336" width="277.4" height="22" rx="3" fill="#2563eb"/>
+<text x="575.4" y="353" font-size="16" font-weight="700">23,774</text>
 <text x="32" y="391" font-size="17" font-weight="700">7단계 Niagara 배경 무리</text>
-<rect x="290.0" y="376" width="310.2" height="22" rx="3" fill="#2563eb"/>
-<rect x="290.0" y="376" width="310.2" height="22" rx="3" fill="url(#spend)"/>
-<text x="608.2" y="393" font-size="16" font-weight="700">26,587</text>
+<rect x="290.0" y="376" width="257.1" height="22" rx="3" fill="#2563eb"/>
+<rect x="290.0" y="376" width="257.1" height="22" rx="3" fill="url(#spend)"/>
+<text x="555.1" y="393" font-size="16" font-weight="700">22,033</text>
 <text x="32" y="431" font-size="17" font-weight="700">8단계 품질 올리기</text>
-<rect x="290.0" y="416" width="302.8" height="22" rx="3" fill="#2563eb"/>
-<rect x="290.0" y="416" width="302.8" height="22" rx="3" fill="url(#spend)"/>
-<text x="600.8" y="433" font-size="16" font-weight="700">25,958</text>
+<rect x="290.0" y="416" width="233.8" height="22" rx="3" fill="#2563eb"/>
+<rect x="290.0" y="416" width="233.8" height="22" rx="3" fill="url(#spend)"/>
+<text x="531.8" y="433" font-size="16" font-weight="700">20,037</text>
 <line x1="406.7" y1="118" x2="406.7" y2="442" stroke="#b45309" stroke-width="2" stroke-dasharray="5 4"/>
 <text x="406.7" y="462" text-anchor="middle" font-size="16" font-weight="700" fill="#b45309">목표 1만</text>
 <line x1="32" y1="472" x2="768" y2="472" stroke="#e5e7eb"/>

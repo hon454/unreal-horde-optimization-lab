@@ -6,29 +6,29 @@
 <text x="410" y="116" font-size="16" fill="#4b5563">느려진다 →</text>
 <text x="32" y="146" font-size="17" font-weight="700">하이드레이션을 뺀다</text>
 <text x="768" y="146" text-anchor="end" font-size="16" font-weight="700" fill="#db2777">병목이 GPU로 바뀐다</text>
-<rect x="315.1" y="156" width="84.9" height="20" rx="3" fill="#374151"/>
-<text x="307.1" y="172" text-anchor="end" font-size="16"><tspan fill="#4b5563">프레임 </tspan><tspan font-weight="700" fill="#374151">−1.59</tspan></text>
-<rect x="194.5" y="182" width="205.5" height="20" rx="3" fill="#2563eb"/>
-<text x="186.5" y="198" text-anchor="end" font-size="16"><tspan fill="#4b5563">게임 스레드 </tspan><tspan font-weight="700" fill="#2563eb">−3.85</tspan></text>
+<rect x="209.5" y="156" width="190.5" height="20" rx="3" fill="#374151"/>
+<text x="201.5" y="172" text-anchor="end" font-size="16"><tspan fill="#4b5563">프레임 </tspan><tspan font-weight="700" fill="#374151">−3.57</tspan></text>
+<rect x="88.6" y="182" width="311.4" height="20" rx="3" fill="#2563eb"/>
+<text x="80.6" y="198" text-anchor="end" font-size="16"><tspan fill="#4b5563">게임 스레드 </tspan><tspan font-weight="700" fill="#2563eb">−5.84</tspan></text>
 <text x="32" y="236" font-size="17" font-weight="700">애니메이션 예산을 뺀다</text>
-<rect x="400.0" y="246" width="93.3" height="20" rx="3" fill="#374151"/>
-<text x="501.3" y="262" font-size="16"><tspan font-weight="700" fill="#374151">+1.75</tspan><tspan fill="#4b5563"> 프레임</tspan></text>
-<rect x="400.0" y="272" width="93.1" height="20" rx="3" fill="#2563eb"/>
-<text x="501.1" y="288" font-size="16"><tspan font-weight="700" fill="#2563eb">+1.75</tspan><tspan fill="#4b5563"> 게임 스레드</tspan></text>
+<rect x="384.4" y="246" width="15.6" height="20" rx="3" fill="#374151"/>
+<text x="376.4" y="262" text-anchor="end" font-size="16"><tspan fill="#4b5563">프레임 </tspan><tspan font-weight="700" fill="#374151">−0.292</tspan></text>
+<rect x="385.0" y="272" width="15.0" height="20" rx="3" fill="#2563eb"/>
+<text x="377.0" y="288" text-anchor="end" font-size="16"><tspan fill="#4b5563">게임 스레드 </tspan><tspan font-weight="700" fill="#2563eb">−0.281</tspan></text>
 <text x="32" y="326" font-size="17" font-weight="700">액터 캡슐 콜리전을 켠다</text>
-<rect x="400.0" y="336" width="107.0" height="20" rx="3" fill="#374151"/>
-<text x="515.0" y="352" font-size="16"><tspan font-weight="700" fill="#374151">+2.01</tspan><tspan fill="#4b5563"> 프레임</tspan></text>
-<rect x="400.0" y="362" width="82.1" height="20" rx="3" fill="#2563eb"/>
-<text x="490.1" y="378" font-size="16"><tspan font-weight="700" fill="#2563eb">+1.54</tspan><tspan fill="#4b5563"> 게임 스레드</tspan></text>
+<rect x="400.0" y="336" width="85.3" height="20" rx="3" fill="#374151"/>
+<text x="493.3" y="352" font-size="16"><tspan font-weight="700" fill="#374151">+1.60</tspan><tspan fill="#4b5563"> 프레임</tspan></text>
+<rect x="400.0" y="362" width="58.8" height="20" rx="3" fill="#2563eb"/>
+<text x="466.8" y="378" font-size="16"><tspan font-weight="700" fill="#2563eb">+1.10</tspan><tspan fill="#4b5563"> 게임 스레드</tspan></text>
 <text x="32" y="416" font-size="17" font-weight="700">전환 대책 다섯 가지를 뺀다</text>
 <text x="768" y="416" text-anchor="end" font-size="16" fill="#4b5563">세 번 잰 범위 안: 구별되지 않는다</text>
-<rect x="399.1" y="426" width="1.5" height="20" rx="3" fill="#374151"/>
-<text x="391.1" y="442" text-anchor="end" font-size="16"><tspan fill="#4b5563">프레임 </tspan><tspan font-weight="700" fill="#374151">−0.017</tspan></text>
-<rect x="399.3" y="452" width="1.5" height="20" rx="3" fill="#2563eb"/>
-<text x="391.3" y="468" text-anchor="end" font-size="16"><tspan fill="#4b5563">게임 스레드 </tspan><tspan font-weight="700" fill="#2563eb">−0.013</tspan></text>
+<rect x="394.5" y="426" width="5.5" height="20" rx="3" fill="#374151"/>
+<text x="386.5" y="442" text-anchor="end" font-size="16"><tspan fill="#4b5563">프레임 </tspan><tspan font-weight="700" fill="#374151">−0.104</tspan></text>
+<rect x="395.1" y="452" width="4.9" height="20" rx="3" fill="#2563eb"/>
+<text x="387.1" y="468" text-anchor="end" font-size="16"><tspan fill="#4b5563">게임 스레드 </tspan><tspan font-weight="700" fill="#2563eb">−0.091</tspan></text>
 <line x1="400" y1="136" x2="400" y2="482" stroke="#4b5563" stroke-width="1.5"/>
 <line x1="32" y1="494" x2="768" y2="494" stroke="#e5e7eb"/>
 <text x="32" y="518" font-size="16" fill="#4b5563">최종 구성은 화면 안 40m까지 액터(상한 1,000)로 그린다.</text>
-<text x="32" y="542" font-size="16" fill="#4b5563">애니메이션 예산은 2ms이고, 캡슐 콜리전은 끈다.</text>
-<text x="32" y="566" font-size="16" fill="#4b5563">최종 구성의 프레임 시간은 7.78ms, 게임 스레드는 7.65ms다.</text>
+<text x="32" y="542" font-size="16" fill="#4b5563">애니메이션 예산은 4ms이고, 캡슐 콜리전은 끈다.</text>
+<text x="32" y="566" font-size="16" fill="#4b5563">최종 구성의 프레임 시간은 9.75ms, 게임 스레드는 9.59ms다.</text>
 </svg>

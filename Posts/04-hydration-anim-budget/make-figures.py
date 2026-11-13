@@ -1,7 +1,8 @@
 # Makes the SVG figures of post 04 in images/.
 # Run from the repository root: py -3 -I Posts/04-hydration-anim-budget/make-figures.py
-# Measured values come from Measurements/Full2/summary.csv and Docs/figures/full2/full-n-at-60fps.csv.
-# No trace values: the post uses no trace numbers (see measurements.md).
+# Measured values come from Measurements/Full3/summary.csv and Docs/figures/full3/full-n-at-60fps.csv.
+# The budget sweep figure reads the reference batch Measurements/Budget1/summary.csv (final configuration, budget only).
+# No trace values: the trace numbers of the post are in measurements.md only.
 import csv, os
 import re
 from decimal import Decimal, ROUND_HALF_UP
@@ -11,7 +12,7 @@ ROOT = os.path.normpath(os.path.join(HERE, "..", ".."))
 OUT = os.path.join(HERE, "images")
 
 rows = {}
-with open(os.path.join(ROOT, "Measurements", "Full2", "summary.csv"), encoding="utf-8") as f:
+with open(os.path.join(ROOT, "Measurements", "Full3", "summary.csv"), encoding="utf-8") as f:
     for r in csv.DictReader(f):
         rows[(r["variant"], int(r["n"]), r["preset"])] = r
 
@@ -24,7 +25,7 @@ def s(variant, n, col, preset="P1"):
     return rows[(variant, n, preset)][col]
 
 
-with open(os.path.join(ROOT, "Docs", "figures", "full2", "full-n-at-60fps.csv"), encoding="utf-8") as f:
+with open(os.path.join(ROOT, "Docs", "figures", "full3", "full-n-at-60fps.csv"), encoding="utf-8") as f:
     NAT = {r["series"]: r for r in csv.DictReader(f)}
 N_AT_60_L4 = int(NAT["4 L4-mass"]["n_p95"])
 L3_ABOVE = NAT["3 L3-vatcull"]["note_p95"] == "above range"
@@ -105,7 +106,7 @@ def summary():
     o = []
     title(o, "호드 총수 1만에서 3단계와 4단계가 쓰는 시간", "오브 시점 카메라, 60초씩 세 번 잰 중앙값(ms)")
     X0, scale = 40, 600 / 17.5
-    groups = [("3단계: VAT 인스턴스, 200m 밖 지우기", L3), ("4단계: 30m 안을 액터로, 애니메이션 예산 2ms", L4)]
+    groups = [("3단계: VAT 인스턴스, 200m 밖 지우기", L3), ("4단계: 30m 안을 액터로, 애니메이션 예산 4ms", L4)]
     y = 120
     top = y - 8
     for g, var in groups:
@@ -169,8 +170,8 @@ def principle():
          ["엔티티의 위치·상태·사망 색을 액터에 넣는다",
           "화면 크기(바운드 반경 ÷ 거리)를 중요도로 넘긴다"]),
         (RED, "스켈레탈 메시 틱과 애니메이션 평가", "USkeletalMeshComponentBudgeted",
-         ["Animation Budget Allocator가 2ms 예산을 나눈다",
-          "중요도 큰 순으로 매 프레임, 나머지는 간격을 늘린다"]),
+         ["Animation Budget Allocator가 4ms 예산을 나눈다",
+          "화면에서 큰 메시부터 매 프레임, 모자라면 작은 메시를 건너뛴다"]),
     ]
     RH, GAP, CX, CW = 118, 22, 32, W - 64
     for i, (col, head, who, lines) in enumerate(boxes):
@@ -381,9 +382,81 @@ def ablation():
     o.append(f'<line x1="{C0}" y1="{top}" x2="{C0}" y2="{y - 20}" stroke="{SUB}" stroke-width="1.5"/>')
     o.append(f'<line x1="32" y1="{y - 8}" x2="{W - 32}" y2="{y - 8}" stroke="{LINE}"/>')
     o.append(f'<text x="32" y="{y + 16}" font-size="16" fill="{SUB}">최종 구성은 화면 안 40m까지 액터(상한 1,000)로 그린다.</text>')
-    o.append(f'<text x="32" y="{y + 40}" font-size="16" fill="{SUB}">애니메이션 예산은 2ms이고, 캡슐 콜리전은 끈다.</text>')
+    o.append(f'<text x="32" y="{y + 40}" font-size="16" fill="{SUB}">애니메이션 예산은 4ms이고, 캡슐 콜리전은 끈다.</text>')
     o.append(f'<text x="32" y="{y + 64}" font-size="16" fill="{SUB}">최종 구성의 프레임 시간은 {fmt(base_frame)}ms, 게임 스레드는 {fmt(base_game)}ms다.</text>')
     write("hyd-ablation.svg", svg(y + 88, o))
+
+
+# ---------- 7. budget sweep: which budget value (reference batch, final configuration) ----------
+BUD = {}
+with open(os.path.join(ROOT, "Measurements", "Budget1", "summary.csv"), encoding="utf-8") as f:
+    for r in csv.DictReader(f):
+        BUD[(r["variant"], int(r["n"]))] = r          # variant B<budget ms>-q4final, B0 = budget off
+BUDGETS = [("0", "끔"), ("1", "1ms"), ("2", "2ms"), ("3", "3ms"), ("4", "4ms"), ("6", "6ms")]
+CHOSEN = "4"
+
+
+def bv(b, n, col):
+    x = BUD[(f"B{b}-q4final", n)][col]
+    return float(x) if x not in ("", None) else 0.0
+
+
+def pct(x):
+    t = fmt(x * 100)
+    return f"{t}%"
+
+
+def budget():
+    o = []
+    title(o, "예산 값마다 잃는 것과 남는 것", "최종 구성에서 예산만 바꿔 오브 시점 카메라로 세 번 잰 중앙값")
+    LX, BX, BW = 32, 150, 500
+    y = 120
+    o.append(f'<text x="{LX}" y="{y}" font-size="18" font-weight="700">호드 총수 1만: 그 프레임에 갱신도 보간도 하지 않은 액터</text>')
+    y += 14
+    o.append(f'<rect x="{BX}" y="{y}" width="14" height="14" rx="2" fill="{RED}"/><text x="{BX + 20}" y="{y + 13}" font-size="16">소형 미니언</text>')
+    o.append(f'<rect x="{BX + 140}" y="{y}" width="14" height="14" rx="2" fill="{PURPLE}"/><text x="{BX + 160}" y="{y + 13}" font-size="16">대형 미니언</text>')
+    y += 30
+    rows1 = []
+    for b, lab in BUDGETS:
+        top = y
+        sm, lg = bv(b, 10000, "small_skipped_ratio"), bv(b, 10000, "large_skipped_ratio")
+        o.append(f'<text x="{BX - 14}" y="{y + 22}" text-anchor="end" font-size="17" font-weight="{"700" if b == CHOSEN else "400"}">{lab}</text>')
+        for val, c in [(sm, RED), (lg, PURPLE)]:
+            w = val * BW
+            o.append(f'<rect x="{BX}" y="{y}" width="{max(w, 1.5):.1f}" height="14" rx="2" fill="{c}"/>')
+            o.append(f'<text x="{BX + max(w, 1.5) + 8:.1f}" y="{y + 13}" font-size="16" font-weight="700" fill="{c}">{pct(val)}</text>')
+            y += 17
+        rows1.append((b, top, y))
+        y += 12
+    y += 18
+    o.append(f'<line x1="32" y1="{y - 16}" x2="{W - 32}" y2="{y - 16}" stroke="{LINE}"/>')
+    o.append(f'<text x="{LX}" y="{y + 10}" font-size="18" font-weight="700">호드 총수 2만: 프레임 시간의 느린 쪽 5% 경계(ms)</text>')
+    y += 30
+    scale = BW / 22.0
+    top2 = y
+    rows2 = []
+    for b, lab in BUDGETS:
+        top = y
+        val = bv(b, 20000, "frame_p95_ms")
+        c = DARK if val <= 16.667 else GRAY
+        o.append(f'<text x="{BX - 14}" y="{y + 17}" text-anchor="end" font-size="17" font-weight="{"700" if b == CHOSEN else "400"}">{lab}</text>')
+        o.append(f'<rect x="{BX}" y="{y}" width="{val * scale:.1f}" height="22" rx="3" fill="{c}"/>')
+        o.append(f'<text x="{BX + val * scale + 8:.1f}" y="{y + 17}" font-size="16" font-weight="700" fill="{c}">{fmt(val)}</text>')
+        y += 30
+        rows2.append((b, top, y - 8))
+    x167 = BX + 16.667 * scale
+    o.append(f'<line x1="{x167:.1f}" y1="{top2 - 6}" x2="{x167:.1f}" y2="{y - 2}" stroke="{AMBER}" stroke-width="2" stroke-dasharray="5 4"/>')
+    o.append(f'<text x="{x167 + 6:.1f}" y="{y + 16}" font-size="16" font-weight="700" fill="{AMBER}">16.7ms(60fps)</text>')
+    # mark the chosen value in both panels
+    for rows in (rows1, rows2):
+        for b, t, bt in rows:
+            if b == CHOSEN:
+                o.append(f'<rect x="{BX - 66}" y="{t - 5}" width="{W - 32 - BX + 66}" height="{bt - t + 8}" rx="6" fill="none" stroke="{GREEN}" stroke-width="2"/>')
+    y += 40
+    o.append(f'<line x1="32" y1="{y - 14}" x2="{W - 32}" y2="{y - 14}" stroke="{LINE}"/>')
+    o.append(f'<text x="32" y="{y + 10}" font-size="16" fill="{SUB}">초록 상자가 고른 값이다. 1만에서 건너뜀이 0이고 2만에서 16.7ms 안인 가장 작은 값이다.</text>')
+    o.append(f'<text x="32" y="{y + 34}" font-size="16" fill="{SUB}">건너뛴 액터는 그 프레임에 자세가 멈춘다. 보간한 액터는 지난 두 자세 사이를 잇는다.</text>')
+    write("hyd-budget.svg", svg(y + 58, o))
 
 
 summary()
@@ -392,6 +465,7 @@ transition()
 expected()
 maxn()
 ablation()
+budget()
 print("wrote", sorted(os.listdir(OUT)))
 print(f"L4 actors {ACTORS_L4} dGame {D_GAME:.4f} dFrame {D_FRAME:.4f} dGPU {D_GPU:.4f}")
 print(f"headroom {HEADROOM:.4f} unitL1 {UNIT_L1_US:.4f}us fitL1 {FIT_L1:.2f} expectL1 {EXPECT_L1:.4f} unitL4 {UNIT_L4_US:.4f}us")

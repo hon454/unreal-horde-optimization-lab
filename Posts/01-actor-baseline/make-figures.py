@@ -1,6 +1,6 @@
 # Makes the SVG figures of post 01 in images/.
-# Run from the repository root: py Posts/01-actor-baseline/make-figures.py
-# Measured values come from Measurements/Full2/summary.csv and Docs/figures/full2/full-n-at-60fps.csv.
+# Run from the repository root: py -3 -I Posts/01-actor-baseline/make-figures.py
+# Measured values come from Measurements/Full3/summary.csv and Docs/figures/full3/full-n-at-60fps.csv.
 # Trace values (one serial trace, 25-75 s window) are constants below; their source is in measurements.md.
 import csv, math, os
 import re
@@ -10,17 +10,17 @@ ROOT = os.path.normpath(os.path.join(HERE, "..", ".."))
 OUT = os.path.join(HERE, "images")
 
 rows = {}
-with open(os.path.join(ROOT, "Measurements", "Full2", "summary.csv"), encoding="utf-8") as f:
+with open(os.path.join(ROOT, "Measurements", "Full3", "summary.csv"), encoding="utf-8") as f:
     for r in csv.DictReader(f):
         rows[(r["variant"], int(r["n"]), r["preset"])] = r
 
 def v(variant, n, col):
     return float(rows[(variant, n, "P1")][col])
 
-with open(os.path.join(ROOT, "Docs", "figures", "full2", "full-n-at-60fps.csv"), encoding="utf-8") as f:
+with open(os.path.join(ROOT, "Docs", "figures", "full3", "full-n-at-60fps.csv"), encoding="utf-8") as f:
     N_AT_60 = int(next(r for r in csv.DictReader(f) if r["series"] == "1 L1-full")["n_p95"])
 
-# Serial trace Full2traceser-L1-full (build 08e45f2), 10000 P1, 25-75 s, per frame (ms). measurements.md "두 트레이스".
+# Serial trace Full2traceser-L1-full (build 08e45f2, not re-extracted from the Full3 trace), 10000 P1, 25-75 s, per frame (ms). measurements.md "두 트레이스".
 T_FRAME, T_CMC, T_SKIN, T_ANIMEVAL = 446.43, 322.20, 27.31, 15.71
 T_REST = T_FRAME - T_CMC - T_SKIN - T_ANIMEVAL
 
@@ -71,7 +71,7 @@ def summary():
           "오브 시점 카메라, 60초씩 세 번 잰 중앙값(ms)")
     X0, scale = 40, 560 / 450.0
     groups = [("액터 군중", "L1-full"), ("액터 군중 + URO", "S1-uro"),
-              ("액터 군중 + Animation Budget Allocator(예산 2ms)", "S1-budget")]
+              ("액터 군중 + Animation Budget Allocator(예산 4ms)", "S1-budget")]
     metrics = [("프레임 시간", "frame_p50_ms", DARK), ("게임 스레드", "game_p50_ms", BLUE),
                ("렌더 스레드", "render_p50_ms", TEAL), ("GPU", "gpu_p50_ms", PINK)]
     y = 120
@@ -231,7 +231,7 @@ def techniques():
     base_f, base_g = v("L1-full", 10000, "frame_p50_ms"), v("L1-full", 10000, "game_p50_ms")
     X0, scale = 40, 440 / 45.0  # the longest bar (43.0) plus its label must stay inside the right margin
     y = 120
-    for name, var in [("URO", "S1-uro"), ("Animation Budget Allocator(예산 2ms)", "S1-budget")]:
+    for name, var in [("URO", "S1-uro"), ("Animation Budget Allocator(예산 4ms)", "S1-budget")]:
         f, g = v(var, 10000, "frame_p50_ms"), v(var, 10000, "game_p50_ms")
         o.append(f'<text x="{X0}" y="{y}" font-size="17" font-weight="700">{name}</text>')
         y += 12

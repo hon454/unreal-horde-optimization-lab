@@ -4,29 +4,29 @@
 <text x="32" y="74" font-size="16" fill="#4b5563">호드 총수 1만, 오브 시점 카메라, 세 번 잰 중앙값(ms)</text>
 <text x="40" y="118" font-size="17" font-weight="700">VAT 인스턴스</text>
 <text x="768" y="118" text-anchor="end" font-size="16" fill="#4b5563">최종 구성에서 ISKM을 뺐다</text>
-<rect x="40" y="130" width="394.0" height="20" rx="3" fill="#374151"/>
-<text x="442.0" y="146" font-size="16"><tspan font-weight="700" fill="#374151">7.58</tspan><tspan fill="#4b5563"> 프레임 시간</tspan></text>
-<rect x="40" y="156" width="380.7" height="20" rx="3" fill="#2563eb"/>
-<text x="428.7" y="172" font-size="16"><tspan font-weight="700" fill="#2563eb">7.32</tspan><tspan fill="#4b5563"> 게임 스레드</tspan></text>
-<rect x="40" y="182" width="361.6" height="20" rx="3" fill="#db2777"/>
-<text x="409.6" y="198" font-size="16"><tspan font-weight="700" fill="#db2777">6.95</tspan><tspan fill="#4b5563"> GPU</tspan></text>
+<rect x="40" y="130" width="499.9" height="20" rx="3" fill="#374151"/>
+<text x="547.9" y="146" font-size="16"><tspan font-weight="700" fill="#374151">9.61</tspan><tspan fill="#4b5563"> 프레임 시간</tspan></text>
+<rect x="40" y="156" width="488.6" height="20" rx="3" fill="#2563eb"/>
+<text x="536.6" y="172" font-size="16"><tspan font-weight="700" fill="#2563eb">9.40</tspan><tspan fill="#4b5563"> 게임 스레드</tspan></text>
+<rect x="40" y="182" width="357.6" height="20" rx="3" fill="#db2777"/>
+<text x="405.6" y="198" font-size="16"><tspan font-weight="700" fill="#db2777">6.88</tspan><tspan fill="#4b5563"> GPU</tspan></text>
 <text x="40" y="236" font-size="17" font-weight="700">ISKM, 엔진 기본 바운드</text>
 <text x="768" y="236" text-anchor="end" font-size="16" fill="#4b5563">최종 구성에서 고정 바운드를 뺐다</text>
-<rect x="40" y="248" width="444.8" height="20" rx="3" fill="#374151"/>
-<text x="492.8" y="264" font-size="16"><tspan font-weight="700" fill="#374151">8.55</tspan><tspan fill="#4b5563"> 프레임 시간</tspan></text>
-<rect x="40" y="274" width="413.2" height="20" rx="3" fill="#2563eb"/>
-<text x="461.2" y="290" font-size="16"><tspan font-weight="700" fill="#2563eb">7.95</tspan><tspan fill="#4b5563"> 게임 스레드</tspan></text>
-<rect x="40" y="300" width="298.3" height="20" rx="3" fill="#db2777"/>
-<text x="346.3" y="316" font-size="16"><tspan font-weight="700" fill="#db2777">5.74</tspan><tspan fill="#4b5563"> GPU</tspan></text>
+<rect x="40" y="248" width="535.0" height="20" rx="3" fill="#374151"/>
+<text x="583.0" y="264" font-size="16"><tspan font-weight="700" fill="#374151">10.3</tspan><tspan fill="#4b5563"> 프레임 시간</tspan></text>
+<rect x="40" y="274" width="503.3" height="20" rx="3" fill="#2563eb"/>
+<text x="551.3" y="290" font-size="16"><tspan font-weight="700" fill="#2563eb">9.68</tspan><tspan fill="#4b5563"> 게임 스레드</tspan></text>
+<rect x="40" y="300" width="299.5" height="20" rx="3" fill="#db2777"/>
+<text x="347.5" y="316" font-size="16"><tspan font-weight="700" fill="#db2777">5.76</tspan><tspan fill="#4b5563"> GPU</tspan></text>
 <text x="40" y="354" font-size="17" font-weight="700">ISKM, 고정 바운드</text>
 <text x="768" y="354" text-anchor="end" font-size="16" fill="#4b5563">최종 구성</text>
-<rect x="40" y="366" width="404.7" height="20" rx="3" fill="#374151"/>
-<text x="452.7" y="382" font-size="16"><tspan font-weight="700" fill="#374151">7.78</tspan><tspan fill="#4b5563"> 프레임 시간</tspan></text>
-<rect x="40" y="392" width="397.7" height="20" rx="3" fill="#2563eb"/>
-<text x="445.7" y="408" font-size="16"><tspan font-weight="700" fill="#2563eb">7.65</tspan><tspan fill="#4b5563"> 게임 스레드</tspan></text>
-<rect x="40" y="418" width="297.4" height="20" rx="3" fill="#db2777"/>
-<text x="345.4" y="434" font-size="16"><tspan font-weight="700" fill="#db2777">5.72</tspan><tspan fill="#4b5563"> GPU</tspan></text>
+<rect x="40" y="366" width="506.8" height="20" rx="3" fill="#374151"/>
+<text x="554.8" y="382" font-size="16"><tspan font-weight="700" fill="#374151">9.75</tspan><tspan fill="#4b5563"> 프레임 시간</tspan></text>
+<rect x="40" y="392" width="498.8" height="20" rx="3" fill="#2563eb"/>
+<text x="546.8" y="408" font-size="16"><tspan font-weight="700" fill="#2563eb">9.59</tspan><tspan fill="#4b5563"> 게임 스레드</tspan></text>
+<rect x="40" y="418" width="299.1" height="20" rx="3" fill="#db2777"/>
+<text x="347.1" y="434" font-size="16"><tspan font-weight="700" fill="#db2777">5.75</tspan><tspan fill="#4b5563"> GPU</tspan></text>
 <line x1="32" y1="462" x2="768" y2="462" stroke="#e5e7eb"/>
 <text x="32" y="488" font-size="16" fill="#4b5563">GPU는 두 ISKM이 VAT보다 짧다. 프레임 시간은 기본 바운드가 가장 길다.</text>
-<text x="32" y="512" font-size="16" fill="#4b5563">고정 바운드를 빼면 +0.771ms, VAT로 되돌리면 −0.206ms다(프레임 시간, 최종 구성 대비).</text>
+<text x="32" y="512" font-size="16" fill="#4b5563">고정 바운드를 빼면 +0.542ms, VAT로 되돌리면 −0.132ms다(프레임 시간, 최종 구성 대비).</text>
 </svg>

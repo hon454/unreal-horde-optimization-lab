@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="766" viewBox="0 0 800 766" font-family="Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Segoe UI, sans-serif" font-size="16" fill="#111827">
+<rect x="0.5" y="0.5" width="799" height="765" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+<text x="32" y="46" font-size="22" font-weight="700">예산 값마다 잃는 것과 남는 것</text>
+<text x="32" y="74" font-size="16" fill="#4b5563">최종 구성에서 예산만 바꿔 오브 시점 카메라로 세 번 잰 중앙값</text>
+<text x="32" y="120" font-size="18" font-weight="700">호드 총수 1만: 그 프레임에 갱신도 보간도 하지 않은 액터</text>
+<rect x="150" y="134" width="14" height="14" rx="2" fill="#dc2626"/><text x="170" y="147" font-size="16">소형 미니언</text>
+<rect x="290" y="134" width="14" height="14" rx="2" fill="#9333ea"/><text x="310" y="147" font-size="16">대형 미니언</text>
+<text x="136" y="186" text-anchor="end" font-size="17" font-weight="400">끔</text>
+<rect x="150" y="164" width="1.5" height="14" rx="2" fill="#dc2626"/>
+<text x="159.5" y="177" font-size="16" font-weight="700" fill="#dc2626">0%</text>
+<rect x="150" y="181" width="1.5" height="14" rx="2" fill="#9333ea"/>
+<text x="159.5" y="194" font-size="16" font-weight="700" fill="#9333ea">0%</text>
+<text x="136" y="232" text-anchor="end" font-size="17" font-weight="400">1ms</text>
+<rect x="150" y="210" width="404.9" height="14" rx="2" fill="#dc2626"/>
+<text x="563.0" y="223" font-size="16" font-weight="700" fill="#dc2626">81%</text>
+<rect x="150" y="227" width="293.4" height="14" rx="2" fill="#9333ea"/>
+<text x="451.4" y="240" font-size="16" font-weight="700" fill="#9333ea">58.7%</text>
+<text x="136" y="278" text-anchor="end" font-size="17" font-weight="400">2ms</text>
+<rect x="150" y="256" width="234.8" height="14" rx="2" fill="#dc2626"/>
+<text x="392.8" y="269" font-size="16" font-weight="700" fill="#dc2626">46.9%</text>
+<rect x="150" y="273" width="10.5" height="14" rx="2" fill="#9333ea"/>
+<text x="168.5" y="286" font-size="16" font-weight="700" fill="#9333ea">2.10%</text>
+<text x="136" y="324" text-anchor="end" font-size="17" font-weight="400">3ms</text>
+<rect x="150" y="302" width="32.3" height="14" rx="2" fill="#dc2626"/>
+<text x="190.3" y="315" font-size="16" font-weight="700" fill="#dc2626">6.46%</text>
+<rect x="150" y="319" width="1.5" height="14" rx="2" fill="#9333ea"/>
+<text x="159.5" y="332" font-size="16" font-weight="700" fill="#9333ea">0%</text>
+<text x="136" y="370" text-anchor="end" font-size="17" font-weight="700">4ms</text>
+<rect x="150" y="348" width="1.5" height="14" rx="2" fill="#dc2626"/>
+<text x="159.5" y="361" font-size="16" font-weight="700" fill="#dc2626">0%</text>
+<rect x="150" y="365" width="1.5" height="14" rx="2" fill="#9333ea"/>
+<text x="159.5" y="378" font-size="16" font-weight="700" fill="#9333ea">0%</text>
+<text x="136" y="416" text-anchor="end" font-size="17" font-weight="400">6ms</text>
+<rect x="150" y="394" width="1.5" height="14" rx="2" fill="#dc2626"/>
+<text x="159.5" y="407" font-size="16" font-weight="700" fill="#dc2626">0%</text>
+<rect x="150" y="411" width="1.5" height="14" rx="2" fill="#9333ea"/>
+<text x="159.5" y="424" font-size="16" font-weight="700" fill="#9333ea">0%</text>
+<line x1="32" y1="442" x2="768" y2="442" stroke="#e5e7eb"/>
+<text x="32" y="468" font-size="18" font-weight="700">호드 총수 2만: 프레임 시간의 느린 쪽 5% 경계(ms)</text>
+<text x="136" y="505" text-anchor="end" font-size="17" font-weight="400">끔</text>
+<rect x="150" y="488" width="431.8" height="22" rx="3" fill="#9ca3af"/>
+<text x="589.8" y="505" font-size="16" font-weight="700" fill="#9ca3af">19</text>
+<text x="136" y="535" text-anchor="end" font-size="17" font-weight="400">1ms</text>
+<rect x="150" y="518" width="305.0" height="22" rx="3" fill="#374151"/>
+<text x="463.0" y="535" font-size="16" font-weight="700" fill="#374151">13.4</text>
+<text x="136" y="565" text-anchor="end" font-size="17" font-weight="400">2ms</text>
+<rect x="150" y="548" width="310.8" height="22" rx="3" fill="#374151"/>
+<text x="468.8" y="565" font-size="16" font-weight="700" fill="#374151">13.7</text>
+<text x="136" y="595" text-anchor="end" font-size="17" font-weight="400">3ms</text>
+<rect x="150" y="578" width="336.7" height="22" rx="3" fill="#374151"/>
+<text x="494.7" y="595" font-size="16" font-weight="700" fill="#374151">14.8</text>
+<text x="136" y="625" text-anchor="end" font-size="17" font-weight="700">4ms</text>
+<rect x="150" y="608" width="374.3" height="22" rx="3" fill="#374151"/>
+<text x="532.3" y="625" font-size="16" font-weight="700" fill="#374151">16.5</text>
+<text x="136" y="655" text-anchor="end" font-size="17" font-weight="400">6ms</text>
+<rect x="150" y="638" width="441.7" height="22" rx="3" fill="#9ca3af"/>
+<text x="599.7" y="655" font-size="16" font-weight="700" fill="#9ca3af">19.4</text>
+<line x1="528.8" y1="482" x2="528.8" y2="666" stroke="#b45309" stroke-width="2" stroke-dasharray="5 4"/>
+<text x="534.8" y="684" font-size="16" font-weight="700" fill="#b45309">16.7ms(60fps)</text>
+<rect x="84" y="343" width="684" height="42" rx="6" fill="none" stroke="#15803d" stroke-width="2"/>
+<rect x="84" y="603" width="684" height="30" rx="6" fill="none" stroke="#15803d" stroke-width="2"/>
+<line x1="32" y1="694" x2="768" y2="694" stroke="#e5e7eb"/>
+<text x="32" y="718" font-size="16" fill="#4b5563">초록 상자가 고른 값이다. 1만에서 건너뜀이 0이고 2만에서 16.7ms 안인 가장 작은 값이다.</text>
+<text x="32" y="742" font-size="16" fill="#4b5563">건너뛴 액터는 그 프레임에 자세가 멈춘다. 보간한 액터는 지난 두 자세 사이를 잇는다.</text>
+</svg>

@@ -1,11 +1,11 @@
 # Makes the SVG figures of the root README in Docs/figures/readme/.
 # Run from anywhere: py -3 -I Scripts/plot-readme.py
-# Every value comes from the latest full batch (Full2), except the transition figure:
-#   Measurements/Full2/summary.csv               ladder, resources and ablation (10000, P1)
-#   Measurements/Full2/runs.csv                  run ranges of the resource figure
-#   Docs/figures/full2/full-n-at-60fps.csv       max entities at 60 fps (n_p95)
+# Every value comes from the latest full batch (Full3), except the transition figure:
+#   Measurements/Full3/summary.csv               ladder, resources and ablation (10000, P1)
+#   Measurements/Full3/runs.csv                  run ranges of the resource figure
+#   Docs/figures/full3/full-n-at-60fps.csv       max entities at 60 fps (n_p95)
 #   Measurements/Pool1/timeline.csv              entity pool on/off over 16 minutes (one run each, 1-minute bins)
-#   Measurements/Full1/transition-dev/runs.csv   transition pop (Development reference, not re-measured with Full2)
+#   Measurements/Full1/transition-dev/runs.csv   transition pop (Development reference, not re-measured with Full3)
 # Colours and fonts follow Posts/01-actor-baseline/make-figures.py.
 import csv, os, statistics
 import re
@@ -14,7 +14,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.normpath(os.path.join(HERE, ".."))
 OUT = os.path.join(ROOT, "Docs", "figures", "readme")
 N, PRESET = 10000, "P1"
-BATCH = "Full2"
+BATCH = "Full3"
 
 FONT = "Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Segoe UI, sans-serif"
 INK, SUB, LINE, BG, CARD = "#111827", "#4b5563", "#e5e7eb", "#ffffff", "#f8fafc"
@@ -104,8 +104,9 @@ def _no_zero_decimals(f):
 @_no_zero_decimals
 def fmt(x, signed=False):
     """Three significant figures."""
-    a = abs(x)
-    s = f"{a:.0f}" if a >= 100 else f"{a:.1f}" if a >= 10 else f"{a:.2f}"
+    from decimal import Decimal, ROUND_HALF_UP
+    a = Decimal(repr(round(abs(x), 6)))  # half up from the decimal text (1.125 -> 1.13), as in the posts
+    s = str(a.quantize(Decimal("1" if a >= 100 else "0.1" if a >= 10 else "0.01"), rounding=ROUND_HALF_UP))
     if float(s) == 0:
         return s
     if signed:
@@ -368,7 +369,7 @@ def ablation():
     legend(o, y, [(m[0], m[2]) for m in mets])
     y += 22
     o.append(f'<text x="32" y="{y}" font-size="16" fill="{SUB}">흐린 막대: 세 번 잰 범위보다 작은 차이(구별되지 않음)</text>')
-    LX, ZX, SC = 32, 540, 30.0
+    LX, ZX, SC = 32, 570, 26.0
     BAR, STEP = 17, 21
     y += 40
     o.append(f'<text x="{ZX - 10}" y="{y}" text-anchor="end" font-size="16" fill="{SUB}">← 빨라짐</text>')
@@ -388,7 +389,7 @@ def ablation():
             tags.append(f"병목이 {bot_name[S[cond]['bottleneck']]}로 바뀜")
         if not freal and diffs["game_p50_ms"][1] and not greal:
             tags.append("프레임은 그대로, 게임 스레드만")
-        elif greal and (not freal or (fd > 0) != (gd > 0)):
+        elif greal and abs(gd) >= 0.1 and (not freal or (fd > 0) != (gd > 0)):
             tags.append("GPU 차이가 프레임에 드러나지 않음")
         sub = list(lines) + tags
         label(o, LX, y + 15, name, sub)

@@ -16,43 +16,43 @@
 <line x1="70" y1="130" x2="70" y2="450" stroke="#4b5563"/>
 <line x1="70" y1="183.3" x2="560" y2="183.3" stroke="#b45309" stroke-dasharray="6 4" stroke-width="1.5"/>
 <text x="78" y="175.3" font-size="16" font-weight="700" fill="#b45309">16.7ms(60fps)</text>
-<polyline points="146.6,351.3 223.1,319.4 376.2,249.6 529.4,183.5" fill="none" stroke="#9ca3af" stroke-width="2.5" stroke-dasharray="6 4"/>
-<circle cx="146.6" cy="351.3" r="4.5" fill="#9ca3af"/>
-<circle cx="223.1" cy="319.4" r="4.5" fill="#9ca3af"/>
-<circle cx="376.2" cy="249.6" r="4.5" fill="#9ca3af"/>
-<circle cx="529.4" cy="183.5" r="4.5" fill="#9ca3af"/>
-<polyline points="146.6,350.9 223.1,327.5 376.2,269.9 529.4,216.9" fill="none" stroke="#2563eb" stroke-width="2.5"/>
-<circle cx="146.6" cy="350.9" r="4.5" fill="#2563eb"/>
-<circle cx="223.1" cy="327.5" r="4.5" fill="#2563eb"/>
-<circle cx="376.2" cy="269.9" r="4.5" fill="#2563eb"/>
-<circle cx="529.4" cy="216.9" r="4.5" fill="#2563eb"/>
-<text x="138.6" y="341.3" text-anchor="end" font-size="16" font-weight="700" fill="#374151">6.17</text>
-<text x="154.6" y="374.9" text-anchor="start" font-size="16" font-weight="700" fill="#2563eb">6.19</text>
-<text x="215.1" y="309.4" text-anchor="end" font-size="16" font-weight="700" fill="#374151">8.16</text>
-<text x="231.1" y="351.5" text-anchor="start" font-size="16" font-weight="700" fill="#2563eb">7.65</text>
-<text x="368.2" y="239.6" text-anchor="end" font-size="16" font-weight="700" fill="#374151">12.5</text>
-<text x="384.2" y="293.9" text-anchor="start" font-size="16" font-weight="700" fill="#2563eb">11.3</text>
-<text x="521.4" y="173.5" text-anchor="end" font-size="16" font-weight="700" fill="#374151">16.7</text>
-<text x="537.4" y="240.9" text-anchor="start" font-size="16" font-weight="700" fill="#2563eb">14.6</text>
+<polyline points="146.6,352.8 223.1,299.2 376.2,207.6 529.4,146.9" fill="none" stroke="#9ca3af" stroke-width="2.5" stroke-dasharray="6 4"/>
+<circle cx="146.6" cy="352.8" r="4.5" fill="#9ca3af"/>
+<circle cx="223.1" cy="299.2" r="4.5" fill="#9ca3af"/>
+<circle cx="376.2" cy="207.6" r="4.5" fill="#9ca3af"/>
+<circle cx="529.4" cy="146.9" r="4.5" fill="#9ca3af"/>
+<polyline points="146.6,351.3 223.1,312.9 376.2,231.3 529.4,179.1" fill="none" stroke="#2563eb" stroke-width="2.5"/>
+<circle cx="146.6" cy="351.3" r="4.5" fill="#2563eb"/>
+<circle cx="223.1" cy="312.9" r="4.5" fill="#2563eb"/>
+<circle cx="376.2" cy="231.3" r="4.5" fill="#2563eb"/>
+<circle cx="529.4" cy="179.1" r="4.5" fill="#2563eb"/>
+<text x="138.6" y="342.8" text-anchor="end" font-size="16" font-weight="700" fill="#374151">6.08</text>
+<text x="154.6" y="375.3" text-anchor="start" font-size="16" font-weight="700" fill="#2563eb">6.17</text>
+<text x="215.1" y="289.2" text-anchor="end" font-size="16" font-weight="700" fill="#374151">9.42</text>
+<text x="231.1" y="336.9" text-anchor="start" font-size="16" font-weight="700" fill="#2563eb">8.57</text>
+<text x="368.2" y="197.6" text-anchor="end" font-size="16" font-weight="700" fill="#374151">15.2</text>
+<text x="384.2" y="255.3" text-anchor="start" font-size="16" font-weight="700" fill="#2563eb">13.7</text>
+<text x="521.4" y="136.9" text-anchor="end" font-size="16" font-weight="700" fill="#374151">18.9</text>
+<text x="537.4" y="203.1" text-anchor="start" font-size="16" font-weight="700" fill="#2563eb">16.9</text>
 <text x="114" y="476" text-anchor="end" font-size="16" fill="#4b5563">호드 총수</text>
 <text x="114" y="500" text-anchor="end" font-size="16" fill="#2563eb">차이</text>
 <line x1="146.6" y1="450" x2="146.6" y2="455" stroke="#4b5563"/>
 <text x="146.6" y="476" text-anchor="middle" font-size="16">5천</text>
-<text x="146.6" y="500" text-anchor="middle" font-size="16" font-weight="700" fill="#2563eb">+0.02</text>
+<text x="146.6" y="500" text-anchor="middle" font-size="16" font-weight="700" fill="#2563eb">+0.09</text>
 <line x1="223.1" y1="450" x2="223.1" y2="455" stroke="#4b5563"/>
 <text x="223.1" y="476" text-anchor="middle" font-size="16">1만</text>
-<text x="223.1" y="500" text-anchor="middle" font-size="16" font-weight="700" fill="#2563eb">−0.51</text>
+<text x="223.1" y="500" text-anchor="middle" font-size="16" font-weight="700" fill="#2563eb">−0.85</text>
 <line x1="376.2" y1="450" x2="376.2" y2="455" stroke="#4b5563"/>
 <text x="376.2" y="476" text-anchor="middle" font-size="16">2만</text>
-<text x="376.2" y="500" text-anchor="middle" font-size="16" font-weight="700" fill="#2563eb">−1.27</text>
+<text x="376.2" y="500" text-anchor="middle" font-size="16" font-weight="700" fill="#2563eb">−1.49</text>
 <line x1="529.4" y1="450" x2="529.4" y2="455" stroke="#4b5563"/>
 <text x="529.4" y="476" text-anchor="middle" font-size="16">3만</text>
-<text x="529.4" y="500" text-anchor="middle" font-size="16" font-weight="700" fill="#2563eb">−2.09</text>
+<text x="529.4" y="500" text-anchor="middle" font-size="16" font-weight="700" fill="#2563eb">−2.01</text>
 <line x1="590" y1="160" x2="618" y2="160" stroke="#9ca3af" stroke-width="2.5" stroke-dasharray="6 4"/><text x="626" y="166" font-size="16">4단계</text>
 <line x1="590" y1="192" x2="618" y2="192" stroke="#2563eb" stroke-width="2.5"/><text x="626" y="198" font-size="16">5단계</text>
 <text x="590" y="238" font-size="16" fill="#4b5563">5천은 두 단계 모두</text>
 <text x="590" y="260" font-size="16" fill="#4b5563">GPU가 정해 같다</text>
 <line x1="32" y1="528" x2="768" y2="528" stroke="#e5e7eb"/>
-<text x="32" y="552" font-size="16" fill="#4b5563">60fps를 지키는 최대 개체 수(느린 쪽 5% 경계 기준): 4단계 25,636.</text>
-<text x="32" y="576" font-size="16" fill="#4b5563">5단계는 3만에서도 느린 쪽 5% 경계가 16.3ms라 한계에 닿지 않았다.</text>
+<text x="32" y="552" font-size="16" fill="#4b5563">60fps를 지키는 최대 개체 수(느린 쪽 5% 경계 기준):</text>
+<text x="32" y="576" font-size="16" fill="#4b5563">4단계 19,952, 5단계 22,857.</text>
 </svg>

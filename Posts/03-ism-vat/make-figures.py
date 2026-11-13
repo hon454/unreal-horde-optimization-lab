@@ -1,6 +1,6 @@
 # Makes the SVG figures of post 03 in images/.
 # Run from the repository root: py -3 -I Posts/03-ism-vat/make-figures.py
-# Measured values come from Measurements/Full2/summary.csv and Docs/figures/full2/full-n-at-60fps.csv.
+# Measured values come from Measurements/Full3/summary.csv and Docs/figures/full3/full-n-at-60fps.csv.
 # Trace values (one trace per step, 25-75 s window) are constants below; their source is in measurements.md.
 import csv, os
 import re
@@ -11,7 +11,7 @@ ROOT = os.path.normpath(os.path.join(HERE, "..", ".."))
 OUT = os.path.join(HERE, "images")
 
 rows = {}
-with open(os.path.join(ROOT, "Measurements", "Full2", "summary.csv"), encoding="utf-8") as f:
+with open(os.path.join(ROOT, "Measurements", "Full3", "summary.csv"), encoding="utf-8") as f:
     for r in csv.DictReader(f):
         rows[(r["variant"], int(r["n"]), r["preset"])] = r
 
@@ -20,7 +20,7 @@ def v(variant, n, col, preset="P1"):
     return float(rows[(variant, n, preset)][col])
 
 
-with open(os.path.join(ROOT, "Docs", "figures", "full2", "full-n-at-60fps.csv"), encoding="utf-8") as f:
+with open(os.path.join(ROOT, "Docs", "figures", "full3", "full-n-at-60fps.csv"), encoding="utf-8") as f:
     NAT = {r["series"]: r for r in csv.DictReader(f)}
 N_AT_60_L2 = int(NAT["2 L2-mass"]["n_p95"])
 L3_ABOVE = NAT["3 L3-vatcull"]["note_p95"] == "above range"

@@ -44,8 +44,8 @@
 <rect x="32" y="568" width="6" height="118" rx="3" fill="#dc2626"/>
 <text x="56" y="600" font-size="18" font-weight="700" fill="#dc2626">스켈레탈 메시 틱과 애니메이션 평가</text>
 <text x="750" y="600" text-anchor="end" font-family="Consolas, SFMono-Regular, Menlo, monospace" font-size="16" fill="#4b5563">USkeletalMeshComponentBudgeted</text>
-<text x="56" y="632" font-size="17">Animation Budget Allocator가 2ms 예산을 나눈다</text>
-<text x="56" y="660" font-size="17">중요도 큰 순으로 매 프레임, 나머지는 간격을 늘린다</text>
+<text x="56" y="632" font-size="17">Animation Budget Allocator가 4ms 예산을 나눈다</text>
+<text x="56" y="660" font-size="17">화면에서 큰 메시부터 매 프레임, 모자라면 작은 메시를 건너뛴다</text>
 <text x="32" y="716" font-size="16" fill="#4b5563">액터는 액터 틱과 이동 컴포넌트를 쓰지 않는다. 위치는 엔티티가 정한다.</text>
 <text x="32" y="740" font-size="16" fill="#4b5563">캡슐 콜리전도 끈다. 판정은 엔티티의 위치와 반경으로 한다.</text>
 </svg>

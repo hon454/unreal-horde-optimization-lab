@@ -3,20 +3,20 @@
 <text x="32" y="46" font-size="22" font-weight="700">6단계는 호드의 절반 넘게를 그리지 않는다</text>
 <text x="32" y="74" font-size="16" fill="#4b5563">호드 총수 1만, 오브 시점 카메라, 세 번 잰 중앙값(프레임 평균 개수와 ms)</text>
 <text x="40" y="112" font-size="18" font-weight="700">개체 1만을 무엇으로 그리나</text>
-<rect x="40.0" y="128" width="26.9" height="40" fill="#dc2626"/>
-<rect x="66.9" y="128" width="244.8" height="40" fill="#2563eb"/>
+<rect x="40.0" y="128" width="26.8" height="40" fill="#dc2626"/>
+<rect x="66.8" y="128" width="244.9" height="40" fill="#2563eb"/>
 <rect x="311.7" y="128" width="448.3" height="40" fill="white" stroke="#9ca3af" stroke-width="2" stroke-dasharray="6 4"/>
 <text x="40.0" y="196" font-size="16"><tspan font-weight="700" fill="#dc2626">373</tspan><tspan fill="#4b5563"> 액터</tspan></text>
 <text x="170.0" y="196" font-size="16"><tspan font-weight="700" fill="#2563eb">3,401</tspan><tspan fill="#4b5563"> ISKM</tspan></text>
 <text x="331.7" y="196" font-size="16"><tspan font-weight="700" fill="#374151">6,226</tspan><tspan fill="#4b5563"> 그리지 않음(200m 밖)</tspan></text>
 <path d="M53.4 170 L50.0 178" stroke="#dc2626" stroke-width="1.5" fill="none"/>
 <text x="40" y="252" font-size="18" font-weight="700">같은 실행의 스레드별 시간(ms)</text>
-<rect x="40" y="268" width="411.3" height="22" rx="3" fill="#2563eb"/>
-<text x="459.3" y="285" font-size="16"><tspan font-weight="700" fill="#2563eb">7.34</tspan><tspan fill="#4b5563"> 게임 스레드</tspan></text>
-<rect x="40" y="298" width="299.9" height="22" rx="3" fill="#db2777"/>
-<text x="347.9" y="315" font-size="16"><tspan font-weight="700" fill="#db2777">5.36</tspan><tspan fill="#4b5563"> GPU</tspan></text>
-<rect x="339.9" y="298" width="111.3" height="22" fill="white" stroke="#b45309" stroke-width="2" stroke-dasharray="5 4"/>
-<text x="339.9" y="344" font-size="16" font-weight="700" fill="#b45309">GPU의 여유 1.99ms</text>
+<rect x="40" y="268" width="464.4" height="22" rx="3" fill="#2563eb"/>
+<text x="512.4" y="285" font-size="16"><tspan font-weight="700" fill="#2563eb">8.29</tspan><tspan fill="#4b5563"> 게임 스레드</tspan></text>
+<rect x="40" y="298" width="300.9" height="22" rx="3" fill="#db2777"/>
+<text x="348.9" y="315" font-size="16"><tspan font-weight="700" fill="#db2777">5.37</tspan><tspan fill="#4b5563"> GPU</tspan></text>
+<rect x="340.9" y="298" width="163.5" height="22" fill="white" stroke="#b45309" stroke-width="2" stroke-dasharray="5 4"/>
+<text x="340.9" y="344" font-size="16" font-weight="700" fill="#b45309">GPU의 여유 2.92ms</text>
 <line x1="32" y1="362" x2="768" y2="362" stroke="#e5e7eb"/>
 <text x="32" y="388" font-size="16" fill="#4b5563">그리지 않는 개체도 엔티티로 살아 걷는다. 화면의 그 자리는 빈 땅이다.</text>
 <text x="32" y="412" font-size="16" fill="#4b5563">GPU는 여유만큼 일을 더 해도 프레임 시간을 늘리지 않는다.</text>

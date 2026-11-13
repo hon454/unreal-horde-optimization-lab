@@ -1,6 +1,6 @@
 # Makes the SVG figures of post 05 in images/.
 # Run from the repository root: py -3 -I Posts/05-simulation-lod-entity-pool/make-figures.py
-# Measured values come from Measurements/Full2/summary.csv and Docs/figures/full2/full-n-at-60fps.csv.
+# Measured values come from Measurements/Full3/summary.csv and Docs/figures/full3/full-n-at-60fps.csv.
 # The entity pool timeline figure is not made here: the post uses Docs/figures/readme/entity-pool.svg (Scripts/plot-readme.py).
 import csv, os
 import re
@@ -11,7 +11,7 @@ ROOT = os.path.normpath(os.path.join(HERE, "..", ".."))
 OUT = os.path.join(HERE, "images")
 
 rows = {}
-with open(os.path.join(ROOT, "Measurements", "Full2", "summary.csv"), encoding="utf-8") as f:
+with open(os.path.join(ROOT, "Measurements", "Full3", "summary.csv"), encoding="utf-8") as f:
     for r in csv.DictReader(f):
         rows[(r["variant"], int(r["n"]), r["preset"])] = r
 
@@ -20,10 +20,11 @@ def v(variant, n, col, preset="P1"):
     return float(rows[(variant, n, preset)][col])
 
 
-with open(os.path.join(ROOT, "Docs", "figures", "full2", "full-n-at-60fps.csv"), encoding="utf-8") as f:
+with open(os.path.join(ROOT, "Docs", "figures", "full3", "full-n-at-60fps.csv"), encoding="utf-8") as f:
     NAT = {r["series"]: r for r in csv.DictReader(f)}
 N_AT_60_L4 = int(NAT["4 L4-mass"]["n_p95"])
 L5_ABOVE = NAT["5 L5-m4offpool"]["note_p95"] == "above range"
+N_AT_60_L5 = int(NAT["5 L5-m4offpool"]["n_p95"])
 
 L4, L5, L8 = "L4-mass", "L5-m4offpool", "L8-q4final"
 NS = [5000, 10000, 20000, 30000]
@@ -261,8 +262,11 @@ def result():
     yb = B + 96
     o.append(f'<line x1="32" y1="{yb - 18}" x2="{W - 32}" y2="{yb - 18}" stroke="{LINE}"/>')
     p95_30k = v(L5, 30000, "frame_p95_ms")
-    o.append(f'<text x="32" y="{yb + 6}" font-size="16" fill="{SUB}">60fps를 지키는 최대 개체 수(느린 쪽 5% 경계 기준): 4단계 {N_AT_60_L4:,}.</text>')
-    tail = f"5단계는 3만에서도 느린 쪽 5% 경계가 {fmt(p95_30k)}ms라 한계에 닿지 않았다." if L5_ABOVE else ""
+    o.append(f'<text x="32" y="{yb + 6}" font-size="16" fill="{SUB}">60fps를 지키는 최대 개체 수(느린 쪽 5% 경계 기준):</text>')
+    if L5_ABOVE:
+        tail = f"4단계 {N_AT_60_L4:,}. 5단계는 3만에서도 느린 쪽 5% 경계가 {fmt(p95_30k)}ms라 한계에 닿지 않았다."
+    else:
+        tail = f"4단계 {N_AT_60_L4:,}, 5단계 {N_AT_60_L5:,}."
     o.append(f'<text x="32" y="{yb + 30}" font-size="16" fill="{SUB}">{tail}</text>')
     write("simlod-result.svg", svg(yb + 52, o))
 
@@ -273,7 +277,7 @@ def ablation():
     title(o, "최종 구성에서 하나씩 빼 보면",
           "호드 총수 1만, 오브 시점 카메라, 60초씩 세 번 잰 프레임 시간(ms)")
     items = [("최종 구성", L8, DARK), ("Simulation LOD를 뺐다", "A8-simlod", BLUE), ("엔티티 풀을 뺐다", "A8-pool", GREEN)]
-    X0, scale = 40, 620 / 10.5
+    X0, scale = 40, 500 / 11
     y = 116
     base = v(L8, 10000, "frame_p50_ms")
     base_lo, base_hi = v(L8, 10000, "frame_p50_ms_min"), v(L8, 10000, "frame_p50_ms_max")

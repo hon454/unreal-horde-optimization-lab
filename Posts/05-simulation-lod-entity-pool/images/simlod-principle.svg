@@ -48,7 +48,7 @@
 <text x="421.8" y="366" text-anchor="middle" font-size="16" font-weight="700" fill="#4b5563">없음</text>
 <rect x="631.5" y="342" width="134.5" height="36" rx="4" fill="#15803d"/>
 <text x="698.8" y="366" text-anchor="middle" font-size="16" font-weight="700" fill="white">1초 간격</text>
-<text x="214" y="404" font-size="16" fill="#4b5563">호드 총수 1만에서 실제 주기: Medium 0.11초, Off 0.32초</text>
+<text x="214" y="404" font-size="16" fill="#4b5563">호드 총수 1만에서 실제 주기: Medium 0.11초, Off 0.33초</text>
 <text x="214" y="428" font-size="16" fill="#4b5563">걷는 개체: High 1,458, Medium 2,411, Off 5,997(프레임 평균)</text>
 <line x1="32" y1="450" x2="768" y2="450" stroke="#e5e7eb"/>
 <text x="32" y="476" font-size="18" font-weight="700">죽은 개체의 엔티티</text>

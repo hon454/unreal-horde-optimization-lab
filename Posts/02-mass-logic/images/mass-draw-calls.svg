@@ -36,18 +36,18 @@
 <circle cx="118.5" cy="323.1" r="4.5" fill="#dc2626"/>
 <text x="118.5" y="311.1" text-anchor="middle" font-size="16" font-weight="700" fill="#dc2626">575</text>
 <circle cx="188.3" cy="292.8" r="4.5" fill="#dc2626"/>
-<text x="188.3" y="280.8" text-anchor="middle" font-size="16" font-weight="700" fill="#dc2626">1,091</text>
+<text x="188.3" y="280.8" text-anchor="middle" font-size="16" font-weight="700" fill="#dc2626">1,090</text>
 <circle cx="258.2" cy="261.8" r="4.5" fill="#dc2626"/>
 <text x="258.2" y="249.8" text-anchor="middle" font-size="16" font-weight="700" fill="#dc2626">2,100</text>
 <circle cx="420.3" cy="186.7" r="4.5" fill="#dc2626"/>
-<text x="420.3" y="174.7" text-anchor="middle" font-size="16" font-weight="700" fill="#dc2626">10,274</text>
-<polyline points="350.5,396.0 420.3,396.0 490.2,396.4 531.0,396.0" fill="none" stroke="#2563eb" stroke-width="2.5"/>
+<text x="420.3" y="174.7" text-anchor="middle" font-size="16" font-weight="700" fill="#dc2626">10,272</text>
+<polyline points="350.5,396.0 420.3,396.0 490.2,396.0 531.0,396.0" fill="none" stroke="#2563eb" stroke-width="2.5"/>
 <circle cx="350.5" cy="396.0" r="4.5" fill="#2563eb"/>
 <text x="350.5" y="422.0" text-anchor="middle" font-size="16" font-weight="700" fill="#2563eb">123</text>
 <circle cx="420.3" cy="396.0" r="4.5" fill="#2563eb"/>
 <text x="420.3" y="422.0" text-anchor="middle" font-size="16" font-weight="700" fill="#2563eb">123</text>
-<circle cx="490.2" cy="396.4" r="4.5" fill="#2563eb"/>
-<text x="490.2" y="422.4" text-anchor="middle" font-size="16" font-weight="700" fill="#2563eb">122</text>
+<circle cx="490.2" cy="396.0" r="4.5" fill="#2563eb"/>
+<text x="490.2" y="422.0" text-anchor="middle" font-size="16" font-weight="700" fill="#2563eb">123</text>
 <circle cx="531.0" cy="396.0" r="4.5" fill="#2563eb"/>
 <text x="531.0" y="422.0" text-anchor="middle" font-size="16" font-weight="700" fill="#2563eb">123</text>
 <line x1="588" y1="170" x2="616" y2="170" stroke="#dc2626" stroke-width="2.5"/>

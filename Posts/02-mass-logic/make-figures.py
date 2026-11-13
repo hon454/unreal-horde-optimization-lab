@@ -1,6 +1,6 @@
 # Makes the SVG figures of post 02 in images/.
 # Run from the repository root: py -3 -I Posts/02-mass-logic/make-figures.py
-# Measured values come from Measurements/Full2/summary.csv and Docs/figures/full2/full-n-at-60fps.csv.
+# Measured values come from Measurements/Full3/summary.csv and Docs/figures/full3/full-n-at-60fps.csv.
 # No trace values: the diagram (mass-processors.svg) carries no numbers. Standard library only.
 import csv, math, os
 import re
@@ -10,7 +10,7 @@ ROOT = os.path.normpath(os.path.join(HERE, "..", ".."))
 OUT = os.path.join(HERE, "images")
 
 rows = {}
-with open(os.path.join(ROOT, "Measurements", "Full2", "summary.csv"), encoding="utf-8") as f:
+with open(os.path.join(ROOT, "Measurements", "Full3", "summary.csv"), encoding="utf-8") as f:
     for r in csv.DictReader(f):
         rows[(r["variant"], int(r["n"]), r["preset"])] = r
 
@@ -19,7 +19,7 @@ def v(variant, n, col):
     return float(rows[(variant, n, "P1")][col])
 
 
-with open(os.path.join(ROOT, "Docs", "figures", "full2", "full-n-at-60fps.csv"), encoding="utf-8") as f:
+with open(os.path.join(ROOT, "Docs", "figures", "full3", "full-n-at-60fps.csv"), encoding="utf-8") as f:
     n60 = {r["series"]: int(r["n_p95"]) for r in csv.DictReader(f)}
 N60_ACTOR, N60_MASS = n60["1 L1-full"], n60["2 L2-mass"]
 

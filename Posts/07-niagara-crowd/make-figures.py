@@ -1,6 +1,6 @@
 # Makes the SVG figures of post 07 in images/.
 # Run from the repository root: py -3 -I Posts/07-niagara-crowd/make-figures.py
-# Measured values come from Measurements/Full2/summary.csv and Docs/figures/full2/full-n-at-60fps.csv.
+# Measured values come from Measurements/Full3/summary.csv and Docs/figures/full3/full-n-at-60fps.csv.
 # No trace values are drawn (trace values are in the post text and measurements.md only).
 import csv, os
 import re
@@ -11,7 +11,7 @@ ROOT = os.path.normpath(os.path.join(HERE, "..", ".."))
 OUT = os.path.join(HERE, "images")
 
 rows = {}
-with open(os.path.join(ROOT, "Measurements", "Full2", "summary.csv"), encoding="utf-8") as f:
+with open(os.path.join(ROOT, "Measurements", "Full3", "summary.csv"), encoding="utf-8") as f:
     for r in csv.DictReader(f):
         rows[(r["variant"], int(r["n"]), r["preset"])] = r
 
@@ -25,7 +25,7 @@ def rng(variant, n, col, preset="P1"):
     return float(r[col + "_max"]) - float(r[col + "_min"])
 
 
-with open(os.path.join(ROOT, "Docs", "figures", "full2", "full-n-at-60fps.csv"), encoding="utf-8") as f:
+with open(os.path.join(ROOT, "Docs", "figures", "full3", "full-n-at-60fps.csv"), encoding="utf-8") as f:
     NAT = {r["series"]: r for r in csv.DictReader(f)}
 N_AT_60_L6 = int(NAT["6 L6-m5bounds"]["n_p95"])
 N_AT_60_L7 = int(NAT["7 L7-q2crowd"]["n_p95"])

@@ -3,20 +3,20 @@
 <text x="32" y="46" font-size="22" font-weight="700">액터가 더한 게임 스레드 시간: 여유, 예상, 실제</text>
 <text x="32" y="74" font-size="16" fill="#4b5563">호드 총수 1만, 오브 시점 카메라, 세 번 잰 중앙값에서 계산(ms)</text>
 <text x="40" y="118" font-size="17" font-weight="700">3단계의 여유: GPU − 게임 스레드</text>
-<text x="768" y="118" text-anchor="end" font-size="16" fill="#4b5563">7.54 − 3.21</text>
-<rect x="40" y="130" width="346.3" height="26" rx="3" fill="white" stroke="#db2777" stroke-width="2"/>
-<text x="396.3" y="150" font-size="17" font-weight="700" fill="#db2777">4.33</text>
+<text x="768" y="118" text-anchor="end" font-size="16" fill="#4b5563">7.53 − 4.16</text>
+<rect x="40" y="130" width="269.8" height="26" rx="3" fill="white" stroke="#db2777" stroke-width="2"/>
+<text x="319.8" y="150" font-size="17" font-weight="700" fill="#db2777">3.37</text>
 <text x="40" y="194" font-size="17" font-weight="700">1단계 액터의 단가로 본 예상</text>
 <text x="768" y="194" text-anchor="end" font-size="16" fill="#4b5563">액터 373개 × 17µs</text>
-<rect x="40" y="206" width="508.5" height="26" rx="3" fill="white" stroke="#374151" stroke-width="1.5" stroke-dasharray="4 3"/>
-<text x="558.5" y="226" font-size="17" font-weight="700" fill="#374151">6.36</text>
+<rect x="40" y="206" width="507.4" height="26" rx="3" fill="white" stroke="#374151" stroke-width="1.5" stroke-dasharray="4 3"/>
+<text x="557.4" y="226" font-size="17" font-weight="700" fill="#374151">6.34</text>
 <text x="40" y="270" font-size="17" font-weight="700">실제: 4단계 − 3단계 게임 스레드</text>
-<text x="768" y="270" text-anchor="end" font-size="16" fill="#4b5563">액터 하나에 12.5µs</text>
-<rect x="40" y="282" width="373.0" height="26" rx="3" fill="#2563eb"/>
-<text x="423.0" y="302" font-size="17" font-weight="700" fill="#2563eb">4.66</text>
-<line x1="386.3" y1="112" x2="386.3" y2="316" stroke="#db2777" stroke-width="1.5" stroke-dasharray="4 4"/>
+<text x="768" y="270" text-anchor="end" font-size="16" fill="#4b5563">액터 하나에 13.4µs</text>
+<rect x="40" y="282" width="398.4" height="26" rx="3" fill="#2563eb"/>
+<text x="448.4" y="302" font-size="17" font-weight="700" fill="#2563eb">4.98</text>
+<line x1="309.8" y1="112" x2="309.8" y2="316" stroke="#db2777" stroke-width="1.5" stroke-dasharray="4 4"/>
 <line x1="32" y1="328" x2="768" y2="328" stroke="#e5e7eb"/>
-<text x="32" y="352" font-size="16" fill="#4b5563">1단계 단가라면 여유는 액터 254개에서 찬다.</text>
+<text x="32" y="352" font-size="16" fill="#4b5563">1단계 단가라면 여유는 액터 198개에서 찬다.</text>
 <text x="32" y="376" font-size="16" fill="#4b5563">실제 액터는 그보다 싸지만, 개수가 많아 여유를 넘었다.</text>
-<text x="32" y="400" font-size="16" fill="#4b5563">같은 단계에서 GPU가 0.597ms 줄어, 프레임 시간은 +0.249ms만 늘었다.</text>
+<text x="32" y="400" font-size="16" fill="#4b5563">같은 단계에서 GPU가 0.603ms 줄어, 프레임 시간은 +1.51ms만 늘었다.</text>
 </svg>

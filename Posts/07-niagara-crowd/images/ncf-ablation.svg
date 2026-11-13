@@ -4,30 +4,30 @@
 <text x="32" y="74" font-size="16" fill="#4b5563">호드 총수 1만, 오브 시점 카메라, 세 번 잰 중앙값(ms)</text>
 <text x="40" y="118" font-size="17" font-weight="700">그리지 않음</text>
 <text x="768" y="118" text-anchor="end" font-size="16" fill="#4b5563">최종 구성에서 배경 무리를 뺐다</text>
-<rect x="40" y="130" width="300.6" height="20" rx="3" fill="#374151"/>
-<text x="348.6" y="146" font-size="16"><tspan font-weight="700" fill="#374151">7.52</tspan><tspan fill="#4b5563"> 프레임 시간</tspan></text>
-<rect x="40" y="156" width="295.1" height="20" rx="3" fill="#2563eb"/>
-<text x="343.1" y="172" font-size="16"><tspan font-weight="700" fill="#2563eb">7.38</tspan><tspan fill="#4b5563"> 게임 스레드</tspan></text>
-<rect x="40" y="182" width="210.1" height="20" rx="3" fill="#db2777"/>
-<text x="258.1" y="198" font-size="16"><tspan font-weight="700" fill="#db2777">5.25</tspan><tspan fill="#4b5563"> GPU</tspan></text>
+<rect x="40" y="130" width="373.9" height="20" rx="3" fill="#374151"/>
+<text x="421.9" y="146" font-size="16"><tspan font-weight="700" fill="#374151">9.35</tspan><tspan fill="#4b5563"> 프레임 시간</tspan></text>
+<rect x="40" y="156" width="368.3" height="20" rx="3" fill="#2563eb"/>
+<text x="416.3" y="172" font-size="16"><tspan font-weight="700" fill="#2563eb">9.21</tspan><tspan fill="#4b5563"> 게임 스레드</tspan></text>
+<rect x="40" y="182" width="211.5" height="20" rx="3" fill="#db2777"/>
+<text x="259.5" y="198" font-size="16"><tspan font-weight="700" fill="#db2777">5.29</tspan><tspan fill="#4b5563"> GPU</tspan></text>
 <text x="40" y="236" font-size="17" font-weight="700">Niagara 입자</text>
 <text x="768" y="236" text-anchor="end" font-size="16" fill="#4b5563">최종 구성</text>
-<rect x="40" y="248" width="311.3" height="20" rx="3" fill="#374151"/>
-<text x="359.3" y="264" font-size="16"><tspan font-weight="700" fill="#374151">7.78</tspan><tspan fill="#4b5563"> 프레임 시간</tspan></text>
-<rect x="40" y="274" width="305.9" height="20" rx="3" fill="#2563eb"/>
-<text x="353.9" y="290" font-size="16"><tspan font-weight="700" fill="#2563eb">7.65</tspan><tspan fill="#4b5563"> 게임 스레드</tspan></text>
-<rect x="40" y="300" width="228.8" height="20" rx="3" fill="#db2777"/>
-<text x="276.8" y="316" font-size="16"><tspan font-weight="700" fill="#db2777">5.72</tspan><tspan fill="#4b5563"> GPU</tspan></text>
+<rect x="40" y="248" width="389.8" height="20" rx="3" fill="#374151"/>
+<text x="437.8" y="264" font-size="16"><tspan font-weight="700" fill="#374151">9.75</tspan><tspan fill="#4b5563"> 프레임 시간</tspan></text>
+<rect x="40" y="274" width="383.7" height="20" rx="3" fill="#2563eb"/>
+<text x="431.7" y="290" font-size="16"><tspan font-weight="700" fill="#2563eb">9.59</tspan><tspan fill="#4b5563"> 게임 스레드</tspan></text>
+<rect x="40" y="300" width="230.1" height="20" rx="3" fill="#db2777"/>
+<text x="278.1" y="316" font-size="16"><tspan font-weight="700" fill="#db2777">5.75</tspan><tspan fill="#4b5563"> GPU</tspan></text>
 <text x="40" y="354" font-size="17" font-weight="700">ISKM(500m까지)</text>
 <text x="768" y="354" text-anchor="end" font-size="16" fill="#4b5563">최종 구성에서 입자 대신 ISKM</text>
-<rect x="40" y="366" width="483.5" height="20" rx="3" fill="#374151"/>
-<text x="531.5" y="382" font-size="16"><tspan font-weight="700" fill="#374151">12.1</tspan><tspan fill="#4b5563"> 프레임 시간</tspan></text>
-<rect x="40" y="392" width="475.3" height="20" rx="3" fill="#2563eb"/>
-<text x="523.3" y="408" font-size="16"><tspan font-weight="700" fill="#2563eb">11.9</tspan><tspan fill="#4b5563"> 게임 스레드</tspan></text>
-<rect x="40" y="418" width="230.3" height="20" rx="3" fill="#db2777"/>
-<text x="278.3" y="434" font-size="16"><tspan font-weight="700" fill="#db2777">5.76</tspan><tspan fill="#4b5563"> GPU</tspan></text>
+<rect x="40" y="366" width="550.0" height="20" rx="3" fill="#374151"/>
+<text x="598.0" y="382" font-size="16"><tspan font-weight="700" fill="#374151">13.8</tspan><tspan fill="#4b5563"> 프레임 시간</tspan></text>
+<rect x="40" y="392" width="541.8" height="20" rx="3" fill="#2563eb"/>
+<text x="589.8" y="408" font-size="16"><tspan font-weight="700" fill="#2563eb">13.5</tspan><tspan fill="#4b5563"> 게임 스레드</tspan></text>
+<rect x="40" y="418" width="231.1" height="20" rx="3" fill="#db2777"/>
+<text x="279.1" y="434" font-size="16"><tspan font-weight="700" fill="#db2777">5.78</tspan><tspan fill="#4b5563"> GPU</tspan></text>
 <line x1="32" y1="462" x2="768" y2="462" stroke="#e5e7eb"/>
-<text x="32" y="488" font-size="16" fill="#4b5563">입자를 빼면 −0.268ms, 입자 대신 ISKM 5,986개로 그리면 +4.30ms다(프레임 시간).</text>
-<text x="32" y="512" font-size="16" fill="#4b5563">ISKM은 GPU가 입자와 거의 같고, 게임 스레드가 +4.24ms 길다.</text>
+<text x="32" y="488" font-size="16" fill="#4b5563">입자를 빼면 −0.398ms, 입자 대신 ISKM 5,984개로 그리면 +4ms다(프레임 시간).</text>
+<text x="32" y="512" font-size="16" fill="#4b5563">ISKM은 GPU가 입자와 거의 같고, 게임 스레드가 +3.95ms 길다.</text>
 <text x="32" y="536" font-size="16" fill="#4b5563">셋째 구성도 엔티티가 없는 500m 밖은 입자로 그린다.</text>
 </svg>

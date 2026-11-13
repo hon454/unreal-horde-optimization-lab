@@ -1,6 +1,6 @@
 # Makes the SVG figures of post 00 in images/.
 # Run from the repository root: py -3 -I Posts/00-goals-and-method/make-figures.py
-# Measured values come from Measurements/Full2/summary.csv and Docs/figures/full2/full-n-at-60fps.csv.
+# Measured values come from Measurements/Full3/summary.csv and Docs/figures/full3/full-n-at-60fps.csv.
 # Distances and caps in the stage map are configuration values; their source is in measurements.md.
 import csv, math, os
 import re
@@ -11,7 +11,7 @@ OUT = os.path.join(HERE, "images")
 os.makedirs(OUT, exist_ok=True)
 
 rows = {}
-with open(os.path.join(ROOT, "Measurements", "Full2", "summary.csv"), encoding="utf-8") as f:
+with open(os.path.join(ROOT, "Measurements", "Full3", "summary.csv"), encoding="utf-8") as f:
     for r in csv.DictReader(f):
         rows[(r["variant"], int(r["n"]), r["preset"])] = r
 
@@ -20,10 +20,10 @@ def v(variant, n, col, preset="P1"):
     return float(rows[(variant, n, preset)][col])
 
 
-with open(os.path.join(ROOT, "Docs", "figures", "full2", "full-n-at-60fps.csv"), encoding="utf-8") as f:
+with open(os.path.join(ROOT, "Docs", "figures", "full3", "full-n-at-60fps.csv"), encoding="utf-8") as f:
     NAT = {r["series"]: r for r in csv.DictReader(f)}
 N_AT_60 = int(NAT["8 L8-q4final"]["n_p95"])
-N_AT_60_P50_NOTE = NAT["8 L8-q4final"]["note_p50"]  # "above range": 30k is still under 16.7 ms
+N_AT_60_P50 = int(NAT["8 L8-q4final"]["n_p50"])  # the same crossing read from the median
 BUDGET_MS = 16.7  # Scripts/plot.py BUDGET_MS, the line the N interpolation uses
 
 FONT = "Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Segoe UI, sans-serif"
@@ -106,7 +106,7 @@ def pipeline():
     o.append(f'<text x="{(a + b) / 2:.1f}" y="{by + 56}" text-anchor="middle" font-size="16" fill="{SUB}">= 가장 느린 GPU의 한 칸</text>')
     ly = by + 92
     o.append(f'<rect x="{LX}" y="{ly - 15}" width="34" height="20" rx="3" fill="url(#hatch)" stroke="{GRAY}" stroke-width="0.8"/>')
-    o.append(f'<text x="{LX + 44}" y="{ly}" font-size="16">기다림: 앞서 나갈 수 있는 프레임 수에 한도가 있어 쉰다</text>')
+    o.append(f'<text x="{LX + 44}" y="{ly}" font-size="16">기다림: 앞서 나갈 수 있는 프레임 수에 한도가 있다</text>')
     o.append(f'<text x="{LX}" y="{ly + 26}" font-size="16">칸의 숫자는 프레임 번호다. 칸의 길이는 지어낸 값이다.</text>')
     o.append(f'<line x1="32" y1="{ly + 46}" x2="{W - 32}" y2="{ly + 46}" stroke="{LINE}"/>')
     o.append(f'<text x="32" y="{ly + 74}" font-size="16" fill="{SUB}">게임 스레드가 가장 느리면 게임 스레드의 한 칸이 프레임 시간이 된다.</text>')
@@ -119,25 +119,27 @@ def judging():
     title(o, "차이 판정: 중앙값의 차이가 범위보다 커야 다르다",
           "호드 총수 1만, 오브 시점 카메라, 프레임 시간 중앙값(ms)",
           "점은 세 번 잰 값의 중앙값, 가로선은 세 번의 최솟값–최댓값")
-    lo, hi = 7.5, 9.9
+    lo, hi = 9.3, 10.0
     X0, X1 = 330, 700
     X = lambda ms: X0 + (ms - lo) / (hi - lo) * (X1 - X0)
     base = ("L8-q4final", "최종 구성(8단계)")
     items = [
-        ("L8-q4final", "최종 구성(8단계)", None),
-        ("L8-q4final-aa", "같은 구성을 측정 끝에 다시", "구별되지 않음"),
-        ("A8-fix", "전환 대책을 뺐을 때", "구별되지 않음"),
-        ("A8-budget", "애니메이션 예산을 뺐을 때", "차이 있음"),
+        ("L8-q4final", "최종 구성(8단계)"),
+        ("L8-q4final-aa", "같은 구성을 측정 끝에 다시"),
+        ("A8-fix", "전환 대책을 뺐을 때"),
+        ("A8-budget", "애니메이션 예산을 뺐을 때"),
     ]
     b_med = v(base[0], 10000, "frame_p50_ms")
     b_rng = v(base[0], 10000, "frame_p50_ms_max") - v(base[0], 10000, "frame_p50_ms_min")
     y = 164
-    for t in [7.5, 8.0, 8.5, 9.0, 9.5]:
+    for t in [9.4, 9.6, 9.8, 10.0]:
         o.append(f'<line x1="{X(t):.1f}" y1="{y - 22}" x2="{X(t):.1f}" y2="{y + 4 * 78 - 40}" stroke="{LINE}"/>')
         o.append(f'<text x="{X(t):.1f}" y="{y - 28}" text-anchor="middle" font-size="16" fill="{SUB}">{t:.1f}</text>')
-    for var, label, verdict in items:
+    for var, label in items:
         med = v(var, 10000, "frame_p50_ms")
         mn, mx = v(var, 10000, "frame_p50_ms_min"), v(var, 10000, "frame_p50_ms_max")
+        # measurement.md "차이 판정": different only when the median gap exceeds the larger of the two ranges
+        verdict = None if var == base[0] else ("차이 있음" if abs(med - b_med) > max(mx - mn, b_rng) else "구별되지 않음")
         col = DARK if verdict is None else (RED if verdict == "차이 있음" else BLUE)
         o.append(f'<text x="32" y="{y + 6}" font-size="17" font-weight="700">{label}</text>')
         o.append(f'<line x1="{X(mn):.1f}" y1="{y}" x2="{X(mx):.1f}" y2="{y}" stroke="{col}" stroke-width="3"/>')
@@ -222,8 +224,7 @@ def max_entities():
     y = B + 84
     o.append(f'<line x1="32" y1="{y - 20}" x2="{W - 32}" y2="{y - 20}" stroke="{LINE}"/>')
     o.append(f'<text x="32" y="{y + 6}" font-size="16" fill="{SUB}">느린 쪽 5% 경계가 16.7ms를 넘는 곳을 잰 점 사이에서 보간한다(로그 보간).</text>')
-    note = "중앙값은 3만에서도 16.7ms 안이다." if N_AT_60_P50_NOTE == "above range" else ""
-    o.append(f'<text x="32" y="{y + 30}" font-size="16" fill="{SUB}">{note} 그래서 느린 쪽으로 판정하면 한계가 더 낮게 나온다.</text>')
+    o.append(f'<text x="32" y="{y + 30}" font-size="16" fill="{SUB}">중앙값으로 판정하면 {N_AT_60_P50:,}이다. 느린 쪽으로 판정하면 한계가 더 낮게 나온다.</text>')
     write("max-entities-method.svg", svg(y + 54, o))
 
 

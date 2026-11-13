@@ -42,7 +42,7 @@
 <text x="545.0" y="388" text-anchor="middle" font-size="16" font-weight="700">프레임 시간</text>
 <text x="545.0" y="410" text-anchor="middle" font-size="16" fill="#4b5563">= 가장 느린 GPU의 한 칸</text>
 <rect x="32" y="431" width="34" height="20" rx="3" fill="url(#hatch)" stroke="#9ca3af" stroke-width="0.8"/>
-<text x="76" y="446" font-size="16">기다림: 앞서 나갈 수 있는 프레임 수에 한도가 있어 쉰다</text>
+<text x="76" y="446" font-size="16">기다림: 앞서 나갈 수 있는 프레임 수에 한도가 있다</text>
 <text x="32" y="472" font-size="16">칸의 숫자는 프레임 번호다. 칸의 길이는 지어낸 값이다.</text>
 <line x1="32" y1="492" x2="768" y2="492" stroke="#e5e7eb"/>
 <text x="32" y="520" font-size="16" fill="#4b5563">게임 스레드가 가장 느리면 게임 스레드의 한 칸이 프레임 시간이 된다.</text>

@@ -1,6 +1,6 @@
 # Makes the SVG figures of post 06 in images/.
 # Run from the repository root: py -3 -I Posts/06-iskm/make-figures.py
-# Measured values come from Measurements/Full2/summary.csv and Docs/figures/full2/full-n-at-60fps.csv.
+# Measured values come from Measurements/Full3/summary.csv and Docs/figures/full3/full-n-at-60fps.csv.
 # No trace values are drawn (the Insights screenshot is added later; see measurements.md).
 import csv, os
 import re
@@ -11,7 +11,7 @@ ROOT = os.path.normpath(os.path.join(HERE, "..", ".."))
 OUT = os.path.join(HERE, "images")
 
 rows = {}
-with open(os.path.join(ROOT, "Measurements", "Full2", "summary.csv"), encoding="utf-8") as f:
+with open(os.path.join(ROOT, "Measurements", "Full3", "summary.csv"), encoding="utf-8") as f:
     for r in csv.DictReader(f):
         rows[(r["variant"], int(r["n"]), r["preset"])] = r
 
@@ -25,7 +25,7 @@ def rng(variant, n, col, preset="P1"):
     return float(r[col + "_max"]) - float(r[col + "_min"])
 
 
-with open(os.path.join(ROOT, "Docs", "figures", "full2", "full-n-at-60fps.csv"), encoding="utf-8") as f:
+with open(os.path.join(ROOT, "Docs", "figures", "full3", "full-n-at-60fps.csv"), encoding="utf-8") as f:
     NAT = {r["series"]: r for r in csv.DictReader(f)}
 N_AT_60_L6 = int(NAT["6 L6-m5bounds"]["n_p95"])
 L5_ABOVE = NAT["5 L5-m4offpool"]["note_p95"] == "above range"
@@ -265,7 +265,7 @@ def delta():
     y += 40
     o.append(f'<line x1="32" y1="{y - 14}" x2="{W - 32}" y2="{y - 14}" stroke="{LINE}"/>')
     o.append(f'<text x="32" y="{y + 12}" font-size="16" fill="{SUB}">점선 막대는 변화가 세 번 잰 값의 흔들림보다 작아 구별되지 않는 칸이다.</text>')
-    o.append(f'<text x="32" y="{y + 36}" font-size="16" fill="{SUB}">GPU는 개체 수가 늘수록 더 줄고, 게임 스레드는 개체 수가 늘수록 더 는다.</text>')
+    o.append(f'<text x="32" y="{y + 36}" font-size="16" fill="{SUB}">GPU는 개체 수가 늘수록 더 줄고, 게임 스레드는 모든 호드 총수에서 흔들림 안이다.</text>')
     write("iskm-delta.svg", svg(y + 60, o))
 
 

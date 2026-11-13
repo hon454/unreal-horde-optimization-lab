@@ -1,6 +1,6 @@
 # Makes the SVG figures of post 09 in images/.
 # Run from the repository root: py -3 -I Posts/09-summary/make-figures.py
-# Measured values come from Measurements/Full2/summary.csv and Docs/figures/full2/full-n-at-60fps.csv.
+# Measured values come from Measurements/Full3/summary.csv and Docs/figures/full3/full-n-at-60fps.csv.
 # The other figures of the post are the README figures in Docs/figures/readme/ (Scripts/plot-readme.py).
 # No trace values are drawn.
 import csv, math, os
@@ -12,7 +12,7 @@ ROOT = os.path.normpath(os.path.join(HERE, "..", ".."))
 OUT = os.path.join(HERE, "images")
 
 rows = {}
-with open(os.path.join(ROOT, "Measurements", "Full2", "summary.csv"), encoding="utf-8") as f:
+with open(os.path.join(ROOT, "Measurements", "Full3", "summary.csv"), encoding="utf-8") as f:
     for r in csv.DictReader(f):
         rows[(r["variant"], int(r["n"]), r["preset"])] = r
 
@@ -26,7 +26,7 @@ def rng(variant, n, col, preset="P1"):
     return float(r[col + "_max"]) - float(r[col + "_min"])
 
 
-with open(os.path.join(ROOT, "Docs", "figures", "full2", "full-n-at-60fps.csv"), encoding="utf-8") as f:
+with open(os.path.join(ROOT, "Docs", "figures", "full3", "full-n-at-60fps.csv"), encoding="utf-8") as f:
     NAT = {r["series"]: r for r in csv.DictReader(f)}
 N_AT_60_L8 = int(NAT["8 L8-q4final"]["n_p95"])
 
@@ -123,7 +123,7 @@ def waterfall():
     o.append(f'<text x="48" y="{y + 46}" font-size="16" fill="{SUB}">아래 막대의 약 90배라 그리지 않았다. 병목은 '
              f'{bottleneck("L1-full")}에서 {bottleneck("L2-mass")}로 바뀐다.</text>')
     y += 90
-    ZX, scale = 330, 300 / 5.0   # zero line; one bar unit = 60px per ms
+    ZX, scale = 330, 280 / 5.0   # zero line; one bar unit = 56px per ms
     top = y - 18
     data = trans_rows()
     for a, b, name, grp, cells in data:
@@ -155,7 +155,9 @@ def waterfall():
     du = v(L8, 10000, "gpu_p50_ms") - v("L2-mass", 10000, "gpu_p50_ms")
     o.append(f'<line x1="32" y1="{y - 14}" x2="{W - 32}" y2="{y - 14}" stroke="{LINE}"/>')
     o.append(f'<text x="32" y="{y + 12}" font-size="16" fill="{SUB}">점선 막대는 변화가 세 번 잰 값의 흔들림보다 작아 구별되지 않는 칸이다.</text>')
-    o.append(f'<text x="32" y="{y + 36}" font-size="16" fill="{SUB}">2단계에서 8단계까지: 프레임 시간 {sfmt(df)}ms, GPU {sfmt(du)}ms, 게임 스레드 {sfmt(dg)}ms.</text>')
+    fnoise = max(rng("L2-mass", 10000, "frame_p50_ms"), rng(L8, 10000, "frame_p50_ms"))
+    ftag = "" if abs(df) > fnoise else "(흔들림 안)"
+    o.append(f'<text x="32" y="{y + 36}" font-size="16" fill="{SUB}">2단계에서 8단계까지: 프레임 시간 {sfmt(df)}ms{ftag}, GPU {sfmt(du)}ms, 게임 스레드 {sfmt(dg)}ms.</text>')
     write("ladder-changes.svg", svg(y + 60, o))
 
 
@@ -178,11 +180,11 @@ def headroom():
     title(o, "최종 구성은 호드 총수 1만에서 16.7ms까지 얼마가 남나",
           "8단계, 오브 시점 카메라, 세 번 잰 중앙값. 네 가지 호드 총수에서 쟀다")
     T, B, L, R = 120, 520, 70, 560
-    ymax = 20.0
+    ymax = 25.0
     X = lambda n: L + n / 32000 * (R - L)
     Y = lambda val: B - val / ymax * (B - T)
     o.append(f'<text x="32" y="{T - 18}" font-size="18" font-weight="700">시간(ms)</text>')
-    for t in [0, 5, 10, 15, 20]:
+    for t in [0, 5, 10, 15, 20, 25]:
         o.append(f'<line x1="{L}" y1="{Y(t):.1f}" x2="{R}" y2="{Y(t):.1f}" stroke="{LINE}"/>')
         o.append(f'<text x="{L - 10}" y="{Y(t) + 6:.1f}" text-anchor="end" font-size="16" fill="{SUB}">{t}</text>')
     for n, lab in zip(NS, NLAB):
@@ -219,9 +221,11 @@ def headroom():
         for k, n in enumerate(NS):
             val = v(L8, n, col)
             above_left = col == "frame_p95_ms" or (col == "gpu_p50_ms" and k == 0)
+            # The p95 point just under 16.7ms gets one more digit, so it does not read as the line itself.
+            txt = f"{val:.2f}" if col == "frame_p95_ms" and fmt(val) == fmt(BUDGET) else fmt(val)
             if above_left:
                 o.append(f'<text x="{X(n) - 8:.1f}" y="{Y(val) - 8:.1f}" text-anchor="end" '
-                         f'font-size="16" font-weight="700" fill="{c}">{fmt(val)}</text>')
+                         f'font-size="16" font-weight="700" fill="{c}">{txt}</text>')
             else:
                 o.append(f'<text x="{X(n) + 8:.1f}" y="{Y(val) + 22:.1f}" '
                          f'font-size="16" font-weight="700" fill="{c}">{fmt(val)}</text>')
@@ -241,18 +245,21 @@ def headroom():
     o.append(f'<text x="{lx}" y="{150 + 4 * 30 + 54}" font-size="16" fill="{SUB}">중앙값이다.</text>')
     o.append(f'<text x="{lx}" y="{150 + 4 * 30 + 90}" font-size="16" fill="{SUB}">병목: 5천은 GPU,</text>')
     o.append(f'<text x="{lx}" y="{150 + 4 * 30 + 114}" font-size="16" fill="{SUB}">1만부터 게임 스레드</text>')
-    # quality row: large-actor animation skip ratio
+    # quality row: share of small-actor frames with neither an update nor an interpolation (animation budget 4 ms)
     yq = B + 92
     o.append(f'<line x1="32" y1="{yq - 18}" x2="{W - 32}" y2="{yq - 18}" stroke="{LINE}"/>')
-    o.append(f'<text x="32" y="{yq + 6}" font-size="16" font-weight="700">대형 액터가 애니메이션 갱신을 건너뛴 비율(같은 실행)</text>')
+    o.append(f'<text x="32" y="{yq + 6}" font-size="16" font-weight="700">소형 액터가 애니메이션을 건너뛴 비율(갱신도 보간도 안 한 프레임)</text>')
     for n in NS:
-        sk = float(rows[(L8, n, "P1")]["large_skip_ratio"])
+        sk = v(L8, n, "small_skipped_ratio")
         o.append(f'<text x="{X(n):.1f}" y="{yq + 34}" text-anchor="middle" font-size="16" font-weight="700" fill="{PURPLE}">{fmt(sk * 100) if sk else "0"}%</text>')
     yb = yq + 76
+    large_max = max(v(L8, n, "large_skipped_ratio") for n in NS)
     o.append(f'<line x1="32" y1="{yb - 18}" x2="{W - 32}" y2="{yb - 18}" stroke="{LINE}"/>')
-    o.append(f'<text x="32" y="{yb + 6}" font-size="16" fill="{SUB}">2만은 16.7ms 안이지만 대형 액터 갱신의 절반 넘게 건너뛴다.</text>')
-    o.append(f'<text x="32" y="{yb + 30}" font-size="16" fill="{SUB}">1만의 GPU는 {fmt(v(L8, 10000, "gpu_p50_ms"))}ms다. 남은 여유는 GPU 쪽이 더 크다.</text>')
-    write("target-headroom.svg", svg(yb + 54, o))
+    o.append(f'<text x="32" y="{yb + 6}" font-size="16" fill="{SUB}">대형 액터의 같은 비율은 네 총수 모두 '
+             f'{"1% 미만이다" if large_max < 0.01 else fmt(large_max * 100) + "% 이하다"}.</text>')
+    o.append(f'<text x="32" y="{yb + 30}" font-size="16" fill="{SUB}">60fps는 약 2만까지다. 2만에서는 애니메이션 예산이 소형 액터를 건너뛴다.</text>')
+    o.append(f'<text x="32" y="{yb + 54}" font-size="16" fill="{SUB}">1만의 GPU는 {fmt(v(L8, 10000, "gpu_p50_ms"))}ms다. 남은 여유는 GPU 쪽이 더 크다.</text>')
+    write("target-headroom.svg", svg(yb + 78, o))
 
 
 waterfall()
@@ -267,4 +274,5 @@ for col in ("frame_p50_ms", "game_p50_ms", "gpu_p50_ms"):
 print("N@60 L8:", N_AT_60_L8, "check:", round(n_at(p95_points(), BUDGET)))
 print("headroom at 1만:", round(BUDGET - v(L8, 10000, "frame_p95_ms"), 3))
 for n in NS:
-    print("L8", n, {c: v(L8, n, c) for c in ("frame_p95_ms", "game_p50_ms", "gpu_p50_ms", "render_p50_ms", "large_skip_ratio")}, rows[(L8, n, "P1")]["bottleneck"])
+    print("L8", n, {c: v(L8, n, c) for c in ("frame_p95_ms", "game_p50_ms", "gpu_p50_ms", "render_p50_ms",
+                                             "small_skipped_ratio", "large_skipped_ratio")}, rows[(L8, n, "P1")]["bottleneck"])

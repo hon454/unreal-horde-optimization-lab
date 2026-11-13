@@ -2,7 +2,7 @@
 <rect x="0.5" y="0.5" width="799" height="1041" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
 <text x="32" y="46" font-size="22" font-weight="700">최종 구성(8단계)에서 기법 하나를 뺐을 때의 변화</text>
 <text x="32" y="74" font-size="16" fill="#4b5563">호드 총수 1만, 오브 시점 카메라, 세 번 잰 중앙값의 차이(ms)</text>
-<text x="32" y="96" font-size="16" fill="#4b5563">0은 최종 구성: 프레임 시간 7.78, 게임 스레드 7.65, GPU 5.72</text>
+<text x="32" y="96" font-size="16" fill="#4b5563">0은 최종 구성: 프레임 시간 9.75, 게임 스레드 9.59, GPU 5.75</text>
 <text x="32" y="118" font-size="16" fill="#4b5563">최종 구성의 병목은 게임 스레드다. 위에서부터 프레임 시간이 많이 느려지는 순</text>
 <text x="32" y="140" font-size="16" fill="#4b5563">굵은 글씨는 최종 구성이 하는 일, 그 아래는 그것을 뺀 실행이 대신 하는 일</text>
 <rect x="32" y="161" width="16" height="16" rx="3" fill="#374151"/>
@@ -12,94 +12,93 @@
 <rect x="324" y="161" width="16" height="16" rx="3" fill="#db2777"/>
 <text x="346" y="174" font-size="16">GPU</text>
 <text x="32" y="196" font-size="16" fill="#4b5563">흐린 막대: 세 번 잰 범위보다 작은 차이(구별되지 않음)</text>
-<text x="530" y="236" text-anchor="end" font-size="16" fill="#4b5563">← 빨라짐</text>
-<text x="550" y="236" font-size="16" fill="#4b5563">느려짐 →</text>
+<text x="560" y="236" text-anchor="end" font-size="16" fill="#4b5563">← 빨라짐</text>
+<text x="580" y="236" font-size="16" fill="#4b5563">느려짐 →</text>
 <text x="32" y="267" font-size="17" font-weight="700">200m 밖 엔티티를 입자로</text>
 <text x="32" y="288" font-size="16" fill="#4b5563">빼면: 입자 대신 ISKM으로 그림</text>
-<rect x="540.0" y="253" width="129.1" height="17" rx="2" fill="#374151" fill-opacity="1"/>
-<text x="675.1" y="267" text-anchor="start" font-size="16" font-weight="700" fill="#374151">+4.30</text>
-<rect x="540.0" y="274" width="127.0" height="17" rx="2" fill="#2563eb" fill-opacity="1"/>
-<text x="673.0" y="288" text-anchor="start" font-size="16" font-weight="700" fill="#2563eb">+4.23</text>
-<rect x="540.0" y="295" width="1.5" height="17" rx="2" fill="#db2777" fill-opacity="1"/>
-<text x="547.1" y="309" text-anchor="start" font-size="16" font-weight="700" fill="#db2777">+0.04</text>
-<text x="32" y="345" font-size="17" font-weight="700">Animation Budget Allocator</text>
-<text x="32" y="366" font-size="16" fill="#4b5563">빼면: 액터가 예산 없이 매 프레임</text>
-<text x="32" y="387" font-size="16" fill="#4b5563">애니메이션을 평가</text>
-<rect x="540.0" y="331" width="52.5" height="17" rx="2" fill="#374151" fill-opacity="1"/>
-<text x="598.5" y="345" text-anchor="start" font-size="16" font-weight="700" fill="#374151">+1.75</text>
-<rect x="540.0" y="352" width="52.4" height="17" rx="2" fill="#2563eb" fill-opacity="1"/>
-<text x="598.4" y="366" text-anchor="start" font-size="16" font-weight="700" fill="#2563eb">+1.75</text>
-<rect x="540.0" y="373" width="1.5" height="17" rx="2" fill="#db2777" fill-opacity="1"/>
-<text x="547.4" y="387" text-anchor="start" font-size="16" font-weight="700" fill="#db2777">+0.05</text>
-<text x="32" y="423" font-size="17" font-weight="700">Simulation LOD</text>
-<text x="32" y="444" font-size="16" fill="#4b5563">빼면: 80m 밖도 접근·피해 로직을 매 프레임,</text>
-<text x="32" y="465" font-size="16" fill="#4b5563">200m 밖도 엔진 이동·조향으로 옮김</text>
-<rect x="540.0" y="409" width="31.3" height="17" rx="2" fill="#374151" fill-opacity="1"/>
-<text x="577.3" y="423" text-anchor="start" font-size="16" font-weight="700" fill="#374151">+1.04</text>
-<rect x="540.0" y="430" width="31.1" height="17" rx="2" fill="#2563eb" fill-opacity="1"/>
-<text x="577.1" y="444" text-anchor="start" font-size="16" font-weight="700" fill="#2563eb">+1.04</text>
-<rect x="540.0" y="451" width="1.5" height="17" rx="2" fill="#db2777" fill-opacity="0.3"/>
-<text x="546.6" y="465" text-anchor="start" font-size="16" fill="#4b5563">+0.02</text>
-<text x="32" y="501" font-size="17" font-weight="700">ISKM 컴포넌트의 고정 바운드</text>
-<text x="32" y="522" font-size="16" fill="#4b5563">빼면: 엔진이 매 프레임 바운드를 다시 계산</text>
-<rect x="540.0" y="487" width="23.1" height="17" rx="2" fill="#374151" fill-opacity="1"/>
-<text x="569.1" y="501" text-anchor="start" font-size="16" font-weight="700" fill="#374151">+0.77</text>
-<rect x="540.0" y="508" width="9.0" height="17" rx="2" fill="#2563eb" fill-opacity="1"/>
-<text x="555.0" y="522" text-anchor="start" font-size="16" font-weight="700" fill="#2563eb">+0.30</text>
-<rect x="540.0" y="529" width="1.5" height="17" rx="2" fill="#db2777" fill-opacity="1"/>
-<text x="546.5" y="543" text-anchor="start" font-size="16" font-weight="700" fill="#db2777">+0.02</text>
-<text x="32" y="579" font-size="17" font-weight="700">80m 밖 인스턴스 그림자 끔</text>
-<text x="32" y="600" font-size="16" fill="#4b5563">빼면: 80m 밖도 그림자를 그림</text>
-<text x="32" y="621" font-size="16" fill="#2563eb" font-weight="700">GPU 차이가 프레임에 드러나지 않음</text>
-<rect x="540.0" y="565" width="1.7" height="17" rx="2" fill="#374151" fill-opacity="0.3"/>
-<text x="547.7" y="579" text-anchor="start" font-size="16" fill="#4b5563">+0.06</text>
-<rect x="540.0" y="586" width="1.5" height="17" rx="2" fill="#2563eb" fill-opacity="0.3"/>
-<text x="546.9" y="600" text-anchor="start" font-size="16" fill="#4b5563">+0.03</text>
-<rect x="540.0" y="607" width="11.6" height="17" rx="2" fill="#db2777" fill-opacity="1"/>
-<text x="557.6" y="621" text-anchor="start" font-size="16" font-weight="700" fill="#db2777">+0.39</text>
-<text x="32" y="657" font-size="17" font-weight="700">엔티티 풀</text>
-<text x="32" y="678" font-size="16" fill="#4b5563">빼면: 죽은 개체의 엔티티를 파괴하고</text>
-<text x="32" y="699" font-size="16" fill="#4b5563">새로 만듦</text>
-<rect x="540.0" y="643" width="1.6" height="17" rx="2" fill="#374151" fill-opacity="0.3"/>
-<text x="547.6" y="657" text-anchor="start" font-size="16" fill="#4b5563">+0.05</text>
-<rect x="540.0" y="664" width="1.7" height="17" rx="2" fill="#2563eb" fill-opacity="0.3"/>
-<text x="547.7" y="678" text-anchor="start" font-size="16" fill="#4b5563">+0.06</text>
-<rect x="540.0" y="685" width="1.5" height="17" rx="2" fill="#db2777" fill-opacity="0.3"/>
-<text x="546.3" y="699" text-anchor="start" font-size="16" fill="#4b5563">+0.01</text>
-<text x="32" y="735" font-size="17" font-weight="700">액터 전환 대책 다섯 가지</text>
-<text x="32" y="756" font-size="16" fill="#4b5563">빼면: 인스턴스와 액터가 바뀔 때의</text>
-<text x="32" y="777" font-size="16" fill="#4b5563">보정을 모두 끔</text>
-<rect x="539.5" y="721" width="1.5" height="17" rx="2" fill="#374151" fill-opacity="0.3"/>
-<text x="533.5" y="735" text-anchor="end" font-size="16" fill="#4b5563">−0.02</text>
-<rect x="539.6" y="742" width="1.5" height="17" rx="2" fill="#2563eb" fill-opacity="0.3"/>
-<text x="533.6" y="756" text-anchor="end" font-size="16" fill="#4b5563">−0.01</text>
-<rect x="540.0" y="763" width="1.5" height="17" rx="2" fill="#db2777" fill-opacity="0.3"/>
-<text x="546.4" y="777" text-anchor="start" font-size="16" fill="#4b5563">+0.01</text>
-<text x="32" y="813" font-size="17" font-weight="700">40~200m를 ISKM으로</text>
-<text x="32" y="834" font-size="16" fill="#4b5563">빼면: ISM + VAT로 그림</text>
-<text x="32" y="855" font-size="16" fill="#2563eb" font-weight="700">GPU 차이가 프레임에 드러나지 않음</text>
-<rect x="533.8" y="799" width="6.2" height="17" rx="2" fill="#374151" fill-opacity="1"/>
-<text x="527.8" y="813" text-anchor="end" font-size="16" font-weight="700" fill="#374151">−0.21</text>
-<rect x="530.2" y="820" width="9.8" height="17" rx="2" fill="#2563eb" fill-opacity="1"/>
-<text x="524.2" y="834" text-anchor="end" font-size="16" font-weight="700" fill="#2563eb">−0.33</text>
-<rect x="540.0" y="841" width="37.0" height="17" rx="2" fill="#db2777" fill-opacity="1"/>
-<text x="583.0" y="855" text-anchor="start" font-size="16" font-weight="700" fill="#db2777">+1.23</text>
+<rect x="570.0" y="253" width="104.1" height="17" rx="2" fill="#374151" fill-opacity="1"/>
+<text x="680.1" y="267" text-anchor="start" font-size="16" font-weight="700" fill="#374151">+4</text>
+<rect x="570.0" y="274" width="102.8" height="17" rx="2" fill="#2563eb" fill-opacity="1"/>
+<text x="678.8" y="288" text-anchor="start" font-size="16" font-weight="700" fill="#2563eb">+3.95</text>
+<rect x="570.0" y="295" width="1.5" height="17" rx="2" fill="#db2777" fill-opacity="0.3"/>
+<text x="576.7" y="309" text-anchor="start" font-size="16" fill="#4b5563">+0.03</text>
+<text x="32" y="345" font-size="17" font-weight="700">Simulation LOD</text>
+<text x="32" y="366" font-size="16" fill="#4b5563">빼면: 80m 밖도 접근·피해 로직을 매 프레임,</text>
+<text x="32" y="387" font-size="16" fill="#4b5563">200m 밖도 엔진 이동·조향으로 옮김</text>
+<rect x="570.0" y="331" width="19.6" height="17" rx="2" fill="#374151" fill-opacity="1"/>
+<text x="595.6" y="345" text-anchor="start" font-size="16" font-weight="700" fill="#374151">+0.75</text>
+<rect x="570.0" y="352" width="20.0" height="17" rx="2" fill="#2563eb" fill-opacity="1"/>
+<text x="596.0" y="366" text-anchor="start" font-size="16" font-weight="700" fill="#2563eb">+0.77</text>
+<rect x="570.0" y="373" width="1.5" height="17" rx="2" fill="#db2777" fill-opacity="0.3"/>
+<text x="576.2" y="387" text-anchor="start" font-size="16" fill="#4b5563">+0.01</text>
+<text x="32" y="423" font-size="17" font-weight="700">ISKM 컴포넌트의 고정 바운드</text>
+<text x="32" y="444" font-size="16" fill="#4b5563">빼면: 엔진이 매 프레임 바운드를 다시 계산</text>
+<rect x="570.0" y="409" width="14.1" height="17" rx="2" fill="#374151" fill-opacity="1"/>
+<text x="590.1" y="423" text-anchor="start" font-size="16" font-weight="700" fill="#374151">+0.54</text>
+<rect x="570.0" y="430" width="2.2" height="17" rx="2" fill="#2563eb" fill-opacity="0.3"/>
+<text x="578.2" y="444" text-anchor="start" font-size="16" fill="#4b5563">+0.09</text>
+<rect x="570.0" y="451" width="1.5" height="17" rx="2" fill="#db2777" fill-opacity="0.3"/>
+<text x="576.2" y="465" text-anchor="start" font-size="16" fill="#4b5563">+0.01</text>
+<text x="32" y="501" font-size="17" font-weight="700">80m 밖 인스턴스 그림자 끔</text>
+<text x="32" y="522" font-size="16" fill="#4b5563">빼면: 80m 밖도 그림자를 그림</text>
+<rect x="570.0" y="487" width="3.3" height="17" rx="2" fill="#374151" fill-opacity="1"/>
+<text x="579.3" y="501" text-anchor="start" font-size="16" font-weight="700" fill="#374151">+0.13</text>
+<rect x="570.0" y="508" width="3.0" height="17" rx="2" fill="#2563eb" fill-opacity="1"/>
+<text x="579.0" y="522" text-anchor="start" font-size="16" font-weight="700" fill="#2563eb">+0.12</text>
+<rect x="570.0" y="529" width="9.2" height="17" rx="2" fill="#db2777" fill-opacity="1"/>
+<text x="585.2" y="543" text-anchor="start" font-size="16" font-weight="700" fill="#db2777">+0.35</text>
+<text x="32" y="579" font-size="17" font-weight="700">엔티티 풀</text>
+<text x="32" y="600" font-size="16" fill="#4b5563">빼면: 죽은 개체의 엔티티를 파괴하고</text>
+<text x="32" y="621" font-size="16" fill="#4b5563">새로 만듦</text>
+<rect x="568.2" y="565" width="1.8" height="17" rx="2" fill="#374151" fill-opacity="0.3"/>
+<text x="562.2" y="579" text-anchor="end" font-size="16" fill="#4b5563">−0.07</text>
+<rect x="568.5" y="586" width="1.5" height="17" rx="2" fill="#2563eb" fill-opacity="0.3"/>
+<text x="562.5" y="600" text-anchor="end" font-size="16" fill="#4b5563">−0.06</text>
+<rect x="569.8" y="607" width="1.5" height="17" rx="2" fill="#db2777" fill-opacity="0.3"/>
+<text x="563.8" y="621" text-anchor="end" font-size="16" fill="#4b5563">−0.01</text>
+<text x="32" y="657" font-size="17" font-weight="700">액터 전환 대책 다섯 가지</text>
+<text x="32" y="678" font-size="16" fill="#4b5563">빼면: 인스턴스와 액터가 바뀔 때의</text>
+<text x="32" y="699" font-size="16" fill="#4b5563">보정을 모두 끔</text>
+<rect x="567.3" y="643" width="2.7" height="17" rx="2" fill="#374151" fill-opacity="0.3"/>
+<text x="561.3" y="657" text-anchor="end" font-size="16" fill="#4b5563">−0.10</text>
+<rect x="567.6" y="664" width="2.4" height="17" rx="2" fill="#2563eb" fill-opacity="0.3"/>
+<text x="561.6" y="678" text-anchor="end" font-size="16" fill="#4b5563">−0.09</text>
+<rect x="570.0" y="685" width="1.5" height="17" rx="2" fill="#db2777" fill-opacity="1"/>
+<text x="576.3" y="699" text-anchor="start" font-size="16" font-weight="700" fill="#db2777">+0.01</text>
+<text x="32" y="735" font-size="17" font-weight="700">40~200m를 ISKM으로</text>
+<text x="32" y="756" font-size="16" fill="#4b5563">빼면: ISM + VAT로 그림</text>
+<text x="32" y="777" font-size="16" fill="#2563eb" font-weight="700">GPU 차이가 프레임에 드러나지 않음</text>
+<rect x="566.6" y="721" width="3.4" height="17" rx="2" fill="#374151" fill-opacity="1"/>
+<text x="560.6" y="735" text-anchor="end" font-size="16" font-weight="700" fill="#374151">−0.13</text>
+<rect x="564.9" y="742" width="5.1" height="17" rx="2" fill="#2563eb" fill-opacity="1"/>
+<text x="558.9" y="756" text-anchor="end" font-size="16" font-weight="700" fill="#2563eb">−0.20</text>
+<rect x="570.0" y="763" width="29.2" height="17" rx="2" fill="#db2777" fill-opacity="1"/>
+<text x="605.2" y="777" text-anchor="start" font-size="16" font-weight="700" fill="#db2777">+1.13</text>
+<text x="32" y="813" font-size="17" font-weight="700">Animation Budget Allocator</text>
+<text x="32" y="834" font-size="16" fill="#4b5563">빼면: 액터가 예산 없이 매 프레임</text>
+<text x="32" y="855" font-size="16" fill="#4b5563">애니메이션을 평가</text>
+<rect x="562.4" y="799" width="7.6" height="17" rx="2" fill="#374151" fill-opacity="1"/>
+<text x="556.4" y="813" text-anchor="end" font-size="16" font-weight="700" fill="#374151">−0.29</text>
+<rect x="562.7" y="820" width="7.3" height="17" rx="2" fill="#2563eb" fill-opacity="1"/>
+<text x="556.7" y="834" text-anchor="end" font-size="16" font-weight="700" fill="#2563eb">−0.28</text>
+<rect x="570.0" y="841" width="1.5" height="17" rx="2" fill="#db2777" fill-opacity="0.3"/>
+<text x="576.4" y="855" text-anchor="start" font-size="16" fill="#4b5563">+0.02</text>
 <text x="32" y="891" font-size="17" font-weight="700">Niagara 배경 무리</text>
 <text x="32" y="912" font-size="16" fill="#4b5563">빼면: 200m 밖에 아무것도 그리지 않음</text>
-<rect x="532.0" y="877" width="8.0" height="17" rx="2" fill="#374151" fill-opacity="1"/>
-<text x="526.0" y="891" text-anchor="end" font-size="16" font-weight="700" fill="#374151">−0.27</text>
-<rect x="531.9" y="898" width="8.1" height="17" rx="2" fill="#2563eb" fill-opacity="1"/>
-<text x="525.9" y="912" text-anchor="end" font-size="16" font-weight="700" fill="#2563eb">−0.27</text>
-<rect x="526.0" y="919" width="14.0" height="17" rx="2" fill="#db2777" fill-opacity="1"/>
-<text x="520.0" y="933" text-anchor="end" font-size="16" font-weight="700" fill="#db2777">−0.47</text>
+<rect x="559.7" y="877" width="10.3" height="17" rx="2" fill="#374151" fill-opacity="1"/>
+<text x="553.7" y="891" text-anchor="end" font-size="16" font-weight="700" fill="#374151">−0.40</text>
+<rect x="560.0" y="898" width="10.0" height="17" rx="2" fill="#2563eb" fill-opacity="1"/>
+<text x="554.0" y="912" text-anchor="end" font-size="16" font-weight="700" fill="#2563eb">−0.39</text>
+<rect x="557.9" y="919" width="12.1" height="17" rx="2" fill="#db2777" fill-opacity="1"/>
+<text x="551.9" y="933" text-anchor="end" font-size="16" font-weight="700" fill="#db2777">−0.47</text>
 <text x="32" y="969" font-size="17" font-weight="700">가까운 개체를 액터로(하이드레이션)</text>
 <text x="32" y="990" font-size="16" fill="#4b5563">빼면: 가까운 개체도 ISKM으로 그림</text>
 <text x="32" y="1011" font-size="16" fill="#2563eb" font-weight="700">병목이 GPU로 바뀜</text>
-<rect x="492.2" y="955" width="47.8" height="17" rx="2" fill="#374151" fill-opacity="1"/>
-<text x="486.2" y="969" text-anchor="end" font-size="16" font-weight="700" fill="#374151">−1.59</text>
-<rect x="424.4" y="976" width="115.6" height="17" rx="2" fill="#2563eb" fill-opacity="1"/>
-<text x="418.4" y="990" text-anchor="end" font-size="16" font-weight="700" fill="#2563eb">−3.85</text>
-<rect x="540.0" y="997" width="1.5" height="17" rx="2" fill="#db2777" fill-opacity="0.3"/>
-<text x="547.1" y="1011" text-anchor="start" font-size="16" fill="#4b5563">+0.04</text>
-<line x1="540" y1="246" x2="540" y2="1022" stroke="#111827" stroke-width="1.5"/>
+<rect x="477.1" y="955" width="92.9" height="17" rx="2" fill="#374151" fill-opacity="1"/>
+<text x="471.1" y="969" text-anchor="end" font-size="16" font-weight="700" fill="#374151">−3.57</text>
+<rect x="418.2" y="976" width="151.8" height="17" rx="2" fill="#2563eb" fill-opacity="1"/>
+<text x="412.2" y="990" text-anchor="end" font-size="16" font-weight="700" fill="#2563eb">−5.84</text>
+<rect x="569.6" y="997" width="1.5" height="17" rx="2" fill="#db2777" fill-opacity="0.3"/>
+<text x="563.6" y="1011" text-anchor="end" font-size="16" fill="#4b5563">−0.02</text>
+<line x1="570" y1="246" x2="570" y2="1022" stroke="#111827" stroke-width="1.5"/>
 </svg>
