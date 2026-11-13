@@ -22,7 +22,7 @@
 | 09 | 총괄 — 사다리와 빼 보기 표, 최대 N, 목표 총수 재검토 | `Full2` | 초안(2026-11-13), 사용자 검토 대기 |
 | 사이트 | 글이 모두 끝나면 한눈에 보는 웹 페이지(GitHub Pages). 형제 프로젝트의 <https://hon454.github.io/ue-dedicated-server-optimization-lab/>처럼 단계를 고르면 화면과 측정값이 바뀐다(2026-11-12 사용자 결정) | 글 00\~09, `Docs/figures/` | 만들었다(`Site/`, `gh-pages` 브랜치, 2026-11-13). 주소는 <https://hon454.github.io/unreal-horde-optimization-lab/> |
 
-글을 쓰기 전에 [post-review.md](post-review.md)를 본다(핵심 인사이트, 글별로 쓸 재료와 버릴 재료, 틀린 문장). 경위에는 수치를 쓰지 않는다([posting.md](Guides/posting.md) "본문과 측정 기록").
+글 준비 문서 `post-review.md`는 글을 다 쓰고 지웠다(2026-11-13, git 이력에 있다). 경위에는 수치를 쓰지 않는다([posting.md](Guides/posting.md) "본문과 측정 기록").
 
 **글의 수치는 총괄 묶음에서 만든다(2026-11-10 사용자 결정, [ADR-0006](Decisions/0006-three-measurement-tiers.md)).** 총괄 묶음은 평지 시나리오에 체력 분산을 더한 조건에서 잰다(2026-11-11 사용자 결정, ADR-0009). 지금 묶음은 `Full2`다(2026-11-12 재측정). 그전의 묶음은 설계 판단의 참고로만 쓰고 글의 수치와 근거로 쓰지 않는다.
 
