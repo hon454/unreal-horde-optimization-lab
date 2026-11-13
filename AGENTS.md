@@ -117,7 +117,7 @@
 
 ### 문서와 글
 
-- **Posts와 README는 한국어 한다체(-다)로 쓴다.** 틀, 문장, 그림 규칙은 [posting.md](Docs/Guides/posting.md)를 따른다. 엔진의 기법·클래스 이름은 번역하지 않는다(Mass, Representation LOD, ISM, VAT, ISKM, Animation Budget Allocator, URO). 한 일은 개념 이름이 아니라 실제로 바꾼 것으로 쓴다("Budget Allocator를 적용했다"가 아니라 "액터 메시를 `USkeletalMeshComponentBudgeted`로 바꾸고 예산을 2ms로 두었다").
+- **Posts와 README는 한국어 한다체(-다)로 쓴다.** 틀, 문장, 그림 규칙은 [posting.md](Docs/Guides/posting.md)를 따른다. 엔진의 기법·클래스 이름은 번역하지 않는다(Mass, Representation LOD, ISM, VAT, ISKM, Animation Budget Allocator, URO). 한 일은 개념 이름이 아니라 실제로 바꾼 것으로 쓴다("Budget Allocator를 적용했다"가 아니라 "액터 메시를 `USkeletalMeshComponentBudgeted`로 바꾸고 예산을 4ms로 두었다").
 - **공개 문서에는 독자가 결과를 읽는 데 필요한 것만 쓴다.** 레포가 공개다. README와 글 본문에는 묶음 이름(`Full1`), 조건 라벨(`L1`), 마일스톤 이름, 다른 프로젝트의 이름, 작업 경위, 사족을 쓰지 않는다. "N일차", "N주 안에" 같은 일정 표현은 어느 문서에도 쓰지 않는다. 글 끝은 "한 문장으로" 절이다.
 - **비교가 요점인 수치는 표가 아니라 SVG 그림으로 보인다.** 그림은 CSV에서 스크립트로 만든다. 글 본문에는 표를 쓰지 않고, 수치의 표는 측정 기록에 둔다([ADR-0014](Docs/Decisions/0014-post-format.md), [ADR-0015](Docs/Decisions/0015-readme-figures.md)).
 - **모든 수치와 설정값에 근거를 적는다.** 측정값(조건 명시), 엔진 소스 확인값(파일과 심볼), 계산값(식) 중 하나다. 글 본문의 수치는 같은 폴더 `measurements.md`에 있어야 한다.
