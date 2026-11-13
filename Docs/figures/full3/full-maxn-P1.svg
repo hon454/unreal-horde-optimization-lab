@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="440" viewBox="0 0 760 440" font-family="Segoe UI, Arial, sans-serif" font-size="13">
+<rect width="100%" height="100%" fill="white"/>
+<text x="330.0" y="28" text-anchor="middle" font-size="16" font-weight="600">Frame p95 vs N (Full3, P1)</text>
+<line x1="70" y1="390" x2="590" y2="390" stroke="#999"/>
+<line x1="70" y1="50" x2="70" y2="390" stroke="#999"/>
+<line x1="70" y1="302.8" x2="590" y2="302.8" stroke="#f59e0b" stroke-dasharray="6 4"/>
+<text x="586" y="296.8" text-anchor="end" fill="#b45309">16.7 ms (60 fps)</text>
+<text x="70.0" y="408" text-anchor="middle">500</text>
+<text x="158.0" y="408" text-anchor="middle">1,000</text>
+<text x="246.1" y="408" text-anchor="middle">2,000</text>
+<text x="362.4" y="408" text-anchor="middle">5,000</text>
+<text x="450.5" y="408" text-anchor="middle">10,000</text>
+<text x="538.5" y="408" text-anchor="middle">20,000</text>
+<text x="590.0" y="408" text-anchor="middle">30,000</text>
+<text x="62" y="393.4" text-anchor="end">5</text>
+<line x1="70" y1="389.4" x2="590" y2="389.4" stroke="#eee"/>
+<text x="62" y="343.6" text-anchor="end">10</text>
+<line x1="70" y1="339.6" x2="590" y2="339.6" stroke="#eee"/>
+<text x="62" y="293.8" text-anchor="end">20</text>
+<line x1="70" y1="289.8" x2="590" y2="289.8" stroke="#eee"/>
+<text x="62" y="228.0" text-anchor="end">50</text>
+<line x1="70" y1="224.0" x2="590" y2="224.0" stroke="#eee"/>
+<text x="62" y="178.2" text-anchor="end">100</text>
+<line x1="70" y1="174.2" x2="590" y2="174.2" stroke="#eee"/>
+<text x="62" y="128.4" text-anchor="end">200</text>
+<line x1="70" y1="124.4" x2="590" y2="124.4" stroke="#eee"/>
+<text x="330.0" y="428" text-anchor="middle">N (log)</text>
+<text x="18" y="220.0" transform="rotate(-90 18 220.0)" text-anchor="middle">frame p95 (solid) / bottleneck p50 (dashed) ms, log</text>
+<path d="M70.0,332.1 L158.0,289.1 L246.1,239.9 L450.5,63.1" fill="none" stroke="#2563eb" stroke-width="2"/>
+<path d="M70.0,343.3 L158.0,297.6 L246.1,245.5 L450.5,67.1" fill="none" stroke="#2563eb" stroke-width="1" stroke-dasharray="4 3" opacity="0.7"/>
+<circle cx="70.0" cy="332.1" r="3" fill="#2563eb"/>
+<circle cx="158.0" cy="289.1" r="3" fill="#2563eb"/>
+<circle cx="246.1" cy="239.9" r="3" fill="#2563eb"/>
+<circle cx="450.5" cy="63.1" r="3" fill="#2563eb"/>
+<text x="602" y="60" fill="#2563eb">1 L1-full</text>
+<path d="M362.4,355.5 L450.5,333.8 L538.5,301.9 L590.0,276.6" fill="none" stroke="#dc2626" stroke-width="2"/>
+<path d="M362.4,360.5 L450.5,338.2 L538.5,307.2 L590.0,288.0" fill="none" stroke="#dc2626" stroke-width="1" stroke-dasharray="4 3" opacity="0.7"/>
+<circle cx="362.4" cy="355.5" r="3" fill="#dc2626"/>
+<circle cx="450.5" cy="333.8" r="3" fill="#dc2626"/>
+<circle cx="538.5" cy="301.9" r="3" fill="#dc2626"/>
+<circle cx="590.0" cy="276.6" r="3" fill="#dc2626"/>
+<text x="602" y="78" fill="#dc2626">2 L2-mass</text>
+<path d="M362.4,368.1 L450.5,351.5 L538.5,328.7 L590.0,308.8" fill="none" stroke="#16a34a" stroke-width="2"/>
+<path d="M362.4,372.8 L450.5,356.4 L538.5,334.1 L590.0,316.5" fill="none" stroke="#16a34a" stroke-width="1" stroke-dasharray="4 3" opacity="0.7"/>
+<circle cx="362.4" cy="368.1" r="3" fill="#16a34a"/>
+<circle cx="450.5" cy="351.5" r="3" fill="#16a34a"/>
+<circle cx="538.5" cy="328.7" r="3" fill="#16a34a"/>
+<circle cx="590.0" cy="308.8" r="3" fill="#16a34a"/>
+<text x="602" y="96" fill="#16a34a">3 L3-vatcull</text>
+<path d="M362.4,369.8 L450.5,332.9 L538.5,302.7 L590.0,285.9" fill="none" stroke="#9333ea" stroke-width="2"/>
+<path d="M362.4,375.4 L450.5,343.9 L538.5,309.7 L590.0,293.7" fill="none" stroke="#9333ea" stroke-width="1" stroke-dasharray="4 3" opacity="0.7"/>
+<circle cx="362.4" cy="369.8" r="3" fill="#9333ea"/>
+<circle cx="450.5" cy="332.9" r="3" fill="#9333ea"/>
+<circle cx="538.5" cy="302.7" r="3" fill="#9333ea"/>
+<circle cx="590.0" cy="285.9" r="3" fill="#9333ea"/>
+<text x="602" y="114" fill="#9333ea">4 L4-mass</text>
+<path d="M362.4,368.3 L450.5,337.2 L538.5,307.8 L590.0,293.5" fill="none" stroke="#ea580c" stroke-width="2"/>
+<path d="M362.4,374.3 L450.5,350.7 L538.5,317.2 L590.0,301.8" fill="none" stroke="#ea580c" stroke-width="1" stroke-dasharray="4 3" opacity="0.7"/>
+<circle cx="362.4" cy="368.3" r="3" fill="#ea580c"/>
+<circle cx="450.5" cy="337.2" r="3" fill="#ea580c"/>
+<circle cx="538.5" cy="307.8" r="3" fill="#ea580c"/>
+<circle cx="590.0" cy="293.5" r="3" fill="#ea580c"/>
+<text x="602" y="132" fill="#ea580c">5 L5-m4offpool</text>
+<path d="M362.4,374.0 L450.5,338.6 L538.5,309.1 L590.0,295.0" fill="none" stroke="#0891b2" stroke-width="2"/>
+<path d="M362.4,384.8 L450.5,351.7 L538.5,318.3 L590.0,303.9" fill="none" stroke="#0891b2" stroke-width="1" stroke-dasharray="4 3" opacity="0.7"/>
+<circle cx="362.4" cy="374.0" r="3" fill="#0891b2"/>
+<circle cx="450.5" cy="338.6" r="3" fill="#0891b2"/>
+<circle cx="538.5" cy="309.1" r="3" fill="#0891b2"/>
+<circle cx="590.0" cy="295.0" r="3" fill="#0891b2"/>
+<text x="602" y="150" fill="#0891b2">6 L6-m5bounds</text>
+<path d="M362.4,370.2 L450.5,335.6 L538.5,306.1 L590.0,293.0" fill="none" stroke="#4b5563" stroke-width="2"/>
+<path d="M362.4,380.3 L450.5,349.4 L538.5,315.5 L590.0,300.4" fill="none" stroke="#4b5563" stroke-width="1" stroke-dasharray="4 3" opacity="0.7"/>
+<circle cx="362.4" cy="370.2" r="3" fill="#4b5563"/>
+<circle cx="450.5" cy="335.6" r="3" fill="#4b5563"/>
+<circle cx="538.5" cy="306.1" r="3" fill="#4b5563"/>
+<circle cx="590.0" cy="293.0" r="3" fill="#4b5563"/>
+<text x="602" y="168" fill="#4b5563">7 L7-q2crowd</text>
+<path d="M362.4,368.0 L450.5,329.6 L538.5,302.8 L590.0,286.8" fill="none" stroke="#2563eb" stroke-width="2"/>
+<path d="M362.4,381.5 L450.5,341.4 L538.5,310.4 L590.0,294.5" fill="none" stroke="#2563eb" stroke-width="1" stroke-dasharray="4 3" opacity="0.7"/>
+<circle cx="362.4" cy="368.0" r="3" fill="#2563eb"/>
+<circle cx="450.5" cy="329.6" r="3" fill="#2563eb"/>
+<circle cx="538.5" cy="302.8" r="3" fill="#2563eb"/>
+<circle cx="590.0" cy="286.8" r="3" fill="#2563eb"/>
+<text x="602" y="186" fill="#2563eb">8 L8-q4final</text></svg>

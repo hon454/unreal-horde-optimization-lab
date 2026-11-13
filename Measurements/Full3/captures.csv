@@ -1,0 +1,10 @@
+﻿time,label,status,file,size_kb,record_sec,note
+2026-11-13 21:02:25,Full3shot-L1-full-N10000-P1-r1,FAIL,,,8,focus=FAILED
+2026-11-13 21:03:26,Full3shot-L2-mass-N10000-P1-r1,OK,G:\Epic Games\UE_5.8.4\Games\unreal-horde-optimization-lab\Saved\Capture\Full3\Full3shot-L2-mass-N10000-P1-r1.webp,6864,8,region 3840x2160@0 0;
+2026-11-13 21:04:27,Full3shot-L3-vatcull-N10000-P1-r1,OK,G:\Epic Games\UE_5.8.4\Games\unreal-horde-optimization-lab\Saved\Capture\Full3\Full3shot-L3-vatcull-N10000-P1-r1.webp,6281,8,region 3840x2160@0 0;
+2026-11-13 21:05:29,Full3shot-L4-mass-N10000-P1-r1,OK,G:\Epic Games\UE_5.8.4\Games\unreal-horde-optimization-lab\Saved\Capture\Full3\Full3shot-L4-mass-N10000-P1-r1.webp,6888,8,region 3840x2160@0 0;
+2026-11-13 21:06:30,Full3shot-L5-m4offpool-N10000-P1-r1,OK,G:\Epic Games\UE_5.8.4\Games\unreal-horde-optimization-lab\Saved\Capture\Full3\Full3shot-L5-m4offpool-N10000-P1-r1.webp,7028,8,region 3840x2160@0 0;
+2026-11-13 21:07:31,Full3shot-L6-m5bounds-N10000-P1-r1,OK,G:\Epic Games\UE_5.8.4\Games\unreal-horde-optimization-lab\Saved\Capture\Full3\Full3shot-L6-m5bounds-N10000-P1-r1.webp,7183,8,region 3840x2160@0 0;
+2026-11-13 21:08:33,Full3shot-L7-q2crowd-N10000-P1-r1,OK,G:\Epic Games\UE_5.8.4\Games\unreal-horde-optimization-lab\Saved\Capture\Full3\Full3shot-L7-q2crowd-N10000-P1-r1.webp,7425,8,region 3840x2160@0 0;
+2026-11-13 21:09:34,Full3shot-L8-q4final-N10000-P1-r1,OK,G:\Epic Games\UE_5.8.4\Games\unreal-horde-optimization-lab\Saved\Capture\Full3\Full3shot-L8-q4final-N10000-P1-r1.webp,7375,8,region 3840x2160@0 0;
+2026-11-13 21:10:56,Full3shot-L1-full-N10000-P1-r2,OK,G:\Epic Games\UE_5.8.4\Games\unreal-horde-optimization-lab\Saved\Capture\Full3\Full3shot-L1-full-N10000-P1-r2.webp,1163,8,region 3840x2160@0 0;

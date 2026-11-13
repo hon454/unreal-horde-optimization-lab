@@ -1,0 +1,3 @@
+﻿time,label,cond,n,preset,kind,reason
+2026-11-13 18:47:26,Full3-A8-farcull-N10000-P1-r2,A8-farcull,10000,P1,ablation,foreground not on game during measurement (fg=29/30 focus=altkey)
+2026-11-13 20:43:51,Full3traceser-L3-vatcull-N10000-P1-r1,L3-vatcull,10000,P1,trace,foreground not on game during measurement (fg=14/30 focus=altkey)
