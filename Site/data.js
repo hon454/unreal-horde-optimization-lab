@@ -412,7 +412,7 @@ window.SITE_DATA = {
   },
   {
    "num": 2,
-   "sentence": "로직을 Mass로 옮기자 개체당 게임 스레드 비용이 27분의 1로 줄었다. 이 값에는 배열 순회의 이득과, 충돌 검사·애니메이션·액터마다의 컴포넌트 갱신이 없어진 몫이 함께 들어 있다.",
+   "sentence": "로직을 Mass로 옮기고 표현을 ISM 하나로 바꾸자 개체당 게임 스레드 비용이 27분의 1로 줄었다. 이 몫은 개체마다 도는 틱을 없애면 Mass 없이도 얻는다. Mass가 준 것은 뒤 단계가 쓰는 표현 LOD와 표현 전환의 경로다.",
    "title": "로직을 Mass로 — 액터마다 돌던 틱이 Processor 몇 개가 된다",
    "url": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Posts/02-mass-logic/README.md"
   },
@@ -674,7 +674,7 @@ window.SITE_DATA = {
     }
    },
    "group": "earn",
-   "learned": "로직을 Mass로 옮기자 개체당 게임 스레드 비용이 27분의 1로 줄었다. 이 값에는 배열 순회의 이득과, 충돌 검사·애니메이션·액터마다의 컴포넌트 갱신이 없어진 몫이 함께 들어 있다.",
+   "learned": "로직을 Mass로 옮기고 표현을 ISM 하나로 바꾸자 개체당 게임 스레드 비용이 27분의 1로 줄었다. 이 몫은 개체마다 도는 틱을 없애면 Mass 없이도 얻는다. Mass가 준 것은 뒤 단계가 쓰는 표현 LOD와 표현 전환의 경로다.",
    "max60": {
     "above": false,
     "n": 19554
