@@ -14,6 +14,7 @@
 | `run-full.ps1`, `full-conditions.json` | 총괄 묶음 러너와 조건 표(사다리 8단계, 빼 보기 열 행, 하위 실험). 조건의 인자와 기대 메타데이터는 JSON이 정한다 |
 | `ablation-check.py`, `equivalence-check.py` | 실행마다 CSV 메타데이터를 조건 표와 대조하고, 단계 사이의 동등성(초당 사망, 30m 안 개체 수)을 검사한다 |
 | `run-pool.ps1`, `pool-timeline.py` | 엔티티 풀 묶음(16분 실행 두 번)과 1분 구간 정리 |
+| `run-budget.ps1`, `check-budget.py`, `plot-budget.py` | 참고 묶음 `Budget1`(예산 값 6 × 호드 2 × 3회)의 러너, 메타데이터 대조, 그림(`Docs/figures/budget1/`) |
 | `capture-full.ps1` | 단계별 화면 촬영(움직이는 WebP). 측정이 끝난 뒤 따로 돈다 |
 | `summarize.py` | 프레임 CSV → `Measurements/<묶음>/runs.csv`, `summary.csv` |
 | `spikes.py` | 묶음의 주기 스파이크 검사 |

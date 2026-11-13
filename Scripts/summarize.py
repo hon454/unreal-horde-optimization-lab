@@ -41,6 +41,13 @@ FULL_NUM = ["deaths", "snipes", "death_rate", "near30_mean", "alive_min", "alive
 # 스레드별 p95(2026-11-12 사용자 결정): 기법이 Game과 GPU 중 어느 쪽 부하를 바꾸는지 p95에서도 가른다. 총괄 묶음에만 붙여 옛 묶음의 열 순서를 바꾸지 않는다. summary에는 중앙값과 _min·_max
 FULL_THREAD = ["game_p95_ms", "gpu_p95_ms"]
 FULL_FIELDS = FULL_TEXT + FULL_NUM + FULL_THREAD
+# 건너뜀과 보간을 나눈 열(Docs/Worklog/Q7.md "건너뜀 지표", 2026-11-13 코드 세션). 건너뜀 비율 = (Skips - Interps) / Frames, 보간 비율 = Interps / Frames.
+# 옛 열 large_skip_ratio는 Skips / Frames(보간 포함)로 이름과 뜻을 그대로 둔다. 새 메타데이터 키가 없는 옛 묶음(Full2)은 이 열이 빈칸이다.
+# budget_ms = 메타데이터 LabBudgetMs(실제 걸린 a.Budget.BudgetMs, 예산 끔은 `-`), budgeted_anim_ms = 엔진 스탯 AnimationBudget/GameThread/BudgetedAnimation의 실행별 중앙값.
+# 숫자 열은 summary에 중앙값과 _min·_max를 쓴다.
+BUDGET_TEXT = ["budget_ms"]
+BUDGET_NUM = ["large_skipped_ratio", "large_interp_ratio", "small_skipped_ratio", "small_interp_ratio", "budgeted_anim_ms"]
+BUDGET_FIELDS = BUDGET_TEXT + BUDGET_NUM
 
 _full_by_label = None
 
@@ -149,6 +156,35 @@ def types_fields(meta):
         ratio = ""
     return {"types": meta.get("labtypes", ""), "types_assets": meta.get("labtypesassets", ""),
             "large_actor_frames": fr, "large_actor_skips": sk, "large_skip_ratio": ratio}
+
+
+def _ratio(num, den):
+    try:
+        return round(int(num) / int(den), 4) if int(den) > 0 else ""
+    except ValueError:
+        return ""
+
+
+def budget_fields(header, data, meta):
+    """Q7 건너뜀·보간 분리 열. 새 메타데이터 키가 없으면 비율은 빈칸이다."""
+    out = {k: "" for k in BUDGET_FIELDS}
+    out["budget_ms"] = meta.get("labbudgetms", "")
+    for kind in ("large", "small"):
+        fr = meta.get(f"lab{kind}actorframes", "")
+        sk = meta.get(f"lab{kind}actorskips", "")
+        ip = meta.get(f"lab{kind}actorinterps", "")
+        if sk == "" or ip == "":
+            continue
+        try:
+            skipped = int(sk) - int(ip)
+        except ValueError:
+            continue
+        out[f"{kind}_skipped_ratio"] = _ratio(skipped, fr)
+        out[f"{kind}_interp_ratio"] = _ratio(ip, fr)
+    ba = column(header, data, ["AnimationBudget/GameThread/BudgetedAnimation"])
+    if ba:
+        out["budgeted_anim_ms"] = percentile(ba, 0.5)
+    return out
 
 
 def sim_lod_fields(header, data, meta, frame):
@@ -347,6 +383,7 @@ def summarize_run(path, pc):
         row.update(full_fields(meta, m))
         row["game_p95_ms"] = percentile(column(header, data, COLS["game"]), 0.95)
         row["gpu_p95_ms"] = percentile(column(header, data, COLS["gpu"]), 0.95)
+        row.update(budget_fields(header, data, meta))
     return row
 
 
@@ -355,14 +392,15 @@ def main():
     ap.add_argument("--milestone", "--batch", dest="milestone", required=True)
     ap.add_argument("--rebuild", action="store_true", help="기존 행도 원본 CSV로 다시 계산한다(CSV가 없는 행은 그대로 둔다)")
     ap.add_argument("--pc", default="1", help="Docs/Reference/pc-specs.md의 행 번호")
+    ap.add_argument("--out", default="", help="결과 폴더(기본 Measurements/<묶음>). 옛 묶음을 덮어쓰지 않고 다시 요약해 견줄 때 쓴다")
     args = ap.parse_args()
 
-    out_dir = ROOT / "Measurements" / args.milestone
+    out_dir = Path(args.out) if args.out else ROOT / "Measurements" / args.milestone
     out_dir.mkdir(parents=True, exist_ok=True)
     runs_path = out_dir / "runs.csv"
     full = bool(BATCH_NAME_RE.match(args.milestone))
     failed = failed_labels(args.milestone) if full else set()
-    run_fields = RUN_FIELDS + (FULL_FIELDS if full else [])
+    run_fields = RUN_FIELDS + (FULL_FIELDS + BUDGET_FIELDS if full else [])
 
     existing = {}
     if runs_path.exists():
@@ -423,6 +461,9 @@ def main():
         fields += FULL_TEXT + FULL_NUM
         for c in FULL_THREAD:
             fields += [c, f"{c}_min", f"{c}_max"]
+        fields += BUDGET_TEXT
+        for c in BUDGET_NUM:
+            fields += [c, f"{c}_min", f"{c}_max"]
     with open(out_dir / "summary.csv", "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=fields)
         w.writeheader()
@@ -459,6 +500,12 @@ def main():
                 for c in FULL_THREAD:
                     vals = [float(r[c]) for r in rs if str(r.get(c, "")) != ""]
                     out[c] = round(statistics.median(vals), 3) if vals else ""
+                    out[f"{c}_min"] = min(vals) if vals else ""
+                    out[f"{c}_max"] = max(vals) if vals else ""
+                out["budget_ms"] = "/".join(sorted({str(r.get("budget_ms", "")) for r in rs if str(r.get("budget_ms", "")) != ""}))
+                for c in BUDGET_NUM:
+                    vals = [float(r[c]) for r in rs if str(r.get(c, "")) != ""]
+                    out[c] = round(statistics.median(vals), 4) if vals else ""
                     out[f"{c}_min"] = min(vals) if vals else ""
                     out[f"{c}_max"] = max(vals) if vals else ""
             w.writerow(out)

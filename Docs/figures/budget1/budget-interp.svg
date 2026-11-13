@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 420" width="800" height="420" font-family="Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Segoe UI, sans-serif">
+<rect width="800" height="420" fill="#ffffff"/>
+<text x="16" y="30" font-size="20" font-weight="700" fill="#111827">애니메이션을 보간한 액터 비율</text>
+<text x="16" y="54" font-size="16" fill="#4b5563">프레임당 비율</text>
+<circle cx="22" cy="76" r="6" fill="#2563eb"/>
+<text x="34" y="82" font-size="16" fill="#111827">대형</text>
+<circle cx="92" cy="76" r="6" fill="#0d9488"/>
+<text x="104" y="82" font-size="16" fill="#111827">소형</text>
+<text x="234.0" y="88" font-size="16" font-weight="700" fill="#111827" text-anchor="middle">호드 10,000</text>
+<line x1="64" y1="346.0" x2="404" y2="346.0" stroke="#e5e7eb"/>
+<text x="58" y="351.0" font-size="16" fill="#4b5563" text-anchor="end">0</text>
+<line x1="64" y1="283.5" x2="404" y2="283.5" stroke="#e5e7eb"/>
+<text x="58" y="288.5" font-size="16" fill="#4b5563" text-anchor="end">0.2</text>
+<line x1="64" y1="221.0" x2="404" y2="221.0" stroke="#e5e7eb"/>
+<text x="58" y="226.0" font-size="16" fill="#4b5563" text-anchor="end">0.4</text>
+<line x1="64" y1="158.5" x2="404" y2="158.5" stroke="#e5e7eb"/>
+<text x="58" y="163.5" font-size="16" fill="#4b5563" text-anchor="end">0.6</text>
+<line x1="64" y1="96.0" x2="404" y2="96.0" stroke="#e5e7eb"/>
+<text x="58" y="101.0" font-size="16" fill="#4b5563" text-anchor="end">0.8</text>
+<text x="92.3" y="370" font-size="16" fill="#4b5563" text-anchor="middle">끔</text>
+<text x="149.0" y="370" font-size="16" fill="#4b5563" text-anchor="middle">1</text>
+<text x="205.7" y="370" font-size="16" fill="#4b5563" text-anchor="middle">2</text>
+<text x="262.3" y="370" font-size="16" fill="#4b5563" text-anchor="middle">3</text>
+<text x="319.0" y="370" font-size="16" fill="#4b5563" text-anchor="middle">4</text>
+<text x="375.7" y="370" font-size="16" fill="#4b5563" text-anchor="middle">6</text>
+<text x="234.0" y="398" font-size="16" fill="#4b5563" text-anchor="middle">예산(ms)</text>
+<line x1="205.7" y1="311.7" x2="205.7" y2="303.5" stroke="#2563eb" stroke-width="3" opacity="0.45"/>
+<line x1="262.3" y1="346.0" x2="262.3" y2="345.5" stroke="#2563eb" stroke-width="3" opacity="0.45"/>
+<polyline fill="none" stroke="#2563eb" stroke-width="2" points="92.3,346.0 149.0,346.0 205.7,310.4 262.3,345.7 319.0,346.0 375.7,346.0"/>
+<circle cx="92.3" cy="346.0" r="4.5" fill="#2563eb"/>
+<circle cx="149.0" cy="346.0" r="4.5" fill="#2563eb"/>
+<circle cx="205.7" cy="310.4" r="4.5" fill="#2563eb"/>
+<circle cx="262.3" cy="345.7" r="4.5" fill="#2563eb"/>
+<circle cx="319.0" cy="346.0" r="4.5" fill="#2563eb"/>
+<circle cx="375.7" cy="346.0" r="4.5" fill="#2563eb"/>
+<line x1="205.7" y1="302.2" x2="205.7" y2="300.4" stroke="#0d9488" stroke-width="3" opacity="0.45"/>
+<line x1="262.3" y1="334.8" x2="262.3" y2="331.8" stroke="#0d9488" stroke-width="3" opacity="0.45"/>
+<line x1="319.0" y1="346.0" x2="319.0" y2="345.8" stroke="#0d9488" stroke-width="3" opacity="0.45"/>
+<polyline fill="none" stroke="#0d9488" stroke-width="2" points="92.3,346.0 149.0,346.0 205.7,301.2 262.3,331.8 319.0,346.0 375.7,346.0"/>
+<circle cx="92.3" cy="346.0" r="4.5" fill="#0d9488"/>
+<circle cx="149.0" cy="346.0" r="4.5" fill="#0d9488"/>
+<circle cx="205.7" cy="301.2" r="4.5" fill="#0d9488"/>
+<circle cx="262.3" cy="331.8" r="4.5" fill="#0d9488"/>
+<circle cx="319.0" cy="346.0" r="4.5" fill="#0d9488"/>
+<circle cx="375.7" cy="346.0" r="4.5" fill="#0d9488"/>
+<text x="622.0" y="88" font-size="16" font-weight="700" fill="#111827" text-anchor="middle">호드 20,000</text>
+<line x1="452" y1="346.0" x2="792" y2="346.0" stroke="#e5e7eb"/>
+<text x="446" y="351.0" font-size="16" fill="#4b5563" text-anchor="end">0</text>
+<line x1="452" y1="283.5" x2="792" y2="283.5" stroke="#e5e7eb"/>
+<text x="446" y="288.5" font-size="16" fill="#4b5563" text-anchor="end">0.2</text>
+<line x1="452" y1="221.0" x2="792" y2="221.0" stroke="#e5e7eb"/>
+<text x="446" y="226.0" font-size="16" fill="#4b5563" text-anchor="end">0.4</text>
+<line x1="452" y1="158.5" x2="792" y2="158.5" stroke="#e5e7eb"/>
+<text x="446" y="163.5" font-size="16" fill="#4b5563" text-anchor="end">0.6</text>
+<line x1="452" y1="96.0" x2="792" y2="96.0" stroke="#e5e7eb"/>
+<text x="446" y="101.0" font-size="16" fill="#4b5563" text-anchor="end">0.8</text>
+<text x="480.3" y="370" font-size="16" fill="#4b5563" text-anchor="middle">끔</text>
+<text x="537.0" y="370" font-size="16" fill="#4b5563" text-anchor="middle">1</text>
+<text x="593.7" y="370" font-size="16" fill="#4b5563" text-anchor="middle">2</text>
+<text x="650.3" y="370" font-size="16" fill="#4b5563" text-anchor="middle">3</text>
+<text x="707.0" y="370" font-size="16" fill="#4b5563" text-anchor="middle">4</text>
+<text x="763.7" y="370" font-size="16" fill="#4b5563" text-anchor="middle">6</text>
+<text x="622.0" y="398" font-size="16" fill="#4b5563" text-anchor="middle">예산(ms)</text>
+<line x1="593.7" y1="341.4" x2="593.7" y2="263.3" stroke="#2563eb" stroke-width="3" opacity="0.45"/>
+<line x1="650.3" y1="293.4" x2="650.3" y2="214.5" stroke="#2563eb" stroke-width="3" opacity="0.45"/>
+<line x1="707.0" y1="326.9" x2="707.0" y2="319.9" stroke="#2563eb" stroke-width="3" opacity="0.45"/>
+<line x1="763.7" y1="346.0" x2="763.7" y2="345.9" stroke="#2563eb" stroke-width="3" opacity="0.45"/>
+<polyline fill="none" stroke="#2563eb" stroke-width="2" points="480.3,346.0 537.0,346.0 593.7,325.2 650.3,287.7 707.0,320.2 763.7,346.0"/>
+<circle cx="480.3" cy="346.0" r="4.5" fill="#2563eb"/>
+<circle cx="537.0" cy="346.0" r="4.5" fill="#2563eb"/>
+<circle cx="593.7" cy="325.2" r="4.5" fill="#2563eb"/>
+<circle cx="650.3" cy="287.7" r="4.5" fill="#2563eb"/>
+<circle cx="707.0" cy="320.2" r="4.5" fill="#2563eb"/>
+<circle cx="763.7" cy="346.0" r="4.5" fill="#2563eb"/>
+<line x1="593.7" y1="346.0" x2="593.7" y2="345.6" stroke="#0d9488" stroke-width="3" opacity="0.45"/>
+<line x1="650.3" y1="309.9" x2="650.3" y2="302.3" stroke="#0d9488" stroke-width="3" opacity="0.45"/>
+<line x1="707.0" y1="306.7" x2="707.0" y2="303.7" stroke="#0d9488" stroke-width="3" opacity="0.45"/>
+<line x1="763.7" y1="342.1" x2="763.7" y2="341.2" stroke="#0d9488" stroke-width="3" opacity="0.45"/>
+<polyline fill="none" stroke="#0d9488" stroke-width="2" points="480.3,346.0 537.0,346.0 593.7,346.0 650.3,302.5 707.0,304.3 763.7,341.3"/>
+<circle cx="480.3" cy="346.0" r="4.5" fill="#0d9488"/>
+<circle cx="537.0" cy="346.0" r="4.5" fill="#0d9488"/>
+<circle cx="593.7" cy="346.0" r="4.5" fill="#0d9488"/>
+<circle cx="650.3" cy="302.5" r="4.5" fill="#0d9488"/>
+<circle cx="707.0" cy="304.3" r="4.5" fill="#0d9488"/>
+<circle cx="763.7" cy="341.3" r="4.5" fill="#0d9488"/>
+</svg>
