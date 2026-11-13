@@ -14,14 +14,15 @@
 ## 다음 할 일
 
 1. 사용자가 글 검토를 끝내면 코디네이터가 `Docs/post-review.md`를 지운다.
-2. 코디네이터가 레포 정리안을 사용자에게 보인다. 대상은 일회성 러너, `.claude/settings.json`, `Config/`의 자동 생성 설정이다.
-3. 사용자가 오브 `SnipeView` 경합(`Source/HordeOptLab/LabOrb.cpp:242`)의 처리 방법을 정한다. 코드를 고치면 측정 인프라 동결 규칙을 따른다([ADR-0002](Decisions/0002-freeze-measurement-infra.md)).
+2. 사용자가 오브 `SnipeView` 경합(`Source/HordeOptLab/LabOrb.cpp:242`)의 처리 방법을 정한다. 코드를 고치면 측정 인프라 동결 규칙을 따른다([ADR-0002](Decisions/0002-freeze-measurement-infra.md)).
 
 코디네이터는 커밋한 뒤 main을 푸시한다([AGENTS.md](../AGENTS.md) "진행 방식").
 
 2026-11-13 검토에서 글과 README의 틀린 서술을 고쳤다. 고친 사실은 [engine-notes.md](Reference/engine-notes.md) 28절에 있다.
 
 사이트 주소는 <https://hon454.github.io/unreal-horde-optimization-lab/>다. 글이나 CSV가 바뀌면 `py -3 -I Scripts/build-site.py`를 다시 돌리고 `gh-pages` 브랜치에 다시 올린다.
+
+끝난 묶음의 러너는 `Scripts/Archive/`에 있다. 그 자리에서는 돌지 않는다([Scripts/README.md](../Scripts/README.md)).
 
 그림과 사이트는 4·7·8단계를 번 시간을 품질에 쓰는 단계로 표시한다(빗금). 묶음 제목은 쓰지 않는다.
 
@@ -129,4 +130,5 @@ Development 전환 점수는 `Full1` 때의 참고값이다(`Measurements/Full1/
 
 - **글 00\~09 초안과 사이트의 검토.** 글은 `Posts/`에 있다. 사이트 주소는 위 "다음 할 일"에 있다.
 - **[autonomous-decisions.md](Worklog/autonomous-decisions.md)의 D20\~D32 검토.** "사용자가 볼 것" 줄이 판단이 필요한 곳이다.
+- **`.claude/settings.json`의 수정.** 없는 스크립트(`capture-video.ps1`, `run-e0.ps1`)와 `python` 항목을 지우고 `git add -A` 거부 규칙을 더한다. 코디네이터는 이 파일을 고치지 않는다.
 - **`Packaged/Release/` 삭제의 허락.** 릴리스 스테이징 폴더다(약 1.7GB, git 밖). 코디네이터가 작업을 모두 끝낸 뒤에 묻는다.

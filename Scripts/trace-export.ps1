@@ -11,7 +11,8 @@ param(
     [string]$OutDir = "$env:TEMP\horde-trace"
 )
 $Root = Split-Path $PSScriptRoot -Parent
-$Insights = "G:\Epic Games\UE_5.8.4\Engine\Binaries\Win64\UnrealInsights.exe"
+. "$PSScriptRoot\common.ps1"
+$Insights = "$UE_ROOT\Engine\Binaries\Win64\UnrealInsights.exe"
 $Trace = "$Root\Saved\Traces\$Label.utrace"
 if (-not (Test-Path $Insights)) { Write-Host "FAIL: no UnrealInsights.exe (see header)"; exit 1 }
 if (-not (Test-Path $Trace)) { Write-Host "FAIL: no trace $Trace"; exit 1 }

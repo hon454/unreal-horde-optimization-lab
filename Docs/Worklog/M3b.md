@@ -25,7 +25,7 @@ plan.md "M3b" 측정 방법 1\~7번을 `Scripts/`에 구현했다. 빌드·패�
 6. **A/A 판정.** 시작 A/A(`-Phase start`, 조건 `m3mass-start`, 필요하면 e3b 앞에 돌린다)와 끝 A/A(`m3mass-aa`)의 프레임 p50 차이가 0.5 ms 이하면 한 묶음으로 쓴다. 넘으면 그 사실을 적고 코디네이터가 판정한다.
 7. **2종 행.** `LabTypesAssets=substituted`인 CSV는 summary에서 빠진다(경고가 찍힌다). 경고가 하나라도 있으면 보고한다. 2종 행의 `large_skip_ratio`도 같이 본다.
 
-**점검 결과(1·2번, 시작 대기 중에 실제로 확인).** `tasklist`: `UnrealEditor`·`UnrealBuildTool`·`HordeOptLab` 없음, `dotnet` 없음, **`EpicGamesLauncher.exe` 1개 켜져 있음**(끄는 것은 사용자). `git status`(추적 파일) 깨끗, `.uproject` `EngineAssociation` = `{DEC43C63-4155-0388-B4B3-6B830A2347BA}` 그대로. 패키지 `6a98c46`(코드 변화 없음), 패키징 뒤 HEAD는 `c5fe174`로 차이는 문서·`DefaultEditor.ini`뿐. 모니터 켜 둠·화면 끄기·절전 설정은 사용자 확인 항목이다. 전체 러너 `Scripts/run-m3b-all.ps1`(-DryRun 합계 294행 = r0 1 + start 3 + e3b 24 + matrix 120 + ab2 9 + aa 3 + trace 2 + types2 132, 85초 기준 6.94시간, 80초 기준 6.53시간)가 사전 점검(에디터·UBT·게임 프로세스, 패키지 존재, 추적 파일 깨끗함)을 스스로 한다.
+**점검 결과(1·2번, 시작 대기 중에 실제로 확인).** `tasklist`: `UnrealEditor`·`UnrealBuildTool`·`HordeOptLab` 없음, `dotnet` 없음, **`EpicGamesLauncher.exe` 1개 켜져 있음**(끄는 것은 사용자). `git status`(추적 파일) 깨끗, `.uproject` `EngineAssociation` = `{DEC43C63-4155-0388-B4B3-6B830A2347BA}` 그대로. 패키지 `6a98c46`(코드 변화 없음), 패키징 뒤 HEAD는 `c5fe174`로 차이는 문서·`DefaultEditor.ini`뿐. 모니터 켜 둠·화면 끄기·절전 설정은 사용자 확인 항목이다. 전체 러너 `Scripts/Archive/run-m3b-all.ps1`(-DryRun 합계 294행 = r0 1 + start 3 + e3b 24 + matrix 120 + ab2 9 + aa 3 + trace 2 + types2 132, 85초 기준 6.94시간, 80초 기준 6.53시간)가 사전 점검(에디터·UBT·게임 프로세스, 패키지 존재, 추적 파일 깨끗함)을 스스로 한다.
 
 ### M0\~M3 재요약
 
@@ -580,7 +580,7 @@ plan.md "M3b" 146\~158행(2종 구성, 저격 E안, E3 (3c) 화면 크기 중요
 
 ## 페이즈 첫 실행 효과(진단, 2026-11-10) (측정 세션)
 
-최종 묶음에서 러너 호출(페이즈)마다 첫 실행만 Game 스레드가 10\~20% 빨랐다(코디네이터 발견). 가설: 게임 창이 포그라운드를 받았느냐의 차이. 도구 `Scripts/fg-probe.ps1`(2초마다 포그라운드 창의 프로세스 이름을 `Saved/Lab/fg-probe.log`에 덧붙임, git 밖. 창 제목은 로그에 있으나 여기에 적지 않는다).
+최종 묶음에서 러너 호출(페이즈)마다 첫 실행만 Game 스레드가 10\~20% 빨랐다(코디네이터 발견). 가설: 게임 창이 포그라운드를 받았느냐의 차이. 도구 `Scripts/Archive/fg-probe.ps1`(2초마다 포그라운드 창의 프로세스 이름을 `Saved/Lab/fg-probe.log`에 덧붙임, git 밖. 창 제목은 로그에 있으나 여기에 적지 않는다).
 
 **묶음의 페이즈 첫 실행 7개** (game p50, ms. 조건 중앙값 = 같은 조건 r1\~r3 중앙값. trace는 m3mass 20k P1 fin 3회 중앙값과 비교)
 

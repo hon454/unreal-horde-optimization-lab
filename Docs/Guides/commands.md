@@ -4,7 +4,7 @@ STATUS.md "명령"에는 매번 쓰는 것만 둔다. 여기에는 스크립트 
 
 ## 스크립트 사양
 
-모든 스크립트는 `Scripts/common.ps1`을 불러 엔진 경로를 얻는다. 엔진 경로는 저장소에 적지 않고 `.uproject`의 `EngineAssociation`을 레지스트리(`HKCU\Software\Epic Games\Unreal Engine\Builds`)에서 찾는다(DS 실험실 방식).
+모든 스크립트는 `Scripts/common.ps1`을 불러 엔진 경로를 얻는다. 엔진 경로는 저장소에 적지 않고 `.uproject`의 `EngineAssociation`을 레지스트리(`HKCU\Software\Epic Games\Unreal Engine\Builds`)에서 찾는다.
 
 | 스크립트 | 하는 일 | 거부 조건 |
 | --- | --- | --- |
@@ -139,7 +139,7 @@ py -3 -I Scripts/ablation-check.py <CSV> --cond L8-q4final --shot
 
 ## Unreal MCP
 
-- 서버는 에디터가 뜨면 자동으로 열린다: `Config/DefaultEditorPerProjectUserSettings.ini`의 `bAutoStartServer=True`, `ServerPortNumber=8001`(DS 실험실의 기본 8000과 겹치지 않게). 수동은 콘솔 `ModelContextProtocol.StartServer`.
+- 서버는 에디터가 뜨면 자동으로 열린다: `Config/DefaultEditorPerProjectUserSettings.ini`의 `bAutoStartServer=True`, `ServerPortNumber=8001`(다른 프로젝트의 기본 8000과 겹치지 않게). 수동은 콘솔 `ModelContextProtocol.StartServer`.
 - 클라이언트 설정: 프로젝트 루트 `.mcp.json`(gitignore)에 `"unreal-mcp": {"type": "http", "url": "http://127.0.0.1:8001/mcp"}`. 새 체크아웃이면 에디터 콘솔 `ModelContextProtocol.GenerateClientConfig ClaudeCode`로 다시 만든다. Claude Code는 에디터를 띄운 뒤 시작해야 툴이 잡힌다.
 - 2026-11-06 확인: `-nullrhi`로 띄운 에디터가 약 15초 뒤 `initialize`에 응답했다.
 - 툴 호출은 게임 스레드에서 직렬. 겹쳐 부르지 않는다. 대량 변경 전후 저장. 새 `UFUNCTION`은 에디터 재시작.

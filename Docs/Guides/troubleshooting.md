@@ -4,7 +4,7 @@
 
 | 증상 | 확인할 것과 대처 | 근거 |
 | --- | --- | --- |
-| `Scripts/common.ps1`이 엔진을 찾지 못한다 | 스크립트를 실행하는 프로세스에서 `reg query "HKCU\Software\Epic Games\Unreal Engine\Builds"`에 `.uproject`의 `EngineAssociation` 이름이 보이는지 확인한다. 없으면 사용자에게 알리고 승인을 받아 등록한다 | DS 실험실에서 에이전트 프로세스의 레지스트리 값이 다르게 보인 적이 있다 |
+| `Scripts/common.ps1`이 엔진을 찾지 못한다 | 스크립트를 실행하는 프로세스에서 `reg query "HKCU\Software\Epic Games\Unreal Engine\Builds"`에 `.uproject`의 `EngineAssociation` 이름이 보이는지 확인한다. 없으면 사용자에게 알리고 승인을 받아 등록한다 | 다른 프로젝트에서 에이전트 프로세스의 레지스트리 값이 다르게 보인 적이 있다 |
 | `common.ps1`이 "not a registered source build"를 던진다. `.uproject`의 `EngineAssociation`이 모르는 GUID로 바뀌어 있고 끝 개행이 사라졌다 | `git diff HordeOptLab.uproject`로 확인하고 커밋 값 `{DEC43C63-4155-0388-B4B3-6B830A2347BA}`(HKCU Builds의 `G:/Epic Games/UE_5.8.4`)로 되돌린다. 런처나 버전 선택기(우클릭 "Switch Unreal Engine version")가 다시 쓴 것이다. 되돌리기 전에 에디터 프로세스가 없는지 본다 | 2026-11-09 15:41, 선행 묶음 패키징 직전에 발생. 소스 빌드만 쓴다(AGENTS.md) |
 | AssetHost 커맨드렛(`migrate-assets.py`)이 Python 출력 없이 종료 코드 1로 끝난다 | AssetHost `Saved/Logs/AssetHost.log`에 "The game module 'AssetHost' could not be found"가 있으면, AssetHost의 빈 C++ 모듈이 다른 엔진(소스 빌드)으로 컴파일된 것이다(`Binaries/Win64/UnrealEditor.modules`의 BuildId가 런처 엔진과 다름). 런처 엔진의 `Engine/Build/BatchFiles/Build.bat AssetHostEditor Win64 Development -project=<AssetHost.uproject>`로 다시 컴파일한다 | [Worklog/M3b.md](../Worklog/M3b.md) "2종(에셋)" |
 | 빌드가 DLL 잠금으로 실패한다 | 에디터나 패키지 실행이 떠 있는지 확인하고 닫는다 | |
