@@ -5,7 +5,7 @@
 단계를 고르면 화면과 측정값이 바뀌는 한 페이지 요약은 <https://hon454.github.io/unreal-horde-optimization-lab/>에 있다.
 
 - **대상**: 클라이언트 한 대에서 그리고 움직이는 군중의 비용. 게임 스레드, 렌더 스레드, GPU, 메모리.
-- **최적화**: Mass Entity(Fragment·Processor), Representation LOD(액터 / ISM+VAT / ISKM / 없음), 액터 하이드레이션과 풀링, Significance Manager → Animation Budget Allocator, URO, Simulation LOD(청크 단위 가변 틱), Niagara 배경 무리(엔티티 구동 입자).
+- **최적화**: Mass Entity(Fragment·Processor), Representation LOD(액터 / ISM+VAT / ISKM / 없음), 액터 하이드레이션과 풀링, 화면 크기 중요도(바운드 반경 ÷ 카메라 거리) → Animation Budget Allocator, URO, Simulation LOD(청크 단위 가변 틱), Niagara 배경 무리(엔티티 구동 입자).
 - **측정 도구**: Test 구성 패키지에서 `csvprofile`과 Unreal Insights.
 
 단계를 쌓은 뒤에는 목표 사양(호드 총수 1만, 60fps) 안에서 거리별 품질을 확보했다. 가까이는 액터 하이드레이션, 멀리는 ISKM, 그리는 끝(200m) 밖은 Niagara 배경 무리로 그리고, 그렇게 번 프레임 시간을 액터 수와 전환 거리에 쓴다. 최종 구성의 기법은 단계별 사다리(기법을 단계별로 더한 순서)와 "기법 하나를 뺀" 그림으로 이점을 확인했고, 이점이 보이지 않은 것도 그대로 적었다.
