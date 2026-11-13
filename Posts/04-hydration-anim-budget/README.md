@@ -85,6 +85,8 @@ const int32 MaxCounts[EMassLOD::Max] = { FLabConfig::Get().ActorCap, 5000, MAX_i
 
 **액터 클래스.** `ALabMinionMassActorBudget`은 메시를 `USkeletalMeshComponentBudgeted`로 바꾼 `ACharacter`다. 액터 틱과 이동 컴포넌트의 틱은 등록하지 않는다(`bCanEverTick = false`). 위치는 `ULabActorSyncProcessor`가 매 프레임 엔티티에서 옮겨 넣는다. 캡슐 콜리전은 `BeginPlay`에서 끈다.
 
+**저품질 액터 단계는 두지 않았다.** 엔진의 군중 기본 구성은 고품질 액터와 VAT 인스턴스 사이에 저품질 액터(`LowResSpawnedActor`) 단계를 하나 더 둔다(`Engine/Plugins/AI/MassCrowd/Source/MassCrowd/Private/MassCrowdVisualizationTrait.cpp:16-38`, 고품질 0\~5m 최대 10명, 저품질 5\~10m 최대 20명). 몸과 얼굴 메시가 여러 벌인 캐릭터라면 한 명을 가볍게 바꿀 때 줄어드는 몫이 크다. 이 레포의 미니언은 메시 하나짜리라 그 몫이 작다. 액터마다 도는 위치 동기화와 애니메이션 갱신은 가벼운 액터에도 그대로 남는다. 그래서 같은 액터 안에서 애니메이션 예산으로 비용을 줄였다. 단계를 더 두면 전환 지점이 둘이 되고 액터 클래스와 풀도 두 벌이 된다.
+
 `Source/HordeOptLab/LabMinion.cpp`, `ALabMinionMassActor::BeginPlay`
 
 ```cpp
@@ -220,6 +222,6 @@ void ALabMinionMassActor::HideUntilPoseReady()
 
 - 하이드레이션의 비용은 액터 수가 정한다. 상한에 걸리면 호드 총수가 늘어도 액터의 비용은 그대로다.
 - 애니메이션 예산은 예산을 넘을 때만 일한다. 4단계 1만에서는 거의 쉬었고, 액터가 더 많은 최종 구성에서 빼면 프레임이 1.75ms 늘었다.
-- 한계: 4단계에서 예산만 끈 측정은 없다. 예산과 콜리전의 몫은 액터 상한과 전환 거리가 다른 최종 구성에서 쟀다.
+- 한계: 4단계에서 예산만 끈 측정은 없다. 예산과 콜리전의 몫은 액터 상한과 전환 거리가 다른 최종 구성에서 쟀다. 저품질 액터 단계를 넣은 구성은 재지 않았다.
 
 [다음 글](../05-simulation-lod-entity-pool/README.md)에서는 거리마다 로직을 덜 자주 돌린다(Simulation LOD). 200m 밖의 이동을 자체 프로세서로 바꾸고, 죽은 엔티티를 지우지 않고 다시 쓴다.
