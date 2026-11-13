@@ -412,13 +412,13 @@ window.SITE_DATA = {
   },
   {
    "num": 2,
-   "sentence": "로직을 Mass로 옮기면 개체마다 돌던 틱이 Processor의 배열 순회가 되어, 개체당 게임 스레드 비용이 27.0분의 1로 준다.",
+   "sentence": "로직을 Mass로 옮기자 개체당 게임 스레드 비용이 27분의 1로 줄었다. 이 값에는 배열 순회의 이득과, 충돌 검사·애니메이션·액터마다의 컴포넌트 갱신이 없어진 몫이 함께 들어 있다.",
    "title": "로직을 Mass로 — 액터마다 돌던 틱이 Processor 몇 개가 된다",
    "url": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Posts/02-mass-logic/README.md"
   },
   {
    "num": 3,
-   "sentence": "먼 개체에 애니메이션을 붙이는 비용보다, 화면 높이의 0.4%도 안 되는 개체를 그리지 않아 버는 시간이 더 컸다.",
+   "sentence": "먼 개체에 애니메이션을 붙이는 비용보다, 화면 높이의 1%도 안 되는 개체를 그리지 않아 버는 시간이 더 컸다.",
    "title": "먼 개체에 애니메이션을 붙이고 더 빨라졌다 — ISM + VAT와 200m 밖 지우기",
    "url": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Posts/03-ism-vat/README.md"
   },
@@ -430,7 +430,7 @@ window.SITE_DATA = {
   },
   {
    "num": 5,
-   "sentence": "Simulation LOD는 간격을 주는 틀일 뿐이고, 프레임을 줄인 것은 먼 개체를 비싼 엔진 이동·조향에서 뺀 일이었다.",
+   "sentence": "Simulation LOD의 효과는 LOD 태그를 읽는 Processor에서만 나온다. 자체 로직에 간격을 준 것으로는 프레임이 줄지 않았고, 줄인 것은 먼 개체를 엔진 이동·조향에서 뺀 일이었다.",
    "title": "먼 개체를 엔진 이동에서 빼자 게임 스레드가 줄었다 — Simulation LOD와 엔티티 풀",
    "url": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Posts/05-simulation-lod-entity-pool/README.md"
   },
@@ -448,7 +448,7 @@ window.SITE_DATA = {
   },
   {
    "num": 8,
-   "sentence": "8단계는 프레임 시간을 그대로 두고, 남은 게임 스레드와 애니메이션 예산을 가까운 액터 84개에 썼다.",
+   "sentence": "8단계는 프레임 시간을 그대로 두고 가까운 액터를 84개 늘렸고, 그 대가는 애니메이션 예산이 건너뜀으로 치렀다.",
    "title": "품질 올리기 — 남은 예산을 액터 수와 전환 거리에 쓰기",
    "url": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Posts/08-quality/README.md"
   },
@@ -674,7 +674,7 @@ window.SITE_DATA = {
     }
    },
    "group": "earn",
-   "learned": "로직을 Mass로 옮기면 개체마다 돌던 틱이 Processor의 배열 순회가 되어, 개체당 게임 스레드 비용이 27.0분의 1로 준다.",
+   "learned": "로직을 Mass로 옮기자 개체당 게임 스레드 비용이 27분의 1로 줄었다. 이 값에는 배열 순회의 이득과, 충돌 검사·애니메이션·액터마다의 컴포넌트 갱신이 없어진 몫이 함께 들어 있다.",
    "max60": {
     "above": false,
     "n": 20753
@@ -851,7 +851,7 @@ window.SITE_DATA = {
     }
    },
    "group": "earn",
-   "learned": "먼 개체에 애니메이션을 붙이는 비용보다, 화면 높이의 0.4%도 안 되는 개체를 그리지 않아 버는 시간이 더 컸다.",
+   "learned": "먼 개체에 애니메이션을 붙이는 비용보다, 화면 높이의 1%도 안 되는 개체를 그리지 않아 버는 시간이 더 컸다.",
    "max60": {
     "above": true,
     "n": 30000
@@ -1205,7 +1205,7 @@ window.SITE_DATA = {
     }
    },
    "group": "earn",
-   "learned": "Simulation LOD는 간격을 주는 틀일 뿐이고, 프레임을 줄인 것은 먼 개체를 비싼 엔진 이동·조향에서 뺀 일이었다.",
+   "learned": "Simulation LOD의 효과는 LOD 태그를 읽는 Processor에서만 나온다. 자체 로직에 간격을 준 것으로는 프레임이 줄지 않았고, 줄인 것은 먼 개체를 엔진 이동·조향에서 뺀 일이었다.",
    "max60": {
     "above": true,
     "n": 30000
@@ -1736,7 +1736,7 @@ window.SITE_DATA = {
     }
    },
    "group": "spend",
-   "learned": "8단계는 프레임 시간을 그대로 두고, 남은 게임 스레드와 애니메이션 예산을 가까운 액터 84개에 썼다.",
+   "learned": "8단계는 프레임 시간을 그대로 두고 가까운 액터를 84개 늘렸고, 그 대가는 애니메이션 예산이 건너뜀으로 치렀다.",
    "max60": {
     "above": false,
     "n": 25958

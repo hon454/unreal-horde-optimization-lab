@@ -37,7 +37,7 @@
 <circle cx="117.5" cy="356.7" r="4.5" fill="#2563eb"/>
 <text x="127.5" y="378.7" font-size="16" font-weight="700" fill="#2563eb">9.36</text>
 <circle cx="209.1" cy="322.1" r="4.5" fill="#2563eb"/>
-<text x="219.1" y="344.1" font-size="16" font-weight="700" fill="#2563eb">18.0</text>
+<text x="219.1" y="344.1" font-size="16" font-weight="700" fill="#2563eb">18</text>
 <circle cx="300.7" cy="284.4" r="4.5" fill="#2563eb"/>
 <text x="310.7" y="306.4" font-size="16" font-weight="700" fill="#2563eb">36.6</text>
 <circle cx="513.3" cy="152.6" r="4.5" fill="#2563eb"/>
@@ -56,7 +56,7 @@
 <text x="130" y="684" text-anchor="middle" font-size="16">500</text>
 <text x="130" y="706" text-anchor="middle" font-size="16" fill="#4b5563">하위 스텝 1회</text>
 <rect x="260" y="610.8" width="60" height="49.2" rx="3" fill="#2563eb"/>
-<text x="290" y="602.8" text-anchor="middle" font-size="17" font-weight="700" fill="#2563eb">17.0</text>
+<text x="290" y="602.8" text-anchor="middle" font-size="17" font-weight="700" fill="#2563eb">17</text>
 <text x="290" y="684" text-anchor="middle" font-size="16">1천</text>
 <text x="290" y="706" text-anchor="middle" font-size="16" fill="#4b5563">1회</text>
 <rect x="420" y="609.6" width="60" height="50.4" rx="3" fill="#2563eb"/>

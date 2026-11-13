@@ -58,6 +58,7 @@
 
 - **구현과 측정이 먼저고 글은 뒤따른다.** 글, 그래프 해석, 영상, 트레이스 분석은 작업 단위의 완료 조건이 아니다. 글은 최신 main에서 쓴다.
 - **개발 속도가 최우선이다.** 단위 테스트, CI, PR, 외부 이슈 트래커를 쓰지 않는다. main에 직접 커밋한다.
+- **커밋한 뒤 코디네이터가 푸시한다.** main은 `git push origin main`으로 올린다. 강제 푸시는 하지 않는다. 사이트(`Site/`)에 들어가는 글이나 CSV가 바뀌면 `Scripts/build-site.py`를 다시 돌리고 `gh-pages`도 올린다. 작업 세션은 푸시하지 않는다.
 - **커밋 메시지는 [Conventional Commits](https://www.conventionalcommits.org/)로 쓴다.** `type(scope): summary` 한 줄, 영어 명령형 소문자. type은 `feat`, `fix`, `docs`, `build`, `refactor`, `chore`, `bench`(측정 결과 추가). 측정 조건이나 설정값을 바꾼 커밋은 본문에 이유를 쓴다.
 - **STATUS.md에는 지금 유효한 것만 두고 10KB를 넘기지 않는다.** 세션마다 통째로 읽는 파일이다. 끝낸 작업의 경위는 Worklog로 옮기고, 다음 작업을 제약하는 결과만 한 줄 남긴다. 매번 쓰지 않는 명령은 commands.md에, 확정값은 measurement.md에, 다시 나올 문제는 troubleshooting.md에, 엔진 소스에서 확인한 사실은 engine-notes.md에 둔다.
 - **STATUS.md는 ASD-STE100(Simplified Technical English)의 작성 규칙에 맞춰 쓴다.** 그 규칙을 한국어 문장에 적용한다.
@@ -135,7 +136,6 @@
 
 직접 하지 않고, 무엇을 해야 하는지 구체적으로 적어 사용자에게 요청한다.
 
-- GitHub 푸시.
 - ADR 승인, 글에 넣을 시각 자료의 최종 선택, 시나리오 고정값의 변경.
 - Fab 에셋과 샘플 프로젝트 다운로드, `../unreal-horde-references/` 구성.
 - 에디터에서만 가능한 작업 중 MCP와 Python Editor Script로 안 되는 것.

@@ -42,7 +42,7 @@
 <text x="421.8" y="314" text-anchor="middle" font-size="16" font-weight="700" fill="white">매 프레임 돈다</text>
 <rect x="631.5" y="290" width="134.5" height="36" rx="4" fill="white" stroke="#9ca3af" stroke-dasharray="5 4"/>
 <text x="698.8" y="314" text-anchor="middle" font-size="16" font-weight="700" fill="#4b5563">돌지 않는다</text>
-<text x="32" y="361" font-size="17" font-weight="700">Lab Off 이동</text>
+<text x="32" y="361" font-size="17" font-weight="700">자체 Off 이동</text>
 <text x="32" y="381" font-size="16" fill="#4b5563">ULabOffMoveProcessor</text>
 <rect x="216.0" y="342" width="411.5" height="36" rx="4" fill="white" stroke="#9ca3af" stroke-dasharray="5 4"/>
 <text x="421.8" y="366" text-anchor="middle" font-size="16" font-weight="700" fill="#4b5563">없음</text>

@@ -45,7 +45,7 @@
 <circle cx="568.1" cy="152.7" r="4.5" fill="#dc2626"/>
 <circle cx="568.1" cy="190.8" r="4.5" fill="#2563eb"/>
 <text x="560.1" y="142.7" text-anchor="end" font-size="16" font-weight="700" fill="#dc2626">18.1</text>
-<text x="576.1" y="212.8" font-size="16" font-weight="700" fill="#2563eb">16.0</text>
+<text x="576.1" y="212.8" font-size="16" font-weight="700" fill="#2563eb">16</text>
 <line x1="503.7" y1="177.8" x2="503.7" y2="470" stroke="#b45309" stroke-width="1.5"/>
 <circle cx="503.7" cy="177.8" r="6" fill="white" stroke="#b45309" stroke-width="3"/>
 <text x="503.7" y="460" text-anchor="middle" font-size="16" font-weight="700" fill="#b45309" paint-order="stroke" stroke="white" stroke-width="5">25,958</text>

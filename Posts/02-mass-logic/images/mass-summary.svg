@@ -20,7 +20,7 @@
 <rect x="40" y="352" width="8.1" height="20" rx="3" fill="#0d9488"/>
 <text x="56.1" y="368" font-size="16"><tspan font-weight="700" fill="#0d9488">6.48</tspan><tspan fill="#4b5563"> 렌더 스레드</tspan></text>
 <rect x="40" y="378" width="12.5" height="20" rx="3" fill="#db2777"/>
-<text x="60.5" y="394" font-size="16"><tspan font-weight="700" fill="#db2777">10.0</tspan><tspan fill="#4b5563"> GPU</tspan></text>
+<text x="60.5" y="394" font-size="16"><tspan font-weight="700" fill="#db2777">10</tspan><tspan fill="#4b5563"> GPU</tspan></text>
 <line x1="32" y1="420" x2="768" y2="420" stroke="#e5e7eb"/>
 <text x="32" y="454" font-size="16" fill="#4b5563">2단계만 확대(0–20ms)</text>
 <text x="40" y="488" font-size="17" font-weight="700">2단계 Mass 로직</text>
@@ -31,7 +31,7 @@
 <rect x="40" y="552" width="181.5" height="20" rx="3" fill="#0d9488"/>
 <text x="229.5" y="568" font-size="16"><tspan font-weight="700" fill="#0d9488">6.48</tspan><tspan fill="#4b5563"> 렌더 스레드</tspan></text>
 <rect x="40" y="578" width="280.6" height="20" rx="3" fill="#db2777"/>
-<text x="328.6" y="594" font-size="16"><tspan font-weight="700" fill="#db2777">10.0</tspan><tspan fill="#4b5563"> GPU</tspan></text>
+<text x="328.6" y="594" font-size="16"><tspan font-weight="700" fill="#db2777">10</tspan><tspan fill="#4b5563"> GPU</tspan></text>
 <line x1="506.7" y1="494" x2="506.7" y2="608" stroke="#b45309" stroke-width="2" stroke-dasharray="5 4"/>
 <text x="512.7" y="624" font-size="16" font-weight="700" fill="#b45309">16.7ms</text>
 <line x1="32" y1="640" x2="768" y2="640" stroke="#e5e7eb"/>

@@ -10,6 +10,7 @@
 # Settings shown in the text (actor cap, actor distance, far distance) come from summary.csv columns.
 # Output is deterministic: running it twice gives the same bytes.
 import csv, glob, json, math, os, re, shutil
+import re
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.normpath(os.path.join(HERE, ".."))
@@ -102,6 +103,12 @@ METRICS = ["frame_p50_ms", "frame_p95_ms", "game_p50_ms", "render_p50_ms", "gpu_
 BOT_NAME = {"game": "게임 스레드", "render": "렌더 스레드", "gpu": "GPU"}
 
 
+def _no_zero_decimals(f):
+    """27.0 -> 27. A value whose decimals are all zero is written as an integer."""
+    return lambda *a, **k: re.sub(r"[.]0+$", "", f(*a, **k))
+
+
+@_no_zero_decimals
 def fmt(x, signed=False):
     """Three significant figures, as Scripts/plot-readme.py."""
     a = abs(x)

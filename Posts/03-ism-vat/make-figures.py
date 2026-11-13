@@ -3,6 +3,7 @@
 # Measured values come from Measurements/Full2/summary.csv and Docs/figures/full2/full-n-at-60fps.csv.
 # Trace values (one trace per step, 25-75 s window) are constants below; their source is in measurements.md.
 import csv, os
+import re
 from decimal import Decimal, ROUND_HALF_UP
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -65,6 +66,12 @@ def write(name, text):
         f.write(text)
 
 
+def _no_zero_decimals(f):
+    """27.0 -> 27. A value whose decimals are all zero is written as an integer."""
+    return lambda *a, **k: re.sub(r"[.]0+$", "", f(*a, **k))
+
+
+@_no_zero_decimals
 def fmt(x):
     """Three significant figures, rounded half up from the CSV text (12.35 -> 12.4), as in the post body."""
     q = "1" if abs(x) >= 100 else "0.1" if abs(x) >= 10 else "0.01"
@@ -224,7 +231,7 @@ def problem():
     yb = B + 84
     o.append(f'<line x1="32" y1="{yb - 18}" x2="{W - 32}" y2="{yb - 18}" stroke="{LINE}"/>')
     o.append(f'<text x="32" y="{yb + 6}" font-size="16" fill="{SUB}">2단계는 거리와 상관없이 모든 개체를 인스턴스로 올린다.</text>')
-    o.append(f'<text x="32" y="{yb + 30}" font-size="16" fill="{SUB}">200m에서 미니언의 키는 화면 높이의 0.4%다.</text>')
+    o.append(f'<text x="32" y="{yb + 30}" font-size="16" fill="{SUB}">200m에서 미니언의 키는 화면 높이의 0.8%다.</text>')
     write("vat-problem.svg", svg(yb + 52, o))
 
 

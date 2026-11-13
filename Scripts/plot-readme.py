@@ -8,6 +8,7 @@
 #   Measurements/Full1/transition-dev/runs.csv   transition pop (Development reference, not re-measured with Full2)
 # Colours and fonts follow Posts/01-actor-baseline/make-figures.py.
 import csv, os, statistics
+import re
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.normpath(os.path.join(HERE, ".."))
@@ -95,6 +96,12 @@ def rng(cond, col):
     return float(S[cond][col + "_max"]) - float(S[cond][col + "_min"])
 
 
+def _no_zero_decimals(f):
+    """27.0 -> 27. A value whose decimals are all zero is written as an integer."""
+    return lambda *a, **k: re.sub(r"[.]0+$", "", f(*a, **k))
+
+
+@_no_zero_decimals
 def fmt(x, signed=False):
     """Three significant figures."""
     a = abs(x)
@@ -174,7 +181,7 @@ def hatch_key(o, y):
 # ---------- 1. ladder ----------
 def ladder():
     o = [HATCH]
-    y = title(o, "단계마다 기법 하나를 더했을 때의 프레임 시간",
+    y = title(o, "단계별 프레임 시간",
               ["호드 총수 1만, 오브 시점 카메라, 60초씩 세 번 잰 중앙값(ms)"])
     y += 34
     legend(o, y, [(m[0], m[2]) for m in METRICS])

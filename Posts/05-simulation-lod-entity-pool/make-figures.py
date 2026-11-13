@@ -3,6 +3,7 @@
 # Measured values come from Measurements/Full2/summary.csv and Docs/figures/full2/full-n-at-60fps.csv.
 # The entity pool timeline figure is not made here: the post uses Docs/figures/readme/entity-pool.svg (Scripts/plot-readme.py).
 import csv, os
+import re
 from decimal import Decimal, ROUND_HALF_UP
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -58,6 +59,12 @@ def write(name, text):
         f.write(text)
 
 
+def _no_zero_decimals(f):
+    """27.0 -> 27. A value whose decimals are all zero is written as an integer."""
+    return lambda *a, **k: re.sub(r"[.]0+$", "", f(*a, **k))
+
+
+@_no_zero_decimals
 def fmt(x):
     """Three significant figures, rounded half up from the CSV text (12.35 -> 12.4), as in the post body."""
     q = "1" if abs(x) >= 100 else "0.1" if abs(x) >= 10 else "0.01"
@@ -171,7 +178,7 @@ def principle():
         ("Simulation LOD", "로직을 얼마나 자주", [(0, 2, DARK, "High · 매 프레임", "white"), (2, 3, PURPLE, "Medium", "white"), (3, 4, AMBER, "Off", "white")]),
         ("Lab 접근·범위 피해", "청크 필터를 건다", [(0, 2, DARK, "매 프레임", "white"), (2, 3, PURPLE, f"{per(CFG_MED)}초 간격", "white"), (3, 4, AMBER, f"{per(CFG_OFF)}초 간격", "white")]),
         ("엔진 이동·조향 넷", "Off 개체를 빼는 쿼리", [(0, 3, GRAY, "매 프레임 돈다", "white"), (3, 4, None, "돌지 않는다", SUB)]),
-        ("Lab Off 이동", "ULabOffMoveProcessor", [(0, 3, None, "없음", SUB), (3, 4, GREEN, f"{per(CFG_OFF)}초 간격", "white")]),
+        ("자체 Off 이동", "ULabOffMoveProcessor", [(0, 3, None, "없음", SUB), (3, 4, GREEN, f"{per(CFG_OFF)}초 간격", "white")]),
     ]
     RH = 44
     for name, sub, segs in rows_:

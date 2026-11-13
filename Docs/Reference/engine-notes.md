@@ -394,3 +394,12 @@
 | 엔진 프로세서의 자리 | `UMassLODCollectorProcessor` LODCollector, `SyncWorldToMass` 뒤. `UMassSimulationLODProcessor`·`UMassVisualizationLODProcessor` LOD, LODCollector 뒤. `UMassSteerToMoveTargetProcessor` 그룹 없음, Tasks 뒤·Avoidance 앞. `UMassApplyForceProcessor` ApplyForces, Avoidance 뒤. `UMassApplyMovementProcessor` Movement, ApplyForces 뒤. `UMassSmoothOrientationProcessor` Movement. `UMassRepresentationProcessor` Representation, LOD 뒤이고 하위 `UMassVisualizationProcessor`는 그룹만 VisualizationProcessing으로 바꾼다(LOD 뒤는 남는다) | `MG/MassLOD/Private/MassLODCollectorProcessor.cpp:18-19`, `MG/MassLOD/Private/MassSimulationLOD.cpp:76-77`, `MG/MassRepresentation/Private/MassVisualizationLODProcessor.cpp:15-16`, `MN/Private/MassSteeringProcessors.cpp:62-63`, `MG/MassMovement/Private/MassMovementProcessors.cpp:25-26,76-77`, `MN/Private/MassSmoothOrientationProcessors.cpp:25`, `MG/MassRepresentation/Private/MassRepresentationProcessor.cpp:56-57,523` |
 | 엔진 ISKM 애니 프로세서 | `UMassConsumeInstancedSkinnedMeshAnimationProcessor`는 자동 등록(기본값)이고 Representation 그룹, VisualizationProcessing 뒤, 게임 스레드다. 쿼리가 `FMassRepresentationAnimationFragment`를 요구해 그 프래그먼트가 없는 엔티티는 돌지 않는다 | `MG/MassRepresentation/Private/MassRepresentationAnimationProcessor.cpp:17-33` |
 | 쿼리로 프로세서 빼기 | 의존성 해결기는 쿼리에 맞는 아키타입이 하나도 없는 프로세서를 그래프에서 뺀다(`ShouldAllowQueryBasedPruning`, 게임 실행에서 `QueryBasedPruning` 기본이 Prune). 그래서 등록된 프로세서와 그래프의 노드는 다를 수 있다 | `ME/Private/MassProcessorDependencySolver.cpp:968-1012`, `ME/Private/MassProcessor.cpp:385-388`, `ME/Public/MassProcessor.h:320-322` |
+
+## 28. URO 기준과 Animation Budget Allocator의 배분(2026-11-13, 글 검토)
+
+| 항목 | 확인한 것 | 위치 |
+| --- | --- | --- |
+| URO 기준의 단위 | `BaseVisibleDistanceFactorThesholds`(0.24, 0.12)와 견주는 `MaxDistanceFactor`는 화면 크기가 아니라 화면 반지름의 제곱(`ScreenRadiusSquared`)이다. LOD는 `Square(ScreenSize * 0.5)`와 견주므로 LOD 화면 크기로는 2 × √0.24 = 0.98, 2 × √0.12 = 0.69다 | `Engine/Source/Runtime/Engine/Private/SkeletalRender.cpp:173,203`, `Components/SkinnedMeshComponent.cpp:310-318` |
+| 예산을 넘을 때의 배분 | 매 프레임 갱신하는 수는 `WorkUnitBudget − WorkUnitsExcess × AlwaysTickFalloffAggression(0.8)`이다. 나머지는 간격이 늘고 상한은 `MaxTickRate`(10)다 | `AnimationBudgetAllocator.cpp:567`, `AnimationBudgetAllocatorParameters.h:34,49` |
+| 그려지지 않은 메시 | 최근 1초 동안 그려지지 않은 메시는 틱하지 않는다(`bTickEvenIfNotRendered`가 꺼져 있을 때) | `AnimationBudgetAllocator.cpp:174,256` |
+| 1만에서의 예산 사용 | 엔진 통계 `AnimationBudget/GameThread/BudgetedAnimation`의 실행별 중앙값이 4단계 1.96\~1.98ms, 7단계 2.01\~2.02ms, 8단계 1.86\~1.88ms다(호드 1만, 오브 시점). 예산 2ms에 닿아 있다 | 프레임 CSV `Saved/Profiling/CSV/Full2-L4-mass-N10000-P1-r<N>.csv` 등(git 밖) |

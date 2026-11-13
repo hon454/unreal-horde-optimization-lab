@@ -85,6 +85,8 @@
 | 액터 수 181 / 373 / 493 / 486 | 181.13 / 373.07 / 493.0 / 486.44 | `L4-mass` 5000\~30000 | `actors_mean` | 2만 493.0 / 492.92 / 493.03, 3만 486.4 / 486.44 / 486.44 |
 | 5천에서 4단계 프레임 시간이 더 짧다 | 6.171 대 6.418(−0.247) | `L4-mass`·`L3-vatcull` 5000 | `frame_p50_ms`, 둘 다 `bottleneck` = `gpu` | 범위 0.017 / 0.036보다 크다 |
 | 대형 액터 건너뜀 1.29%(1만) | 0.0129 | `L4-mass` 10000 | `large_skip_ratio` | 0.0132 / 0.0079 / 0.0129 |
+| 예산 대상 애니메이션 약 1.96ms(1만) | 1.957 | `L4-mass` 10000 P1 | 프레임 CSV(`Saved/Profiling/CSV/Full2-L4-mass-N10000-P1-r<N>.csv`, git 밖)의 `AnimationBudget/GameThread/BudgetedAnimation` 열, 실행별 중앙값 | 1.979 / 1.957 / 1.957 |
+| 넘는 몫의 0.8배, 2\~10프레임 간격 | | 엔진 소스 | `AnimationBudgetAllocator.cpp:567`(`AlwaysTickFalloffAggression`), `AnimationBudgetAllocatorParameters.h:34`(`MaxTickRate = 10`), `:49`(0.8) | |
 | 대형 액터 건너뜀 49.5%(2만) | 0.4949 | `L4-mass` 20000 | 같음 | 0.4018 / 0.5405 / 0.4949 |
 
 `large_skip_ratio`는 대형 액터만 센다(`LabActorSyncProcessor.cpp:355-361`, 분자 `Lab/LargeActorSkips`, 분모 `Lab/LargeActors`). 할당기가 외부 틱 제어로 둔 컴포넌트가 이번 프레임 애니메이션 틱을 건너뛰었는지(`ShouldTickAnimation()`)로 센다. 소형 액터의 건너뜀은 세지 않았다. 3만의 값(0.3008, 회차 0.0883 / 0.3008 / 0.4266)은 회차마다 크게 갈려 본문에 쓰지 않았다.

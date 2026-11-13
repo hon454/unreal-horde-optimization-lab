@@ -14,6 +14,13 @@
 ## 다음 할 일
 
 1. 사용자가 글 검토를 끝내면 코디네이터가 `Docs/post-review.md`를 지운다.
+2. 코디네이터가 레포 정리안을 사용자에게 보인다. 대상은 일회성 러너, `.claude/settings.json`, `Config/`의 자동 생성 설정이다.
+3. 사용자가 오브 `SnipeView` 경합(`Source/HordeOptLab/LabOrb.cpp:242`)의 처리 방법을 정한다. 코드를 고치면 측정 인프라 동결 규칙을 따른다([ADR-0002](Decisions/0002-freeze-measurement-infra.md)).
+4. 코디네이터가 그림과 사이트의 단계 묶음을 글과 맞춘다. 글은 4단계를 시간을 쓰는 단계로 적는다.
+
+코디네이터는 커밋한 뒤 main을 푸시한다([AGENTS.md](../AGENTS.md) "진행 방식").
+
+2026-11-13 검토에서 글과 README의 틀린 서술을 고쳤다. 고친 사실은 [engine-notes.md](Reference/engine-notes.md) 28절에 있다.
 
 사이트 주소는 <https://hon454.github.io/unreal-horde-optimization-lab/>다. 글이나 CSV가 바뀌면 `py -3 -I Scripts/build-site.py`를 다시 돌리고 `gh-pages` 브랜치에 다시 올린다.
 

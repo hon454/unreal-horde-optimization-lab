@@ -10,7 +10,7 @@
 <rect x="40" y="184" width="222.2" height="20" rx="3" fill="#0d9488"/>
 <text x="270.2" y="200" font-size="16"><tspan font-weight="700" fill="#0d9488">6.48</tspan><tspan fill="#4b5563"> 렌더 스레드</tspan></text>
 <rect x="40" y="210" width="343.6" height="20" rx="3" fill="#db2777"/>
-<text x="391.6" y="226" font-size="16"><tspan font-weight="700" fill="#db2777">10.0</tspan><tspan fill="#4b5563"> GPU</tspan></text>
+<text x="391.6" y="226" font-size="16"><tspan font-weight="700" fill="#db2777">10</tspan><tspan fill="#4b5563"> GPU</tspan></text>
 <text x="40" y="266" font-size="17" font-weight="700">3단계: VAT 인스턴스, 200m 밖 지우기</text>
 <rect x="40" y="278" width="271.3" height="20" rx="3" fill="#374151"/>
 <text x="319.3" y="294" font-size="16"><tspan font-weight="700" fill="#374151">7.91</tspan><tspan fill="#4b5563"> 프레임 시간</tspan></text>

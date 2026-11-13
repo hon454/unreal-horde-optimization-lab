@@ -63,9 +63,11 @@
 | --- | --- | --- | --- | --- |
 | 7단계 프레임 p95 9.34ms | 9.336 | `L7-q2crowd` | `frame_p95_ms` | 9.309 / 9.336 / 9.411 |
 | 16.7ms | 16.667 | 계산 | 1000 ÷ 60 | |
-| 16.7ms까지 7.33ms | 7.331 | 계산 | 16.667 − 9.336 | |
+| 16.7ms까지 7.36ms | 7.364 | 계산 | 16.7 − 9.336 | |
 | GPU가 게임 스레드보다 1.53ms 짧다 | 1.532 | 계산 | 7.628 − 6.096 | |
 | 대형 건너뜀 0.650% | 0.0065 | `L7-q2crowd` | `large_skip_ratio` | 위 표 |
+| 예산 대상 애니메이션 약 2.01ms(7단계, 1만) | 2.014 | `L7-q2crowd` 10000 P1 | 프레임 CSV(`Saved/Profiling/CSV/Full2-L7-q2crowd-N10000-P1-r<N>.csv`, git 밖)의 `AnimationBudget/GameThread/BudgetedAnimation` 열, 실행별 중앙값 | 2.021 / 2.005 / 2.014 |
+| 4단계 건너뜀 1.29% | 0.0129 | `L4-mass` 10000 | `large_skip_ratio` | [04번 글의 측정 기록](../04-hydration-anim-budget/measurements.md) |
 | 2만에서 30m 안 액터 비율 69.4% | 0.6937 | `L7-q2crowd` 20000 | `coverhyd_mean` | 0.6937 / 0.6939 / 0.6936 |
 
 `coverhyd_mean`은 프레임마다 `ViewActors / (ViewActors + ViewInstHyd)`의 평균이다. 화면 안, 카메라에서 그 단계의 전환 거리 안에 있는 개체 가운데 액터의 비율이다(`Scripts/summarize.py` 107\~108행 주석, `LabIskmProcessor.cpp:316-321`). 7단계는 30m, 8단계는 40m 안을 센다. 본문은 "화면 안 30m 개체의 69.4%"로 썼다.

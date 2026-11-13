@@ -75,6 +75,9 @@
 | 기본값 0.05초, 8회 | | 엔진 소스 | 아래 "엔진 소스" | |
 | 0.4초 | 0.4 | 엔진 설정 | `BaseGame.ini:199` | |
 | URO 0.24, 0.12, 네 프레임에 한 번 | | 엔진 소스 | 아래 "엔진 소스" | |
+| URO 기준은 화면 반지름의 제곱. LOD 화면 크기로 약 0.98, 0.69. 건너뛴 프레임은 보간 | | 엔진 소스, 계산 | `SkeletalRender.cpp:173,203`(`MaxDistanceFactor`에 `ScreenRadiusSquared`를 넣고, LOD는 `Square(ScreenSize * 0.5)`와 견준다), `SkinnedMeshComponent.cpp:310-318`. 2 × √0.24 = 0.98, 2 × √0.12 = 0.69 | |
+| Budget: 넘는 몫의 0.8배, 2\~10프레임 간격, 최근 1초 | | 엔진 소스 | `AnimationBudgetAllocator.cpp:174`(최근 1초), `:567`(`AlwaysTickFalloffAggression`), `AnimationBudgetAllocatorParameters.h:34`(`MaxTickRate = 10`), `:49`(0.8) | |
+| 개체당 시간 2.5배 | 2.5 | 계산 | 42.5 ÷ 17.0 | |
 | 예산 2ms, 거리 단계 25 / 50 / 100 / 250m, 중요도 1 / 0.75 / 0.5 / 0.25 / 0 | 2.0 | 코드 | `LabConfig.h:161-162`, `LabMinion.cpp:229-241` | |
 
 `L1-full` 10000 P1에는 버리는 첫 실행 `Full2-L1-full-N10000-P1-r0`(프레임 p50 438.835)이 `runs.csv`에 있다. 요약은 r1\~r3만 쓴다.

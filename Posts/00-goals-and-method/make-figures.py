@@ -3,6 +3,7 @@
 # Measured values come from Measurements/Full2/summary.csv and Docs/figures/full2/full-n-at-60fps.csv.
 # Distances and caps in the stage map are configuration values; their source is in measurements.md.
 import csv, math, os
+import re
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.normpath(os.path.join(HERE, "..", ".."))
@@ -46,6 +47,12 @@ def write(name, text):
         f.write(text)
 
 
+def _no_zero_decimals(f):
+    """27.0 -> 27. A value whose decimals are all zero is written as an integer."""
+    return lambda *a, **k: re.sub(r"[.]0+$", "", f(*a, **k))
+
+
+@_no_zero_decimals
 def fmt(x):
     """Three significant figures, as in the post body."""
     if abs(x) >= 100:

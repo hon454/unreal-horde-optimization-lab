@@ -3,6 +3,7 @@
 # Measured values come from Measurements/Full2/summary.csv and Docs/figures/full2/full-n-at-60fps.csv.
 # No trace values are drawn (trace values are in the post text and measurements.md only).
 import csv, os
+import re
 from decimal import Decimal, ROUND_HALF_UP
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -54,6 +55,12 @@ def write(name, text):
         f.write(text)
 
 
+def _no_zero_decimals(f):
+    """27.0 -> 27. A value whose decimals are all zero is written as an integer."""
+    return lambda *a, **k: re.sub(r"[.]0+$", "", f(*a, **k))
+
+
+@_no_zero_decimals
 def fmt(x):
     """Three significant figures, rounded half up from the decimal text (2.345 -> 2.35), as in the post body."""
     d = Decimal(repr(round(x, 6)))
