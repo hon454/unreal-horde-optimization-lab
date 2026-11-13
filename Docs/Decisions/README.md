@@ -23,6 +23,7 @@
 | [0013](0013-full-batch-runner-and-condition-table.md) | 총괄 묶음은 새 러너 `run-full.ps1`로 돌리고 조건 표 21개에는 단계별 기술과 성능 변화만 둔다 | 승인됨 |
 | [0014](0014-post-format.md) | 글 본문은 표와 Mermaid 없이 SVG 그림과 산문으로 쓰고, 수치의 표는 측정 기록에 둔다(루트 README 부분은 0015로 대체) | 승인됨 |
 | [0015](0015-readme-figures.md) | 루트 README도 비교가 요점인 수치는 SVG 그림으로 보이고, 표는 찾아 읽는 목록에만 쓴다 | 승인됨 |
+| [0016](0016-animation-budget-value.md) | Animation Budget Allocator의 예산을 2ms에서 4ms로 올린다(호드 1만에서 건너뜀 0, 2만에서 p95가 16.7ms 안) | 제안됨 |
 
 ## ADR 이전의 결정
 
