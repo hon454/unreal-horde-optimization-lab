@@ -96,7 +96,7 @@ SVG 넷은 [make-figures.py](make-figures.py)가 만든다(저장소 루트에�
 
 ## 트레이스 값
 
-본문 "결과" 끝 문단의 값이다. Insights 화면은 찍지 않고 명령줄 내보내기로 뽑았다.
+본문 "결과" 끝 문단의 값이다. 값은 명령줄 내보내기로 뽑았다. 같은 트레이스의 Insights 화면은 아래 "Insights 화면"에 있다.
 
 | 항목 | 값 |
 | --- | --- |
@@ -166,3 +166,17 @@ SVG 넷은 [make-figures.py](make-figures.py)가 만든다(저장소 루트에�
 - 이동 상한(0.1초)이 2단계에서 실제로 걸리지 않는다는 것은 프레임 p99와 50ms 넘는 프레임 수로 판단했다. 엔티티의 이동 거리를 직접 세지 않았다.
 - 화면: 1·2단계 WebP를 재생해 보지 않았다(브라우저를 띄우지 않는다). "걷는 동작 없이 한 자세로 움직인다", "피격·사망 때 멈춰 섰다가 사라진다"는 코드(`UMassUpdateISMProcessor`는 위치만 쓰고, 피격·사망은 이동 태그를 뗀다)에서 판단했다.
 - SVG 넷을 화면에서 보지 않았다. 글자와 값만 텍스트로 대조했다.
+
+## Insights 화면
+
+본문의 Insights 스크린샷이다. 2026-11-13에 찍었다. 값의 계산은 위 트레이스 표가 근거이고, 화면은 같은 트레이스에서 같은 타이머의 구간 합계를 보인다.
+
+| 항목 | 내용 |
+| --- | --- |
+| 파일 | `images/insights-mass-processors.jpg` |
+| 트레이스 | `Full2traceser-L2-mass-N10000-P1-r1`(직렬) |
+| 거른 말 | Timers 목록 `Mass`, CPU 타이머만 |
+| 표시한 행(Count, Incl) | PrePhysics 5,037 / 15.18s, `MassVisualizationComponent EndVisualChanges` 5,038 / 12.67s, `MassSmoothOrientationProcessor` 5,037 / 4.66s, `MassUpdateISMProcessor` 5,037 / 2.89s, `MassSteerToMoveTargetProcessor` 5,037 / 2.22s |
+| 화면에 없는 값 | 프레임 평균 9.92ms(`FEngineLoop::Tick`)는 거른 목록에 없다 |
+| 구간 | Timing 뷰의 시간 눈금자를 끌어 25초부터 75초까지(길이 표시 50s)를 골랐다. 손으로 고른 구간이라 내보내기의 창과 프레임이 한두 개 다를 수 있다. 화면의 합계는 표시 자릿수까지 내보낸 값과 같다 |
+| 가공 | 화면 캡처 둘(왼쪽 절반, 오른쪽 절반)을 이어 붙였다. 트레이스 파일 이름이 보이는 제목 줄은 잘라 냈다. 빨간 상자와 단계 이름을 그렸다. 두 트레이스를 견주는 그림은 위아래로 붙였다 |

@@ -13,10 +13,11 @@
 
 ## 다음 할 일
 
-1. 코디네이터가 트레이스 값을 쓰는 글(02\~07)에 Unreal Insights 스크린샷을 넣는다(2026-11-13 사용자 지시).
-2. 사용자가 여유 기준 13.3ms의 처리를 정한다. 코디네이터는 그 뒤에 08번과 09번 글을 고친다.
-3. 사용자가 GitHub Pages를 켜면 코디네이터가 README와 backlog.md에 사이트 주소를 넣는다.
-4. 사용자가 글 검토를 끝내면 코디네이터가 `Docs/post-review.md`를 지운다.
+1. 사용자가 여유 기준 13.3ms의 처리를 정한다. 코디네이터는 그 뒤에 08번과 09번 글을 고친다.
+2. 사용자가 GitHub Pages를 켜면 코디네이터가 README와 backlog.md에 사이트 주소를 넣는다.
+3. 사용자가 글 검토를 끝내면 코디네이터가 `Docs/post-review.md`를 지운다.
+
+글 02\~07에는 Unreal Insights 스크린샷이 있다([Worklog/Posts.md](Worklog/Posts.md) "Insights 스크린샷"). 트레이스 값을 새로 쓰는 글에는 같은 방법으로 스크린샷을 넣는다.
 
 글이나 CSV가 바뀌면 `py -3 -I Scripts/build-site.py`를 다시 돌리고 `gh-pages` 브랜치에 다시 올린다.
 

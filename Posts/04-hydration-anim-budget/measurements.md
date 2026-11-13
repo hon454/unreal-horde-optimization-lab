@@ -137,7 +137,7 @@
 
 ## 트레이스 값
 
-본문 "결과"의 트레이스 문단 값이다. Insights 화면은 찍지 않고 명령줄 내보내기로 뽑았다.
+본문 "결과"의 트레이스 문단 값이다. 값은 명령줄 내보내기로 뽑았다. 같은 트레이스의 Insights 화면은 아래 "Insights 화면"에 있다.
 
 | 항목 | 값 |
 | --- | --- |
@@ -226,3 +226,17 @@ SVG 여섯 개는 [make-figures.py](make-figures.py)가 만든다(저장소 루�
 - 전환 대책의 화면 효과를 최종 측정 빌드에서 다시 잰 값. 본문은 옛 개발 빌드 기록의 방향만 썼다.
 - 4단계 화면에서 액터의 AnimBP 동작과 전환이 실제로 보이는지. 움직이는 WebP를 열어 보지 않았다(브라우저 금지). 이미지 설명은 "액터다"까지만 적었다.
 - SVG를 화면에 그려 보지 않았다. 글자 겹침은 좌표와 글자 수로만 확인했다.
+
+## Insights 화면
+
+본문의 Insights 스크린샷이다. 2026-11-13에 찍었다. 값의 계산은 위 트레이스 표가 근거이고, 화면은 같은 트레이스에서 같은 타이머의 구간 합계를 보인다.
+
+| 항목 | 내용 |
+| --- | --- |
+| 파일 | `images/insights-mesh-tick.jpg` |
+| 트레이스 | `Full2traceser-L4-mass-N10000-P1-r1`(직렬) |
+| 거른 말 | Timers 목록 `MeshComponent`, CPU 타이머만 |
+| 표시한 행(Count, Incl) | `USkinnedMeshComponent_TickComponent` 1,458,813 / 5.98s, `USkeletalMeshComponent_CompleteParallelAnimationEvaluation` 1,451,827 / 4.7s. 프레임 수 5,672는 같은 구간을 `Mass`로 걸렀을 때 Processor 행의 Count다 |
+| 화면에 없는 값 | `ULabActorSyncProcessor`, `Sync_RenderingThread`, `Tick_Engine`과 3단계 트레이스의 값은 찍지 않았다 |
+| 구간 | Timing 뷰의 시간 눈금자를 끌어 25초부터 75초까지(길이 표시 50s)를 골랐다. 손으로 고른 구간이라 내보내기의 창과 프레임이 한두 개 다를 수 있다. 화면의 합계는 표시 자릿수까지 내보낸 값과 같다 |
+| 가공 | 화면 캡처 둘(왼쪽 절반, 오른쪽 절반)을 이어 붙였다. 트레이스 파일 이름이 보이는 제목 줄은 잘라 냈다. 빨간 상자와 단계 이름을 그렸다. 두 트레이스를 견주는 그림은 위아래로 붙였다 |

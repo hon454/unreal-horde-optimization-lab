@@ -179,7 +179,7 @@ engine-notes.md 3절 "ISKM 트랙 풀 누수"(773·864·1156)와 5절과 같은 
 
 ## 트레이스 값
 
-본문 "결과"의 트레이스 문단 값이다. Insights 화면은 찍지 않고 명령줄 내보내기로 뽑았다.
+본문 "결과"의 트레이스 문단 값이다. 값은 명령줄 내보내기로 뽑았다. 같은 트레이스의 Insights 화면은 아래 "Insights 화면"에 있다.
 
 | 항목 | 값 |
 | --- | --- |
@@ -255,3 +255,17 @@ SVG 다섯 개는 [make-figures.py](make-figures.py)가 만든다(저장소 루�
 ## 측정 기록의 변경
 
 - 2026-11-13(처음 씀).
+
+## Insights 화면
+
+본문의 Insights 스크린샷이다. 2026-11-13에 찍었다. 값의 계산은 위 트레이스 표가 근거이고, 화면은 같은 트레이스에서 같은 타이머의 구간 합계를 보인다.
+
+| 항목 | 내용 |
+| --- | --- |
+| 파일 | `images/insights-movement-processors.jpg`. 위가 4단계, 아래가 5단계다 |
+| 트레이스 | `Full2traceser-L4-mass-N10000-P1-r1`, `Full2traceser-L5-m4offpool-N10000-P1-r1`(직렬) |
+| 거른 말 | Timers 목록 `Mass`, CPU 타이머만 |
+| 표시한 행(Incl) | 4단계(Count 5,672): `MassSmoothOrientationProcessor` 5.31s, `MassSteerToMoveTargetProcessor` 2.65s, `MassApplyForceProcessor` 847.57ms, `MassApplyMovementProcessor` 739.88ms. 합 9.55s. 5단계(Count 6,284): 2.31s, 1.23s, 450.57ms, 217.21ms. 합 4.21s |
+| 화면에 없는 값 | `LabOffMoveProcessor` 0.006ms는 `Mass`로 거른 목록에 없다 |
+| 구간 | Timing 뷰의 시간 눈금자를 끌어 25초부터 75초까지(길이 표시 50s)를 골랐다. 손으로 고른 구간이라 내보내기의 창과 프레임이 한두 개 다를 수 있다. 화면의 합계는 표시 자릿수까지 내보낸 값과 같다 |
+| 가공 | 화면 캡처 둘(왼쪽 절반, 오른쪽 절반)을 이어 붙였다. 트레이스 파일 이름이 보이는 제목 줄은 잘라 냈다. 빨간 상자와 단계 이름을 그렸다. 두 트레이스를 견주는 그림은 위아래로 붙였다 |

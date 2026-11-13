@@ -107,6 +107,14 @@ ISMInfo[ISMInfoIndex].AddBatchedCustomData<FLabVatFrameData>(Data, Representatio
 
 위 그림은 각 단계를 따로 뜬 트레이스에서 읽은 값이다. 그림자 그리기는 예상 1.01ms, 실제 1.66ms다. 차이는 VAT가 더한 일과 인스턴스 수에 비례하지 않는 몫이다. 둘을 가르지는 않았다.
 
+아래 세 화면이 그 트레이스다. Unreal Insights에서 25초부터 75초까지를 고른 구간의 합계이고, 프레임 수로 나누면 위 그림의 값이 된다. 위가 2단계, 아래가 3단계다.
+
+![GPU 타이머. 빨간 상자의 구간 합계는 ShadowDepths 12.71초에서 10.63초, BasePass 7.07초에서 5.31초, RenderVelocities 7.22초에서 4.37초다. 프레임은 2단계 5,054개, 3단계 6,422개다](images/insights-gpu-passes.jpg)
+
+![Timers 목록을 DistanceField로 거른 화면. 렌더 스레드의 PrepareDistanceFieldScene은 구간 합계(Excl)가 13.38초에서 8.72초다](images/insights-distance-field.jpg)
+
+![Processor를 한 스레드에 돌린 트레이스의 게임 스레드. EndVisualChanges의 구간 합계는 12.67초(프레임 5,038개)에서 7.90초(6,412개)다](images/insights-gamethread-ism.jpg)
+
 60fps를 지키는 최대 개체 수는 2단계가 20,753이다. 프레임 시간의 느린 쪽 5% 경계가 16.7ms에 닿는 호드 총수를, 잰 개체 수 사이에서 보간한 값이다. 3단계는 잰 가장 큰 호드 총수 3만에서도 그 경계가 15.3ms라 한계에 닿지 않았다.
 
 ![호드 총수에 따른 프레임 시간의 느린 쪽 5% 경계. 2단계는 20,753에서 16.7ms를 넘고, 3단계는 3만에서도 15.3ms다](images/vat-maxn.svg)

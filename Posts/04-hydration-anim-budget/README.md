@@ -192,6 +192,10 @@ void ALabMinionMassActor::HideUntilPoseReady()
 
 트레이스에서 게임 스레드의 프레임 평균을 읽었다(Unreal Insights, 호드 총수 1만, Processor를 한 스레드에 돌린 실행이라 위의 측정값과 견주지 않는다). 4단계에서 스켈레탈 메시 틱(`USkinnedMeshComponent_TickComponent`)은 프레임당 1.05ms를 쓰고 257번 불린다. 애니메이션 평가를 마치는 일(`USkeletalMeshComponent_CompleteParallelAnimationEvaluation`)은 0.828ms, 액터 동기화 Processor(`ULabActorSyncProcessor`)는 0.510ms다. 3단계에서 게임 스레드가 렌더 스레드를 기다리던 `Sync_RenderingThread`는 2.75ms였고, 4단계에서는 0.005ms로 사라진다. 엔진 틱(`Tick_Engine`)은 3단계의 4.68ms에서 4단계의 8.37ms로 늘었다.
 
+![Unreal Insights에서 4단계 트레이스의 25초부터 75초까지를 고르고 Timers 목록을 MeshComponent로 거른 화면. 빨간 상자의 스켈레탈 메시 틱은 1,458,813번 불리고 구간 합계가 5.98초다. 애니메이션 평가를 마치는 일은 4.70초다. 프레임은 5,672개다](images/insights-mesh-tick.jpg)
+
+위 문단의 값은 이 합계를 고른 구간의 프레임 수로 나눈 값이다. 5.98초를 5,672로 나누면 1.05ms이고, 1,458,813번을 5,672로 나누면 257번이다.
+
 60fps를 지키는 최대 개체 수는 3단계가 잰 범위 3만 안에서 한계에 닿지 않았다. 4단계는 25,636이다. 프레임 시간의 느린 쪽 5% 경계가 16.7ms에 닿는 호드 총수를, 잰 개체 수 사이에서 보간한 값이다. 이 단계가 품질을 사는 대신 내는 값이다.
 
 ![호드 총수에 따른 프레임 시간의 느린 쪽 5% 경계. 4단계는 25,636에서 16.7ms를 넘는다. 아래에 4단계의 액터 수 181, 373, 493, 486](images/hyd-maxn.svg)

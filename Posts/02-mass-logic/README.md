@@ -164,6 +164,10 @@ Lab Fragment는 [`LabMassTypes.h`](../../Source/HordeOptLab/LabMassTypes.h)에 �
 
 Processor를 한 스레드에 차례로 돌린 트레이스(Unreal Insights, 호드 총수 1만)에서 게임 스레드의 프레임 평균을 읽었다. 이 트레이스는 병렬 처리를 끈 실행이라 위의 6.30ms와 견주지 않는다. 게임 스레드의 한 프레임은 평균 9.92ms이고, 그 안에서 Mass 처리 단계(PrePhysics)가 3.01ms, ISM 위치를 컴포넌트에 올리는 `EndVisualChanges`가 2.52ms다. Processor 가운데 가장 긴 것은 `UMassSmoothOrientationProcessor`로 0.925ms이고, 그다음이 `UMassSteerToMoveTargetProcessor`의 0.440ms다. ISM 위치를 쌓는 `UMassUpdateISMProcessor`는 0.573ms다. 캐릭터 이동 컴포넌트의 틱 타이머(`UCharacterMovementComponent_TickComponent`)는 이 트레이스에 없다.
 
+![Unreal Insights에서 2단계 트레이스의 25초부터 75초까지를 고르고 Timers 목록을 Mass로 거른 화면. 빨간 상자의 구간 합계는 위부터 PrePhysics 15.18초, EndVisualChanges 12.67초, SmoothOrientation 4.66초, UpdateISM 2.89초, SteerToMoveTarget 2.22초다. 프레임은 5,037개다](images/insights-mass-processors.jpg)
+
+위 문단의 값은 이 합계를 고른 구간의 프레임 수로 나눈 값이다. 15.18초를 5,037로 나누면 3.01ms다.
+
 화면에서는 품질을 잃었다. 개체는 걷는 동작 없이 한 자세로 움직인다. 피격과 사망 때는 그 자리에 멈춰 섰다가 사라진다. 이 단계는 이 품질을 내주고 시간을 벌었다.
 
 ## 한 문장으로

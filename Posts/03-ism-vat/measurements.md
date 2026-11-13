@@ -205,3 +205,17 @@ SVG 다섯 개는 [make-figures.py](make-figures.py)가 만든다(저장소 루�
 - 3단계 화면에서 피격·죽기 동작이 보이는지. 움직이는 WebP를 열어 보지 않았다(브라우저 금지). 본문 이미지 설명은 "걷는다"까지만 적었다.
 - 200m 경계에서 개체가 사라지는 모습이 화면에서 티 나는지. 본문은 화면 높이 0.4%(계산)까지만 적었다.
 - SVG를 화면에 그려 보지 않았다. 글자 겹침은 좌표와 글자 수로만 확인했다.
+
+## Insights 화면
+
+본문의 Insights 스크린샷이다. 2026-11-13에 찍었다. 값의 계산은 위 트레이스 표가 근거이고, 화면은 같은 트레이스에서 같은 타이머의 구간 합계를 보인다.
+
+| 항목 | 내용 |
+| --- | --- |
+| 파일 | `images/insights-gpu-passes.jpg`, `images/insights-distance-field.jpg`, `images/insights-gamethread-ism.jpg`. 각각 위가 2단계, 아래가 3단계다 |
+| 트레이스 | GPU와 디스턴스 필드: `Full2trace-L2-mass-N10000-P1-r1`, `Full2trace-L3-vatcull-N10000-P1-r1`(병렬). 게임 스레드: `Full2traceser-L2-mass-N10000-P1-r1`, `Full2traceser-L3-vatcull-N10000-P1-r1`(직렬) |
+| 거른 말 | GPU: 거르지 않고 GPU 타이머만. 디스턴스 필드: `DistanceField`. 게임 스레드: `Mass`, CPU 타이머만 |
+| 표시한 행 | GPU(Excl): `ShadowDepths` 12.71s / 10.63s, `BasePass` 7.07s / 5.31s, `RenderVelocities(%s)` 7.22s / 4.37s, Count 5,054 / 6,422. 렌더 스레드(Excl): `FSceneRenderer::PrepareDistanceFieldScene` 13.38s / 8.72s. 게임 스레드(Incl): `MassVisualizationComponent EndVisualChanges` 12.67s / 7.9s, Count 5,038 / 6,412 |
+| 화면에 없는 값 | VAT 프로세서 0.458ms(`LabVatISMProcessor`)는 `Mass`로 거른 목록에 없다. 엔진 ISM 프로세서(`MassUpdateISMProcessor` 2.89s)는 2단계 화면에 보이지만 표시하지 않았다 |
+| 구간 | Timing 뷰의 시간 눈금자를 끌어 25초부터 75초까지(길이 표시 50s)를 골랐다. 손으로 고른 구간이라 내보내기의 창과 프레임이 한두 개 다를 수 있다. 화면의 합계는 표시 자릿수까지 내보낸 값과 같다 |
+| 가공 | 화면 캡처 둘(왼쪽 절반, 오른쪽 절반)을 이어 붙였다. 트레이스 파일 이름이 보이는 제목 줄은 잘라 냈다. 빨간 상자와 단계 이름을 그렸다. 두 트레이스를 견주는 그림은 위아래로 붙였다 |

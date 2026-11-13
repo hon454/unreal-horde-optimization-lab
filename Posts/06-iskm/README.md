@@ -195,6 +195,10 @@ if (bRangeChanged || Track.AppliedState != int8(Anim.State) || Track.AppliedStar
 
 트레이스에서 렌더 스레드의 프레임 평균을 읽었다(Unreal Insights, 호드 총수 1만, 오브 시점 카메라, 한 회). 디스턴스 필드 장면을 갱신하는 `FSceneRenderer::PrepareDistanceFieldScene`은 5단계에서 프레임당 1.41ms였고, 6단계에서는 0.0368ms다. GPU에서 디스턴스 필드를 갱신하는 `GlobalDistanceFieldUpdate`도 프레임당 0.302ms에서 0.003ms로 줄었다.
 
+![Unreal Insights에서 두 트레이스의 25초부터 75초까지를 고르고 Timers 목록을 DistanceField로 거른 화면. 위가 5단계, 아래가 6단계다. 아래 빨간 상자의 PrepareDistanceFieldScene은 구간 합계(Excl)가 8.92초에서 0.240초로 줄었다. 위 빨간 상자의 GlobalDistanceFieldUpdate는 1.91초에서 0.0168초로 줄었다. 프레임은 5단계 6,312개, 6단계 6,515개다](images/insights-distance-field.jpg)
+
+위 문단의 값은 이 합계를 고른 구간의 프레임 수로 나눈 값이다. 8.92초를 6,312로 나누면 1.41ms다.
+
 남은 비용은 개체마다 게임 스레드가 하는 일이다. 엔진은 ISKM 인스턴스마다 트랙 맵을 찾고 재생 상태를 읽어 적는다. VAT가 쓰는 ISM 경로에는 없는 일이고, 끌 설정도 없다.
 
 ### 최종 구성에서 하나씩 빼면

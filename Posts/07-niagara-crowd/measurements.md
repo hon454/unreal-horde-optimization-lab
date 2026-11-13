@@ -161,69 +161,17 @@
 - "경계에서 빈 띠나 겹친 띠가 생기지 않는다": Development 정지 카메라 연속 캡처의 행 밝기와 확대 화면([Worklog/Q2.md](../../Docs/Worklog/Q2.md) "Q2b" 에셋 단위 진행의 화면 확인 (b), `Measurements/Q2/shots/q2b-boundary-zoom.jpg`, `q2b-static-entity.jpg`). 같은 방향으로 걷는 모습은 같은 절 (d)(`q2b-dir-zoom.jpg`). 새 패키지의 입자가 지평선까지 깨짐 없이 그려지는 것은 [particle-check-q4final-t20.jpg](../../Measurements/Full2/shots/particle-check-q4final-t20.jpg)(최종 구성, 묶음 밖 확인 실행)로 봤다.
 - "저격당한 개체는 배열에서 빠져 사라진다": 모으기 프로세서가 상태 Walk만 담는다(`LabCrowdFxProcessor.cpp:95-99`). 피격·사망 개체는 멈춘다(Q2.md "Q2b" "확인한 것"의 피격·사망 항).
 
-## 코디네이터가 찍을 Insights 화면
+## Insights 화면
 
-본문 "결과"의 주석 처리한 이미지 자리(`images/insights-gpu-passes.jpg`)에 넣는다.
+본문의 Insights 스크린샷이다. 2026-11-13에 찍었다. 값의 계산은 위 트레이스 표가 근거이고, 화면은 같은 트레이스에서 같은 타이머의 구간 합계를 보인다.
 
 | 항목 | 내용 |
 | --- | --- |
-| 트레이스 | `Saved/Traces/Full2trace-L7-q2crowd-N10000-P1-r1.utrace`(병렬). 비교로 `Full2trace-L6-m5bounds-N10000-P1-r1.utrace` |
-| 구간 | 25\~75초 창 안에서 프레임 하나. 창 평균은 위 "트레이스 값" 표에 있다 |
-| 타이머 | GPU 트랙(`GPU0-Graphics0`)의 `BasePass`, `RenderVelocities`, `ShadowDepths` |
-| 읽을 값 | 고른 프레임의 세 패스 ms. 창 평균(6단계 0.248 / 0.185 / 1.112, 7단계 0.491 / 0.428 / 1.365ms)과 가까운 프레임을 고른다 |
-| 스크린샷 | 두 단계의 같은 GPU 구간을 위아래로. 읽을 곳 하나(`BasePass`)에 빨간 상자. jpg로 `images/`에 둔다 |
-| 고칠 곳 | 본문 주석을 풀고 캡션의 OO를 읽은 값으로 채운다. 이 표 아래에 트레이스 파일, 프레임 번호, 값을 적는다 |
-
-## 그림
-
-| 파일 | 내용 | 값의 출처 |
-| --- | --- | --- |
-| `images/ncf-summary.svg` | 요약 그림. 6·7단계의 프레임·게임 스레드·렌더 스레드·GPU 막대(1만), 16.7ms 선, 아래 문장에 GPU·프레임 변화 | "1만에서 6단계와 7단계" |
-| `images/ncf-problem.svg` | 문제 그림. 6단계의 액터 / ISKM / 그리지 않음 쌓은 막대, 게임 스레드와 GPU 막대와 여유 | "6단계가 그리는 것과 GPU의 여유" |
-| `images/ncf-principle.svg` | 원리 도식. 6·7단계의 거리 구간 네 칸(0\~30\~200\~500\~1,000m), 한 프레임의 세 칸(게임 스레드 → 사용자 변수 → GPU) | "7단계의 구현", "설정값과 계산값" |
-| `images/ncf-delta.svg` | 결과 그림. 호드 총수별 7단계 − 6단계의 프레임·게임 스레드·GPU 막대, 병목, 최대 개체 수 | "호드 총수별 6단계와 7단계" |
-| `images/ncf-ablation.svg` | 빼 보기 그림. 최종 구성의 200m 밖을 그리지 않음 / 입자 / ISKM으로 그린 프레임·게임 스레드·GPU | "최종 구성에서 하나씩 바꾼 측정" |
-| `../../Docs/figures/steps/step6-L6-m5bounds.webp`, `step7-L7-q2crowd.webp` | 6·7단계 화면(HUD 켬) | "화면 근거" |
-| `../../Measurements/CrowdFx2/shots/lod-compare-horizon.jpg` | 지평선 띠의 메시 LOD0 / LOD3 / LOD4 | "입자 메시와 첫 구현의 경위" |
-
-SVG 다섯 개는 [make-figures.py](make-figures.py)가 만든다(저장소 루트에서 `py -3 -I Posts/07-niagara-crowd/make-figures.py`). 측정값은 `summary.csv`와 `full-n-at-60fps.csv`에서 읽는다. 트레이스 값은 그리지 않는다. 폭 800 기준으로 글자는 16px 이상이고, 자기 흰 배경을 가진다. 흔들림 판정(점선 막대)은 변화가 두 조건의 세 회차 범위 가운데 큰 쪽보다 작은 칸이다([measurement.md](../../Docs/Guides/measurement.md) "차이 판정").
-
-## 엔진 소스
-
-로컬 소스 빌드 `G:/Epic Games/UE_5.8.4`에서 확인했다. 경로는 `Engine/` 아래다. 줄임말: **MG** = `Plugins/Runtime/MassGameplay/Source`, **NI** = `Plugins/FX/Niagara/Source/Niagara`.
-
-| 사실 | 위치 |
-| --- | --- |
-| 한 단계 위로 오를 때만 히스테리시스를 두고, 그 거리는 그 LOD 거리와 다음 LOD 거리 사이의 `1 − 비율` 지점이다 | `MG/MassLOD/Public/MassLODCalculator.h:864-886`(`TMassLODCalculator::ComputeLODFromSettings`), 비율 기본 0.1(`:271`) |
-| 표현 LOD 히스테리시스 기본 10% | `MG/MassRepresentation/Public/MassRepresentationFragments.h:309` |
-| 그리지 않는 청크의 표현 갱신은 0.5초 간격 | `MassRepresentationFragments.h:181` `NotVisibleUpdateRate = 0.5f`(engine-notes 21절). 본문에는 쓰지 않았다(아래 "확인하지 않은 것") |
-| 배열 사용자 변수를 C++에서 넣는 함수 | `NI/Classes/NiagaraDataInterfaceArrayFunctionLibrary.h:172`, `NI/Private/NiagaraDataInterfaceArrayFunctionLibrary.cpp:33-49`(engine-notes 21절) |
-| 메시 렌더러가 인스턴스 커스텀 데이터 0번에 입자 번호를 쓴다 | `NI/Private/NiagaraRendererMeshes.cpp:1130,1207,1225`(engine-notes 17절) |
-| 프리미티브 컴포넌트의 그림자 기본값 꺼짐 | `Source/Runtime/Engine/Private/Components/PrimitiveComponent.cpp:341` |
-| 메시 배치 그림자는 컴포넌트·렌더러·섹션 값의 곱 | `NI/Private/NiagaraRendererMeshes.cpp:1290-1292`(engine-notes 23절) |
-
-입자 그림자의 기본값은 엔진의 버그가 아니라 `UPrimitiveComponent`의 기본값이다. 공개 이슈는 찾지 않았다. 이 레포의 처리는 `ALabGameMode::SetupCrowdFx`의 `SetCastShadow`(`Source/HordeOptLab/LabGameMode.cpp:308-312`)다.
-
-### 본문에 넣은 발췌
-
-엔진 코드는 9줄이다(`// ...` 포함). 남긴 줄은 소스를 그대로 옮기고 들여쓰기만 줄였다.
-
-| 블록 | 줄 수 | 원본 줄 |
-| --- | --- | --- |
-| 히스테리시스(엔진) | 9 | `MassLODCalculator.h:873-874`, `// ...`(`:875`), `:876-882` |
-| 모으기 프로세서 | 15 | `LabCrowdFxProcessor.cpp:89-96`, `:97`(줄 끝 주석을 뺐다), `:98-99`, `// ...`(`:100-106`), `:107`, `// ...`(`:108-120`), `:121` |
-| 위치 식(HLSL) | 1 | `Scripts/create-crowd-fx.md:71` |
-| 그림자 | 4 | `LabGameMode.cpp:309-312` |
-
-뺀 주석: `LabCrowdFxProcessor.cpp:97` "멈춘 개체(위 헤더 주석). 사망 상태는 태그보다 먼저 표현 상태로 바뀌므로 태그가 아니라 상태로 거른다". 발췌 둘레 주석의 작업 이름: `LabGameMode.cpp:305` "Q2c 입자 그림자", `LabConfig.h:109` "Q2b 엔티티 구동 입자".
-
-## 확인하지 않은 것
-
-- 게임 스레드 +0.284ms 가운데 모으기 프로세서(트레이스 0.199ms) 밖의 몫. Niagara 컴포넌트의 틱과 배열 복사로 짐작하지만 타이머로 가르지 않았다.
-- 7단계에서 `LumenScreenProbeGather`가 0.420ms 길게 잡힌 원인. 옛 Development 조사(Q6.md "입자 GPU 비용 조사")에서도 입자 때문에 늘었고 원인은 보지 않았다.
-- `A8-farcull`의 게임 스레드 +4.24ms가 어느 프로세서에서 나는지. 빼 보기 행의 트레이스가 없다. 엔진의 ISKM 트랙 처리, `ULabIskmProcessor`, Off에서 벗어난 엔티티의 표현 LOD 갱신이 후보다.
-- 그리지 않는 엔티티의 표현은 0.5초 간격으로만 다시 보므로, 개체가 188m보다 조금 안쪽까지 입자로 남는다(옛 Development 로그의 최솟값 184m대, Q2.md "Q2b"). 최종 측정 빌드에서 다시 재지 않아 본문에 쓰지 않았다.
-- 엔티티 구동 입자 수의 최종 측정 값. `Lab/CrowdRecs`는 CSV에 있으나 `summarize.py`가 요약하지 않는다. 본문은 그리지 않는 개체 수(계산값)만 썼다.
-- 경계에서 한 개체씩 따라간 입자 → ISKM의 자리·걷기 위상 연속성. 정지 화면과 행 밝기로만 봤다(Q2.md "Q2b" 확인하지 못한 것 (3)).
-- 움직이는 WebP 두 개는 첫 프레임만 Read로 열어 봤다(브라우저 금지). 재생 중의 경계 모습은 보지 않았다.
-- SVG를 화면에 그려 보지 않았다. 글자 겹침은 좌표와 글자 수로만 확인했다.
+| 파일 | `images/insights-gpu-passes.jpg`. 위가 6단계, 아래가 7단계다 |
+| 트레이스 | `Full2trace-L6-m5bounds-N10000-P1-r1`, `Full2trace-L7-q2crowd-N10000-P1-r1`(병렬) |
+| 거른 말 | 거르지 않고 GPU 타이머만 |
+| 표시한 행(Incl) | `LumenScreenProbeGather` 14.01s / 16.27s, `ShadowDepths` 7.25s / 8.64s, `BasePass` 1.62s / 3.11s, `RenderVelocities(%s)` 1.21s / 2.71s. Count 6,515 / 6,330 |
+| 화면에 없는 값 | 게임 스레드의 모으기 프로세서 0.199ms는 찍지 않았다 |
+| 바뀐 것 | 처음 계획은 프레임 하나의 GPU 트랙이었다. 본문 값이 구간 평균이라 구간 합계 화면으로 바꿨다 |
+| 구간 | Timing 뷰의 시간 눈금자를 끌어 25초부터 75초까지(길이 표시 50s)를 골랐다. 손으로 고른 구간이라 내보내기의 창과 프레임이 한두 개 다를 수 있다. 화면의 합계는 표시 자릿수까지 내보낸 값과 같다 |
+| 가공 | 화면 캡처 둘(왼쪽 절반, 오른쪽 절반)을 이어 붙였다. 트레이스 파일 이름이 보이는 제목 줄은 잘라 냈다. 빨간 상자와 단계 이름을 그렸다. 두 트레이스를 견주는 그림은 위아래로 붙였다 |

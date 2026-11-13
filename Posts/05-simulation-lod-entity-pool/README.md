@@ -113,6 +113,10 @@ Query.SetChunkFilter(&FMassSimulationVariableTickChunkFragment::ShouldTickChunkT
 
 트레이스에서 게임 스레드의 프레임 평균을 읽었다(Unreal Insights, 호드 총수 1만, Processor를 한 스레드에 돌린 실행이라 위의 측정값과 견주지 않는다). 엔진 이동·조향 Processor 넷(`UMassApplyForceProcessor`, `UMassApplyMovementProcessor`, `UMassSteerToMoveTargetProcessor`, `UMassSmoothOrientationProcessor`)의 합은 4단계에서 프레임당 1.68ms였고, 5단계에서 0.669ms다. 5단계의 합은 4단계의 39.7%다. 처리하는 개체가 39%라는 예상과 거의 같다. 200m 밖을 움직이는 `LabOffMoveProcessor`는 0.006ms다.
 
+![Unreal Insights에서 두 트레이스의 25초부터 75초까지를 고르고 Timers 목록을 Mass로 거른 화면. 위가 4단계, 아래가 5단계다. 빨간 상자가 엔진 이동·조향 Processor 넷이다. 구간 합계의 합은 4단계 9.55초(프레임 5,672개), 5단계 4.21초(6,284개)다](images/insights-movement-processors.jpg)
+
+위 문단의 값은 이 합계를 고른 구간의 프레임 수로 나눈 값이다. 9.55초를 5,672로 나누면 1.68ms이고, 4.21초를 6,284로 나누면 0.669ms다.
+
 설정한 간격과 실제로 도는 주기는 달랐다. 값은 호드 총수 1만의 것이다. Medium 간격은 0.5초로 두었지만, 실제로는 0.110초마다 돌았다. Off 간격은 1초로 두었지만, 실제로는 0.321초마다 돌았다. 엔진은 엔티티가 드나든 청크를 간격과 상관없이 다음 프레임에 돌린다.
 
 `Engine/Plugins/Runtime/MassGameplay/Source/MassLOD/Public/MassLODTickRateController.h`, `TMassLODTickRateController`
