@@ -49,7 +49,7 @@ const FLabConfig& FLabConfig::Get()
 			else if (Variant == TEXT("uro")) { C.Variant = ELabVariant::Uro; }
 			else if (Variant == TEXT("pawn")) { C.Variant = ELabVariant::Pawn; }
 			else if (Variant == TEXT("staticpawn")) { C.Variant = ELabVariant::StaticPawn; }
-			else if (Variant == TEXT("m0full")) { C.Variant = ELabVariant::Full; } // M3b 묶음 1 라벨
+			else if (Variant == TEXT("full") || Variant == TEXT("m0full")) { C.Variant = ELabVariant::Full; } // full: M0 기준(Scripts/full-conditions.json L1, run-dev.ps1 기본값), m0full: M3b 묶음 1 라벨
 			else if (Variant == TEXT("mass") || Variant == TEXT("noanim") || Variant == TEXT("m3base") || Variant == TEXT("m3colbase") || Variant == TEXT("m3hydbase")
 				|| Variant == TEXT("m1mass") || Variant == TEXT("m2mass") || Variant == TEXT("m3mass") || Variant == TEXT("m4mass")) { C.Variant = ELabVariant::Mass; } // noanim: M2 묶음에서 잰 M1, m3base·m3colbase·m3hydbase: E3 하위 실험 묶음(5, 6, 7)에서 다시 잰 M3 대표, m1mass·m2mass·m3mass: M3b 묶음 1, m4mass: M4 대표. 이름만 다르다
 			else if (Variant == TEXT("m4off")) { C.Variant = ELabVariant::M4Off; }
