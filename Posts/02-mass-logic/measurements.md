@@ -291,21 +291,25 @@
 | 구간 | Timing 뷰의 시간 눈금자를 끌어 25초부터 75초까지(길이 표시 50s)를 골랐다. 손으로 고른 구간이라 내보내기의 창과 프레임이 한두 개 다를 수 있다. 화면의 합계는 표시 자릿수까지 내보낸 값과 같다. PrePhysics의 Count만 화면이 하나 많다(5,009 대 내보내기 5,008) |
 | 가공 | 창을 최대화하고 Timing 뷰를 한 칸 축소한 뒤, 창 캡처(PrintWindow)로 화면 전체를 한 번에 찍어 2304폭으로 줄였다. 트레이스 파일 이름이 보이는 제목 줄은 잘라 냈다. 빨간 상자와 단계 이름을 그렸다. 두 트레이스를 견주는 그림은 위아래로 붙였다 |
 
-### 매니저 방식 트레이스의 화면(아직 없다)
+### 매니저 방식 트레이스의 화면
 
-본문 "차이의 출처" 절에 주석으로 자리를 두었다. 코디네이터가 찍어 넣으면 "화면 값" 칸을 채우고 주석을 푼다. 기대 값은 `timers.csv`의 프레임당 ms × 프레임 수다.
+본문 "차이의 출처" 절의 스크린샷이다. 코디네이터가 2026-11-14에 찍었다. 값의 계산은 위 "참고 트레이스의 값"이 근거이고, 화면은 같은 트레이스에서 같은 타이머의 구간 합계를 보인다.
 
 | 항목 | 내용 |
 | --- | --- |
-| 파일 | `images/insights-manager-gamethread.jpg`(두 트레이스를 위아래로 붙인 한 장) |
-| 위 | `MgrT1-L2-mass-N20000-P1-r1`, 20\~70초, Timers 목록 `Mass`, CPU 타이머만 |
-| 위의 기대 값(Incl) | PrePhysics 18.98s, `EndVisualChanges` 18.46s, `MassVisualizationLODProcessor` 8.71s, `MassUpdateISMProcessor` 5.63s, Count 3,394 |
-| 아래 | `MgrT1-L2-manager-N20000-P1-r1`, 같은 구간, Timers 목록 `LabCrowdManager` |
-| 아래의 기대 값(Incl) | `LabCrowdManager Tick` 29.2s, Count 3,477 |
-| 화면 값 | 아직 없다 |
+| 파일 | `images/insights-manager-gamethread.jpg`(두 트레이스를 위아래로 붙인 한 장, 2304폭) |
+| 위 | `MgrT1-L2-mass-N20000-P1-r1`, Timers 목록 `Mass`, CPU 타이머만. 고른 구간은 49.64초(19.94\~69.58초)다 |
+| 위의 표시한 행(Count, Incl) | PrePhysics 3,370 / 18.84s, `MassVisualizationComponent EndVisualChanges` 3,370 / 18.31s, `MassVisualizationLODProcessor` 3,370 / 8.65s(Excl 9.73ms), `MassUpdateISMProcessor` 3,369 / 5.59s |
+| 아래 | `MgrT1-L2-manager-N20000-P1-r1`, Timers 목록 `LabCrowdManager`. 고른 구간은 50.15초다 |
+| 아래의 표시한 행(Count, Incl) | `LabCrowdManager Tick` 3,487 / 29.28s(Excl 29.28s) |
+| 구간 | 시간 눈금자를 손으로 끌어 골랐다. 내보내기의 창(20\~70초)과 프레임 수가 다르다(2단계 3,370 대 3,394, 매니저 방식 3,487 대 3,477) |
+| 프레임당 값 | 화면 값으로 계산해도 내보내기 값과 같다. 18.84 ÷ 3,370 = 5.59ms, 18.31 ÷ 3,370 = 5.43ms, 8.65 ÷ 3,370 = 2.57ms, 29.28 ÷ 3,487 = 8.40ms |
+| 화면에 없는 값 | `Tick_Engine`, 한 스레드 2단계의 값은 화면에 없다. 내보낸 표가 근거다 |
+| 가공 | 다른 글의 화면과 같다. 제목 줄을 잘라 내고 빨간 상자와 이름("2단계", "매니저")을 그렸다 |
 
 ## 측정 기록의 변경
 
+- 2026-11-14: 매니저 방식 트레이스의 Insights 화면을 넣었다(코디네이터). 본문 캡션은 화면 값이다.
 - 2026-11-14: 참고 측정(매니저 방식)을 더했다. 사용자가 Mass가 번 몫과 액터의 틱을 없애서 번 몫을 가르는 측정을 정했기 때문이다. 최종 측정의 값은 그대로다. 본문 "한 문장으로"의 첫 문단과 셋째 글머리표를 참고 측정에 맞춰 고쳤다. 그림 넷(`mass-gain`, `manager-diagram`, `manager-times`, `manager-gamethread`)을 더했다.
 
 - 2026-11-13: 트레이스 값을 Full3 트레이스(df41c13)에서 다시 뽑았다. 직렬 `Full3traceser-L2-mass-N10000-P1-r1`에서 프레임 평균 9.92 → 9.98ms, PrePhysics 3.01 → 3.11, `EndVisualChanges` 2.52 → 2.48, SmoothOrientation 0.925 → 0.950, SteerToMoveTarget 0.440 → 0.443, UpdateISM 0.573 → 0.576ms다. 스크린샷 캡션의 구간 합계도 새 내보내기 값으로 바꿨다.

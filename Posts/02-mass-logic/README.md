@@ -198,11 +198,9 @@ Processor를 한 스레드에 차례로 돌린 트레이스(Unreal Insights, 호
 
 매니저 방식에서는 그 자리에 매니저의 틱 8.40ms 하나가 있다. 둘의 차이는 2.64ms다. 게임 스레드의 엔진 틱 전체가 준 2.90ms의 90.9%다.
 
-<!-- Insights 스크린샷 자리: images/insights-manager-gamethread.jpg. 호드 총수 2만의 2단계 트레이스(위)와 매니저 방식 트레이스(아래)에서 20초부터 70초까지를 고른 Timers 목록. 찍으면 이 주석을 풀고 아래 캡션의 값을 화면 값과 대조한다.
-![Unreal Insights에서 호드 총수 2만의 두 트레이스를 20초부터 70초까지 고른 화면. 위는 2단계이고 빨간 상자의 구간 합계는 PrePhysics 18.98초, EndVisualChanges 18.46초, 표현 LOD Processor 8.71초, UpdateISM 5.63초다. 프레임은 3,394개다. 아래는 매니저 방식이고 매니저의 틱이 29.2초, 프레임은 3,477개다](images/insights-manager-gamethread.jpg)
+![Unreal Insights에서 호드 총수 2만의 두 트레이스를 20초부터 70초까지 고른 화면. 위는 2단계이고 빨간 상자의 구간 합계는 PrePhysics 18.84초, EndVisualChanges 18.31초, 표현 LOD Processor 8.65초, UpdateISM 5.59초다. 프레임은 3,370개다. 아래는 매니저 방식이고 매니저의 틱이 29.28초, 프레임은 3,487개다](images/insights-manager-gamethread.jpg)
 
-위 문단의 값은 이 합계를 고른 구간의 프레임 수로 나눈 값이다. 29.2초를 3,477로 나누면 8.40ms다.
--->
+위 문단의 값은 이 합계를 고른 구간의 프레임 수로 나눈 값이다. 29.28초를 3,487로 나누면 8.40ms다.
 
 Processor를 한 스레드에 돌리면 로직 Processor 3.58ms가 게임 스레드로 온다. 그래도 처리 단계의 합은 11.2ms로 거의 같다. 표현 쪽 Processor 넷이 5.45ms에서 2.13ms로 줄기 때문이다. 그 가운데 표현 LOD를 계산하는 Processor 하나가 2.57ms에서 0.226ms가 된다. 병렬 실행의 2.57ms에 워커 스레드를 기다린 시간이 들었는지는 확인하지 못했다.
 
