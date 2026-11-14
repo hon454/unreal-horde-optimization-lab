@@ -1,0 +1,21 @@
+﻿{
+    "batch":  "Spike2",
+    "build":  "de6f21858f007908898d7d606280a4cddab017a3 (dirty)",
+    "start":  "2026-11-15 00:24:37",
+    "end":  "2026-11-15 00:58:07",
+    "n":  10000,
+    "preset":  "P3",
+    "radius_m":  "57.3",
+    "height_m":  "6",
+    "speeds":  [
+                   "2",
+                   "2.5",
+                   "3"
+               ],
+    "duration_sec":  180,
+    "runs":  3,
+    "planned":  10,
+    "ok":  9,
+    "failed":  1,
+    "gave_up":  0
+}
