@@ -6,6 +6,7 @@
 
 - 마일스톤 M0\~M5, M3b와 품질 계획 Q1\~Q6은 끝났다. 총괄 묶음은 `Full3`이다.
 - 글 00\~09의 초안, Releases, 사이트는 끝났다. 경위는 [Worklog/Posts.md](Worklog/Posts.md)에 있다.
+- 사용자가 2026-11-14에 글 00\~09의 검토를 끝냈다.
 - Q7(예산 재측정, `Full3`)과 Q8(매니저 변형, 글 02 보강)은 끝났다. 경위는 [Worklog/Q7.md](Worklog/Q7.md)와 [Worklog/Q8.md](Worklog/Q8.md)에 있다.
 - 방향은 목표 사양(호드 총수 1만, 60fps) 안에서 거리별 품질을 확보하는 것이다([ADR-0009](Decisions/0009-flat-scenario-quality-by-distance.md)).
 - 계획은 [plan.md](plan.md) "품질 계획"에 있다. 경위는 `Worklog/M<N>.md`와 `Worklog/Q<N>.md`에 있다.
