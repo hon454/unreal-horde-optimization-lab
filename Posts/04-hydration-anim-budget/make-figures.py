@@ -454,7 +454,7 @@ def budget():
                 o.append(f'<rect x="{BX - 66}" y="{t - 5}" width="{W - 32 - BX + 66}" height="{bt - t + 8}" rx="6" fill="none" stroke="{GREEN}" stroke-width="2"/>')
     y += 40
     o.append(f'<line x1="32" y1="{y - 14}" x2="{W - 32}" y2="{y - 14}" stroke="{LINE}"/>')
-    o.append(f'<text x="32" y="{y + 10}" font-size="16" fill="{SUB}">초록 상자가 고른 값이다. 1만에서 건너뜀이 0이고 2만에서 16.7ms 안인 가장 작은 값이다.</text>')
+    o.append(f'<text x="32" y="{y + 10}" font-size="16" fill="{SUB}">초록 상자가 고른 값이다. 두 기준(1만에서 건너뜀 0, 2만에서 16.7ms 안)을 함께 만족한다.</text>')
     o.append(f'<text x="32" y="{y + 34}" font-size="16" fill="{SUB}">건너뛴 액터는 그 프레임에 자세가 멈춘다. 보간한 액터는 지난 두 자세 사이를 잇는다.</text>')
     write("hyd-budget.svg", svg(y + 58, o))
 

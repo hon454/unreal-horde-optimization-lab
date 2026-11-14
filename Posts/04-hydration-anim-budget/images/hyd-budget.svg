@@ -60,6 +60,6 @@
 <rect x="84" y="343" width="684" height="42" rx="6" fill="none" stroke="#15803d" stroke-width="2"/>
 <rect x="84" y="603" width="684" height="30" rx="6" fill="none" stroke="#15803d" stroke-width="2"/>
 <line x1="32" y1="694" x2="768" y2="694" stroke="#e5e7eb"/>
-<text x="32" y="718" font-size="16" fill="#4b5563">초록 상자가 고른 값이다. 1만에서 건너뜀이 0이고 2만에서 16.7ms 안인 가장 작은 값이다.</text>
+<text x="32" y="718" font-size="16" fill="#4b5563">초록 상자가 고른 값이다. 두 기준(1만에서 건너뜀 0, 2만에서 16.7ms 안)을 함께 만족한다.</text>
 <text x="32" y="742" font-size="16" fill="#4b5563">건너뛴 액터는 그 프레임에 자세가 멈춘다. 보간한 액터는 지난 두 자세 사이를 잇는다.</text>
 </svg>
