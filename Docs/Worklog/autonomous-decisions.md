@@ -4,6 +4,8 @@
 
 2026-11-12 덧붙임: 사용자 지시로 ADR 초안 넷을 "제안됨"으로 썼다. [ADR-0010](../Decisions/0010-final-representation-bands.md)(D11, D12, D15, D18), [ADR-0011](../Decisions/0011-entity-driven-crowd-particles.md)(D1\~D4, D6, D17), [ADR-0012](../Decisions/0012-ablation-switches-and-quality-metrics.md)(D9, D10, D13), [ADR-0013](../Decisions/0013-full-batch-runner-and-condition-table.md)(D8, D16, D19). D5, D7, D14는 대안을 비교한 설계 결정이 아니라 ADR로 쓰지 않았다. 넷 모두 같은 날 사용자가 승인했다.
 
+2026-11-14 덧붙임: 사용자가 D20\~D32의 검토를 끝냈다.
+
 ## 요약
 
 2026-11-12 `Full1`(Test 패키지 730ff18)이 끝나 채운 요약이다. 아래 D1\~D19의 본문은 결정 시점의 것이라 고치지 않았다. 수치는 `Measurements/Full1/summary.csv`의 세 회차 중앙값이고, 별말이 없으면 1만 P1이다.

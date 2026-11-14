@@ -9,7 +9,7 @@
 - Q7(예산 재측정, `Full3`)과 Q8(매니저 변형, 글 02 보강)은 끝났다. 경위는 [Worklog/Q7.md](Worklog/Q7.md)와 [Worklog/Q8.md](Worklog/Q8.md)에 있다.
 - 방향은 목표 사양(호드 총수 1만, 60fps) 안에서 거리별 품질을 확보하는 것이다([ADR-0009](Decisions/0009-flat-scenario-quality-by-distance.md)).
 - 계획은 [plan.md](plan.md) "품질 계획"에 있다. 경위는 `Worklog/M<N>.md`와 `Worklog/Q<N>.md`에 있다.
-- 코디네이터가 묻지 않고 내린 결정은 [autonomous-decisions.md](Worklog/autonomous-decisions.md) D20\~D32에 있다.
+- 코디네이터가 묻지 않고 내린 결정은 [autonomous-decisions.md](Worklog/autonomous-decisions.md) D20\~D32에 있다. 사용자가 2026-11-14에 검토를 끝냈다.
 
 ## 다음 할 일
 
@@ -146,5 +146,4 @@ Development 전환 점수는 `Full1` 때의 참고값이다(`Measurements/Full1/
 
 ## 사용자에게 요청한 일
 
-- **[autonomous-decisions.md](Worklog/autonomous-decisions.md)의 D20\~D32 검토.** "사용자가 볼 것" 줄이 판단이 필요한 곳이다.
-- **`.claude/settings.json`의 수정.** 없는 스크립트(`capture-video.ps1`, `run-e0.ps1`)와 `python` 항목을 지우고 `git add -A` 거부 규칙을 더한다. 코디네이터는 이 파일을 고치지 않는다.
+없다.

@@ -10,9 +10,6 @@
       "Bash(powershell -ExecutionPolicy Bypass -File Scripts/package.ps1:*)",
       "Bash(powershell -ExecutionPolicy Bypass -File Scripts/run-bench.ps1:*)",
       "Bash(powershell -ExecutionPolicy Bypass -File Scripts/run-dev.ps1:*)",
-      "Bash(powershell -ExecutionPolicy Bypass -File Scripts/run-e0.ps1:*)",
-      "Bash(python Scripts/summarize.py:*)",
-      "Bash(python Scripts/plot.py:*)",
       "Bash(py -3 Scripts/summarize.py:*)",
       "Bash(py -3 Scripts/plot.py:*)",
       "Bash(powershell -NoProfile -Command \"Get-Process *)",
@@ -36,11 +33,12 @@
     ],
     "ask": [
       "Bash(git reset:*)",
-      "Bash(git rebase:*)",
-      "Bash(powershell -ExecutionPolicy Bypass -File Scripts/capture-video.ps1:*)"
+      "Bash(git rebase:*)"
     ],
     "deny": [
       "Bash(git push --force:*)",
+      "Bash(git add -A:*)",
+      "Bash(git add --all:*)",
       "Bash(rm -rf:*)",
       "Bash(Remove-Item -Recurse:*)",
       "Read(./.mcp.json)",
