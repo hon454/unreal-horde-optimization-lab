@@ -295,9 +295,9 @@ struct FLabConfig
 	bool bAvoid = false;
 	/**
 	 * v2 W4 겹침 방지, 직접 구현(-LabSeparate=0/1, Docs/v2-spec.md 3절, Docs/Worklog/V2.md "W4"). 1이면 ULabSeparationProcessor가 겹친 개체의 위치를 직접 떼어 놓는다.
-	 * 기본 0. Mass 단계(M1~M5)에서만 뜻이 있다. 엔진 회피(-LabAvoid)와 따로 켜고 끈다. CSV 메타데이터 LabTechSeparate.
+	 * 기본 1(v2 W5부터, D45). -LabSeparate=0이 끈다. Mass 단계(M1~M5)에서만 뜻이 있다. 엔진 회피(-LabAvoid)와 따로 켜고 끈다. CSV 메타데이터 LabTechSeparate.
 	 */
-	bool bSeparate = false;
+	bool bSeparate = true;
 	/** 분리 파라미터(LabSeparation.h). Test 빌드는 기본값만 쓴다. 개발 빌드는 -LabSepIter=, -LabSepRelax=, -LabSepMaxStep=, -LabSepVel=로 바꿔 본다 */
 	FLabSeparationParams Separation;
 	/**
@@ -436,7 +436,7 @@ struct FLabConfig
 	bool UsesSimLod() const { return Stage >= ELabStage::M4 && !bNoSimLod; }
 	/** 엔티티에 엔진 회피 Trait을 붙이는가(변형 massav·m4avoid 또는 -LabAvoid=1). M0에는 Mass가 없다 */
 	bool UsesAvoidance() const;
-	/** 겹친 개체를 직접 떼어 놓는가(-LabSeparate=1, ULabSeparationProcessor 등록 조건). M0에는 Mass가 없다 */
+	/** 겹친 개체를 직접 떼어 놓는가(기본 참, -LabSeparate=0이면 거짓, ULabSeparationProcessor 등록 조건). M0에는 Mass가 없다 */
 	bool UsesSeparation() const { return Stage != ELabStage::M0 && bSeparate && !UsesManager(); }
 	/** 변형에서 정한 M4 틱 간격과 회피 여부(UsesSimLod일 때만 뜻이 있다) */
 	FLabSimLod SimLod() const;

@@ -152,12 +152,12 @@ const FLabConfig& FLabConfig::Get()
 			C.bAvoid = true;
 			NoteOverride(TEXT("avoid=1"));
 		}
-		// v2 W4 겹침 방지, 직접 구현(LabConfig.h bSeparate). 기본 0
+		// v2 W4 겹침 방지, 직접 구현(LabConfig.h bSeparate). 기본 1(W5, D45). 0을 주면 끈다
 		int32 Separate = -1;
-		if (FParse::Value(Cmd, TEXT("-LabSeparate="), Separate) && Separate > 0)
+		if (FParse::Value(Cmd, TEXT("-LabSeparate="), Separate) && Separate >= 0)
 		{
-			C.bSeparate = true;
-			NoteOverride(TEXT("separate=1"));
+			if ((Separate != 0) != C.bSeparate) { NoteOverride(FString::Printf(TEXT("separate=%d"), Separate != 0 ? 1 : 0)); }
+			C.bSeparate = Separate != 0;
 		}
 #if !UE_BUILD_TEST
 		// 개발 빌드에서만 분리 파라미터를 바꿔 본다(LabSeparation.h). Test 빌드는 기본값이다

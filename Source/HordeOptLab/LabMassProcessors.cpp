@@ -710,7 +710,7 @@ void ULabOverlapCountProcessor::Execute(FMassEntityManager& EntityManager, FMass
 ULabSeparationProcessor::ULabSeparationProcessor()
 	: EntityQuery(*this)
 {
-	bAutoRegisterWithProcessingPhases = false; // -LabSeparate=1에서만 게임 모듈이 켠다(HordeOptLab.cpp)
+	bAutoRegisterWithProcessingPhases = false; // FLabConfig::UsesSeparation()일 때만 게임 모듈이 켠다(기본 켬, -LabSeparate=0이 끈다, HordeOptLab.cpp)
 	ExecutionFlags = (int32)EProcessorExecutionFlags::AllNetModes;
 	// 그 프레임의 이동이 끝난 위치를 고친다. 범위 피해(LabLogic)는 Movement 그룹 뒤라 고친 위치를 본다
 	ExecutionOrder.ExecuteInGroup = UE::Mass::ProcessorGroupNames::Movement;

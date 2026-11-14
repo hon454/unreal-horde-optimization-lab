@@ -49,7 +49,7 @@ public:
 		// Q2b: 배경 무리의 엔티티 구동 입자(-LabCrowdFx=1, -LabCrowdFxEntity=1). Mass 단계(M1부터)에서만 대상이 있다. 그 밖에는 등록하지 않아 프로세서 구성이 그대로다.
 		const bool bCrowdFxEntity = FLabConfig::Get().UsesCrowdFxEntity() && FLabConfig::Get().Stage >= ELabStage::M1;
 		LabSetAutoRegister(GetMutableDefault<ULabCrowdFxGatherProcessor>(), bCrowdFxEntity);
-		// v2 W4: 겹침 방지 직접 구현(-LabSeparate=1). 끈 실행은 프로세서 구성이 그대로다
+		// v2 W4: 겹침 방지 직접 구현(W5부터 기본 켬, -LabSeparate=0이 끈다). 끈 실행은 프로세서 구성이 W4 전과 같다
 		const bool bSeparate = FLabConfig::Get().UsesSeparation();
 		LabSetAutoRegister(GetMutableDefault<ULabSeparationProcessor>(), bSeparate);
 		// crowdfx_entity·separate는 켰을 때만 붙인다(다른 실행의 로그는 그대로다)

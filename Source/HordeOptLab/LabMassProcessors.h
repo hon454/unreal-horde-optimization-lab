@@ -197,7 +197,7 @@ protected:
 };
 
 /**
- * v2 W4 겹침 방지, 직접 구현(-LabSeparate=1, LabSeparation.h, Docs/Worklog/V2.md "W4"). 게임 모듈이 FLabConfig::UsesSeparation()일 때만 등록한다(HordeOptLab.cpp).
+ * v2 W4 겹침 방지, 직접 구현(W5부터 기본 켬, -LabSeparate=0이 끈다, LabSeparation.h, Docs/Worklog/V2.md "W4"). 게임 모듈이 FLabConfig::UsesSeparation()일 때만 등록한다(HordeOptLab.cpp).
  * 대상은 겹친 쌍의 수(ULabOverlapCountProcessor)와 같은 개체다: 살아 있는 미니언(걷기·피격), 사망 중인 개체와 풀 제외. Simulation LOD 밴드를 가리지 않고 매 프레임 돈다.
  * 자리: 그룹 Movement, 엔진 이동(UMassApplyMovementProcessor)과 Off 밴드 이동(ULabOffMoveProcessor) 뒤. 그 프레임에 옮겨진 위치를 고치고,
  * 범위 피해(LabLogic, Movement 뒤)와 표현이 고친 위치를 본다. 오브 피해 범위 안으로 들어가는 것은 막지 않는다.
