@@ -656,6 +656,13 @@ void ALabGameMode::Tick(float DeltaSeconds)
 	CSV_CUSTOM_STAT(Lab, Alive, LastAlive, ECsvCustomStatOp::Set);
 	CSV_CUSTOM_STAT(Lab, Deaths, GetDeathCount(), ECsvCustomStatOp::Set);
 	CSV_CUSTOM_STAT(Lab, Near30, LastNear30, ECsvCustomStatOp::Set);
+	// v2 W3 겹친 쌍의 수(LabOverlap.h). 0.5초마다 센 값이다. M0 액터 단계는 아직 세지 않는다(0)
+	{
+		const ULabCrowdSubsystem* OverlapCrowd = GetWorld()->GetSubsystem<ULabCrowdSubsystem>();
+		const bool bOverlap = OverlapCrowd && OverlapCrowd->IsActive();
+		CSV_CUSTOM_STAT(Lab, OverlapPairs, bOverlap ? OverlapCrowd->OverlapPairs.load() : 0, ECsvCustomStatOp::Set);
+		CSV_CUSTOM_STAT(Lab, OverlapDeep, bOverlap ? OverlapCrowd->OverlapDeep.load() : 0, ECsvCustomStatOp::Set);
+	}
 
 	const float ShotAt = FLabConfig::Get().ShotAtSec;
 	if (FLabConfig::Get().bBench)
@@ -706,9 +713,12 @@ void ALabGameMode::Tick(float DeltaSeconds)
 			UE_LOG(LogLab, Log, TEXT("lab_damage hits=%lld per_sec=%.0f"), Crowd->DamageHits.load(), Crowd->DamageHits.load() / FMath::Max(Elapsed, 0.01f));
 		}
 		UE_LOG(LogLab, Log, TEXT("lab_applied %s"), *AppliedString()); // Q3: 개발 실행에서도 실제 적용값을 남긴다(벤치마크는 측정 시작 때)
-		UE_LOG(LogLab, Log, TEXT("lab_summary elapsed=%.1f n=%d respawns=%d kills=%d snipes=%d avg_ms=%.1f deaths=%d near30=%d actors=%d"),
+		const ULabCrowdSubsystem* OverlapCrowd = GetWorld()->GetSubsystem<ULabCrowdSubsystem>();
+		const bool bOverlap = OverlapCrowd && OverlapCrowd->IsActive();
+		UE_LOG(LogLab, Log, TEXT("lab_summary elapsed=%.1f n=%d respawns=%d kills=%d snipes=%d avg_ms=%.1f deaths=%d near30=%d actors=%d overlap=%d/%d"),
 			Elapsed, Spawner->GetAliveCount(), Spawner->GetRespawnCount(), Orb->GetKillCount(), Orb->GetSnipeCount(),
-			1000.f * Elapsed / FMath::Max<uint64>(GFrameCounter - StartFrame, 1), GetDeathCount(), LastNear30, GetHudActors()); // Q5: 누적 사망, 오브 30m 안(마지막 프레임), 액터
+			1000.f * Elapsed / FMath::Max<uint64>(GFrameCounter - StartFrame, 1), GetDeathCount(), LastNear30, GetHudActors(), // Q5: 누적 사망, 오브 30m 안(마지막 프레임), 액터
+			bOverlap ? OverlapCrowd->OverlapPairs.load() : 0, bOverlap ? OverlapCrowd->OverlapDeep.load() : 0); // v2 W3: 마지막 표본의 겹친 쌍/깊게 겹친 쌍
 		FPlatformMisc::RequestExit(false, TEXT("LabDuration"));
 	}
 }

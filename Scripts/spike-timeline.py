@@ -19,8 +19,10 @@ STATS = [("actors", "Lab/Actors"), ("iskm", "Lab/IskmInstances"), ("near30", "La
 # 표현 전환 수(ULabRepSwitchCountProcessor, 프레임마다 그 프레임의 수). 구간의 합 ÷ 구간 길이 = 초당 전환 수
 SWITCH = [("none_to_inst", "Lab/SwNoneToInst"), ("inst_to_actor", "Lab/SwInstToActor"), ("actor_to_inst", "Lab/SwActorToInst"),
           ("inst_to_none", "Lab/SwInstToNone"), ("other", "Lab/SwOther"), ("round", "Lab/SwRound")]
+# 겹친 쌍의 수(v2 W3, LabOverlap.h). 열은 맨 뒤에 붙인다(옛 timeline.csv의 열 순서를 지킨다)
+EXTRA = [("overlap", "Lab/OverlapPairs"), ("overlap_deep", "Lab/OverlapDeep")]
 FIELDS = (["label", "orbit", "bin", "t_end", "frames", "frame_p50", "frame_p95"] + [f"{k}_{s}" for k, _ in STATS for s in ("mean", "max")]
-          + [f"sw_{k}_per_s" for k, _ in SWITCH] + ["deaths_per_s"])
+          + [f"sw_{k}_per_s" for k, _ in SWITCH] + ["deaths_per_s"] + [f"{k}_{s}" for k, _ in EXTRA for s in ("mean", "max")])
 
 
 def main():
@@ -38,7 +40,7 @@ def main():
         ft = column(header, data, ["FrameTime"])
         if not ft:
             continue
-        cols = {k: column(header, data, [name]) for k, name in STATS + SWITCH}
+        cols = {k: column(header, data, [name]) for k, name in STATS + SWITCH + EXTRA}
         deaths = column(header, data, ["Lab/Deaths"])
         orbit = meta.get("laborbit", meta.get("LabOrbit", ""))
         t, start, b, t_start = 0.0, 0, 0, 0.0
@@ -53,7 +55,7 @@ def main():
         for n, (s, e, t_end, span) in enumerate(edges + [(0, len(ft), t, t)]):
             row = {"label": path.stem, "orbit": orbit, "bin": "all" if n == len(edges) else n + 1, "t_end": round(t_end, 1), "frames": e - s,
                    "frame_p50": round(percentile(ft[s:e], 0.5), 2), "frame_p95": round(percentile(ft[s:e], 0.95), 2)}
-            for k, _ in STATS:
+            for k, _ in STATS + EXTRA:
                 v = cols[k][s:e] if len(cols[k]) == len(ft) else []
                 row[f"{k}_mean"] = round(sum(v) / len(v), 1) if v else ""
                 row[f"{k}_max"] = int(max(v)) if v else ""

@@ -112,6 +112,9 @@ public:
 	std::atomic<int64> SmallActorInterps{0};
 	/** Q5 동등성 통계: 오브 수평 30m 안 엔티티 수(ULabNearOrbCountProcessor가 매 프레임 쓴다, FLabEquivalence). 게임 모드가 CSV 스탯 Lab/Near30으로 남긴다 */
 	std::atomic<int32> Near30{0};
+	/** v2 W3 겹친 쌍의 수(LabOverlap.h). ULabOverlapCountProcessor가 0.5초마다 쓴다. 게임 모드가 CSV 스탯 Lab/OverlapPairs·Lab/OverlapDeep로 남긴다 */
+	std::atomic<int32> OverlapPairs{0};
+	std::atomic<int32> OverlapDeep{0};
 	/** Q5 HUD: 이 프레임 동기화한 하이드레이션 액터 수(CSV 스탯 Lab/Actors와 같은 값, ULabActorSyncProcessor가 쓴다) */
 	std::atomic<int32> ActorCount{0};
 	/**

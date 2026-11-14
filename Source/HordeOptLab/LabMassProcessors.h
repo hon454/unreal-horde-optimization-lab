@@ -5,6 +5,7 @@
 #include "MassEntityQuery.h"
 #include "MassObserverProcessor.h"
 #include "LabConfig.h"
+#include "LabOverlap.h"
 #include "LabMassProcessors.generated.h"
 
 /**
@@ -203,4 +204,22 @@ protected:
 	virtual void ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager) override;
 	virtual void Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context) override;
 	FMassEntityQuery EntityQuery;
+};
+
+/**
+ * 겹친 쌍의 수(v2 W3, LabOverlap.h). LabOverlapSampleSec마다 살아 있는 미니언의 위치와 몸통 반지름(FAgentRadiusFragment)을 모아 세고
+ * ULabCrowdSubsystem::OverlapPairs·OverlapDeep에 쓴다. 게임 모드가 CSV 스탯 Lab/OverlapPairs·Lab/OverlapDeep로 남긴다. 모든 Mass 단계에서 돈다.
+ */
+UCLASS()
+class ULabOverlapCountProcessor : public UMassProcessor
+{
+	GENERATED_BODY()
+public:
+	ULabOverlapCountProcessor();
+protected:
+	virtual void ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager) override;
+	virtual void Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context) override;
+	FMassEntityQuery EntityQuery;
+	TArray<FLabBody> Bodies; // 표본마다 다시 채운다(할당을 되풀이하지 않는다)
+	double NextSampleTime = 0.;
 };

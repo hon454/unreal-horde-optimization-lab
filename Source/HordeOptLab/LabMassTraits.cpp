@@ -13,7 +13,8 @@ void ULabMinionTrait::BuildTemplate(FMassEntityTemplateBuildContext& BuildContex
 	FMassEntityManager& EntityManager = UE::Mass::Utils::GetEntityManagerChecked(World);
 
 	BuildContext.AddFragment<FTransformFragment>();
-	BuildContext.AddFragment_GetRef<FAgentRadiusFragment>().Radius = 40.f; // M0 액터의 캡슐 반지름(ACharacter 기본값 34)과 비슷한 크기. 회피를 켜는 E1 (c)에서 쓴다
+	// 몸통 반지름(v2 W3): 종류별 BoundRadius(소형 40, 대형 94)다. 엔진 회피와 겹친 쌍의 수(ULabOverlapCountProcessor)가 같은 값을 쓴다. W3 전에는 둘 다 40이었다
+	BuildContext.AddFragment_GetRef<FAgentRadiusFragment>().Radius = FLabUnitAssetPaths::Get(UnitType).BoundRadius;
 	BuildContext.AddFragment<FMassActorFragment>();                        // UMassVisualizationTrait가 요구한다(MassVisualizationTrait.cpp RequireFragment)
 	BuildContext.AddFragment<FLabMinionFragment>();
 	BuildContext.AddFragment<FLabHealthFragment>();
@@ -32,7 +33,7 @@ void ULabMinionTrait::BuildTemplate(FMassEntityTemplateBuildContext& BuildContex
 	Params.UnitType = UnitType;
 	Params.MoveSpeed = FLabScenario::MoveSpeed;
 	Params.MaxHealth = FLabScenario::MinionHealth;
-	Params.BoundRadius = FLabUnitAssetPaths::Get(UnitType).BoundRadius; // 소형 40(전과 같다), 대형은 ini LargeBoundRadius(확정값 94). FAgentRadiusFragment는 둘 다 40(회피가 꺼져 있어 쓰이지 않는다)
+	Params.BoundRadius = FLabUnitAssetPaths::Get(UnitType).BoundRadius; // 소형 40(전과 같다), 대형은 ini LargeBoundRadius(확정값 94). FAgentRadiusFragment도 같은 값이다(v2 W3)
 	BuildContext.AddConstSharedFragment(EntityManager.GetOrCreateConstSharedFragment(Params));
 }
 

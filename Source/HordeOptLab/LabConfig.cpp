@@ -146,6 +146,12 @@ const FLabConfig& FLabConfig::Get()
 			if ((Pool != 0) != C.bEntityPool) { NoteOverride(FString::Printf(TEXT("pool=%d"), Pool != 0 ? 1 : 0)); }
 			C.bEntityPool = Pool != 0;
 		}
+		int32 Avoid = -1;
+		if (FParse::Value(Cmd, TEXT("-LabAvoid="), Avoid) && Avoid > 0)
+		{
+			C.bAvoid = true;
+			NoteOverride(TEXT("avoid=1"));
+		}
 		// Q2 Niagara 배경 무리 기본값: 변형 q2crowd만 켠다. run-bench.ps1의 ValidateSet에 q2crowd가 들어가기 전에는 -Variant m5bounds -ExtraArgs "-LabCrowdFx=1"로 같은 구성을 고른다.
 		C.bCrowdFx = C.Variant == ELabVariant::Q2Crowd || C.Variant == ELabVariant::Q4Final; // q4final = q2crowd + Q4 품질 값
 		int32 CrowdFx = -1;
@@ -381,6 +387,11 @@ bool FLabConfig::UsesBudgetActors() const
 	return Stage >= ELabStage::M3 && (Variant == ELabVariant::M3BudgetDist || Variant == ELabVariant::M3BudgetSig || bScreenSigBudget);
 }
 
+bool FLabConfig::UsesAvoidance() const
+{
+	return Stage != ELabStage::M0 && (bAvoid || Variant == ELabVariant::MassAv || (UsesSimLod() && SimLod().bAvoidance));
+}
+
 TArray<FLabConfig::FTech> FLabConfig::TechList() const
 {
 	auto B = [](bool b) { return FString(b ? TEXT("1") : TEXT("0")); };
@@ -397,6 +408,7 @@ TArray<FLabConfig::FTech> FLabConfig::TechList() const
 		{ TEXT("LabTechFixedBounds"), TEXT("bnd"), B(IskmParams().bFixedBounds) },
 		{ TEXT("LabTechFarCull"), TEXT("far"), B(CullsFar()) },
 		{ TEXT("LabTechCrowdFx"), TEXT("fx"), B(bCrowdFx) },
+		{ TEXT("LabTechAvoid"), TEXT("av"), B(UsesAvoidance()) },
 	};
 }
 

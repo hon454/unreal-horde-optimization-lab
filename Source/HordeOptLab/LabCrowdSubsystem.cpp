@@ -69,9 +69,9 @@ UMassEntityConfigAsset* ULabCrowdSubsystem::BuildEntityConfig(int32 UnitType, US
 		// M4: 엔진 Simulation LOD(가변 틱). LOD 수집 Trait(위)이 만든 FMassViewerInfoFragment를 요구한다(MassLODTrait.cpp:123)
 		AddLabTrait<ULabSimulationLODTrait>(*EntityConfig);
 	}
-	if (FLabConfig::Get().Variant == ELabVariant::MassAv || (bSimLod && FLabConfig::Get().SimLod().bAvoidance))
+	if (FLabConfig::Get().UsesAvoidance())
 	{
-		// E1 (c): 엔진 회피. 이웃을 찾으려면 장애물 격자에 등록돼야 하므로 두 Trait을 함께 붙인다. 파라미터는 엔진 기본값.
+		// v2 W3(-LabAvoid=1)와 E1 (c): 엔진 회피. 이웃을 찾으려면 장애물 격자에 등록돼야 하므로 두 Trait을 함께 붙인다. 파라미터는 엔진 기본값.
 		// E4 (c) m4avoid: 같은 Trait. LOD 태그가 있어 회피 프로세서가 High(80m 안)만 처리한다(MassAvoidanceProcessors.cpp:301-303)
 		AddLabTrait<UMassObstacleAvoidanceTrait>(*EntityConfig);
 		AddLabTrait<UMassNavigationObstacleTrait>(*EntityConfig);

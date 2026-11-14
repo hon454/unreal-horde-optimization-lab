@@ -114,6 +114,9 @@ SIM_FIELDS += ["gpu_mem_p50", "gpu_mem_first", "gpu_mem_last", "iskm_tracks_firs
 # view_actors_mean·_p05 = Lab/ViewActors(화면 안 보이는 액터) 평균·5백분위, cover30_* = 프레임마다 ViewActors30 / (ViewActors30 + ViewInst30)(화면 안 카메라 30m 안 개체 중 보이는 액터 비율)의
 # 평균·최솟값·5백분위, coverhyd_mean = 같은 비율을 전환 거리 안으로(ViewActors / (ViewActors + ViewInstHyd)). 열이 없으면 빈칸
 QUALITY_FIELDS = ["actor_cap", "hydrate_m", "actors_mean", "view_actors_mean", "view_actors_p05", "cover30_mean", "cover30_min", "cover30_p05", "coverhyd_mean"]
+# v2 W3 겹침 방지(Docs/Worklog/V2.md "W3"). tech_avoid = 메타데이터 LabTechAvoid(엔진 회피 Trait 켬 1), overlap_mean·overlap_deep_mean = Lab/OverlapPairs·Lab/OverlapDeep
+# 평균(0.5초마다 센 겹친 쌍·깊게 겹친 쌍의 수, LabOverlap.h). 열이 없으면 빈칸
+QUALITY_FIELDS += ["tech_avoid", "overlap_mean", "overlap_deep_mean"]
 SIM_FIELDS += QUALITY_FIELDS
 RUN_FIELDS = ["label", "milestone", "variant", "n", "preset", "seed", "run", "pc", "frames",
               "game_p50_ms", "game_p99_ms", "render_p50_ms", "gpu_p50_ms", "frame_p50_ms", "frame_p95_ms", "frame_p99_ms",
@@ -283,6 +286,11 @@ def quality_fields(header, data, meta):
     covh = [x / (x + y) for x, y in paired(header, data, "Lab/ViewActors", "Lab/ViewInstHyd") if x + y > 0]
     if covh:
         out["coverhyd_mean"] = round(statistics.fmean(covh), 4)
+    out["tech_avoid"] = meta.get("labtechavoid", "")
+    for key, stat in (("overlap_mean", "Lab/OverlapPairs"), ("overlap_deep_mean", "Lab/OverlapDeep")):
+        vals = column(header, data, [stat])
+        if vals:
+            out[key] = round(statistics.fmean(vals), 2)
     return out
 
 

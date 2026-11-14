@@ -625,6 +625,85 @@ void ULabNearOrbCountProcessor::Execute(FMassEntityManager& EntityManager, FMass
 	Crowd->Near30.store(Count);
 }
 
+// 겹친 쌍의 수(v2 W3) ----------------------------------------------------------
+
+ULabOverlapCountProcessor::ULabOverlapCountProcessor()
+	: EntityQuery(*this)
+{
+	ExecutionFlags = (int32)EProcessorExecutionFlags::AllNetModes;
+	// 그룹과 순서를 선언하지 않는다(ULabNearOrbCountProcessor와 같다). 읽기 전용 순회다
+}
+
+void ULabOverlapCountProcessor::ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager)
+{
+	ProcessorRequirements.AddSubsystemRequirement<ULabCrowdSubsystem>(EMassFragmentAccess::ReadWrite); // 겹친 쌍의 수를 쓴다(원자 변수)
+	EntityQuery.AddRequirement<FTransformFragment>(EMassFragmentAccess::ReadOnly);
+	EntityQuery.AddRequirement<FAgentRadiusFragment>(EMassFragmentAccess::ReadOnly);
+	EntityQuery.AddTagRequirement<FLabMinionTag>(EMassFragmentPresence::All);
+	EntityQuery.AddTagRequirement<FLabDeadTag>(EMassFragmentPresence::None);
+	EntityQuery.AddTagRequirement<FLabPooledTag>(EMassFragmentPresence::None);
+}
+
+void ULabOverlapCountProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context)
+{
+	ULabCrowdSubsystem* Crowd = LabCrowdWrite(Context);
+	if (!Crowd)
+	{
+		return;
+	}
+	const double Now = Crowd->GetWorld()->GetTimeSeconds();
+	if (Now < NextSampleTime)
+	{
+		return;
+	}
+	NextSampleTime = Now + LabOverlapSampleSec;
+	CSV_SCOPED_TIMING_STAT(Lab, OverlapCount);
+	Bodies.Reset();
+	float MaxRadius = 0.f;
+	EntityQuery.ForEachEntityChunk(Context, [this, &MaxRadius](FMassExecutionContext& Context)
+	{
+		const TConstArrayView<FTransformFragment> Transforms = Context.GetFragmentView<FTransformFragment>();
+		const TConstArrayView<FAgentRadiusFragment> Radii = Context.GetFragmentView<FAgentRadiusFragment>();
+		for (FMassExecutionContext::FEntityIterator It = Context.CreateEntityIterator(); It; ++It)
+		{
+			const FVector Location = Transforms[It].GetTransform().GetLocation();
+			FLabBody& Body = Bodies.AddDefaulted_GetRef();
+			Body.X = float(Location.X);
+			Body.Y = float(Location.Y);
+			Body.Radius = Radii[It].Radius;
+			MaxRadius = FMath::Max(MaxRadius, Body.Radius);
+		}
+	});
+	int32 Pairs = 0;
+	int32 Deep = 0;
+	LabCountOverlaps(Bodies, MaxRadius, Pairs, Deep);
+#if !UE_BUILD_SHIPPING && !UE_BUILD_TEST
+	// 개발 검증(-LabOverlapCheck): 같은 표본을 모든 쌍으로 다시 세어 격자 결과와 함께 로그에 남긴다(Docs/Worklog/V2.md "W3")
+	static const bool bCheck = FParse::Param(FCommandLine::Get(), TEXT("LabOverlapCheck"));
+	if (bCheck)
+	{
+		int32 BrutePairs = 0;
+		int32 BruteDeep = 0;
+		for (int32 A = 0; A < Bodies.Num(); ++A)
+		{
+			for (int32 B = A + 1; B < Bodies.Num(); ++B)
+			{
+				const float DX = Bodies[A].X - Bodies[B].X;
+				const float DY = Bodies[A].Y - Bodies[B].Y;
+				const float Sum = Bodies[A].Radius + Bodies[B].Radius;
+				const float DistSq = DX * DX + DY * DY;
+				BrutePairs += DistSq < Sum * Sum ? 1 : 0;
+				BruteDeep += DistSq < 0.25f * Sum * Sum ? 1 : 0;
+			}
+		}
+		UE_LOG(LogLab, Log, TEXT("lab_overlap_check t=%.1f bodies=%d grid=%d/%d brute=%d/%d %s"), Now, Bodies.Num(), Pairs, Deep, BrutePairs, BruteDeep,
+			(Pairs == BrutePairs && Deep == BruteDeep) ? TEXT("match") : TEXT("MISMATCH"));
+	}
+#endif
+	Crowd->OverlapPairs.store(Pairs);
+	Crowd->OverlapDeep.store(Deep);
+}
+
 // 표현 전환 수(Spike1) ---------------------------------------------------------
 
 ULabRepSwitchCountProcessor::ULabRepSwitchCountProcessor()

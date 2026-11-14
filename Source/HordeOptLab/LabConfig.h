@@ -287,6 +287,12 @@ struct FLabConfig
 	 */
 	bool bEntityPool = false;
 	/**
+	 * v2 W3 겹침 방지(-LabAvoid=0/1, Docs/v2-spec.md 3절). 1이면 Mass 단계의 엔티티에 엔진 회피 Trait 둘을 붙인다
+	 * (UMassObstacleAvoidanceTrait, UMassNavigationObstacleTrait, 파라미터는 엔진 기본값). 기본 0. 변형 massav·m4avoid는 이 값과 무관하게 켠다.
+	 * Simulation LOD를 쓰는 단계에서는 엔진 회피 프로세서가 High(80m 안)만 처리한다(MassAvoidanceProcessors.cpp:301-303).
+	 */
+	bool bAvoid = false;
+	/**
 	 * Budget Allocator, 중요도 = 화면 크기(-LabScreenSigBudget=0/1). 액터를 Budget 템플릿으로 만들고 ActorSync가 화면 크기를 중요도로 넣는다.
 	 * 기본: M3·M4·M5 단계 1, 그 밖 0. 변형 m3sig는 항상 1. 비교 상대인 m3mass(와 m3base·m3colbase·m3hydbase)·m3uro·m3budgetdist·m3budgetsig·m3lowres·m3noactor와
 	 * M3 하위 실험·진단 변형은 0. 인자를 주면 그 값이 이긴다. M3 이상 단계에서만 뜻이 있다.
@@ -420,6 +426,8 @@ struct FLabConfig
 
 	/** M4부터 참(-LabSimLod=0이면 거짓). Simulation LOD Trait을 붙이고 로직 프로세서 둘(접근·범위 피해)이 청크 필터를 건다 */
 	bool UsesSimLod() const { return Stage >= ELabStage::M4 && !bNoSimLod; }
+	/** 엔티티에 엔진 회피 Trait을 붙이는가(변형 massav·m4avoid 또는 -LabAvoid=1). M0에는 Mass가 없다 */
+	bool UsesAvoidance() const;
 	/** 변형에서 정한 M4 틱 간격과 회피 여부(UsesSimLod일 때만 뜻이 있다) */
 	FLabSimLod SimLod() const;
 	/** 로그와 CSV 메타데이터용. "80/200m tick=0/0.5/1.0 avoid=0" 꼴, M3까지는 "-" */
