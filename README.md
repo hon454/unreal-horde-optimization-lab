@@ -1,5 +1,7 @@
 # Unreal 호드 최적화 실험실
 
+![가운데의 빛나는 오브와 달팽이를 향해 사방에서 모여드는 작은 점토 인형 무리. 멀어질수록 인형이 단순한 모양과 점으로 바뀐다](Docs/figures/readme/cover.webp)
+
 `ACharacter` 액터로 호드 1만을 만들면 한 프레임에 444ms가 걸린다. 이 호드를 Unreal Engine 5.8의 Mass Entity로 다시 만들었다. 로직을 Mass로 옮기고 애니메이션을 뺀 2단계에서 10.2ms로 60fps(한 프레임 16.7ms) 안에 들었다. 나머지 여섯 단계는 그 시간 안에서 애니메이션, 가까운 개체의 액터, 지평선까지의 무리를 되찾는 데 썼다. 순서는 Mass 로직, ISM + VAT(Vertex Animation Texture, 애니메이션을 텍스처에 구워 정점 셰이더로 재생), 액터 하이드레이션(Hydration, 가까운 엔티티에만 진짜 액터를 붙이는 일)과 애니메이션 예산, Simulation LOD, ISKM(Instanced Skinned Mesh, GPU에서 스키닝하는 인스턴스 스켈레탈 메시), Niagara 배경 무리, 품질 올리기다. 단계마다 같은 시나리오를 같은 방법으로 다시 재서 얼마나 달라졌는지 확인했다.
 
 단계를 고르면 화면과 측정값이 바뀌는 한 페이지 요약은 <https://hon454.github.io/unreal-horde-optimization-lab/>에 있다.
@@ -166,3 +168,13 @@ py -3 -I Scripts/plot.py --batch <묶음>
 | `Docs/figures/` | 그래프(SVG)와 그 수치(CSV), 단계별 화면(`steps/`) |
 | `Posts/` | 글과 측정 기록 |
 | `Measurements/` | 묶음별 수치와 대표 스크린샷. [최종 측정](Measurements/Full3/), 개발 중의 측정은 `M<N>/`·`Q<N>/` |
+
+## 라이선스
+
+이 저장소의 코드, 스크립트, 문서, 측정 결과는 [MIT 라이선스](LICENSE)를 따른다.
+
+다음은 MIT 라이선스에 들어가지 않는다.
+
+- **Unreal Engine**: 엔진과 엔진 소스는 [Unreal Engine EULA](https://www.unrealengine.com/eula)를 따른다. `Source/`에 엔진 소스의 식을 옮긴 곳은 주석에 원본 파일과 줄을 적었고, 그 부분은 EULA의 조건도 함께 따른다.
+- **Fab 에셋**: [Paragon: Minions](https://www.fab.com/listings/039ea035-9360-4e76-ad06-5d3a92da6f65)와 [Niagara Examples Pack](https://www.fab.com/listings/0e188eca-4e54-4fb2-a9ed-d8b8a565e600)은 Fab 스탠다드 라이선스의 Epic 에셋이라 재배포할 수 없다. 저장소에 넣지 않았고, 직접 받아 `Scripts/restore-assets.ps1`로 복구한다. 이 에셋에서 만든 VAT·ISKM 파생 에셋도 넣지 않았다.
+- **상표**: Unreal, Unreal Engine, Paragon은 Epic Games, Inc.의 상표다. 이 프로젝트는 Epic Games와 관계가 없다.
