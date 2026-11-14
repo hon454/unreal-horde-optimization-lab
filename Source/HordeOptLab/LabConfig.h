@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "LabSeparation.h"
 
 /** 미니언 표현 변형(M0 E0). 실행 인자 -LabVariant=로 고른다. plan.md "M0". */
 enum class ELabVariant : uint8
@@ -293,6 +294,13 @@ struct FLabConfig
 	 */
 	bool bAvoid = false;
 	/**
+	 * v2 W4 겹침 방지, 직접 구현(-LabSeparate=0/1, Docs/v2-spec.md 3절, Docs/Worklog/V2.md "W4"). 1이면 ULabSeparationProcessor가 겹친 개체의 위치를 직접 떼어 놓는다.
+	 * 기본 0. Mass 단계(M1~M5)에서만 뜻이 있다. 엔진 회피(-LabAvoid)와 따로 켜고 끈다. CSV 메타데이터 LabTechSeparate.
+	 */
+	bool bSeparate = false;
+	/** 분리 파라미터(LabSeparation.h). Test 빌드는 기본값만 쓴다. 개발 빌드는 -LabSepIter=, -LabSepRelax=, -LabSepMaxStep=, -LabSepVel=로 바꿔 본다 */
+	FLabSeparationParams Separation;
+	/**
 	 * Budget Allocator, 중요도 = 화면 크기(-LabScreenSigBudget=0/1). 액터를 Budget 템플릿으로 만들고 ActorSync가 화면 크기를 중요도로 넣는다.
 	 * 기본: M3·M4·M5 단계 1, 그 밖 0. 변형 m3sig는 항상 1. 비교 상대인 m3mass(와 m3base·m3colbase·m3hydbase)·m3uro·m3budgetdist·m3budgetsig·m3lowres·m3noactor와
 	 * M3 하위 실험·진단 변형은 0. 인자를 주면 그 값이 이긴다. M3 이상 단계에서만 뜻이 있다.
@@ -428,6 +436,8 @@ struct FLabConfig
 	bool UsesSimLod() const { return Stage >= ELabStage::M4 && !bNoSimLod; }
 	/** 엔티티에 엔진 회피 Trait을 붙이는가(변형 massav·m4avoid 또는 -LabAvoid=1). M0에는 Mass가 없다 */
 	bool UsesAvoidance() const;
+	/** 겹친 개체를 직접 떼어 놓는가(-LabSeparate=1, ULabSeparationProcessor 등록 조건). M0에는 Mass가 없다 */
+	bool UsesSeparation() const { return Stage != ELabStage::M0 && bSeparate && !UsesManager(); }
 	/** 변형에서 정한 M4 틱 간격과 회피 여부(UsesSimLod일 때만 뜻이 있다) */
 	FLabSimLod SimLod() const;
 	/** 로그와 CSV 메타데이터용. "80/200m tick=0/0.5/1.0 avoid=0" 꼴, M3까지는 "-" */

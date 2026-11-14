@@ -6,6 +6,9 @@
 #include "MassObserverProcessor.h"
 #include "LabConfig.h"
 #include "LabOverlap.h"
+#include "LabSeparation.h"
+#include "MassCommonFragments.h"   // FTransformFragment
+#include "MassMovementFragments.h" // FMassDesiredMovementFragment
 #include "LabMassProcessors.generated.h"
 
 /**
@@ -191,6 +194,35 @@ protected:
 	FMassEntityQuery EntityQuery;
 	struct FLastSwitch { double Time = 0.; uint8 From = 0; uint8 To = 0; };
 	TMap<FMassEntityHandle, FLastSwitch> LastSwitch; // 전환한 엔티티만 들어간다(게임 스레드 전용)
+};
+
+/**
+ * v2 W4 겹침 방지, 직접 구현(-LabSeparate=1, LabSeparation.h, Docs/Worklog/V2.md "W4"). 게임 모듈이 FLabConfig::UsesSeparation()일 때만 등록한다(HordeOptLab.cpp).
+ * 대상은 겹친 쌍의 수(ULabOverlapCountProcessor)와 같은 개체다: 살아 있는 미니언(걷기·피격), 사망 중인 개체와 풀 제외. Simulation LOD 밴드를 가리지 않고 매 프레임 돈다.
+ * 자리: 그룹 Movement, 엔진 이동(UMassApplyMovementProcessor)과 Off 밴드 이동(ULabOffMoveProcessor) 뒤. 그 프레임에 옮겨진 위치를 고치고,
+ * 범위 피해(LabLogic, Movement 뒤)와 표현이 고친 위치를 본다. 오브 피해 범위 안으로 들어가는 것은 막지 않는다.
+ * 모으기와 쓰기는 한 스레드에서 차례로 하고, 이웃 찾기와 밀어낼 양의 계산은 ParallelFor로 나눈다(FLabSeparationSolver).
+ * 쓰기는 모으기 때 적어 둔 프래그먼트 포인터로 한다. 한 Execute 안에서는 구조 변경이 없어 청크 메모리가 움직이지 않는다.
+ */
+UCLASS()
+class ULabSeparationProcessor : public UMassProcessor
+{
+	GENERATED_BODY()
+public:
+	ULabSeparationProcessor();
+protected:
+	virtual void ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager) override;
+	virtual void Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context) override;
+	FMassEntityQuery EntityQuery;
+	FLabSeparationSolver Solver;
+	TArray<FTransformFragment*> Transforms;
+	TArray<FMassDesiredMovementFragment*> Movements; // 없는 개체는 nullptr
+	// 개발 확인 로그(lab_sep)의 누계
+	double LogSince = 0.;
+	int64 LogPushed = 0;
+	double LogPushSum = 0.;
+	float LogPushMax = 0.f;
+	int32 LogFrames = 0;
 };
 
 /** 피격·사망 상태의 남은 시간. 피격이 끝나면 사망, 사망이 끝나면 엔티티를 지우고 가장자리 링에서 새로 만든다. */

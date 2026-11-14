@@ -152,6 +152,25 @@ const FLabConfig& FLabConfig::Get()
 			C.bAvoid = true;
 			NoteOverride(TEXT("avoid=1"));
 		}
+		// v2 W4 겹침 방지, 직접 구현(LabConfig.h bSeparate). 기본 0
+		int32 Separate = -1;
+		if (FParse::Value(Cmd, TEXT("-LabSeparate="), Separate) && Separate > 0)
+		{
+			C.bSeparate = true;
+			NoteOverride(TEXT("separate=1"));
+		}
+#if !UE_BUILD_TEST
+		// 개발 빌드에서만 분리 파라미터를 바꿔 본다(LabSeparation.h). Test 빌드는 기본값이다
+		{
+			int32 SepVel = -1;
+			FParse::Value(Cmd, TEXT("-LabSepIter="), C.Separation.Iterations);
+			FParse::Value(Cmd, TEXT("-LabSepRelax="), C.Separation.Relax);
+			FParse::Value(Cmd, TEXT("-LabSepMaxStep="), C.Separation.MaxStepFrac);
+			FParse::Value(Cmd, TEXT("-LabSepSkin="), C.Separation.Skin);
+			if (FParse::Value(Cmd, TEXT("-LabSepVel="), SepVel) && SepVel >= 0) { C.Separation.bVelocity = SepVel != 0; }
+			C.Separation.Iterations = FMath::Clamp(C.Separation.Iterations, 1, 16);
+		}
+#endif
 		// Q2 Niagara 배경 무리 기본값: 변형 q2crowd만 켠다. run-bench.ps1의 ValidateSet에 q2crowd가 들어가기 전에는 -Variant m5bounds -ExtraArgs "-LabCrowdFx=1"로 같은 구성을 고른다.
 		C.bCrowdFx = C.Variant == ELabVariant::Q2Crowd || C.Variant == ELabVariant::Q4Final; // q4final = q2crowd + Q4 품질 값
 		int32 CrowdFx = -1;
@@ -409,6 +428,7 @@ TArray<FLabConfig::FTech> FLabConfig::TechList() const
 		{ TEXT("LabTechFarCull"), TEXT("far"), B(CullsFar()) },
 		{ TEXT("LabTechCrowdFx"), TEXT("fx"), B(bCrowdFx) },
 		{ TEXT("LabTechAvoid"), TEXT("av"), B(UsesAvoidance()) },
+		{ TEXT("LabTechSeparate"), TEXT("sep"), B(UsesSeparation()) },
 	};
 }
 

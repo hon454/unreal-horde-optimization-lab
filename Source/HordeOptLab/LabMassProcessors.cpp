@@ -10,6 +10,7 @@
 #include "MassCommonTypes.h"
 #include "MassExecutionContext.h"
 #include "MassMovementFragments.h"
+#include "Movement/MassMovementProcessors.h" // ULabSeparationProcessor의 순서(UMassApplyMovementProcessor 뒤)
 #include "MassNavigationFragments.h"
 #include "MassRepresentationFragments.h" // ULabRepSwitchCountProcessor
 #include "MassRepresentationTypes.h"
@@ -702,6 +703,119 @@ void ULabOverlapCountProcessor::Execute(FMassEntityManager& EntityManager, FMass
 #endif
 	Crowd->OverlapPairs.store(Pairs);
 	Crowd->OverlapDeep.store(Deep);
+}
+
+// 겹침 방지, 직접 구현(v2 W4) ---------------------------------------------------
+
+ULabSeparationProcessor::ULabSeparationProcessor()
+	: EntityQuery(*this)
+{
+	bAutoRegisterWithProcessingPhases = false; // -LabSeparate=1에서만 게임 모듈이 켠다(HordeOptLab.cpp)
+	ExecutionFlags = (int32)EProcessorExecutionFlags::AllNetModes;
+	// 그 프레임의 이동이 끝난 위치를 고친다. 범위 피해(LabLogic)는 Movement 그룹 뒤라 고친 위치를 본다
+	ExecutionOrder.ExecuteInGroup = UE::Mass::ProcessorGroupNames::Movement;
+	ExecutionOrder.ExecuteAfter.Add(UMassApplyMovementProcessor::StaticClass()->GetFName());
+	if (FLabConfig::Get().UsesSimLod() && FLabConfig::Get().SimLod().bOffMove)
+	{
+		ExecutionOrder.ExecuteAfter.Add(ULabOffMoveProcessor::StaticClass()->GetFName()); // 등록되지 않은 이름은 해결기가 빈 노드로 둔다(engine-notes.md 37절). 그래도 쓸 때만 적는다
+	}
+}
+
+void ULabSeparationProcessor::ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager)
+{
+	ProcessorRequirements.AddSubsystemRequirement<ULabCrowdSubsystem>(EMassFragmentAccess::ReadOnly); // 개발 확인 로그에 겹친 쌍의 수를 읽는다(원자 변수)
+	EntityQuery.AddRequirement<FTransformFragment>(EMassFragmentAccess::ReadWrite);
+	EntityQuery.AddRequirement<FAgentRadiusFragment>(EMassFragmentAccess::ReadOnly);
+	EntityQuery.AddRequirement<FMassDesiredMovementFragment>(EMassFragmentAccess::ReadWrite, EMassFragmentPresence::Optional);
+	// 겹친 쌍의 수(ULabOverlapCountProcessor)와 같은 개체
+	EntityQuery.AddTagRequirement<FLabMinionTag>(EMassFragmentPresence::All);
+	EntityQuery.AddTagRequirement<FLabDeadTag>(EMassFragmentPresence::None);
+	EntityQuery.AddTagRequirement<FLabPooledTag>(EMassFragmentPresence::None);
+}
+
+void ULabSeparationProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context)
+{
+	CSV_SCOPED_TIMING_STAT(Lab, Separation);
+	const FLabSeparationParams& Params = FLabConfig::Get().Separation;
+	Solver.Reset();
+	Transforms.Reset();
+	Movements.Reset();
+	EntityQuery.ForEachEntityChunk(Context, [this](FMassExecutionContext& Context)
+	{
+		const TArrayView<FTransformFragment> TransformList = Context.GetMutableFragmentView<FTransformFragment>();
+		const TConstArrayView<FAgentRadiusFragment> Radii = Context.GetFragmentView<FAgentRadiusFragment>();
+		const TArrayView<FMassDesiredMovementFragment> MovementList = Context.GetMutableFragmentView<FMassDesiredMovementFragment>();
+		const bool bHasMovement = MovementList.Num() > 0;
+		for (FMassExecutionContext::FEntityIterator It = Context.CreateEntityIterator(); It; ++It)
+		{
+			FTransformFragment& Transform = TransformList[It];
+			const FVector Location = Transform.GetTransform().GetLocation();
+			Solver.Add(float(Location.X), float(Location.Y), Radii[It].Radius);
+			Transforms.Add(&Transform);
+			Movements.Add(bHasMovement ? &MovementList[It] : nullptr);
+		}
+	});
+	Solver.Solve(Params, /*bParallel*/ true);
+
+	int32 Pushed = 0;
+	double PushSum = 0.;
+	float PushMax = 0.f;
+	for (int32 I = 0; I < Transforms.Num(); ++I)
+	{
+		const FVector2f Push = Solver.Push[I];
+		const float LenSq = Push.SizeSquared();
+		if (LenSq < 1.e-4f) // 0.01cm 아래는 옮기지 않는다
+		{
+			continue;
+		}
+		const float Len = FMath::Sqrt(LenSq);
+		++Pushed;
+		PushSum += Len;
+		PushMax = FMath::Max(PushMax, Len);
+		Transforms[I]->GetMutableTransform().AddToTranslation(FVector(Push.X, Push.Y, 0.));
+		if (Params.bVelocity && Movements[I])
+		{
+			// 밀린 방향의 반대(이웃 쪽)로 가는 성분을 뺀다. 엔진 조향이 다음 프레임부터 가속 상한으로 다시 붙인다(engine-notes.md 36절)
+			FVector& Velocity = Movements[I]->DesiredVelocity;
+			const double NX = Push.X / Len;
+			const double NY = Push.Y / Len;
+			const double Into = Velocity.X * NX + Velocity.Y * NY;
+			if (Into < 0.)
+			{
+				Velocity.X -= Into * NX;
+				Velocity.Y -= Into * NY;
+			}
+		}
+	}
+	CSV_CUSTOM_STAT(Lab, SepBodies, Transforms.Num(), ECsvCustomStatOp::Set);
+	CSV_CUSTOM_STAT(Lab, SepPushed, Pushed, ECsvCustomStatOp::Set);
+	CSV_CUSTOM_STAT(Lab, SepPushMean, Pushed > 0 ? float(PushSum / Pushed) : 0.f, ECsvCustomStatOp::Set); // 옮긴 개체 하나가 이번 프레임에 옮긴 거리(cm)
+
+#if !UE_BUILD_TEST
+	// 개발 확인: 5초마다 옮긴 개체 수(프레임 평균), 옮긴 거리의 평균·최대(cm), 마지막 겹친 쌍 표본
+	LogPushed += Pushed;
+	LogPushSum += PushSum;
+	LogPushMax = FMath::Max(LogPushMax, PushMax);
+	++LogFrames;
+	const UWorld* World = Context.GetWorld();
+	const double Now = World ? World->GetTimeSeconds() : 0.;
+	if (LogSince <= 0.)
+	{
+		LogSince = Now;
+	}
+	else if (Now - LogSince >= 5.)
+	{
+		const ULabCrowdSubsystem* Crowd = LabCrowdRead(Context);
+		UE_LOG(LogLab, Log, TEXT("lab_sep t=%.1f frames=%d bodies=%d pushed_per_frame=%lld push_mean_cm=%.2f push_max_cm=%.1f overlap=%d/%d iter=%d relax=%.2f maxstep=%.2f vel=%d skin=%.2f"),
+			Now, LogFrames, Transforms.Num(), LogPushed / LogFrames, LogPushed > 0 ? LogPushSum / double(LogPushed) : 0., LogPushMax,
+			Crowd ? Crowd->OverlapPairs.load() : -1, Crowd ? Crowd->OverlapDeep.load() : -1, Params.Iterations, Params.Relax, Params.MaxStepFrac, Params.bVelocity ? 1 : 0, Params.Skin);
+		LogSince = Now;
+		LogPushed = 0;
+		LogPushSum = 0.;
+		LogPushMax = 0.f;
+		LogFrames = 0;
+	}
+#endif
 }
 
 // 표현 전환 수(Spike1) ---------------------------------------------------------
