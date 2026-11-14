@@ -401,61 +401,61 @@ window.SITE_DATA = {
   {
    "num": 0,
    "sentence": "목표 사양과 시나리오와 재는 법을 하나로 고정해 두면, 기법 하나가 어느 스레드의 몇 ms를 바꾸는지가 드러난다.",
-   "title": "호드 1만을 60fps로 — 목표 사양과 재는 법",
+   "title": "호드 1만을 60fps로: 목표 사양과 재는 법",
    "url": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Posts/00-goals-and-method/README.md"
   },
   {
    "num": 1,
-   "sentence": "액터 1만의 벽은 애니메이션이 아니라 이동 컴포넌트이고, 프레임이 느려질수록 그 이동 컴포넌트가 정확도를 지키려고 계산을 더 해서 더 느려진다.",
-   "title": "목표 사양을 액터로 돌리면 — URO와 Budget을 켜도 남는 것",
+   "sentence": "액터 1만의 프레임을 잡아먹는 것은 이동 컴포넌트이고, 이 컴포넌트는 프레임이 느려질수록 하위 스텝을 늘려 더 느려진다.",
+   "title": "목표 사양을 액터로 돌리면: URO와 Animation Budget Allocator를 켜도 남는 것",
    "url": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Posts/01-actor-baseline/README.md"
   },
   {
    "num": 2,
    "sentence": "로직을 Mass로 옮기고 표현을 ISM 하나로 바꾸자 개체당 게임 스레드 비용이 27분의 1로 줄었다. 이 몫은 개체마다 도는 틱을 없애면 Mass 없이도 얻는다. Mass가 준 것은 뒤 단계가 쓰는 표현 LOD와 표현 전환의 경로다.",
-   "title": "로직을 Mass로 — 액터마다 돌던 틱이 Processor 몇 개가 된다",
+   "title": "로직을 Mass로: 액터마다 돌던 틱이 Processor 몇 개가 된다",
    "url": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Posts/02-mass-logic/README.md"
   },
   {
    "num": 3,
    "sentence": "먼 개체에 애니메이션을 붙이는 비용보다, 화면 높이의 1%도 안 되는 개체를 그리지 않아 버는 시간이 더 컸다.",
-   "title": "먼 개체에 애니메이션을 붙이고 더 빨라졌다 — ISM + VAT와 200m 밖 지우기",
+   "title": "먼 개체에 애니메이션을 붙이고 더 빨라졌다: ISM + VAT와 200m 밖 지우기",
    "url": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Posts/03-ism-vat/README.md"
   },
   {
    "num": 4,
-   "sentence": "가까운 개체를 진짜 액터로 바꾸면 게임 스레드가 두 배 넘게 늘고, 그 시간이 그대로 프레임 시간이 된다.",
-   "title": "가까운 개체를 진짜 액터로 — 하이드레이션과 애니메이션 예산",
+   "sentence": "가까운 개체를 진짜 액터로 바꾸면 게임 스레드가 두 배 넘게 늘고, 프레임 시간을 정하는 쪽이 GPU에서 게임 스레드로 바뀐다.",
+   "title": "가까운 개체를 진짜 액터로: 하이드레이션과 애니메이션 예산",
    "url": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Posts/04-hydration-anim-budget/README.md"
   },
   {
    "num": 5,
    "sentence": "Simulation LOD의 효과는 LOD 태그를 읽는 Processor에서만 나온다. 자체 로직에 간격을 준 것으로는 프레임이 줄지 않았고, 줄인 것은 먼 개체를 엔진 이동·조향에서 뺀 일이었다.",
-   "title": "먼 개체를 엔진 이동에서 빼자 게임 스레드가 줄었다 — Simulation LOD와 엔티티 풀",
+   "title": "먼 개체를 엔진 이동에서 빼자 게임 스레드가 줄었다: Simulation LOD와 엔티티 풀",
    "url": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Posts/05-simulation-lod-entity-pool/README.md"
   },
   {
    "num": 6,
-   "sentence": "ISKM은 먼 개체의 GPU 시간을 23% 줄였지만, 게임 스레드가 병목인 동안 그 이점은 프레임 시간이 아니라 GPU 여유로 남는다.",
-   "title": "GPU 시간은 23% 줄고 프레임 시간은 거의 그대로였다 — ISKM과 고정 바운드",
+   "sentence": "ISKM은 먼 개체의 GPU 시간을 23% 줄였지만, 게임 스레드가 병목인 동안 그 이점은 GPU 여유로만 남는다.",
+   "title": "GPU 시간은 23% 줄고 프레임 시간은 거의 그대로였다: ISKM과 고정 바운드",
    "url": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Posts/06-iskm/README.md"
   },
   {
    "num": 7,
    "sentence": "200m 밖 엔티티의 자리에 GPU 입자를 그리자 호드가 지평선까지 이어졌고, 값은 게임 스레드가 정한 프레임 0.276ms였다.",
-   "title": "지평선까지 이어진 호드에 0.276ms — 엔티티가 움직이는 Niagara 배경 무리",
+   "title": "지평선까지 이어진 호드에 0.276ms: 엔티티가 움직이는 Niagara 배경 무리",
    "url": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Posts/07-niagara-crowd/README.md"
   },
   {
    "num": 8,
    "sentence": "8단계는 남은 애니메이션 예산 안에서 가까운 액터를 84개 늘렸고, 그 대가로 프레임 시간이 1.02ms 길어지고 60fps를 지키는 호드 총수가 약 2만으로 내려왔다.",
-   "title": "품질 올리기 — 남은 예산을 액터 수와 전환 거리에 쓰기",
+   "title": "품질 올리기: 남은 예산을 액터 수와 전환 거리에 쓰기",
    "url": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Posts/08-quality/README.md"
   },
   {
    "num": 9,
    "sentence": "호드 1만의 60fps는 2단계에서 이미 지켰고, 나머지 여섯 단계는 번 시간을 품질로 바꿨으며 그 값은 게임 스레드가 치렀다.",
-   "title": "444ms에서 9.75ms로, 그리고 남은 5.21ms — 사다리, 빼 보기, 목표 총수",
+   "title": "444ms에서 9.75ms로, 그리고 남은 5.21ms: 사다리, 빼 보기, 목표 총수",
    "url": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Posts/09-summary/README.md"
   }
  ],
@@ -551,7 +551,7 @@ window.SITE_DATA = {
    ],
    "delta": {},
    "group": "earn",
-   "learned": "액터 1만의 벽은 애니메이션이 아니라 이동 컴포넌트이고, 프레임이 느려질수록 그 이동 컴포넌트가 정확도를 지키려고 계산을 더 해서 더 느려진다.",
+   "learned": "액터 1만의 프레임을 잡아먹는 것은 이동 컴포넌트이고, 이 컴포넌트는 프레임이 느려질수록 하위 스텝을 늘려 더 느려진다.",
    "max60": {
     "above": false,
     "n": 766
@@ -560,7 +560,7 @@ window.SITE_DATA = {
    "num": 1,
    "post": {
     "num": 1,
-    "title": "목표 사양을 액터로 돌리면 — URO와 Budget을 켜도 남는 것",
+    "title": "목표 사양을 액터로 돌리면: URO와 Animation Budget Allocator를 켜도 남는 것",
     "url": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Posts/01-actor-baseline/README.md"
    }
   },
@@ -683,7 +683,7 @@ window.SITE_DATA = {
    "num": 2,
    "post": {
     "num": 2,
-    "title": "로직을 Mass로 — 액터마다 돌던 틱이 Processor 몇 개가 된다",
+    "title": "로직을 Mass로: 액터마다 돌던 틱이 Processor 몇 개가 된다",
     "url": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Posts/02-mass-logic/README.md"
    }
   },
@@ -860,7 +860,7 @@ window.SITE_DATA = {
    "num": 3,
    "post": {
     "num": 3,
-    "title": "먼 개체에 애니메이션을 붙이고 더 빨라졌다 — ISM + VAT와 200m 밖 지우기",
+    "title": "먼 개체에 애니메이션을 붙이고 더 빨라졌다: ISM + VAT와 200m 밖 지우기",
     "url": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Posts/03-ism-vat/README.md"
    }
   },
@@ -1028,7 +1028,7 @@ window.SITE_DATA = {
     }
    },
    "group": "spend",
-   "learned": "가까운 개체를 진짜 액터로 바꾸면 게임 스레드가 두 배 넘게 늘고, 그 시간이 그대로 프레임 시간이 된다.",
+   "learned": "가까운 개체를 진짜 액터로 바꾸면 게임 스레드가 두 배 넘게 늘고, 프레임 시간을 정하는 쪽이 GPU에서 게임 스레드로 바뀐다.",
    "max60": {
     "above": false,
     "n": 19952
@@ -1037,7 +1037,7 @@ window.SITE_DATA = {
    "num": 4,
    "post": {
     "num": 4,
-    "title": "가까운 개체를 진짜 액터로 — 하이드레이션과 애니메이션 예산",
+    "title": "가까운 개체를 진짜 액터로: 하이드레이션과 애니메이션 예산",
     "url": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Posts/04-hydration-anim-budget/README.md"
    }
   },
@@ -1214,7 +1214,7 @@ window.SITE_DATA = {
    "num": 5,
    "post": {
     "num": 5,
-    "title": "먼 개체를 엔진 이동에서 빼자 게임 스레드가 줄었다 — Simulation LOD와 엔티티 풀",
+    "title": "먼 개체를 엔진 이동에서 빼자 게임 스레드가 줄었다: Simulation LOD와 엔티티 풀",
     "url": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Posts/05-simulation-lod-entity-pool/README.md"
    }
   },
@@ -1382,7 +1382,7 @@ window.SITE_DATA = {
     }
    },
    "group": "earn",
-   "learned": "ISKM은 먼 개체의 GPU 시간을 23% 줄였지만, 게임 스레드가 병목인 동안 그 이점은 프레임 시간이 아니라 GPU 여유로 남는다.",
+   "learned": "ISKM은 먼 개체의 GPU 시간을 23% 줄였지만, 게임 스레드가 병목인 동안 그 이점은 GPU 여유로만 남는다.",
    "max60": {
     "above": false,
     "n": 23774
@@ -1391,7 +1391,7 @@ window.SITE_DATA = {
    "num": 6,
    "post": {
     "num": 6,
-    "title": "GPU 시간은 23% 줄고 프레임 시간은 거의 그대로였다 — ISKM과 고정 바운드",
+    "title": "GPU 시간은 23% 줄고 프레임 시간은 거의 그대로였다: ISKM과 고정 바운드",
     "url": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Posts/06-iskm/README.md"
    }
   },
@@ -1568,7 +1568,7 @@ window.SITE_DATA = {
    "num": 7,
    "post": {
     "num": 7,
-    "title": "지평선까지 이어진 호드에 0.276ms — 엔티티가 움직이는 Niagara 배경 무리",
+    "title": "지평선까지 이어진 호드에 0.276ms: 엔티티가 움직이는 Niagara 배경 무리",
     "url": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Posts/07-niagara-crowd/README.md"
    }
   },
@@ -1745,7 +1745,7 @@ window.SITE_DATA = {
    "num": 8,
    "post": {
     "num": 8,
-    "title": "품질 올리기 — 남은 예산을 액터 수와 전환 거리에 쓰기",
+    "title": "품질 올리기: 남은 예산을 액터 수와 전환 거리에 쓰기",
     "url": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Posts/08-quality/README.md"
    }
   }

@@ -1,8 +1,8 @@
-# 05 먼 개체를 엔진 이동에서 빼자 게임 스레드가 줄었다 — Simulation LOD와 엔티티 풀
+# 05 먼 개체를 엔진 이동에서 빼자 게임 스레드가 줄었다: Simulation LOD와 엔티티 풀
 
 ## 요약
 
-5단계는 4단계에 두 가지를 더한다. 카메라에서 먼 개체의 로직을 덜 자주 돌리고, 200m 밖 개체는 엔진 이동·조향 대신 자체 프로세서로 옮긴다. 그리고 죽은 개체의 엔티티를 파괴하지 않고 풀에 두었다가 다시 쓴다. 호드 총수 1만, 오브 시점 카메라에서 프레임 시간이 9.42ms에서 8.57ms로 줄었다. 준 것은 게임 스레드다. 60fps를 지키는 최대 개체 수는 약 2만에서 약 2만 3천으로 늘었다.
+5단계는 카메라에서 먼 개체의 로직을 덜 자주 돌리고, 200m 밖 개체는 엔진 이동·조향 대신 자체 Processor로 옮긴다. 그리고 죽은 개체의 엔티티를 파괴하지 않고 풀에 두었다가 다시 쓴다. 호드 총수 1만, 오브 시점 카메라에서 프레임 시간이 9.42ms에서 8.57ms로 줄었다. 준 것은 게임 스레드다. 60fps를 지키는 최대 개체 수는 약 2만에서 약 2만 3천으로 늘었다.
 
 ![호드 총수 1만, 오브 시점 카메라에서 4단계와 5단계의 프레임·게임 스레드·렌더 스레드·GPU 시간. 두 단계 모두 게임 스레드가 가장 느리고, 5단계에서 게임 스레드가 9.14ms에서 8.25ms로 줄었다](images/simlod-summary.svg)
 
@@ -22,15 +22,15 @@
 
 ### Simulation LOD
 
-Simulation LOD는 카메라와의 거리로 개체의 로직을 얼마나 자주 돌릴지 정하는 Mass 기능이다. 표현 LOD처럼 High·Medium·Low·Off 네 등급을 매긴다. 등급을 매기는 것은 엔진 프로세서 `UMassSimulationLODProcessor`다. 엔진은 등급마다 LOD 태그를 붙이고, 등급마다 틱 간격을 둘 수 있게 한다. 이 글에서는 80m와 200m를 경계로 두었다.
+Simulation LOD는 카메라와의 거리로 개체의 로직을 얼마나 자주 돌릴지 정하는 Mass 기능이다. 표현 LOD처럼 High·Medium·Low·Off 네 등급을 매긴다. 등급을 매기는 것은 엔진 Processor `UMassSimulationLODProcessor`다. 엔진은 등급마다 LOD 태그를 붙이고, 등급마다 틱 간격을 둘 수 있게 한다. 5단계는 80m와 200m를 경계로 둔다.
 
 ### 가변 틱과 청크 필터
 
-Mass는 같은 태그를 가진 엔티티를 같은 청크에 모은다. 가변 틱을 켜면 엔진이 청크마다 "이번 프레임에 돈다"는 값을 정한다. 프로세서가 쿼리에 청크 필터 `ShouldTickChunkThisFrame`를 걸어야 그 값을 따른다. 필터를 걸지 않은 프로세서는 Simulation LOD를 켜도 매 프레임 모든 청크를 돈다.
+Mass는 같은 태그를 가진 엔티티를 같은 청크에 모은다. 가변 틱을 켜면 엔진이 청크마다 "이번 프레임에 돈다"는 값을 정한다. Processor가 쿼리에 청크 필터 `ShouldTickChunkThisFrame`를 걸어야 그 값을 따른다. 필터를 걸지 않은 Processor는 Simulation LOD를 켜도 매 프레임 모든 청크를 돈다.
 
 ### 엔티티 풀
 
-엔티티 풀은 죽은 개체의 엔티티를 파괴하지 않고 모아 두었다가 새 개체에 다시 쓰는 방식이다. 엔티티 핸들이 그대로 남으므로, 핸들을 키로 쓰는 엔진 자료도 그대로 다시 쓰인다. 이 글에서는 위치·체력·상태만 다시 넣는다.
+엔티티 풀은 죽은 개체의 엔티티를 파괴하지 않고 모아 두었다가 새 개체에 다시 쓰는 방식이다. 엔티티 핸들이 그대로 남으므로, 핸들을 키로 쓰는 엔진 자료도 그대로 다시 쓰인다. 5단계는 위치·체력·상태만 다시 넣는다.
 
 ## 문제: 4단계는 게임 스레드가 프레임을 정하고, 그리지 않는 개체도 매 프레임 옮긴다
 
@@ -38,7 +38,7 @@ Mass는 같은 태그를 가진 엔티티를 같은 청크에 모은다. 가변 
 
 ![4단계의 게임 스레드·렌더 스레드·GPU 시간. 5천에서는 GPU가 가장 길고, 1만부터는 게임 스레드가 가장 길다. 3만에서 게임 스레드는 18.2ms다](images/simlod-problem.svg)
 
-개체의 60%는 200m 밖에 있고, 3단계부터 그 개체는 그리지 않는다. 그래도 걷는 개체는 모두 엔진의 조향·힘 적용·이동·회전 프로세서 넷을 매 프레임 거친다.
+개체의 60%는 200m 밖에 있고, 3단계부터 그 개체는 그리지 않는다. 그래도 걷는 개체는 모두 엔진의 조향·힘 적용·이동·회전 Processor 넷을 매 프레임 거친다.
 
 ## 원리: 먼 개체는 덜 자주 생각하고, 200m 밖은 엔진 이동에서 뺀다
 
@@ -46,9 +46,9 @@ Mass는 같은 태그를 가진 엔티티를 같은 청크에 모은다. 가변 
 
 ![5단계의 거리 구간. 그리는 방식, Simulation LOD 등급, 자체 로직의 간격, 엔진 이동·조향, 자체 Off 이동을 거리 구간마다 보인다. 아래는 죽은 개체의 엔티티를 4단계는 파괴하고 5단계는 풀에 넣어 다시 쓴다는 그림이다](images/simlod-principle.svg)
 
-엔진은 Off 개체에 `FMassOffLODTag`를 붙인다. 엔진의 힘 적용·이동·조향 Processor는 이 태그를 가진 개체를 쿼리에서 뺀다. 회전 Processor는 틱이 온 청크만 따로 처리한다. 그래서 200m 밖 개체는 넷을 매 프레임 거치지 않는다. 대신 자체 프로세서가 간격(1초)마다 한 번 그 개체를 오브 쪽으로 옮긴다.
+엔진은 Off 개체에 `FMassOffLODTag`를 붙인다. 엔진의 힘 적용·이동·조향 Processor는 이 태그를 가진 개체를 쿼리에서 뺀다. 회전 Processor는 틱이 온 청크만 따로 처리한다. 그래서 200m 밖 개체는 넷을 매 프레임 거치지 않는다. 대신 자체 Processor가 간격(1초)마다 한 번 그 개체를 오브 쪽으로 옮긴다.
 
-엔진에도 Off 개체를 옮기는 프로세서 `UMassOffLODNavigationProcessor`가 있다. 그러나 이 프로세서는 개체를 이동 목표의 중심으로 순간 이동시킨다. 이 시나리오의 이동 목표는 오브다. 그래서 등록하지 않았다.
+엔진에도 Off 개체를 옮기는 Processor `UMassOffLODNavigationProcessor`가 있다. 그러나 이 Processor는 개체를 이동 목표의 중심으로 순간 이동시킨다. 이 시나리오의 이동 목표는 오브다. 그래서 등록하지 않았다.
 
 `Source/HordeOptLab/LabMassProcessors.cpp`, `ULabOffMoveProcessor`
 
@@ -73,9 +73,9 @@ Movements[It].DesiredVelocity = Direction * Speed;
 
 **예상.** 호드 총수 1만에서 걷는 개체는 프레임 평균 9,866이다. 그 가운데 5,997이 200m 밖이다. 엔진 이동·조향이 처리하는 개체는 3,869로, 39%가 된다. 그 넷의 비용도 39% 근처로 줄 것이다.
 
-## 바꾼 것: Simulation LOD Trait, 청크 필터, Off 이동 프로세서, 엔티티 풀
+## 바꾼 것: Simulation LOD Trait, 청크 필터, Off 이동 Processor, 엔티티 풀
 
-4단계에서 네 가지를 바꿨다. 엔티티 구성에 `ULabSimulationLODTrait`을 붙였다. 자체 접근·범위 피해 프로세서의 쿼리에 청크 필터를 걸었다. 저격과 피격·사망 타이머에는 걸지 않았다. 게임 모듈이 `ULabOffMoveProcessor`를 등록하고 `UMassOffLODNavigationProcessor`를 등록하지 않는다([HordeOptLab.cpp](../../Source/HordeOptLab/HordeOptLab.cpp)). 엔티티 풀의 코드는 아래 "엔티티 풀" 절에 있다.
+4단계에서 네 가지를 바꿨다. 엔티티 구성에 `ULabSimulationLODTrait`을 붙였다. 자체 접근·범위 피해 Processor의 쿼리에 청크 필터를 걸었다. 저격과 피격·사망 타이머에는 걸지 않았다. 게임 모듈이 `ULabOffMoveProcessor`를 등록하고 `UMassOffLODNavigationProcessor`를 등록하지 않는다([HordeOptLab.cpp](../../Source/HordeOptLab/HordeOptLab.cpp)). 엔티티 풀의 코드는 아래 "엔티티 풀" 절에 있다.
 
 `Source/HordeOptLab/LabMassTraits.cpp`, `ULabSimulationLODTrait::ULabSimulationLODTrait`
 
@@ -99,7 +99,7 @@ Query.AddChunkRequirement<FMassSimulationVariableTickChunkFragment>(EMassFragmen
 Query.SetChunkFilter(&FMassSimulationVariableTickChunkFragment::ShouldTickChunkThisFrame);
 ```
 
-이 함수를 부른 쿼리만 간격을 따른다. 이 쿼리를 쓰는 프로세서는 엔진 LOD 그룹 뒤에 돈다고 적었다. 적지 않으면 한 주기를 통째로 건너뛸 수 있다.
+이 함수를 부른 쿼리만 간격을 따른다. 이 쿼리를 쓰는 Processor는 엔진 LOD 그룹 뒤에 돌도록 실행 순서를 지정했다. 지정하지 않으면 한 주기를 통째로 건너뛸 수 있다.
 
 이 단계에서 바뀐 변수는 둘이다. Simulation LOD(Off 이동 포함)와 엔티티 풀이다. 풀만 뺀 사다리 단계는 최종 측정에 없다. 표현, 그림자, 시나리오는 4단계와 같다.
 
@@ -111,13 +111,15 @@ Query.SetChunkFilter(&FMassSimulationVariableTickChunkFragment::ShouldTickChunkT
 
 ![4단계와 5단계의 프레임 시간 중앙값 대 호드 총수. 차이는 5천 +0.09, 1만 −0.85, 2만 −1.49, 3만 −2.01ms다](images/simlod-result.svg)
 
-트레이스에서 게임 스레드의 프레임 평균을 읽었다(Unreal Insights, 호드 총수 1만, Processor를 한 스레드에 돌린 실행이라 위의 측정값과 견주지 않는다). 엔진 이동·조향 Processor 넷(`UMassApplyForceProcessor`, `UMassApplyMovementProcessor`, `UMassSteerToMoveTargetProcessor`, `UMassSmoothOrientationProcessor`)의 합은 4단계에서 프레임당 1.70ms였고, 5단계에서 0.748ms다. 5단계의 합은 4단계의 44.1%다. 처리하는 개체는 39%로 줄었으니, 시간은 예상보다 조금 덜 줄었다. 200m 밖을 움직이는 `LabOffMoveProcessor`는 0.008ms다.
+Unreal Insights로 트레이스에서 게임 스레드의 프레임 평균을 읽었다. 호드 총수 1만에서 Processor를 한 스레드에 돌린 실행이라, 위의 측정값과 견주지 않는다.
+
+엔진 이동·조향 Processor 넷(`UMassApplyForceProcessor`, `UMassApplyMovementProcessor`, `UMassSteerToMoveTargetProcessor`, `UMassSmoothOrientationProcessor`)의 합은 4단계에서 프레임당 1.70ms였고, 5단계에서 0.748ms다. 5단계의 합은 4단계의 44.1%다. 처리하는 개체는 39%로 줄었으니, 시간은 예상보다 조금 덜 줄었다. 200m 밖을 움직이는 `LabOffMoveProcessor`는 0.008ms다.
 
 ![Unreal Insights에서 두 트레이스의 25초부터 75초까지를 고르고 Timers 목록을 Mass로 거른 화면. 위가 4단계, 아래가 5단계다. 빨간 상자가 엔진 이동·조향 Processor 넷이다. 구간 합계의 합은 4단계 8.60초(프레임 5,070개), 5단계 3.95초(5,285개)다](images/insights-movement-processors.jpg)
 
-위 문단의 값은 이 합계를 고른 구간의 프레임 수로 나눈 값이다. 8.60초를 5,070으로 나누면 1.70ms이고, 3.953초를 5,285로 나누면 0.748ms다.
+위 값은 구간 합계를 구간의 프레임 수로 나눈 것이다.
 
-설정한 간격과 실제로 도는 주기는 달랐다. 값은 호드 총수 1만의 것이다. Medium 간격은 0.5초로 두었지만, 실제로는 0.113초마다 돌았다. Off 간격은 1초로 두었지만, 실제로는 0.328초마다 돌았다. 엔진은 엔티티가 드나든 청크를 간격과 상관없이 다음 프레임에 돌린다.
+설정한 간격과 실제로 도는 주기는 달랐다. 호드 총수 1만에서 잰 값이다. Medium 간격은 0.5초로 두었지만, 실제로는 0.113초마다 돌았다. Off 간격은 1초로 두었지만, 실제로는 0.328초마다 돌았다. 엔진은 엔티티가 드나든 청크를 간격과 상관없이 다음 프레임에 돌린다.
 
 `Engine/Plugins/Runtime/MassGameplay/Source/MassLOD/Public/MassLODTickRateController.h`, `TMassLODTickRateController`
 
@@ -131,11 +133,11 @@ bShouldTickThisFrame = TimeUntilNextTick <= 0.0f || LastChunkSerialModificationN
 
 ![최종 구성, Simulation LOD를 뺀 구성, 엔티티 풀을 뺀 구성의 프레임 시간. Simulation LOD를 빼면 +0.754ms, 엔티티 풀을 빼면 −0.070ms로 범위 안이다](images/simlod-ablation.svg)
 
-화면에서 달라진 점은 없다. Off 개체는 평균 0.328초마다 약 0.984m씩 한 번에 옮겨지지만, 그리지 않는 거리다.
+화면에서 달라진 점은 없다. 자체 Processor가 Off 개체를 평균 0.328초마다 약 0.984m씩 한 번에 옮긴다. 이 거리에서는 개체를 그리지 않는다.
 
 ### 엔티티 풀: 16분 동안 돌린 실행에서만 보인다
 
-엔티티 풀이 필요한 이유는 엔진 문제다. 엔진은 ISKM의 애니메이션 트랙을 엔티티마다 할당하고, 파괴된 움직이는 엔티티의 트랙을 돌려받지 않는다. ISKM(Instanced Skinned Mesh)은 스켈레탈 메시를 인스턴스로 그리는 엔진 컴포넌트다. [06번 글](../06-iskm/README.md)에서 30\~200m를 ISKM으로 바꾼다.
+엔티티 풀은 엔진의 트랙 누수를 피하려고 넣었다. 엔진은 ISKM의 애니메이션 트랙을 엔티티마다 할당하고, 파괴된 움직이는 엔티티의 트랙을 돌려받지 않는다. ISKM(Instanced Skinned Mesh)은 스켈레탈 메시를 인스턴스로 그리는 엔진 컴포넌트다. [06번 글](../06-iskm/README.md)에서 30\~200m를 ISKM으로 바꾼다.
 
 `Engine/Plugins/Runtime/MassGameplay/Source/MassRepresentation/Private/MassVisualizationComponent.cpp`, `UMassVisualizationComponent::EndVisualChanges`
 
@@ -170,9 +172,9 @@ if (TrackElementId.IsValid())
 	SharedTrackMap.RemoveByElementId(TrackElementId);
 ```
 
-트랙을 돌려받는 곳은 이 함수뿐이다. 이 함수에 엔티티를 넘기는 것은 정지 표현의 전환 프로세서뿐이다. 같은 문제를 다룬 글이 [Epic 개발자 포럼](https://forums.unrealengine.com/t/mass-crowds-using-skinnedmeshinstance-leak-gpu-memory-every-wave-of-spawned-and-killed-entities-permanently-grows-the-animation-track-pool-5-8/2742508)에 있다. 이 글의 근거는 엔진 소스다.
+트랙을 돌려받는 곳은 이 함수뿐이다. 이 함수에 엔티티를 넘기는 것은 정지 표현의 전환 Processor뿐이다. 같은 문제를 다룬 글이 [Epic 개발자 포럼](https://forums.unrealengine.com/t/mass-crowds-using-skinnedmeshinstance-leak-gpu-memory-every-wave-of-spawned-and-killed-entities-permanently-grows-the-animation-track-pool-5-8/2742508)에 있다. 여기서 든 근거는 위의 엔진 소스다.
 
-이 레포는 죽은 엔티티를 파괴하지 않는다. 상태 프로세서가 사망이 끝난 엔티티를 풀로 넘기고, 재생성이 풀의 엔티티를 먼저 꺼낸다.
+이 레포는 죽은 엔티티를 파괴하지 않는다. 상태 Processor가 사망이 끝난 엔티티를 풀로 넘기고, 재생성이 풀의 엔티티를 먼저 꺼낸다.
 
 `Source/HordeOptLab/LabMassProcessors.cpp`, `ULabMinionStateProcessor::Execute`
 
@@ -223,9 +225,9 @@ for (int32 k = 0; k < NumReuse; ++k)
 
 처음에는 Simulation LOD를 켜고 자체 로직에 틱 간격을 걸면 먼 개체의 비용이 준다고 보았다. 그런데 틱 간격만 건 앞선 변형은 프레임 시간이 줄지 않았다. 간격을 바꿔도 결과는 같았다.
 
-트레이스로 나눠 보니 이유가 셋이었다. 간격을 건 자체 로직은 처음부터 작은 몫이었다. 거리를 계산하는 LOD 프로세서가 그만큼 비용을 더했다. 큰 몫은 엔진 이동·조향이었고, 이 넷은 청크 필터를 쓰지 않아 매 프레임 돌았다.
+트레이스로 나눠 보니 이유가 셋이었다. 간격을 건 자체 로직은 처음부터 작은 몫이었다. 거리를 계산하는 LOD Processor가 그만큼 비용을 더했다. 큰 몫은 엔진 이동·조향이었고, 이 넷은 청크 필터를 쓰지 않아 매 프레임 돌았다.
 
-고친 설명에서 Simulation LOD는 등급, 태그, 틱 간격을 주는 틀이다. 프레임을 줄이는 것은 어느 프로세서가 그 틀로 무엇을 건너뛰느냐다. 200m 밖을 Off로 두어 엔진 이동·조향에서 빼자 비로소 게임 스레드가 줄었다.
+Simulation LOD는 등급과 틱 간격을 정할 뿐이다. 그 값을 읽어 처리를 건너뛰는 Processor가 있어야 프레임이 준다. 200m 밖을 Off로 두어 엔진 이동·조향에서 빼자 게임 스레드가 줄었다.
 
 ## 한 문장으로
 
