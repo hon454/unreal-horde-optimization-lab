@@ -140,6 +140,8 @@ ULabIskmProcessor::ULabIskmProcessor()
 
 void ULabIskmProcessor::ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager)
 {
+	ProcessorRequirements.AddSubsystemRequirement<UMassRepresentationSubsystem>(EMassFragmentAccess::ReadWrite); // 통계용(보이는 청크가 없는 프레임)
+	ProcessorRequirements.AddSubsystemRequirement<ULabCrowdSubsystem>(EMassFragmentAccess::ReadWrite); // HUD 집계와 개발 진단을 쓴다(원자 변수)
 	// 엔진 ISKM 프로세서의 쿼리(MassUpdateSkinnedMeshProcessor.cpp:42-54)에 Lab 표현 상태와 트랙 기록을 더한다.
 	EntityQuery.AddRequirement<FTransformFragment>(EMassFragmentAccess::ReadOnly);
 	EntityQuery.AddRequirement<FMassRepresentationFragment>(EMassFragmentAccess::ReadWrite);
@@ -159,8 +161,8 @@ void ULabIskmProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutio
 {
 	CSV_SCOPED_TIMING_STAT(Lab, IskmUpdate);
 	UWorld* World = Context.GetWorld();
-	const ULabCrowdSubsystem* Crowd = World ? World->GetSubsystem<ULabCrowdSubsystem>() : nullptr;
-	if (!Crowd || !Crowd->IsActive())
+	ULabCrowdSubsystem* Crowd = LabCrowdWrite(Context);
+	if (!Crowd)
 	{
 		return;
 	}
@@ -184,7 +186,7 @@ void ULabIskmProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutio
 #endif
 	int32 TrackWrites = 0;  // 이 프로세서가 기존 트랙에 직접 쓴 수(상태 전환, 풀에서 다시 나옴)
 	int32 TrackFirst = 0;    // 트랙이 없어 엔진이 이 프레임에 만들 수
-	UMassRepresentationSubsystem* RepresentationSubsystemForStats = nullptr;
+	UMassRepresentationSubsystem* RepresentationSubsystemForStats = Context.GetMutableSubsystem<UMassRepresentationSubsystem>(); // 쿼리 밖에서 얻는다
 
 	EntityQuery.ForEachEntityChunk(Context, [&](FMassExecutionContext& Context)
 	{
@@ -338,10 +340,6 @@ void ULabIskmProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutio
 	}
 
 	// plan.md "M5" 결정 8: 트랙 맵 크기와 ISKM 인스턴스 수. 엔진 EndVisualChanges가 이 프로세서 뒤에 돌므로 지난 프레임까지 반영된 값이다.
-	if (!RepresentationSubsystemForStats)
-	{
-		RepresentationSubsystemForStats = World->GetSubsystem<UMassRepresentationSubsystem>();
-	}
 	int32 IskmTracks = 0;
 	int32 IskmInstances = 0;
 	if (RepresentationSubsystemForStats)

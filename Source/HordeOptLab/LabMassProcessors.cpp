@@ -54,13 +54,6 @@ namespace
 		return FMath::Clamp(int32(FMassSimulationVariableTickChunkFragment::GetChunkLOD(Context)), 0, 4);
 	}
 
-	ULabCrowdSubsystem* LabCrowd(FMassExecutionContext& Context)
-	{
-		UWorld* World = Context.GetWorld();
-		ULabCrowdSubsystem* Crowd = World ? World->GetSubsystem<ULabCrowdSubsystem>() : nullptr;
-		return Crowd && Crowd->IsActive() ? Crowd : nullptr;
-	}
-
 	/** 피격·사망에 들어간 개체는 멈춘다. 엔진 이동 프로세서는 코드 구동 태그가 있는 엔티티만 옮긴다(MassMovementProcessors.cpp:88). */
 	void StopMoving(FMassExecutionContext& Context, FMassEntityHandle Entity)
 	{
@@ -81,6 +74,7 @@ ULabApproachProcessor::ULabApproachProcessor()
 
 void ULabApproachProcessor::ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager)
 {
+	ProcessorRequirements.AddSubsystemRequirement<ULabCrowdSubsystem>(EMassFragmentAccess::ReadOnly); // 오브 위치를 읽는다
 	EntityQuery.AddRequirement<FTransformFragment>(EMassFragmentAccess::ReadOnly);
 	EntityQuery.AddRequirement<FMassMoveTargetFragment>(EMassFragmentAccess::ReadWrite);
 	EntityQuery.AddConstSharedRequirement<FLabUnitTypeParams>(EMassFragmentPresence::All);
@@ -101,7 +95,7 @@ void ULabApproachProcessor::ConfigureQueries(const TSharedRef<FMassEntityManager
 
 void ULabApproachProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context)
 {
-	ULabCrowdSubsystem* Crowd = LabCrowd(Context);
+	const ULabCrowdSubsystem* Crowd = LabCrowdRead(Context);
 	if (!Crowd)
 	{
 		return;
@@ -215,6 +209,7 @@ ULabOffMoveProcessor::ULabOffMoveProcessor()
 
 void ULabOffMoveProcessor::ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager)
 {
+	ProcessorRequirements.AddSubsystemRequirement<ULabCrowdSubsystem>(EMassFragmentAccess::ReadOnly); // 오브 위치를 읽는다
 	EntityQuery.AddRequirement<FTransformFragment>(EMassFragmentAccess::ReadWrite);
 	EntityQuery.AddRequirement<FMassDesiredMovementFragment>(EMassFragmentAccess::ReadWrite);
 	EntityQuery.AddRequirement<FLabOffMoveFragment>(EMassFragmentAccess::ReadWrite);
@@ -230,7 +225,7 @@ void ULabOffMoveProcessor::ConfigureQueries(const TSharedRef<FMassEntityManager>
 void ULabOffMoveProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context)
 {
 	CSV_SCOPED_TIMING_STAT(Lab, OffMove);
-	ULabCrowdSubsystem* Crowd = LabCrowd(Context);
+	const ULabCrowdSubsystem* Crowd = LabCrowdRead(Context);
 	if (!Crowd)
 	{
 		return;
@@ -321,6 +316,7 @@ ULabOffMoveEnterObserver::ULabOffMoveEnterObserver()
 
 void ULabOffMoveEnterObserver::ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager)
 {
+	ProcessorRequirements.AddSubsystemRequirement<ULabCrowdSubsystem>(EMassFragmentAccess::ReadOnly); // 개발 확인 로그에만 읽는다
 	EntityQuery.AddRequirement<FLabOffMoveFragment>(EMassFragmentAccess::ReadWrite);
 	EntityQuery.AddRequirement<FTransformFragment>(EMassFragmentAccess::ReadOnly); // 개발 확인 로그에만 읽는다
 }
@@ -337,7 +333,7 @@ void ULabOffMoveEnterObserver::Execute(FMassEntityManager& EntityManager, FMassE
 	const bool bRemoved = Observed && Observed->GetOperationType() == EMassObservedOperation::RemoveElement;
 #if !UE_BUILD_TEST
 	static const bool bLog = FParse::Param(FCommandLine::Get(), TEXT("LabSimLodLog"));
-	const ULabCrowdSubsystem* Crowd = bLog ? World->GetSubsystem<ULabCrowdSubsystem>() : nullptr;
+	const ULabCrowdSubsystem* Crowd = bLog ? Context.GetSubsystem<ULabCrowdSubsystem>() : nullptr;
 #endif
 	EntityQuery.ForEachEntityChunk(Context, [&](FMassExecutionContext& Context)
 	{
@@ -377,6 +373,7 @@ ULabOrbContactProcessor::ULabOrbContactProcessor()
 
 void ULabOrbContactProcessor::ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager)
 {
+	ProcessorRequirements.AddSubsystemRequirement<ULabCrowdSubsystem>(EMassFragmentAccess::ReadWrite); // 사망 수와 번개 대상을 쓴다(ResultLock)
 	EntityQuery.AddRequirement<FTransformFragment>(EMassFragmentAccess::ReadOnly);
 	EntityQuery.AddRequirement<FLabHealthFragment>(EMassFragmentAccess::ReadWrite);
 	EntityQuery.AddRequirement<FLabMinionFragment>(EMassFragmentAccess::ReadWrite);
@@ -394,7 +391,7 @@ void ULabOrbContactProcessor::ConfigureQueries(const TSharedRef<FMassEntityManag
 
 void ULabOrbContactProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context)
 {
-	ULabCrowdSubsystem* Crowd = LabCrowd(Context);
+	ULabCrowdSubsystem* Crowd = LabCrowdWrite(Context);
 	if (!Crowd)
 	{
 		return;
@@ -492,6 +489,7 @@ ULabOrbSnipeProcessor::ULabOrbSnipeProcessor()
 
 void ULabOrbSnipeProcessor::ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager)
 {
+	ProcessorRequirements.AddSubsystemRequirement<ULabCrowdSubsystem>(EMassFragmentAccess::ReadWrite); // 저격 틱을 가져가고 대상 위치를 쓴다(원자 변수, ResultLock)
 	EntityQuery.AddRequirement<FTransformFragment>(EMassFragmentAccess::ReadOnly);
 	EntityQuery.AddRequirement<FLabHealthFragment>(EMassFragmentAccess::ReadOnly);
 	// 순회에서는 Serial만 읽지만 고른 대상의 StateTimeLeft와 표현 상태를 바꾸므로 쓰기로 선언한다(Shabel 12:32, talk-notes.md).
@@ -505,7 +503,7 @@ void ULabOrbSnipeProcessor::ConfigureQueries(const TSharedRef<FMassEntityManager
 
 void ULabOrbSnipeProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context)
 {
-	ULabCrowdSubsystem* Crowd = LabCrowd(Context);
+	ULabCrowdSubsystem* Crowd = LabCrowdWrite(Context);
 	if (!Crowd || Crowd->PendingSnipeTick.load() == 0)
 	{
 		return;
@@ -597,6 +595,7 @@ ULabNearOrbCountProcessor::ULabNearOrbCountProcessor()
 
 void ULabNearOrbCountProcessor::ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager)
 {
+	ProcessorRequirements.AddSubsystemRequirement<ULabCrowdSubsystem>(EMassFragmentAccess::ReadWrite); // Near30을 쓴다(원자 변수)
 	EntityQuery.AddRequirement<FTransformFragment>(EMassFragmentAccess::ReadOnly);
 	EntityQuery.AddTagRequirement<FLabMinionTag>(EMassFragmentPresence::All);
 	EntityQuery.AddTagRequirement<FLabPooledTag>(EMassFragmentPresence::None); // 풀 엔티티는 맵 밖에 서 있어 어차피 세지 않지만 뜻을 분명히 한다
@@ -604,7 +603,7 @@ void ULabNearOrbCountProcessor::ConfigureQueries(const TSharedRef<FMassEntityMan
 
 void ULabNearOrbCountProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context)
 {
-	ULabCrowdSubsystem* Crowd = LabCrowd(Context);
+	ULabCrowdSubsystem* Crowd = LabCrowdWrite(Context);
 	if (!Crowd)
 	{
 		return;
@@ -714,6 +713,7 @@ ULabMinionStateProcessor::ULabMinionStateProcessor()
 
 void ULabMinionStateProcessor::ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager)
 {
+	ProcessorRequirements.AddSubsystemRequirement<ULabCrowdSubsystem>(EMassFragmentAccess::ReadWrite); // 재생성을 맡긴다(지연 커맨드, 게임 스레드)
 	EntityQuery.AddRequirement<FLabMinionFragment>(EMassFragmentAccess::ReadWrite);
 	EntityQuery.AddRequirement<FLabAnimStateFragment>(EMassFragmentAccess::ReadWrite); // 피격 → 사망 전환
 	EntityQuery.AddRequirement<FTransformFragment>(EMassFragmentAccess::ReadOnly);     // 개발용 진단 로그(제거 위치). 쿼리 밖 읽기를 없애려고 선언한다
@@ -732,7 +732,7 @@ void ULabMinionStateProcessor::ConfigureQueries(const TSharedRef<FMassEntityMana
 
 void ULabMinionStateProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context)
 {
-	ULabCrowdSubsystem* Crowd = LabCrowd(Context);
+	ULabCrowdSubsystem* Crowd = LabCrowdWrite(Context);
 	if (!Crowd)
 	{
 		return;
@@ -856,6 +856,7 @@ ULabDamageGenProcessor::ULabDamageGenProcessor()
 
 void ULabDamageGenProcessor::ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager)
 {
+	ProcessorRequirements.AddSubsystemRequirement<ULabCrowdSubsystem>(EMassFragmentAccess::ReadWrite); // DamageHits를 쓴다(원자 변수)
 	EntityQuery.AddRequirement<FLabHealthFragment>(EMassFragmentAccess::ReadWrite);
 	EntityQuery.AddRequirement<FLabMinionFragment>(EMassFragmentAccess::ReadWrite); // E2 (d) 치명 모드가 피격 시간을 쓴다
 	EntityQuery.AddRequirement<FLabAnimStateFragment>(EMassFragmentAccess::ReadWrite); // 치명 모드의 피격 전환
@@ -868,7 +869,7 @@ void ULabDamageGenProcessor::Execute(FMassEntityManager& EntityManager, FMassExe
 {
 	bool bEvent = false;
 	const int32 Rate = LabDamageRate(bEvent);
-	ULabCrowdSubsystem* Crowd = LabCrowd(Context);
+	ULabCrowdSubsystem* Crowd = LabCrowdWrite(Context);
 	if (Rate == 0 || !Crowd || Crowd->GetAliveCount() <= 0)
 	{
 		return;
@@ -957,6 +958,7 @@ ULabDamageApplyProcessor::ULabDamageApplyProcessor()
 
 void ULabDamageApplyProcessor::ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager)
 {
+	ProcessorRequirements.AddSubsystemRequirement<ULabCrowdSubsystem>(EMassFragmentAccess::ReadWrite); // DamageHits를 쓴다(원자 변수)
 	EventQuery.AddRequirement<FLabDamageEventFragment>(EMassFragmentAccess::ReadOnly);
 	HealthQuery.AddRequirement<FLabHealthFragment>(EMassFragmentAccess::ReadWrite);
 	HealthQuery.AddTagRequirement<FLabMinionTag>(EMassFragmentPresence::All);
@@ -964,6 +966,7 @@ void ULabDamageApplyProcessor::ConfigureQueries(const TSharedRef<FMassEntityMana
 
 void ULabDamageApplyProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context)
 {
+	ULabCrowdSubsystem* Crowd = LabCrowdWrite(Context); // 쿼리 밖에서 얻는다
 	TArray<FMassEntityHandle> Consumed;
 	EventQuery.ForEachEntityChunk(Context, [&](FMassExecutionContext& Context)
 	{
@@ -977,7 +980,7 @@ void ULabDamageApplyProcessor::Execute(FMassEntityManager& EntityManager, FMassE
 				if (FLabHealthFragment* Health = EntityManager.GetFragmentDataPtr<FLabHealthFragment>(Event.Target))
 				{
 					Health->Health = FMath::Max(LabNonLethalFloor, Health->Health - Event.Amount);
-					if (ULabCrowdSubsystem* Crowd = LabCrowd(Context)) { ++Crowd->DamageHits; }
+					if (Crowd) { ++Crowd->DamageHits; }
 				}
 			}
 			Consumed.Add(Context.GetEntity(It));

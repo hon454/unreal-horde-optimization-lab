@@ -42,6 +42,7 @@ ULabVatISMProcessor::ULabVatISMProcessor()
 
 void ULabVatISMProcessor::ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager)
 {
+	ProcessorRequirements.AddSubsystemRequirement<ULabCrowdSubsystem>(EMassFragmentAccess::ReadWrite); // HUD 집계와 개발 진단을 쓴다(원자 변수)
 	Super::ConfigureQueries(EntityManager);
 	EntityQuery.AddConstSharedRequirement<FLabUnitTypeParams>(EMassFragmentPresence::All); // 2종: 청크의 종류로 VAT 클립을 고른다
 	if (LabUseOldQueries())
@@ -58,8 +59,8 @@ void ULabVatISMProcessor::Execute(FMassEntityManager& EntityManager, FMassExecut
 {
 	CSV_SCOPED_TIMING_STAT(Lab, VatIsm); // 병목 분석용
 	UWorld* World = Context.GetWorld();
-	const ULabCrowdSubsystem* Crowd = World ? World->GetSubsystem<ULabCrowdSubsystem>() : nullptr;
-	if (!Crowd || !Crowd->IsActive())
+	ULabCrowdSubsystem* Crowd = LabCrowdWrite(Context);
+	if (!Crowd)
 	{
 		return;
 	}

@@ -28,6 +28,7 @@ ULabCrowdFxGatherProcessor::ULabCrowdFxGatherProcessor()
 
 void ULabCrowdFxGatherProcessor::ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager)
 {
+	ProcessorRequirements.AddSubsystemRequirement<ULabCrowdSubsystem>(EMassFragmentAccess::ReadWrite); // CrowdRecsLast를 쓴다(게임 스레드 전용 프로세서)
 	EntityQuery.AddRequirement<FTransformFragment>(EMassFragmentAccess::ReadOnly);
 	EntityQuery.AddRequirement<FMassRepresentationFragment>(EMassFragmentAccess::ReadOnly);
 	EntityQuery.AddRequirement<FLabAnimStateFragment>(EMassFragmentAccess::ReadOnly);
@@ -42,8 +43,8 @@ void ULabCrowdFxGatherProcessor::Execute(FMassEntityManager& EntityManager, FMas
 {
 	CSV_SCOPED_TIMING_STAT(Lab, CrowdFxGather); // 모으기와 Niagara에 넣기를 합친 시간
 	UWorld* World = Context.GetWorld();
-	ULabCrowdSubsystem* Crowd = World ? World->GetSubsystem<ULabCrowdSubsystem>() : nullptr;
-	if (!Crowd || !Crowd->IsActive())
+	ULabCrowdSubsystem* Crowd = LabCrowdWrite(Context);
+	if (!Crowd)
 	{
 		return;
 	}

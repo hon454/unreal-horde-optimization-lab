@@ -96,6 +96,7 @@ ULabActorSyncProcessor::ULabActorSyncProcessor()
 
 void ULabActorSyncProcessor::ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager)
 {
+	ProcessorRequirements.AddSubsystemRequirement<ULabCrowdSubsystem>(EMassFragmentAccess::ReadWrite); // 애니 갱신 통계와 액터 수를 쓴다(원자 변수)
 	EntityQuery.AddRequirement<FTransformFragment>(EMassFragmentAccess::ReadOnly);
 	EntityQuery.AddRequirement<FMassActorFragment>(EMassFragmentAccess::ReadWrite);
 	EntityQuery.AddRequirement<FMassRepresentationFragment>(EMassFragmentAccess::ReadOnly);
@@ -120,8 +121,8 @@ void ULabActorSyncProcessor::Execute(FMassEntityManager& EntityManager, FMassExe
 {
 	CSV_SCOPED_TIMING_STAT(Lab, ActorSync); // 병목 분석용(Exclusive/GameThread/TickActors를 나눠 보려고)
 	UWorld* World = Context.GetWorld();
-	const ULabCrowdSubsystem* Crowd = World ? World->GetSubsystem<ULabCrowdSubsystem>() : nullptr;
-	if (!Crowd || !Crowd->IsActive())
+	ULabCrowdSubsystem* Crowd = LabCrowdWrite(Context);
+	if (!Crowd)
 	{
 		return;
 	}

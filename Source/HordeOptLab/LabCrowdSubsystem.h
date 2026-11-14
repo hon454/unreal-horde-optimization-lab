@@ -3,6 +3,8 @@
 #include "CoreMinimal.h"
 #include "Subsystems/WorldSubsystem.h"
 #include "MassEntityHandle.h"
+#include "MassExecutionContext.h"
+#include "Mass/ExternalSubsystemTraits.h"
 #include "LabSnipe.h"
 #include "LabUnitAssets.h"
 #include "LabCrowdSubsystem.generated.h"
@@ -87,6 +89,7 @@ public:
 	UPROPERTY() TArray<TObjectPtr<UTransformProviderData>> IskmProviders;
 
 	// 프로세서가 쓰고 오브가 읽는다. 청크 단위로 병렬 실행될 수 있어 잠금으로 모은다.
+	// 프로세서가 쓰는 멤버는 이 잠금 안에서 쓰거나 원자 변수다. 그래서 아래 특성의 ThreadSafeWrite가 참이다.
 	FCriticalSection ResultLock;
 	TArray<FVector> SnipeTargets;    // 이번 저격의 대상 위치(이펙트용)
 	bool bHasNearest = false;        // 피해 범위 안에서 가장 가까운 개체(테슬라 코일 번개 대상)
@@ -101,22 +104,22 @@ public:
 	 * 애니 갱신 통계(종류별): 액터×프레임 합, 그중 애니 갱신을 하지 않은 수(보간 + 건너뜀), 그중 보간한 수. 건너뜀 = Skips − Interps.
 	 * ULabActorSyncProcessor가 더하고 게임 모드가 측정 구간 차이를 CSV 메타데이터 LabLargeActor*·LabSmallActor*로 쓴다.
 	 */
-	mutable std::atomic<int64> LargeActorFrames{0};
-	mutable std::atomic<int64> LargeActorSkips{0};
-	mutable std::atomic<int64> LargeActorInterps{0};
-	mutable std::atomic<int64> SmallActorFrames{0};
-	mutable std::atomic<int64> SmallActorSkips{0};
-	mutable std::atomic<int64> SmallActorInterps{0};
+	std::atomic<int64> LargeActorFrames{0};
+	std::atomic<int64> LargeActorSkips{0};
+	std::atomic<int64> LargeActorInterps{0};
+	std::atomic<int64> SmallActorFrames{0};
+	std::atomic<int64> SmallActorSkips{0};
+	std::atomic<int64> SmallActorInterps{0};
 	/** Q5 동등성 통계: 오브 수평 30m 안 엔티티 수(ULabNearOrbCountProcessor가 매 프레임 쓴다, FLabEquivalence). 게임 모드가 CSV 스탯 Lab/Near30으로 남긴다 */
-	mutable std::atomic<int32> Near30{0};
+	std::atomic<int32> Near30{0};
 	/** Q5 HUD: 이 프레임 동기화한 하이드레이션 액터 수(CSV 스탯 Lab/Actors와 같은 값, ULabActorSyncProcessor가 쓴다) */
-	mutable std::atomic<int32> ActorCount{0};
+	std::atomic<int32> ActorCount{0};
 	/**
 	 * 독자용 HUD(Docs/Worklog/Q5-hud.md): 이 프레임 인스턴스로 그린 개체 수(VAT·ISKM 프로세서의 밴드 집계 Lab/IsmBand0~3의 합).
 	 * HUD가 보일 때만 ALabHud가 bHudCounts를 켜고, 꺼져 있으면 프로세서는 이 값을 쓰지 않는다(측정 실행의 동작 그대로).
 	 */
 	std::atomic<bool> bHudCounts{false};
-	mutable std::atomic<int32> HudInstances{0};
+	std::atomic<int32> HudInstances{0};
 	/**
 	 * Q2b 엔티티 구동 입자(-LabCrowdFx=1, -LabCrowdFxEntity=1). 게임 모드가 배경 무리 컴포넌트를 켠 뒤 넣고, ULabCrowdFxGatherProcessor(게임 스레드)가 매 프레임 배열과 시각을 넣는다.
 	 * bCrowdFx*는 에셋에 그 사용자 변수가 있는지(게임 모드가 활성화 전에 한 번 확인한다). 없는 값은 넣지 않는다(없는 이름은 Niagara가 부를 때마다 경고를 남긴다).
@@ -142,7 +145,7 @@ public:
 	 * VAT·ActorSync 프로세서가 GFrameCounter&1 슬롯에 더하고, 게임 모드 Tick이 다음 프레임에 이전 슬롯을 읽고 비운다(두 프로세서의 실행 순서와 무관).
 	 */
 	struct FFrameDiag { std::atomic<int32> NearVat{0}; std::atomic<int32> NearActors{0}; std::atomic<int32> ViewActors{0}; };
-	mutable FFrameDiag FrameDiag[2];
+	FFrameDiag FrameDiag[2];
 #endif
 
 private:
@@ -162,3 +165,36 @@ private:
 	bool bActive = false;
 	int32 AliveCount = 0;
 };
+
+/**
+ * Mass가 프로세서의 의존성과 스레드 배치를 계산할 때 읽는 특성이다(Mass/ExternalSubsystemTraits.h).
+ * GameThreadOnly = false: 이 서브시스템을 요구한다는 이유만으로 프로세서가 게임 스레드에 묶이지 않는다.
+ * ThreadSafeWrite = true: 쓰기 선언(ReadWrite)끼리도 의존성을 만들지 않는다(MassProcessorDependencySolver.cpp GatherSubsystemInformation).
+ * 프로세서가 쓰는 멤버가 모두 ResultLock 안이거나 원자 변수라서 참이다. 잠금 없는 멤버를 프로세서가 쓰게 되면 이 값을 거짓으로 바꾼다.
+ */
+template<>
+struct TMassExternalSubsystemTraits<ULabCrowdSubsystem> final
+{
+	enum
+	{
+		GameThreadOnly = false,
+		ThreadSafeWrite = true,
+	};
+};
+
+/**
+ * 프로세서가 Execute의 첫머리(쿼리 밖)에서 군중 서브시스템을 얻는다. 활성화 전(M0)이면 nullptr이다.
+ * 쓰는 프로세서는 ConfigureQueries에서 ProcessorRequirements.AddSubsystemRequirement<ULabCrowdSubsystem>(ReadWrite)를, 읽기만 하는 프로세서는 ReadOnly를 선언한다.
+ * 선언하지 않은 접근은 엔진이 막는다(FMassSubsystemAccess). 쿼리 안에서는 부르지 않는다. 쿼리는 자기 요구 조건으로 접근 범위를 다시 잡는다(MassEntityQuery.cpp:53).
+ */
+inline ULabCrowdSubsystem* LabCrowdWrite(FMassExecutionContext& Context)
+{
+	ULabCrowdSubsystem* Crowd = Context.GetMutableSubsystem<ULabCrowdSubsystem>();
+	return Crowd && Crowd->IsActive() ? Crowd : nullptr;
+}
+
+inline const ULabCrowdSubsystem* LabCrowdRead(FMassExecutionContext& Context)
+{
+	const ULabCrowdSubsystem* Crowd = Context.GetSubsystem<ULabCrowdSubsystem>();
+	return Crowd && Crowd->IsActive() ? Crowd : nullptr;
+}

@@ -619,7 +619,7 @@ void ALabGameMode::Tick(float DeltaSeconds)
 	static const bool bFrameLog = FParse::Param(FCommandLine::Get(), TEXT("LabFrameLog"));
 	if (bFrameLog)
 	{
-		if (const ULabCrowdSubsystem* Crowd = GetWorld()->GetSubsystem<ULabCrowdSubsystem>(); Crowd && Crowd->IsActive())
+		if (ULabCrowdSubsystem* Crowd = GetWorld()->GetSubsystem<ULabCrowdSubsystem>(); Crowd && Crowd->IsActive())
 		{
 			ULabCrowdSubsystem::FFrameDiag& D = Crowd->FrameDiag[(GFrameCounter - 1) & 1];
 			UE_LOG(LogLab, Log, TEXT("lab_frame frame=%llu near_vat=%d near_actors=%d view_actors=%d"), (unsigned long long)(GFrameCounter - 1), D.NearVat.exchange(0), D.NearActors.exchange(0), D.ViewActors.exchange(0));
