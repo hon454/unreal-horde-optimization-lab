@@ -546,3 +546,21 @@
 | 없는 이름에 대한 순서 선언 | `ExecuteAfter`·`ExecuteBefore`가 등록되지 않은 이름을 가리키면 해결기는 로그(`Unable to find dependency ... Creating a dummy dependency node`)를 남기고 빈 노드를 만든다. 실패하지 않는다 | `Engine/Source/Runtime/MassEntity/Private/MassProcessorDependencySolver.cpp:664,705` |
 | 쿼리의 병렬 순회 끄기 | `ParallelForEachEntityChunk`는 `mass.AllowQueryParallelFor`(기본 true)가 거짓이면 `ForEachEntityChunk`로 돈다. `mass.FullyParallel`은 프로세서를 작업자 스레드로 나누는 값이라 이 값과 따로다 | `Engine/Source/Runtime/MassEntity/Private/MassEntityQuery.cpp:26-31,516,533`, `MassProcessingPhaseManager.cpp:36` |
 | `MurmurFinalize32` | `UE::Private` 이름공간에 있고 전역에서도 부를 수 있다(`LabSnipe.h`가 이미 쓴다) | `Engine/Source/Runtime/Core/Public/Templates/TypeHash.h:17` |
+
+## 38. 액터 캡슐 콜리전과 트레이스 채널(2026-11-15, v2 W5)
+
+줄임말: **E** = `Engine/Source/Runtime/Engine`, **MA** = `Engine/Plugins/Runtime/MassGameplay/Source/MassActors`. Lab의 캡슐 Trace 설정(`ALabMinionMassActor::BeginPlay`)과 저격 캡슐 트레이스(`ALabOrb::TraceSnipeCapsules`)가 이 사실에 기댄다.
+
+| 항목 | 확인한 것 | 위치 |
+| --- | --- | --- |
+| `ACharacter` 캡슐의 기본값 | `Pawn` 프로필, 물리 볼륨 갱신 켬, 내비게이션에 영향 없음(`SetCanEverAffectNavigation(false)`) | `E/Private/Character.cpp:78-84` |
+| `Pawn` 프로필 | `QueryAndPhysics`, 오브젝트 종류 `Pawn`, `Visibility`만 무시이고 나머지 채널은 기본 응답(막음) | `Engine/Config/BaseEngine.ini:3110` |
+| 콜리전 켬·끔과 피직스 상태 | `FBodyInstance::SetCollisionEnabled`는 물리 켬 여부(`QueryAndPhysics` 대 `QueryOnly`·`NoCollision`)가 바뀔 때 컴포넌트의 피직스 상태를 다시 만든다. `NoCollision`이면 `ShouldCreatePhysicsState`가 거짓이라 바디가 없다 | `E/Private/PhysicsEngine/BodyInstance.cpp:742-771`, `E/Private/Components/PrimitiveComponent.cpp:2122-2131,1769-1772` |
+| 이동할 때 바디 변환 | 피직스 상태가 있으면 변환이 바뀔 때마다 `SendPhysicsTransform` → `FBodyInstance::SetBodyTransform` → `SetGlobalPose`를 부른다. `QueryOnly` 캡슐은 이동마다 이 일을 하고 `NoCollision` 캡슐은 하지 않는다 | `E/Private/Components/PrimitiveComponent.cpp:1061-1083`, `E/Private/PhysicsEngine/BodyInstance.cpp:2767-2840` |
+| 스윕 없는 이동의 오버랩 | `MoveComponentImpl`의 스윕 없는 길은 위치만 바꾼다. 뒤의 `UpdateOverlapsImpl`은 `GetGenerateOverlapEvents()`가 거짓이면 오버랩을 모으지 않는다 | `E/Private/Components/PrimitiveComponent.cpp:3312-3317,4464-4483` |
+| 액터 단위 콜리전 끄기 | `AActor::SetActorEnableCollision`은 컴포넌트마다 `OnActorEnableCollisionChanged` → `UpdatePhysicsFilterData`를 부른다. 바디는 남고 쿼리 필터만 바뀐다 | `E/Private/PrimitiveComponentPhysics.cpp:1428-1432` |
+| Mass 액터 풀의 콜리전 | 풀에 넣을 때(`ReleaseActorToPool`) 액터를 숨기기만 하고 콜리전은 그대로 둔다. 꺼낼 때(`SpawnOrRetrieveFromPool`) 보이게 하고 `ResetPhysics`로 옮긴다. `SetActorEnableCollision(true)`는 GUID 이름으로 찾은 액터에만, `false`는 풀에 넣지 못한 액터에만 부른다 | `MA/Private/MassActorSpawnerSubsystem.cpp:119-145,235-255,327,536` |
+| 엔티티에서 액터 찾기 | `UMassActorSubsystem::GetActorFromHandle`은 엔티티의 `FMassActorFragment`를 엔티티 관리자에서 바로 읽는다 | `MA/Private/MassActorSubsystem.cpp:144-149`, `MA/Public/MassActorSubsystem.h:203` |
+| `p.Chaos.AccelerationStructureIsolateQueryOnlyObjects` | 기본 0. 1이면 QueryOnly 바디를 가속 구조의 따로 된 칸(`DefaultQueryOnly`·`DynamicQueryOnly`)에 넣는다. 그 칸을 건너뛰는 곳은 시뮬레이션 겹침 검사(`FSimOverlapVisitor`)뿐이고 씬 쿼리는 모든 칸을 본다. 칸은 물리 씬을 만들 때 생기므로 게임 시작 전에 넣어야 한다(`p.BroadphaseType` 기본 `Tree`일 때만 칸이 생긴다) | `Engine/Source/Runtime/Experimental/Chaos/Private/Chaos/PBDRigidsEvolution.cpp:37-38,92-126`, `Engine/Source/Runtime/PhysicsCore/Private/ChaosEngineInterface.cpp:2453-2490`, `Engine/Source/Runtime/Experimental/Chaos/Public/Chaos/SpatialAccelerationCollection.h:544-560`, `Public/Chaos/PBDRigidsEvolution.h:46-65` |
+| 스켈레탈 메시 바운드 | `USkeletalMeshComponent::CalcBounds`는 로컬 바운드 캐시가 맞으면 변환만 곱한다. 아니면 `CalcMeshBound`가 `bComponentUseFixedSkelBounds`이면 메시의 고정 바운드를, 아니면 피직스 에셋의 바디로 `CalcAABB`를 셈한다 | `E/Private/Components/SkeletalMeshComponent.cpp:3417-3445`, `E/Private/Components/SkinnedMeshComponent.cpp:2225-2283` |
+| 사용자 트레이스 채널 | `[/Script/Engine.CollisionProfile]`의 `+DefaultChannelResponses=(Channel=ECC_GameTraceChannel<n>,DefaultResponse=…,bTraceType=True,bStaticObject=False,Name="…")`. 기본 응답을 무시로 두면 프로필이 따로 막게 하지 않은 것은 모두 무시한다. Lyra는 캡슐만 막는 무기 트레이스 채널(`Lyra_TraceChannel_Weapon_Capsule`)을 이렇게 둔다 | `E/Classes/Engine/CollisionProfile.h:96-124`, `Samples/Games/Lyra/Config/DefaultEngine.ini:218,224` |

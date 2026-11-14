@@ -1,0 +1,19 @@
+﻿{
+    "batch":  "V2W5Trace",
+    "build":  "c79ee55dabc1a3baa6510e4d32c0ee463675d421 (dirty)",
+    "start":  "2026-11-15 06:39:07",
+    "end":  "2026-11-15 06:47:30",
+    "n":  10000,
+    "preset":  "P3",
+    "radius_m":  "57.3",
+    "height_m":  "6",
+    "speeds":  [
+                   "2"
+               ],
+    "duration_sec":  60,
+    "runs":  1,
+    "planned":  4,
+    "ok":  4,
+    "failed":  0,
+    "gave_up":  0
+}
