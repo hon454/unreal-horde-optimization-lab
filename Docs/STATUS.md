@@ -15,7 +15,7 @@
 
 ## 다음 할 일
 
-1. 코디네이터가 [v2-plan.md](v2-plan.md)의 작업 단위를 W5부터 하나씩 맡긴다. W1\~W4는 끝났다(0ae4f8e까지, [Worklog/V2.md](Worklog/V2.md)). 총괄 묶음(W13)부터는 사용자 검토 뒤에 한다.
+1. 코디네이터가 [v2-plan.md](v2-plan.md)의 작업 단위를 W6부터 하나씩 맡긴다. W1\~W5는 끝났다(4308932까지, [Worklog/V2.md](Worklog/V2.md)). 총괄 묶음(W13)부터는 사용자 검토 뒤에 한다.
 2. 사용자가 [v2-spec.md](v2-spec.md), [v2-plan.md](v2-plan.md), 결정 D33부터([autonomous-decisions.md](Worklog/autonomous-decisions.md))를 검토한다.
 
 사용자가 자리를 비운 동안 코디네이터가 추천안으로 진행한다(2026-11-15 사용자 지시, D33). 두 문서는 잠정 확정이다.
@@ -36,7 +36,9 @@
 | 엔진 회피(`-LabAvoid=1`) | 10,835 | 17.96ms |
 
 - `-LabAvoid`의 기본값은 0이다(D43).
-- `-LabSeparate`의 기본값은 W5의 첫 단계에서 1로 바꾼다(D45).
+- `-LabSeparate`의 기본값은 1이다(72f8095, D45).
+- 액터의 캡슐은 기본으로 켜져 있다(c79ee55, D46).
+- 캡슐을 켠 프레임 p95는 15.87ms다(묶음 `V2W5Cost`). 목표까지 0.83ms 남는다.
 
 사용자 요구(ISKM 번쩍임 제거, 움직이는 오브용 기법, 양방향 전환, 오브·카메라 HUD)는 [v2-spec.md](v2-spec.md) 4절과 6절에 있다.
 
@@ -58,7 +60,7 @@
 
 | 세션 | 작업 단위 | 모델 | 상태 |
 | --- | --- | --- | --- |
-| w5-capsule | W5 캡슐과 액터 비용([v2-plan.md](v2-plan.md)) | Opus high, 하위 에이전트 | 시작 |
+| w6-actor | W6 액터 기준선([v2-plan.md](v2-plan.md)) | Opus high, 하위 에이전트 | 시작 |
 
 코디네이터는 세션을 띄우면 여기에 적는다. 끝난 세션은 결과를 확인하고 보관한 뒤 지운다.
 
