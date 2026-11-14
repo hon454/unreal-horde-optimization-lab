@@ -4,13 +4,11 @@
 
 ## 단계
 
-- 마일스톤 M0\~M5, M3b와 품질 계획 Q1\~Q6은 끝났다. 총괄 묶음은 `Full3`이다.
-- 글 00\~09의 초안, Releases, 사이트는 끝났다. 경위는 [Worklog/Posts.md](Worklog/Posts.md)에 있다.
-- 사용자가 2026-11-14에 글 00\~09의 검토를 끝냈다.
-- Q7(예산 재측정, `Full3`)과 Q8(매니저 변형, 글 02 보강)은 끝났다. 경위는 [Worklog/Q7.md](Worklog/Q7.md)와 [Worklog/Q8.md](Worklog/Q8.md)에 있다.
+- 마일스톤 M0\~M5, M3b와 품질 계획 Q1\~Q8은 끝났다. 총괄 묶음은 `Full3`이다.
+- 글 00\~09, Releases, 사이트는 끝났고 사용자 검토도 끝났다([Worklog/Posts.md](Worklog/Posts.md)).
 - 방향은 목표 사양(호드 총수 1만, 60fps) 안에서 거리별 품질을 확보하는 것이다([ADR-0009](Decisions/0009-flat-scenario-quality-by-distance.md)).
 - 계획은 [plan.md](plan.md) "품질 계획"에 있다. 경위는 `Worklog/M<N>.md`와 `Worklog/Q<N>.md`에 있다.
-- 코디네이터가 묻지 않고 내린 결정은 [autonomous-decisions.md](Worklog/autonomous-decisions.md) D20\~D32에 있다. 사용자가 2026-11-14에 검토를 끝냈다.
+- 코디네이터가 묻지 않고 내린 결정은 [autonomous-decisions.md](Worklog/autonomous-decisions.md)에 있다.
 
 ## 다음 할 일
 
@@ -37,8 +35,6 @@
 | 세션 | 작업 단위 | 모델 | 상태 |
 | --- | --- | --- | --- |
 | 없음 | | | |
-
-벤치 끝의 종료 코드는 늘 0이다. 러너는 실패를 `LabOk`와 CSV 유무로 판정한다([Worklog/Q7.md](Worklog/Q7.md) "종료 코드").
 
 코디네이터는 세션을 띄우면 여기에 적는다. 끝난 세션은 결과를 확인하고 보관한 뒤 지운다.
 
@@ -118,17 +114,7 @@ py -3 -I Scripts/check-tilde.py
 - 모든 행의 병목이 Game이다. 이 묶음 안에서만 비교한다.
 - `A8-hydrate`는 프레임 p50이 −3.73ms다. `Full2` 때의 참고값이다.
 
-참고 묶음 `Mgr1`(Test 패키지 28346dc, P1, [Worklog/Q8.md](Worklog/Q8.md) "측정: Mgr1"):
-
-| 조건 | Game p50 1만 | Game p50 2만 | 프레임 p50 1만 | 프레임 p50 2만 |
-| --- | --- | --- | --- | --- |
-| `manager` | 5.27 | 9.89 | 10.14 | 14.98 |
-| 2단계 | 6.22 | 12.18 | 9.89 | 15.09 |
-| 2단계 직렬 | 6.46 | 12.87 | 10.00 | 14.83 |
-
-- 세 조건의 병목은 GPU다. 프레임 p50은 구별되지 않는다([measurement.md](Guides/measurement.md) "차이 판정").
-- 초당 사망 수와 살아 있는 총수는 세 조건이 같다.
-- 트레이스 한 회에서 Game 차이의 91%는 Mass 처리 단계 둘이 매니저 틱 하나로 바뀐 데서 나온다.
+참고 묶음 `Mgr1`(글 02 보강)의 세 조건은 프레임 p50이 구별되지 않는다([Worklog/Q8.md](Worklog/Q8.md) "측정: Mgr1").
 
 엔티티 풀 묶음 `Pool1`(16분 실행 두 번):
 
