@@ -13,6 +13,9 @@
 #include "AnimToTextureDataAsset.h"
 #include "Animation/AnimSequenceTransformProviderData.h"
 #include "Engine/World.h"
+#include "ProfilingDebugging/CsvProfiler.h"
+
+CSV_DECLARE_CATEGORY_EXTERN(Lab);
 
 namespace
 {
@@ -292,6 +295,32 @@ ALabMinion* ALabCrowdSpawner::SpawnAt(float Radius, float Angle)
 	Minion->InitMinion(this, FLabUnitTypes::IsLarge(Serial) ? LargeAssets : Assets, Serial); // M0 2종: 대형 에셋(없으면 소형과 같다)
 	Minions.Add(Minion);
 	return Minion;
+}
+
+void ALabCrowdSpawner::SampleActorOverlaps(double Now)
+{
+	if (Now < NextOverlapSample)
+	{
+		return;
+	}
+	NextOverlapSample = Now + LabOverlapSampleSec;
+	CSV_SCOPED_TIMING_STAT(Lab, OverlapCount); // Mass 단계의 ULabOverlapCountProcessor와 같은 이름
+	OverlapBodies.Reset();
+	float MaxRadius = 0.f;
+	for (const ALabMinion* Minion : Minions)
+	{
+		if (!Minion || Minion->IsDead())
+		{
+			continue;
+		}
+		const FVector Location = Minion->GetActorLocation();
+		FLabBody& Body = OverlapBodies.AddDefaulted_GetRef();
+		Body.X = float(Location.X);
+		Body.Y = float(Location.Y);
+		Body.Radius = FLabUnitAssetPaths::Get(Minion->GetUnitType()).BoundRadius;
+		MaxRadius = FMath::Max(MaxRadius, Body.Radius);
+	}
+	LabCountOverlaps(OverlapBodies, MaxRadius, ActorOverlapPairs, ActorOverlapDeep);
 }
 
 void ALabCrowdSpawner::OnMinionFinished(ALabMinion* Minion)

@@ -3,6 +3,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "LabMinion.h"
+#include "LabOverlap.h"
 #include "LabCrowdSpawner.generated.h"
 
 /**
@@ -30,6 +31,14 @@ public:
 	int32 GetAliveCount() const;
 	int32 GetRespawnCount() const { return RespawnCount; }
 
+	/**
+	 * v2 W6: M0 액터의 겹친 쌍(LabOverlap.h, Mass의 ULabOverlapCountProcessor와 같은 정의). 게임 모드 틱이 매 프레임 부르고 LabOverlapSampleSec마다 센다.
+	 * 몸통은 액터 위치(캡슐 중심)의 수평 원이고 반지름은 종류별 BoundRadius(소형 40, 대형 94)다. 사망 중인 개체는 뺀다
+	 */
+	void SampleActorOverlaps(double Now);
+	int32 GetActorOverlapPairs() const { return ActorOverlapPairs; }
+	int32 GetActorOverlapDeep() const { return ActorOverlapDeep; }
+
 protected:
 	ALabMinion* SpawnAt(float Radius, float Angle);
 	TSubclassOf<ALabMinion> MinionClass() const;
@@ -45,4 +54,8 @@ protected:
 	FRandomStream Stream;
 	uint32 NextSerial = 0;
 	int32 RespawnCount = 0;
+	TArray<FLabBody> OverlapBodies; // v2 W6 M0 겹친 쌍 표본(SampleActorOverlaps)
+	double NextOverlapSample = 0.;
+	int32 ActorOverlapPairs = 0;
+	int32 ActorOverlapDeep = 0;
 };

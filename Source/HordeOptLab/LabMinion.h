@@ -43,7 +43,8 @@ inline void LabExcludeFromLumen(UPrimitiveComponent& Component)
 
 /**
  * M0 액터 군중의 개체. 오브로 직진하고, 소멸 반경에 들거나 저격되면 죽는 애니 뒤 사라진다.
- * AI 컨트롤러 없이 CharacterMovement가 직접 돈다(bRunPhysicsWithNoController). 개체끼리는 충돌하지 않는다(회피 없음, plan.md M1 (c)).
+ * AI 컨트롤러 없이 CharacterMovement가 직접 돈다(bRunPhysicsWithNoController).
+ * v2 W6부터 개체끼리 캡슐로 막는다(겹침 방지, 캡슐 반지름 = 몸통 반지름, InitMinion). -LabSeparate=0이면 W5까지처럼 서로 무시한다.
  */
 UCLASS()
 class ALabMinion : public ACharacter
@@ -60,6 +61,8 @@ public:
 	void Snipe();
 
 	bool IsAlive() const { return State == ELabMinionState::Walk; }
+	/** 사망 중(겹친 쌍에서 뺀다, Mass의 FLabDeadTag와 같은 뜻). 피격 중인 개체는 센다 */
+	bool IsDead() const { return State == ELabMinionState::Dead; }
 	uint32 GetSerial() const { return Serial; }
 	/** 종류(ELabUnitType, LabUnitAssets.h). M0는 InitMinion이 일련번호로 정하고, M3 하이드레이션 액터는 클래스(…Large)가 정한다. 저격 E안이 읽는다 */
 	int32 GetUnitType() const { return UnitType; }

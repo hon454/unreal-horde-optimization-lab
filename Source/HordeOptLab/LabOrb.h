@@ -36,6 +36,7 @@ public:
 	 * v2 W5 저격 캡슐 트레이스의 누적 수(Docs/v2-spec.md 3절 기능 3). 액터 구간의 대상(하이드레이션 액터가 붙은 엔티티)마다 구체에서 액터 캡슐 중심까지
 	 * LabSnipe 채널로 한 번 쏜다. 대상은 실제 저격 대상 중 액터가 붙은 것(SnipeTraces)과 저격 틱마다 하나의 확인 대상(LabCrowdSubsystem.h CapsuleCheckEntities)이다.
 	 * Hits: 처음 맞은 것이 그 대상의 캡슐. Blocked: 다른 액터의 캡슐이 먼저 맞았다. 빗나감 = Traces − Hits − Blocked.
+	 * M0(v2 W6)는 모든 개체가 액터라 저격 대상 전부와 같은 규칙의 확인 대상 하나에 쏜다(ALabOrb::Snipe).
 	 * 확인용이라 저격의 대상과 결과는 바꾸지 않는다. CSV 스탯 Lab/CapsuleTraces·Lab/CapsuleHits·Lab/CapsuleBlocked(누적), 메타데이터 LabCapsule*(측정 구간 증가분)
 	 */
 	struct FLabCapsuleTraceStats { int32 Traces = 0; int32 Hits = 0; int32 Blocked = 0; int32 SnipeTraces = 0; };
@@ -69,6 +70,10 @@ protected:
 	void TickStrikes(float DeltaSeconds);
 	/** v2 W5: 저격 대상 엔티티 중 액터가 붙은 것에 캡슐 트레이스를 쏘고 센다(게임 스레드, TickMass). 위 GetCapsuleTraceStats */
 	void TraceSnipeCapsules(TConstArrayView<FMassEntityHandle> SnipeTargets, TConstArrayView<FMassEntityHandle> CheckTargets);
+	/** 구체에서 대상 액터의 캡슐 중심까지 LabSnipe 채널로 한 번 쏘고 센다. Mass 단계(TraceSnipeCapsules)와 M0(Snipe, v2 W6)가 같이 쓴다 */
+	void TraceCapsule(const AActor* Target, bool bSnipeTarget);
+	/** 누적 캡슐 트레이스 수를 CSV 스탯 Lab/CapsuleTraces·Lab/CapsuleHits·Lab/CapsuleBlocked로 쓴다(매 프레임) */
+	void WriteCapsuleStats() const;
 	FLabCapsuleTraceStats CapsuleTraceStats;
 
 	static constexpr float StrikeDuration = 0.3f;  // 저격 궤적이 남아 있는 시간

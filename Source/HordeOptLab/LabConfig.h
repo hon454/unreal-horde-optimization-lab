@@ -295,7 +295,8 @@ struct FLabConfig
 	bool bAvoid = false;
 	/**
 	 * v2 W4 겹침 방지, 직접 구현(-LabSeparate=0/1, Docs/v2-spec.md 3절, Docs/Worklog/V2.md "W4"). 1이면 ULabSeparationProcessor가 겹친 개체의 위치를 직접 떼어 놓는다.
-	 * 기본 1(v2 W5부터, D45). -LabSeparate=0이 끈다. Mass 단계(M1~M5)에서만 뜻이 있다. 엔진 회피(-LabAvoid)와 따로 켜고 끈다. CSV 메타데이터 LabTechSeparate.
+	 * 기본 1(v2 W5부터, D45). -LabSeparate=0이 끈다. 엔진 회피(-LabAvoid)와 따로 켜고 끈다. CSV 메타데이터 LabTechSeparate.
+	 * M0(v2 W6)에서는 분리 프로세서가 아니라 액터 캡슐끼리 막기를 켜고 끈다(UsesActorBlocking).
 	 */
 	bool bSeparate = true;
 	/** 분리 파라미터(LabSeparation.h). Test 빌드는 기본값만 쓴다. 개발 빌드는 -LabSepIter=, -LabSepRelax=, -LabSepMaxStep=, -LabSepVel=로 바꿔 본다 */
@@ -378,7 +379,8 @@ struct FLabConfig
 	 * Off: NoCollision + 오버랩·물리 볼륨 갱신 끔(옛 m3nocol 처리). QueryOnly: 같은 두 갱신 끔 + QueryOnly(m3colquery). On: ACharacter 캡슐의 Pawn 프로필 그대로
 	 * (Mass 액터 풀이 꺼낼 때 SetActorEnableCollision(true)를 부른다, MassActorSpawnerSubsystem.cpp:327).
 	 * 변형 기본값: m3colquery는 QueryOnly, 라벨 m3colbase는 On(E3 (6)의 "그대로" 기준점의 뜻을 지킨다), 그 밖은 Off. -LabActorCollision=1이 켜고 =0이 끈다(인자가 이긴다).
-	 * 판정(범위 피해, 저격)은 엔티티 위치의 수평 거리로 하고 캡슐을 쓰지 않는다. M0 액터(ALabMinion, CharacterMovement가 캡슐로 바닥을 찾는다)는 이 값과 무관하게 늘 켬이다.
+	 * 판정(범위 피해, 저격)은 엔티티 위치의 수평 거리로 하고 캡슐을 쓰지 않는다. M0 액터(ALabMinion, CharacterMovement가 캡슐로 바닥을 찾는다)는 이 값과 무관하게 늘 켬이다
+	 * (v2 W6: Pawn 프로필 + 저격 채널 막음, 메타데이터 "pawn", ALabMinion::InitMinion).
 	 * v2 W5(Docs/v2-spec.md 3절 기능 3, Docs/Worklog/V2.md "W5"): 기본이 Trace다. QueryOnly + 모든 채널 무시 + 저격 트레이스 채널(LabSnipe, LabSnipe.h)만 막음, 오버랩·물리 볼륨 갱신 끔.
 	 * 캡슐끼리는 서로 무시하고 이동은 스윕 없는 텔레포트라 밀지 않는다. 오브가 액터 구간의 저격 대상에 이 채널로 라인 트레이스를 쏴 맞는지 센다(ALabOrb::TraceSnipeCapsules).
 	 * -LabActorCollision=0 끔, =1 Pawn 프로필 켬(옛 S8-col), =2 Trace. m3colquery·m3colbase는 옛 값 그대로다.
@@ -441,6 +443,11 @@ struct FLabConfig
 	bool UsesAvoidance() const;
 	/** 겹친 개체를 직접 떼어 놓는가(기본 참, -LabSeparate=0이면 거짓, ULabSeparationProcessor 등록 조건). M0에는 Mass가 없다 */
 	bool UsesSeparation() const { return Stage != ELabStage::M0 && bSeparate && !UsesManager(); }
+	/**
+	 * v2 W6 액터 기준선의 겹침 방지(Docs/Worklog/V2.md "W6"). M0 액터의 캡슐이 서로(Pawn 채널) 막고 CharacterMovement가 스윕 이동으로 비켜 미끄러진다.
+	 * 캡슐 반지름은 몸통 반지름(소형 40, 대형 94)이다. 기본 참, -LabSeparate=0이면 캡슐끼리 무시한다(W5까지의 M0). CSV 메타데이터 LabTechSeparate는 둘 중 하나가 켜지면 1이다
+	 */
+	bool UsesActorBlocking() const { return Stage == ELabStage::M0 && bSeparate; }
 	/** 변형에서 정한 M4 틱 간격과 회피 여부(UsesSimLod일 때만 뜻이 있다) */
 	FLabSimLod SimLod() const;
 	/** 로그와 CSV 메타데이터용. "80/200m tick=0/0.5/1.0 avoid=0" 꼴, M3까지는 "-" */

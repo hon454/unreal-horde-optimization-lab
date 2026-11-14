@@ -9,6 +9,8 @@
 param(
     [string]$Batch = "Spike1",
     [int]$N = 10000,
+    # v2 W6: 쉼표로 이은 개체 수. 주면 -N 대신 N마다 조건이 갈린다(라벨의 N<N>, summarize.py는 N을 조건 열로 가른다). 예: "500,1000,2000"
+    [string]$Ns = "",
     [Parameter(Mandatory = $true)][string]$RadiusM,
     [Parameter(Mandatory = $true)][string]$HeightM,
     # 쉼표로 이은 궤도 속도(m/s). 예: "0,1.5,3,6". -File로 부를 때 배열이 한 문자열로 넘어오므로 문자열로 받는다
@@ -59,26 +61,30 @@ $ConfigTable = @(
     @{ Name = "finalnosepser"; Args = @("-LabStage=M5", "-LabVariant=q4final", "-LabSeparate=0", "-LabFullyParallel=0"); Expect = @("LabStage=M5", "LabVariant=q4final", "LabTechAvoid=0", "LabTechSeparate=0") },
     @{ Name = "finalavser"; Args = @("-LabStage=M5", "-LabVariant=q4final", "-LabAvoid=1", "-LabSeparate=0", "-LabFullyParallel=0"); Expect = @("LabStage=M5", "LabVariant=q4final", "LabTechAvoid=1", "LabTechSeparate=0") },
     @{ Name = "m1ser"; Args = @("-LabStage=M1", "-LabVariant=m1mass", "-LabFullyParallel=0"); Expect = @("LabStage=M1", "LabTechAvoid=0", "LabTechSeparate=1") },
-    @{ Name = "m1avser"; Args = @("-LabStage=M1", "-LabVariant=m1mass", "-LabAvoid=1", "-LabSeparate=0", "-LabFullyParallel=0"); Expect = @("LabStage=M1", "LabTechAvoid=1", "LabTechSeparate=0") }
+    @{ Name = "m1avser"; Args = @("-LabStage=M1", "-LabVariant=m1mass", "-LabAvoid=1", "-LabSeparate=0", "-LabFullyParallel=0"); Expect = @("LabStage=M1", "LabTechAvoid=1", "LabTechSeparate=0") },
+    # v2 W6 액터 기준선(사다리 1단계). 캡슐끼리 막기(LabTechSeparate=1), 캡슐 Pawn 프로필 + 저격 채널(LabActorCollision=pawn). m0nosep은 캡슐끼리 무시(W5까지의 M0)
+    @{ Name = "m0"; Args = @("-LabStage=M0", "-LabVariant=full"); Expect = @("LabStage=M0", "LabVariant=full", "LabLadder=1", "LabTechSeparate=1", "LabActorCollision=pawn") },
+    @{ Name = "m0nosep"; Args = @("-LabStage=M0", "-LabVariant=full", "-LabSeparate=0"); Expect = @("LabStage=M0", "LabVariant=full", "LabTechSeparate=0", "LabActorCollision=pawn") }
 )
 $ConfigNames = @($Configs -split "," | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne "" })
 $UseConfigs = @($ConfigTable | Where-Object { $ConfigNames -contains $_.Name })
 if ($UseConfigs.Count -ne $ConfigNames.Count) { Write-Host "FAIL: unknown config in -Configs '$Configs' ($(($ConfigTable | ForEach-Object { $_.Name }) -join ', '))"; exit 1 }
 $SpeedList = @($Speeds -split "," | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne "" })
+$NList = if ($Ns) { @($Ns -split "," | ForEach-Object { [int]$_.Trim() } | Where-Object { $_ -gt 0 }) } else { @($N) }
 $Conds = @()
 for ($i = 0; $i -lt $SpeedList.Count; $i++) {
-    foreach ($c in $UseConfigs) { $Conds += @{ Step = "V$i"; Speed = $SpeedList[$i]; Config = $c } }
+    foreach ($c in $UseConfigs) { foreach ($n in $NList) { $Conds += @{ Step = "V$i"; Speed = $SpeedList[$i]; Config = $c; N = $n } } }
 }
-function Label-Of($c, $run) { return "$Batch-$($c.Step)-$($c.Config.Name)-N$N-P1-r$run" }
+function Label-Of($c, $run) { return "$Batch-$($c.Step)-$($c.Config.Name)-N$($c.N)-P1-r$run" }
 function Get-GameArgs($c, $label) {
-    $a = @($Doc.common_args) + @($c.Config.Args) + @("-LabN=$N", "-LabPreset=1", "-LabLabel=$label",
+    $a = @($Doc.common_args) + @($c.Config.Args) + @("-LabN=$($c.N)", "-LabPreset=1", "-LabLabel=$label",
         "-LabOrbOrbitRadius=$RadiusM", "-LabOrbOrbitSpeed=$($c.Speed)", "-LabOrbHeight=$HeightM", "-LabDuration=$DurationSec")
     if ($WarmupSec -ge 0) { $a += "-LabWarmup=$WarmupSec" }
     if ($Trace) { $a += @("-trace=cpu,gpu,frame,counters,mass", "-tracefile=`"$ProjectDir\Saved\Traces\$label.utrace`"") }
     return $a
 }
 function Get-Expect($c, $label) {
-    return @("LabOrbit=r$RadiusM/v$($c.Speed)/h$HeightM", "LabPreset=P1", "LabN=$N", "LabLabel=$label", "LabAlive=$N", "LabOk=1",
+    return @("LabOrbit=r$RadiusM/v$($c.Speed)/h$HeightM", "LabPreset=P1", "LabN=$($c.N)", "LabLabel=$label", "LabAlive=$($c.N)", "LabOk=1",
         "LabTypes=2", "LabTypesAssets=ok", "LabHud=0", "LabShotAt=0") + @($c.Config.Expect)
 }
 
@@ -92,7 +98,7 @@ for ($r = 1; $r -le $Runs; $r++) {
 
 if ($DryRun) {
     $est = [math]::Round($Jobs.Count * ($StartupSec + $WarmupEst + $DurationSec + 2) / 60.0, 1)
-    Write-Host "DRYRUN batch=$Batch N=$N radius=${RadiusM}m height=${HeightM}m speeds=$($SpeedList -join '/') conds=$($Conds.Count) runs=$($Jobs.Count) est=${est} min"
+    Write-Host "DRYRUN batch=$Batch N=$($NList -join '/') radius=${RadiusM}m height=${HeightM}m speeds=$($SpeedList -join '/') conds=$($Conds.Count) runs=$($Jobs.Count) est=${est} min"
     foreach ($s in $SpeedList) {
         if ([double]$s -gt 0) { $T = 2 * [math]::PI * [double]$RadiusM / [double]$s; Write-Host ("  speed {0} m/s: period {1:N2} s, laps in {2} s = {3:N3}" -f $s, $T, $DurationSec, ($DurationSec / $T)) }
     }
@@ -184,7 +190,7 @@ function Invoke-Run($c, $run) {
     }
     $st = if ($reason) { "FAIL" } elseif ($run -eq 0) { "DISCARD" } else { "OK" }
     Add-Content -Path $ProgressLog -Encoding UTF8 -Value ("{0}`t{1}`t{2}`t{3}`t{4}`t{5}" -f (Now), $Label, $st, $p50, $p95, (Clean $reason))
-    if ($reason) { Add-Content -Path $FailuresCsv -Encoding UTF8 -Value ("{0},{1},{2},{3},P1,spike,{4}" -f (Now), $Label, "$($c.Step)-$($c.Config.Name)", $N, (Clean $reason)) }
+    if ($reason) { Add-Content -Path $FailuresCsv -Encoding UTF8 -Value ("{0},{1},{2},{3},P1,spike,{4}" -f (Now), $Label, "$($c.Step)-$($c.Config.Name)", $c.N, (Clean $reason)) }
     Write-Host "$st $Label p50=$p50 p95=$p95 $reason"
     return (-not $reason)
 }
@@ -201,7 +207,7 @@ $GaveUp = 0
 foreach ($j in $Retry) {
     if (Invoke-Run $j.Cond ($j.Run + $Runs)) { $Ok++ } else { $GaveUp++; Write-Host "GIVEUP $(Label-Of $j.Cond ($j.Run + $Runs))" }
 }
-$Info = [ordered]@{ batch = $Batch; build = $Commit; start = $Start; end = (Now); n = $N; preset = "P3"; radius_m = $RadiusM; height_m = $HeightM; speeds = $SpeedList;
+$Info = [ordered]@{ batch = $Batch; build = $Commit; start = $Start; end = (Now); n = ($NList -join ","); preset = "P3"; radius_m = $RadiusM; height_m = $HeightM; speeds = $SpeedList;
     duration_sec = $DurationSec; runs = $Runs; planned = $Jobs.Count; ok = $Ok; failed = $Fail; gave_up = $GaveUp }
 $Info | ConvertTo-Json | Set-Content -Path "$BatchDir\batch.json" -Encoding UTF8
 Write-Host "DONE $Batch ended=$(Now) ok=$Ok failed=$Fail gave_up=$GaveUp"

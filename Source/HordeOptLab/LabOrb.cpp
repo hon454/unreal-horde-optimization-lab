@@ -212,6 +212,7 @@ void ALabOrb::Tick(float DeltaSeconds)
 		SnipeAccumulator -= FLabScenario::SnipeInterval;
 		Snipe();
 	}
+	WriteCapsuleStats(); // v2 W6: M0도 Mass 단계와 같은 CSV 스탯을 남긴다
 }
 
 uint32 ALabOrb::AdvanceSnipeClock(float DeltaSeconds)
@@ -253,27 +254,48 @@ void ALabOrb::Snipe()
 
 	// 화면 안의 산 개체를 거리 구간별로 나눠, 구간마다 해시(일련번호, 저격 틱)가 가장 작은 개체를 고른다(LabSnipe.h). 2종은 예약 발만 대형.
 	TLabSnipeSelector<ALabMinion*> Picker(SnipeTick);
+	// v2 W6 캡슐 확인 대상: Mass 저격 프로세서의 CheckBest와 같은 규칙(액터가 붙은 화면 안의 산 개체 중 해시 최소). M0는 모든 개체가 액터다
+	ALabMinion* CheckBest = nullptr;
+	uint32 CheckBestHash = MAX_uint32;
 	for (ALabMinion* Minion : Spawner->GetMinions())
 	{
-		if (!Minion->IsAlive())
+		if (!Minion->IsAlive() || !View.bValid)
 		{
 			continue;
 		}
 		const FVector Location = Minion->GetActorLocation();
-		const int32 Band = FLabSnipeBands::BandOf(FVector::Dist2D(Location, Center));
-		if (Band == INDEX_NONE || !View.bValid || !View.Contains(FVector(Location.X, Location.Y, LabSnipeAimHeight)))
+		if (!View.Contains(FVector(Location.X, Location.Y, LabSnipeAimHeight)))
 		{
 			continue;
 		}
-		Picker.Offer(Band, LabSnipeHash(Minion->GetSerial(), SnipeTick), Minion, Location, Minion->GetUnitType() == LabUnitLarge);
+		const uint32 Hash = LabSnipeHash(Minion->GetSerial(), SnipeTick);
+		if (Hash < CheckBestHash)
+		{
+			CheckBestHash = Hash;
+			CheckBest = Minion;
+		}
+		const int32 Band = FLabSnipeBands::BandOf(FVector::Dist2D(Location, Center));
+		if (Band == INDEX_NONE)
+		{
+			continue;
+		}
+		Picker.Offer(Band, Hash, Minion, Location, Minion->GetUnitType() == LabUnitLarge);
 	}
 
-	Picker.ForEach([this](const TLabSnipeSelector<ALabMinion*>::FPick& Pick)
+	// v2 W6: 저격 대상과 확인 대상에 캡슐 라인 트레이스를 쏴 센다(Mass 단계의 TraceSnipeCapsules와 같은 집계). 대상 선택과 피해는 바꾸지 않는다
+	TArray<const ALabMinion*, TInlineAllocator<FLabScenario::SnipeCount>> Traced;
+	Picker.ForEach([this, &Traced](const TLabSnipeSelector<ALabMinion*>::FPick& Pick)
 	{
+		TraceCapsule(Pick.Target, /*bSnipeTarget*/ true);
+		Traced.Add(Pick.Target);
 		Pick.Target->Snipe();
 		++SnipeCount;
 		SpawnStrikeFx(FVector(Pick.Location.X, Pick.Location.Y, LabSnipeAimHeight));
 	});
+	if (CheckBest && !Traced.Contains(CheckBest)) // 확인 대상이 마침 저격 대상이면 한 번만 쏜다
+	{
+		TraceCapsule(CheckBest, /*bSnipeTarget*/ false);
+	}
 }
 
 void ALabOrb::SpawnStrikeFx(const FVector& Target)
@@ -360,10 +382,7 @@ void ALabOrb::TickMass(float DeltaSeconds, ULabCrowdSubsystem* Crowd)
 	{
 		TraceSnipeCapsules(TargetEntities, CheckEntities);
 	}
-	// 누적 값을 매 프레임 쓴다(Lab/Deaths와 같은 방식, Scripts/spike-timeline.py가 구간 증가분으로 초당 수를 낸다)
-	CSV_CUSTOM_STAT(Lab, CapsuleTraces, CapsuleTraceStats.Traces, ECsvCustomStatOp::Set);
-	CSV_CUSTOM_STAT(Lab, CapsuleHits, CapsuleTraceStats.Hits, ECsvCustomStatOp::Set);
-	CSV_CUSTOM_STAT(Lab, CapsuleBlocked, CapsuleTraceStats.Blocked, ECsvCustomStatOp::Set);
+	WriteCapsuleStats();
 }
 
 void ALabOrb::TraceSnipeCapsules(TConstArrayView<FMassEntityHandle> SnipeTargets, TConstArrayView<FMassEntityHandle> CheckTargets)
@@ -376,33 +395,13 @@ void ALabOrb::TraceSnipeCapsules(TConstArrayView<FMassEntityHandle> SnipeTargets
 	{
 		return;
 	}
-	const FVector Start = Sphere->GetComponentLocation(); // 저격 궤적(NS_LabBolt)의 시작점
-	FCollisionQueryParams Params(SCENE_QUERY_STAT(LabSnipeCapsule), /*bTraceComplex*/ false, this);
 	auto TraceOne = [&](const FMassEntityHandle& Entity, bool bSnipeTarget)
 	{
-		const ALabMinionMassActor* Target = Cast<ALabMinionMassActor>(Actors->GetActorFromHandle(Entity));
-		if (!Target)
+		// 인스턴스(VAT·ISKM)나 입자로 그리는 개체는 액터가 없어 캡슐도 없다
+		if (const ALabMinionMassActor* Target = Cast<ALabMinionMassActor>(Actors->GetActorFromHandle(Entity)))
 		{
-			return; // 인스턴스(VAT·ISKM)나 입자로 그리는 개체: 캡슐이 없다
+			TraceCapsule(Target, bSnipeTarget);
 		}
-		// 끝점은 캡슐 중심(액터 위치, ULabActorSyncProcessor가 엔티티 위치 + 반높이로 옮긴다). 시작점이 캡슐 밖이라 맞으면 표면에서 맞는다
-		FHitResult Hit;
-		++CapsuleTraceStats.Traces;
-		CapsuleTraceStats.SnipeTraces += bSnipeTarget ? 1 : 0;
-		const bool bAny = GetWorld()->LineTraceSingleByChannel(Hit, Start, Target->GetActorLocation(), LabSnipeTraceChannel, Params);
-		if (bAny)
-		{
-			if (Hit.GetActor() == Target) { ++CapsuleTraceStats.Hits; }
-			else { ++CapsuleTraceStats.Blocked; }
-		}
-#if !UE_BUILD_TEST
-		// 개발 확인: 막은 액터가 숨은(풀) 액터인지, 대상에서 얼마나 앞인지
-		const AActor* Blocker = bAny && Hit.GetActor() != Target ? Hit.GetActor() : nullptr;
-		UE_LOG(LogLab, Log, TEXT("lab_capsule snipe=%d result=%s dist_m=%.1f blocker_hidden=%d blocker_gap_m=%.1f blocker_large=%d"),
-			bSnipeTarget ? 1 : 0, !bAny ? TEXT("miss") : Blocker ? TEXT("blocked") : TEXT("hit"), FVector::Dist(Start, Target->GetActorLocation()) / 100.f,
-			Blocker && Blocker->IsHidden() ? 1 : 0, Blocker ? FVector::Dist2D(Blocker->GetActorLocation(), Target->GetActorLocation()) / 100.f : 0.f,
-			Blocker && Cast<ALabMinion>(Blocker) && Cast<ALabMinion>(Blocker)->GetUnitType() == LabUnitLarge ? 1 : 0);
-#endif
 	};
 	for (const FMassEntityHandle& Entity : SnipeTargets)
 	{
@@ -415,4 +414,41 @@ void ALabOrb::TraceSnipeCapsules(TConstArrayView<FMassEntityHandle> SnipeTargets
 			TraceOne(Entity, false);
 		}
 	}
+}
+
+void ALabOrb::TraceCapsule(const AActor* Target, bool bSnipeTarget)
+{
+	if (!Target || !Sphere)
+	{
+		return;
+	}
+	const FVector Start = Sphere->GetComponentLocation(); // 저격 궤적(NS_LabBolt)의 시작점
+	FCollisionQueryParams Params(SCENE_QUERY_STAT(LabSnipeCapsule), /*bTraceComplex*/ false, this);
+	// 끝점은 캡슐 중심(액터 위치). 하이드레이션 액터는 ULabActorSyncProcessor가 엔티티 위치 + 반높이로 옮기고, M0 액터는 CharacterMovement가 캡슐 중심을 옮긴다.
+	// 시작점이 캡슐 밖이라 맞으면 표면에서 맞는다
+	FHitResult Hit;
+	++CapsuleTraceStats.Traces;
+	CapsuleTraceStats.SnipeTraces += bSnipeTarget ? 1 : 0;
+	const bool bAny = GetWorld()->LineTraceSingleByChannel(Hit, Start, Target->GetActorLocation(), LabSnipeTraceChannel, Params);
+	if (bAny)
+	{
+		if (Hit.GetActor() == Target) { ++CapsuleTraceStats.Hits; }
+		else { ++CapsuleTraceStats.Blocked; }
+	}
+#if !UE_BUILD_TEST
+	// 개발 확인: 막은 액터가 숨은(풀) 액터인지, 대상에서 얼마나 앞인지
+	const AActor* Blocker = bAny && Hit.GetActor() != Target ? Hit.GetActor() : nullptr;
+	UE_LOG(LogLab, Log, TEXT("lab_capsule snipe=%d result=%s dist_m=%.1f blocker_hidden=%d blocker_gap_m=%.1f blocker_large=%d"),
+		bSnipeTarget ? 1 : 0, !bAny ? TEXT("miss") : Blocker ? TEXT("blocked") : TEXT("hit"), FVector::Dist(Start, Target->GetActorLocation()) / 100.f,
+		Blocker && Blocker->IsHidden() ? 1 : 0, Blocker ? FVector::Dist2D(Blocker->GetActorLocation(), Target->GetActorLocation()) / 100.f : 0.f,
+		Blocker && Cast<ALabMinion>(Blocker) && Cast<ALabMinion>(Blocker)->GetUnitType() == LabUnitLarge ? 1 : 0);
+#endif
+}
+
+void ALabOrb::WriteCapsuleStats() const
+{
+	// 누적 값을 매 프레임 쓴다(Lab/Deaths와 같은 방식, Scripts/spike-timeline.py가 구간 증가분으로 초당 수를 낸다)
+	CSV_CUSTOM_STAT(Lab, CapsuleTraces, CapsuleTraceStats.Traces, ECsvCustomStatOp::Set);
+	CSV_CUSTOM_STAT(Lab, CapsuleHits, CapsuleTraceStats.Hits, ECsvCustomStatOp::Set);
+	CSV_CUSTOM_STAT(Lab, CapsuleBlocked, CapsuleTraceStats.Blocked, ECsvCustomStatOp::Set);
 }

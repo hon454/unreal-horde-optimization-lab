@@ -55,6 +55,18 @@ void ALabMinion::InitMinion(ALabCrowdSpawner* InSpawner, const FLabMinionAssets&
 	{
 		SetActorScale3D(FVector(Scale)); // 대형: 캡슐과 메시가 함께 커진다. 스포너가 캡슐 중심 높이도 같은 배율로 올린다(LabCrowdSpawner.cpp SpawnAt)
 	}
+	// v2 W6 액터 기준선(Docs/v2-spec.md 3절 기능 2·3, Docs/Worklog/V2.md "W6"). 엔진이 ACharacter에 주는 보통의 수단으로 겹침을 막는다:
+	// 캡슐끼리 Pawn 채널로 막고, CharacterMovement의 스윕 이동이 막히면 미끄러지고(MoveAlongFloor → SlideAlongSurface) 시작부터 겹쳐 있으면 밀어낸다
+	// (SafeMoveUpdatedComponent → ResolvePenetration, engine-notes.md 39절). 캡슐 반지름은 겹친 쌍의 몸통 반지름(소형 40, 대형 94, FLabUnitAssetPaths::BoundRadius)과 같게 둔다.
+	// 대형은 액터 배율(2)이 캡슐에도 곱해지므로 배율로 나눈다. 반높이(88)는 ACharacter 기본값 그대로다.
+	// 저격 트레이스 채널(LabSnipe)을 막게 해 오브의 캡슐 라인 트레이스가 맞는다(하이드레이션 액터의 Trace 설정과 같은 채널, ALabOrb::TraceCapsule).
+	{
+		UCapsuleComponent* Capsule = GetCapsuleComponent();
+		const FLabUnitAssetPaths& Paths = FLabUnitAssetPaths::Get(UnitType);
+		Capsule->SetCapsuleRadius(Paths.BoundRadius / FMath::Max(Paths.Scale, 0.1f), /*bUpdateOverlaps*/ false);
+		Capsule->SetCollisionResponseToChannel(ECC_Pawn, FLabConfig::Get().UsesActorBlocking() ? ECR_Block : ECR_Ignore); // -LabSeparate=0이면 W5까지의 M0(서로 무시)
+		Capsule->SetCollisionResponseToChannel(LabSnipeTraceChannel, ECR_Block);
+	}
 	SetupVisual(Assets);
 	EnterState(ELabMinionState::Walk);
 }
@@ -98,6 +110,11 @@ void ALabMinion::EnterState(ELabMinionState NewState)
 	{
 		GetCharacterMovement()->StopMovementImmediately();
 		GetCharacterMovement()->DisableMovement();
+	}
+	if (NewState == ELabMinionState::Dead)
+	{
+		// v2 W6: 사망 중인 개체는 막지 않는다. Mass 분리 프로세서도 사망 개체를 밀지도, 밀리지도 않게 둔다(Docs/Worklog/V2.md "W4" 결정 6). 피격 중인 개체는 막는다(멈춘 채)
+		GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
 	}
 
 	USkeletalMeshComponent* SkelMesh = GetMesh();

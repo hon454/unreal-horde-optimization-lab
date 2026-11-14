@@ -82,6 +82,8 @@ protected:
 	int32 ComputeNear30() const;
 	/** Q5: 누적 사망 수 = 범위 피해 사망 + 저격(저격은 피격 뒤 반드시 죽는다). 액터 단계와 Mass 단계의 두 카운터가 같은 사건을 센다(Docs/Worklog/Q5.md) */
 	int32 GetDeathCount() const;
+	/** v2 W3·W6 겹친 쌍과 깊게 겹친 쌍의 마지막 표본. Mass 단계는 ULabOverlapCountProcessor, M0은 스포너(SampleActorOverlaps), 그 밖(변형 manager)은 0 */
+	void GetOverlapCounts(int32& OutPairs, int32& OutDeep) const;
 	/** 상태 오버레이가 지금 보이는가(CSV 메타데이터 LabHud) */
 	bool IsHudShown() const;
 

@@ -430,7 +430,7 @@ TArray<FLabConfig::FTech> FLabConfig::TechList() const
 		{ TEXT("LabTechFarCull"), TEXT("far"), B(CullsFar()) },
 		{ TEXT("LabTechCrowdFx"), TEXT("fx"), B(bCrowdFx) },
 		{ TEXT("LabTechAvoid"), TEXT("av"), B(UsesAvoidance()) },
-		{ TEXT("LabTechSeparate"), TEXT("sep"), B(UsesSeparation()) },
+		{ TEXT("LabTechSeparate"), TEXT("sep"), B(UsesSeparation() || UsesActorBlocking()) }, // M0는 캡슐끼리 막기(v2 W6), Mass 단계는 분리 프로세서
 	};
 }
 
@@ -446,9 +446,14 @@ FString FLabConfig::TechString() const
 
 const TCHAR* FLabConfig::ActorCollisionString() const
 {
+	if (Stage == ELabStage::M0)
+	{
+		// v2 W6: M0 액터 캡슐은 늘 켬이다(CharacterMovement가 캡슐로 바닥을 찾는다). Pawn 프로필 + 저격 채널 막음이고, 캡슐끼리는 겹침 방지가 켜지면 막는다(UsesActorBlocking)
+		return TEXT("pawn");
+	}
 	if (!UsesHydration())
 	{
-		return TEXT("-"); // 하이드레이션 액터가 없다(M0 액터는 CharacterMovement가 캡슐을 쓰므로 늘 켜져 있고 바꾸지 않는다)
+		return TEXT("-"); // 하이드레이션 액터가 없다
 	}
 	switch (ActorCollision)
 	{

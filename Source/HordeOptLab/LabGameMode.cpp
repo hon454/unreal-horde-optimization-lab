@@ -128,6 +128,22 @@ int32 ALabGameMode::ComputeNear30() const
 	return Count;
 }
 
+void ALabGameMode::GetOverlapCounts(int32& OutPairs, int32& OutDeep) const
+{
+	OutPairs = 0;
+	OutDeep = 0;
+	if (const ULabCrowdSubsystem* Crowd = GetWorld()->GetSubsystem<ULabCrowdSubsystem>(); Crowd && Crowd->IsActive())
+	{
+		OutPairs = Crowd->OverlapPairs.load();
+		OutDeep = Crowd->OverlapDeep.load();
+	}
+	else if (Spawner && FLabConfig::Get().Stage == ELabStage::M0)
+	{
+		OutPairs = Spawner->GetActorOverlapPairs(); // v2 W6: M0 액터(ALabCrowdSpawner::SampleActorOverlaps)
+		OutDeep = Spawner->GetActorOverlapDeep();
+	}
+}
+
 int32 ALabGameMode::GetDeathCount() const
 {
 	return Orb ? Orb->GetKillCount() + Orb->GetSnipeCount() : 0;
@@ -667,12 +683,17 @@ void ALabGameMode::Tick(float DeltaSeconds)
 	CSV_CUSTOM_STAT(Lab, Alive, LastAlive, ECsvCustomStatOp::Set);
 	CSV_CUSTOM_STAT(Lab, Deaths, GetDeathCount(), ECsvCustomStatOp::Set);
 	CSV_CUSTOM_STAT(Lab, Near30, LastNear30, ECsvCustomStatOp::Set);
-	// v2 W3 겹친 쌍의 수(LabOverlap.h). 0.5초마다 센 값이다. M0 액터 단계는 아직 세지 않는다(0)
+	// v2 W3 겹친 쌍의 수(LabOverlap.h). 0.5초마다 센 값이다. M0 액터 단계는 스포너가 같은 정의로 센다(v2 W6). 변형 manager는 세지 않는다(0)
 	{
-		const ULabCrowdSubsystem* OverlapCrowd = GetWorld()->GetSubsystem<ULabCrowdSubsystem>();
-		const bool bOverlap = OverlapCrowd && OverlapCrowd->IsActive();
-		CSV_CUSTOM_STAT(Lab, OverlapPairs, bOverlap ? OverlapCrowd->OverlapPairs.load() : 0, ECsvCustomStatOp::Set);
-		CSV_CUSTOM_STAT(Lab, OverlapDeep, bOverlap ? OverlapCrowd->OverlapDeep.load() : 0, ECsvCustomStatOp::Set);
+		if (FLabConfig::Get().Stage == ELabStage::M0)
+		{
+			Spawner->SampleActorOverlaps(GetWorld()->GetTimeSeconds());
+		}
+		int32 Pairs = 0;
+		int32 Deep = 0;
+		GetOverlapCounts(Pairs, Deep);
+		CSV_CUSTOM_STAT(Lab, OverlapPairs, Pairs, ECsvCustomStatOp::Set);
+		CSV_CUSTOM_STAT(Lab, OverlapDeep, Deep, ECsvCustomStatOp::Set);
 	}
 
 	const float ShotAt = FLabConfig::Get().ShotAtSec;
@@ -724,12 +745,13 @@ void ALabGameMode::Tick(float DeltaSeconds)
 			UE_LOG(LogLab, Log, TEXT("lab_damage hits=%lld per_sec=%.0f"), Crowd->DamageHits.load(), Crowd->DamageHits.load() / FMath::Max(Elapsed, 0.01f));
 		}
 		UE_LOG(LogLab, Log, TEXT("lab_applied %s"), *AppliedString()); // Q3: 개발 실행에서도 실제 적용값을 남긴다(벤치마크는 측정 시작 때)
-		const ULabCrowdSubsystem* OverlapCrowd = GetWorld()->GetSubsystem<ULabCrowdSubsystem>();
-		const bool bOverlap = OverlapCrowd && OverlapCrowd->IsActive();
+		int32 OverlapPairs = 0;
+		int32 OverlapDeep = 0;
+		GetOverlapCounts(OverlapPairs, OverlapDeep);
 		UE_LOG(LogLab, Log, TEXT("lab_summary elapsed=%.1f n=%d respawns=%d kills=%d snipes=%d avg_ms=%.1f deaths=%d near30=%d actors=%d overlap=%d/%d capsule=%d/%d/%d/%d"),
 			Elapsed, Spawner->GetAliveCount(), Spawner->GetRespawnCount(), Orb->GetKillCount(), Orb->GetSnipeCount(),
 			1000.f * Elapsed / FMath::Max<uint64>(GFrameCounter - StartFrame, 1), GetDeathCount(), LastNear30, GetHudActors(), // Q5: 누적 사망, 오브 30m 안(마지막 프레임), 액터
-			bOverlap ? OverlapCrowd->OverlapPairs.load() : 0, bOverlap ? OverlapCrowd->OverlapDeep.load() : 0, // v2 W3: 마지막 표본의 겹친 쌍/깊게 겹친 쌍
+			OverlapPairs, OverlapDeep, // v2 W3: 마지막 표본의 겹친 쌍/깊게 겹친 쌍(M0는 v2 W6부터)
 			Orb->GetCapsuleTraceStats().Traces, Orb->GetCapsuleTraceStats().Hits, Orb->GetCapsuleTraceStats().Blocked, Orb->GetCapsuleTraceStats().SnipeTraces); // v2 W5: 저격 캡슐 트레이스/적중/막힘/그중 실제 저격 대상(누적)
 		FPlatformMisc::RequestExit(false, TEXT("LabDuration"));
 	}
