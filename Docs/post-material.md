@@ -6,7 +6,7 @@
 
 수치 출처는 따로 적지 않으면 Test 패키지 96f8202, P1, Game Thread p50이고 `Measurements/M0/`, `Measurements/M1/`에 있다. 글에 쓸 때는 총괄 묶음 `Full1`의 값으로 바꾼다.
 
-**절 번호.** 아래 `## 00`\~`## 07`은 마일스톤 시절의 글 번호다. 지금 글 번호와 순서는 [backlog.md](backlog.md) "글 대기열"이 정한다(그쪽에서 Simulation LOD가 05, ISKM이 06이다). [ADR-0007](Decisions/0007-keep-default-motion-blur.md)이 이 문서의 "07"을 가리키므로 절 이름은 그대로 둔다.
+**절 번호.** 아래 `## 00`\~`## 07`은 마일스톤 시절의 글 번호다. 지금 글 번호와 순서는 [Posts/README.md](../Posts/README.md)의 목록을 따른다(그쪽에서 Simulation LOD가 05, ISKM이 06이다). [ADR-0007](Decisions/0007-keep-default-motion-blur.md)이 이 문서의 "07"을 가리키므로 절 이름은 그대로 둔다.
 
 ## 01 액터 군중 기준선
 
