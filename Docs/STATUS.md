@@ -22,6 +22,8 @@
 
 사이트 주소는 <https://hon454.github.io/unreal-horde-optimization-lab/>다. 글이나 CSV가 바뀌면 `py -3 -I Scripts/build-site.py`를 다시 돌리고 `gh-pages` 브랜치에 다시 올린다.
 
+`gh-pages`의 파일은 main `c4f8806`의 `Site/`와 같다(2026-11-14 확인, `gh-pages` 79e37dc).
+
 끝난 묶음의 러너는 `Scripts/Archive/`에 있다. 그 자리에서는 돌지 않는다([Scripts/README.md](../Scripts/README.md)).
 
 그림과 사이트는 4·7·8단계를 번 시간을 품질에 쓰는 단계로 표시한다(빗금). 묶음 제목은 쓰지 않는다.
@@ -73,6 +75,8 @@ powershell -ExecutionPolicy Bypass -File Scripts/run-full.ps1 -DryRun
 py -3 -I Scripts/summarize.py --batch Full3
 py -3 -I Scripts/plot.py --batch Full3
 py -3 -I Scripts/plot-readme.py
+py -3 -I Scripts/build-site.py
+py -3 -I Scripts/check-tilde.py
 ```
 
 나머지 명령은 [commands.md](Guides/commands.md)에 있다.
@@ -147,4 +151,4 @@ Development 전환 점수는 `Full1` 때의 참고값이다(`Measurements/Full1/
 
 ## 사용자에게 요청한 일
 
-없다.
+- `backlog.md` 정리 방식을 정한다. 글 대기열의 글 00\~09와 사이트는 모두 끝났다. "글에 넣을 것" 두 항목은 글 02에 들어갔다.
