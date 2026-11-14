@@ -267,15 +267,18 @@ SVG 일곱 개는 [make-figures.py](make-figures.py)가 만든다(저장소 루�
 | 준비 대기는 인스턴스가 있을 때와 준비 안 됨일 때 표현 전환을 미룬다 | `MassRepresentationProcessor.cpp:275-298` |
 | `bKeepActorExtraFrame`·`bWaitForActorVisualReadiness` 기본값 거짓 | `MG/MassRepresentation/Public/MassRepresentationFragments.h:202,211` |
 | `ACharacter` 캡슐 반높이 기본 88 | `Source/Runtime/Engine/Private/Character.cpp:78` |
+| Mass가 움직이는 액터를 퍼핏(puppet)이라 부른다 | `MG/MassActors/Public/MassAgentComponent.h:23` 주석 "Actor driven by Mass (puppet)", 상태 `PuppetPendingInitialization` 등(`:24-28`). 액터가 엔티티를 만드는 쪽은 `EntityPendingCreation`(`:20`) |
+| 변환기가 태그로 엔티티와 액터 사이의 복사 방향을 정한다 | `MG/MassActors/Public/Translators/MassCharacterMovementTranslators.h:23,44`(`FMassCharacterMovementCopyToMassTag`·`CopyToActorTag`), `MassSceneComponentLocationTranslator.h:21,43` |
 
 풀이 액터를 바로 보이게 하는 동작과 `TeleportActor`가 엔티티 변환(발밑)으로 옮기는 동작을 다룬 공개 이슈는 찾지 못했다. [references.md](../../Docs/Reference/references.md)와 [engine-notes.md](../../Docs/Reference/engine-notes.md)에도 없다. 두 동작은 엔진의 버그라기보다 이 프로젝트의 액터 원점(캡슐 중심)과 엔티티 원점(발밑)이 다르고 모션 블러를 켜 둔 조건에서 드러난 기본 동작이다. 해결은 `ULabActorManagement::TeleportActor`(`Source/HordeOptLab/LabActorSyncProcessor.cpp:46-63`)와 `ALabMinionMassActor::HideUntilPoseReady`(`Source/HordeOptLab/LabMinion.cpp:319-333`)다.
 
 ### 본문에 넣은 발췌
 
-엔진 코드는 14줄이다(`// ...` 포함). 남긴 줄은 소스를 그대로 옮겼다.
+엔진 코드는 25줄이다(`// ...` 포함). 남긴 줄은 소스를 그대로 옮겼다.
 
 | 블록 | 줄 수 | 원본 줄 |
 | --- | --- | --- |
+| 에이전트 상태(엔진) | 11 | `MassAgentComponent.h:15-16`, `// ...`(`:17-18`), `:19-21`, `// ...`(`:22`), `:23-25`, `// ...`(`:26-29`) |
 | 할당기(엔진) | 7 | `AnimationBudgetAllocator.cpp:558`, `// ...`, `:561`, `// ...`, `:566`, `// ...`, `:339` |
 | 풀에서 꺼내기(엔진) | 4 | `MassActorSpawnerSubsystem.cpp:252-253`, `// ...`(`:254` 빈 줄), `:255` |
 | 엔티티 변환으로 옮기기(엔진) | 3 | `MassRepresentationProcessor.cpp:272`, `// ...`, `MassRepresentationActorManagement.cpp:53` |
@@ -295,6 +298,7 @@ SVG 일곱 개는 [make-figures.py](make-figures.py)가 만든다(저장소 루�
 - `S8-col`에서 프레임 시간(+1.60)이 게임 스레드(+1.10)보다 더 는 이유.
 - `A8-budget`의 −0.292ms가 무엇에서 나는지. 예산을 빼면 액터 클래스가 `ALabMinionMassActor`(일반 스켈레탈 메시)로 바뀐다(`LabCrowdSubsystem.cpp:101,109`). 4단계에서 예산만 끈 측정은 최종 측정에 없다.
 - 전환 대책의 화면 효과를 최종 측정 빌드에서 다시 잰 값. 본문은 옛 개발 빌드 기록의 방향만 썼다.
+- 액터 구동 방식(액터가 로직과 이동을 맡는 쪽)의 비용과 "붙고 뗄 때 상태가 어긋나기 쉽다"는 이 레포에서 구현하거나 재지 않았다. 근거는 [글 재료](../../Docs/post-material.md) "하이브리드에서 로직은 누가 갖나"의 설명이다. "1단계에서 게임 스레드 시간의 대부분을 쓴 비용"은 [01번 글](../01-actor-baseline/README.md)의 이동 컴포넌트 비중이다.
 - 4단계 화면에서 액터의 AnimBP 동작과 전환이 실제로 보이는지. 움직이는 WebP를 열어 보지 않았다(브라우저 금지). 이미지 설명은 "액터다"까지만 적었다.
 - SVG는 `hyd-budget.svg`와 `hyd-maxn.svg`만 브라우저로 그려 보았다. 나머지는 좌표와 글자 수로만 확인했다.
 

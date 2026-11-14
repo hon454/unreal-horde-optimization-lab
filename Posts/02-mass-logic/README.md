@@ -162,7 +162,20 @@ Lab Fragment는 [`LabMassTypes.h`](../../Source/HordeOptLab/LabMassTypes.h)에 �
 
 엔진 기본값 둘을 바꿨다. Mass ISM의 그림자는 기본으로 꺼져 있어, 1단계와 맞추려고 `bCastShadows`를 켰다. 표현에 필요한 Processor 셋(카메라 거리 수집, 표현 LOD 계산, 표현 전환)도 기본으로 꺼져 있다. 셋이 없으면 아무것도 그려지지 않아 [`Config/DefaultMass.ini`](../../Config/DefaultMass.ini)에서 켰다.
 
-미니언 표현은 모든 단계에서 Lumen 장면에서 뺀다(`LabExcludeFromLumen`). 넣은 채로 돌린 시험 실행에서 GPU 시간이 크게 늘었다.
+미니언 표현은 모든 단계에서 Lumen 장면에서 뺀다(`LabExcludeFromLumen`). Lumen은 UE5의 실시간 전역 조명(Global Illumination)으로, 물체에 맞고 튄 빛이 주변을 밝히는 간접광을 프레임마다 계산한다. 소프트웨어 Lumen은 동적 간접광에 영향을 주고 디스턴스 필드 표현이 있는 컴포넌트만 Lumen 장면에 넣는다. 디스턴스 필드는 메시 둘레의 각 점에서 가장 가까운 표면까지의 거리를 적은 3D 데이터다. 스켈레탈 메시에는 이 표현이 없어 1단계 액터는 원래 빠져 있지만, 정적 메시인 2단계 ISM은 기본으로 들어간다.
+
+나무나 바위 같은 ISM과 달리 미니언 인스턴스는 프레임마다 움직인다. Lumen은 위치가 바뀐 인스턴스마다 장면에 둔 표면 정보의 위치와 경계를 다시 맞춘다. 미니언 ISM을 Lumen 장면에 넣은 채로 돌린 시험 실행에서는 GPU 시간이 크게 늘었다.
+
+[`Source/HordeOptLab/LabMinion.h`](../../Source/HordeOptLab/LabMinion.h), `LabExcludeFromLumen`
+
+```cpp
+inline void LabExcludeFromLumen(UPrimitiveComponent& Component)
+{
+	Component.SetAffectDynamicIndirectLighting(false);
+}
+```
+
+이 함수는 Lumen 장면에 드는 두 조건 가운데 동적 간접광 쪽만 끈다. 미니언은 여전히 그림자를 그리고, Lumen이 계산한 간접광도 받는다.
 
 ## 결과: 1만이 10.2ms가 되고, 병목이 GPU로 옮겨 간다
 

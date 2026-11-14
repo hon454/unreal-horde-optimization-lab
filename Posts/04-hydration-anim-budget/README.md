@@ -44,7 +44,29 @@ VAT 인스턴스는 미리 구운 걷기·피격·죽기 클립을 상태에 따
 
 ![위: 3단계와 4단계의 거리 구간. 4단계는 0\~30m를 액터로 그린다. 아래: 액터 하나가 한 프레임에 하는 일 세 가지. 엔진이 액터를 붙이고 떼고, 동기화 프로세서가 엔티티의 상태를 넣고, 스켈레탈 메시가 예산 안에서 애니메이션을 평가한다](images/hyd-principle.svg)
 
-액터는 1단계 액터와 달리 액터 틱과 이동 컴포넌트를 쓰지 않는다. 1단계에서 게임 스레드 시간의 대부분을 쓴 이동 컴포넌트가 빠진다. 남는 일은 동기화 프로세서가 엔티티의 위치와 상태를 넣는 일, 스켈레탈 메시의 틱과 애니메이션 평가다. 애니메이션 쪽은 Animation Budget Allocator가 예산을 나눈다.
+엔티티에 액터가 붙을 때 로직을 누가 갖는지는 두 갈래다. 하나는 로직을 엔티티에 두고, 액터는 엔티티의 위치와 상태를 받아 그리기만 하는 방식이다. 엔진 소스는 이렇게 Mass가 움직이는 액터를 퍼핏(puppet)이라 부른다. 다른 하나는 액터가 붙어 있는 동안 액터의 AI와 CharacterMovement가 개체를 움직이고, 엔티티가 액터의 위치를 받아 가는 방식이다. 엔진의 변환기(Translator)가 태그에 따라 엔티티와 액터 사이의 복사 방향을 정한다.
+
+`Engine/Plugins/Runtime/MassGameplay/Source/MassActors/Public/MassAgentComponent.h`, `EAgentComponentState`
+
+```cpp
+enum class EAgentComponentState : uint8
+{
+	// ...
+	// States of actors needing mass entity creation
+	EntityPendingCreation, // Actor waiting for entity creation
+	EntityCreated, // Actor with a created entity
+	// ...
+	// States are for Actor driven by Mass (puppet) needing fragments initialization
+	PuppetPendingInitialization, // Puppet actor queued for fragments initialization
+	PuppetInitialized, // Puppet actor with all initialized fragments
+	// ...
+```
+
+엔진은 Mass에 등록된 액터의 상태를 두 묶음으로 나눈다. 위 묶음은 액터가 먼저 있고 자기를 대표하는 엔티티를 만드는 쪽이다. 아래 묶음은 Mass가 움직이는 퍼핏 쪽이다.
+
+4단계는 앞의 방식을 쓴다. 단계끼리 비교하려면 모든 단계에서 로직이 같아야 하기 때문이다. 뒤의 방식은 이동을 CharacterMovement에 넘겨, 1단계에서 게임 스레드 시간의 대부분을 쓴 비용을 다시 산다. 또 액터가 붙고 뗄 때마다 엔티티와 액터가 상태를 주고받고, 그 경계에서 둘의 상태가 어긋나기 쉽다.
+
+그래서 4단계의 액터는 1단계 액터와 달리 액터 틱과 이동 컴포넌트를 쓰지 않는다. 남는 일은 동기화 프로세서가 엔티티의 위치와 상태를 넣는 일, 스켈레탈 메시의 틱과 애니메이션 평가다. 애니메이션 쪽은 Animation Budget Allocator가 예산을 나눈다.
 
 `Engine/Plugins/Runtime/AnimationBudgetAllocator/Source/AnimationBudgetAllocator/Private/AnimationBudgetAllocator.cpp`, `FAnimationBudgetAllocator::CalculateWorkDistributionAndQueue`(앞 세 줄)와 `QueueSortedComponentIndices`(마지막 줄)
 

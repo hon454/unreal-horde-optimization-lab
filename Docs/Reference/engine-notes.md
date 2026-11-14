@@ -486,3 +486,19 @@
 
 - `UMassEntitySettings::ChunkMemorySize`의 기본값은 `128 * 1024`다(`Engine/Source/Runtime/MassEntity/Public/MassEntitySettings.h:92`).
 - Archetype은 만들 때 값이 0이면 이 기본값을 쓰고, 1KB\~512KB로 자른다(`Private/MassArchetypeData.cpp:19-25, 227`).
+
+## 33. 글 재료 보강에서 확인한 것(2026-11-14, 글 02\~08)
+
+경로 약어는 위 절과 같다(`MG` = `Engine/Plugins/Runtime/MassGameplay/Source`, `MR` = `MG/MassRepresentation`).
+
+| 항목 | 확인한 것 | 위치 |
+| --- | --- | --- |
+| 움직이는 인스턴스의 Lumen 장면 갱신 | 인스턴스나 변환이 바뀐 프리미티브는 `LumenUpdatePrimitive`로 갱신 목록(`PendingUpdateOperations`)에 든다. `UpdateLumenScenePrimitives`가 프리미티브 그룹마다 `UpdateMeshCards`와 `UpdatePrimitiveGroupCullingInfo`를 부른다 | `Renderer/Private/RendererScene.cpp:6278-6279, 6359-6363`, `Renderer/Private/Lumen/LumenScene.cpp:926-943, 1422-1481` |
+| `bAffectDynamicIndirectLighting`의 뜻 | 프리미티브가 간접광에 영향을 줄지 정한다. 끄면 Lumen 장면 포함 조건(11절) 가운데 이쪽만 꺼진다 | `Engine/Classes/Components/PrimitiveComponent.h:554-556` |
+| 화면 밖 인스턴스와 청크 필터 | 표현이 `None`이 아닌 개체는 화면 밖이어도 `CanBeSeen`이라, `AreAnyEntitiesVisibleInChunk` 필터가 그 청크를 거르지 않는다(31절과 같은 사실). post-material의 "화면 밖 개체는 원래 갱신하지 않는다"는 이 줄로 정정했다 | `MR/Private/MassRepresentationProcessor.cpp:605` `UpdateEntityVisibility` |
+| 퍼핏 | `EAgentComponentState`는 액터가 엔티티를 만드는 상태(`EntityPendingCreation`, `EntityCreated`)와 Mass가 움직이는 액터(주석 "Actor driven by Mass (puppet)")의 상태(`PuppetPendingInitialization` 등)를 나눈다 | `MG/MassActors/Public/MassAgentComponent.h:15-29` |
+| 변환기의 복사 방향 | 태그(`FMassCharacterMovementCopyToMassTag`, `CopyToActorTag` 등)가 엔티티와 액터 사이의 복사 방향을 정한다 | `MG/MassActors/Public/Translators/MassCharacterMovementTranslators.h:23, 44`, `MassSceneComponentLocationTranslator.h:21, 43` |
+| 속도 버퍼 | 정점의 지금 위치와 이전 프레임 위치를 각각 화면에 투영한 차이다 | `Shaders/Private/VelocityShader.usf:78-96, 277-280` |
+| 속도 버퍼를 읽는 패스 | 모션 블러와 TSR이 읽는다 | `Renderer/Private/PostProcess/PostProcessMotionBlur.cpp:1334`, `TemporalSuperResolution.cpp:1898, 2537` |
+| 인스턴스별 이전 변환이 없을 때 | 인스턴스가 컴포넌트와 함께만 움직였다고 본다(지금 변환 × 프리미티브의 `WorldToPreviousWorld`). 그래서 이전 변환이 빠지면 번지지 않고 블러가 빠진다. 번짐은 틀린 이전 변환에서 난다 | `Shaders/Private/SceneData.ush:1211-1236` |
+| ISKM 재생 위치 | 렌더러가 매 프레임 그 프레임의 월드 시각으로 트랙의 재생 위치를 구하고, 활성 트랙마다 샘플과 GPU 평가 헤더를 쓴다. Animation Budget Allocator의 예산 밖이다 | `Renderer/Private/Skinning/AnimSequenceTransformProvider.cpp:1190, 1280-1305, 1415` |

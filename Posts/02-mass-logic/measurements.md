@@ -235,7 +235,10 @@
 | `UMassUpdateISMProcessor`는 게임 스레드에서 돌고, 보이는 엔티티가 있는 Chunk의 위치를 `UpdateISMTransform`으로 쌓는다 | `Plugins/Runtime/MassGameplay/Source/MassRepresentation/Private/MassUpdateISMProcessor.cpp:15-22`(`bRequiresGameThreadExecution`), `:24-36`(쿼리, `AreAnyEntitiesVisibleInChunk`), `:38-69`(`Execute`) |
 | 쌓은 ISM 데이터는 PostPhysics 단계가 끝날 때 `EndVisualChanges`가 컴포넌트에 올린다 | [engine-notes.md](../../Docs/Reference/engine-notes.md) 27절(`MassRepresentationSubsystem.cpp:444-445,526-540`). 이번에 다시 열지 않았다 |
 | 컴포넌트는 메시 설명자마다 하나다(종류 둘 = ISM 컴포넌트 둘) | engine-notes.md 22절(`MassVisualizationComponent.cpp:259`). 이번에 다시 열지 않았다 |
-| 소프트웨어 Lumen 장면은 동적 간접광에 영향을 주고 거리 필드가 있는 프리미티브만 넣는다 | engine-notes.md 11절(`PrimitiveSceneProxy.cpp:1701-1734`). 이번에 다시 열지 않았다 |
+| 소프트웨어 Lumen 장면은 동적 간접광에 영향을 주고 거리 필드가 있는 프리미티브만 넣는다 | engine-notes.md 11절. 2026-11-14에 다시 열었다: `Source/Runtime/Engine/Private/PrimitiveSceneProxy.cpp:1703`(`bAffectsLumen = AffectsDynamicIndirectLighting()`), `:1724-1732`(`AffectsDistanceFieldLighting()`와 `SupportsDistanceFieldRepresentation()`), `:1734`(`bVisibleInLumenScene = bAffectsLumen && bCanBeTraced`) |
+| 스켈레탈 메시에는 거리 필드 표현이 없고 정적 메시·Nanite·스플라인 프록시만 켠다 | engine-notes.md 11절(`StaticMeshSceneProxy.cpp:340`, `Rendering/NaniteResources.cpp:1035`). 이번에 다시 열지 않았다 |
+| 인스턴스가 바뀐 프리미티브는 Lumen 장면의 갱신 목록에 들고, Lumen은 인스턴스마다 카드의 위치와 경계를 다시 맞춘다 | `Source/Runtime/Renderer/Private/RendererScene.cpp:6359-6363`(인스턴스 갱신 경로의 `LumenUpdatePrimitive`), `:6278-6279`(변환 갱신 경로), `Renderer/Private/Lumen/LumenScene.cpp:926-943`(`FScene::LumenUpdatePrimitive`가 `PendingUpdateOperations`에 넣는다), `:1422-1481`(`UpdateLumenScenePrimitives`의 `UpdateLumenPrimitives`가 프리미티브 그룹마다 `UpdateMeshCards`, `UpdatePrimitiveGroupCullingInfo`). 본문의 "표면 정보"는 카드다 |
+| `bAffectDynamicIndirectLighting`의 뜻 "Controls whether the primitive should influence indirect lighting" | `Source/Runtime/Engine/Classes/Components/PrimitiveComponent.h:554-556` |
 | Chunk 크기의 기본값 `ChunkMemorySize = 128 * 1024`. 프로젝트 `Config/`는 이 값을 바꾸지 않는다 | `Source/Runtime/MassEntity/Public/MassEntitySettings.h:92`(`UMassEntitySettings`), `Private/MassArchetypeData.cpp:227` |
 | Processor 기본 처리 단계 PrePhysics | engine-notes.md 27절(`MassEntity/Public/MassProcessor.h:244`) |
 
@@ -253,11 +256,12 @@
 | --- | --- | --- |
 | `ULabMinionTrait::BuildTemplate` | 9 | `LabMassTraits.cpp:15-21`, `// ...`(`:22-35`), `:36`. `:16`, `:17`, `:20`의 줄 끝 주석을 뺐다 |
 | `ULabOrbContactProcessor::Execute` | 15 | `LabMassProcessors.cpp:425`, `// ...`(`:426-435`), `:436-437`, `// ...`(`:438-452`), `:453-455`, `// ...`(`:456-457`), `:458-460`(`:458` 줄 끝 주석 뺌), `// ...`(`:461` `++Kills`), `:462-463` |
+| `LabExcludeFromLumen` | 4 | `LabMinion.h:39-42` 그대로. 위의 문서 주석(`:32-38`)은 뺐다 |
 | `ULabCrowdSubsystem::BuildEntityConfig` 표현 | 12 | `LabCrowdSubsystem.cpp:81-83`, `// ...`(`:84-85` 회전·배율), `:86`, `:87-93`. `:86`, `:90`, `:91`의 줄 끝 주석을 뺐다 |
 
 ## 경위의 근거
 
-- "넣은 채로 돌린 시험 실행에서 GPU 시간이 크게 늘었다"(Lumen): 옛 시험 실행이고 최종 측정에 대응 조건이 없어 수치를 쓰지 않았다. 근거는 [engine-notes.md](../../Docs/Reference/engine-notes.md) 11절 "움직이는 ISM과 Lumen" 행과 [measurement.md](../../Docs/Guides/measurement.md) "확정값"의 "미니언과 Lumen, 그림자" 행(2천, Test 패키지 시험, 원본 `Saved/Profiling/CSV/trial/`은 저장소 밖)이다. 어느 Lumen 패스가 시간을 썼는지는 확인하지 않았다.
+- "미니언 ISM을 Lumen 장면에 넣은 채로 돌린 시험 실행에서는 GPU 시간이 크게 늘었다"(Lumen): 옛 시험 실행이고 최종 측정에 대응 조건이 없어 수치를 쓰지 않았다. 근거는 [engine-notes.md](../../Docs/Reference/engine-notes.md) 11절 "움직이는 ISM과 Lumen" 행과 [measurement.md](../../Docs/Guides/measurement.md) "확정값"의 "미니언과 Lumen, 그림자" 행(2천, Test 패키지 시험, 원본 `Saved/Profiling/CSV/trial/`은 저장소 밖)이다. 어느 Lumen 패스가 시간을 썼는지는 확인하지 않았다.
 - 글 재료 가운데 쓰지 않은 것: 옛 묶음의 "17배"·"25배"와 그 분해(애니 없는 액터, CharacterMovement를 끈 액터의 변형은 최종 측정에 없다), 병렬 처리 비교(최종 측정에 직렬 조건이 없다), 개발 빌드에서 이동 상한 때문에 처치가 줄었던 관찰(개발 빌드 값이다. 본문은 엔진 소스와 최종 측정의 사망 수만 썼다), 옛 묶음 2만의 회차 간 흔들림(최종 측정의 2단계 2만 프레임 p50 범위는 15.34\~16.07ms로 0.73ms다). 근거와 판단은 `Docs/post-review.md` "02 Mass 코어"(글을 다 쓰면 지우는 문서라, 지운 뒤에는 git 이력에서 본다)와 `Docs/post-material.md` "02 Mass 코어"다.
 - 2단계의 비교 상대: 옛 계획은 애니 없는 정적 메시 액터 변형과 견줘 변수를 하나로 두었다(`Docs/plan.md` "M1"). 최종 측정의 사다리는 1단계(액터 군중) 다음이 2단계라 로직과 표현이 함께 바뀐다. 본문은 이것을 "변수 둘"로 적었다.
 
@@ -310,6 +314,7 @@
 
 ## 측정 기록의 변경
 
+- 2026-11-14: "바꾼 것"의 Lumen 문장을 두 문단과 `LabExcludeFromLumen` 발췌로 늘렸다(글 재료 "움직이는 ISM과 Lumen"). 새 수치는 없다. 엔진 사실은 위 "엔진 소스"의 Lumen 행 넷이다. 디스턴스 필드의 정의(가장 가까운 표면까지의 거리를 적은 3D 데이터)는 개념 설명이고 엔진 소스로 확인하지 않았다. 시험 실행이 늘린 GPU 시간이 어느 Lumen 패스에서 났는지는 여전히 확인하지 않았다. 본문은 Lumen 장면 갱신의 경로와 시험 실행의 방향을 따로 적고 원인으로 잇지 않았다.
 - 2026-11-14: 배경 지식 "Mass Entity와 Fragment"에 Mass의 장단점을 더했다(사용자 지시). 캐시 설명은 원리이고 측정값이 아니다. 캐시 라인 64바이트는 x86-64 CPU의 일반 사실이며 이 PC에서 확인하지 않았다. 캐시 미스는 재지 않았다.
 - 2026-11-14: 본문의 매니저 절 셋을 "참고" 절 하나로 합치고 매니저 방식의 설명을 앞에 두었다. 한 스레드 2단계는 본문과 그림 둘(`manager-times`, `manager-gamethread`)에서 뺐다. 그 값은 이 기록의 표에 남긴다. 표에서 "(그림)"이라 적은 한 스레드 행은 이제 그림에 없다. 측정값은 바뀌지 않았다.
 - 2026-11-14: 매니저 방식 트레이스의 Insights 화면을 넣었다(코디네이터). 본문 캡션은 화면 값이다.

@@ -117,7 +117,7 @@
 ### 화면 밖만 지우면 왜 얻는 게 없었나
 
 - 5k P1 프레임: 그대로 7.5, 거리만으로 200m 밖 지우기 6.4, 화면 밖일 때만 200m 밖 지우기 7.7.
-- 엔진 ISM 갱신은 보이는 개체가 있는 청크만 돈다(`MassUpdateISMProcessor.cpp` `AreAnyEntitiesVisibleInChunk`). 화면 밖 개체는 원래도 갱신하지 않아, 지워도 줄일 일이 없었다.
+- (2026-11-14 정정) 처음에는 "엔진 ISM 갱신은 보이는 개체가 있는 청크만 돌아 화면 밖 개체는 원래 갱신하지 않는다"고 적었다. 틀렸다. `UpdateEntityVisibility`는 표현이 `None`이 아닌 개체를 화면 밖이어도 `CanBeSeen`으로 둔다(`MassRepresentationProcessor.cpp:605`, engine-notes.md 31절). 그래서 청크 필터(`AreAnyEntitiesVisibleInChunk`)로는 설명되지 않고, 원인은 가르지 않았다. 글 03은 방향만 적었다.
 
 ### 실험 설계가 틀렸던 사례: 사망 0 / 초당 1천 **설명 강조**
 

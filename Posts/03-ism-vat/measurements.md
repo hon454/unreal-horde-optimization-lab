@@ -199,6 +199,7 @@ SVG 다섯 개는 [make-figures.py](make-figures.py)가 만든다(저장소 루�
 - 표현만 VAT로 바꾼 실험(오브 시점 GPU 그대로, 게임 스레드 증가, 탑뷰 GPU 증가): M2 묶음 E2 (a), Test 패키지 c867446, 1종, 체력 100. [Worklog/M2.md](../../Docs/Worklog/M2.md) "2026-11-08 E2 측정"과 "STATUS.md에서 옮김". 최종 측정의 사다리에는 VAT만 바꾼 단계가 없다.
 - 프로세서 안쪽을 나눠 잰 진단(반복 안 쓰기는 그대로, 늘어난 시간은 첫 청크 전 `WaitForQueryResources`, 직렬이면 사라짐): M3 진단 실행 `diag-vt*`(액터가 있는 단계, 20k P1, `-LabVatTiming`). [Worklog/M3.md](../../Docs/Worklog/M3.md) "2026-11-09 액터 쪽 비용 순위", [engine-notes.md](../../Docs/Reference/engine-notes.md) 11절.
 - 본문은 기다림을 줄이려고 프래그먼트를 나눈 일(`FLabAnimStateFragment`, M3b 정비)을 적지 않았다. 그 전후 A/B(`m3qold` 대 정비 뒤, 20k P1)는 프레임 p50 17.01 대 17.77로 범위가 겹쳐 갈리지 않았다([Worklog/M3b.md](../../Docs/Worklog/M3b.md) 표 2). 3단계는 정비 뒤의 쿼리(`LabVatProcessor.cpp:53`)로 쟀다.
+- 화면 밖일 때만 200m 밖을 지운 실험(프레임 그대로, 거리만으로 지우면 줆): M2 묶음 E2 (c), Test 패키지 c867446, 5k P1, 변형 `vatcullvis`(`LabCrowdSubsystem.cpp:133-136`, 화면 안 Off 경계만 1e7). [Worklog/M2.md](../../Docs/Worklog/M2.md) "2026-11-08 E2 측정". 원인은 가르지 않았다. 엔진 ISM 갱신의 청크 필터로는 설명되지 않는다. 표현이 있는 개체는 화면 밖이어도 `CanBeSeen`이기 때문이다(`MassRepresentationProcessor.cpp:605` `UpdateEntityVisibility`, [engine-notes.md](../../Docs/Reference/engine-notes.md) 31절).
 - "자동 재생은 클립을 되풀이한다": `Scripts/bake-vat.py:8-9` 주석과 [Worklog/M2.md](../../Docs/Worklog/M2.md) "설계 결정과 VAT 구현". 머티리얼 함수는 에셋이라 소스로 확인하지 않았다.
 - 글 재료의 사실 확인: `Docs/post-review.md` "03 ISM + VAT"(글을 다 쓰면 지우는 문서라, 지운 뒤에는 git 이력에서 본다).
 

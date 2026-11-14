@@ -99,6 +99,7 @@
 | 8단계 대형 2만 0.36% | 0.0036 | 20000 | `large_skipped_ratio` | 0.001 / 0.0036 / 0.0045 |
 | 7단계 2만 액터 492개 | 491.9 | `L7-q2crowd` 20000 | `actors_mean` | 491.9 / 491.91 / 491.88 |
 | 8단계 2만 액터 928개 | 928.45 | `L8-q4final` 20000 | 같음 | 928.45 / 928.79 / 928.42 |
+| 8단계 2만에서 예산이 찼다 | 4.036 | `L8-q4final` 20000 | `budgeted_anim_ms`, 예산 4ms | 4.046 / 4.036 / 4.018 |
 | 3만에서 8단계도 상한에 닿는다 | 985.89 | `L8-q4final` 30000 | `actors_mean`, 상한 1,000 | 985.73 / 985.89 / 986.0 |
 | 최대 개체 수 약 2만 2천 → 약 2만(그림 22,033 → 20,037) | 22033 / 20037 | `7 L7-q2crowd`, `8 L8-q4final` | `full-n-at-60fps.csv` `n_p95` | 중앙값 기준(`n_p50`)은 27,984 / 24,031 |
 | 8단계 2만 16.68ms, 0.02ms 남는다 | 16.681, 16.667 − 16.681 = −0.014 | `L8-q4final` 20000 | `frame_p95_ms` | 16.681 / 16.873 / 16.68 |
@@ -163,6 +164,9 @@ Development 빌드 참고값이다. 옛 총괄 묶음의 소스(730ff18)로, 200
 | 예산 4ms | 4.0 | `LabConfig.h:163` `BudgetMs`, [ADR-0016](../../Docs/Decisions/0016-animation-budget-value.md) |
 | 넘으면 화면에서 작은 액터부터 건너뛴다 | | 정렬 `AnimationBudgetAllocator.cpp:327-342`, 중요도 = 바운드 반경 ÷ 카메라 거리([04번 글의 측정 기록](../04-hydration-anim-budget/measurements.md)), [engine-notes.md](../../Docs/Reference/engine-notes.md) 29절 |
 | ISKM은 예산에 들지 않는다 | | 할당기는 `USkeletalMeshComponentBudgeted`만 등록한다(`AnimationBudgetAllocator/Public/IAnimationBudgetAllocator.h:27` `RegisterComponent`). ISKM은 `UInstancedSkinnedMeshComponent`다 |
+| 예산이 차면 중요도가 낮은 액터부터 갱신 간격을 늘린다 | | 매 프레임 갱신 수 `AnimationBudgetAllocator.cpp:558-570`, 남은 메시의 간격 2\~`MaxTickRate`(10) `:593-607,633-643`, 정렬 `:327-342`. [engine-notes.md](../../Docs/Reference/engine-notes.md) 29절 |
+| ISKM은 렌더러가 매 프레임 월드 시각으로 재생 위치를 구하고 GPU가 자세를 계산한다 | | `Engine/Source/Runtime/Renderer/Private/Skinning/AnimSequenceTransformProvider.cpp:1415`(그 프레임의 월드 시각), `:1190`(`GetTimePosition(WorldTime)`), `:1280-1305`(활성 트랙마다 샘플과 GPU 평가 헤더를 쓴다). 본문 발췌는 `:1415`, `// ...`, `:1190` |
+| 예산을 올린 몫은 게임 스레드 시간이 된다 | | 할당기가 재는 시간은 게임 스레드의 틱과 완료 구간이다(`SkeletalMeshComponentBudgeted.cpp:91-157`, engine-notes.md 29절). 1만에서 늘어난 액터의 비용이 게임 스레드에 남았다(위 "예상과 실제") |
 | 중요도 1\~2가 40\~80m, 2\~3이 80\~200m | | 엔진 소스 표의 "중요도" 행, `Bands`(위) |
 | 액터는 메시마다 따로 그린다 | | 드로우 콜이 액터 수와 함께 는다(위 표). 04번 글의 측정 기록과 같은 설명 |
 
@@ -183,12 +187,13 @@ Development 빌드 참고값이다. 옛 총괄 묶음의 소스(730ff18)로, 200
 
 ### 본문에 넣은 발췌
 
-엔진 코드는 11줄이다(`// ...` 포함). 남긴 줄은 소스를 그대로 옮겼다.
+엔진 코드는 14줄이다(`// ...` 포함). 남긴 줄은 소스를 그대로 옮겼다.
 
 | 블록 | 줄 수 | 원본 줄 |
 | --- | --- | --- |
 | 설명자와 컴포넌트(엔진) | 7 | `MassSkinnedMeshRepresentationTypes.h:71`, `// ...`, `:75`, `// ...`, `:79`, `// ...`, `MassVisualizationComponent.cpp:1337` |
 | 트랙 다시 쓰기 조건(엔진) | 4 | `MassVisualizationComponent.cpp:766-769` |
+| ISKM 재생 위치(엔진) | 3 | `Renderer/Private/Skinning/AnimSequenceTransformProvider.cpp:1415`, `// ...`, `:1190` |
 | `FLabQuality` | 7 | `LabConfig.h:78-79`, `// ...`(`:80-81`), `:82`, `// ...`(`:83`), `:84`. 줄 끝 주석을 뺐다 |
 | `FLabConfig::Get` | 3 | `LabConfig.cpp:204`, `// ...`(`:205-213`), `:214` |
 | 그림자 설명자 | 9 | `LabCrowdSubsystem.cpp:191-192`, `:194-200`(`:193` 주석을 표시 없이 뺐다) |
