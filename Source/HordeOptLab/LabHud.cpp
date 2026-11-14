@@ -250,8 +250,13 @@ void ALabHud::DrawOrbPanel()
 	const FString PosLabel = TEXT("위치");
 	const FString SpeedLabel = TEXT("속도");
 	const FString StopText = TEXT("정지");
+	const FString TitleText = TEXT("오브");
+	const FString ArrowNote = TEXT("화살표: 위 +X, 오른쪽 +Y"); // 진행 방향 화살표의 기준(월드 축). 카메라가 돌아도 바뀌지 않는다
+	const FSlateFontInfo TitleFont(FontObject, FMath::RoundToFloat(14.f * S), FName(TEXT("Bold")));   // 상태 오버레이의 머리 글자와 같은 크기
+	const FSlateFontInfo NoteFont(FontObject, FMath::RoundToFloat(13.f * S), FName(TEXT("Regular"))); // 상태 오버레이의 작은 줄과 같은 크기
+	const float TitleH = float(FVector2D(Measure->Measure(FString(TEXT("Hg0")), TitleFont)).Y);
 	const float Gap = 10.f * S;
-	const float Pad = 12.f * S;
+	const float Pad = 16.f * S; // 상태 오버레이와 같은 안쪽 여백
 	const float LabelW = FMath::Max(Width(PosLabel, LabelFont), Width(SpeedLabel, LabelFont)) + Gap * 1.6f;
 	const float AxisW = FMath::Max(Width(TEXT("X"), LabelFont), Width(TEXT("Y"), LabelFont)) + Gap * 0.6f;
 	const float NumW = Width(TEXT("+000.0"), ValueFont);
@@ -259,24 +264,22 @@ void ALabHud::DrawOrbPanel()
 	const float SpeedNumW = Width(TEXT("00.0"), ValueFont);
 	const float ArrowW = ValueH * 1.1f;
 	const float Row1W = LabelW + AxisW + NumW + UnitW + Gap * 2.f + AxisW + NumW + UnitW;
-	const float PanelW = Row1W + 2.f * Pad;
+	const float InnerW = FMath::Max(Row1W, Width(TitleText, TitleFont) + Gap * 2.f + Width(ArrowNote, NoteFont));
+	const float PanelW = InnerW + 2.f * Pad;
 	const float RowH = ValueH + 2.f * S;
-	const float PanelH = 2.f * RowH + 2.f * Pad;
+	const float PanelH = TitleH + 6.f * S + 2.f * RowH + 2.f * Pad;
 
-	// 자리: 구체 위쪽 끝을 화면에 옮긴 점의 바로 위. 카메라 뒤면 그리지 않고, 화면 밖으로 나가지 않게 민다
-	const FVector SphereCenter = Pos + FVector(0., 0., FLabConfig::Get().Orbit.SphereZ());
-	const FVector Screen = Canvas->Project(SphereCenter + FVector(0., 0., 90.));
-	if (Screen.Z <= 0.)
-	{
-		return;
-	}
-	const float PX = FMath::Clamp(float(Screen.X) - PanelW * 0.5f, 4.f, FMath::Max(4.f, Canvas->ClipX - PanelW - 4.f));
-	const float PY = FMath::Clamp(float(Screen.Y) - PanelH - 14.f * S, 4.f, FMath::Max(4.f, Canvas->ClipY - PanelH - 4.f));
-	LabRect(Canvas, PX, PY, PanelW, PanelH, FLinearColor(0.f, 0.f, 0.f, 0.62f));
+	// 자리: 화면 오른쪽 위에 고정한다. 왼쪽 위 상태 오버레이와 같은 바깥 여백(20 × S)과 바탕색을 써서 두 판이 짝을 이루고 서로 겹치지 않는다
+	const float PX = Canvas->ClipX - 20.f * S - PanelW;
+	const float PY = 20.f * S;
+	LabRect(Canvas, PX, PY, PanelW, PanelH, PanelColor);
 
 	auto Baseline = [ValueH, LabelH](float RowY) { return RowY + (ValueH - LabelH) * 0.75f; }; // 작은 글자를 큰 글자의 밑선 가까이에 맞춘다
 	float X = PX + Pad;
 	float Y = PY + Pad;
+	LabText(Canvas, TitleText, TitleFont, AccentColor, X, Y, S);
+	LabText(Canvas, ArrowNote, NoteFont, DimColor, PX + PanelW - Pad - Width(ArrowNote, NoteFont), Y + (TitleH - float(FVector2D(Measure->Measure(FString(TEXT("Hg0")), NoteFont)).Y)) * 0.75f, S);
+	Y += TitleH + 6.f * S;
 	LabText(Canvas, PosLabel, LabelFont, DimColor, X, Baseline(Y), S);
 	X += LabelW;
 	const FString* Values[2] = { &XText, &YText };
@@ -305,11 +308,9 @@ void ALabHud::DrawOrbPanel()
 	LabText(Canvas, TEXT(" m/s"), LabelFont, DimColor, X, Baseline(Y), S);
 	X += Width(TEXT(" m/s"), LabelFont) + Gap * 1.5f;
 
-	// 진행 방향 화살표: 오브가 가는 쪽을 화면에 옮긴 방향. 글리프가 아니라 선으로 그려 글꼴에 기대지 않는다
-	const FVector A = Canvas->Project(SphereCenter);
-	const FVector B = Canvas->Project(SphereCenter + OrbPanelDir * 200.);
-	FVector2D Dir(B.X - A.X, B.Y - A.Y);
-	if (A.Z <= 0. || B.Z <= 0. || !Dir.Normalize())
+	// 진행 방향 화살표: 월드 기준이다(위에서 내려다본 지도처럼 화면 위가 +X, 오른쪽이 +Y). 글리프가 아니라 선으로 그려 글꼴에 기대지 않는다
+	FVector2D Dir(OrbPanelDir.Y, -OrbPanelDir.X);
+	if (!Dir.Normalize())
 	{
 		return;
 	}

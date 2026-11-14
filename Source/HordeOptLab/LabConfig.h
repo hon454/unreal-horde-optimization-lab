@@ -169,7 +169,7 @@ struct FLabScenario
  * 시험 실행 Spike1(ADR-0017, Docs/Worklog/V2.md "시험 실행"): 오브가 지면 위를 원 궤도로 돈다. 인자를 주지 않으면 지금까지와 같다(원점 고정, 타워).
  * 궤도는 월드 시각의 결정적 함수다. 원의 중심은 (0, R)이고 t = 0에 원점에서 +X로 출발한다. 그래서 속도가 0이면 반지름과 무관하게 원점에 머문다.
  * -LabOrbOrbitRadius=<m>, -LabOrbOrbitSpeed=<m/s>, -LabOrbHeight=<m>(0보다 크면 타워를 숨기고 구체를 그 높이에 띄운다), 
- * -LabMotionAids=1(오브 위에 위치와 속도를 적는 패널, ALabHud::DrawOrbPanel. 상태 오버레이 -LabHud와 따로 켜고 측정 실행에서도 그린다).
+ * -LabMotionAids=1(화면 오른쪽 위에 오브의 위치와 속도를 적는 판, ALabHud::DrawOrbPanel. 상태 오버레이 -LabHud와 따로 켜고 측정 실행에서도 그린다).
  * 오브 액터의 위치는 늘 지면(z = 0)이다. 판정은 수평 거리라 높이는 겉모습만 바꾼다.
  */
 struct FLabOrbit
