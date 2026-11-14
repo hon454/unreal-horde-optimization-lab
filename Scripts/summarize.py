@@ -31,8 +31,8 @@ CSV_DIR = ROOT / "Saved" / "Profiling" / "CSV"
 LABEL_RE = re.compile(r"^(?P<m>M\d+b?|Q\d+)-(?P<variant>[a-z][a-z0-9]*)-N(?P<n>\d+)-(?P<preset>P\d)(?P<tag>[a-z0-9]*)-r(?P<run>\d+)$")
 # 총괄 묶음(Full<n>, 예행 Reh<n>, Docs/Worklog/Q5.md "2단위"): Full1-<단계>-<변형>-N<N>-<P1|P2>-r<i>. 단계·변형 칸은 Scripts/full-conditions.json의 조건 이름이 된다(L8-q4final, A8-hydrate, S1-budget).
 # 촬영(Full1shot-)·트레이스(Full1trace-, Full1traceser-) 라벨은 접두사가 달라 읽지 않는다. 회차 11 이상은 묶음 끝 A/A(요약에서 <조건>-aa), 실패 재측정은 회차 + Runs(4~6, 14~16)라 같은 조건으로 센다.
-FULL_RE = re.compile(r"^(?P<m>[A-Z][a-z]+\d+)-(?P<step>[A-Z]\d+)-(?P<variant>[A-Za-z0-9]+)-N(?P<n>\d+)-(?P<preset>P\d)-r(?P<run>\d+)$")
-BATCH_NAME_RE = re.compile(r"^[A-Z][a-z]+\d+$")  # Full1(총괄 묶음), Reh1(예행). M3b·Q4는 소문자가 없어 걸리지 않는다
+FULL_RE = re.compile(r"^(?P<m>[A-Z][A-Za-z]+\d+)-(?P<step>[A-Z]\d+)-(?P<variant>[A-Za-z0-9]+)-N(?P<n>\d+)-(?P<preset>P\d)-r(?P<run>\d+)$")
+BATCH_NAME_RE = re.compile(r"^[A-Z][A-Za-z]+\d+$")  # Full1(총괄 묶음), Reh1(예행), AB1(참고). M3b·Q4는 숫자 앞 글자가 하나라 걸리지 않는다
 FULL_CONDITIONS = Path(__file__).resolve().parent / "full-conditions.json"
 FULL_AA_MIN_RUN = 10
 # 총괄 묶음에만 붙는 열: 조건 이름, 묶음 종류(ladder·ablation·sub), 사다리 단계(LabLadder), 동등성 값(Docs/Worklog/Q5.md "동등성 통계")
