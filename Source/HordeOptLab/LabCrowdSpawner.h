@@ -23,7 +23,8 @@ public:
 	/** 변형 manager의 매니저. 다른 변형에서는 nullptr */
 	class ALabCrowdManager* GetManager() const { return Manager; }
 
-	FVector GetOrbLocation() const { return OrbLocation; }
+	/** 오브의 지금 지면 위치. Spike1 궤도(FLabOrbit)를 켜지 않으면 원점이다 */
+	FVector GetOrbLocation() const;
 	const TArray<TObjectPtr<ALabMinion>>& GetMinions() const { return Minions; }
 	/** 단계와 무관한 개체 수(M0 액터, M1부터 엔티티). 러너의 LabAlive와 오버레이가 쓴다. */
 	int32 GetAliveCount() const;
@@ -42,7 +43,6 @@ protected:
 	UPROPERTY() TObjectPtr<class ULabCrowdSubsystem> Crowd; // M1부터
 	UPROPERTY() TObjectPtr<class ALabCrowdManager> Manager; // 변형 manager만(FLabConfig::UsesManager). 있으면 Crowd는 비어 있다
 	FRandomStream Stream;
-	FVector OrbLocation = FVector::ZeroVector;
 	uint32 NextSerial = 0;
 	int32 RespawnCount = 0;
 };

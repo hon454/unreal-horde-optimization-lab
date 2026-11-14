@@ -24,6 +24,20 @@ public:
 	bool IsShown() const { return bVisible; }
 
 protected:
+	/**
+	 * 시험 실행 Spike1(-LabMotionAids=1, Docs/Worklog/V2.md "시험 실행"): 오브의 화면 위치 바로 위에 붙어 따라가는 작은 패널. 넓은 평지에서 카메라가 오브를 따라가면
+	 * 오브가 움직이는 것이 화면에 보이지 않아서 오브의 월드 위치(m)와 속도(m/s), 화면에서의 진행 방향 화살표를 적는다.
+	 * 값은 인자가 아니라 오브 액터의 실제 위치와 프레임 사이 이동에서 구한다(속도는 0.25초 창의 이동 거리 ÷ 시간). 상태 오버레이(bVisible)와 무관하게 그린다.
+	 */
+	void DrawOrbPanel();
+	TWeakObjectPtr<class ALabOrb> OrbForPanel;
+	FVector OrbPanelLast = FVector::ZeroVector;        // 지난 프레임의 오브 위치
+	FVector OrbPanelWindowStart = FVector::ZeroVector; // 속도 창이 시작할 때의 위치
+	double OrbPanelWindowTime = -1.;                   // 속도 창이 시작한 월드 시각
+	double OrbPanelWindowPath = 0.;                    // 창 안에서 움직인 거리(cm)
+	float OrbPanelSpeed = 0.f;                         // 표시하는 속도(cm/s)
+	FVector OrbPanelDir = FVector::ZeroVector;         // 표시하는 진행 방향(월드, 단위 벡터)
+
 	/** 이번 프레임 값을 1초 창과 그래프 기록에 더한다(보일 때만) */
 	void Sample();
 

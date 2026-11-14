@@ -2,6 +2,8 @@
 #include "LabConfig.h"
 #include "LabCrowdSubsystem.h"
 #include "LabGameMode.h"
+#include "LabOrb.h"
+#include "EngineUtils.h"
 #include "CanvasItem.h"
 #include "DynamicRHI.h"      // RHIGetGPUFrameCycles: CSV GPUTime과 같은 값(LaunchEngineLoop.cpp:1520)
 #include "Engine/Canvas.h"
@@ -186,9 +188,156 @@ void ALabHud::Sample()
 	HistoryCount = FMath::Min(HistoryCount + 1, HistoryCapacity);
 }
 
+void ALabHud::DrawOrbPanel()
+{
+	if (!OrbForPanel.IsValid())
+	{
+		for (TActorIterator<ALabOrb> It(GetWorld()); It; ++It)
+		{
+			OrbForPanel = *It;
+			break;
+		}
+		if (!OrbForPanel.IsValid())
+		{
+			return;
+		}
+	}
+	const TSharedPtr<FSlateFontMeasure> Measure = FEngineFontServices::IsInitialized() ? FEngineFontServices::Get().GetFontMeasure() : nullptr;
+	if (!Measure.IsValid())
+	{
+		return;
+	}
+
+	// 값: 오브 액터의 실제 위치와 프레임 사이 이동. 속도는 0.25초 창마다 한 번 바꿔 숫자가 떨리지 않게 한다
+	const FVector Pos = OrbForPanel->GetActorLocation();
+	const double Now = GetWorld()->GetTimeSeconds();
+	if (OrbPanelWindowTime < 0.)
+	{
+		OrbPanelWindowTime = Now;
+		OrbPanelWindowStart = Pos;
+		OrbPanelLast = Pos;
+	}
+	OrbPanelWindowPath += FVector::Dist2D(Pos, OrbPanelLast);
+	OrbPanelLast = Pos;
+	if (Now - OrbPanelWindowTime >= 0.25)
+	{
+		OrbPanelSpeed = float(OrbPanelWindowPath / (Now - OrbPanelWindowTime));
+		OrbPanelDir = (Pos - OrbPanelWindowStart).GetSafeNormal2D();
+		OrbPanelWindowTime = Now;
+		OrbPanelWindowStart = Pos;
+		OrbPanelWindowPath = 0.;
+	}
+	const bool bMoving = OrbPanelSpeed >= 5.f && !OrbPanelDir.IsNearlyZero(); // 0.05m/s 아래는 정지로 적는다(표시 자릿수의 절반)
+
+	// 글자: 1440p에서 값 27pt, 낱말 20pt. 720p에서는 0.8배에서 멈춘다(상태 오버레이와 같은 규칙)
+	const float S = FMath::Max(Canvas->ClipY / 1080.f, 0.8f);
+	const UObject* FontObject = GEngine->GetMediumFont();
+	const FSlateFontInfo LabelFont(FontObject, FMath::RoundToFloat(15.f * S), FName(TEXT("Regular")));
+	const FSlateFontInfo ValueFont(FontObject, FMath::RoundToFloat(20.f * S), FName(TEXT("Bold")));
+	auto Width = [&Measure](const FString& Text, const FSlateFontInfo& Font) { return float(FVector2D(Measure->Measure(Text, Font)).X); };
+	const float ValueH = float(FVector2D(Measure->Measure(FString(TEXT("Hg0")), ValueFont)).Y);
+	const float LabelH = float(FVector2D(Measure->Measure(FString(TEXT("Hg0")), LabelFont)).Y);
+
+	// 부호는 늘 적고 소수 한 자리. 숫자 칸은 가장 넓은 값의 폭으로 고정하고 오른쪽에 맞춰 자릿수가 바뀌어도 흔들리지 않는다
+	auto Signed = [](double Meters)
+	{
+		const double R = FMath::RoundToDouble(Meters * 10.) / 10.;
+		return FString::Printf(TEXT("%s%.1f"), R < 0. ? TEXT("−") : TEXT("+"), FMath::Abs(R));
+	};
+	const FString XText = Signed(Pos.X / 100.);
+	const FString YText = Signed(Pos.Y / 100.);
+	const FString SpeedText = FString::Printf(TEXT("%.1f"), OrbPanelSpeed / 100.f);
+	const FString PosLabel = TEXT("위치");
+	const FString SpeedLabel = TEXT("속도");
+	const FString StopText = TEXT("정지");
+	const float Gap = 10.f * S;
+	const float Pad = 12.f * S;
+	const float LabelW = FMath::Max(Width(PosLabel, LabelFont), Width(SpeedLabel, LabelFont)) + Gap * 1.6f;
+	const float AxisW = FMath::Max(Width(TEXT("X"), LabelFont), Width(TEXT("Y"), LabelFont)) + Gap * 0.6f;
+	const float NumW = Width(TEXT("+000.0"), ValueFont);
+	const float UnitW = Width(TEXT(" m"), LabelFont);
+	const float SpeedNumW = Width(TEXT("00.0"), ValueFont);
+	const float ArrowW = ValueH * 1.1f;
+	const float Row1W = LabelW + AxisW + NumW + UnitW + Gap * 2.f + AxisW + NumW + UnitW;
+	const float PanelW = Row1W + 2.f * Pad;
+	const float RowH = ValueH + 2.f * S;
+	const float PanelH = 2.f * RowH + 2.f * Pad;
+
+	// 자리: 구체 위쪽 끝을 화면에 옮긴 점의 바로 위. 카메라 뒤면 그리지 않고, 화면 밖으로 나가지 않게 민다
+	const FVector SphereCenter = Pos + FVector(0., 0., FLabConfig::Get().Orbit.SphereZ());
+	const FVector Screen = Canvas->Project(SphereCenter + FVector(0., 0., 90.));
+	if (Screen.Z <= 0.)
+	{
+		return;
+	}
+	const float PX = FMath::Clamp(float(Screen.X) - PanelW * 0.5f, 4.f, FMath::Max(4.f, Canvas->ClipX - PanelW - 4.f));
+	const float PY = FMath::Clamp(float(Screen.Y) - PanelH - 14.f * S, 4.f, FMath::Max(4.f, Canvas->ClipY - PanelH - 4.f));
+	LabRect(Canvas, PX, PY, PanelW, PanelH, FLinearColor(0.f, 0.f, 0.f, 0.62f));
+
+	auto Baseline = [ValueH, LabelH](float RowY) { return RowY + (ValueH - LabelH) * 0.75f; }; // 작은 글자를 큰 글자의 밑선 가까이에 맞춘다
+	float X = PX + Pad;
+	float Y = PY + Pad;
+	LabText(Canvas, PosLabel, LabelFont, DimColor, X, Baseline(Y), S);
+	X += LabelW;
+	const FString* Values[2] = { &XText, &YText };
+	const TCHAR* Axes[2] = { TEXT("X"), TEXT("Y") };
+	for (int32 i = 0; i < 2; ++i)
+	{
+		LabText(Canvas, Axes[i], LabelFont, AccentColor, X, Baseline(Y), S);
+		X += AxisW;
+		LabText(Canvas, *Values[i], ValueFont, TextColor, X + NumW - Width(*Values[i], ValueFont), Y, S);
+		X += NumW;
+		LabText(Canvas, TEXT(" m"), LabelFont, DimColor, X, Baseline(Y), S);
+		X += UnitW + Gap * 2.f;
+	}
+
+	X = PX + Pad;
+	Y += RowH;
+	LabText(Canvas, SpeedLabel, LabelFont, DimColor, X, Baseline(Y), S);
+	X += LabelW;
+	if (!bMoving)
+	{
+		LabText(Canvas, StopText, ValueFont, TextColor, X, Y, S);
+		return;
+	}
+	LabText(Canvas, SpeedText, ValueFont, TextColor, X + SpeedNumW - Width(SpeedText, ValueFont), Y, S);
+	X += SpeedNumW;
+	LabText(Canvas, TEXT(" m/s"), LabelFont, DimColor, X, Baseline(Y), S);
+	X += Width(TEXT(" m/s"), LabelFont) + Gap * 1.5f;
+
+	// 진행 방향 화살표: 오브가 가는 쪽을 화면에 옮긴 방향. 글리프가 아니라 선으로 그려 글꼴에 기대지 않는다
+	const FVector A = Canvas->Project(SphereCenter);
+	const FVector B = Canvas->Project(SphereCenter + OrbPanelDir * 200.);
+	FVector2D Dir(B.X - A.X, B.Y - A.Y);
+	if (A.Z <= 0. || B.Z <= 0. || !Dir.Normalize())
+	{
+		return;
+	}
+	const FVector2D Center(X + ArrowW * 0.5f, Y + ValueH * 0.5f);
+	const float Half = ArrowW * 0.45f;
+	const FVector2D Tip = Center + Dir * Half;
+	const FVector2D Tail = Center - Dir * Half;
+	const FVector2D Side(-Dir.Y, Dir.X);
+	const float Thick = FMath::Max(2.f, FMath::RoundToFloat(2.5f * S));
+	auto Line = [this, Thick](const FVector2D& P0, const FVector2D& P1)
+	{
+		FCanvasLineItem Item(P0, P1);
+		Item.SetColor(AccentColor);
+		Item.LineThickness = Thick;
+		Canvas->DrawItem(Item);
+	};
+	Line(Tail, Tip);
+	Line(Tip, Tip - Dir * Half * 0.8f + Side * Half * 0.55f);
+	Line(Tip, Tip - Dir * Half * 0.8f - Side * Half * 0.55f);
+}
+
 void ALabHud::DrawHUD()
 {
 	Super::DrawHUD();
+	if (Canvas && GEngine && FLabConfig::Get().Orbit.bAids)
+	{
+		DrawOrbPanel(); // Spike1: 상태 오버레이와 따로 켠다(측정 실행에서도 그린다)
+	}
 	if (!bVisible || !Canvas || !GEngine)
 	{
 		return; // 숨겨 둔 측정 실행에서는 아무것도 하지 않는다

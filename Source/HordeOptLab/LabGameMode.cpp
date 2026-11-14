@@ -419,6 +419,7 @@ void ALabGameMode::TickBench()
 			CSV_METADATA(TEXT("LabN"), *FString::FromInt(Config.N));
 			CSV_METADATA(TEXT("LabPreset"), *FString::Printf(TEXT("P%d"), Config.Preset));
 			CSV_METADATA(TEXT("LabSeed"), *FString::FromInt(Config.Seed));
+			CSV_METADATA(TEXT("LabOrbit"), *Config.Orbit.ToString()); // Spike1 떠다니는 오브. 켜지 않으면 "-"
 			CSV_METADATA(TEXT("LabVariant"), FLabConfig::VariantName(Config.Variant));
 			CSV_METADATA(TEXT("LabLabel"), *Config.Label);
 			// M3b 2종: 종류 수와 에셋 상태. substituted(대형 에셋 없음, 소형으로 대체)는 스모크 전용이라 비교에 쓰지 않는다(LabUnitAssets.h).

@@ -228,9 +228,23 @@ const FLabConfig& FLabConfig::Get()
 		if (C.Seed != 20261106) { NoteOverride(FString::Printf(TEXT("seed=%d"), C.Seed)); }
 		if (C.HealthFixed > 0.f) { NoteOverride(FString::Printf(TEXT("health_fixed=%.0f"), C.HealthFixed)); }
 		if (C.FullyParallel == 0) { NoteOverride(TEXT("fully_parallel=0")); }
+		// Spike1 떠다니는 오브(LabConfig.h FLabOrbit). 인자는 m, m/s이고 안에서는 cm다
+		{
+			float RadiusM = 0.f, SpeedMs = 0.f, HeightM = 0.f;
+			int32 Aids = 0;
+			FParse::Value(Cmd, TEXT("-LabOrbOrbitRadius="), RadiusM);
+			FParse::Value(Cmd, TEXT("-LabOrbOrbitSpeed="), SpeedMs);
+			FParse::Value(Cmd, TEXT("-LabOrbHeight="), HeightM);
+			FParse::Value(Cmd, TEXT("-LabMotionAids="), Aids);
+			C.Orbit.RadiusCm = FMath::Max(RadiusM, 0.f) * 100.f;
+			C.Orbit.SpeedCms = FMath::Max(SpeedMs, 0.f) * 100.f;
+			C.Orbit.HeightCm = FMath::Max(HeightM, 0.f) * 100.f;
+			C.Orbit.bAids = Aids != 0;
+			if (C.Orbit.ToString() != TEXT("-")) { NoteOverride(TEXT("orbit=") + C.Orbit.ToString()); }
+		}
 		C.Overrides = FString::Join(Overrides, TEXT("|")); // CSV 메타데이터 행은 쉼표로 나뉘므로 | 로 잇는다(LabCVars와 같다)
 		C.N = FMath::Max(C.N, 1);
-		C.Preset = FMath::Clamp(C.Preset, 1, 2);
+		C.Preset = FMath::Clamp(C.Preset, 1, 3);
 		return C;
 	}();
 	return Config;

@@ -53,6 +53,9 @@ protected:
 	 */
 	void OnMassPrePhysicsStart(float DeltaSeconds);
 	FDelegateHandle PhaseStartHandle;
+	/** Spike1 떠다니는 오브(FLabOrbit): 프레임에 한 번 궤도 위치로 옮긴다. 궤도 속도가 0이면 아무것도 하지 않는다 */
+	void UpdateOrbit();
+	uint64 OrbitFrame = MAX_uint64;
 	void SpawnStrikeFx(const FVector& Target);
 	void TickStrikes(float DeltaSeconds);
 

@@ -24,7 +24,7 @@ void ALabCameraRig::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 	Elapsed += DeltaSeconds;
-	if (Preset == 1)
+	if (Preset != 2)
 	{
 		Apply();
 	}
@@ -60,7 +60,9 @@ void ALabCameraRig::Apply()
 		}
 #endif
 		const FVector Forward = FRotator(0.f, Yaw, 0.f).Vector();
-		const FVector Location = Target - Forward * FLabScenario::OrbViewBack + FVector(0.f, 0.f, FLabScenario::OrbViewHeight);
+		// P3(Spike1): 중심이 오브의 지금 위치다. 오브와 같은 함수(FLabOrbit, 월드 시각)라 틱 순서와 무관하게 같은 프레임의 위치를 쓴다
+		const FVector Center = Preset == 3 ? Target + FLabConfig::Get().Orbit.LocationAt(GetWorld()->GetTimeSeconds()) : Target;
+		const FVector Location = Center - Forward * FLabScenario::OrbViewBack + FVector(0.f, 0.f, FLabScenario::OrbViewHeight);
 		SetActorLocationAndRotation(Location, FRotator(FLabScenario::OrbViewPitch, Yaw, 0.f));
 		return;
 	}

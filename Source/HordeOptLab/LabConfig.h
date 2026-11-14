@@ -166,6 +166,42 @@ struct FLabScenario
 };
 
 /**
+ * 시험 실행 Spike1(ADR-0017, Docs/Worklog/V2.md "시험 실행"): 오브가 지면 위를 원 궤도로 돈다. 인자를 주지 않으면 지금까지와 같다(원점 고정, 타워).
+ * 궤도는 월드 시각의 결정적 함수다. 원의 중심은 (0, R)이고 t = 0에 원점에서 +X로 출발한다. 그래서 속도가 0이면 반지름과 무관하게 원점에 머문다.
+ * -LabOrbOrbitRadius=<m>, -LabOrbOrbitSpeed=<m/s>, -LabOrbHeight=<m>(0보다 크면 타워를 숨기고 구체를 그 높이에 띄운다), 
+ * -LabMotionAids=1(오브 위에 위치와 속도를 적는 패널, ALabHud::DrawOrbPanel. 상태 오버레이 -LabHud와 따로 켜고 측정 실행에서도 그린다).
+ * 오브 액터의 위치는 늘 지면(z = 0)이다. 판정은 수평 거리라 높이는 겉모습만 바꾼다.
+ */
+struct FLabOrbit
+{
+	float RadiusCm = 0.f;
+	float SpeedCms = 0.f;
+	float HeightCm = 0.f;
+	bool bAids = false;
+	bool IsMoving() const { return RadiusCm > 0.f && SpeedCms > 0.f; }
+	/** 한 바퀴 시간(초). 움직이지 않으면 0 */
+	float PeriodSec() const { return IsMoving() ? UE_TWO_PI * RadiusCm / SpeedCms : 0.f; }
+	/** 월드 시각 T(초)의 오브 지면 위치 */
+	FVector LocationAt(double T) const
+	{
+		if (!IsMoving())
+		{
+			return FVector::ZeroVector;
+		}
+		const double A = double(SpeedCms) / double(RadiusCm) * T;
+		return FVector(RadiusCm * FMath::Sin(A), RadiusCm * (1. - FMath::Cos(A)), 0.);
+	}
+	/** 구체 중심의 높이(cm). 띄우지 않으면 타워 위 400(LabOrb.cpp) */
+	float SphereZ() const { return HeightCm > 0.f ? HeightCm : 400.f; }
+	/** CSV 메타데이터 LabOrbit: "r57.3/v3/h6/aids1" 꼴(m, m/s, m). 인자를 하나도 주지 않으면 "-" */
+	FString ToString() const
+	{
+		return RadiusCm <= 0.f && SpeedCms <= 0.f && HeightCm <= 0.f && !bAids ? FString(TEXT("-"))
+			: FString::Printf(TEXT("r%g/v%g/h%g/aids%d"), RadiusCm / 100.f, SpeedCms / 100.f, HeightCm / 100.f, bAids ? 1 : 0);
+	}
+};
+
+/**
  * 최적화 단계(마일스톤). 모든 단계가 한 빌드에 공존하고 -LabStage=로 고른다(ADR-0004).
  * 스포너·오브·카메라·러너·CSV는 모든 단계가 공유하고, 단계는 개체를 표현하고 움직이는 방식만 바꾼다.
  * 마일스톤을 끝낼 때 이전 단계를 지우지 않고 새 단계를 더한다.
@@ -201,7 +237,8 @@ struct FLabConfig
 	 */
 	bool bHud = false;
 	int32 N = 500;
-	int32 Preset = 1;          // 1 오브 시점, 2 탑뷰(P3는 2026-11-07에 뺐다)
+	int32 Preset = 1;          // 1 오브 시점, 2 탑뷰, 3 따라가는 오브 시점(Spike1: P1과 같은 배치·회전, 중심만 오브의 지금 위치. 궤도 속도 0이면 P1과 같다)
+	FLabOrbit Orbit;           // Spike1 떠다니는 오브(기본은 꺼짐)
 	int32 Seed = 20261106;
 	/**
 	 * Q1 개체 체력 고정(-LabHealthFixed=<값>, 기본 0 = 분산). 0보다 크면 모든 개체 체력이 그 값이다(분산 전 상태 재현용 디버그 인자, 예: 100).

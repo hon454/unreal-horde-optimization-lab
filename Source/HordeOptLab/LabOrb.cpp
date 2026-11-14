@@ -51,9 +51,29 @@ ALabOrb::ALabOrb()
 	ZoneFx->SetupAttachment(Root);
 }
 
+void ALabOrb::UpdateOrbit()
+{
+	// Spike1: 궤도 위치는 월드 시각의 함수다(FLabOrbit). 카메라와 스포너도 같은 함수를 불러 틱 순서와 무관하게 같은 값을 본다.
+	const FLabOrbit& Orbit = FLabConfig::Get().Orbit;
+	if (Orbit.IsMoving() && OrbitFrame != GFrameCounter)
+	{
+		OrbitFrame = GFrameCounter;
+		SetActorLocation(Orbit.LocationAt(GetWorld()->GetTimeSeconds()));
+	}
+}
+
 void ALabOrb::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (const FLabOrbit& Orbit = FLabConfig::Get().Orbit; Orbit.HeightCm > 0.f)
+	{
+		// Spike1: 타워 없이 구체만 띄운다. 번개(CoilFx)는 구체 중심에서 지면의 대상으로 내려온다
+		Tower->SetVisibility(false);
+		Tower->SetCastShadow(false);
+		Sphere->SetRelativeLocation(FVector(0.f, 0.f, Orbit.SphereZ()));
+		CoilFx->SetRelativeLocation(FVector(0.f, 0.f, Orbit.SphereZ()));
+	}
 
 	UMaterialInterface* Metal = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/NiagaraExamples/Gallery/Materials/M_Target_Metal.M_Target_Metal"), nullptr, LOAD_Quiet | LOAD_NoWarn);
 	if (UStaticMesh* TowerMesh = LoadObject<UStaticMesh>(nullptr, TEXT("/Game/NiagaraExamples/Gallery/StaticMesh/SM_TorchBase.SM_TorchBase"), nullptr, LOAD_Quiet | LOAD_NoWarn))
@@ -113,6 +133,7 @@ void ALabOrb::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 void ALabOrb::OnMassPrePhysicsStart(float DeltaSeconds)
 {
+	UpdateOrbit(); // 프로세서가 읽는 OrbCenter보다 먼저 옮긴다
 	ULabCrowdSubsystem* Crowd = GetWorld()->GetSubsystem<ULabCrowdSubsystem>();
 	if (!Spawner || !Crowd || !Crowd->IsActive())
 	{
@@ -132,6 +153,7 @@ void ALabOrb::OnMassPrePhysicsStart(float DeltaSeconds)
 void ALabOrb::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
+	UpdateOrbit(); // Mass 단계 시작이 이 프레임에 아직 불리지 않았을 때(M0 액터 단계 포함)
 	if (!Spawner)
 	{
 		return;

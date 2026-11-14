@@ -109,7 +109,6 @@ void ALabCrowdSpawner::SpawnInitial()
 	LoadAssets();
 	const FLabConfig& Config = FLabConfig::Get();
 	Stream.Initialize(Config.Seed);
-	OrbLocation = FVector::ZeroVector;
 
 	// 반지름을 [피해 범위, R]에서 균등하게 뽑으면 반지름당 개체 수가 일정하다(밀도 ∝ 1/r). 모든 단계가 같은 순서로 뽑는다.
 	TArray<FVector2D> RadiusAngles;
@@ -126,7 +125,7 @@ void ALabCrowdSpawner::SpawnInitial()
 		// 변형 manager(Docs/Worklog/Q8.md): Mass 엔티티 대신 틱 없는 액터와 매니저 하나. 메시와 피격·사망 시간은 아래 M1 경로와 같은 값이다
 		Manager = GetWorld()->SpawnActor<ALabCrowdManager>();
 		UStaticMesh* ManagerMeshes[LabUnitTypeMax] = { Assets.StaticMesh, LargeAssets.StaticMesh };
-		Manager->Activate(this, OrbLocation, MakeArrayView(ManagerMeshes, FLabUnitTypes::Num()),
+		Manager->Activate(this, GetOrbLocation(), MakeArrayView(ManagerMeshes, FLabUnitTypes::Num()),
 			Assets.Hit ? Assets.Hit->GetPlayLength() : 0.5f, Assets.Death ? Assets.Death->GetPlayLength() : 1.f);
 		SpawnEntitiesAt(RadiusAngles);
 	}
@@ -142,7 +141,7 @@ void ALabCrowdSpawner::SpawnInitial()
 	{
 		// M1부터 개체는 Mass 엔티티다. 표현은 static 변형과 같은 정적 메시, 피격·사망 시간은 M0 애니 길이와 같다.
 		Crowd = GetWorld()->GetSubsystem<ULabCrowdSubsystem>();
-		Crowd->OrbCenter = OrbLocation;
+		Crowd->OrbCenter = GetOrbLocation();
 		// 종류별 ISM 메시(2종이면 둘, LabUnitAssets.h). M1은 정적 메시, M2부터 VAT 메시.
 		const int32 Types = FLabUnitTypes::Num();
 		UStaticMesh* CrowdMeshes[LabUnitTypeMax] = { Assets.StaticMesh, LargeAssets.StaticMesh };
@@ -239,15 +238,22 @@ int32 ALabCrowdSpawner::GetAliveCount() const
 	return Manager ? Manager->GetAliveCount() : Crowd ? Crowd->GetAliveCount() : Minions.Num();
 }
 
+FVector ALabCrowdSpawner::GetOrbLocation() const
+{
+	// Spike1: 오브의 지금 위치(FLabOrbit). 궤도 속도가 0이면 원점이라 전과 같다
+	return FLabConfig::Get().Orbit.LocationAt(GetWorld()->GetTimeSeconds());
+}
+
 void ALabCrowdSpawner::SpawnEntitiesAt(TConstArrayView<FVector2D> RadiusAngles)
 {
+	const FVector Center = GetOrbLocation(); // 초기 배치와 재생성 링의 중심은 오브의 지금 위치다
 	TArray<FVector> Locations;
 	TArray<uint32> Serials;
 	Locations.Reserve(RadiusAngles.Num());
 	Serials.Reserve(RadiusAngles.Num());
 	for (const FVector2D& RA : RadiusAngles)
 	{
-		Locations.Emplace(RA.X * FMath::Cos(RA.Y), RA.X * FMath::Sin(RA.Y), 0.f); // 엔티티 위치는 발밑(지면)이다
+		Locations.Emplace(Center.X + RA.X * FMath::Cos(RA.Y), Center.Y + RA.X * FMath::Sin(RA.Y), 0.f); // 엔티티 위치는 발밑(지면)이다
 		Serials.Add(NextSerial++);
 	}
 	if (Manager)
@@ -276,8 +282,9 @@ ALabMinion* ALabCrowdSpawner::SpawnAt(float Radius, float Angle)
 {
 	const uint32 Serial = NextSerial++;
 	// 대형은 캡슐이 배율만큼 커지므로 캡슐 중심 높이도 같은 배율로 올린다(소형은 배율 1이라 전과 같다)
-	const FVector Location(Radius * FMath::Cos(Angle), Radius * FMath::Sin(Angle), SpawnZ * FLabUnitAssetPaths::Get(FLabUnitTypes::TypeOf(Serial)).Scale);
-	const FRotator Facing = (OrbLocation - Location).GetSafeNormal2D().Rotation();
+	const FVector Center = GetOrbLocation();
+	const FVector Location(Center.X + Radius * FMath::Cos(Angle), Center.Y + Radius * FMath::Sin(Angle), SpawnZ * FLabUnitAssetPaths::Get(FLabUnitTypes::TypeOf(Serial)).Scale);
+	const FRotator Facing = (Center - Location).GetSafeNormal2D().Rotation();
 
 	FActorSpawnParameters Params;
 	Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;

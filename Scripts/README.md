@@ -14,6 +14,7 @@
 | `run-full.ps1`, `full-conditions.json` | 총괄 묶음 러너와 조건 표(사다리 8단계, 빼 보기 열 행, 하위 실험). 조건의 인자와 기대 메타데이터는 JSON이 정한다 |
 | `ablation-check.py`, `equivalence-check.py` | 실행마다 CSV 메타데이터를 조건 표와 대조하고, 단계 사이의 동등성(초당 사망, 30m 안 개체 수)을 검사한다 |
 | `run-pool.ps1`, `pool-timeline.py` | 엔티티 풀 묶음(16분 실행 두 번)과 1분 구간 정리 |
+| `run-spike.ps1`, `spike-check.py`, `spike-timeline.py` | 시험 실행 묶음 `Spike1`(떠다니는 오브: 궤도 속도 × 구성 둘 × 5회, 따라가는 카메라 P3)의 러너, 메타데이터 대조, 5초 구간의 가까운 개체 수 정리(`Measurements/Spike1/timeline.csv`). 경위는 [Docs/Worklog/V2.md](../Docs/Worklog/V2.md) "시험 실행" |
 | `run-budget.ps1`, `check-budget.py`, `plot-budget.py` | 참고 묶음 `Budget1`(예산 값 6 × 호드 2 × 3회)의 러너, 메타데이터 대조, 그림(`Docs/figures/budget1/`) |
 | `run-mgr.ps1`, `check-mgr.py` | 참고 묶음 `Mgr1`(변형 `manager`, 2단계, 2단계 직렬 × 호드 1만·2만 × 3회)의 러너와 메타데이터 대조 |
 | `mgr-trace-table.py` | 참고 묶음 `MgrT1`(`run-mgr.ps1 -Trace`)의 트레이스 내보내기 CSV → `Measurements/MgrT1/timers.csv`(스레드별 타이머, 프레임당 ms) |
