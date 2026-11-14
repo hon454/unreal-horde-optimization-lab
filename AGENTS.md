@@ -16,6 +16,7 @@
 | --- | --- |
 | 지금 단계, 다음 할 일, 진행 중인 세션, 매번 쓰는 명령, 최근 묶음의 수치, 막힌 것, 사용자에게 요청한 일 | [Docs/STATUS.md](Docs/STATUS.md) |
 | 목표 사양, 사다리, 빼 보기 표, 측정 목록, 끝낸 단계의 목표와 실험 | [Docs/plan.md](Docs/plan.md) |
+| `v2`의 사양(시나리오, 기능, 표현, 측정)과 계획(사다리, 작업 단위, 조건 표) | [Docs/v2-spec.md](Docs/v2-spec.md), [Docs/v2-plan.md](Docs/v2-plan.md) |
 | 글 대기열 | [Docs/backlog.md](Docs/backlog.md) |
 | 확정된 결정과 이유, 버린 대안 | [Docs/Decisions/](Docs/Decisions/README.md)(ADR). ADR이 없는 결정은 그 README의 표 |
 | 측정 규약: 시나리오 고정값, 빌드 구성, 절차, 지표 이름, 차이 판정, 한계 | [measurement.md](Docs/Guides/measurement.md) |
