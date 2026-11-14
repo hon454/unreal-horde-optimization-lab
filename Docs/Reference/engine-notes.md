@@ -564,3 +564,17 @@
 | `p.Chaos.AccelerationStructureIsolateQueryOnlyObjects` | 기본 0. 1이면 QueryOnly 바디를 가속 구조의 따로 된 칸(`DefaultQueryOnly`·`DynamicQueryOnly`)에 넣는다. 그 칸을 건너뛰는 곳은 시뮬레이션 겹침 검사(`FSimOverlapVisitor`)뿐이고 씬 쿼리는 모든 칸을 본다. 칸은 물리 씬을 만들 때 생기므로 게임 시작 전에 넣어야 한다(`p.BroadphaseType` 기본 `Tree`일 때만 칸이 생긴다) | `Engine/Source/Runtime/Experimental/Chaos/Private/Chaos/PBDRigidsEvolution.cpp:37-38,92-126`, `Engine/Source/Runtime/PhysicsCore/Private/ChaosEngineInterface.cpp:2453-2490`, `Engine/Source/Runtime/Experimental/Chaos/Public/Chaos/SpatialAccelerationCollection.h:544-560`, `Public/Chaos/PBDRigidsEvolution.h:46-65` |
 | 스켈레탈 메시 바운드 | `USkeletalMeshComponent::CalcBounds`는 로컬 바운드 캐시가 맞으면 변환만 곱한다. 아니면 `CalcMeshBound`가 `bComponentUseFixedSkelBounds`이면 메시의 고정 바운드를, 아니면 피직스 에셋의 바디로 `CalcAABB`를 셈한다 | `E/Private/Components/SkeletalMeshComponent.cpp:3417-3445`, `E/Private/Components/SkinnedMeshComponent.cpp:2225-2283` |
 | 사용자 트레이스 채널 | `[/Script/Engine.CollisionProfile]`의 `+DefaultChannelResponses=(Channel=ECC_GameTraceChannel<n>,DefaultResponse=…,bTraceType=True,bStaticObject=False,Name="…")`. 기본 응답을 무시로 두면 프로필이 따로 막게 하지 않은 것은 모두 무시한다. Lyra는 캡슐만 막는 무기 트레이스 채널(`Lyra_TraceChannel_Weapon_Capsule`)을 이렇게 둔다 | `E/Classes/Engine/CollisionProfile.h:96-124`, `Samples/Games/Lyra/Config/DefaultEngine.ini:218,224` |
+
+## 39. 액터끼리 겹치지 않게 하는 엔진의 보통 수단(2026-11-15, v2 W6)
+
+줄임말: **E** = `Engine/Source/Runtime/Engine`, **CMC** = `E/Private/Components/CharacterMovementComponent.cpp`, **MC** = `E/Private/Components/MovementComponent.cpp`. Lab의 M0 액터 기준선(`ALabMinion::InitMinion`, 캡슐끼리 Pawn 채널 막기)이 이 사실에 기댄다.
+
+| 항목 | 확인한 것 | 위치 |
+| --- | --- | --- |
+| `ACharacter` 캡슐 기본값 | 반지름 34, 반높이 88, `Pawn` 프로필, `CanCharacterStepUpOn = ECB_No` | `E/Private/Character.cpp:78-81` |
+| 걷기 이동의 스윕 | `MoveAlongFloor`는 `SafeMoveUpdatedComponent(..., bSweep=true)`로 옮긴다. 막히면 계단 오르기를 보고, 오를 수 없는 컴포넌트면 `HandleImpact`와 `SlideAlongSurface`로 표면을 따라 미끄러진다 | `CMC:5552-5632` |
+| 다른 캐릭터에 오르지 않음 | `CanStepUp`은 맞은 컴포넌트의 `CanCharacterStepUp`이 거짓이면 거짓이다. `CanCharacterStepUpOn`이 `ECB_No`면 거짓이다. 그래서 캐릭터 캡슐끼리는 늘 미끄러지기다 | `CMC:7525-7542`, `E/Private/Components/PrimitiveComponent.cpp:5287-5298` |
+| 시작부터 겹친 경우 | `SafeMoveUpdatedComponent`는 스윕이 겹친 채 시작하면(`bStartPenetrating`) 겹친 깊이 + 0.125cm(`p.PenetrationPullbackDistance`)만큼 밀어낼 자리를 겹침 검사로 보고, 비어 있으면 스윕 없이 옮긴 뒤 원래 이동을 다시 한다 | `MC:558-588,593,608-657` |
+| 캐릭터끼리 밀기 없음 | `HandleImpact`의 `ApplyImpactPhysicsForces`는 맞은 바디가 물리 시뮬레이션 중일 때만 힘을 준다. 캐릭터 캡슐은 시뮬레이션하지 않아 서로 밀지 않고 막기만 한다 | `CMC:7784-7812,7814-7825` |
+| 끼었을 때의 로그 | `OnCharacterStuckInGeometry`는 `LogCharacterMovement`의 `Log` 수준이다(경고·오류 아님) | `CMC:5513-5528` |
+| RVO 회피 | `bUseRVOAvoidance` 기본 거짓. 켜면 속도 계산 끝에 `CalcAvoidanceVelocity`가 `UAvoidanceManager`의 속도로 바꾼다(고려 반경 기본 500cm). 속도 조향이라 막기를 대신하지 않는다 | `CMC:822,829,3953-3955,4105-4141` |

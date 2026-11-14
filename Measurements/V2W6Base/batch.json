@@ -1,0 +1,19 @@
+﻿{
+    "batch":  "V2W6Base",
+    "build":  "6b91acc650b594c5e81085718b1f28e01e217a37 (dirty)",
+    "start":  "2026-11-15 07:50:44",
+    "end":  "2026-11-15 08:31:44",
+    "n":  "500,1000,2000",
+    "preset":  "P3",
+    "radius_m":  "57.3",
+    "height_m":  "6",
+    "speeds":  [
+                   "2"
+               ],
+    "duration_sec":  180,
+    "runs":  3,
+    "planned":  10,
+    "ok":  10,
+    "failed":  0,
+    "gave_up":  0
+}
