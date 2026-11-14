@@ -246,7 +246,7 @@ FVector ALabCrowdSpawner::GetOrbLocation() const
 
 void ALabCrowdSpawner::SpawnEntitiesAt(TConstArrayView<FVector2D> RadiusAngles)
 {
-	const FVector Center = GetOrbLocation(); // 초기 배치와 재생성 링의 중심은 오브의 지금 위치다
+	const FVector Center = FVector::ZeroVector; // 초기 배치와 재생성 링의 중심은 맵의 중심이다(v2-spec.md 2절). 오브를 따라가지 않는다
 	TArray<FVector> Locations;
 	TArray<uint32> Serials;
 	Locations.Reserve(RadiusAngles.Num());
@@ -282,9 +282,9 @@ ALabMinion* ALabCrowdSpawner::SpawnAt(float Radius, float Angle)
 {
 	const uint32 Serial = NextSerial++;
 	// 대형은 캡슐이 배율만큼 커지므로 캡슐 중심 높이도 같은 배율로 올린다(소형은 배율 1이라 전과 같다)
-	const FVector Center = GetOrbLocation();
+	const FVector Center = FVector::ZeroVector; // 맵의 중심
 	const FVector Location(Center.X + Radius * FMath::Cos(Angle), Center.Y + Radius * FMath::Sin(Angle), SpawnZ * FLabUnitAssetPaths::Get(FLabUnitTypes::TypeOf(Serial)).Scale);
-	const FRotator Facing = (Center - Location).GetSafeNormal2D().Rotation();
+	const FRotator Facing = (GetOrbLocation() - Location).GetSafeNormal2D().Rotation();
 
 	FActorSpawnParameters Params;
 	Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;

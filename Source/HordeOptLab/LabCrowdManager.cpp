@@ -255,7 +255,7 @@ void ALabCrowdManager::Tick(float DeltaSeconds)
 				const int32 Band = FLabSnipeBands::BandOf(FMath::Sqrt(DistSq));
 				if (Band != INDEX_NONE && View.Contains(FVector(Location.X, Location.Y, LabSnipeAimHeight)))
 				{
-					Picker.Offer(Band, HashCombineFast(::GetTypeHash(M.Serial), ::GetTypeHash(SnipeTick)), &M, Location, M.UnitType == LabUnitLarge);
+					Picker.Offer(Band, LabSnipeHash(M.Serial, SnipeTick), &M, Location, M.UnitType == LabUnitLarge);
 				}
 			}
 		}

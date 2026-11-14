@@ -13,8 +13,13 @@ class UNiagaraComponent;
 /** 벤치마크 러너 시간. commands.md "벤치마크 러너 인자", measurement.md "벤치마크 조건". */
 struct FLabBench
 {
-	static constexpr float WarmupSec = 15.f; // 2026-11-07 30초에서 줄임(measurement.md "벤치마크 조건")
-	static constexpr float MeasureSec = 60.f;
+	// v2(Docs/v2-spec.md 2절, D34): 이동 시나리오는 워밍업 60초 + 측정 180초(궤도 한 바퀴). 정지 조건은 v1과 같은 15초 + 60초
+	static constexpr float WarmupSec = 60.f;
+	static constexpr float MeasureSec = 180.f;
+	static constexpr float StillWarmupSec = 15.f;
+	static constexpr float StillMeasureSec = 60.f;
+	static float Warmup(bool bMoving, float OverrideSec) { return OverrideSec >= 0.f ? OverrideSec : bMoving ? WarmupSec : StillWarmupSec; }
+	static float Measure(bool bMoving, float OverrideSec) { return OverrideSec > 0.f ? OverrideSec : bMoving ? MeasureSec : StillMeasureSec; }
 	static constexpr float FlushSec = 2.f;
 };
 

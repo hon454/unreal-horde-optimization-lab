@@ -24,19 +24,18 @@ void ALabCameraRig::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 	Elapsed += DeltaSeconds;
-	if (Preset != 2)
-	{
-		Apply();
-	}
+	Apply(); // 탑뷰도 오브를 따라간다(v2)
 }
 
 void ALabCameraRig::Apply()
 {
+	// 중심은 오브의 지금 위치다. 오브와 같은 함수(FLabOrbit, 월드 시각)라 틱 순서와 무관하게 같은 프레임의 위치를 쓴다
+	const FVector Center = Target + FLabConfig::Get().Orbit.LocationAt(GetWorld()->GetTimeSeconds());
 	switch (Preset)
 	{
 	case 2:
 		// 탑뷰: 모든 개체가 원거리 밴드에 드는 대조군.
-		SetActorLocationAndRotation(Target + FVector(0.f, 0.f, FLabScenario::TopDownHeight), FRotator(-90.f, 0.f, 0.f));
+		SetActorLocationAndRotation(Center + FVector(0.f, 0.f, FLabScenario::TopDownHeight), FRotator(-90.f, 0.f, 0.f));
 		return;
 	default:
 	{
@@ -60,8 +59,6 @@ void ALabCameraRig::Apply()
 		}
 #endif
 		const FVector Forward = FRotator(0.f, Yaw, 0.f).Vector();
-		// P3(Spike1): 중심이 오브의 지금 위치다. 오브와 같은 함수(FLabOrbit, 월드 시각)라 틱 순서와 무관하게 같은 프레임의 위치를 쓴다
-		const FVector Center = Preset == 3 ? Target + FLabConfig::Get().Orbit.LocationAt(GetWorld()->GetTimeSeconds()) : Target;
 		const FVector Location = Center - Forward * FLabScenario::OrbViewBack + FVector(0.f, 0.f, FLabScenario::OrbViewHeight);
 		SetActorLocationAndRotation(Location, FRotator(FLabScenario::OrbViewPitch, Yaw, 0.f));
 		return;

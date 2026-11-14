@@ -547,7 +547,7 @@ void ULabOrbSnipeProcessor::Execute(FMassEntityManager& EntityManager, FMassExec
 			{
 				continue;
 			}
-			Picker.Offer(Band, HashCombineFast(::GetTypeHash(Minions[It].Serial), ::GetTypeHash(SnipeTick)), Context.GetEntity(It), Location, bLarge);
+			Picker.Offer(Band, LabSnipeHash(Minions[It].Serial, SnipeTick), Context.GetEntity(It), Location, bLarge);
 		}
 	});
 
@@ -631,8 +631,7 @@ void ULabNearOrbCountProcessor::Execute(FMassEntityManager& EntityManager, FMass
 ULabRepSwitchCountProcessor::ULabRepSwitchCountProcessor()
 	: EntityQuery(*this)
 {
-	// 궤도 인자를 준 실행에서만 돈다(기본 실행은 그대로). CDO가 만들어질 때 실행 인자는 이미 읽을 수 있다(ULabOffMoveEnterObserver와 같다)
-	bAutoRegisterWithProcessingPhases = FLabConfig::Get().Orbit.ToString() != TEXT("-");
+	bAutoRegisterWithProcessingPhases = true; // v2: 늘 돈다(v2-spec.md 4.1)
 	ExecutionFlags = (int32)(EProcessorExecutionFlags::Client | EProcessorExecutionFlags::Standalone);
 	// ULabIskmProcessor와 같은 자리: 엔진 표현 프로세서가 이번 프레임의 Prev·Current를 쓴 뒤
 	ExecutionOrder.ExecuteInGroup = UE::Mass::ProcessorGroupNames::Representation;

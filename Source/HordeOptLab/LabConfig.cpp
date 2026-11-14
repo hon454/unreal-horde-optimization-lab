@@ -14,6 +14,7 @@ const FLabConfig& FLabConfig::Get()
 		FParse::Value(Cmd, TEXT("-LabHealthFixed="), C.HealthFixed);
 		FParse::Value(Cmd, TEXT("-LabLabel="), C.Label);
 		FParse::Value(Cmd, TEXT("-LabDuration="), C.DurationSec);
+		FParse::Value(Cmd, TEXT("-LabWarmup="), C.WarmupSec);
 		FParse::Value(Cmd, TEXT("-LabShotAt="), C.ShotAtSec);
 		if (FParse::Value(Cmd, TEXT("-LabHydrateFix="), C.HydrateFix))
 		{
@@ -228,23 +229,20 @@ const FLabConfig& FLabConfig::Get()
 		if (C.Seed != 20261106) { NoteOverride(FString::Printf(TEXT("seed=%d"), C.Seed)); }
 		if (C.HealthFixed > 0.f) { NoteOverride(FString::Printf(TEXT("health_fixed=%.0f"), C.HealthFixed)); }
 		if (C.FullyParallel == 0) { NoteOverride(TEXT("fully_parallel=0")); }
-		// Spike1 떠다니는 오브(LabConfig.h FLabOrbit). 인자는 m, m/s이고 안에서는 cm다
+		// v2 떠다니는 오브(LabConfig.h FLabOrbit). 인자는 m, m/s이고 안에서는 cm다. 주지 않으면 FLabScenario의 궤도다
 		{
-			float RadiusM = 0.f, SpeedMs = 0.f, HeightM = 0.f;
-			int32 Aids = 0;
+			float RadiusM = C.Orbit.RadiusCm / 100.f, SpeedMs = C.Orbit.SpeedCms / 100.f, HeightM = C.Orbit.HeightCm / 100.f;
 			FParse::Value(Cmd, TEXT("-LabOrbOrbitRadius="), RadiusM);
 			FParse::Value(Cmd, TEXT("-LabOrbOrbitSpeed="), SpeedMs);
 			FParse::Value(Cmd, TEXT("-LabOrbHeight="), HeightM);
-			FParse::Value(Cmd, TEXT("-LabMotionAids="), Aids);
 			C.Orbit.RadiusCm = FMath::Max(RadiusM, 0.f) * 100.f;
 			C.Orbit.SpeedCms = FMath::Max(SpeedMs, 0.f) * 100.f;
 			C.Orbit.HeightCm = FMath::Max(HeightM, 0.f) * 100.f;
-			C.Orbit.bAids = Aids != 0;
-			if (C.Orbit.ToString() != TEXT("-")) { NoteOverride(TEXT("orbit=") + C.Orbit.ToString()); }
+			if (!C.Orbit.IsDefault()) { NoteOverride(TEXT("orbit=") + C.Orbit.ToString()); }
 		}
 		C.Overrides = FString::Join(Overrides, TEXT("|")); // CSV 메타데이터 행은 쉼표로 나뉘므로 | 로 잇는다(LabCVars와 같다)
 		C.N = FMath::Max(C.N, 1);
-		C.Preset = FMath::Clamp(C.Preset, 1, 3);
+		C.Preset = C.Preset == 2 ? 2 : 1; // 옛 P3(따라가는 오브 시점)은 P1에 합쳤다
 		return C;
 	}();
 	return Config;

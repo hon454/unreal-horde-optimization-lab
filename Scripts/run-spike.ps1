@@ -1,7 +1,8 @@
 ﻿# 시험 실행 묶음(Spike<n>) 러너(ADR-0017, Docs/Worklog/V2.md "시험 실행"). 떠다니는 오브의 궤도 속도 × 구성 둘을 Test 패키지에서 잰다.
 #   구성 final: 최종 구성(-LabStage=M5 -LabVariant=q4final). 구성 nofix: 고정 목표용 기법 셋을 끈 것(+ -LabSimLod=0 -LabFixedBounds=0 -LabCrowdFx=0, 빼 보기 A8-simlod·A8-bounds·A8-crowdfx의 인자).
-#   모든 조건이 같은 궤도 반지름·높이, 따라가는 카메라(-LabPreset=3), 기준 장치(-LabMotionAids=1)를 쓴다. 속도 0이 정지 조건이다.
-# 라벨: <Batch>-V<속도 번호>-<구성>-N<N>-P3-r<i>. 속도 번호는 -Speeds의 순서다(0부터). summarize.py가 조건 "V<번호>-<구성>"으로 요약한다.
+#   모든 조건이 같은 궤도 반지름·높이를 쓴다. 카메라는 P1(오브를 따라간다, v2 W1부터 기본)이다. 속도 0이 정지 조건이다.
+#   v2 W1부터: -WarmupSec(기본 -1 = 게임의 기본값: 이동 60초, 정지 15초)과 -DurationSec을 늘 넘긴다. 그전 묶음(Spike1, Spike2)은 P3·15초 워밍업이었다.
+# 라벨: <Batch>-V<속도 번호>-<구성>-N<N>-P1-r<i>. 속도 번호는 -Speeds의 순서다(0부터). summarize.py가 조건 "V<번호>-<구성>"으로 요약한다.
 # 순서: 묶음 맨 앞에 r0 하나(버림), 그 뒤 회차가 바깥 루프다(홀수 회차는 조건 순서대로, 짝수 회차는 거꾸로).
 # 실행 절차(앞 창 검사, 실패 CSV 이동, progress.log, failures.csv)는 run-pool.ps1에서 옮겼다. 메타데이터는 spike-check.py가 대조한다.
 # 총괄 묶음의 조건 표(full-conditions.json)는 exe 경로와 공통 인자만 읽고 고치지 않는다.
@@ -15,7 +16,8 @@ param(
     [int]$Runs = 5,
     # 쉼표로 이은 구성 이름. Spike2는 "final"만 잰다
     [string]$Configs = "final,nofix",
-    [int]$DurationSec = 60,
+    [int]$DurationSec = 180,
+    [int]$WarmupSec = -1,
     [int]$StartupSec = 30,
     [switch]$SkipR0,
     [switch]$DryRun
@@ -24,7 +26,8 @@ $env:LAB_NO_ENGINE = "1"
 . "$PSScriptRoot\common.ps1"
 $ErrorActionPreference = "Continue"
 
-$TimeoutSec = 3 * ($StartupSec + 15 + $DurationSec + 2)
+$WarmupEst = if ($WarmupSec -ge 0) { $WarmupSec } else { 60 }
+$TimeoutSec = 3 * ($StartupSec + $WarmupEst + $DurationSec + 2)
 $Doc = Get-Content "$PSScriptRoot\full-conditions.json" -Raw -Encoding UTF8 | ConvertFrom-Json
 $Exe = "$ProjectDir\$(($Doc.exe) -replace '/', '\')"
 $PkgRoot = "$ProjectDir\Packaged\Test\Windows\HordeOptLab"
@@ -46,15 +49,15 @@ $Conds = @()
 for ($i = 0; $i -lt $SpeedList.Count; $i++) {
     foreach ($c in $UseConfigs) { $Conds += @{ Step = "V$i"; Speed = $SpeedList[$i]; Config = $c } }
 }
-function Label-Of($c, $run) { return "$Batch-$($c.Step)-$($c.Config.Name)-N$N-P3-r$run" }
+function Label-Of($c, $run) { return "$Batch-$($c.Step)-$($c.Config.Name)-N$N-P1-r$run" }
 function Get-GameArgs($c, $label) {
-    $a = @($Doc.common_args) + @($c.Config.Args) + @("-LabN=$N", "-LabPreset=3", "-LabLabel=$label",
-        "-LabOrbOrbitRadius=$RadiusM", "-LabOrbOrbitSpeed=$($c.Speed)", "-LabOrbHeight=$HeightM", "-LabMotionAids=1")
-    if ($DurationSec -ne 60) { $a += "-LabDuration=$DurationSec" }
+    $a = @($Doc.common_args) + @($c.Config.Args) + @("-LabN=$N", "-LabPreset=1", "-LabLabel=$label",
+        "-LabOrbOrbitRadius=$RadiusM", "-LabOrbOrbitSpeed=$($c.Speed)", "-LabOrbHeight=$HeightM", "-LabDuration=$DurationSec")
+    if ($WarmupSec -ge 0) { $a += "-LabWarmup=$WarmupSec" }
     return $a
 }
 function Get-Expect($c, $label) {
-    return @("LabOrbit=r$RadiusM/v$($c.Speed)/h$HeightM/aids1", "LabPreset=P3", "LabN=$N", "LabLabel=$label", "LabAlive=$N", "LabOk=1",
+    return @("LabOrbit=r$RadiusM/v$($c.Speed)/h$HeightM", "LabPreset=P1", "LabN=$N", "LabLabel=$label", "LabAlive=$N", "LabOk=1",
         "LabStage=M5", "LabVariant=q4final", "LabTypes=2", "LabTypesAssets=ok", "LabHud=0", "LabShotAt=0") + @($c.Config.Expect)
 }
 
@@ -67,7 +70,7 @@ for ($r = 1; $r -le $Runs; $r++) {
 }
 
 if ($DryRun) {
-    $est = [math]::Round($Jobs.Count * ($StartupSec + 15 + $DurationSec + 2) / 60.0, 1)
+    $est = [math]::Round($Jobs.Count * ($StartupSec + $WarmupEst + $DurationSec + 2) / 60.0, 1)
     Write-Host "DRYRUN batch=$Batch N=$N radius=${RadiusM}m height=${HeightM}m speeds=$($SpeedList -join '/') conds=$($Conds.Count) runs=$($Jobs.Count) est=${est} min"
     foreach ($s in $SpeedList) {
         if ([double]$s -gt 0) { $T = 2 * [math]::PI * [double]$RadiusM / [double]$s; Write-Host ("  speed {0} m/s: period {1:N2} s, laps in {2} s = {3:N3}" -f $s, $T, $DurationSec, ($DurationSec / $T)) }
@@ -159,7 +162,7 @@ function Invoke-Run($c, $run) {
     }
     $st = if ($reason) { "FAIL" } elseif ($run -eq 0) { "DISCARD" } else { "OK" }
     Add-Content -Path $ProgressLog -Encoding UTF8 -Value ("{0}`t{1}`t{2}`t{3}`t{4}`t{5}" -f (Now), $Label, $st, $p50, $p95, (Clean $reason))
-    if ($reason) { Add-Content -Path $FailuresCsv -Encoding UTF8 -Value ("{0},{1},{2},{3},P3,spike,{4}" -f (Now), $Label, "$($c.Step)-$($c.Config.Name)", $N, (Clean $reason)) }
+    if ($reason) { Add-Content -Path $FailuresCsv -Encoding UTF8 -Value ("{0},{1},{2},{3},P1,spike,{4}" -f (Now), $Label, "$($c.Step)-$($c.Config.Name)", $N, (Clean $reason)) }
     Write-Host "$st $Label p50=$p50 p95=$p95 $reason"
     return (-not $reason)
 }

@@ -157,6 +157,10 @@ struct FLabScenario
 	static constexpr float OrbViewHeight = 900.f;    // P1 높이 9m
 	static constexpr float OrbViewPitch = -12.f;     // P1 내려다보는 각
 	static constexpr float OrbViewPeriod = 60.f;     // P1 1rpm으로 제자리 회전, 측정 60초에 한 바퀴
+	// v2 떠다니는 오브(Docs/v2-spec.md 2절, autonomous-decisions.md D34). 궤도의 중심은 맵의 중심이다
+	static constexpr float OrbitRadius = 5730.f;     // 궤도 반지름 57.3m
+	static constexpr float OrbitSpeed = 200.f;       // 궤도 속도 2m/s. 한 바퀴 180초(2π × 57.3 ÷ 2)
+	static constexpr float OrbHeight = 600.f;        // 구체 높이 6m. 타워는 그리지 않는다
 	static constexpr float TopDownHeight = 10000.f;  // P2 탑뷰 100m. 가장 가까운 개체도 100m 떨어져 근거리 밴드(초안 30m)에 들지 않는다. 300m는 너무 멀었다
 
 	// budget 변형의 Significance 거리 단계(25/50/100/250m). plan.md "M0"
@@ -166,19 +170,19 @@ struct FLabScenario
 };
 
 /**
- * 시험 실행 Spike1(ADR-0017, Docs/Worklog/V2.md "시험 실행"): 오브가 지면 위를 원 궤도로 돈다. 인자를 주지 않으면 지금까지와 같다(원점 고정, 타워).
- * 궤도는 월드 시각의 결정적 함수다. 원의 중심은 (0, R)이고 t = 0에 원점에서 +X로 출발한다. 그래서 속도가 0이면 반지름과 무관하게 원점에 머문다.
- * -LabOrbOrbitRadius=<m>, -LabOrbOrbitSpeed=<m/s>, -LabOrbHeight=<m>(0보다 크면 타워를 숨기고 구체를 그 높이에 띄운다), 
- * -LabMotionAids=1(화면 오른쪽 위에 오브의 위치와 속도를 적는 판, ALabHud::DrawOrbPanel. 상태 오버레이 -LabHud와 따로 켜고 측정 실행에서도 그린다).
+ * v2 떠다니는 오브(ADR-0017, Docs/v2-spec.md 2절): 오브가 지면 위를 원 궤도로 돈다. 기본값은 FLabScenario의 궤도 상수다.
+ * 궤도는 월드 시각의 결정적 함수다. 원의 중심은 맵의 중심(원점)이고 t = 0에 (R, 0)에서 +Y로 출발한다.
+ * 정지 조건(-LabOrbOrbitSpeed=0)에서는 오브가 원점에 머문다(v1과 같은 장면).
+ * 탐색용 인자: -LabOrbOrbitRadius=<m>, -LabOrbOrbitSpeed=<m/s>, -LabOrbHeight=<m>.
  * 오브 액터의 위치는 늘 지면(z = 0)이다. 판정은 수평 거리라 높이는 겉모습만 바꾼다.
  */
 struct FLabOrbit
 {
-	float RadiusCm = 0.f;
-	float SpeedCms = 0.f;
-	float HeightCm = 0.f;
-	bool bAids = false;
+	float RadiusCm = FLabScenario::OrbitRadius;
+	float SpeedCms = FLabScenario::OrbitSpeed;
+	float HeightCm = FLabScenario::OrbHeight;
 	bool IsMoving() const { return RadiusCm > 0.f && SpeedCms > 0.f; }
+	bool IsDefault() const { return RadiusCm == FLabScenario::OrbitRadius && SpeedCms == FLabScenario::OrbitSpeed && HeightCm == FLabScenario::OrbHeight; }
 	/** 한 바퀴 시간(초). 움직이지 않으면 0 */
 	float PeriodSec() const { return IsMoving() ? UE_TWO_PI * RadiusCm / SpeedCms : 0.f; }
 	/** 월드 시각 T(초)의 오브 지면 위치 */
@@ -189,15 +193,14 @@ struct FLabOrbit
 			return FVector::ZeroVector;
 		}
 		const double A = double(SpeedCms) / double(RadiusCm) * T;
-		return FVector(RadiusCm * FMath::Sin(A), RadiusCm * (1. - FMath::Cos(A)), 0.);
+		return FVector(RadiusCm * FMath::Cos(A), RadiusCm * FMath::Sin(A), 0.);
 	}
 	/** 구체 중심의 높이(cm). 띄우지 않으면 타워 위 400(LabOrb.cpp) */
 	float SphereZ() const { return HeightCm > 0.f ? HeightCm : 400.f; }
-	/** CSV 메타데이터 LabOrbit: "r57.3/v3/h6/aids1" 꼴(m, m/s, m). 인자를 하나도 주지 않으면 "-" */
+	/** CSV 메타데이터 LabOrbit: "r57.3/v2/h6" 꼴(m, m/s, m) */
 	FString ToString() const
 	{
-		return RadiusCm <= 0.f && SpeedCms <= 0.f && HeightCm <= 0.f && !bAids ? FString(TEXT("-"))
-			: FString::Printf(TEXT("r%g/v%g/h%g/aids%d"), RadiusCm / 100.f, SpeedCms / 100.f, HeightCm / 100.f, bAids ? 1 : 0);
+		return FString::Printf(TEXT("r%g/v%g/h%g"), RadiusCm / 100.f, SpeedCms / 100.f, HeightCm / 100.f);
 	}
 };
 
@@ -237,8 +240,8 @@ struct FLabConfig
 	 */
 	bool bHud = false;
 	int32 N = 500;
-	int32 Preset = 1;          // 1 오브 시점, 2 탑뷰, 3 따라가는 오브 시점(Spike1: P1과 같은 배치·회전, 중심만 오브의 지금 위치. 궤도 속도 0이면 P1과 같다)
-	FLabOrbit Orbit;           // Spike1 떠다니는 오브(기본은 꺼짐)
+	int32 Preset = 1;          // 1 오브 시점, 2 탑뷰. 둘 다 오브의 지금 위치를 따라간다(v2)
+	FLabOrbit Orbit;           // v2 떠다니는 오브(기본은 FLabScenario의 궤도)
 	int32 Seed = 20261106;
 	/**
 	 * Q1 개체 체력 고정(-LabHealthFixed=<값>, 기본 0 = 분산). 0보다 크면 모든 개체 체력이 그 값이다(분산 전 상태 재현용 디버그 인자, 예: 100).
@@ -249,6 +252,7 @@ struct FLabConfig
 	ELabVariant Variant = ELabVariant::Full;
 	bool bBench = false;       // 벤치마크 러너(M0 7번)
 	FString Label;
+	float WarmupSec = -1.f;    // -LabWarmup=<초>. 0 이상이면 -LabBench 워밍업을 그 길이로 한다(기본은 FLabBench: 이동 60초, 정지 15초)
 	float DurationSec = 0.f;   // 0보다 크면 그 시간 뒤 종료(개발용 -Small 실행). -LabBench에서는 측정 구간 길이(기본 60초 대신, M5 E5 (b) 960)
 	float ShotAtSec = 0.f;     // 0보다 크면 그 시각에 QHD 스크린샷 한 장(Saved/Screenshots/)
 	/**

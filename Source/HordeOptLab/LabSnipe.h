@@ -116,6 +116,16 @@ struct TLabSnipePicker
  * 대형 전용이다(그 구간 화면 안 대형 중 해시 최소). 홀수 틱은 예약이 없다. 예약 구간 화면 안에 대형이 없으면 그 발은 소형으로 떨어진다.
  * 1종(대형 없음)에서는 예약 발이 늘 소형으로 떨어져 TLabSnipePicker만 쓸 때와 같은 대상이 같은 순서로 나온다(같은 시드에서 kills·snipes가 같다).
  */
+/**
+ * 저격 대상 선택의 해시(v2 W1). 구간마다 이 값이 가장 작은 개체를 고른다.
+ * HashCombineFast만 쓰면 틱이 바뀌어도 작은 일련번호가 늘 최소였다. 섞지 않은 결합이라 틱이 순서를 거의 바꾸지 못한다(Docs/Reference/engine-notes.md).
+ * MurmurFinalize32로 섞어 틱마다 순서가 달라지게 한다.
+ */
+inline uint32 LabSnipeHash(uint32 Serial, uint32 SnipeTick)
+{
+	return MurmurFinalize32(HashCombineFast(MurmurFinalize32(Serial), SnipeTick));
+}
+
 inline int32 LabLargeReservedBand(uint32 SnipeTick)
 {
 	return SnipeTick % 4u == 0u ? 2 : SnipeTick % 4u == 2u ? 1 : INDEX_NONE;

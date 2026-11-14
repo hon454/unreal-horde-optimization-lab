@@ -259,7 +259,7 @@ void ALabOrb::Snipe()
 		{
 			continue;
 		}
-		Picker.Offer(Band, HashCombineFast(::GetTypeHash(Minion->GetSerial()), ::GetTypeHash(SnipeTick)), Minion, Location, Minion->GetUnitType() == LabUnitLarge);
+		Picker.Offer(Band, LabSnipeHash(Minion->GetSerial(), SnipeTick), Minion, Location, Minion->GetUnitType() == LabUnitLarge);
 	}
 
 	Picker.ForEach([this](const TLabSnipeSelector<ALabMinion*>::FPick& Pick)

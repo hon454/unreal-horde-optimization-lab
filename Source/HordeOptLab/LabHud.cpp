@@ -224,12 +224,11 @@ void ALabHud::DrawOrbPanel()
 	if (Now - OrbPanelWindowTime >= 0.25)
 	{
 		OrbPanelSpeed = float(OrbPanelWindowPath / (Now - OrbPanelWindowTime));
-		OrbPanelDir = (Pos - OrbPanelWindowStart).GetSafeNormal2D();
-		OrbPanelWindowTime = Now;
+				OrbPanelWindowTime = Now;
 		OrbPanelWindowStart = Pos;
 		OrbPanelWindowPath = 0.;
 	}
-	const bool bMoving = OrbPanelSpeed >= 5.f && !OrbPanelDir.IsNearlyZero(); // 0.05m/s 아래는 정지로 적는다(표시 자릿수의 절반)
+	const bool bMoving = OrbPanelSpeed >= 5.f; // 0.05m/s 아래는 정지로 적는다(표시 자릿수의 절반)
 
 	// 글자: 1440p에서 값 27pt, 낱말 20pt. 720p에서는 0.8배에서 멈춘다(상태 오버레이와 같은 규칙)
 	const float S = FMath::Max(Canvas->ClipY / 1080.f, 0.8f);
@@ -253,9 +252,7 @@ void ALabHud::DrawOrbPanel()
 	const FString SpeedLabel = TEXT("속도");
 	const FString StopText = TEXT("정지");
 	const FString TitleText = TEXT("오브");
-	const FString ArrowNote = TEXT("화살표: 위 +X, 오른쪽 +Y"); // 진행 방향 화살표의 기준(월드 축). 카메라가 돌아도 바뀌지 않는다
 	const FSlateFontInfo TitleFont(FontObject, FMath::RoundToFloat(14.f * S), FName(TEXT("Bold")));   // 상태 오버레이의 머리 글자와 같은 크기
-	const FSlateFontInfo NoteFont(FontObject, FMath::RoundToFloat(13.f * S), FName(TEXT("Regular"))); // 상태 오버레이의 작은 줄과 같은 크기
 	const float TitleH = float(FVector2D(Measure->Measure(FString(TEXT("Hg0")), TitleFont)).Y);
 	const float Gap = 10.f * S;
 	const float Pad = 16.f * S; // 상태 오버레이와 같은 안쪽 여백
@@ -264,9 +261,8 @@ void ALabHud::DrawOrbPanel()
 	const float NumW = Width(TEXT("+000.0"), ValueFont);
 	const float UnitW = Width(TEXT(" m"), LabelFont);
 	const float SpeedNumW = Width(TEXT("00.0"), ValueFont);
-	const float ArrowW = ValueH * 1.1f;
 	const float Row1W = LabelW + AxisW + NumW + UnitW + Gap * 2.f + AxisW + NumW + UnitW;
-	const float InnerW = FMath::Max(Row1W, Width(TitleText, TitleFont) + Gap * 2.f + Width(ArrowNote, NoteFont));
+	const float InnerW = Row1W;
 	const float PanelW = InnerW + 2.f * Pad;
 	const float RowH = ValueH + 2.f * S;
 	const float PanelH = TitleH + 6.f * S + 2.f * RowH + 2.f * Pad;
@@ -280,7 +276,6 @@ void ALabHud::DrawOrbPanel()
 	float X = PX + Pad;
 	float Y = PY + Pad;
 	LabText(Canvas, TitleText, TitleFont, AccentColor, X, Y, S);
-	LabText(Canvas, ArrowNote, NoteFont, DimColor, PX + PanelW - Pad - Width(ArrowNote, NoteFont), Y + (TitleH - float(FVector2D(Measure->Measure(FString(TEXT("Hg0")), NoteFont)).Y)) * 0.75f, S);
 	Y += TitleH + 6.f * S;
 	LabText(Canvas, PosLabel, LabelFont, DimColor, X, Baseline(Y), S);
 	X += LabelW;
@@ -300,29 +295,6 @@ void ALabHud::DrawOrbPanel()
 	Y += RowH;
 	LabText(Canvas, SpeedLabel, LabelFont, DimColor, X, Baseline(Y), S);
 	X += LabelW;
-	// 방향 화살표: 월드 기준이다(위에서 내려다본 지도처럼 화면 위가 +X, 오른쪽이 +Y). 글리프가 아니라 선으로 그려 글꼴에 기대지 않는다
-	auto DrawArrow = [this, S, ArrowW, ValueH](float AtX, float AtY, const FVector& WorldDir)
-	{
-		FVector2D Dir(WorldDir.Y, -WorldDir.X);
-		if (!Dir.Normalize())
-		{
-			return;
-		}
-		const FVector2D Center(AtX + ArrowW * 0.5f, AtY + ValueH * 0.5f);
-		const float Half = ArrowW * 0.45f;
-		const FVector2D Tip = Center + Dir * Half;
-		const FVector2D Tail = Center - Dir * Half;
-		const FVector2D Side(-Dir.Y, Dir.X);
-		const float Thick = FMath::Max(2.f, FMath::RoundToFloat(2.5f * S));
-		const FVector2D Ends[3] = { Tail, Tip - Dir * Half * 0.8f + Side * Half * 0.55f, Tip - Dir * Half * 0.8f - Side * Half * 0.55f };
-		for (const FVector2D& End : Ends)
-		{
-			FCanvasLineItem Item(End, Tip);
-			Item.SetColor(AccentColor);
-			Item.LineThickness = Thick;
-			Canvas->DrawItem(Item);
-		}
-	};
 	if (!bMoving)
 	{
 		LabText(Canvas, StopText, ValueFont, TextColor, X, Y, S);
@@ -332,11 +304,9 @@ void ALabHud::DrawOrbPanel()
 		LabText(Canvas, SpeedText, ValueFont, TextColor, X + SpeedNumW - Width(SpeedText, ValueFont), Y, S);
 		X += SpeedNumW;
 		LabText(Canvas, TEXT(" m/s"), LabelFont, DimColor, X, Baseline(Y), S);
-		X += Width(TEXT(" m/s"), LabelFont) + Gap * 1.5f;
-		DrawArrow(X, Y, OrbPanelDir);
 	}
 
-	// 카메라 판: 오브 판 바로 아래, 같은 폭과 양식. 카메라가 오브 둘레를 도는 각속도와 한 바퀴 시간, 지금 보는 방향을 적는다.
+	// 카메라 판: 오브 판 바로 아래, 같은 폭과 양식. 카메라가 오브 둘레를 도는 각속도와 한 바퀴 시간을 적는다.
 	// 값은 설정이 아니라 실제 카메라에서 구한다: 오브에서 본 카메라의 방위각(수평 거리가 1m 아래면 카메라 요)의 프레임 사이 변화를 0.5초 창으로 모은다.
 	const APlayerCameraManager* Cam = PlayerOwner ? PlayerOwner->PlayerCameraManager.Get() : nullptr;
 	if (!Cam)
@@ -363,7 +333,6 @@ void ALabHud::DrawOrbPanel()
 	const FString CamTitle = TEXT("카메라");
 	const FString TurnLabel = TEXT("회전");
 	const FString LapLabel = TEXT("한 바퀴");
-	const FString LookLabel = TEXT("보는 방향");
 	const FString FixedText = TEXT("고정");
 	const FString RateText = FString::Printf(TEXT("%.1f"), CamPanelRate);
 	const FString RpmText = FString::Printf(TEXT("(%.1f rpm)"), CamPanelRate / 6.f);
@@ -397,24 +366,17 @@ void ALabHud::DrawOrbPanel()
 	LabText(Canvas, LapText, ValueFont, TextColor, X + CamNumW - Width(LapText, ValueFont), Y, S);
 	X += CamNumW;
 	LabText(Canvas, TEXT(" s"), LabelFont, DimColor, X, Baseline(Y), S);
-	// 보는 방향은 판 오른쪽 끝에 맞춘다
-	const float LookX = PX + PanelW - Pad - ArrowW - Gap * 0.8f - Width(LookLabel, LabelFont);
-	LabText(Canvas, LookLabel, LabelFont, DimColor, LookX, Baseline(Y), S);
-	DrawArrow(PX + PanelW - Pad - ArrowW, Y, CamRot.Vector().GetSafeNormal2D());
 }
 
 void ALabHud::DrawHUD()
 {
 	Super::DrawHUD();
-	if (Canvas && GEngine && FLabConfig::Get().Orbit.bAids)
-	{
-		DrawOrbPanel(); // Spike1: 상태 오버레이와 따로 켠다(측정 실행에서도 그린다)
-	}
 	if (!bVisible || !Canvas || !GEngine)
 	{
 		return; // 숨겨 둔 측정 실행에서는 아무것도 하지 않는다
 	}
 	Sample();
+	DrawOrbPanel(); // v2: 오브 판과 카메라 판은 상태 오버레이와 함께 켜고 끈다(v2-spec.md 6절)
 
 	const FLabConfig& Config = FLabConfig::Get();
 	const ALabGameMode* GameMode = GetWorld()->GetAuthGameMode<ALabGameMode>();

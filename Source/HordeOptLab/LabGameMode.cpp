@@ -413,13 +413,14 @@ void ALabGameMode::TickBench()
 	switch (BenchPhase)
 	{
 	case ELabBenchPhase::Warmup:
-		if (BenchPhaseTime >= FLabBench::WarmupSec)
+		if (BenchPhaseTime >= FLabBench::Warmup(Config.Orbit.IsMoving(), Config.WarmupSec))
 		{
 #if CSV_PROFILER
 			CSV_METADATA(TEXT("LabN"), *FString::FromInt(Config.N));
 			CSV_METADATA(TEXT("LabPreset"), *FString::Printf(TEXT("P%d"), Config.Preset));
 			CSV_METADATA(TEXT("LabSeed"), *FString::FromInt(Config.Seed));
-			CSV_METADATA(TEXT("LabOrbit"), *Config.Orbit.ToString()); // Spike1 떠다니는 오브. 켜지 않으면 "-"
+			CSV_METADATA(TEXT("LabOrbit"), *Config.Orbit.ToString()); // v2 떠다니는 오브
+			CSV_METADATA(TEXT("LabWindow"), *FString::Printf(TEXT("%g+%g"), FLabBench::Warmup(Config.Orbit.IsMoving(), Config.WarmupSec), FLabBench::Measure(Config.Orbit.IsMoving(), Config.DurationSec))); // 워밍업+측정(초)
 			CSV_METADATA(TEXT("LabVariant"), FLabConfig::VariantName(Config.Variant));
 			CSV_METADATA(TEXT("LabLabel"), *Config.Label);
 			// M3b 2종: 종류 수와 에셋 상태. substituted(대형 에셋 없음, 소형으로 대체)는 스모크 전용이라 비교에 쓰지 않는다(LabUnitAssets.h).
@@ -499,7 +500,7 @@ void ALabGameMode::TickBench()
 		AliveMin = FMath::Min(AliveMin, LastAlive);
 		AliveMax = FMath::Max(AliveMax, LastAlive);
 		// E5 (b)(plan.md "M5"): -LabBench에 -LabDuration=초를 주면 측정 구간을 그 길이로 늘린다(16분 누수 진단 960). 주지 않으면 지금까지와 같은 60초다
-		if (BenchPhaseTime >= (Config.DurationSec > 0.f ? Config.DurationSec : FLabBench::MeasureSec))
+		if (BenchPhaseTime >= FLabBench::Measure(Config.Orbit.IsMoving(), Config.DurationSec))
 		{
 			const int32 Alive = Spawner->GetAliveCount();
 			const bool bOk = Alive == Config.N && BenchFrames > 0;
