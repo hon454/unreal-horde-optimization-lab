@@ -193,7 +193,7 @@ Development 빌드 참고값이다. 옛 총괄 묶음의 소스(730ff18)로, 200
 | --- | --- | --- |
 | 설명자와 컴포넌트(엔진) | 7 | `MassSkinnedMeshRepresentationTypes.h:71`, `// ...`, `:75`, `// ...`, `:79`, `// ...`, `MassVisualizationComponent.cpp:1337` |
 | 트랙 다시 쓰기 조건(엔진) | 4 | `MassVisualizationComponent.cpp:766-769` |
-| ISKM 재생 위치(엔진) | 3 | `Renderer/Private/Skinning/AnimSequenceTransformProvider.cpp:1415`, `// ...`, `:1190` |
+| ISKM 재생 위치(엔진) | 3 | `Renderer/Private/Skinning/AnimSequenceTransformProvider.cpp:1415`, `// ...`, `:1190`. 두 줄의 들여쓰기 깊이가 달라 맨 앞 탭을 지웠다 |
 | `FLabQuality` | 7 | `LabConfig.h:78-79`, `// ...`(`:80-81`), `:82`, `// ...`(`:83`), `:84`. 줄 끝 주석을 뺐다 |
 | `FLabConfig::Get` | 3 | `LabConfig.cpp:204`, `// ...`(`:205-213`), `:214` |
 | 그림자 설명자 | 9 | `LabCrowdSubsystem.cpp:191-192`, `:194-200`(`:193` 주석을 표시 없이 뺐다) |

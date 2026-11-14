@@ -164,21 +164,21 @@ GPU는 0.309ms 줄었다. 최종 구성에서 80m 밖 그림자만 다시 켜면
 
 2만부터는 예산이 차서 8단계의 소형 액터 42.1%가 그 프레임에 자세를 멈춘다. 대형은 0.36%만 멈춘다. 할당기가 화면에서 큰 메시를 먼저 갱신하기 때문이다.
 
-자세를 멈춘 소형 액터는 바로 바깥의 ISKM 인스턴스보다 띄엄띄엄 움직일 수 있다. 할당기는 예산이 차면 중요도가 낮은 액터부터 갱신 간격을 늘린다. ISKM 인스턴스는 예산 밖이고, 렌더러가 매 프레임 재생 위치를 다시 구한다.
+ISKM 인스턴스는 예산 밖이라, 렌더러가 매 프레임 재생 위치를 월드 시각에서 다시 구한다.
 
 `Engine/Source/Runtime/Renderer/Private/Skinning/AnimSequenceTransformProvider.cpp`, ISKM 트랙의 샘플 쓰기
 
 ```cpp
-	const double WorldTime = Context.CurrentTime.GetWorldTimeSeconds() * GlobalTimeScale;
+const double WorldTime = Context.CurrentTime.GetWorldTimeSeconds() * GlobalTimeScale;
 // ...
-		const double TimePosition = bPrevious ? RenderData.GetPreviousTimePosition() : PackedData.GetTimePosition(WorldTime);
+const double TimePosition = bPrevious ? RenderData.GetPreviousTimePosition() : PackedData.GetTimePosition(WorldTime);
 ```
 
-재생 위치는 그 프레임의 월드 시각에서 나오고, GPU가 그 위치의 자세를 계산한다. 그래서 개체 수가 늘어도 ISKM은 건너뛰지 않고, 가까운 액터만 갱신이 성기어진다.
+`WorldTime`은 그 프레임의 월드 시각이고, `GetTimePosition(WorldTime)`이 재생 위치를 매번 새로 낸다. 그래서 호드가 커져도 ISKM 인스턴스는 건너뛰는 프레임이 없고, 자세를 멈추는 쪽은 가까운 액터뿐이다.
 
-품질을 지키려면 액터 상한을 예산이 감당하는 수에 맞춘다. 호드 총수 1만의 액터 457개는 하나도 건너뛰지 않았다. 2만의 928개에서는 예산이 찼다. 예산을 올리면 더 많은 액터를 매 프레임 갱신하지만, 그 몫은 그대로 게임 스레드 시간이 된다.
+60fps를 지키는 최대 개체 수는 약 2만 2천에서 약 2만으로 줄었다. 프레임 시간의 느린 쪽 5% 경계가 16.7ms에 닿는 호드 총수다. 8단계는 2만에서 16.68ms다. 기준까지 0.02ms만 남는다. 2만과 3만 모두 두 단계의 차이가 세 번 잰 범위보다 크다.
 
-60fps를 지키는 최대 개체 수도 약 2만 2천에서 약 2만으로 줄었다. 프레임 시간의 느린 쪽 5% 경계가 16.7ms에 닿는 호드 총수다. 8단계는 2만에서 16.68ms다. 기준까지 0.02ms만 남는다. 2만과 3만 모두 두 단계의 차이가 세 번 잰 범위보다 크다.
+품질을 지키려면 액터 상한을 예산이 감당하는 수에 맞춘다. 호드 총수 1만의 액터 457개는 하나도 건너뛰지 않았지만, 2만의 928개에서는 예산이 찼다. 예산을 올리면 더 많은 액터를 매 프레임 갱신하지만, 그 비용은 그대로 게임 스레드 시간이 된다.
 
 ### 최종 구성에서 하나씩 빼면
 
