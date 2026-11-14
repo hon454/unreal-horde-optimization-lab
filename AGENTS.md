@@ -35,7 +35,7 @@
 | 총괄 묶음의 조건 표와 스크립트 목록 | `Scripts/full-conditions.json`, [Scripts/README.md](Scripts/README.md) |
 | 글 본문과 이미지 | `Posts/NN-이름/README.md`, `Posts/NN-이름/images/` |
 | 글 수치의 근거(실행 라벨, 세 실행의 값, 계산식, 캡처, 소스 위치) | `Posts/NN-이름/measurements.md` |
-| 묶음별 측정 결과 | `Measurements/<묶음>/`(총괄 묶음은 지금 `Full2/`). 안에 `summary.csv`(조건별 중앙값·범위), `runs.csv`(실행별 한 행), `shots/` |
+| 묶음별 측정 결과 | `Measurements/<묶음>/`(가장 최근 총괄 묶음은 STATUS.md "단계"에 있다). 안에 `summary.csv`(조건별 중앙값·범위), `runs.csv`(실행별 한 행), `shots/` |
 | 그래프(SVG)와 그 수치(CSV) | `Docs/figures/`(`Scripts/plot.py`). README의 그림은 `Docs/figures/readme/`(`Scripts/plot-readme.py`), 단계별 화면은 `Docs/figures/steps/` |
 | 공개 소개와 결과 요약 | [README.md](README.md) |
 | 참고 프로젝트(City Sample, MetaHuman Crowd Sample, Fab 원본 팩) | 형제 디렉터리 `../unreal-horde-references/`(git 밖, 읽기 전용) |
@@ -100,7 +100,7 @@
 ### 결정
 
 - **확정된 결정을 다시 열지 않는다.** [ADR 목록](Docs/Decisions/README.md)의 표와 승인된 ADR을 바꾸자고 제안하지 않는다. 예외는 결정의 근거가 사실과 다름을 엔진 소스(파일과 줄)나 실행 결과(라벨)로 확인한 경우 하나다. 이때는 대체 ADR을 "제안됨"으로 쓰고 사용자에게 알린다. 더 나은 방법이 있다는 생각은 채팅으로 알린다.
-- **대안을 비교해 내린 결정은 ADR로 남긴다.** "제안됨"으로 초안을 쓰고 STATUS.md "사용자에게 요청한 일"에 승인을 요청한다. 승인된 ADR의 본문은 고치지 않고, 결정이 바뀌면 새 ADR로 대체한다. 단계의 순서와 실험 선택은 plan.md가 정하므로 ADR로 쓰지 않는다.
+- **대안을 비교해 내린 결정은 ADR로 남긴다.** "제안됨"으로 초안을 쓴다. 코디네이터가 STATUS.md "사용자에게 요청한 일"에 승인 요청을 적는다. 작업 세션은 초안을 쓴 뒤 코디네이터에 알린다. 승인된 ADR의 본문은 고치지 않고, 결정이 바뀌면 새 ADR로 대체한다. 단계의 순서와 실험 선택은 plan.md가 정하므로 ADR로 쓰지 않는다.
 - **질문에는 답과 수정안만 낸다.** 사용자가 "\~하는 게 낫지 않아?"처럼 물으면 의견과 수정안(바꿀 파일과 문장)을 채팅에 보여 주고 편집과 커밋은 하지 않는다. "고쳐", "반영해" 같은 지시나 승인 뒤에 구현한다.
 - **선택지를 낼 때는 추천안을 먼저 밝힌다.** 이유는 이 프로젝트의 사실(측정값, 엔진 소스, 확정된 결정, 작업량)에 기댄 한두 문장이고, 다른 선택지의 득실도 적는다. 한 번에 결정 하나를 묻고, 선택은 사용자가 한다.
 - **설계가 갈리는 선택은 구현 전에 묻는다.** 사용자가 모르는 개념이 나오면 구현 전에 한 단락으로 설명한다.
