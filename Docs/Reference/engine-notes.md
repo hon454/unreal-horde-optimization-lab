@@ -518,3 +518,17 @@
 - 프로세서 단위의 선언은 `ProcessorRequirements`에 한다(엔진 예: `MassVisualizationLODProcessor.cpp:50`). 엔진이 `Execute` 전에 `Context.CacheSubsystemRequirements(ProcessorRequirements)`를 부르고, 실패하면 `Execute`를 건너뛴다(`MassEntity/Private/MassProcessor.cpp:346-353`).
 - 쿼리는 실행할 때 자기 요구 조건으로 접근 범위를 다시 잡는다(`MassEntity/Private/MassEntityQuery.cpp:50-53`). 그래서 프로세서 단위로 선언한 서브시스템은 `ForEachEntityChunk` 밖에서 얻는다.
 - 얻는 함수는 `FMassExecutionContext::GetSubsystem<T>()`(읽기)와 `GetMutableSubsystem<T>()`(쓰기)다(`MassEntity/Public/MassExecutionContext.h:732-746`).
+
+## 36. 엔진 회피 프로세서가 도는 조건과 구조(2026-11-15, v2 W3)
+
+경로는 `Engine/Plugins/AI/MassAI/Source/MassNavigation` 기준이다(MN).
+
+- `UMassObstacleAvoidanceTrait`는 `FMassNavigationEdgesFragment`를 더하고, 반지름·변환·속도·힘·이동 목표 프래그먼트를 요구하고, 이동·서 있는 회피 파라미터를 공유 프래그먼트로 더한다(`MN/Private/MassAvoidanceTrait.cpp:15-33`). `UMassNavigationObstacleTrait`는 `FMassNavigationObstacleGridCellLocationFragment`만 더한다(`MN/Private/MassNavigationObstacleTrait.cpp:9-14`).
+- 이동 회피(`UMassMovingAvoidanceProcessor`)는 그룹 `Avoidance`, LOD 그룹 뒤다. 쿼리는 위 프래그먼트에 더해 `FMassMovementParameters`(이동 Trait)를 요구하고 Medium·Low·Off LOD 태그가 없는 개체만 돈다(`MN/Private/MassAvoidanceProcessors.cpp:282-307`). 이동 목표의 지금 동작이 `Stand`나 `Animate`면 그 개체를 건너뛴다(`:393`).
+- 이동 회피는 시작·끝 감쇠를 건다. 이전 동작이 `Move`가 아니면 `StartOfPathDuration`(1초) 동안 0에서 1로 올린다(`:427-433`). `IntentAtGoal`이 `Stand`면 목표 0.5초 거리 안에서 0.1까지 줄인다(`:435-443`). `FMassMoveTargetFragment`의 동작 기본값은 현재·이전 모두 `Move`다(`MN/Public/MassNavigationFragments.h:79,82`). 이 프로젝트의 접근 프로세서는 `IntentAtGoal = Move`라 두 감쇠가 걸리지 않는다.
+- 회피 힘은 `FMassForceFragment`에 더해진다(`:421`, `:1046-1078`). 조향(`UMassSteerToMoveTargetProcessor`)이 앞서 쓴 힘에 더하고 가속 상한으로 자른다.
+- 서 있는 회피(`UMassStandingAvoidanceProcessor`)는 이동 회피 뒤다. `FMassGhostLocationFragment`를 요구하고(조향 Trait이 더한다, `MN/Private/MassSteeringTrait.cpp:27`) 지금 동작이 `Stand`가 아닌 개체는 건너뛴다(`:1108-1129`, `:1194-1197`). 이 프로젝트의 개체는 늘 `Move`라 순회만 하고 일은 하지 않는다.
+- 이웃 찾기는 장애물 격자(2단 해시 격자, 한 칸 2.5m)에서 탐지 거리(`ObstacleDetectionDistance` 400cm) 상자의 칸을 가까운 순으로 훑고 이웃을 최대 24개까지 모은다(`:49-51`, `:53-110`, `:778`; `MN/Private/MassNavigationSubsystem.cpp:13`; `MN/Public/MassNavigationSubsystem.h:33`).
+- 장애물 격자 갱신(`UMassNavigationObstacleGridProcessor`)은 이동 그룹 뒤에 돈다. 격자의 `Move`가 스레드 안전하지 않아 병렬 순회를 하지 않는다(`MN/Private/MassNavigationProcessors.cpp:161-188`, 주석 `:195`). Off LOD 개체는 격자에서 빠진다(`:188`).
+- `UMassNavigationSubsystem`의 특성은 `GameThreadOnly = false`, `ThreadSafeWrite = false`다(`MN/Public/MassNavigationSubsystem.h:55-61`). 격자 갱신(쓰기)과 두 회피(읽기)는 서로 순서가 생기고, 작업자 스레드에서 돌 수 있다. 두 회피 프로세서도 병렬 순회(`ParallelForEachEntityChunk`)를 쓰지 않는다.
+- 이동 회피 파라미터 기본값(`MN/Public/Avoidance/MassAvoidanceFragments.h:35-114`): 분리 반경 배율 0.9, 장애물 분리 강성 250, 분리 거리 75cm, 예측 시간 2.5초, 예측 반경 배율 0.65, 예측 거리 75cm, 예측 강성 700.
