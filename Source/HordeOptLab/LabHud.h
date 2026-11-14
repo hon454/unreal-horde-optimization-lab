@@ -37,6 +37,11 @@ protected:
 	double OrbPanelWindowPath = 0.;                    // 창 안에서 움직인 거리(cm)
 	float OrbPanelSpeed = 0.f;                         // 표시하는 속도(cm/s)
 	FVector OrbPanelDir = FVector::ZeroVector;         // 표시하는 진행 방향(월드, 단위 벡터)
+	// 카메라 판(오브 판 바로 아래, Spike2): 카메라가 오브 둘레를 도는 각속도(도/초, rpm), 한 바퀴 시간, 지금 보는 방향(오브 판과 같은 월드 기준 화살표)
+	float CamPanelAngleLast = 0.f;   // 지난 프레임의 방위각(도)
+	double CamPanelWindowTime = -1.; // 각속도 창이 시작한 월드 시각
+	double CamPanelWindowTurn = 0.;  // 창 안에서 돈 각(도, 부호 있음)
+	float CamPanelRate = 0.f;        // 표시하는 각속도(도/초)
 
 	/** 이번 프레임 값을 1초 창과 그래프 기록에 더한다(보일 때만) */
 	void Sample();

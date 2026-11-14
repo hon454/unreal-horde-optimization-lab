@@ -20,7 +20,7 @@ STATS = [("actors", "Lab/Actors"), ("iskm", "Lab/IskmInstances"), ("near30", "La
 SWITCH = [("none_to_inst", "Lab/SwNoneToInst"), ("inst_to_actor", "Lab/SwInstToActor"), ("actor_to_inst", "Lab/SwActorToInst"),
           ("inst_to_none", "Lab/SwInstToNone"), ("other", "Lab/SwOther"), ("round", "Lab/SwRound")]
 FIELDS = (["label", "orbit", "bin", "t_end", "frames", "frame_p50", "frame_p95"] + [f"{k}_{s}" for k, _ in STATS for s in ("mean", "max")]
-          + [f"sw_{k}_per_s" for k, _ in SWITCH])
+          + [f"sw_{k}_per_s" for k, _ in SWITCH] + ["deaths_per_s"])
 
 
 def main():
@@ -39,6 +39,7 @@ def main():
         if not ft:
             continue
         cols = {k: column(header, data, [name]) for k, name in STATS + SWITCH}
+        deaths = column(header, data, ["Lab/Deaths"])
         orbit = meta.get("laborbit", meta.get("LabOrbit", ""))
         t, start, b, t_start = 0.0, 0, 0, 0.0
         edges = []
@@ -59,6 +60,9 @@ def main():
             for k, _ in SWITCH:
                 v = cols[k][s:e] if len(cols[k]) == len(ft) else []
                 row[f"sw_{k}_per_s"] = round(sum(v) / span, 2) if v and span > 0 else ""
+            # 초당 사망: 누적 사망 수(Lab/Deaths)의 구간 증가분 ÷ 구간 길이. 구간 앞 프레임의 값에서 잰다
+            dv = deaths[max(s - 1, 0):e] if len(deaths) == len(ft) else []
+            row["deaths_per_s"] = round((dv[-1] - dv[0]) / span, 2) if len(dv) > 1 and span > 0 else ""
             rows.append(row)
     if args.batch:
         out_dir = ROOT / "Measurements" / args.batch

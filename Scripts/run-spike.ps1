@@ -13,6 +13,8 @@ param(
     # 쉼표로 이은 궤도 속도(m/s). 예: "0,1.5,3,6". -File로 부를 때 배열이 한 문자열로 넘어오므로 문자열로 받는다
     [Parameter(Mandatory = $true)][string]$Speeds,
     [int]$Runs = 5,
+    # 쉼표로 이은 구성 이름. Spike2는 "final"만 잰다
+    [string]$Configs = "final,nofix",
     [int]$DurationSec = 60,
     [int]$StartupSec = 30,
     [switch]$SkipR0,
@@ -32,14 +34,17 @@ $BatchDir = "$ProjectDir\Measurements\$Batch"
 $ProgressLog = "$BatchDir\progress.log"
 $FailuresCsv = "$BatchDir\failures.csv"
 
-$Configs = @(
+$ConfigTable = @(
     @{ Name = "final"; Args = @("-LabStage=M5", "-LabVariant=q4final"); Expect = @("LabTechSimLod=1", "LabTechFixedBounds=1", "LabTechCrowdFx=1") },
     @{ Name = "nofix"; Args = @("-LabStage=M5", "-LabVariant=q4final", "-LabSimLod=0", "-LabFixedBounds=0", "-LabCrowdFx=0"); Expect = @("LabTechSimLod=0", "LabTechFixedBounds=0", "LabTechCrowdFx=0") }
 )
+$ConfigNames = @($Configs -split "," | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne "" })
+$UseConfigs = @($ConfigTable | Where-Object { $ConfigNames -contains $_.Name })
+if ($UseConfigs.Count -ne $ConfigNames.Count) { Write-Host "FAIL: unknown config in -Configs '$Configs' (final, nofix)"; exit 1 }
 $SpeedList = @($Speeds -split "," | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne "" })
 $Conds = @()
 for ($i = 0; $i -lt $SpeedList.Count; $i++) {
-    foreach ($c in $Configs) { $Conds += @{ Step = "V$i"; Speed = $SpeedList[$i]; Config = $c } }
+    foreach ($c in $UseConfigs) { $Conds += @{ Step = "V$i"; Speed = $SpeedList[$i]; Config = $c } }
 }
 function Label-Of($c, $run) { return "$Batch-$($c.Step)-$($c.Config.Name)-N$N-P3-r$run" }
 function Get-GameArgs($c, $label) {

@@ -4,6 +4,8 @@
 #include "LabGameMode.h"
 #include "LabOrb.h"
 #include "EngineUtils.h"
+#include "Camera/PlayerCameraManager.h"
+#include "GameFramework/PlayerController.h"
 #include "CanvasItem.h"
 #include "DynamicRHI.h"      // RHIGetGPUFrameCycles: CSV GPUTime과 같은 값(LaunchEngineLoop.cpp:1520)
 #include "Engine/Canvas.h"
@@ -298,38 +300,107 @@ void ALabHud::DrawOrbPanel()
 	Y += RowH;
 	LabText(Canvas, SpeedLabel, LabelFont, DimColor, X, Baseline(Y), S);
 	X += LabelW;
+	// 방향 화살표: 월드 기준이다(위에서 내려다본 지도처럼 화면 위가 +X, 오른쪽이 +Y). 글리프가 아니라 선으로 그려 글꼴에 기대지 않는다
+	auto DrawArrow = [this, S, ArrowW, ValueH](float AtX, float AtY, const FVector& WorldDir)
+	{
+		FVector2D Dir(WorldDir.Y, -WorldDir.X);
+		if (!Dir.Normalize())
+		{
+			return;
+		}
+		const FVector2D Center(AtX + ArrowW * 0.5f, AtY + ValueH * 0.5f);
+		const float Half = ArrowW * 0.45f;
+		const FVector2D Tip = Center + Dir * Half;
+		const FVector2D Tail = Center - Dir * Half;
+		const FVector2D Side(-Dir.Y, Dir.X);
+		const float Thick = FMath::Max(2.f, FMath::RoundToFloat(2.5f * S));
+		const FVector2D Ends[3] = { Tail, Tip - Dir * Half * 0.8f + Side * Half * 0.55f, Tip - Dir * Half * 0.8f - Side * Half * 0.55f };
+		for (const FVector2D& End : Ends)
+		{
+			FCanvasLineItem Item(End, Tip);
+			Item.SetColor(AccentColor);
+			Item.LineThickness = Thick;
+			Canvas->DrawItem(Item);
+		}
+	};
 	if (!bMoving)
 	{
 		LabText(Canvas, StopText, ValueFont, TextColor, X, Y, S);
-		return;
 	}
-	LabText(Canvas, SpeedText, ValueFont, TextColor, X + SpeedNumW - Width(SpeedText, ValueFont), Y, S);
-	X += SpeedNumW;
-	LabText(Canvas, TEXT(" m/s"), LabelFont, DimColor, X, Baseline(Y), S);
-	X += Width(TEXT(" m/s"), LabelFont) + Gap * 1.5f;
+	else
+	{
+		LabText(Canvas, SpeedText, ValueFont, TextColor, X + SpeedNumW - Width(SpeedText, ValueFont), Y, S);
+		X += SpeedNumW;
+		LabText(Canvas, TEXT(" m/s"), LabelFont, DimColor, X, Baseline(Y), S);
+		X += Width(TEXT(" m/s"), LabelFont) + Gap * 1.5f;
+		DrawArrow(X, Y, OrbPanelDir);
+	}
 
-	// 진행 방향 화살표: 월드 기준이다(위에서 내려다본 지도처럼 화면 위가 +X, 오른쪽이 +Y). 글리프가 아니라 선으로 그려 글꼴에 기대지 않는다
-	FVector2D Dir(OrbPanelDir.Y, -OrbPanelDir.X);
-	if (!Dir.Normalize())
+	// 카메라 판: 오브 판 바로 아래, 같은 폭과 양식. 카메라가 오브 둘레를 도는 각속도와 한 바퀴 시간, 지금 보는 방향을 적는다.
+	// 값은 설정이 아니라 실제 카메라에서 구한다: 오브에서 본 카메라의 방위각(수평 거리가 1m 아래면 카메라 요)의 프레임 사이 변화를 0.5초 창으로 모은다.
+	const APlayerCameraManager* Cam = PlayerOwner ? PlayerOwner->PlayerCameraManager.Get() : nullptr;
+	if (!Cam)
 	{
 		return;
 	}
-	const FVector2D Center(X + ArrowW * 0.5f, Y + ValueH * 0.5f);
-	const float Half = ArrowW * 0.45f;
-	const FVector2D Tip = Center + Dir * Half;
-	const FVector2D Tail = Center - Dir * Half;
-	const FVector2D Side(-Dir.Y, Dir.X);
-	const float Thick = FMath::Max(2.f, FMath::RoundToFloat(2.5f * S));
-	auto Line = [this, Thick](const FVector2D& P0, const FVector2D& P1)
+	const FVector CamOffset = Cam->GetCameraLocation() - Pos;
+	const FRotator CamRot = Cam->GetCameraRotation();
+	const float CamAngle = CamOffset.SizeSquared2D() > FMath::Square(100.) ? FMath::RadiansToDegrees(FMath::Atan2(CamOffset.Y, CamOffset.X)) : CamRot.Yaw;
+	if (CamPanelWindowTime < 0.)
 	{
-		FCanvasLineItem Item(P0, P1);
-		Item.SetColor(AccentColor);
-		Item.LineThickness = Thick;
-		Canvas->DrawItem(Item);
-	};
-	Line(Tail, Tip);
-	Line(Tip, Tip - Dir * Half * 0.8f + Side * Half * 0.55f);
-	Line(Tip, Tip - Dir * Half * 0.8f - Side * Half * 0.55f);
+		CamPanelWindowTime = Now;
+		CamPanelAngleLast = CamAngle;
+	}
+	CamPanelWindowTurn += FMath::FindDeltaAngleDegrees(CamPanelAngleLast, CamAngle);
+	CamPanelAngleLast = CamAngle;
+	if (Now - CamPanelWindowTime >= 0.5)
+	{
+		CamPanelRate = FMath::Abs(float(CamPanelWindowTurn / (Now - CamPanelWindowTime)));
+		CamPanelWindowTime = Now;
+		CamPanelWindowTurn = 0.;
+	}
+	const bool bTurning = CamPanelRate >= 0.05f; // 0.05도/초 아래는 고정으로 적는다
+	const FString CamTitle = TEXT("카메라");
+	const FString TurnLabel = TEXT("회전");
+	const FString LapLabel = TEXT("한 바퀴");
+	const FString LookLabel = TEXT("보는 방향");
+	const FString FixedText = TEXT("고정");
+	const FString RateText = FString::Printf(TEXT("%.1f"), CamPanelRate);
+	const FString RpmText = FString::Printf(TEXT("(%.1f rpm)"), CamPanelRate / 6.f);
+	const FString LapText = bTurning ? FString::Printf(TEXT("%.0f"), 360.f / CamPanelRate) : FString(TEXT("−"));
+	const float CamLabelW = FMath::Max(Width(TurnLabel, LabelFont), Width(LapLabel, LabelFont)) + Gap * 1.6f;
+	const float CamNumW = Width(TEXT("000.0"), ValueFont);
+	const float CY0 = PY + PanelH + 8.f * S;
+	LabRect(Canvas, PX, CY0, PanelW, PanelH, PanelColor);
+	X = PX + Pad;
+	Y = CY0 + Pad;
+	LabText(Canvas, CamTitle, TitleFont, AccentColor, X, Y, S);
+	Y += TitleH + 6.f * S;
+	LabText(Canvas, TurnLabel, LabelFont, DimColor, X, Baseline(Y), S);
+	X += CamLabelW;
+	if (!bTurning)
+	{
+		LabText(Canvas, FixedText, ValueFont, TextColor, X, Y, S);
+	}
+	else
+	{
+		LabText(Canvas, RateText, ValueFont, TextColor, X + CamNumW - Width(RateText, ValueFont), Y, S);
+		X += CamNumW;
+		LabText(Canvas, TEXT(" °/s"), LabelFont, DimColor, X, Baseline(Y), S);
+		X += Width(TEXT(" °/s"), LabelFont) + Gap * 1.5f;
+		LabText(Canvas, RpmText, LabelFont, DimColor, X, Baseline(Y), S);
+	}
+	X = PX + Pad;
+	Y += RowH;
+	LabText(Canvas, LapLabel, LabelFont, DimColor, X, Baseline(Y), S);
+	X += CamLabelW;
+	LabText(Canvas, LapText, ValueFont, TextColor, X + CamNumW - Width(LapText, ValueFont), Y, S);
+	X += CamNumW;
+	LabText(Canvas, TEXT(" s"), LabelFont, DimColor, X, Baseline(Y), S);
+	// 보는 방향은 판 오른쪽 끝에 맞춘다
+	const float LookX = PX + PanelW - Pad - ArrowW - Gap * 0.8f - Width(LookLabel, LabelFont);
+	LabText(Canvas, LookLabel, LabelFont, DimColor, LookX, Baseline(Y), S);
+	DrawArrow(PX + PanelW - Pad - ArrowW, Y, CamRot.Vector().GetSafeNormal2D());
 }
 
 void ALabHud::DrawHUD()
