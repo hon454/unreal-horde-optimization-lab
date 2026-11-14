@@ -9,16 +9,23 @@
 - 방향은 목표 사양(호드 총수 1만, 60fps) 안에서 거리별 품질을 확보하는 것이다([ADR-0009](Decisions/0009-flat-scenario-quality-by-distance.md)).
 - 계획은 [plan.md](plan.md) "품질 계획"에 있다. 경위는 `Worklog/M<N>.md`와 `Worklog/Q<N>.md`에 있다.
 - 코디네이터가 묻지 않고 내린 결정은 [autonomous-decisions.md](Worklog/autonomous-decisions.md)에 있다.
+- 작업 브랜치는 `v2`다. main은 태그 `v1`(62146e2)의 상태로 동결돼 있다.
+- `v2`는 시나리오와 시뮬레이션을 다시 만든다([ADR-0017](Decisions/0017-roaming-orb-and-equal-function-ladder.md), 제안됨). 경위는 [Worklog/V2.md](Worklog/V2.md)에 있다.
+- 아래 "지금 유효한 조건"과 "측정 결과"는 `v1`의 값이다. `v2`의 첫 총괄 묶음이 끝나면 코디네이터가 바꾼다.
 
 ## 다음 할 일
 
-없다. 코디네이터는 사용자에게 다음 작업을 확인한다.
+1. 사용자가 시험 실행의 브리프를 승인한다.
+2. 코디네이터가 시험 실행 세션을 띄운다. 세션은 지금 코드에 떠다니는 오브와 따라가는 카메라를 붙인다.
+3. 세션이 A/A 편차와 가까운 개체 수를 재서 [Worklog/V2.md](Worklog/V2.md)에 적는다.
+4. 코디네이터가 그 값으로 사양 문서와 계획 문서의 초안을 쓴다.
+5. 사용자가 두 문서와 상세 계획안을 승인한다. 구현은 그 뒤에 시작한다.
 
 사용자가 측정을 허락했다. 코디네이터는 뒤의 측정과 촬영을 허락 없이 시작한다.
 
-코디네이터는 커밋한 뒤 main을 푸시한다([AGENTS.md](../AGENTS.md) "진행 방식").
+코디네이터는 커밋한 뒤 `v2`를 푸시한다([AGENTS.md](../AGENTS.md) "진행 방식").
 
-사이트 주소는 <https://hon454.github.io/unreal-horde-optimization-lab/>다. 글이나 CSV가 바뀌면 `py -3 -I Scripts/build-site.py`를 다시 돌리고 `gh-pages` 브랜치에 다시 올린다.
+사이트 주소는 <https://hon454.github.io/unreal-horde-optimization-lab/>다. `v2`를 main에 병합할 때까지 `gh-pages`는 올리지 않는다.
 
 `gh-pages`의 파일은 main `c4f8806`의 `Site/`와 같다(2026-11-14 확인, `gh-pages` 79e37dc).
 
@@ -137,4 +144,5 @@ Development 전환 점수는 `Full1` 때의 참고값이다(`Measurements/Full1/
 
 ## 사용자에게 요청한 일
 
-없다.
+- [ADR-0017](Decisions/0017-roaming-orb-and-equal-function-ladder.md)의 승인.
+- 시험 실행 브리프의 승인.

@@ -30,7 +30,7 @@
 | 영상·문서·샘플·에셋·포럼 스레드 | [references.md](Docs/Reference/references.md) |
 | 강연 두 편(Shabel, 윤준기)의 요약과 타임스탬프 | [talk-notes.md](Docs/Reference/talk-notes.md) |
 | 측정 PC 사양과 엔진 버전 | [pc-specs.md](Docs/Reference/pc-specs.md) |
-| 끝낸 작업의 경위와 실패한 실행 | `Docs/Worklog/M<N>.md`, `Q<N>.md`, 글과 README는 `Posts.md`, 에셋 복구는 `Setup.md`(목록은 [Worklog/README.md](Docs/Worklog/README.md)). 세션 시작 때 읽지 않고 검색만 한다 |
+| 끝낸 작업의 경위와 실패한 실행 | `Docs/Worklog/M<N>.md`, `Q<N>.md`, 글과 README는 `Posts.md`, 에셋 복구는 `Setup.md`, `v2` 브랜치의 작업은 `V2.md`(목록은 [Worklog/README.md](Docs/Worklog/README.md)). 세션 시작 때 읽지 않고 검색만 한다 |
 | 코디네이터가 묻지 않고 내린 결정과 사용자 판단이 필요한 항목 | [autonomous-decisions.md](Docs/Worklog/autonomous-decisions.md) |
 | 총괄 묶음의 조건 표와 스크립트 목록 | `Scripts/full-conditions.json`, [Scripts/README.md](Scripts/README.md) |
 | 글 본문과 이미지 | `Posts/NN-이름/README.md`, `Posts/NN-이름/images/` |
@@ -56,9 +56,11 @@
 
 ### 진행 방식
 
-- **구현과 측정이 먼저고 글은 뒤따른다.** 글, 그래프 해석, 영상, 트레이스 분석은 작업 단위의 완료 조건이 아니다. 글은 최신 main에서 쓴다.
-- **개발 속도가 최우선이다.** 단위 테스트, CI, PR, 외부 이슈 트래커를 쓰지 않는다. main에 직접 커밋한다.
-- **커밋한 뒤 코디네이터가 푸시한다.** main은 `git push origin main`으로 올린다. 강제 푸시는 하지 않는다. 사이트(`Site/`)에 들어가는 글이나 CSV가 바뀌면 `Scripts/build-site.py`를 다시 돌리고 `gh-pages`도 올린다. 작업 세션은 푸시하지 않는다.
+- **구현과 측정이 먼저고 글은 뒤따른다.** 글, 그래프 해석, 영상, 트레이스 분석은 작업 단위의 완료 조건이 아니다. 글은 작업 브랜치의 최신 커밋에서 쓴다.
+- **작업 브랜치는 `v2`다**([ADR-0017](Docs/Decisions/0017-roaming-orb-and-equal-function-ladder.md)). main은 태그 `v1`의 상태로 동결돼 있고 공개된 결과(README, 글, 사이트)를 지킨다. 모든 세션은 같은 체크아웃의 `v2`에서 일하고 브랜치를 바꾸지 않는다. main은 오탈자 수준만 고치고, 고쳤으면 `v2`에 병합한다. `v2`는 전 조건 측정과 글·README·사이트 교체가 끝난 뒤 사용자 승인을 받아 main에 병합한다.
+- **개발 속도가 최우선이다.** 단위 테스트, CI, PR, 외부 이슈 트래커를 쓰지 않는다. `v2`에 직접 커밋한다.
+- **커밋한 뒤 코디네이터가 푸시한다.** `git push origin v2`로 올린다. 강제 푸시는 하지 않는다. `gh-pages`는 `v2`를 main에 병합할 때까지 올리지 않는다. 병합한 뒤에는 `Scripts/build-site.py`를 다시 돌리고 `gh-pages`도 올린다. 작업 세션은 푸시하지 않는다.
+- **구현 전에 문서를 확정한다.** 구현 작업 단위는 사양 문서, 계획 문서, 그 작업 단위의 상세 계획안이 사용자 승인을 받은 뒤에 시작한다. 설계 근거를 얻는 시험 실행은 예외다.
 - **커밋 메시지는 [Conventional Commits](https://www.conventionalcommits.org/)로 쓴다.** `type(scope): summary` 한 줄, 영어 명령형 소문자. type은 `feat`, `fix`, `docs`, `build`, `refactor`, `chore`, `bench`(측정 결과 추가). 측정 조건이나 설정값을 바꾼 커밋은 본문에 이유를 쓴다.
 - **STATUS.md에는 지금 유효한 것만 두고 10KB를 넘기지 않는다.** 세션마다 통째로 읽는 파일이다. 끝낸 작업의 경위는 Worklog로 옮기고, 다음 작업을 제약하는 결과만 한 줄 남긴다. 매번 쓰지 않는 명령은 commands.md에, 확정값은 measurement.md에, 다시 나올 문제는 troubleshooting.md에, 엔진 소스에서 확인한 사실은 engine-notes.md에 둔다.
 - **STATUS.md는 ASD-STE100(Simplified Technical English)의 작성 규칙에 맞춰 쓴다.** 그 규칙을 한국어 문장에 적용한다.
