@@ -5,7 +5,11 @@
 #include "LabCrowdSubsystem.h"
 #include "LabSnipe.h"
 #include "LabUnitAssets.h"
+#include "LabMinion.h"
+#include "MassActorSubsystem.h"
 #include "MassSimulationSubsystem.h"
+#include "Engine/World.h"
+#include "ProfilingDebugging/CsvProfiler.h"
 #include "Camera/PlayerCameraManager.h"
 #include "GameFramework/PlayerController.h"
 #include "Components/StaticMeshComponent.h"
@@ -16,6 +20,8 @@
 #include "Materials/MaterialInstanceDynamic.h"
 #include "Materials/MaterialInterface.h"
 #include "UObject/ConstructorHelpers.h"
+
+CSV_DECLARE_CATEGORY_EXTERN(Lab);
 
 namespace
 {
@@ -327,11 +333,17 @@ void ALabOrb::TickMass(float DeltaSeconds, ULabCrowdSubsystem* Crowd)
 	Crowd->ExcludeVisualsFromLumen();
 
 	TArray<FVector> Targets;
+	TArray<FMassEntityHandle> TargetEntities;
+	TArray<FMassEntityHandle> CheckEntities;
 	FVector CoilTarget = GetActorLocation();
 	{
 		FScopeLock Lock(&Crowd->ResultLock);
 		Targets = MoveTemp(Crowd->SnipeTargets);
 		Crowd->SnipeTargets.Reset();
+		TargetEntities = MoveTemp(Crowd->SnipeTargetEntities);
+		Crowd->SnipeTargetEntities.Reset();
+		CheckEntities = MoveTemp(Crowd->CapsuleCheckEntities);
+		Crowd->CapsuleCheckEntities.Reset();
 		if (Crowd->bHasNearest)
 		{
 			CoilTarget = Crowd->Nearest;
@@ -344,4 +356,63 @@ void ALabOrb::TickMass(float DeltaSeconds, ULabCrowdSubsystem* Crowd)
 		SpawnStrikeFx(Target);
 	}
 	TickStrikes(DeltaSeconds);
+	if (TargetEntities.Num() > 0 || CheckEntities.Num() > 0)
+	{
+		TraceSnipeCapsules(TargetEntities, CheckEntities);
+	}
+	// 누적 값을 매 프레임 쓴다(Lab/Deaths와 같은 방식, Scripts/spike-timeline.py가 구간 증가분으로 초당 수를 낸다)
+	CSV_CUSTOM_STAT(Lab, CapsuleTraces, CapsuleTraceStats.Traces, ECsvCustomStatOp::Set);
+	CSV_CUSTOM_STAT(Lab, CapsuleHits, CapsuleTraceStats.Hits, ECsvCustomStatOp::Set);
+	CSV_CUSTOM_STAT(Lab, CapsuleBlocked, CapsuleTraceStats.Blocked, ECsvCustomStatOp::Set);
+}
+
+void ALabOrb::TraceSnipeCapsules(TConstArrayView<FMassEntityHandle> SnipeTargets, TConstArrayView<FMassEntityHandle> CheckTargets)
+{
+	// 액터 구간의 대상인지는 엔티티에 하이드레이션 액터가 붙어 있는지로 가른다(UMassActorSubsystem, 프래그먼트 FMassActorFragment를 읽는다).
+	// 대상 선택은 저격 프로세서가 이미 끝냈다. 여기서는 그 대상의 캡슐이 트레이스에 맞는지만 센다(대상·피해·사망은 바꾸지 않는다).
+	// 게임 스레드에서 부른다: 액터 프래그먼트를 쓰는 프로세서(표현, ULabActorSyncProcessor)는 게임 스레드 전용이고 씬 쿼리도 게임 스레드에서 쏜다.
+	const UMassActorSubsystem* Actors = GetWorld()->GetSubsystem<UMassActorSubsystem>();
+	if (!Actors || !Sphere)
+	{
+		return;
+	}
+	const FVector Start = Sphere->GetComponentLocation(); // 저격 궤적(NS_LabBolt)의 시작점
+	FCollisionQueryParams Params(SCENE_QUERY_STAT(LabSnipeCapsule), /*bTraceComplex*/ false, this);
+	auto TraceOne = [&](const FMassEntityHandle& Entity, bool bSnipeTarget)
+	{
+		const ALabMinionMassActor* Target = Cast<ALabMinionMassActor>(Actors->GetActorFromHandle(Entity));
+		if (!Target)
+		{
+			return; // 인스턴스(VAT·ISKM)나 입자로 그리는 개체: 캡슐이 없다
+		}
+		// 끝점은 캡슐 중심(액터 위치, ULabActorSyncProcessor가 엔티티 위치 + 반높이로 옮긴다). 시작점이 캡슐 밖이라 맞으면 표면에서 맞는다
+		FHitResult Hit;
+		++CapsuleTraceStats.Traces;
+		CapsuleTraceStats.SnipeTraces += bSnipeTarget ? 1 : 0;
+		const bool bAny = GetWorld()->LineTraceSingleByChannel(Hit, Start, Target->GetActorLocation(), LabSnipeTraceChannel, Params);
+		if (bAny)
+		{
+			if (Hit.GetActor() == Target) { ++CapsuleTraceStats.Hits; }
+			else { ++CapsuleTraceStats.Blocked; }
+		}
+#if !UE_BUILD_TEST
+		// 개발 확인: 막은 액터가 숨은(풀) 액터인지, 대상에서 얼마나 앞인지
+		const AActor* Blocker = bAny && Hit.GetActor() != Target ? Hit.GetActor() : nullptr;
+		UE_LOG(LogLab, Log, TEXT("lab_capsule snipe=%d result=%s dist_m=%.1f blocker_hidden=%d blocker_gap_m=%.1f blocker_large=%d"),
+			bSnipeTarget ? 1 : 0, !bAny ? TEXT("miss") : Blocker ? TEXT("blocked") : TEXT("hit"), FVector::Dist(Start, Target->GetActorLocation()) / 100.f,
+			Blocker && Blocker->IsHidden() ? 1 : 0, Blocker ? FVector::Dist2D(Blocker->GetActorLocation(), Target->GetActorLocation()) / 100.f : 0.f,
+			Blocker && Cast<ALabMinion>(Blocker) && Cast<ALabMinion>(Blocker)->GetUnitType() == LabUnitLarge ? 1 : 0);
+#endif
+	};
+	for (const FMassEntityHandle& Entity : SnipeTargets)
+	{
+		TraceOne(Entity, true);
+	}
+	for (const FMassEntityHandle& Entity : CheckTargets)
+	{
+		if (!SnipeTargets.Contains(Entity)) // 확인 대상이 마침 저격 대상이면 한 번만 쏜다
+		{
+			TraceOne(Entity, false);
+		}
+	}
 }

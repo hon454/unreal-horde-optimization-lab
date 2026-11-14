@@ -1,6 +1,7 @@
 ﻿#include "LabMinion.h"
 #include "LabConfig.h"
 #include "LabCrowdSpawner.h"
+#include "LabSnipe.h" // LabSnipeTraceChannel(v2 W5)
 #include "LabUnitAssets.h"
 #include "HordeOptLab.h"
 #include "Animation/AnimSequence.h"
@@ -300,15 +301,25 @@ void ALabMinionMassActor::BeginPlay()
 		SetActorScale3D(FVector(Scale));
 	}
 	SkelMesh->SetCustomPrimitiveDataFloat(0, 0.f);
-	// 캡슐 콜리전(FLabConfig::ActorCollision): 기본 끔(plan.md M3b "함께 바꾸는 설정", E3 (6) m3nocol 처리, Docs/Worklog/Q5.md "1b단위").
-	// 켬(-LabActorCollision=1, 라벨 m3colbase)은 캡슐 기본값(Pawn 프로필) 그대로, m3colquery는 QueryOnly. 판정은 캡슐을 쓰지 않는다.
+	// 캡슐 콜리전(FLabConfig::ActorCollision): v2 W5부터 기본 Trace(저격 트레이스 채널만 막는 QueryOnly, Docs/Worklog/V2.md "W5").
+	// 끔(-LabActorCollision=0)은 옛 m3nocol 처리(E3 (6), Docs/Worklog/Q5.md "1b단위"), 켬(=1, 라벨 m3colbase)은 캡슐 기본값(Pawn 프로필) 그대로, m3colquery는 Pawn 응답의 QueryOnly.
+	// 범위 피해와 저격 대상 선택은 캡슐을 쓰지 않는다. 저격의 캡슐 트레이스는 확인용이다(ALabOrb::TraceSnipeCapsules).
 	const FLabConfig::EActorCollision Collision = FLabConfig::Get().ActorCollision;
 	if (Collision != FLabConfig::EActorCollision::On)
 	{
-		GetCapsuleComponent()->SetShouldUpdatePhysicsVolume(false);
-		GetCapsuleComponent()->SetGenerateOverlapEvents(false);
-		// QueryOnly: 트레이스·스윕은 받고 물리 시뮬레이션 바디는 만들지 않는다. NoCollision: 피직스 씬에서 뺀다
-		GetCapsuleComponent()->SetCollisionEnabled(Collision == FLabConfig::EActorCollision::Off ? ECollisionEnabled::NoCollision : ECollisionEnabled::QueryOnly);
+		UCapsuleComponent* Capsule = GetCapsuleComponent();
+		Capsule->SetShouldUpdatePhysicsVolume(false);
+		Capsule->SetGenerateOverlapEvents(false);
+		if (Collision == FLabConfig::EActorCollision::Trace)
+		{
+			// 오브젝트 종류는 Pawn 그대로, 응답은 저격 채널만 막음. 캡슐끼리(Pawn), 바닥, 카메라와는 아무 일도 하지 않는다.
+			// 응답을 먼저 넣고 콜리전을 바꾼다. QueryAndPhysics → QueryOnly에서 바디를 한 번 다시 만든다(BodyInstance.cpp:757-767)
+			FCollisionResponseContainer Responses(ECR_Ignore);
+			Responses.SetResponse(LabSnipeTraceChannel, ECR_Block);
+			Capsule->SetCollisionResponseToChannels(Responses);
+		}
+		// QueryOnly·Trace: 트레이스·스윕은 받고 물리 시뮬레이션 바디는 만들지 않는다. NoCollision: 피직스 상태를 지운다(이동 때 바디 변환을 보내지 않는다)
+		Capsule->SetCollisionEnabled(Collision == FLabConfig::EActorCollision::Off ? ECollisionEnabled::NoCollision : ECollisionEnabled::QueryOnly);
 	}
 	if (FLabConfig::Get().Variant == ELabVariant::M3Uro)
 	{
@@ -350,6 +361,9 @@ void ALabMinionMassActor::PrepareForPooling_Implementation()
 {
 	GetMesh()->SetComponentTickEnabled(false);
 	BoundEntity.Reset();
+	// 엔진 풀은 액터를 숨기기만 하고 콜리전은 그대로 둔다(MassActorSpawnerSubsystem.cpp:119-145). 숨은 액터의 캡슐이 마지막 자리에 남아
+	// 트레이스에 맞지 않게 액터 단위로 끈다. 꺼낼 때(PrepareForGame) 다시 켠다(v2 W5)
+	SetActorEnableCollision(false);
 	// 죽은 채 풀에 들어온 액터의 진홍색을 지운다. 숨긴 동안 바꾼 커스텀 프리미티브 데이터는 보이는 첫 프레임에 반영되지 않는 것을 연속 캡처로 봤다.
 	if (FLabConfig::Get().HasFix(FLabConfig::FixTintReset))
 	{
@@ -368,6 +382,7 @@ void ALabMinionMassActor::PrepareForGame_Implementation()
 		SetActorScale3D(FVector(Scale));
 	}
 	GetMesh()->SetComponentTickEnabled(true);
+	SetActorEnableCollision(true); // 풀에 넣을 때 끈 것을 되돌린다(PrepareForPooling). 컴포넌트 설정(Trace·끔)은 그대로다
 	// 엔진은 풀에서 꺼낸 액터를 이 함수 바로 앞에서 보이게 한다(MassActorSpawnerSubsystem.cpp:252-255). 포즈를 맞출 때까지 다시 숨긴다.
 	if (FLabConfig::Get().HasFix(FLabConfig::FixWait))
 	{

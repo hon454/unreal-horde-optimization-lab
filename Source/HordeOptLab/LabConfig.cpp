@@ -212,16 +212,18 @@ const FLabConfig& FLabConfig::Get()
 		if (C.bNoIskm) { NoteOverride(TEXT("iskm=0")); }
 		if (C.bNoFixedBounds) { NoteOverride(TEXT("fixed_bounds=0")); }
 		if (C.bNoFarCull) { NoteOverride(TEXT("far_cull=0")); }
-		// 하이드레이션 액터 캡슐 콜리전(LabConfig.h ActorCollision): 기본 끔, m3colquery는 QueryOnly, 라벨 m3colbase는 켬. -LabActorCollision=1/0이 이긴다(Q5 하위 실험 S8-col)
+		// 하이드레이션 액터 캡슐 콜리전(LabConfig.h ActorCollision): 기본 Trace(v2 W5), m3colquery는 QueryOnly, 라벨 m3colbase는 켬.
+		// -LabActorCollision=0 끔, =1 Pawn 프로필 켬(Q5 하위 실험 S8-col), =2 Trace가 이긴다
 		C.ActorCollision = C.Variant == ELabVariant::M3ColQuery ? FLabConfig::EActorCollision::QueryOnly
 			: Variant == TEXT("m3colbase") ? FLabConfig::EActorCollision::On
-			: FLabConfig::EActorCollision::Off;
+			: FLabConfig::EActorCollision::Trace;
 		{
 			int32 ActorCol = -1;
 			if (FParse::Value(Cmd, TEXT("-LabActorCollision="), ActorCol) && ActorCol >= 0)
 			{
-				const FLabConfig::EActorCollision Wanted = ActorCol != 0 ? FLabConfig::EActorCollision::On : FLabConfig::EActorCollision::Off;
-				if (Wanted != C.ActorCollision) { NoteOverride(FString::Printf(TEXT("actor_collision=%d"), ActorCol != 0 ? 1 : 0)); }
+				const FLabConfig::EActorCollision Wanted = ActorCol == 0 ? FLabConfig::EActorCollision::Off
+					: ActorCol == 1 ? FLabConfig::EActorCollision::On : FLabConfig::EActorCollision::Trace;
+				if (Wanted != C.ActorCollision) { NoteOverride(FString::Printf(TEXT("actor_collision=%d"), FMath::Min(ActorCol, 2))); }
 				C.ActorCollision = Wanted;
 			}
 		}
@@ -452,6 +454,7 @@ const TCHAR* FLabConfig::ActorCollisionString() const
 	{
 	case EActorCollision::On: return TEXT("1");
 	case EActorCollision::QueryOnly: return TEXT("query");
+	case EActorCollision::Trace: return TEXT("trace");
 	default: return TEXT("0");
 	}
 }

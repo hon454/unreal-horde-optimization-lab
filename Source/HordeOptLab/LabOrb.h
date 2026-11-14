@@ -5,6 +5,7 @@
 #include "LabOrb.generated.h"
 
 class ALabCrowdSpawner;
+struct FMassEntityHandle;
 class UNiagaraComponent;
 class USceneComponent;
 class UStaticMeshComponent;
@@ -31,6 +32,14 @@ public:
 
 	int32 GetKillCount() const;
 	int32 GetSnipeCount() const;
+	/**
+	 * v2 W5 저격 캡슐 트레이스의 누적 수(Docs/v2-spec.md 3절 기능 3). 액터 구간의 대상(하이드레이션 액터가 붙은 엔티티)마다 구체에서 액터 캡슐 중심까지
+	 * LabSnipe 채널로 한 번 쏜다. 대상은 실제 저격 대상 중 액터가 붙은 것(SnipeTraces)과 저격 틱마다 하나의 확인 대상(LabCrowdSubsystem.h CapsuleCheckEntities)이다.
+	 * Hits: 처음 맞은 것이 그 대상의 캡슐. Blocked: 다른 액터의 캡슐이 먼저 맞았다. 빗나감 = Traces − Hits − Blocked.
+	 * 확인용이라 저격의 대상과 결과는 바꾸지 않는다. CSV 스탯 Lab/CapsuleTraces·Lab/CapsuleHits·Lab/CapsuleBlocked(누적), 메타데이터 LabCapsule*(측정 구간 증가분)
+	 */
+	struct FLabCapsuleTraceStats { int32 Traces = 0; int32 Hits = 0; int32 Blocked = 0; int32 SnipeTraces = 0; };
+	const FLabCapsuleTraceStats& GetCapsuleTraceStats() const { return CapsuleTraceStats; }
 
 	/** 화면 판정용 카메라(직전 프레임에 그린 카메라). 변형 manager의 매니저도 읽는다 */
 	struct FLabSnipeView GetSnipeView() const;
@@ -58,6 +67,9 @@ protected:
 	uint64 OrbitFrame = MAX_uint64;
 	void SpawnStrikeFx(const FVector& Target);
 	void TickStrikes(float DeltaSeconds);
+	/** v2 W5: 저격 대상 엔티티 중 액터가 붙은 것에 캡슐 트레이스를 쏘고 센다(게임 스레드, TickMass). 위 GetCapsuleTraceStats */
+	void TraceSnipeCapsules(TConstArrayView<FMassEntityHandle> SnipeTargets, TConstArrayView<FMassEntityHandle> CheckTargets);
+	FLabCapsuleTraceStats CapsuleTraceStats;
 
 	static constexpr float StrikeDuration = 0.3f;  // 저격 궤적이 남아 있는 시간
 	static constexpr float BoltWidth = 6.f;          // 궤적 굵기(빔 너비 단위)

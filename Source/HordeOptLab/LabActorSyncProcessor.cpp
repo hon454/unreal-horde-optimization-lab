@@ -20,6 +20,7 @@
 #include "Animation/AnimationAsset.h"  // FAnimTickRecord(개발 확인)
 #include "Animation/AnimSequenceBase.h"
 #include "ProfilingDebugging/CsvProfiler.h"
+#include "ProfilingDebugging/CpuProfilerTrace.h"
 #include "Engine/World.h"
 #include "EngineUtils.h"
 #include "Misc/CommandLine.h"
@@ -253,7 +254,11 @@ void ULabActorSyncProcessor::Execute(FMassEntityManager& EntityManager, FMassExe
 			const FTransform& Xf = Transforms[It].GetTransform();
 			const float HalfHeight = Actor->GetCapsuleComponent()->GetScaledCapsuleHalfHeight(); // 소형은 스케일 1이라 전과 같다. 대형은 배율만큼 높다
 			const uint64 M0 = bTiming ? FPlatformTime::Cycles64() : 0;
-			Actor->SetActorLocationAndRotation(Xf.GetLocation() + FVector(0.f, 0.f, HalfHeight), Xf.GetRotation(), false, nullptr, ETeleportType::TeleportPhysics);
+			{
+				// v2 W5 액터 개당 비용 나누기: 이동(캡슐·메시 변환, 바운드, 캡슐 피직스 바디 변환)만 트레이스 타이머로 뗀다. 트레이스를 켜지 않으면 채널 검사 하나다
+				TRACE_CPUPROFILER_EVENT_SCOPE(LabActorMove);
+				Actor->SetActorLocationAndRotation(Xf.GetLocation() + FVector(0.f, 0.f, HalfHeight), Xf.GetRotation(), false, nullptr, ETeleportType::TeleportPhysics);
+			}
 			if (bTiming) { CyMove += FPlatformTime::Cycles64() - M0; }
 
 			USkeletalMeshComponent* SkelMesh = Actor->GetMesh();

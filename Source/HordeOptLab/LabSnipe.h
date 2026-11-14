@@ -1,7 +1,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Engine/EngineTypes.h"
 #include "LabConfig.h"
+
+/**
+ * 저격 캡슐 확인 트레이스 채널(v2 W5). Config/DefaultEngine.ini [/Script/Engine.CollisionProfile]의 "LabSnipe" 트레이스 채널이고 기본 응답은 무시다.
+ * 하이드레이션 액터의 캡슐만 이 채널을 막는다(ALabMinionMassActor::BeginPlay, FLabConfig::EActorCollision::Trace). 바닥·오브·다른 것은 맞지 않는다.
+ */
+constexpr ECollisionChannel LabSnipeTraceChannel = ECC_GameTraceChannel1;
 
 /**
  * 오브 저격 대상 선택 규칙(모든 단계 공통).

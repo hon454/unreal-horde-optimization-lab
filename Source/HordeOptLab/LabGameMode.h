@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
+#include "LabOrb.h" // ALabOrb::FLabCapsuleTraceStats(v2 W5)
 #include "LabGameMode.generated.h"
 
 class ALabCameraRig;
@@ -109,6 +110,7 @@ protected:
 	int32 LastNear30 = 0;
 	int32 KillsAtStart = 0;
 	int32 SnipesAtStart = 0;
+	ALabOrb::FLabCapsuleTraceStats CapsuleAtStart; // v2 W5 저격 캡슐 트레이스의 측정 시작 값(ALabOrb::GetCapsuleTraceStats)
 	int64 Near30Sum = 0;
 	int32 AliveMin = 0;
 	int32 AliveMax = 0;

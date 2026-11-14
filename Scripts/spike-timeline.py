@@ -21,8 +21,11 @@ SWITCH = [("none_to_inst", "Lab/SwNoneToInst"), ("inst_to_actor", "Lab/SwInstToA
           ("inst_to_none", "Lab/SwInstToNone"), ("other", "Lab/SwOther"), ("round", "Lab/SwRound")]
 # 겹친 쌍의 수(v2 W3, LabOverlap.h). 열은 맨 뒤에 붙인다(옛 timeline.csv의 열 순서를 지킨다)
 EXTRA = [("overlap", "Lab/OverlapPairs"), ("overlap_deep", "Lab/OverlapDeep")]
+# 저격 캡슐 트레이스(v2 W5, ALabOrb::GetCapsuleTraceStats). 누적 값이라 구간 증가분을 쓴다: 초당 트레이스 수, 대상 적중 비율, 캡슐에 맞은 비율(적중 + 막힘). 맨 뒤에 붙인다
+CAPSULE = [("traces", "Lab/CapsuleTraces"), ("hits", "Lab/CapsuleHits"), ("blocked", "Lab/CapsuleBlocked")]
 FIELDS = (["label", "orbit", "bin", "t_end", "frames", "frame_p50", "frame_p95"] + [f"{k}_{s}" for k, _ in STATS for s in ("mean", "max")]
-          + [f"sw_{k}_per_s" for k, _ in SWITCH] + ["deaths_per_s"] + [f"{k}_{s}" for k, _ in EXTRA for s in ("mean", "max")])
+          + [f"sw_{k}_per_s" for k, _ in SWITCH] + ["deaths_per_s"] + [f"{k}_{s}" for k, _ in EXTRA for s in ("mean", "max")]
+          + ["capsule_traces_per_s", "capsule_hit_ratio", "capsule_any_ratio"])
 
 
 def main():
@@ -42,6 +45,7 @@ def main():
             continue
         cols = {k: column(header, data, [name]) for k, name in STATS + SWITCH + EXTRA}
         deaths = column(header, data, ["Lab/Deaths"])
+        caps = {k: column(header, data, [name]) for k, name in CAPSULE}
         orbit = meta.get("laborbit", meta.get("LabOrbit", ""))
         t, start, b, t_start = 0.0, 0, 0, 0.0
         edges = []
@@ -65,6 +69,13 @@ def main():
             # 초당 사망: 누적 사망 수(Lab/Deaths)의 구간 증가분 ÷ 구간 길이. 구간 앞 프레임의 값에서 잰다
             dv = deaths[max(s - 1, 0):e] if len(deaths) == len(ft) else []
             row["deaths_per_s"] = round((dv[-1] - dv[0]) / span, 2) if len(dv) > 1 and span > 0 else ""
+            inc = {}
+            for k, _ in CAPSULE:
+                cv = caps[k][max(s - 1, 0):e] if len(caps[k]) == len(ft) else []
+                inc[k] = cv[-1] - cv[0] if len(cv) > 1 else None
+            row["capsule_traces_per_s"] = round(inc["traces"] / span, 3) if inc["traces"] is not None and span > 0 else ""
+            row["capsule_hit_ratio"] = round(inc["hits"] / inc["traces"], 3) if inc["traces"] else ""
+            row["capsule_any_ratio"] = round((inc["hits"] + inc["blocked"]) / inc["traces"], 3) if inc["traces"] else ""
             rows.append(row)
     if args.batch:
         out_dir = ROOT / "Measurements" / args.batch

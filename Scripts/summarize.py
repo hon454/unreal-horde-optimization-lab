@@ -120,7 +120,12 @@ QUALITY_FIELDS += ["tech_avoid", "overlap_mean", "overlap_deep_mean"]
 # v2 W4 겹침 방지 직접 구현(Docs/Worklog/V2.md "W4"). tech_sep = 메타데이터 LabTechSeparate(ULabSeparationProcessor 켬 1),
 # sep_pushed_mean = Lab/SepPushed 평균(프레임마다 옮긴 개체 수), sep_push_cm_mean = Lab/SepPushMean 평균(옮긴 개체 하나가 한 프레임에 옮긴 거리, cm). 열이 없으면 빈칸
 QUALITY_FIELDS += ["tech_sep", "sep_pushed_mean", "sep_push_cm_mean"]
+# v2 W5 캡슐과 액터 비용(Docs/Worklog/V2.md "W5"). actor_collision = 메타데이터 LabActorCollision(trace 기본, 0 끔).
+# capsule_traces·capsule_hits·capsule_blocked·capsule_snipe = 메타데이터 LabCapsule*(측정 구간의 저격 캡슐 트레이스 수, 대상 캡슐 적중, 다른 캡슐에 막힘,
+# 그중 실제 저격 대상에 쏜 수). capsule_hit_ratio = 적중 ÷ 트레이스, capsule_any_ratio = (적중 + 막힘) ÷ 트레이스. 메타데이터가 없으면 빈칸
+QUALITY_FIELDS += ["actor_collision", "capsule_traces", "capsule_hits", "capsule_blocked", "capsule_snipe", "capsule_hit_ratio", "capsule_any_ratio"]
 SIM_FIELDS += QUALITY_FIELDS
+TEXT_SIM_FIELDS = {"actor_collision"}  # 글자 값이라 summary.csv에서 중앙값 대신 값들을 잇는다
 RUN_FIELDS = ["label", "milestone", "variant", "n", "preset", "seed", "run", "pc", "frames",
               "game_p50_ms", "game_p99_ms", "render_p50_ms", "gpu_p50_ms", "frame_p50_ms", "frame_p95_ms", "frame_p99_ms",
               "hitch_abs", "hitch_rel", "draw_calls_p50", "mem_total_mb", "bottleneck", "build",
@@ -296,6 +301,16 @@ def quality_fields(header, data, meta):
         vals = column(header, data, [stat])
         if vals:
             out[key] = round(statistics.fmean(vals), 2)
+    out["actor_collision"] = meta.get("labactorcollision", "")
+    for key in ("capsule_traces", "capsule_hits", "capsule_blocked", "capsule_snipe"):
+        out[key] = meta.get("lab" + key.replace("_", ""), "")
+    try:
+        traces = int(out["capsule_traces"])
+        if traces > 0:
+            out["capsule_hit_ratio"] = round(int(out["capsule_hits"]) / traces, 4)
+            out["capsule_any_ratio"] = round((int(out["capsule_hits"]) + int(out["capsule_blocked"])) / traces, 4)
+    except ValueError:
+        pass
     return out
 
 
@@ -501,6 +516,9 @@ def main():
             out["sim_lod"] = " // ".join(lods)
             for c in SIM_FIELDS:
                 if c == "sim_lod":
+                    continue
+                if c in TEXT_SIM_FIELDS:
+                    out[c] = "/".join(sorted({str(r.get(c, "")) for r in rs if str(r.get(c, "")) != ""}))
                     continue
                 vals = [float(r[c]) for r in rs if str(r.get(c, "")) != ""]
                 out[c] = round(statistics.median(vals), 4) if vals else ""

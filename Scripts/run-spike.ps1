@@ -41,8 +41,12 @@ $FailuresCsv = "$BatchDir\failures.csv"
 
 # v2 W5부터 분리 프로세서(-LabSeparate)의 기본값이 1이다(D45). final·m1·finalser·m1ser는 분리 켬이고, 분리 끔은 접미사 nosep이다.
 # W4의 finalsep·m1sep·finalsepser·m1sepser는 지금의 final·m1·finalser·m1ser와 같아 지웠다. 엔진 회피 구성(av)은 W3·W4와 같은 뜻이 되게 분리를 끈다.
+# v2 W5부터 하이드레이션 액터 캡슐의 기본값이 Trace(LabActorCollision=trace)다. 캡슐 끔은 접미사 nocap(-LabActorCollision=0)이다.
 $ConfigTable = @(
-    @{ Name = "final"; Args = @("-LabStage=M5", "-LabVariant=q4final"); Expect = @("LabStage=M5", "LabVariant=q4final", "LabTechSimLod=1", "LabTechFixedBounds=1", "LabTechCrowdFx=1", "LabTechAvoid=0", "LabTechSeparate=1") },
+    @{ Name = "final"; Args = @("-LabStage=M5", "-LabVariant=q4final"); Expect = @("LabStage=M5", "LabVariant=q4final", "LabTechSimLod=1", "LabTechFixedBounds=1", "LabTechCrowdFx=1", "LabTechAvoid=0", "LabTechSeparate=1", "LabActorCollision=trace") },
+    @{ Name = "finalnocap"; Args = @("-LabStage=M5", "-LabVariant=q4final", "-LabActorCollision=0"); Expect = @("LabStage=M5", "LabVariant=q4final", "LabTechSimLod=1", "LabTechAvoid=0", "LabTechSeparate=1", "LabActorCollision=0") },
+    # v2 W5 직렬 트레이스용(아래 W3 직렬 구성과 같은 방식). 수치는 비교에 쓰지 않는다
+    @{ Name = "finalnocapser"; Args = @("-LabStage=M5", "-LabVariant=q4final", "-LabActorCollision=0", "-LabFullyParallel=0"); Expect = @("LabStage=M5", "LabVariant=q4final", "LabTechSeparate=1", "LabActorCollision=0") },
     @{ Name = "finalnosep"; Args = @("-LabStage=M5", "-LabVariant=q4final", "-LabSeparate=0"); Expect = @("LabStage=M5", "LabVariant=q4final", "LabTechSimLod=1", "LabTechAvoid=0", "LabTechSeparate=0") },
     @{ Name = "nofix"; Args = @("-LabStage=M5", "-LabVariant=q4final", "-LabSimLod=0", "-LabFixedBounds=0", "-LabCrowdFx=0"); Expect = @("LabStage=M5", "LabVariant=q4final", "LabTechSimLod=0", "LabTechFixedBounds=0", "LabTechCrowdFx=0") },
     # v2 W3: 엔진 회피(-LabAvoid=1). finalav는 최종 구성(80m 안만 회피), m1·m1av는 첫 Mass 단계(전 개체가 매 프레임 돈다)
@@ -51,7 +55,7 @@ $ConfigTable = @(
     @{ Name = "m1nosep"; Args = @("-LabStage=M1", "-LabVariant=m1mass", "-LabSeparate=0"); Expect = @("LabStage=M1", "LabTechAvoid=0", "LabTechSeparate=0") },
     @{ Name = "m1av"; Args = @("-LabStage=M1", "-LabVariant=m1mass", "-LabAvoid=1", "-LabSeparate=0"); Expect = @("LabStage=M1", "LabTechAvoid=1", "LabTechSeparate=0") },
     # v2 W3 직렬 트레이스용(-LabFullyParallel=0, Mass 프로세서가 Game 스레드에서 차례로 돈다). 프로세서별 비용을 대기 없이 읽는다. 수치는 비교에 쓰지 않는다
-    @{ Name = "finalser"; Args = @("-LabStage=M5", "-LabVariant=q4final", "-LabFullyParallel=0"); Expect = @("LabStage=M5", "LabVariant=q4final", "LabTechAvoid=0", "LabTechSeparate=1") },
+    @{ Name = "finalser"; Args = @("-LabStage=M5", "-LabVariant=q4final", "-LabFullyParallel=0"); Expect = @("LabStage=M5", "LabVariant=q4final", "LabTechAvoid=0", "LabTechSeparate=1", "LabActorCollision=trace") },
     @{ Name = "finalnosepser"; Args = @("-LabStage=M5", "-LabVariant=q4final", "-LabSeparate=0", "-LabFullyParallel=0"); Expect = @("LabStage=M5", "LabVariant=q4final", "LabTechAvoid=0", "LabTechSeparate=0") },
     @{ Name = "finalavser"; Args = @("-LabStage=M5", "-LabVariant=q4final", "-LabAvoid=1", "-LabSeparate=0", "-LabFullyParallel=0"); Expect = @("LabStage=M5", "LabVariant=q4final", "LabTechAvoid=1", "LabTechSeparate=0") },
     @{ Name = "m1ser"; Args = @("-LabStage=M1", "-LabVariant=m1mass", "-LabFullyParallel=0"); Expect = @("LabStage=M1", "LabTechAvoid=0", "LabTechSeparate=1") },

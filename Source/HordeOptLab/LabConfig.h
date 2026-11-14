@@ -374,15 +374,18 @@ struct FLabConfig
 	/** CSV 메타데이터 LabFarShadow: "1" 켬, "0" 끔, M3 미만 단계 "-" */
 	const TCHAR* FarShadowString() const { return Stage < ELabStage::M3 ? TEXT("-") : bFarShadow ? TEXT("1") : TEXT("0"); }
 	/**
-	 * 하이드레이션 액터(M3 이상, ALabMinionMassActor 계열)의 캡슐 콜리전. 기본은 끔이다(plan.md M3b "함께 바꾸는 설정", Q5 1b단위에서 코드에 넣었다).
+	 * 하이드레이션 액터(M3 이상, ALabMinionMassActor 계열)의 캡슐 콜리전. v1에서는 기본이 끔이었다(plan.md M3b "함께 바꾸는 설정", Q5 1b단위에서 코드에 넣었다). v2 W5부터 기본은 Trace다(아래).
 	 * Off: NoCollision + 오버랩·물리 볼륨 갱신 끔(옛 m3nocol 처리). QueryOnly: 같은 두 갱신 끔 + QueryOnly(m3colquery). On: ACharacter 캡슐의 Pawn 프로필 그대로
 	 * (Mass 액터 풀이 꺼낼 때 SetActorEnableCollision(true)를 부른다, MassActorSpawnerSubsystem.cpp:327).
 	 * 변형 기본값: m3colquery는 QueryOnly, 라벨 m3colbase는 On(E3 (6)의 "그대로" 기준점의 뜻을 지킨다), 그 밖은 Off. -LabActorCollision=1이 켜고 =0이 끈다(인자가 이긴다).
 	 * 판정(범위 피해, 저격)은 엔티티 위치의 수평 거리로 하고 캡슐을 쓰지 않는다. M0 액터(ALabMinion, CharacterMovement가 캡슐로 바닥을 찾는다)는 이 값과 무관하게 늘 켬이다.
+	 * v2 W5(Docs/v2-spec.md 3절 기능 3, Docs/Worklog/V2.md "W5"): 기본이 Trace다. QueryOnly + 모든 채널 무시 + 저격 트레이스 채널(LabSnipe, LabSnipe.h)만 막음, 오버랩·물리 볼륨 갱신 끔.
+	 * 캡슐끼리는 서로 무시하고 이동은 스윕 없는 텔레포트라 밀지 않는다. 오브가 액터 구간의 저격 대상에 이 채널로 라인 트레이스를 쏴 맞는지 센다(ALabOrb::TraceSnipeCapsules).
+	 * -LabActorCollision=0 끔, =1 Pawn 프로필 켬(옛 S8-col), =2 Trace. m3colquery·m3colbase는 옛 값 그대로다.
 	 */
-	enum class EActorCollision : uint8 { Off, QueryOnly, On };
-	EActorCollision ActorCollision = EActorCollision::Off;
-	/** 하이드레이션 액터 캡슐 콜리전의 실제 적용값. "0" 끔(기본), "1" 켬(-LabActorCollision=1, m3colbase), "query" m3colquery. 액터가 없는 단계는 "-". CSV 메타데이터 LabActorCollision */
+	enum class EActorCollision : uint8 { Off, QueryOnly, On, Trace };
+	EActorCollision ActorCollision = EActorCollision::Trace;
+	/** 하이드레이션 액터 캡슐 콜리전의 실제 적용값. "trace" 기본(W5), "0" 끔(-LabActorCollision=0), "1" 켬(-LabActorCollision=1, m3colbase), "query" m3colquery. 액터가 없는 단계는 "-". CSV 메타데이터 LabActorCollision */
 	const TCHAR* ActorCollisionString() const;
 	/**
 	 * 변형이 정한 기본값과 다르게 준 인자(Q5). "hydrate_m=70|actor_collision=1" 꼴(CSV 메타데이터 행이 쉼표로 나뉘어 | 로 잇는다), 없으면 빈 문자열. 사다리 단계를 그대로 고른 실행인지 가리는 데 쓴다.

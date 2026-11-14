@@ -473,6 +473,7 @@ void ALabGameMode::TickBench()
 			RespawnsAtStart = Spawner->GetRespawnCount();
 			KillsAtStart = Orb->GetKillCount();
 			SnipesAtStart = Orb->GetSnipeCount();
+			CapsuleAtStart = Orb->GetCapsuleTraceStats();
 			Near30Sum = 0;
 			AliveMin = TNumericLimits<int32>::Max();
 			AliveMax = 0;
@@ -510,9 +511,15 @@ void ALabGameMode::TickBench()
 			const int32 Deaths = ZoneKills + Snipes;
 			const float DeathRate = Deaths / FMath::Max(BenchPhaseTime, 0.001f);
 			const float Near30Mean = float(double(Near30Sum) / FMath::Max(BenchFrames, 1));
-			const FString Summary = FString::Printf(TEXT("lab_summary label=%s measure_sec=%.2f frames=%d avg_ms=%.3f n=%d respawns=%d ok=%d deaths=%d zone_kills=%d snipes=%d death_rate=%.3f near30_mean=%.2f alive_min=%d alive_max=%d"),
+			// v2 W5: 측정 구간의 저격 캡슐 트레이스 수, 그중 대상 캡슐 적중, 다른 캡슐에 막힘, 실제 저격 대상에 쏜 수(ALabOrb::GetCapsuleTraceStats)
+			const ALabOrb::FLabCapsuleTraceStats& CapNow = Orb->GetCapsuleTraceStats();
+			const int32 CapTraces = CapNow.Traces - CapsuleAtStart.Traces;
+			const int32 CapHits = CapNow.Hits - CapsuleAtStart.Hits;
+			const int32 CapBlocked = CapNow.Blocked - CapsuleAtStart.Blocked;
+			const int32 CapSnipe = CapNow.SnipeTraces - CapsuleAtStart.SnipeTraces;
+			const FString Summary = FString::Printf(TEXT("lab_summary label=%s measure_sec=%.2f frames=%d avg_ms=%.3f n=%d respawns=%d ok=%d deaths=%d zone_kills=%d snipes=%d death_rate=%.3f near30_mean=%.2f alive_min=%d alive_max=%d capsule_traces=%d capsule_hits=%d capsule_blocked=%d capsule_snipe=%d"),
 				*Config.Label, BenchPhaseTime, BenchFrames, BenchPhaseTime * 1000.f / FMath::Max(BenchFrames, 1),
-				Alive, Spawner->GetRespawnCount() - RespawnsAtStart, bOk ? 1 : 0, Deaths, ZoneKills, Snipes, DeathRate, Near30Mean, AliveMin, AliveMax);
+				Alive, Spawner->GetRespawnCount() - RespawnsAtStart, bOk ? 1 : 0, Deaths, ZoneKills, Snipes, DeathRate, Near30Mean, AliveMin, AliveMax, CapTraces, CapHits, CapBlocked, CapSnipe);
 #if CSV_PROFILER
 			CSV_METADATA(TEXT("LabAlive"), *FString::FromInt(Alive));
 			CSV_METADATA(TEXT("LabRespawns"), *FString::FromInt(Spawner->GetRespawnCount() - RespawnsAtStart));
@@ -524,6 +531,10 @@ void ALabGameMode::TickBench()
 			CSV_METADATA(TEXT("LabNear30Mean"), *FString::Printf(TEXT("%.2f"), Near30Mean));
 			CSV_METADATA(TEXT("LabAliveMin"), *FString::FromInt(AliveMin));
 			CSV_METADATA(TEXT("LabAliveMax"), *FString::FromInt(AliveMax));
+			CSV_METADATA(TEXT("LabCapsuleTraces"), *FString::FromInt(CapTraces));
+			CSV_METADATA(TEXT("LabCapsuleHits"), *FString::FromInt(CapHits));
+			CSV_METADATA(TEXT("LabCapsuleBlocked"), *FString::FromInt(CapBlocked));
+			CSV_METADATA(TEXT("LabCapsuleSnipe"), *FString::FromInt(CapSnipe));
 			if (ULabCrowdSubsystem* Crowd = GetWorld()->GetSubsystem<ULabCrowdSubsystem>(); Crowd && Crowd->IsActive())
 			{
 				// 애니 갱신 지표(종류별): 측정 구간의 액터×프레임 합, 그중 애니 갱신을 하지 않은 수(보간 + 건너뜀), 그중 보간한 수(ULabActorSyncProcessor).
@@ -715,10 +726,11 @@ void ALabGameMode::Tick(float DeltaSeconds)
 		UE_LOG(LogLab, Log, TEXT("lab_applied %s"), *AppliedString()); // Q3: 개발 실행에서도 실제 적용값을 남긴다(벤치마크는 측정 시작 때)
 		const ULabCrowdSubsystem* OverlapCrowd = GetWorld()->GetSubsystem<ULabCrowdSubsystem>();
 		const bool bOverlap = OverlapCrowd && OverlapCrowd->IsActive();
-		UE_LOG(LogLab, Log, TEXT("lab_summary elapsed=%.1f n=%d respawns=%d kills=%d snipes=%d avg_ms=%.1f deaths=%d near30=%d actors=%d overlap=%d/%d"),
+		UE_LOG(LogLab, Log, TEXT("lab_summary elapsed=%.1f n=%d respawns=%d kills=%d snipes=%d avg_ms=%.1f deaths=%d near30=%d actors=%d overlap=%d/%d capsule=%d/%d/%d/%d"),
 			Elapsed, Spawner->GetAliveCount(), Spawner->GetRespawnCount(), Orb->GetKillCount(), Orb->GetSnipeCount(),
 			1000.f * Elapsed / FMath::Max<uint64>(GFrameCounter - StartFrame, 1), GetDeathCount(), LastNear30, GetHudActors(), // Q5: 누적 사망, 오브 30m 안(마지막 프레임), 액터
-			bOverlap ? OverlapCrowd->OverlapPairs.load() : 0, bOverlap ? OverlapCrowd->OverlapDeep.load() : 0); // v2 W3: 마지막 표본의 겹친 쌍/깊게 겹친 쌍
+			bOverlap ? OverlapCrowd->OverlapPairs.load() : 0, bOverlap ? OverlapCrowd->OverlapDeep.load() : 0, // v2 W3: 마지막 표본의 겹친 쌍/깊게 겹친 쌍
+			Orb->GetCapsuleTraceStats().Traces, Orb->GetCapsuleTraceStats().Hits, Orb->GetCapsuleTraceStats().Blocked, Orb->GetCapsuleTraceStats().SnipeTraces); // v2 W5: 저격 캡슐 트레이스/적중/막힘/그중 실제 저격 대상(누적)
 		FPlatformMisc::RequestExit(false, TEXT("LabDuration"));
 	}
 }

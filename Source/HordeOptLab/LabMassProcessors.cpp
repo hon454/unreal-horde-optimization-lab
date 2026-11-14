@@ -527,9 +527,13 @@ void ULabOrbSnipeProcessor::Execute(FMassEntityManager& EntityManager, FMassExec
 
 	// M0 ALabOrb::Snipe와 같은 선택: 화면 안의 산 개체를 거리 구간별로 나눠 구간마다 해시가 가장 작은 개체(LabSnipe.h). 2종은 예약 발만 대형.
 	TLabSnipeSelector<FMassEntityHandle> Picker(SnipeTick);
+	// v2 W5 캡슐 확인 대상(LabCrowdSubsystem.h CapsuleCheckEntities): 액터가 붙은 화면 안의 산 개체 중 해시 최소. 대상 선택(Picker)과 따로 고르고 피해를 주지 않는다
+	FMassEntityHandle CheckBest;
+	uint32 CheckBestHash = MAX_uint32;
 	EntityQuery.ForEachEntityChunk(Context, [&](FMassExecutionContext& Context)
 	{
 		const bool bLarge = Context.GetConstSharedFragment<FLabUnitTypeParams>().UnitType == LabUnitLarge; // 종류는 청크 단위(아키타입)
+		const bool bActorChunk = Context.DoesArchetypeHaveTag<FLabActorTag>(); // 하이드레이션 액터가 붙은 아키타입(ULabActorManagement::OnPostActorSpawn)
 		const TConstArrayView<FTransformFragment> Transforms = Context.GetFragmentView<FTransformFragment>();
 		const TConstArrayView<FLabHealthFragment> Healths = Context.GetFragmentView<FLabHealthFragment>();
 		const TConstArrayView<FLabMinionFragment> Minions = Context.GetFragmentView<FLabMinionFragment>();
@@ -542,7 +546,13 @@ void ULabOrbSnipeProcessor::Execute(FMassEntityManager& EntityManager, FMassExec
 			}
 			const FVector Location = Transforms[It].GetTransform().GetLocation();
 			const int32 Band = FLabSnipeBands::BandOf(FVector::Dist2D(Location, Center));
-			if (Band == INDEX_NONE || !View.Contains(FVector(Location.X, Location.Y, LabSnipeAimHeight)))
+			const bool bInView = (Band != INDEX_NONE || bActorChunk) && View.Contains(FVector(Location.X, Location.Y, LabSnipeAimHeight));
+			if (bActorChunk && bInView)
+			{
+				const uint32 Hash = LabSnipeHash(Minions[It].Serial, SnipeTick);
+				if (Hash < CheckBestHash) { CheckBestHash = Hash; CheckBest = Context.GetEntity(It); }
+			}
+			if (Band == INDEX_NONE || !bInView)
 			{
 				continue;
 			}
@@ -581,8 +591,13 @@ void ULabOrbSnipeProcessor::Execute(FMassEntityManager& EntityManager, FMassExec
 		LabLogScreenEvent(Picker.bHasLarge && Pick.Target == Picker.LargeBest.Target ? TEXT("snipe_large") : TEXT("snipe_small"), View, Pick.Location); // 개발용 진단: 피격 멈춤 확인
 #endif
 		Crowd->SnipeTargets.Add(FVector(Pick.Location.X, Pick.Location.Y, LabSnipeAimHeight)); // M0과 같은 몸통 높이
+		Crowd->SnipeTargetEntities.Add(Target); // v2 W5 캡슐 트레이스(ALabOrb::TraceSnipeCapsules)
 		++Crowd->SnipeCount;
 	});
+	if (CheckBest.IsSet())
+	{
+		Crowd->CapsuleCheckEntities.Add(CheckBest);
+	}
 }
 
 // 동등성 통계: 오브 30m 안 개체 수(Q5) ---------------------------------------
