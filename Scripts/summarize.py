@@ -117,6 +117,9 @@ QUALITY_FIELDS = ["actor_cap", "hydrate_m", "actors_mean", "view_actors_mean", "
 # v2 W3 겹침 방지(Docs/Worklog/V2.md "W3"). tech_avoid = 메타데이터 LabTechAvoid(엔진 회피 Trait 켬 1), overlap_mean·overlap_deep_mean = Lab/OverlapPairs·Lab/OverlapDeep
 # 평균(0.5초마다 센 겹친 쌍·깊게 겹친 쌍의 수, LabOverlap.h). 열이 없으면 빈칸
 QUALITY_FIELDS += ["tech_avoid", "overlap_mean", "overlap_deep_mean"]
+# v2 W4 겹침 방지 직접 구현(Docs/Worklog/V2.md "W4"). tech_sep = 메타데이터 LabTechSeparate(ULabSeparationProcessor 켬 1),
+# sep_pushed_mean = Lab/SepPushed 평균(프레임마다 옮긴 개체 수), sep_push_cm_mean = Lab/SepPushMean 평균(옮긴 개체 하나가 한 프레임에 옮긴 거리, cm). 열이 없으면 빈칸
+QUALITY_FIELDS += ["tech_sep", "sep_pushed_mean", "sep_push_cm_mean"]
 SIM_FIELDS += QUALITY_FIELDS
 RUN_FIELDS = ["label", "milestone", "variant", "n", "preset", "seed", "run", "pc", "frames",
               "game_p50_ms", "game_p99_ms", "render_p50_ms", "gpu_p50_ms", "frame_p50_ms", "frame_p95_ms", "frame_p99_ms",
@@ -287,7 +290,9 @@ def quality_fields(header, data, meta):
     if covh:
         out["coverhyd_mean"] = round(statistics.fmean(covh), 4)
     out["tech_avoid"] = meta.get("labtechavoid", "")
-    for key, stat in (("overlap_mean", "Lab/OverlapPairs"), ("overlap_deep_mean", "Lab/OverlapDeep")):
+    out["tech_sep"] = meta.get("labtechseparate", "")
+    for key, stat in (("overlap_mean", "Lab/OverlapPairs"), ("overlap_deep_mean", "Lab/OverlapDeep"),
+                      ("sep_pushed_mean", "Lab/SepPushed"), ("sep_push_cm_mean", "Lab/SepPushMean")):
         vals = column(header, data, [stat])
         if vals:
             out[key] = round(statistics.fmean(vals), 2)

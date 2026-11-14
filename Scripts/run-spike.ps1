@@ -40,21 +40,27 @@ $ProgressLog = "$BatchDir\progress.log"
 $FailuresCsv = "$BatchDir\failures.csv"
 
 $ConfigTable = @(
-    @{ Name = "final"; Args = @("-LabStage=M5", "-LabVariant=q4final"); Expect = @("LabStage=M5", "LabVariant=q4final", "LabTechSimLod=1", "LabTechFixedBounds=1", "LabTechCrowdFx=1", "LabTechAvoid=0") },
+    @{ Name = "final"; Args = @("-LabStage=M5", "-LabVariant=q4final"); Expect = @("LabStage=M5", "LabVariant=q4final", "LabTechSimLod=1", "LabTechFixedBounds=1", "LabTechCrowdFx=1", "LabTechAvoid=0", "LabTechSeparate=0") },
     @{ Name = "nofix"; Args = @("-LabStage=M5", "-LabVariant=q4final", "-LabSimLod=0", "-LabFixedBounds=0", "-LabCrowdFx=0"); Expect = @("LabStage=M5", "LabVariant=q4final", "LabTechSimLod=0", "LabTechFixedBounds=0", "LabTechCrowdFx=0") },
     # v2 W3: 엔진 회피(-LabAvoid=1). finalav는 최종 구성(80m 안만 회피), m1·m1av는 첫 Mass 단계(전 개체가 매 프레임 돈다)
-    @{ Name = "finalav"; Args = @("-LabStage=M5", "-LabVariant=q4final", "-LabAvoid=1"); Expect = @("LabStage=M5", "LabVariant=q4final", "LabTechSimLod=1", "LabTechAvoid=1") },
-    @{ Name = "m1"; Args = @("-LabStage=M1", "-LabVariant=m1mass"); Expect = @("LabStage=M1", "LabTechAvoid=0") },
-    @{ Name = "m1av"; Args = @("-LabStage=M1", "-LabVariant=m1mass", "-LabAvoid=1"); Expect = @("LabStage=M1", "LabTechAvoid=1") },
+    @{ Name = "finalav"; Args = @("-LabStage=M5", "-LabVariant=q4final", "-LabAvoid=1"); Expect = @("LabStage=M5", "LabVariant=q4final", "LabTechSimLod=1", "LabTechAvoid=1", "LabTechSeparate=0") },
+    @{ Name = "m1"; Args = @("-LabStage=M1", "-LabVariant=m1mass"); Expect = @("LabStage=M1", "LabTechAvoid=0", "LabTechSeparate=0") },
+    @{ Name = "m1av"; Args = @("-LabStage=M1", "-LabVariant=m1mass", "-LabAvoid=1"); Expect = @("LabStage=M1", "LabTechAvoid=1", "LabTechSeparate=0") },
     # v2 W3 직렬 트레이스용(-LabFullyParallel=0, Mass 프로세서가 Game 스레드에서 차례로 돈다). 프로세서별 비용을 대기 없이 읽는다. 수치는 비교에 쓰지 않는다
     @{ Name = "finalser"; Args = @("-LabStage=M5", "-LabVariant=q4final", "-LabFullyParallel=0"); Expect = @("LabStage=M5", "LabVariant=q4final", "LabTechAvoid=0") },
     @{ Name = "finalavser"; Args = @("-LabStage=M5", "-LabVariant=q4final", "-LabAvoid=1", "-LabFullyParallel=0"); Expect = @("LabStage=M5", "LabVariant=q4final", "LabTechAvoid=1") },
     @{ Name = "m1ser"; Args = @("-LabStage=M1", "-LabVariant=m1mass", "-LabFullyParallel=0"); Expect = @("LabStage=M1", "LabTechAvoid=0") },
-    @{ Name = "m1avser"; Args = @("-LabStage=M1", "-LabVariant=m1mass", "-LabAvoid=1", "-LabFullyParallel=0"); Expect = @("LabStage=M1", "LabTechAvoid=1") }
+    @{ Name = "m1avser"; Args = @("-LabStage=M1", "-LabVariant=m1mass", "-LabAvoid=1", "-LabFullyParallel=0"); Expect = @("LabStage=M1", "LabTechAvoid=1") },
+    # v2 W4: 겹침 방지 직접 구현(-LabSeparate=1, ULabSeparationProcessor). finalsep은 최종 구성, m1sep은 첫 Mass 단계. 둘 다 전 개체가 매 프레임 돈다
+    @{ Name = "finalsep"; Args = @("-LabStage=M5", "-LabVariant=q4final", "-LabSeparate=1"); Expect = @("LabStage=M5", "LabVariant=q4final", "LabTechSimLod=1", "LabTechAvoid=0", "LabTechSeparate=1") },
+    @{ Name = "m1sep"; Args = @("-LabStage=M1", "-LabVariant=m1mass", "-LabSeparate=1"); Expect = @("LabStage=M1", "LabTechAvoid=0", "LabTechSeparate=1") },
+    # v2 W4 직렬 트레이스용(위 W3 직렬 구성과 같은 방식). 수치는 비교에 쓰지 않는다
+    @{ Name = "finalsepser"; Args = @("-LabStage=M5", "-LabVariant=q4final", "-LabSeparate=1", "-LabFullyParallel=0"); Expect = @("LabStage=M5", "LabVariant=q4final", "LabTechSeparate=1") },
+    @{ Name = "m1sepser"; Args = @("-LabStage=M1", "-LabVariant=m1mass", "-LabSeparate=1", "-LabFullyParallel=0"); Expect = @("LabStage=M1", "LabTechSeparate=1") }
 )
 $ConfigNames = @($Configs -split "," | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne "" })
 $UseConfigs = @($ConfigTable | Where-Object { $ConfigNames -contains $_.Name })
-if ($UseConfigs.Count -ne $ConfigNames.Count) { Write-Host "FAIL: unknown config in -Configs '$Configs' (final, nofix, finalav, m1, m1av, finalser, finalavser, m1ser, m1avser)"; exit 1 }
+if ($UseConfigs.Count -ne $ConfigNames.Count) { Write-Host "FAIL: unknown config in -Configs '$Configs' (final, nofix, finalav, m1, m1av, finalser, finalavser, m1ser, m1avser, finalsep, m1sep, finalsepser, m1sepser)"; exit 1 }
 $SpeedList = @($Speeds -split "," | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne "" })
 $Conds = @()
 for ($i = 0; $i -lt $SpeedList.Count; $i++) {

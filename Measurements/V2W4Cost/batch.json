@@ -1,0 +1,19 @@
+﻿{
+    "batch":  "V2W4Cost",
+    "build":  "0ae4f8e93ebb42040a2b94172fd46b6274312133 (dirty)",
+    "start":  "2026-11-15 04:26:50",
+    "end":  "2026-11-15 05:44:46",
+    "n":  10000,
+    "preset":  "P3",
+    "radius_m":  "57.3",
+    "height_m":  "6",
+    "speeds":  [
+                   "2"
+               ],
+    "duration_sec":  180,
+    "runs":  3,
+    "planned":  19,
+    "ok":  19,
+    "failed":  0,
+    "gave_up":  0
+}

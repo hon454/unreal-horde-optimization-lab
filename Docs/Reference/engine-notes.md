@@ -532,3 +532,17 @@
 - 장애물 격자 갱신(`UMassNavigationObstacleGridProcessor`)은 이동 그룹 뒤에 돈다. 격자의 `Move`가 스레드 안전하지 않아 병렬 순회를 하지 않는다(`MN/Private/MassNavigationProcessors.cpp:161-188`, 주석 `:195`). Off LOD 개체는 격자에서 빠진다(`:188`).
 - `UMassNavigationSubsystem`의 특성은 `GameThreadOnly = false`, `ThreadSafeWrite = false`다(`MN/Public/MassNavigationSubsystem.h:55-61`). 격자 갱신(쓰기)과 두 회피(읽기)는 서로 순서가 생기고, 작업자 스레드에서 돌 수 있다. 두 회피 프로세서도 병렬 순회(`ParallelForEachEntityChunk`)를 쓰지 않는다.
 - 이동 회피 파라미터 기본값(`MN/Public/Avoidance/MassAvoidanceFragments.h:35-114`): 분리 반경 배율 0.9, 장애물 분리 강성 250, 분리 거리 75cm, 예측 시간 2.5초, 예측 반경 배율 0.65, 예측 거리 75cm, 예측 강성 700.
+
+## 37. 분리 프로세서의 자리와 엔진 이동의 식(2026-11-15, v2 W4)
+
+경로는 `Engine/Plugins/Runtime/MassGameplay/Source/MassMovement` 기준이다(MM). Lab의 `ULabSeparationProcessor`가 이 사실에 기댄다.
+
+| 항목 | 확인한 것 | 위치 |
+| --- | --- | --- |
+| 이동 프로세서의 헤더와 내보내기 | `UMassApplyMovementProcessor`는 `Public/Movement/MassMovementProcessors.h`에 있고 `UCLASS(MinimalAPI)`다. 게임 모듈에서 `StaticClass()->GetFName()`으로 순서를 적을 수 있다 | `MM/Public/Movement/MassMovementProcessors.h:35-38` |
+| 힘 적용 | `UMassApplyForceProcessor`(그룹 ApplyForces, Avoidance 뒤)는 `DesiredVelocity += 힘 × dt`를 `MaxSpeed`로 자르고 힘을 0으로 되돌린다. 이 자리에는 가속 상한이 없다. dt는 0.1초 상한이다. Off LOD 개체는 돌지 않는다 | `MM/Private/MassMovementProcessors.cpp:21-58` |
+| 위치 적용 | `UMassApplyMovementProcessor`(그룹 Movement, ApplyForces 뒤)는 `Velocity = DesiredVelocity`로 두고 위치에 `Velocity × dt`를 더한다. 코드 구동 태그가 있고 Off LOD 태그가 없는 개체만 돈다. 병렬 순회가 아니다(`ForEachEntityChunk`) | `MM/Private/MassMovementProcessors.cpp:65-128` |
+| 조향 힘 | 조향 힘 = `SteerK × (조향 속도 − DesiredVelocity)`이고 `SteerK = 1 ÷ ReactionTime`(0.3초)이다. 그래서 바라는 속도를 0으로 깎으면 약 0.3초에 걸쳐 다시 붙는다 | `Engine/Plugins/AI/MassAI/Source/MassNavigation/Private/MassSteeringProcessors.cpp:110,237` |
+| 없는 이름에 대한 순서 선언 | `ExecuteAfter`·`ExecuteBefore`가 등록되지 않은 이름을 가리키면 해결기는 로그(`Unable to find dependency ... Creating a dummy dependency node`)를 남기고 빈 노드를 만든다. 실패하지 않는다 | `Engine/Source/Runtime/MassEntity/Private/MassProcessorDependencySolver.cpp:664,705` |
+| 쿼리의 병렬 순회 끄기 | `ParallelForEachEntityChunk`는 `mass.AllowQueryParallelFor`(기본 true)가 거짓이면 `ForEachEntityChunk`로 돈다. `mass.FullyParallel`은 프로세서를 작업자 스레드로 나누는 값이라 이 값과 따로다 | `Engine/Source/Runtime/MassEntity/Private/MassEntityQuery.cpp:26-31,516,533`, `MassProcessingPhaseManager.cpp:36` |
+| `MurmurFinalize32` | `UE::Private` 이름공간에 있고 전역에서도 부를 수 있다(`LabSnipe.h`가 이미 쓴다) | `Engine/Source/Runtime/Core/Public/Templates/TypeHash.h:17` |
