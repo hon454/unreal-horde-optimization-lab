@@ -79,7 +79,7 @@ if (Test-Path $ProgressLog) { Write-Host "FAIL: $ProgressLog exists. Use a new -
 foreach ($j in $Jobs) { $l = Label-Of $j.Cond $j.Run; if (Test-Path "$OutCsv\$l.csv") { Write-Host "FAIL: CSV already exists for $l"; exit 1 } }
 New-Item -ItemType Directory -Force -Path $OutCsv, $BatchDir | Out-Null
 Set-Content -Path $FailuresCsv -Value "time,label,cond,n,preset,kind,reason" -Encoding UTF8
-$Commit = if (Test-Path "$ProjectDir\Packaged\Test\commit.txt") { (Get-Content "$ProjectDir\Packaged\Test\commit.txt" -TotalCount 1) } else { "" }
+$Commit = if (Test-Path "$ProjectDir\Packaged\Test\commit.txt") { [string](Get-Content "$ProjectDir\Packaged\Test\commit.txt" -TotalCount 1) } else { "" }
 
 if (-not ('FgWin' -as [type])) {
     Add-Type @"
