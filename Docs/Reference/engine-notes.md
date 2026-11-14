@@ -502,3 +502,10 @@
 | 속도 버퍼를 읽는 패스 | 모션 블러와 TSR이 읽는다 | `Renderer/Private/PostProcess/PostProcessMotionBlur.cpp:1334`, `TemporalSuperResolution.cpp:1898, 2537` |
 | 인스턴스별 이전 변환이 없을 때 | 인스턴스가 컴포넌트와 함께만 움직였다고 본다(지금 변환 × 프리미티브의 `WorldToPreviousWorld`). 그래서 이전 변환이 빠지면 번지지 않고 블러가 빠진다. 번짐은 틀린 이전 변환에서 난다 | `Shaders/Private/SceneData.ush:1211-1236` |
 | ISKM 재생 위치 | 렌더러가 매 프레임 그 프레임의 월드 시각으로 트랙의 재생 위치를 구하고, 활성 트랙마다 샘플과 GPU 평가 헤더를 쓴다. Animation Budget Allocator의 예산 밖이다 | `Renderer/Private/Skinning/AnimSequenceTransformProvider.cpp:1190, 1280-1305, 1415` |
+
+## 34. `HashCombineFast`는 섞지 않는다(2026-11-15, v2 W1)
+
+- `Engine/Source/Runtime/Core/Public/Templates/TypeHash.h`의 `HashCombineFast(A, B)`는 `A ^ (B + 0x9e3779b9 + (A << 6) + (A >> 2))`다. `GetTypeHash(uint32)`는 값을 그대로 돌려준다.
+- 그래서 `HashCombineFast(일련번호, 틱)`의 최솟값으로 대상을 고르면 틱은 모든 후보에 같은 수를 더할 뿐이고, 작은 일련번호가 늘 최소가 된다. 같은 식을 Python으로 흉내 내 후보 2,000개와 틱 200개로 돌리면 200번 모두 가장 작은 일련번호가 뽑힌다.
+- 같은 파일의 `MurmurFinalize32`로 섞으면 순서가 틱마다 바뀐다. `MurmurFinalize32(HashCombineFast(MurmurFinalize32(일련번호), 틱))`은 같은 흉내에서 200번에 서로 다른 대상 189개를 뽑고, 뽑힌 순위의 평균이 1,043이다(고르면 1,000).
+- Lab은 저격 대상 선택에 이 식을 쓴다(`LabSnipe.h`의 `LabSnipeHash`).

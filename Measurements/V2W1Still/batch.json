@@ -1,0 +1,19 @@
+﻿{
+    "batch":  "V2W1Still",
+    "build":  "2896c6706279ce4b91121fa536ee99e87bd93a59 (dirty)",
+    "start":  "2026-11-15 01:52:25",
+    "end":  "2026-11-15 01:57:48",
+    "n":  10000,
+    "preset":  "P3",
+    "radius_m":  "57.3",
+    "height_m":  "6",
+    "speeds":  [
+                   "0"
+               ],
+    "duration_sec":  60,
+    "runs":  3,
+    "planned":  4,
+    "ok":  4,
+    "failed":  0,
+    "gave_up":  0
+}
