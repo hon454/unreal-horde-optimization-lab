@@ -173,11 +173,22 @@ py -3 -I Scripts/plot.py --batch <묶음>
 
 ## 참고 자료
 
-- [Unlearning OOP: Data-Oriented Gameplay Design with ECS and Mass Entity](https://www.youtube.com/watch?v=UXA8axmAb-U&t=169s) — Jared Shabel, Unreal Fest Chicago 2026
-- [언리얼 엔진의 매스 프레임워크와 대규모 씬 처리를 위한 기능들](https://www.youtube.com/watch?v=yhtj9xuAu_c) — 윤준기, 언리얼 페스트 서울 2026
-- [언리얼 엔진 5의 대규모 매스 엔티티 | 기능 하이라이트 | State of Unreal 2022](https://www.youtube.com/watch?v=FTQ8wTldbsk) — Unreal Engine KR
-- [How to Build Scalable MetaHuman Crowds in Unreal Engine](https://www.youtube.com/watch?v=wQoa1j4Rgss) — Unreal Fest Chicago 2026
-- [Understand MASS with Unreal Engine](https://www.youtube.com/watch?v=eJR82WyIl_U) — Rogue Entity
+- Unreal Engine 공식 문서
+  - [Mass Entity](https://dev.epicgames.com/documentation/en-us/unreal-engine/overview-of-mass-entity-in-unreal-engine)
+  - [MassGameplay](https://dev.epicgames.com/documentation/en-us/unreal-engine/overview-of-mass-gameplay-in-unreal-engine): Representation LOD, Simulation LOD
+  - [Instanced Static Mesh(ISM)](https://dev.epicgames.com/documentation/en-us/unreal-engine/instanced-static-mesh-component-in-unreal-engine)
+  - [AnimToTexture(VAT)](https://dev.epicgames.com/documentation/en-us/unreal-engine/API/Plugins/AnimToTexture?application_version=5.7)
+  - [Instanced Skinned Mesh(ISKM)](https://dev.epicgames.com/documentation/en-us/unreal-engine/API/Runtime/Engine/UInstancedSkinnedMeshComponent?application_version=5.7)
+  - [Animation Budget Allocator](https://dev.epicgames.com/documentation/en-us/unreal-engine/animation-budget-allocator-in-unreal-engine)
+  - [Animation Optimization(URO)](https://dev.epicgames.com/documentation/en-us/unreal-engine/animation-optimization-in-unreal-engine)
+  - [Niagara](https://dev.epicgames.com/documentation/en-us/unreal-engine/overview-of-niagara-effects-for-unreal-engine)
+  - [Unreal Insights](https://dev.epicgames.com/documentation/en-us/unreal-engine/unreal-insights-in-unreal-engine)
+- 강연과 영상
+  - [Unlearning OOP: Data-Oriented Gameplay Design with ECS and Mass Entity](https://www.youtube.com/watch?v=UXA8axmAb-U&t=169s) — Jared Shabel, Unreal Fest Chicago 2026
+  - [언리얼 엔진의 매스 프레임워크와 대규모 씬 처리를 위한 기능들](https://www.youtube.com/watch?v=yhtj9xuAu_c) — 윤준기, 언리얼 페스트 서울 2026
+  - [언리얼 엔진 5의 대규모 매스 엔티티 | 기능 하이라이트 | State of Unreal 2022](https://www.youtube.com/watch?v=FTQ8wTldbsk) — Unreal Engine KR
+  - [How to Build Scalable MetaHuman Crowds in Unreal Engine](https://www.youtube.com/watch?v=wQoa1j4Rgss) — Unreal Fest Chicago 2026
+  - [Understand MASS with Unreal Engine](https://www.youtube.com/watch?v=eJR82WyIl_U) — Rogue Entity
 
 ## 라이선스
 
