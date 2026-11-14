@@ -10,13 +10,13 @@
 - 계획은 [plan.md](plan.md) "품질 계획"에 있다. 경위는 `Worklog/M<N>.md`와 `Worklog/Q<N>.md`에 있다.
 - 코디네이터가 묻지 않고 내린 결정은 [autonomous-decisions.md](Worklog/autonomous-decisions.md)에 있다.
 - 작업 브랜치는 `v2`다. main은 태그 `v1`(62146e2)의 상태로 동결돼 있다.
-- `v2`는 시나리오와 시뮬레이션을 다시 만든다([ADR-0017](Decisions/0017-roaming-orb-and-equal-function-ladder.md), 제안됨). 경위는 [Worklog/V2.md](Worklog/V2.md)에 있다.
+- `v2`는 시나리오와 시뮬레이션을 다시 만든다([ADR-0017](Decisions/0017-roaming-orb-and-equal-function-ladder.md)). 경위는 [Worklog/V2.md](Worklog/V2.md)에 있다.
 - 아래 "지금 유효한 조건"과 "측정 결과"는 `v1`의 값이다. `v2`의 첫 총괄 묶음이 끝나면 코디네이터가 바꾼다.
 
 ## 다음 할 일
 
-1. 사용자가 시험 실행의 브리프를 승인한다.
-2. 코디네이터가 시험 실행 세션을 띄운다. 세션은 지금 코드에 떠다니는 오브와 따라가는 카메라를 붙인다.
+1. 시험 실행 세션이 지금 코드에 떠다니는 오브, 따라가는 카메라, 움직임이 보이는 장치를 붙인다.
+2. 세션이 궤도 값의 후보와 화면을 코디네이터에 보고한다. 코디네이터가 확인한 뒤 묶음 `Spike1`을 돌리게 한다.
 3. 세션이 A/A 편차와 가까운 개체 수를 재서 [Worklog/V2.md](Worklog/V2.md)에 적는다.
 4. 코디네이터가 그 값으로 사양 문서와 계획 문서의 초안을 쓴다.
 5. 사용자가 두 문서와 상세 계획안을 승인한다. 구현은 그 뒤에 시작한다.
@@ -144,5 +144,4 @@ Development 전환 점수는 `Full1` 때의 참고값이다(`Measurements/Full1/
 
 ## 사용자에게 요청한 일
 
-- [ADR-0017](Decisions/0017-roaming-orb-and-equal-function-ladder.md)의 승인.
-- 시험 실행 브리프의 승인.
+없다.

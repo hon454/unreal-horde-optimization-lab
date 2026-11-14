@@ -16,7 +16,7 @@
 | [0006](0006-three-measurement-tiers.md) | 측정을 세 층(개발 확인 / 마일스톤 묶음 / 총괄 묶음)으로 나누고 단계마다 60fps 경계 둘레만 잰다 | 승인됨 |
 | [0007](0007-keep-default-motion-blur.md) | ISKM 모션 블러 줄무늬가 있어도 모션 블러는 엔진 기본값(켬)으로 두고 측정한다 | 승인됨 |
 | [0008](0008-game-scene-baseline-and-target-spec.md) | 게임 장면(건물, 방향장, 비켜 가기, 부위 판정, 래그돌)을 새 기준선으로 삼고 목표 사양(1만, 60fps)에서 프레임을 맞춘다 | 대체됨(0009) |
-| [0009](0009-flat-scenario-quality-by-distance.md) | 평지 시나리오로 돌아가 목표 사양 안에서 거리별 품질을 확보한다(하이드레이션, ISKM, Niagara 배경 무리). 사다리와 빼 보기 표로 이점을 보인다 | 승인됨 |
+| [0009](0009-flat-scenario-quality-by-distance.md) | 평지 시나리오로 돌아가 목표 사양 안에서 거리별 품질을 확보한다(하이드레이션, ISKM, Niagara 배경 무리). 사다리와 빼 보기 표로 이점을 보인다 | 대체됨(0017) |
 | [0010](0010-final-representation-bands.md) | 최종 구성의 표현을 거리 네 구간으로 나눈다: 액터 0\~40m(상한 1,000), ISKM 40\~80m 그림자 켬, ISKM 80\~200m 그림자 끔, 200m 밖 입자 | 승인됨 |
 | [0011](0011-entity-driven-crowd-particles.md) | 200m 밖 배경 무리를 두 겹으로 만든다: 200\~500m는 실제 엔티티 자리에 그리는 입자, 500\~1,000m는 독립 입자 | 승인됨 |
 | [0012](0012-ablation-switches-and-quality-metrics.md) | 빼 보기 행은 끄는 인자 하나로 고른다. 전환 점수와 빠른 회전 지표는 Development 참고값으로 낸다 | 승인됨 |
@@ -24,7 +24,7 @@
 | [0014](0014-post-format.md) | 글 본문은 표와 Mermaid 없이 SVG 그림과 산문으로 쓰고, 수치의 표는 측정 기록에 둔다(루트 README 부분은 0015로 대체) | 승인됨 |
 | [0015](0015-readme-figures.md) | 루트 README도 비교가 요점인 수치는 SVG 그림으로 보이고, 표는 찾아 읽는 목록에만 쓴다 | 승인됨 |
 | [0016](0016-animation-budget-value.md) | Animation Budget Allocator의 예산을 2ms에서 4ms로 올린다(호드 1만에서 건너뜀 0, 2만에서 p95가 16.7ms 안) | 승인됨 |
-| [0017](0017-roaming-orb-and-equal-function-ladder.md) | `v2` 브랜치에서 시나리오와 시뮬레이션을 다시 만든다: 떠다니는 오브, 모든 단계가 같은 기능(겹침 방지, 캡슐 콜리전), 엔진 기본 경로가 첫 Mass 단계, 최종 구성에 정지 조건 | 제안됨 |
+| [0017](0017-roaming-orb-and-equal-function-ladder.md) | `v2` 브랜치에서 시나리오와 시뮬레이션을 다시 만든다: 떠다니는 오브, 모든 단계가 같은 기능(겹침 방지, 캡슐 콜리전), 엔진 기본 경로가 첫 Mass 단계, 최종 구성에 정지 조건 | 승인됨 |
 
 ## ADR 이전의 결정
 
