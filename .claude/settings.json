@@ -44,5 +44,31 @@
       "Read(./.mcp.json)",
       "Read(../unreal-horde-references/**/*.uasset)"
     ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          { "type": "command", "command": "py -3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/session_brief.py\"", "timeout": 20 }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash|PowerShell",
+        "hooks": [
+          { "type": "command", "command": "py -3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/bench_guard.py\"", "timeout": 20 },
+          { "type": "command", "command": "py -3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/commit_gate.py\"", "timeout": 30 }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|MultiEdit|Write",
+        "hooks": [
+          { "type": "command", "command": "py -3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/doc_check.py\"", "timeout": 20 }
+        ]
+      }
+    ]
   }
 }

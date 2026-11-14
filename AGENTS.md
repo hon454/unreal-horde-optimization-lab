@@ -22,6 +22,7 @@
 | 빌드·패키징·벤치마크·그래프 명령과 인자 | [commands.md](Docs/Guides/commands.md). 매번 쓰는 것만 STATUS.md "명령"에 둔다 |
 | 클론에서 측정까지: 엔진 등록, Fab 두 팩, 에셋 복구(`Scripts/restore-assets.ps1`), 빌드, 패키징 | [setup.md](Docs/Guides/setup.md) |
 | 최종 구성에서 한 프레임에 도는 코드, 프로세서 순서, 엔티티 구성 | [code-tour.md](Docs/Guides/code-tour.md). 흐름 그림은 `Scripts/plot-code-tour.py`가 만든다 |
+| 훅이 강제하는 규칙, 판정 기준, 우회 방법 | [harness.md](Docs/Guides/harness.md). 훅에 막혔을 때 연다 |
 | 빌드나 실행이 실패했을 때의 증상별 대처 | [troubleshooting.md](Docs/Guides/troubleshooting.md). 문제가 생겼을 때만 연다 |
 | 글과 README의 독자, 틀, 문장 규칙, 그림 규칙 | [posting.md](Docs/Guides/posting.md) |
 | 글 재료: 작업 중 질답에서 나온, 독자에게 설명이 필요한 부분 | [post-material.md](Docs/post-material.md). 사용자가 원인을 물어 답한 것은 여기에 더한다 |
