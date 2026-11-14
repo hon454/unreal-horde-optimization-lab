@@ -170,6 +170,28 @@ protected:
 	FMassEntityQuery EntityQuery;
 };
 
+/**
+ * 시험 실행 Spike1(Docs/Worklog/V2.md "시험 실행"): 표현 전환 수를 방향별로 센다. 오브와 카메라가 움직이면 높은 품질 → 낮은 품질 전환과 경계에서의 왕복이 생긴다.
+ * 엔진 표현 프로세서가 이번 프레임에 갱신한 청크(FMassVisualizationChunkFragment::ShouldUpdateVisualization, MassRepresentationProcessor.cpp:529)에서
+ * PrevRepresentation != CurrentRepresentation인 엔티티가 이번 프레임에 전환한 것이다(:118-121. 액터 준비 대기 중에는 Prev가 고정되므로 대기가 끝난 프레임에 한 번 센다).
+ * CSV 스탯(프레임마다 그 프레임의 수): Lab/SwNoneToInst(없음·입자 → 인스턴스), Lab/SwInstToActor, Lab/SwActorToInst, Lab/SwInstToNone, Lab/SwOther(없음 ↔ 액터),
+ * Lab/SwRound(같은 엔티티가 RoundTripSec 안에 같은 경계를 반대로 다시 넘은 수). 궤도 인자(FLabOrbit)를 하나라도 준 실행에서만 등록한다.
+ */
+UCLASS()
+class ULabRepSwitchCountProcessor : public UMassProcessor
+{
+	GENERATED_BODY()
+public:
+	ULabRepSwitchCountProcessor();
+	static constexpr double RoundTripSec = 2.;
+protected:
+	virtual void ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager) override;
+	virtual void Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context) override;
+	FMassEntityQuery EntityQuery;
+	struct FLastSwitch { double Time = 0.; uint8 From = 0; uint8 To = 0; };
+	TMap<FMassEntityHandle, FLastSwitch> LastSwitch; // 전환한 엔티티만 들어간다(게임 스레드 전용)
+};
+
 /** 피격·사망 상태의 남은 시간. 피격이 끝나면 사망, 사망이 끝나면 엔티티를 지우고 가장자리 링에서 새로 만든다. */
 UCLASS()
 class ULabMinionStateProcessor : public UMassProcessor

@@ -11,6 +11,8 @@
 #include "MassExecutionContext.h"
 #include "MassMovementFragments.h"
 #include "MassNavigationFragments.h"
+#include "MassRepresentationFragments.h" // ULabRepSwitchCountProcessor
+#include "MassRepresentationTypes.h"
 #include "MassSimulationLOD.h"
 #include "HordeOptLab.h"
 #include "ProfilingDebugging/CsvProfiler.h"
@@ -622,6 +624,83 @@ void ULabNearOrbCountProcessor::Execute(FMassEntityManager& EntityManager, FMass
 		}
 	});
 	Crowd->Near30.store(Count);
+}
+
+// 표현 전환 수(Spike1) ---------------------------------------------------------
+
+ULabRepSwitchCountProcessor::ULabRepSwitchCountProcessor()
+	: EntityQuery(*this)
+{
+	// 궤도 인자를 준 실행에서만 돈다(기본 실행은 그대로). CDO가 만들어질 때 실행 인자는 이미 읽을 수 있다(ULabOffMoveEnterObserver와 같다)
+	bAutoRegisterWithProcessingPhases = FLabConfig::Get().Orbit.ToString() != TEXT("-");
+	ExecutionFlags = (int32)(EProcessorExecutionFlags::Client | EProcessorExecutionFlags::Standalone);
+	// ULabIskmProcessor와 같은 자리: 엔진 표현 프로세서가 이번 프레임의 Prev·Current를 쓴 뒤
+	ExecutionOrder.ExecuteInGroup = UE::Mass::ProcessorGroupNames::Representation;
+	ExecutionOrder.ExecuteAfter.Add(UE::Mass::ProcessorGroupNames::VisualizationProcessing);
+	bRequiresGameThreadExecution = true; // LastSwitch 맵
+}
+
+void ULabRepSwitchCountProcessor::ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager)
+{
+	EntityQuery.AddRequirement<FMassRepresentationFragment>(EMassFragmentAccess::ReadOnly);
+	EntityQuery.AddChunkRequirement<FMassVisualizationChunkFragment>(EMassFragmentAccess::ReadOnly);
+	EntityQuery.AddTagRequirement<FLabMinionTag>(EMassFragmentPresence::All);
+	EntityQuery.AddTagRequirement<FLabPooledTag>(EMassFragmentPresence::None);
+}
+
+void ULabRepSwitchCountProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context)
+{
+	const UWorld* World = Context.GetWorld();
+	if (!World)
+	{
+		return;
+	}
+	const double Now = World->GetTimeSeconds();
+	// 표현을 세 무리로 묶는다: 0 액터, 1 인스턴스(ISKM·VAT ISM), 2 없음(200m 밖, 최종 구성에서는 입자)
+	auto ClassOf = [](EMassRepresentationType Type) -> uint8
+	{
+		return UE::Mass::Representation::IsValidActorRepresentation(Type) ? 0 : Type == EMassRepresentationType::None ? 2 : 1;
+	};
+	int32 NoneToInst = 0, InstToActor = 0, ActorToInst = 0, InstToNone = 0, Other = 0, Round = 0;
+	EntityQuery.ForEachEntityChunk(Context, [&](FMassExecutionContext& Context)
+	{
+		if (!Context.GetChunkFragment<FMassVisualizationChunkFragment>().ShouldUpdateVisualization())
+		{
+			return; // 엔진이 이번 프레임에 갱신하지 않은 청크는 Prev가 옛 값이다
+		}
+		const TConstArrayView<FMassRepresentationFragment> Representations = Context.GetFragmentView<FMassRepresentationFragment>();
+		for (FMassExecutionContext::FEntityIterator It = Context.CreateEntityIterator(); It; ++It)
+		{
+			const FMassRepresentationFragment& R = Representations[It];
+			if (R.PrevRepresentation == R.CurrentRepresentation || R.IsWaitingForActorVisualReadiness())
+			{
+				continue;
+			}
+			const uint8 From = ClassOf(R.PrevRepresentation);
+			const uint8 To = ClassOf(R.CurrentRepresentation);
+			if (From == To)
+			{
+				continue;
+			}
+			if (From == 2 && To == 1) { ++NoneToInst; }
+			else if (From == 1 && To == 0) { ++InstToActor; }
+			else if (From == 0 && To == 1) { ++ActorToInst; }
+			else if (From == 1 && To == 2) { ++InstToNone; }
+			else { ++Other; }
+			FLastSwitch& Last = LastSwitch.FindOrAdd(Context.GetEntity(It));
+			if (Last.Time > 0. && Now - Last.Time <= RoundTripSec && Last.From == To && Last.To == From)
+			{
+				++Round;
+			}
+			Last = { Now, From, To };
+		}
+	});
+	CSV_CUSTOM_STAT(Lab, SwNoneToInst, NoneToInst, ECsvCustomStatOp::Set);
+	CSV_CUSTOM_STAT(Lab, SwInstToActor, InstToActor, ECsvCustomStatOp::Set);
+	CSV_CUSTOM_STAT(Lab, SwActorToInst, ActorToInst, ECsvCustomStatOp::Set);
+	CSV_CUSTOM_STAT(Lab, SwInstToNone, InstToNone, ECsvCustomStatOp::Set);
+	CSV_CUSTOM_STAT(Lab, SwOther, Other, ECsvCustomStatOp::Set);
+	CSV_CUSTOM_STAT(Lab, SwRound, Round, ECsvCustomStatOp::Set);
 }
 
 // 상태 타이머 ----------------------------------------------------------------
