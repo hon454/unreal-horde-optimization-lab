@@ -509,3 +509,12 @@
 - 그래서 `HashCombineFast(일련번호, 틱)`의 최솟값으로 대상을 고르면 틱은 모든 후보에 같은 수를 더할 뿐이고, 작은 일련번호가 늘 최소가 된다. 같은 식을 Python으로 흉내 내 후보 2,000개와 틱 200개로 돌리면 200번 모두 가장 작은 일련번호가 뽑힌다.
 - 같은 파일의 `MurmurFinalize32`로 섞으면 순서가 틱마다 바뀐다. `MurmurFinalize32(HashCombineFast(MurmurFinalize32(일련번호), 틱))`은 같은 흉내에서 200번에 서로 다른 대상 189개를 뽑고, 뽑힌 순위의 평균이 1,043이다(고르면 1,000).
 - Lab은 저격 대상 선택에 이 식을 쓴다(`LabSnipe.h`의 `LabSnipeHash`).
+
+## 35. Mass 프로세서의 서브시스템 접근 선언(2026-11-15, v2 W2)
+
+- 서브시스템마다 특성 `TMassExternalSubsystemTraits<T>`를 특수화한다. 기본값은 `GameThreadOnly = true`, `ThreadSafeWrite = !GameThreadOnly`다(`Engine/Source/Runtime/Mass/MassCore/Public/Mass/ExternalSubsystemTraits.h:25-36`). 옛 헤더 `MassExternalSubsystemTraits.h`는 5.8에서 폐기 예정이다.
+- `AddSubsystemRequirement<T>(접근)`은 `GameThreadOnly`가 참이면 그 프로세서를 게임 스레드에 묶는다(`MassEntity/Public/MassRequirements.h:100-123`).
+- 의존성 계산은 `ThreadSafeWrite`가 참인 서브시스템을 따로 모은다. 그 서브시스템의 쓰기 선언은 읽기처럼 다뤄 프로세서 사이에 순서를 만들지 않는다(`MassEntity/Private/MassProcessorDependencySolver.cpp:1063-1086`, 헤더 주석 "all RW and RO operations will be viewed as RO").
+- 프로세서 단위의 선언은 `ProcessorRequirements`에 한다(엔진 예: `MassVisualizationLODProcessor.cpp:50`). 엔진이 `Execute` 전에 `Context.CacheSubsystemRequirements(ProcessorRequirements)`를 부르고, 실패하면 `Execute`를 건너뛴다(`MassEntity/Private/MassProcessor.cpp:346-353`).
+- 쿼리는 실행할 때 자기 요구 조건으로 접근 범위를 다시 잡는다(`MassEntity/Private/MassEntityQuery.cpp:50-53`). 그래서 프로세서 단위로 선언한 서브시스템은 `ForEachEntityChunk` 밖에서 얻는다.
+- 얻는 함수는 `FMassExecutionContext::GetSubsystem<T>()`(읽기)와 `GetMutableSubsystem<T>()`(쓰기)다(`MassEntity/Public/MassExecutionContext.h:732-746`).

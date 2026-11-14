@@ -15,7 +15,7 @@
 
 ## 다음 할 일
 
-1. 코디네이터가 [v2-plan.md](v2-plan.md)의 작업 단위를 W2부터 차례로 한다. W1은 끝났다(2896c67, [Worklog/V2.md](Worklog/V2.md) "W1 시나리오 뼈대"). 총괄 묶음(W13)부터는 사용자 검토 뒤에 한다.
+1. 코디네이터가 [v2-plan.md](v2-plan.md)의 작업 단위를 W3부터 작업 세션에 하나씩 맡긴다. W1과 W2는 끝났다(2896c67, ca94cf1, [Worklog/V2.md](Worklog/V2.md)). 총괄 묶음(W13)부터는 사용자 검토 뒤에 한다.
 2. 사용자가 [v2-spec.md](v2-spec.md), [v2-plan.md](v2-plan.md), 결정 D33부터([autonomous-decisions.md](Worklog/autonomous-decisions.md))를 검토한다.
 
 사용자가 자리를 비운 동안 코디네이터가 추천안으로 진행한다(2026-11-15 사용자 지시, D33). 두 문서는 잠정 확정이다.
@@ -47,7 +47,7 @@
 
 | 세션 | 작업 단위 | 모델 | 상태 |
 | --- | --- | --- | --- |
-| 코디네이터 | W2 서브시스템 접근 선언([v2-plan.md](v2-plan.md)). 세션을 띄울 수 없어 직접 한다(D41) | Fable | 구현 중 |
+| w3-avoidance | W3 겹침 방지, 엔진 경로([v2-plan.md](v2-plan.md)) | Opus 5.5 high | 소스 편집 끝. 빌드부터 이어 간다 |
 
 코디네이터는 세션을 띄우면 여기에 적는다. 끝난 세션은 결과를 확인하고 보관한 뒤 지운다.
 

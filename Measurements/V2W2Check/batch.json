@@ -1,0 +1,20 @@
+﻿{
+    "batch":  "V2W2Check",
+    "build":  "ca94cf19a4ad9ccf7ad0a7ff2efb25334255adef (dirty)",
+    "start":  "2026-11-15 02:05:44",
+    "end":  "2026-11-15 02:17:24",
+    "n":  10000,
+    "preset":  "P3",
+    "radius_m":  "57.3",
+    "height_m":  "6",
+    "speeds":  [
+                   "0",
+                   "2"
+               ],
+    "duration_sec":  60,
+    "runs":  3,
+    "planned":  7,
+    "ok":  7,
+    "failed":  0,
+    "gave_up":  0
+}
