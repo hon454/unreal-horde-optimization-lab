@@ -15,7 +15,7 @@
 
 ## 다음 할 일
 
-1. 코디네이터가 [v2-plan.md](v2-plan.md)의 작업 단위를 W4부터 작업 세션에 하나씩 맡긴다. W1, W2, W3은 끝났다(2896c67, ca94cf1, 34e5c3f, [Worklog/V2.md](Worklog/V2.md)). 총괄 묶음(W13)부터는 사용자 검토 뒤에 한다.
+1. 코디네이터가 [v2-plan.md](v2-plan.md)의 작업 단위를 W5부터 하나씩 맡긴다. W1\~W4는 끝났다(0ae4f8e까지, [Worklog/V2.md](Worklog/V2.md)). 총괄 묶음(W13)부터는 사용자 검토 뒤에 한다.
 2. 사용자가 [v2-spec.md](v2-spec.md), [v2-plan.md](v2-plan.md), 결정 D33부터([autonomous-decisions.md](Worklog/autonomous-decisions.md))를 검토한다.
 
 사용자가 자리를 비운 동안 코디네이터가 추천안으로 진행한다(2026-11-15 사용자 지시, D33). 두 문서는 잠정 확정이다.
@@ -27,12 +27,16 @@
 - 입자에서 ISKM으로 바뀔 때 개체가 안 보이는 증상의 원인은 확정하지 못했다.
 - 두 바퀴의 평균은 1% 안에서 같다(묶음 `V2W1`). 워밍업 60초와 측정 180초를 그대로 쓴다.
 
-W3의 결과([Worklog/V2.md](Worklog/V2.md) "W3 겹침 방지", 묶음 `V2W3Cost`):
+겹침 방지의 결과([Worklog/V2.md](Worklog/V2.md) "W3", "W4", 묶음 `V2W4Cost`, 최종 구성):
 
-- 엔진 회피는 최종 구성의 겹친 쌍 평균을 1,607에서 10,553으로 늘린다.
-- 엔진 회피는 프레임 p95를 12.59ms에서 18.03ms로 올린다. 목표는 16.7ms다.
-- 비용은 `UMassMovingAvoidanceProcessor`에 있다(프레임당 10.0ms).
-- `-LabAvoid`의 기본값은 0이다(D43). 겹침 방지는 W4의 직접 구현으로 간다(D44).
+| 조건 | 겹친 쌍 평균 | 프레임 p95 |
+| --- | --- | --- |
+| 겹침 방지 없음 | 1,607 | 12.67ms |
+| 분리 프로세서(`-LabSeparate=1`) | 175 | 13.65ms |
+| 엔진 회피(`-LabAvoid=1`) | 10,835 | 17.96ms |
+
+- `-LabAvoid`의 기본값은 0이다(D43).
+- `-LabSeparate`의 기본값은 W5의 첫 단계에서 1로 바꾼다(D45).
 
 사용자 요구(ISKM 번쩍임 제거, 움직이는 오브용 기법, 양방향 전환, 오브·카메라 HUD)는 [v2-spec.md](v2-spec.md) 4절과 6절에 있다.
 
@@ -54,7 +58,7 @@ W3의 결과([Worklog/V2.md](Worklog/V2.md) "W3 겹침 방지", 묶음 `V2W3Cost
 
 | 세션 | 작업 단위 | 모델 | 상태 |
 | --- | --- | --- | --- |
-| w4-separation | W4 겹침 방지, 직접 구현([v2-plan.md](v2-plan.md)) | Opus 5.5 high | 시작 |
+| w5-capsule | W5 캡슐과 액터 비용([v2-plan.md](v2-plan.md)) | Opus high, 하위 에이전트 | 시작 |
 
 코디네이터는 세션을 띄우면 여기에 적는다. 끝난 세션은 결과를 확인하고 보관한 뒤 지운다.
 
