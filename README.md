@@ -171,6 +171,14 @@ py -3 -I Scripts/plot.py --batch <묶음>
 
 이 저장소는 Claude Code 에이전트가 작업한다. 측정 규칙과 커밋 규칙은 훅이 강제한다([하네스](Docs/Guides/harness.md)).
 
+## 참고 자료
+
+- [Unlearning OOP: Data-Oriented Gameplay Design with ECS and Mass Entity](https://www.youtube.com/watch?v=UXA8axmAb-U&t=169s) — Jared Shabel, Unreal Fest Chicago 2026
+- [언리얼 엔진의 매스 프레임워크와 대규모 씬 처리를 위한 기능들](https://www.youtube.com/watch?v=yhtj9xuAu_c) — 윤준기, 언리얼 페스트 서울 2026
+- [언리얼 엔진 5의 대규모 매스 엔티티 | 기능 하이라이트 | State of Unreal 2022](https://www.youtube.com/watch?v=FTQ8wTldbsk) — Unreal Engine KR
+- [How to Build Scalable MetaHuman Crowds in Unreal Engine](https://www.youtube.com/watch?v=wQoa1j4Rgss) — Unreal Fest Chicago 2026
+- [Understand MASS with Unreal Engine](https://www.youtube.com/watch?v=eJR82WyIl_U) — Rogue Entity
+
 ## 라이선스
 
 이 저장소의 코드, 스크립트, 문서, 측정 결과는 [MIT 라이선스](LICENSE)를 따른다.
