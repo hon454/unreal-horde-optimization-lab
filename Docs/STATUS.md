@@ -1,27 +1,19 @@
 # 현재 상태
 
-마지막 갱신: 2026-11-13
+마지막 갱신: 2026-11-14
 
 ## 단계
 
 - 마일스톤 M0\~M5, M3b와 품질 계획 Q1\~Q6은 끝났다. 총괄 묶음은 `Full3`이다.
 - 글 00\~09의 초안, Releases, 사이트는 끝났다. 경위는 [Worklog/Posts.md](Worklog/Posts.md)에 있다.
-- 지금은 사용자 검토에서 나온 수정을 한다.
+- Q7(예산 재측정, `Full3`)과 Q8(매니저 변형, 글 02 보강)은 끝났다. 경위는 [Worklog/Q7.md](Worklog/Q7.md)와 [Worklog/Q8.md](Worklog/Q8.md)에 있다.
 - 방향은 목표 사양(호드 총수 1만, 60fps) 안에서 거리별 품질을 확보하는 것이다([ADR-0009](Decisions/0009-flat-scenario-quality-by-distance.md)).
 - 계획은 [plan.md](plan.md) "품질 계획"에 있다. 경위는 `Worklog/M<N>.md`와 `Worklog/Q<N>.md`에 있다.
 - 코디네이터가 묻지 않고 내린 결정은 [autonomous-decisions.md](Worklog/autonomous-decisions.md) D20\~D32에 있다.
 
 ## 다음 할 일
 
-사용자가 2026-11-13에 정했다. Animation Budget Allocator의 예산 값을 측정으로 다시 정한다. 오브 `SnipeView` 경합을 고친다. 전 조건을 새 총괄 묶음 `Full3`으로 다시 잰다. 경위는 [Worklog/Q7.md](Worklog/Q7.md)에 적는다.
-
-1\~6. 끝났다. 예산은 4ms다([ADR-0016](Decisions/0016-animation-budget-value.md)). 공개 문서와 사이트는 `Full3` 값이다.
-7. 끝났다. 사용자가 사이트를 검토했다. 코디네이터가 `Docs/post-review.md`를 지웠다.
-8. 끝났다(83ffcbd). 변형 `manager`의 인자는 `-LabStage=M1 -LabVariant=manager`다([Worklog/Q8.md](Worklog/Q8.md)).
-9. 끝났다(47394de). 참고 묶음 `Mgr1`은 18회이고 실패는 0회다. 값은 아래 "측정 결과"에 있다.
-10. 끝났다(b27177f). Game 차이의 출처는 [Worklog/Q8.md](Worklog/Q8.md) "트레이스: MgrT1"에 있다.
-11. 끝났다(f24c84d, 59bfed7). 글 02에 매니저 변형의 참고 절과 그림이 있다.
-12. 사용자가 README 글 표의 02 행 문장을 정한다. 코디네이터가 고치고 사이트를 다시 올린다.
+없다. 사용자가 다음 작업을 정한다.
 
 사용자가 측정을 허락했다. 코디네이터는 뒤의 측정과 촬영을 허락 없이 시작한다.
 
@@ -156,4 +148,3 @@ Development 전환 점수는 `Full1` 때의 참고값이다(`Measurements/Full1/
 
 - **[autonomous-decisions.md](Worklog/autonomous-decisions.md)의 D20\~D32 검토.** "사용자가 볼 것" 줄이 판단이 필요한 곳이다.
 - **`.claude/settings.json`의 수정.** 없는 스크립트(`capture-video.ps1`, `run-e0.ps1`)와 `python` 항목을 지우고 `git add -A` 거부 규칙을 더한다. 코디네이터는 이 파일을 고치지 않는다.
-- **`Packaged/Release/` 삭제의 허락.** 릴리스 스테이징 폴더다(약 1.7GB, git 밖). 코디네이터가 작업을 모두 끝낸 뒤에 묻는다.
