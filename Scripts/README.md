@@ -26,6 +26,7 @@
 | `plot-code-tour.py` | 코드 투어의 한 프레임 흐름 그림(`Docs/figures/code-tour/frame-flow.svg`). 수치 없이 프로세서 선언 순서를 그린다 |
 | `build-site.py` | 최종 측정 CSV → 한눈에 보는 사이트의 데이터(`Site/data.js`). 단계별 화면을 `Site/assets/stepN.webp`로 복사한다. 사이트의 수치는 모두 이 스크립트가 만든다 |
 | `check-iskm.py` | 러너의 메타데이터 검사(ISKM 인스턴스 수) |
+| `check-tilde.py` | 추적되는 Markdown에서 `\~`로 쓰지 않은 `~`를 찾는다. 코드 스팬, 코드 블록, 주석, 링크 대상은 건너뛴다. 찾으면 종료 코드 1 |
 
 ## 에셋을 다시 만드는 것
 
