@@ -169,6 +169,8 @@ py -3 -I Scripts/plot.py --batch <묶음>
 | `Posts/` | 글과 측정 기록 |
 | `Measurements/` | 묶음별 수치와 대표 스크린샷. [최종 측정](Measurements/Full3/), 개발 중의 측정은 `M<N>/`·`Q<N>/` |
 
+이 저장소는 Claude Code 에이전트가 작업한다. 측정 규칙과 커밋 규칙은 훅이 강제한다([하네스](Docs/Guides/harness.md)).
+
 ## 라이선스
 
 이 저장소의 코드, 스크립트, 문서, 측정 결과는 [MIT 라이선스](LICENSE)를 따른다.
