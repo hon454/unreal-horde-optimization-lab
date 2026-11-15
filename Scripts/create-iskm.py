@@ -5,6 +5,8 @@
 #                      빌드 SkeletalMeshRenderData.cpp:259 BuildUnifiedBoneMap). 원본을 고치면 액터 경로의 렌더 데이터도 바뀌어
 #                      이전 단계의 측정 조건이 달라지므로 복제본에만 켠다. 스켈레톤은 원본과 같아 클립을 그대로 쓴다.
 #   ASTP_<TOKEN>     : UAnimSequenceTransformProviderData. SkinnedAsset = 위 복제본, Sequences = 0 걷기, 1 피격, 2 죽기(bake-vat.py ANIMS와 같은 클립·순서).
+#   A_<TOKEN>_<클립>_Full : 가산 클립(피격 HitReact_Front)의 비가산 복제본. ISKM 트랙 제공자는 가산 클립을 기준 자세에 더하지 않아
+#                      피격 중 개체가 사라졌다(M6 조사). ASTP에는 이 복제본을 넣는다(provider_clip).
 #   M_<TOKEN>ISKM    : 액터 머티리얼(bake-vat.py make_actor_material)과 같은 색 그래프. 사용처 SkeletalMesh + InstancedSkinnedMesh를 둘 다 켠다
 #                      (ISKM 프록시는 두 플래그를 모두 검사한다, SkeletalMeshSceneProxy.cpp:233-240). 죽기 정도(DeadAmount, 0\~1)는
 #                      컴포넌트 CustomPrimitiveData 0번 대신 인스턴스 커스텀 데이터 0번에서 읽는다. 값의 뜻은 액터와 같다.
@@ -153,15 +155,52 @@ def set_mesh_material(mesh, mat):
     log("%s material slots=%s" % (mesh.get_name(), slots))
 
 
+def full_pose_path(u, src_path):
+    """가산 클립의 ISKM용 복제본 경로(M6 조사, Docs/Worklog/V2.md "M6 조사: 먼 거리 ISKM의 피격·사망 클립")."""
+    return OUT + "/A_" + u["token"] + "_" + src_path.rsplit("/", 1)[-1] + "_Full"
+
+
+def provider_clip(u, src_path):
+    """ASTPD에 넣을 클립. 가산 클립(피격 HitReact_Front, AAT_LocalSpaceBase)이면 비가산 복제본을 만든다.
+    ISKM 트랙 제공자는 가산 클립의 압축 값(차이)을 기준 자세에 더하지 않고 그대로 지역 자세로 쓴다
+    (Renderer/Private/Skinning/AnimSequenceTransformProvider.cpp:1082-1119). 그래서 소형은 뼈가 모여 보이지 않고 대형은 눕는다.
+    원본 데이터 모델은 늘 전체 자세이고 가산 값은 압축 때 만든다(Engine/Private/Animation/AnimSequence.cpp:1842).
+    복제본의 AdditiveAnimType을 AAT_None으로 두면 전체 자세 = 기준 자세 + 가산 = 액터의 단일 노드 재생 자세다
+    (AnimSingleNodeInstanceProxy.cpp:331-352)."""
+    anim = unreal.load_asset(src_path)
+    if not anim:
+        raise RuntimeError("missing anim " + src_path)
+    kind = anim.get_editor_property("additive_anim_type")
+    if kind == unreal.AdditiveAnimationType.AAT_NONE:
+        return anim
+    path = full_pose_path(u, src_path)
+    full = unreal.load_asset(path)  # 남은 패키지는 다시 쓴다(make_provider와 같은 까닭)
+    if not full:
+        full = eal.duplicate_asset(src_path, path)
+    if not full:
+        raise RuntimeError("duplicate failed " + src_path)
+    full.set_editor_property("additive_anim_type", unreal.AdditiveAnimationType.AAT_NONE)  # PostEditChange가 다시 압축한다
+    eal.save_loaded_asset(full, False)
+    got = full.get_editor_property("additive_anim_type")
+    if got != unreal.AdditiveAnimationType.AAT_NONE:
+        raise RuntimeError("additive not cleared: %s" % got)
+    log("%s full pose clip %s from %s additive=%s length=%.4fs" % (u["token"], path, anim.get_name(), kind, full.get_play_length()))
+    return full
+
+
 def make_provider(u, mesh):
     factory = unreal.TransformProviderDataFactory()
     factory.set_editor_property("provider_data_class", unreal.AnimSequenceTransformProviderData)
-    ast = new_asset("ASTP_" + u["token"], unreal.AnimSequenceTransformProviderData, factory)
+    # 다시 돌릴 때 clear()가 ASTP를 지워도 패키지가 남아 create_asset이 거부한다(2026-11-15 실행, "already exists in package").
+    # 남아 있으면 읽어서 속성을 다시 넣는다
+    ast = unreal.load_asset(OUT + "/ASTP_" + u["token"])
+    if not ast:
+        ast = new_asset("ASTP_" + u["token"], unreal.AnimSequenceTransformProviderData, factory)
     seqs = []
+    clips = []
     for p in u["anims"]:
-        anim = unreal.load_asset(p)
-        if not anim:
-            raise RuntimeError("missing anim " + p)
+        anim = provider_clip(u, p)
+        clips.append(anim)
         s = unreal.AnimSequenceTransformProviderSequence()
         s.set_editor_property("sequence", anim)
         s.set_editor_property("play_rate", 1.0)
@@ -174,7 +213,7 @@ def make_provider(u, mesh):
     # 저장 뒤 다시 읽어 확인
     got = ast.get_editor_property("sequences")
     names = [s.get_editor_property("sequence").get_path_name() if s.get_editor_property("sequence") else None for s in got]
-    want = [unreal.load_asset(p).get_path_name() for p in u["anims"]]
+    want = [a.get_path_name() for a in clips]
     if names != want:
         raise RuntimeError("sequences mismatch: %s" % names)
     if ast.get_skinned_asset() != mesh:
@@ -207,8 +246,9 @@ def validate(assets):
 
 def clear(u):
     """다시 돌릴 때 참조하는 쪽부터 지운다. ASTP가 메시를, 메시가 머티리얼을 참조해 반대 순서면 delete_asset이 거부한다."""
-    for name in ["ASTP_" + u["token"], "SK_" + u["token"] + "ISKM", "M_" + u["token"] + "ISKM"]:
-        path = OUT + "/" + name
+    paths = [OUT + "/" + name for name in ["ASTP_" + u["token"], "SK_" + u["token"] + "ISKM", "M_" + u["token"] + "ISKM"]]
+    paths += [full_pose_path(u, p) for p in u["anims"]]  # ASTP가 참조하는 비가산 복제본(없으면 건너뛴다)
+    for path in paths:
         if eal.does_asset_exist(path) and not eal.delete_asset(path):
             raise RuntimeError("delete failed " + path)
 
@@ -237,9 +277,11 @@ def verify(key):
     usage = (mat.get_editor_property("used_with_skeletal_mesh"), mat.get_editor_property("used_with_instanced_skinned_mesh"))
     seqs = [s.get_editor_property("sequence").get_name() for s in ast.get_sequences()]
     lens = ["%.4f" % ast.get_sequence_play_length(i) for i in range(len(seqs))]
-    ok = all(flags) and all(usage) and ast.get_skinned_asset() == mesh and len(seqs) == 3 and all(n == mat.get_name() for n in slots)
-    log("%s verify ok=%s optimize_for_instancing=%s slots=%s usage=%s skinned_asset=%s sequences=%s lengths=%s"
-        % (u["token"], ok, flags, slots, usage, ast.get_skinned_asset().get_name(), seqs, lens))
+    additive = [str(s.get_editor_property("sequence").get_editor_property("additive_anim_type")) for s in ast.get_sequences()]
+    no_additive = all(s.get_editor_property("sequence").get_editor_property("additive_anim_type") == unreal.AdditiveAnimationType.AAT_NONE for s in ast.get_sequences())
+    ok = all(flags) and all(usage) and ast.get_skinned_asset() == mesh and len(seqs) == 3 and all(n == mat.get_name() for n in slots) and no_additive
+    log("%s verify ok=%s optimize_for_instancing=%s slots=%s usage=%s skinned_asset=%s sequences=%s lengths=%s additive=%s"
+        % (u["token"], ok, flags, slots, usage, ast.get_skinned_asset().get_name(), seqs, lens, additive))
     if not ok:
         raise RuntimeError("verify failed")
     validate([ast, mesh, mat])

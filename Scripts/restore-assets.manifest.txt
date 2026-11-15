@@ -147,6 +147,8 @@
 [vat-lod] Lab/VAT/Baked/T_LabMinionVAT_Bone_Lod4_BoneWeight.uasset
 [iskm] Lab/ISKM/Baked/ASTP_LabMinion.uasset
 [iskm] Lab/ISKM/Baked/ASTP_LabMinionLarge.uasset
+[iskm] Lab/ISKM/Baked/A_LabMinionLarge_HitReact_Front_Full.uasset
+[iskm] Lab/ISKM/Baked/A_LabMinion_HitReact_Front_Full.uasset
 [iskm] Lab/ISKM/Baked/M_LabMinionISKM.uasset
 [iskm] Lab/ISKM/Baked/M_LabMinionLargeISKM.uasset
 [iskm] Lab/ISKM/Baked/SK_LabMinionISKM.uasset

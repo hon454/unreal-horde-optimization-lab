@@ -145,7 +145,8 @@ function VatLodOutputs($Token, $Lod) {
     $B = "${Token}VAT_Bone_Lod$Lod"
     return @("SM_$B", "DA_$B", "MI_$B", "T_${B}_BonePosition", "T_${B}_BoneRotation", "T_${B}_BoneWeight") | ForEach-Object { "Lab\VAT\Baked\$_" }
 }
-$IskmOutputs = foreach ($T in "LabMinion", "LabMinionLarge") { "Lab\ISKM\Baked\ASTP_$T", "Lab\ISKM\Baked\M_${T}ISKM", "Lab\ISKM\Baked\SK_${T}ISKM" }
+# A_*_HitReact_Front_Full: 가산 피격 클립의 비가산 복제본(create-iskm.py provider_clip, Docs/Worklog/V2.md "M6 조사")
+$IskmOutputs = foreach ($T in "LabMinion", "LabMinionLarge") { "Lab\ISKM\Baked\ASTP_$T", "Lab\ISKM\Baked\M_${T}ISKM", "Lab\ISKM\Baked\SK_${T}ISKM", "Lab\ISKM\Baked\A_${T}_HitReact_Front_Full" }
 
 # -script 경로는 슬래시로 넘긴다. 역슬래시면 "Games\UE_5.8.4"의 "\UE"가 사라져 파일을 못 찾는다
 # (2026-11-12 검증 실행 로그: Could not load Python file 'G:/Epic Games_5.8.4/...').

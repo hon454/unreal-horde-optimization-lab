@@ -373,6 +373,20 @@ void ULabIskmProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutio
 			Data.PlayRate = Rate;
 			Data.BlendTime = BlendTime;
 			Data.LoopMode = Anim.State == ELabMinionState::Walk ? EAnimSequenceTrackLoopMode::Loop : EAnimSequenceTrackLoopMode::Clamp;
+#if !UE_BUILD_TEST
+			{
+				// M6 조사 개발 진단(-LabIskmForceSeq=<클립>): 모든 ISKM 인스턴스가 이 클립을 루프로 재생한다. 거리에 따라 사라지는지 한 화면에서 본다
+				static int32 ForceSeq = INDEX_NONE;
+				static const bool bForceParsed = FParse::Value(FCommandLine::Get(), TEXT("-LabIskmForceSeq="), ForceSeq);
+				if (bForceParsed && ForceSeq >= 0)
+				{
+					Data.SequenceIndex = ForceSeq;
+					Data.PlayRate = 1.f;
+					Data.Position = FMath::Max(T, 0.f);
+					Data.LoopMode = EAnimSequenceTrackLoopMode::Loop;
+				}
+			}
+#endif
 			Info.AddBatchedAnimationData(Entity, Data, LODSignificance, Representation.PrevLODSignificance);
 			// 커스텀 데이터 0번 = 죽기 색 정도. 액터와 같은 식(LabActorSyncProcessor.cpp)이고 ISKM 머티리얼이 PerInstanceCustomData 0번으로 읽는다(Scripts/create-iskm.py DEAD_AMOUNT_INDEX).
 			const float DeadAmount = Anim.State == ELabMinionState::Dead ? FMath::Clamp(T / DeathDuration * 2.5f, 0.f, 1.f) : 0.f;

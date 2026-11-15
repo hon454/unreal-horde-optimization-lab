@@ -671,3 +671,16 @@ for (const int32 TrackIndex : Temp)
 | Off 개체의 LOD 중요도 | 표현 LOD 계산은 Off 개체의 중요도를 `float(EMassLOD::Off)` = 3.0으로, 그 밖은 LOD 정수 + 밴드 안 비율로 넣는다. 중요도 범위 찾기는 반열린 구간 `[Min, Max)`다. 그래서 LOD만 Low로 올리고 중요도를 두면 `[Off, Max)` 설명자로 간다. 표현은 LOD로 고른다(`LODRepresentation[LOD]`) | `MG/MassLOD/Public/MassLODCalculator.h:739-753`, `MG/MassRepresentation/Public/MassSkinnedMeshRepresentationTypes.h:69-75, 653-663`, `MG/MassRepresentation/Private/MassRepresentationProcessor.cpp:125` |
 | 올린 LOD가 남는 프레임 | Low에서 Off로 내려가는 경계에는 히스테리시스 10%(`BufferHysteresisOnDistancePercentage`)가 붙는다. 200\~220m 개체는 한 번 Low로 올리면 엔진이 Off로 다시 셈하지 않는 프레임이 있다. Off 청크의 LOD는 갱신 프레임에만 다시 셈해 그사이 올린 값이 남는다 | `MG/MassRepresentation/Public/MassRepresentationFragments.h:309`, 위 첫 줄 |
 | ISKM 컴포넌트와 중요도 범위 | 컴포넌트는 메시 설명자 해시마다 하나다. 해시에는 에셋, 트랙 제공자, 컴포넌트 클래스, 그림자 플래그, 이동성, 로컬 변환, 애니 최소 화면 크기, 머티리얼이 들고 중요도 범위는 없다. 그래서 그림자 플래그만 같고 범위가 다른 두 설명자(단계 8의 `[Low, Off)`와 `[Off, Max)`)는 한 컴포넌트를 함께 쓴다. Lab은 `[Off, Max)` 설명자의 `AnimationMinScreenSize`를 −2(늘 재생, 기본 설명자는 −1)로 두어 따로 된 컴포넌트를 만든다. 고정 상자(`SetPrimitiveBoundsOverride`)는 컴포넌트마다 들어간다(41절) | `MG/MassRepresentation/Public/MassSkinnedMeshRepresentationTypes.h:118-135`, `MG/MassRepresentation/Private/MassVisualizationComponent.cpp:1299-1337` |
+
+## 46. ISKM 트랙 제공자와 가산 애니메이션(2026-11-15, M6 조사)
+
+줄임말: **ENG** = `Engine/Source/Runtime/Engine`, **RD** = `Engine/Source/Runtime/Renderer/Private`, **SH** = `Engine/Shaders/Private`. 200m 밖 저격 대상이 피격 중 사라진 원인이다. 실행 결과는 [Worklog/V2.md](../Worklog/V2.md) "M6 조사: 먼 거리 ISKM의 피격·사망 클립"에 있다. Lab은 `Scripts/create-iskm.py`의 `provider_clip`으로 피한다.
+
+| 항목 | 확인한 것 | 위치 |
+| --- | --- | --- |
+| 트랙 제공자는 가산 클립을 기준 자세에 더하지 않는다 | 클립 프레임을 올릴 때 압축 데이터를 `IsValidAdditive()`·`GetAdditiveAnimType()`을 넘긴 압축 해제 문맥으로 풀고, 풀린 지역 자세를 그대로 뼈 변환으로 쓴다. 가산 클립이면 이 값은 기준 자세와의 차이다. 기준 자세(`RefPoseSeq`)를 읽는 코드는 없다 | `RD/Skinning/AnimSequenceTransformProvider.cpp:1082-1121` |
+| 층 하나면 샘플 자세가 곧 결과다 | 층 0의 모드는 덮어쓰기이고 층이 하나면(`SINGLE_LAYER`) 층 가중치 1로 샘플 자세를 그대로 쓴다. 층 단위 가산(`EAnimSequenceTransformProviderLayerBlendMode::Additive`)은 층 1부터 다른 층에 더하는 기능이다 | `SH/Skinning/AnimSequenceTransformProvider.usf:412-439`, `ENG/Private/Animation/AnimSequenceTransformProviderData.cpp:274` |
+| 액터의 단일 노드 재생은 더한다 | 가산 클립이면 기준 자세(`GetAdditiveBasePose`, 처리 불가면 기준 포즈)를 만든 뒤 가산 자세를 `AccumulateAdditivePose`로 더한다 | `ENG/Private/Animation/AnimSingleNodeInstanceProxy.cpp:331-352` |
+| VAT 굽기는 더한다 | AnimToTexture는 스켈레탈 메시 컴포넌트를 단일 노드 모드로 두고 클립을 넣어 시각마다 자세를 뽑는다. 그래서 VAT의 피격 클립은 기준 자세 + 가산이고 ISKM만 깨졌다 | `Engine/Plugins/Experimental/AnimToTexture/Source/AnimToTextureEditor/Private/AnimToTextureBPLibrary.cpp:106, 125, 153` |
+| 원본 데이터는 늘 전체 자세다 | 원본 데이터로 자세를 뽑을 때는 가산으로 다루지 않는다("Raw data is never additive"). 가산 값은 압축 때 만든다. 그래서 가산 클립을 복제해 `AdditiveAnimType`을 `AAT_None`으로 두면 압축 결과가 전체 자세이고, 그 자세 = 기준 자세 + 가산이다 | `ENG/Private/Animation/AnimSequence.cpp:1842` |
+| 이 프로젝트의 클립 | Paragon 미니언의 `HitReact_Front`(소형·대형)는 `AAT_LocalSpaceBase`, 기준 자세 종류 `ABPT_AnimFrame`이다. 걷기(`NonCombat_JogFwd`, `Jog_Fwd_NonCombat`)와 `Death_A`는 `AAT_None`이다. ISKM에서 그대로 쓰면 소형은 뼈가 모여 보이지 않고 대형은 누운 모양이 된다 | `.uasset` 문자열, 실행 라벨 `LabBurst-w9-iskmseq1-p1`(git 밖) |
