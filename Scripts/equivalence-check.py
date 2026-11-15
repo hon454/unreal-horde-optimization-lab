@@ -5,16 +5,18 @@
 
 검사 항목(조건의 값 = 그 조건의 실행들의 중앙값)
 1. 살아 있는 총수: LabAliveMin = LabAliveMax = N(허용 0). 모든 조건. 어기면 실패.
-2. 초당 사망(LabDeathRate), 오브 수평 30m 안 평균(LabNear30Mean): 같은 (N, 속도)의 기준과 ±3%(조건 표 equivalence). 기준 = 같은 (N, 속도)의 단계 조건 가운데 equiv가 strict인 것
+2. 초당 사망(LabDeathRate), 오브 수평 30m 안 평균(LabNear30Mean): 같은 (N, 속도)의 기준과 ±1%(조건 표 equivalence. 리뷰 N2: ±3%에서 줄였다). 기준 = 같은 (N, 속도)의 단계 조건 가운데 equiv가 strict인 것
    (단계 3~8)의 중앙값의 중앙값. 조건 표의 equiv가 strict인 조건은 어기면 실패, report인 조건(단계 1, 단계 2, 겹침 방지 끔, 엔진 회피 더하기)은 값만 보고한다.
    단계 2는 엔진 회피가 오브 둘레에 무리를 쌓아 두 값이 정의상 다르다(V2W10Ladder: 초당 사망 48.5 대 56.7, 30m 안 1,997 대 927. D51).
-3. 겹친 쌍의 평균(runs.csv overlap_mean): 조건 표 equivalence.overlap_mean의 범위. 구성의 overlap 종류(sep, zero, engine, off)와 속도로 범위를 고른다.
-   근거는 조건 표의 overlap_basis. sep과 zero(N 2000 이하)는 범위 밖이면 실패, 그 밖은 보고만 한다. 단계 2가 범위를 벗어나는 것은 실패로 막지 않는다(D51).
+3. 겹친 쌍의 평균(runs.csv overlap_mean): 구성의 overlap 종류(sep, zero, engine, off)로 고른다. 근거는 조건 표의 overlap_basis.
+   sep(분리 프로세서)은 모든 N에서 같은 (N, 속도)의 엄격 단계 조건 중앙값의 ±25%(리뷰 M5. 값이 작으면 ±1쌍은 늘 허용)이고 어기면 실패다.
+   zero(N 2000 이하)는 조건 표의 범위 밖이면 실패, engine, off, zero(N 2000 초과)는 범위 밖이어도 보고만 한다. 단계 2가 벗어나는 것은 실패로 막지 않는다(D51).
+   탑뷰(P2) 실행은 같은 기준에 견주되 모두 보고만 한다.
 4. 캡슐 트레이스: LabActorCollision이 trace나 pawn이면 트레이스 수가 0보다 크고 적중 + 막힘 = 트레이스 수(빗나감 0)여야 한다. 어기면 실패.
 5. 왕복 전환(runs.csv sw_round_all, 초당): LabRepHold가 0보다 크면 조건 표의 round_trip_max_per_sec 이하여야 한다(D48). 어기면 실패. 최소 유지가 없는 조건은 값만 보고한다.
 
-허용 편차의 근거: 사망·30m 안 평균은 V2W10Ladder의 단계 3~8이 56.62~56.76 / 925~930(±0.4%)이고 V2W11Sweep의 네 조건이 56.7~56.8 / 926~927이다. ±3%는 v1과 같은 값이고
-실행 간 범위의 7배 남짓이다(Docs/Worklog/Q5.md "패키지 확인"의 근거를 잇는다). 정의상 값이 달라지는 조건은 조건 표의 equiv를 report로 둔다.
+허용 편차의 근거: 사망·30m 안 평균은 V2W10Ladder의 단계 3~8이 56.62~56.76 / 925~930(±0.4%)이고 V2W11Sweep의 네 조건이 56.7~56.8 / 926~927이다. ±3%는 v1과 같은 값으로
+실행 간 범위의 7배 남짓이라 동작이 2% 바뀐 단계도 통과했다. 리뷰 N2에서 ±1%로 줄였다(값만 바꿨다). 정의상 값이 달라지는 조건은 조건 표의 equiv를 report로 둔다.
 
 실행: py -3 -I Scripts/equivalence-check.py --batch Full4 [--out <csv>]
 출력: Measurements/<묶음>/equivalence.csv와 요약. 실패가 있으면 종료 코드 1. 표준 라이브러리만 쓴다.
@@ -112,7 +114,7 @@ def main():
             continue
         meta = read_meta(path)
         t = table.get(path.stem, {})
-        runs.setdefault((p["n"], p["speed"], p["cfg"], p["run"] > AA_RUN_MIN), []).append({
+        runs.setdefault((p["n"], p["speed"], p["cfg"], p["run"] > AA_RUN_MIN, p["preset"]), []).append({
             "label": path.stem, "death_rate": num(meta, "labdeathrate"), "near30_mean": num(meta, "labnear30mean"),
             "alive_min": num(meta, "labalivemin"), "alive_max": num(meta, "labalivemax"),
             "traces": num(meta, "labcapsuletraces"), "hits": num(meta, "labcapsulehits"), "blocked": num(meta, "labcapsuleblocked"),
@@ -123,19 +125,24 @@ def main():
         return 1
     have_table = bool(table)
 
+    # 기준 조건은 P1(오브 시점)의 같은 (N, 속도)다. 탑뷰(P2) 실행은 같은 기준에 견주되 모두 보고만 한다(카메라가 Simulation LOD 거리를 바꾼다)
     groups = {}
-    for (n, speed, cfg, aa), rs in runs.items():
-        groups.setdefault((n, speed), []).append((cfg, aa, rs))
+    for (n, speed, cfg, aa, preset), rs in runs.items():
+        groups.setdefault((n, speed, preset), []).append((cfg, aa, rs))
+
+    def peers_of(n, speed):
+        return [c for c in groups.get((n, speed, "1"), []) if not c[1] and cfgs[c[0]]["kind"] == "step" and cfgs[c[0]]["equiv"] == "strict"]
 
     rows, bad, reports = [], 0, 0
-    for (n, speed), conds in sorted(groups.items()):
-        peers = [c for c in conds if not c[1] and cfgs[c[0]]["kind"] == "step" and cfgs[c[0]]["equiv"] == "strict"]
-        ref = {k: med([med([r[k] for r in rs]) for _, _, rs in peers]) for k in ("death_rate", "near30_mean")} if peers else {"death_rate": None, "near30_mean": None}
+    for (n, speed, preset), conds in sorted(groups.items()):
+        peers = peers_of(n, speed)
+        keys = ("death_rate", "near30_mean", "overlap")
+        ref = {k: med([med([r[k] for r in rs]) for _, _, rs in peers]) for k in keys} if peers else {k: None for k in keys}
         moving = "moving" if speed == "V0" else "still"
         for cfg, aa, rs in sorted(conds, key=lambda c: (c[1], c[0])):
             c = cfgs[cfg]
-            strict = c["equiv"] == "strict"
-            row = {"n": n, "speed": speed, "cond": f"{speed}-{cfg}" + ("-aa" if aa else ""), "runs": len(rs), "equiv": c["equiv"]}
+            strict = c["equiv"] == "strict" and preset == "1"
+            row = {"n": n, "speed": speed, "cond": f"{speed}-{cfg}" + ("-aa" if aa else "") + ("" if preset == "1" else f"-P{preset}"), "runs": len(rs), "equiv": c["equiv"] if preset == "1" else "report"}
             fails, notes = [], []
             # 1. 살아 있는 총수
             amin = [r["alive_min"] for r in rs if r["alive_min"] is not None]
@@ -168,16 +175,24 @@ def main():
             ov = med([r["overlap"] for r in rs])
             row["overlap_mean"] = round(ov, 1) if ov is not None else ""
             klass = c["overlap"]
-            lo_hi = eq["overlap_mean"].get(klass if klass == "zero" else f"{klass}_{moving}")
             row["overlap_class"] = klass
-            row["overlap_range"] = f"{lo_hi[0]}..{lo_hi[1]}" if lo_hi else ""
+            ref_ov = ref["overlap"]
+            if klass == "sep":
+                # 리뷰 M5: 분리 프로세서는 같은 (N, 속도)의 엄격 단계 조건 중앙값의 ±overlap_rel_tol. 값이 작은 정지 조건을 위해 overlap_rel_floor쌍은 늘 허용한다
+                half = max(eq["overlap_rel_tol"] * ref_ov, eq["overlap_rel_floor"]) if ref_ov is not None else None
+                lo_hi = (ref_ov - half, ref_ov + half) if half is not None else None
+                row["overlap_range"] = f"{lo_hi[0]:.1f}..{lo_hi[1]:.1f}" if lo_hi else ""
+            else:
+                lo_hi = eq["overlap_mean"].get(klass if klass == "zero" else f"{klass}_{moving}")
+                row["overlap_range"] = f"{lo_hi[0]}..{lo_hi[1]}" if lo_hi else ""
             if ov is None:
                 row["overlap_ok"] = "no runs.csv" if not have_table else "no value"
             elif lo_hi and lo_hi[0] <= ov <= lo_hi[1]:
                 row["overlap_ok"] = "ok"
+            elif klass == "sep" and not lo_hi:
+                row["overlap_ok"] = "no peers"
             else:
-                # sep의 범위는 N=10000의 값에서 왔다. 다른 N은 보고만 한다(V2W12Dry: N=20000에서 2,287).
-                blocking = (klass == "sep" and n == 10000) or (klass == "zero" and n <= 2000)
+                blocking = (klass == "sep" and strict) or (klass == "zero" and n <= 2000 and preset == "1")
                 row["overlap_ok"] = "FAIL" if blocking else "report"
                 (fails if blocking else notes).append(f"overlap {ov:.0f} outside {row['overlap_range']} ({klass})")
             # 4. 캡슐 트레이스
@@ -234,7 +249,7 @@ def main():
         print(f'N={r["n"]:>6} {r["cond"]:<14} runs={r["runs"]} death={r["death_rate"]}/s ({r["death_rate_dev_pct"]}%) near30={r["near30_mean"]} ({r["near30_mean_dev_pct"]}%) '
               f'overlap={r["overlap_mean"]} capsule_miss={r["capsule_miss"]} round={r["round_per_sec"]}/s {r["pass"]} {r["note"]}')
     print(f"equivalence: {len(rows)} conditions, {len(rows) - bad - reports} pass, {reports} report, {bad} FAIL "
-          f"(tol death {eq['death_rate_tol']:.0%}, near30 {eq['near30_tol']:.0%}, alive exact, overlap range by class) -> {out}")
+          f"(tol death {eq['death_rate_tol']:.0%}, near30 {eq['near30_tol']:.0%}, alive exact, overlap sep +-{eq['overlap_rel_tol']:.0%} of the strict steps, other classes by range) -> {out}")
     if not have_table:
         print(f"note: Measurements/{a.batch}/runs.csv not found; overlap and round-trip checks skipped (run summarize.py --batch {a.batch} first)")
     if skipped:

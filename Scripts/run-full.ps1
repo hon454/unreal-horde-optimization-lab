@@ -2,11 +2,16 @@
 # 조건은 Scripts/full-conditions.json(v2)이 정한다: 구성(단계 s1~s8, 빼 보기 a8*), 묶음 종류(group)별 구성·속도·N·회차, 시나리오 값(궤도, 워밍업, 측정 구간).
 # 절차(앞 창 검사, 실패 CSV 이동, progress.log, failures.csv, 메타데이터 대조)는 run-spike.ps1과 v1 run-full.ps1에서 옮겼다.
 # 묶음 종류(group): ladder(8단계 x 1만 x 이동), ablation(빼 보기 x 이동), still(단계 8과 빼 보기 x 정지), sub(하위 실험), maxn(Mass 단계 x {5천, 2만}),
-#   actor(단계 1 x {500, 1천, 2천}), aa(단계 8 반복, 회차 11~13), trace(단계 1~8 트레이스), traceser(단계 2~8 직렬 트레이스), extra(기본 묶음에 없는 후보, -Only extra로만).
-# 라벨: <묶음>-<V0|V1>-<구성>-N<N>-P1-r<회차>. V0는 이동(궤도 속도 2m/s), V1은 정지(0). 트레이스는 <묶음>trace-..., <묶음>traceser-...
+#   maxn_mid(단계 4~8 x 1.25만), maxn_low(단계 2 x 2,500), topview(단계 8 탑뷰 P2, 참고 한 점), actor(단계 1 x {500, 1천, 2천}), aa(단계 8 반복, 회차 11~13),
+#   trace(단계 1~8 트레이스), traceser(단계 2~8 직렬 트레이스), extra(기본 묶음에 없는 후보 s8iso, -Only extra로만).
+# 라벨: <묶음>-<V0|V1>-<구성>-N<N>-P<1|2>-r<회차>. V0는 이동(궤도 속도 2m/s), V1은 정지(0). P는 그룹의 preset(기본 1, topview는 2)이다. 트레이스는 <묶음>trace-..., <묶음>traceser-...
 # 실행 순서: 회차가 바깥 루프(r1 전 조건 -> r2 -> r3), 짝수 회차는 슬롯 순서를 뒤집는다(표류가 조건에 고르게 퍼지게). -Order cond면 조건 단위. 묶음 맨 첫 실행 r0 하나는 버린다.
 # 실행마다 끝난 직후 ablation-check.py로 메타데이터를 대조한다. 실패(종료 코드, CSV 없음, 앞 창이 게임이 아님, 대조 틀림, 시간 초과)는 Measurements/<묶음>/failures.csv에 적고 넘어간다.
 # 묶음 끝에서 실패분만 새 회차 번호(회차 + 그 묶음 종류의 회차 수)로 한 번 다시 잰다. 실패 CSV는 Saved/Profiling/CSV/failed/ 또는 fg-failed/로 옮겨 요약에서 빠진다.
+# 리뷰 M4: 실패 재측정 뒤에 느린 실행(Game p50과 Render p50이 그 조건 중앙값보다 함께 3% 넘게 긴 실행, Scripts/batch_rules.py)을 새 회차(7~9)로 한 번 다시 잰다.
+#   다시 잰 실행도 느리면 더 재지 않는다. 표시는 runs.csv slow_mark와 slow.csv에 남고 summary.csv runs_used가 요약에 쓴 회차를 적는다.
+#   끝에서 summarize.py, spikes.py, equivalence-check.py, batch-check.py(A/A 3회 차이 0.5ms, 단계 8 모든 실행 p95 16.7ms 이하, 느린 실행)를 부르고, 검사가 실패하면 종료 코드 1이다.
+# 리뷰 M7: 패키지의 commit.txt에 dirty가 있으면 시작하지 않는다(-AllowDirty는 시험용). 패키지 커밋에는 태그 v2-full4를 단다(measurement.md "측정 인프라 동결").
 # 진행은 Measurements/<묶음>/progress.log(탭 구분: 시각, 라벨, OK|FAIL|DISCARD, 프레임 p50, p95, 이유). -Resume이면 거기 있는 라벨은 건너뛴다(중단 뒤 이어 하기).
 # v2 W12: 실행마다 CPU 클럭(% Processor Performance, 측정 구간 평균·최소·최대)과 시작 전 CPU 사용률을 Measurements/<묶음>/clock.csv에 남긴다(summarize.py가 runs.csv에 붙인다).
 #   시작 전 CPU가 한가하지 않으면(20% 넘음) 최대 50초 기다렸다 시작한다. 시작 검사는 편집기·게임·브라우저·셰이더 컴파일러 같은 방해 프로세스가 떠 있으면 멈춘다.
@@ -35,7 +40,9 @@ param(
     [string]$ExePath = "",
     [string]$ExeArgsPrefix = "",
     [string]$PkgRootOverride = "",
-    [switch]$NoProcCheck
+    [switch]$NoProcCheck,
+    # 시험용: 패키지 커밋에 dirty가 있어도 시작한다. 측정 묶음에는 쓰지 않는다
+    [switch]$AllowDirty
 )
 $env:LAB_NO_ENGINE = "1"
 . "$PSScriptRoot\common.ps1"
@@ -73,6 +80,7 @@ foreach ($gn in $GroupNames) {
             $measure = if ($g.measure_sec) { [int]$g.measure_sec } else { [int]$Sc.measure_sec }
             $prefix = $Batch + $(if ($g.prefix) { [string]$g.prefix } else { "" })
             [void]$Slots.Add(@{ Group = $gn; Cfg = $Cfg[$cn]; Speed = [string]$g.speed; Mps = [string]$sp.mps; Warmup = [int]$sp.warmup_sec; Measure = $measure; N = [int]$n
+                                Preset = $(if ($g.preset) { [int]$g.preset } else { 1 })
                                 Prefix = $prefix; RunBase = $(if ($g.run_base) { [int]$g.run_base } else { 0 }); RunCount = $runCount
                                 Trace = [bool]$g.trace; Serial = [bool]$g.serial; Aux = $isAux })
         }
@@ -81,7 +89,7 @@ foreach ($gn in $GroupNames) {
 function Slot-Key($j) { return "$($j.Slot.Group)|$($j.Slot.Prefix)|$($j.Slot.Speed)|$($j.Slot.Cfg.name)|$($j.Slot.N)" }
 function Run-Sec($s) { return $StartupSec + $s.Warmup + $s.Measure + $FlushSec }
 function New-Job($Slot, $Run) {
-    $label = "$($Slot.Prefix)-$($Slot.Speed)-$($Slot.Cfg.name)-N$($Slot.N)-P1-r$Run"
+    $label = "$($Slot.Prefix)-$($Slot.Speed)-$($Slot.Cfg.name)-N$($Slot.N)-P$($Slot.Preset)-r$Run"
     return @{ Slot = $Slot; Run = $Run; Label = $label; RetryRun = $Run + $Slot.RunCount; Group = $Slot.Group }
 }
 $MainSlots = @($Slots | Where-Object { -not $_.Aux })
@@ -104,8 +112,9 @@ $SlotCount = @($All | ForEach-Object { Slot-Key $_ } | Sort-Object -Unique).Coun
 # ---- 게임 인자 ----
 function Get-GameArgs($j, $label) {
     $s = $j.Slot
-    $a = @($Doc.common_args) + @($s.Cfg.args)
-    $a += @("-LabN=$($s.N)", "-LabLabel=$label", "-LabOrbOrbitRadius=$($Sc.radius_m)", "-LabOrbOrbitSpeed=$($s.Mps)", "-LabOrbHeight=$($Sc.height_m)",
+    # common_args의 -LabPreset=1은 그룹의 preset이 덮어쓴다(FParse::Value는 첫 인자를 읽으므로 뺀다. topview가 P2)
+    $a = @($Doc.common_args | Where-Object { $_ -notlike "-LabPreset=*" }) + @($s.Cfg.args)
+    $a += @("-LabPreset=$($s.Preset)", "-LabN=$($s.N)", "-LabLabel=$label", "-LabOrbOrbitRadius=$($Sc.radius_m)", "-LabOrbOrbitSpeed=$($s.Mps)", "-LabOrbHeight=$($Sc.height_m)",
             "-LabWarmup=$($s.Warmup)", "-LabDuration=$($s.Measure)")
     if ($s.Serial) { $a += @($Doc.serial_trace_args) }
     if ($s.Trace) { $a += @(([string]$Doc.trace_args), "-tracefile=`"$ProjectDir\Saved\Traces\$label.utrace`"") }
@@ -132,6 +141,7 @@ if ($DryRun) {
     foreach ($j in $All) { $upper += (Run-Sec $j.Slot) }
     Write-Host "DRYRUN batch=$Batch order=$Order groups=$($GroupNames -join '/') pick='$Pick' nfilter='$NFilter' build=$Build12 ($Commit)"
     Write-Host "exe: $Exe (exists=$(Test-Path $Exe))"
+    if ($Commit -match "dirty") { Write-Host "NOTE: the package commit is dirty; the real run refuses to start unless -AllowDirty (tests only)." }
     foreach ($gn in $groupsShown) {
         $jobs = @($All | Where-Object { $_.Group -eq $gn })
         $slotsK = @($jobs | ForEach-Object { Slot-Key $_ } | Sort-Object -Unique).Count
@@ -174,6 +184,10 @@ $Blockers = @("UnrealEditor", "UnrealEditor-Cmd", "HordeOptLab-Win64-Test", "Sha
 $Running = @(Get-Process -Name $Blockers -ErrorAction SilentlyContinue)
 if ($Running.Count -gt 0 -and -not $NoProcCheck) { Write-Host "FAIL: other programs are up ($(($Running | ForEach-Object { "$($_.ProcessName) pid $($_.Id)" }) -join ', ')). Close them first (chrome causes 7s periodic spikes)."; exit 1 }
 if ($All.Count -eq 0) { Write-Host "FAIL: no runs selected."; exit 1 }
+if ($Commit -match "dirty") {
+    if ($AllowDirty) { Write-Host "NOTE: the package is dirty ($Commit); -AllowDirty lets the batch start. Do not use it for a measurement batch." }
+    else { Write-Host "FAIL: the package commit is dirty ($Commit). Commit the changes (docs included), run Scripts/package.ps1 again, and tag the commit v2-full4. -AllowDirty is for tests only."; exit 1 }
+}
 if ($Build12 -eq "") { Write-Host "NOTE: no commit hash in $CommitFile; LabBuild is not checked." }
 
 if (-not ('FgWin' -as [type])) {
@@ -257,7 +271,7 @@ function Write-Progress-Line($Label, $St, $P50, $P95, $Reason) {
     Add-Content -Path $ProgressLog -Encoding UTF8 -Value ("{0}`t{1}`t{2}`t{3}`t{4}`t{5}" -f (Now), $Label, $St, $P50, $P95, (Clean $Reason))
 }
 function Write-Failure($j, $Label, $Reason) {
-    Add-Content -Path $FailuresCsv -Encoding UTF8 -Value ("{0},{1},{2},{3},P1,{4},{5}" -f (Now), $Label, "$($j.Slot.Speed)-$($j.Slot.Cfg.name)", $j.Slot.N, $j.Group, (Clean $Reason))
+    Add-Content -Path $FailuresCsv -Encoding UTF8 -Value ("{0},{1},{2},{3},P{4},{5},{6}" -f (Now), $Label, "$($j.Slot.Speed)-$($j.Slot.Cfg.name)", $j.Slot.N, $j.Slot.Preset, $j.Group, (Clean $Reason))
 }
 
 # 시작 때 batch.json의 시작 시각과 해시를 적는다. 끝에서 다시 쓴다
@@ -364,7 +378,7 @@ function Run-Job($j, $Label) {
     return $r.Ok
 }
 
-function Retry-Label($j) { return "$($j.Slot.Prefix)-$($j.Slot.Speed)-$($j.Slot.Cfg.name)-N$($j.Slot.N)-P1-r$($j.RetryRun)" }
+function Retry-Label($j) { return "$($j.Slot.Prefix)-$($j.Slot.Speed)-$($j.Slot.Cfg.name)-N$($j.Slot.N)-P$($j.Slot.Preset)-r$($j.RetryRun)" }
 function Save-BatchJson($Ended, $State) {
     $ok = @($All | Where-Object { $Status[$_.Label] -eq "OK" -or $Status[(Retry-Label $_)] -eq "OK" }).Count
     $failRuns = @($Status.Values | Where-Object { $_ -eq "FAIL" }).Count
@@ -417,12 +431,33 @@ foreach ($j in $Retry) {
     if (-not (Run-Job $jr $jr.Label)) { Write-Host "GIVEUP $($jr.Label) (failed twice: $($j.Label))" }
 }
 
+# 느린 실행을 새 회차(7~9)로 한 번 다시 잰다(리뷰 M4). 요약으로 runs.csv를 만들고 batch-check.py가 다시 잴 실행을 알려 준다. 다시 잰 실행이 또 느려도 더 재지 않는다
+& py -3 -I "$PSScriptRoot\summarize.py" --batch $Batch 2>&1 | Out-Host
+$SlowList = @(& py -3 -I "$PSScriptRoot\batch-check.py" --batch $Batch --list-slow 2>&1 | ForEach-Object { "$_" } | Where-Object { $_ -match "^RERUN " })
+if ($SlowList.Count -gt 0) { Write-Host "SLOW RERUN PASS: $($SlowList.Count) slow runs" }
+foreach ($ln in $SlowList) {
+    $parts = $ln -split " "
+    $orig = @($All | Where-Object { $_.Label -eq $parts[1] -or (Retry-Label $_) -eq $parts[1] }) | Select-Object -First 1
+    if (-not $orig) { Write-Host "SLOW RERUN skipped: $($parts[1]) is not a planned run"; continue }
+    $jr = New-Job $orig.Slot ([int]$parts[2])
+    if ($Status.ContainsKey($jr.Label)) { continue }
+    Write-Host "SLOW RERUN $($parts[1]) -> $($jr.Label)"
+    [void](Run-Job $jr $jr.Label)
+}
+
 $Ended = Now
 Save-BatchJson $Ended "done"
 $okCount = @($Status.GetEnumerator() | Where-Object { $_.Value -eq "OK" }).Count
 $failCount = @($Status.GetEnumerator() | Where-Object { $_.Value -eq "FAIL" }).Count
 Write-Host "DONE $Batch ok=$okCount fail=$failCount ended=$Ended (details: $BatchJson)"
+
+# 묶음 끝 검사: 요약, 스파이크(주기적이면 묶음을 참고로 내리는 판단은 사람이 한다), 동등성, 묶음 판정(A/A, 단계 8의 모든 실행, 느린 실행). 동등성이나 묶음 판정이 실패하면 종료 코드 1이다
 & py -3 -I "$PSScriptRoot\summarize.py" --batch $Batch 2>&1 | Out-Host
+& py -3 -I "$PSScriptRoot\spikes.py" --batch $Batch 2>&1 | Out-Host
+$ExitCode = 0
 $eq = "$PSScriptRoot\equivalence-check.py"
-if (Test-Path $eq) { & py -3 -I $eq --batch $Batch 2>&1 | Out-Host }
-exit 0
+if (Test-Path $eq) { & py -3 -I $eq --batch $Batch 2>&1 | Out-Host; if ($LASTEXITCODE -ne 0) { $ExitCode = 1; Write-Host "CHECK FAIL: equivalence-check.py" } }
+& py -3 -I "$PSScriptRoot\batch-check.py" --batch $Batch 2>&1 | Out-Host
+if ($LASTEXITCODE -ne 0) { $ExitCode = 1; Write-Host "CHECK FAIL: batch-check.py" }
+if ($ExitCode -ne 0) { Write-Host "BATCH CHECKS FAILED: do not use this batch for public numbers until the cause is known (details above)." }
+exit $ExitCode

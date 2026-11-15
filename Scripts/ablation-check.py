@@ -35,7 +35,7 @@ def check_labels(doc, cfgs, path):
             bad += 1
             print(f"  LABEL FAIL {label}")
             continue
-        lc.expected(doc, cfgs, p["cfg"], p["speed"], p["n"], label, "000000000000", p["kind"] == "shot", p["kind"] == "traceser")
+        lc.expected(doc, cfgs, p["cfg"], p["speed"], p["n"], label, "000000000000", p["kind"] == "shot", p["kind"] == "traceser", preset=p["preset"])
     dup = len(labels) - len(set(labels))
     if dup:
         bad += 1
@@ -123,7 +123,7 @@ def main():
             continue
         serial = a.serial or (p is not None and p["kind"] == "traceser")
         measure = a.measure_sec or (doc["groups"]["trace"]["measure_sec"] if p and p["kind"] in ("trace", "traceser") else 0)
-        exp = lc.expected(doc, cfgs, cfg, speed, n, label if p else None, a.build or None, a.shot or (p is not None and p["kind"] == "shot"), serial, measure or None)
+        exp = lc.expected(doc, cfgs, cfg, speed, n, label if p else None, a.build or None, a.shot or (p is not None and p["kind"] == "shot"), serial, measure or None, p["preset"] if p else None)
         if exp.get("labhud") == "1" and meta.get("labshotat", "0") in ("0", ""):
             exp["labshotat"] = "> 0"
         if exp.get("labhud") == "1":

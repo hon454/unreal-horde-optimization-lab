@@ -68,6 +68,8 @@ SWITCH_FIELDS = SWITCH_TEXT + SWITCH_NUM
 # cpu_mhz_mean = 평균 × 기본 클럭, cpu_busy_before = 실행 시작 전 3초의 전체 CPU 사용률(%). 파일이 없으면 빈칸. summary에는 중앙값(cpu_perf_min은 최솟값)을 쓴다
 CLOCK_FIELDS = ["cpu_perf_mean", "cpu_perf_min", "cpu_mhz_mean", "cpu_busy_before"]
 CLOCK_SRC = {"cpu_perf_mean": "perf_mean_pct", "cpu_perf_min": "perf_min_pct", "cpu_mhz_mean": "mhz_mean", "cpu_busy_before": "cpu_busy_before_pct"}
+# 리뷰 M4 느린 실행(Scripts/batch_rules.py, measurement.md "느린 실행"). 총괄 묶음의 runs.csv 맨 끝 열 slow_mark(빈칸 = 표시 없음)와 summary.csv의 runs_used(요약에 쓴 회차), slow_note(요약에서 뺀 실행)
+SLOW_FIELDS = ["slow_mark"]
 
 
 def read_clock(batch):
@@ -488,7 +490,7 @@ def main():
     runs_path = out_dir / "runs.csv"
     full = bool(BATCH_NAME_RE.match(args.milestone))
     failed = failed_labels(args.milestone) if full else set()
-    run_fields = RUN_FIELDS + (FULL_FIELDS + BUDGET_FIELDS if full else []) + SWITCH_FIELDS + CLOCK_FIELDS
+    run_fields = RUN_FIELDS + (FULL_FIELDS + BUDGET_FIELDS if full else []) + SWITCH_FIELDS + CLOCK_FIELDS + (SLOW_FIELDS if full else [])
 
     existing = {}
     if runs_path.exists():
@@ -512,6 +514,18 @@ def main():
             existing[row["label"]] = row
 
     rows = sorted(existing.values(), key=lambda r: (r["variant"], int(r["n"]), r["preset"], int(r["run"])))
+    if full:
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        import batch_rules
+        by_cond = {}
+        for r in rows:
+            if 1 <= int(r["run"]) <= batch_rules.RERUN_RUN_MAX:
+                by_cond.setdefault((r["variant"], int(r["n"]), r["preset"]), []).append(r)
+        marks = {}
+        for rs in by_cond.values():
+            marks.update(batch_rules.slow_marks(rs))
+        for r in rows:
+            r["slow_mark"] = marks.get(r["label"], "")
     with open(runs_path, "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=run_fields)
         w.writeheader()
@@ -520,6 +534,7 @@ def main():
             w.writerow({k: r.get(k, "") for k in run_fields})
 
     groups = {}
+    slow_dropped = {}
     for r in rows:
         if int(r["run"]) == 0:
             continue
@@ -531,6 +546,9 @@ def main():
             continue  # Insights 트레이스 실행은 비교에 쓰지 않는다(runs.csv에는 남는다)
         if BATCH_NAME_RE.match(r["milestone"]):
             # 총괄 묶음: 조건 이름(L8-q4final)이 곧 variant. 회차 11 이상은 묶음 끝 A/A라 <조건>-aa로 따로 요약한다
+            if r.get("slow_mark") == "slow-replaced":
+                slow_dropped.setdefault((r["variant"], int(r["n"]), r["preset"]), []).append(r["label"])
+                continue  # 느린 실행은 다시 잰 실행이 대신한다(batch_rules.py). runs.csv에는 남는다
             groups.setdefault((r["variant"] + ("-aa" if int(r["run"]) > FULL_AA_MIN_RUN else ""), int(r["n"]), r["preset"]), []).append(r)
             continue
         if r["milestone"].startswith("Q"):
@@ -559,6 +577,8 @@ def main():
     for c in SWITCH_NUM:
         fields += [c] + ([f"{c}_min", f"{c}_max"] if c in SWITCH_RANGE else [])
     fields += CLOCK_FIELDS
+    if full:
+        fields += ["runs_used", "slow_note"]
     with open(out_dir / "summary.csv", "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=fields)
         w.writeheader()
@@ -616,6 +636,12 @@ def main():
             for c in CLOCK_FIELDS:
                 vals = [float(r[c]) for r in rs if str(r.get(c, "")) != ""]
                 out[c] = (round(min(vals), 1) if c == "cpu_perf_min" else round(statistics.median(vals), 1)) if vals else ""
+            if full:
+                out["runs_used"] = " ".join(f"r{int(r['run'])}" for r in sorted(rs, key=lambda r: int(r["run"])))
+                dropped = slow_dropped.get((variant, n, preset), [])
+                kept = [r["label"] for r in rs if r.get("slow_mark") == "slow-kept"]
+                out["slow_note"] = "; ".join(([f"replaced {lb.rsplit('-', 1)[1]}" for lb in dropped] if not variant.endswith("-aa") else [])
+                                             + [f"slow again {lb.rsplit('-', 1)[1]}" for lb in kept])
             w.writerow(out)
 
     print(f"runs.csv: {len(rows)} rows (+{added}), summary.csv: {len(groups)} conditions -> {out_dir}")

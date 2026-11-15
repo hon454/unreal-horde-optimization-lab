@@ -74,7 +74,7 @@ STATUS.md "명령"에는 매번 쓰는 것만 둔다. 여기에는 스크립트 
 
 ### 빼 보기(v2 W10)
 
-단계 8에 스위치 하나를 더한다. 총괄 묶음의 조건 표는 위 열일곱 가운데 열네 행(`a8res`, `a8fxf`, `a8stp`와 하위 실험 `s8iso`는 `-Only extra`로만)과 하위 실험 `s8av`다. 근거는 [Worklog/V2.md](../Worklog/V2.md) "W12"에 있다.
+단계 8에 스위치 하나를 더한다. 총괄 묶음의 조건 표는 위 열일곱 행 모두(이동 조건. 정지 조건은 `a8fxf`와 `a8stp`를 뺀 열다섯 행)와 하위 실험 `s8av`(분리를 엔진 회피로 바꾼 것)다. 하위 실험 `s8iso`는 `-Only extra`로만 돈다. 근거는 [Worklog/V2.md](../Worklog/V2.md) "W12"에 있다.
 
 | 구성(`run-spike.ps1`) | 빼는 것 | 인자 | 바뀌는 메타데이터 |
 | --- | --- | --- | --- |
@@ -291,16 +291,17 @@ v2 W12에서 다시 만들었다. 조건과 기대 메타데이터는 `Scripts/f
 powershell -ExecutionPolicy Bypass -File Scripts/run-full.ps1 -Batch Full4 -DryRun
 # 마른 실행 묶음(종류마다 하나씩, 1회씩): 라벨 V2W12Dry-...
 powershell -ExecutionPolicy Bypass -File Scripts/run-full.ps1 -Batch V2W12Dry -Runs 1 -NFilter "500,10000,20000" -Pick "ladder:s1,ladder:s8,ablation:a8fsb,still:s8,maxn:s8,actor:s1,trace:s2"
-# 총괄 묶음 Full4(약 11.5시간, 사용자 검토 뒤에 한다)
+# 총괄 묶음 Full4(본 실행 216회, 잰 길이로 약 13.7시간. 사용자 검토 뒤에 한다. 패키지 커밋에 dirty가 있으면 시작하지 않는다)
 powershell -ExecutionPolicy Bypass -File Scripts/run-full.ps1 -Batch Full4
 # 끊겼으면 이어 한다(progress.log에 있는 라벨은 건너뛴다)
 powershell -ExecutionPolicy Bypass -File Scripts/run-full.ps1 -Batch Full4 -Resume
-# 일부만: -Only ladder,ablation,still,sub,maxn,actor,aa,trace,traceser,extra (쉼표로 이은 한 문자열)
+# 일부만: -Only ladder,ablation,still,sub,topview,maxn,maxn_mid,maxn_low,actor,aa,trace,traceser,extra (쉼표로 이은 한 문자열)
 powershell -ExecutionPolicy Bypass -File Scripts/run-full.ps1 -Batch Full4 -Only ladder,ablation -Runs 1
 
-# 묶음 검사와 요약(러너가 끝에 summarize와 equivalence를 돌린다)
+# 묶음 검사와 요약(러너가 끝에 summarize, spikes, equivalence, batch-check를 돌리고 동등성이나 묶음 판정이 실패하면 종료 코드 1이다)
 py -3 -I Scripts/summarize.py --batch Full4
 py -3 -I Scripts/equivalence-check.py --batch Full4
+py -3 -I Scripts/batch-check.py --batch Full4   # A/A, 단계 8의 모든 실행, 느린 실행. --dir <폴더> --out <slow.csv>로 스크래치에 돌릴 수 있다
 py -3 -I Scripts/spikes.py --batch Full4
 py -3 -I Scripts/plot.py --batch Full4          # 확인용은 --out <폴더>
 py -3 -I Scripts/ablation-check.py --selftest    # 조건 표의 기대 키와 묶음 종류의 구성을 검사
@@ -314,11 +315,14 @@ powershell -ExecutionPolicy Bypass -File Scripts/capture-full.ps1 -Batch Full4
 | 인자(`run-full.ps1`) | 뜻 |
 | --- | --- |
 | `-Batch` | 묶음 이름(필수). 폴더 `Measurements/<Batch>/`, 라벨 접두사. 같은 이름과 라벨은 다시 쓰지 않는다(`progress.log`가 있으면 `-Resume` 아니면 거부) |
-| `-Only` | 묶음 종류만: `ladder`(8단계 × 1만 × 이동), `ablation`(빼 보기 14행 × 이동), `still`(단계 8과 빼 보기 × 정지), `sub`(`s8av`), `maxn`(단계 2\~8 × {5천, 2만}), `actor`(단계 1 × {500, 1천, 2천}), `aa`(단계 8 반복, 회차 11\~13), `trace`(단계 1\~8), `traceser`(단계 2\~8 직렬), `extra`(후보 4개. 적어야 돈다). 비우면 `extra`를 뺀 전부 |
+| `-Only` | 묶음 종류만: `ladder`(8단계 × 1만 × 이동), `ablation`(빼 보기 17행 × 이동), `still`(단계 8과 빼 보기 15행 × 정지), `sub`(`s8av`), `topview`(단계 8 × 이동 × 탑뷰 P2, 참고 한 점), `maxn`(단계 2\~8 × {5천, 2만}), `maxn_mid`(단계 4\~8 × 1.25만), `maxn_low`(단계 2 × 2,500), `actor`(단계 1 × {500, 1천, 2천}), `aa`(단계 8 반복, 회차 11\~13), `trace`(단계 1\~8), `traceser`(단계 2\~8 직렬), `extra`(후보 `s8iso`. 적어야 돈다). 비우면 `extra`를 뺀 전부 |
 | `-Pick`, `-NFilter` | 예행용. `-Pick "ladder:s1,still:*"`은 묶음 종류:구성이 맞는 슬롯만, `-NFilter 500,10000`은 그 N인 슬롯만 남긴다 |
 | `-Runs` | 반복 묶음의 회차 수를 덮어쓴다(기본은 조건 표의 3). 트레이스와 A/A는 조건 표 값이다 |
 | `-Order round\|cond` | 기본 `round`: 회차가 바깥 루프(r1 전 슬롯, r2 전 슬롯 역순, r3). `cond`: 같은 조건 연달아 |
 | `-Resume`, `-DryRun`, `-SkipR0`, `-NoFgCheck`, `-NoClock` | 이어 하기, 계획만, `r0` 건너뛰기, 앞 창 검사 끄기, CPU 클럭 기록 끄기(측정에는 앞 창 검사를 끄지 않는다) |
+| `-AllowDirty` | 패키지의 `commit.txt`에 `dirty`가 있어도 시작한다. 러너 시험 전용이다. 측정 묶음에는 쓰지 않는다 |
+
+탑뷰 한 점의 장치 확인(Development 빌드, 측정이 없을 때 한다. 러너를 거치지 않고 한 줄로 확인한다): `powershell -ExecutionPolicy Bypass -File Scripts/run-dev.ps1 -N 10000 -Preset P2 -Stage 8 -Extra "-LabOrbOrbitRadius=57.3","-LabOrbOrbitSpeed=2","-LabOrbHeight=6" -Duration 30 -ShotAt 20`. 스크린샷(`Saved/Screenshots/Lab/`)이 오브 위 100m에서 수직으로 내려다본 장면이어야 한다. `-Duration 60 -ShotAt 50`으로 한 번 더 찍어 오브가 화면 한가운데에 있고 지면의 배치가 궤도를 도는 만큼(2m/s × 30초 = 60m) 옮겨 갔는지 견준다. 로그의 `lab_config` 줄에 Preset 2가 찍혀야 한다.
 | `-StartupSec`, `-TimeoutFactor` | 예상 시간 계산용 프로세스 시작 시간(기본 30초), 시간 제한 = 배수(기본 3) × 한 실행 예상 시간 |
 | `-ExePath`, `-ExeArgsPrefix`, `-PkgRootOverride`, `-NoProcCheck` | 러너 시험용(게임 없이 파싱·재시도·이어 하기 점검). 측정에는 쓰지 않는다 |
 

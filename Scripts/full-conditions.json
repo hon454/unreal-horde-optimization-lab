@@ -3,7 +3,7 @@
  "source": "Docs/Worklog/V2.md \"W12 측정 준비\". 단계와 빼 보기의 기대값은 같은 문서 \"W10\"의 표와 \"W11\"이다. 기대값은 Test 패키지 실행의 CSV 메타데이터 키(대소문자 무시)와 문자열 값이다. base가 있으면 그 설정의 expect 위에 이 expect를 덮어쓴다.",
  "exe": "Packaged/Test/Windows/HordeOptLab/Binaries/Win64/HordeOptLab-Win64-Test.exe",
  "batch": "Full4",
- "label_format": "<Batch>-<V0|V1>-<구성>-N<N>-P1-r<i>. V0 = 오브 궤도 속도 2m/s(이동), V1 = 속도 0(정지). 트레이스는 <Batch>trace-..., <Batch>traceser-..., 촬영은 <Batch>shot-..., A/A는 회차 11~13, 실패 재측정은 회차 + Runs.",
+ "label_format": "<Batch>-<V0|V1>-<구성>-N<N>-P<1|2>-r<i>. V0 = 오브 궤도 속도 2m/s(이동), V1 = 속도 0(정지). P1 = 오브 시점(기본), P2 = 탑뷰(그룹의 preset이 정한다). 트레이스는 <Batch>trace-..., <Batch>traceser-..., 촬영은 <Batch>shot-..., A/A는 회차 11~13, 실패 재측정은 회차 + Runs(4~6), 느린 실행 재측정은 7~9.",
  "common_args": [
   "-windowed",
   "-ResX=2560",
@@ -49,18 +49,12 @@
   "LabPreset": "P1"
  },
  "equivalence": {
-  "death_rate_tol": 0.03,
-  "near30_tol": 0.03,
+  "death_rate_tol": 0.01,
+  "near30_tol": 0.01,
   "round_trip_max_per_sec": 0.5,
+  "overlap_rel_tol": 0.25,
+  "overlap_rel_floor": 1.0,
   "overlap_mean": {
-   "sep_moving": [
-    120,
-    280
-   ],
-   "sep_still": [
-    0,
-    10
-   ],
    "zero": [
     0,
     50
@@ -82,8 +76,8 @@
     3000
    ]
   },
-  "overlap_basis": "분리 프로세서(sep) 이동: 단계 3~8과 W11 묶음의 값 159~225(V2W10Ladder, V2W11Cost, V2W11Sweep, V2W9Flash)에 0.75배와 1.25배를 곱했다. 분리 프로세서 정지: V2W7Switch의 0.01~0.02에 여유를 뒀다. 액터 기준선(zero)은 V2W6Base N 500~2000에서 0이다. 엔진 회피(engine)는 V2W3Cost, V2W4Cost, V2W10Ladder에서 10,338~10,835다. 겹침 방지 끔(off)은 V2W4Cost에서 1,599~1,607이다.",
-  "overlap_severity": "sep(N 10000)와 zero(N 2000 이하)는 범위 밖이면 실패로 센다. sep(다른 N), engine, off, zero(N 2000 초과)는 보고만 한다(D51: 단계 2는 엔진 회피라 실패로 막지 않는다)."
+  "overlap_basis": "분리 프로세서(sep)는 절대 범위를 쓰지 않는다. 같은 (N, 속도)의 엄격 단계 조건(단계 3~8) 중앙값의 ±overlap_rel_tol(25%)이고, 값이 작은 정지 조건을 위해 ±overlap_rel_floor(1쌍) 이상은 늘 허용한다(리뷰 M5: 절대 범위는 N=1만의 값에서 와서 N=2만의 붕괴를 가렸다). 액터 기준선(zero)은 V2W6Base N 500~2000에서 0이다. 엔진 회피(engine)는 V2W3Cost, V2W4Cost, V2W10Ladder에서 10,338~10,835다. 겹침 방지 끔(off)은 V2W4Cost에서 1,599~1,607이다.",
+  "overlap_severity": "sep은 모든 N에서 상대 기준을 어기면 실패로 센다. zero(N 2000 이하)는 범위 밖이면 실패로 센다. engine, off, zero(N 2000 초과)는 보고만 한다(D51: 단계 2는 엔진 회피라 실패로 막지 않는다). 탑뷰(P2) 실행은 모두 보고만 한다."
  },
  "steps": {
   "1": {
@@ -540,20 +534,22 @@
    "name": "s8av",
    "kind": "sub",
    "base": "s8",
-   "title": "Engine avoidance (added)",
+   "title": "Engine avoidance instead of separation",
    "overlap": "engine",
    "equiv": "report",
    "args": [
     "-LabStage=8",
-    "-LabAvoid=1"
+    "-LabAvoid=1",
+    "-LabSeparate=0"
    ],
    "expect": {
-    "LabTechAvoid": "1"
+    "LabTechAvoid": "1",
+    "LabTechSeparate": "0"
    }
   },
   {
    "name": "a8res",
-   "kind": "extra",
+   "kind": "ablation",
    "base": "s8",
    "title": "ISKM track reserve",
    "overlap": "sep",
@@ -568,7 +564,7 @@
   },
   {
    "name": "a8fxf",
-   "kind": "extra",
+   "kind": "ablation",
    "base": "s8",
    "title": "Particle orb follow",
    "overlap": "sep",
@@ -583,7 +579,7 @@
   },
   {
    "name": "a8stp",
-   "kind": "extra",
+   "kind": "ablation",
    "base": "s8",
    "title": "Bounds step follow",
    "overlap": "sep",
@@ -646,14 +642,17 @@
     "a8sep",
     "a8cap",
     "a8shd",
-    "a8fsb"
+    "a8fsb",
+    "a8res",
+    "a8fxf",
+    "a8stp"
    ],
    "speed": "V0",
    "n": [
     10000
    ],
    "runs": 3,
-   "note": "빼 보기 열네 행(단계 8에 스위치 하나) x 이동. 기준은 사다리의 s8"
+   "note": "빼 보기 열일곱 행(단계 8에 스위치 하나) x 이동. 기준은 사다리의 s8. a8res, a8fxf, a8stp는 리뷰 M1에서 옮겨 왔다"
   },
   "still": {
    "configs": [
@@ -671,14 +670,15 @@
     "a8sep",
     "a8cap",
     "a8shd",
-    "a8fsb"
+    "a8fsb",
+    "a8res"
    ],
    "speed": "V1",
    "n": [
     10000
    ],
    "runs": 3,
-   "note": "정지 조건: 단계 8과 빼 보기 열네 행"
+   "note": "정지 조건: 단계 8과 빼 보기 열다섯 행(a8res 포함). a8fxf와 a8stp는 오브와 카메라가 서 있으면 단계 8과 같은 일이라 뺀다(measurement.md)"
   },
   "sub": {
    "configs": [
@@ -689,7 +689,19 @@
     10000
    ],
    "runs": 3,
-   "note": "하위 실험: 단계 8에 엔진 회피를 더한다(D43)"
+   "note": "하위 실험: 단계 8에서 분리 프로세서를 엔진 회피로 바꾼다(D43, 리뷰 M2)"
+  },
+  "topview": {
+   "configs": [
+    "s8"
+   ],
+   "speed": "V0",
+   "n": [
+    10000
+   ],
+   "runs": 3,
+   "preset": 2,
+   "note": "참고 한 점(리뷰 M8): 단계 8을 탑뷰(P2)로 잰다. 사다리 표와 그림에 넣지 않는다. 라벨의 P2로 갈라진다"
   },
   "maxn": {
    "configs": [
@@ -708,6 +720,32 @@
    ],
    "runs": 3,
    "note": "보조(최대 N): Mass 단계 2~8 x {5천, 2만}. 1만은 사다리가 맡는다"
+  },
+  "maxn_mid": {
+   "configs": [
+    "s4",
+    "s5",
+    "s6",
+    "s7",
+    "s8"
+   ],
+   "speed": "V0",
+   "n": [
+    12500
+   ],
+   "runs": 3,
+   "note": "보조(최대 N) 보간 구간을 좁힌다(리뷰 M5): 단계 4~8 x 1.25만. 1만이 15.6ms 근처라 1만~2만 사이 한 구간에서 값이 정해지는 것을 줄인다"
+  },
+  "maxn_low": {
+   "configs": [
+    "s2"
+   ],
+   "speed": "V0",
+   "n": [
+    2500
+   ],
+   "runs": 3,
+   "note": "보조(최대 N) 보간 구간을 좁힌다(리뷰 M5): 단계 2 x 2,500. 단계 2는 1만에서 34ms라 5천도 16.7ms를 넘을 수 있다"
   },
   "actor": {
    "configs": [
@@ -778,9 +816,6 @@
   },
   "extra": {
    "configs": [
-    "a8res",
-    "a8fxf",
-    "a8stp",
     "s8iso"
    ],
    "speed": "V0",
@@ -797,7 +832,10 @@
   "ablation",
   "still",
   "sub",
+  "topview",
   "maxn",
+  "maxn_mid",
+  "maxn_low",
   "actor"
  ],
  "capture": {

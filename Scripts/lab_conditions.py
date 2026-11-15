@@ -48,12 +48,14 @@ def window_text(doc, speed_key, measure_sec=None):
     return f'{sp["warmup_sec"]}+{measure_sec or doc["scenario"]["measure_sec"]}'
 
 
-def expected(doc, cfgs, cfg_name, speed_key, n=None, label=None, build12=None, shot=False, serial=False, measure_sec=None):
-    """한 실행의 기대 메타데이터(키 소문자 -> 값). n, label, build12가 None이면 그 항목은 대조하지 않는다."""
+def expected(doc, cfgs, cfg_name, speed_key, n=None, label=None, build12=None, shot=False, serial=False, measure_sec=None, preset=None):
+    """한 실행의 기대 메타데이터(키 소문자 -> 값). n, label, build12가 None이면 그 항목은 대조하지 않는다. preset(라벨의 P칸, 1|2)이 있으면 LabPreset을 P<preset>으로 둔다."""
     c = cfgs[cfg_name]
     sc = doc["scenario"]
     exp = {k.lower(): v for k, v in doc["common_expect"].items()}
     exp.update({k.lower(): v for k, v in c["expect"].items()})
+    if preset:
+        exp["labpreset"] = f"P{preset}"
     exp["laborbit"] = f'r{sc["radius_m"]}/v{speed_info(doc, speed_key)["mps"]}/h{sc["height_m"]}'
     exp["labwindow"] = window_text(doc, speed_key, measure_sec)
     if n:

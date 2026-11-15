@@ -231,7 +231,7 @@ def full_ablation(rows, doc, cfgs, speed, target, out, title_extra):
         v95, v50 = fnum(r, "frame_p95_ms"), fnum(r, "frame_p50_ms")
         added = cfgs[cfg]["kind"] == "sub"
         d95, d50 = v95 - b95, v50 - b50
-        label = f'with {cfgs[cfg]["title"].replace(" (added)", "")}' if added else f'without {cfgs[cfg]["title"]}'
+        label = f'with {cfgs[cfg]["title"][0].lower() + cfgs[cfg]["title"][1:]}' if added else f'without {cfgs[cfg]["title"]}'
         items.append((label, v95, v50, FULL_KIND_COLOR["earn"] if d95 > 0 else FULL_KIND_COLOR["start"], f"{d95:+.2f}"))
         # 차이 판정(measurement.md): p50 변화가 두 조건의 범위(최댓값 - 최솟값) 중 큰 쪽보다 클 때만 차이가 있다
         rng = lambda x, k: (fnum(x, k + "_max") or 0) - (fnum(x, k + "_min") or 0)
@@ -282,7 +282,7 @@ def full_main(batch, target_n=None, out_dir=None):
         write_rows(out / f"full-ablation-{name}.csv", csv_rows, abl_fields)
 
     # 보조: N 스케일링. 계열 = 단계. 단계 1의 점은 사다리(1만)와 액터 보조(500, 1천, 2천)를 합친다
-    p95, p50 = {}, {}
+    p95, p50, ovl = {}, {}, {}
     ns = sorted({n for (v, n, p) in rows if v.startswith("V0-s") and v[4:].isdigit()})
     for num in doc["steps"]:
         for n in ns:
@@ -290,6 +290,7 @@ def full_main(batch, target_n=None, out_dir=None):
             if r and fnum(r, "frame_p95_ms") is not None:
                 key = f"{num} {doc['steps'][num]['name']}"
                 p95.setdefault(key, []).append((n, fnum(r, "frame_p95_ms")))
+                ovl.setdefault(key, {})[n] = fnum(r, "overlap_mean")
                 named = [fnum(r, k) for k in ("frame_p50_ms", "game_p50_ms", "render_p50_ms", "gpu_p50_ms")]
                 p50.setdefault(key, []).append((n, max(v for v in named if v is not None)))
     table = []
@@ -299,14 +300,16 @@ def full_main(batch, target_n=None, out_dir=None):
         n95, note95 = n_at_budget(sorted(pts))
         n50, note50 = n_at_budget(sorted(p50[name]))
         table.append({"series": name, "n_p95": round(n95) if n95 else "", "note_p95": note95, "n_p50": round(n50) if n50 else "", "note_p50": note50,
-                      "points": " ".join(f"{n}:{m:.2f}" for n, m in sorted(pts))})
-    write_rows(out / "full-n-at-60fps.csv", table, ["series", "n_p95", "note_p95", "n_p50", "note_p50", "points"])
+                      "points": " ".join(f"{n}:{m:.2f}" for n, m in sorted(pts)),
+                      # 리뷰 M5: 각 점의 겹친 쌍(0.5초 표본 평균). 보간한 N이 겹침 방지가 무너진 구간이면 값을 그대로 쓰지 않는다
+                      "overlap_points": " ".join(f"{n}:{ovl[name][n]:.0f}" if ovl[name].get(n) is not None else f"{n}:-" for n, _ in sorted(pts))})
+    write_rows(out / "full-n-at-60fps.csv", table, ["series", "n_p95", "note_p95", "n_p50", "note_p50", "points", "overlap_points"])
     multi = {k: sorted(v) for k, v in p95.items() if len(v) >= 2}
     if multi:
         line_chart(multi, f"Frame p95 vs N ({batch}, moving orb)", out / "full-maxn.svg", {k: sorted(v) for k, v in p50.items() if k in multi})
     print(f"{batch}: target N={target:,} (from {target_src}) {aa_note}")
     for t in table:
-        print(f'{t["series"]}: N@16.7ms p95 = {t["n_p95"]} {t["note_p95"]} | p50 = {t["n_p50"]} {t["note_p50"]}')
+        print(f'{t["series"]}: N@16.7ms p95 = {t["n_p95"]} {t["note_p95"]} | p50 = {t["n_p50"]} {t["note_p50"]} | p95 points {t["points"]} | overlapping pairs {t["overlap_points"]}')
     print(f"wrote {out}")
 
 
