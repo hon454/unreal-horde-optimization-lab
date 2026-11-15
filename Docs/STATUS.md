@@ -15,10 +15,11 @@
 
 ## 다음 할 일
 
-1. 코디네이터가 [v2-plan.md](v2-plan.md)의 작업 단위를 W12부터 하나씩 맡긴다. W1\~W11은 끝났다(25b16c2까지). 총괄 묶음(W13)부터는 사용자 검토 뒤에 한다.
-2. 사용자가 [v2-spec.md](v2-spec.md), [v2-plan.md](v2-plan.md), 결정 D33부터([autonomous-decisions.md](Worklog/autonomous-decisions.md))를 검토한다.
+1. 사용자가 [v2-spec.md](v2-spec.md), [v2-plan.md](v2-plan.md), 결정 D33\~D53([autonomous-decisions.md](Worklog/autonomous-decisions.md))을 검토한다.
+2. 코디네이터가 작은 묶음 `V2W12Dry`를 돌린다(약 33분). 명령은 [Worklog/V2.md](Worklog/V2.md) "W12 측정 준비"에 있다. Edge 건이 풀려야 한다.
+3. 사용자 검토 뒤에 코디네이터가 W13(총괄 묶음 `Full4`, 약 11.5시간)을 맡긴다.
 
-사용자가 자리를 비운 동안 코디네이터가 추천안으로 진행한다(2026-11-15 사용자 지시, D33). 두 문서는 잠정 확정이다.
+W1\~W12는 끝났다(12dd374까지). W12의 `V2W12Dry`만 남았다. 자율 진행(D33)은 여기서 멈춘다. 두 문서는 잠정 확정이다.
 
 시험 실행의 결과([Worklog/V2.md](Worklog/V2.md) "묶음 Spike1", "묶음 Spike2"):
 
@@ -53,13 +54,13 @@
 
 공개 글은 여유 기준 13.3ms를 쓰지 않는다. 기준은 16.7ms 하나이고, 남는 시간은 잰 비용과 견주어 적는다([plan.md](plan.md) "목표 사양").
 
-글 01\~07에는 Unreal Insights 스크린샷이 있다([Worklog/Posts.md](Worklog/Posts.md) "Insights 스크린샷"). 트레이스 값을 새로 쓰는 글에는 같은 방법으로 스크린샷을 넣는다.
+트레이스 값을 새로 쓰는 글에는 Unreal Insights 스크린샷을 넣는다([Worklog/Posts.md](Worklog/Posts.md) "Insights 스크린샷").
 
 ## 진행 중인 세션
 
 | 세션 | 작업 단위 | 모델 | 상태 |
 | --- | --- | --- | --- |
-| w12-prep | W12 측정 준비([v2-plan.md](v2-plan.md)) | Sonnet medium, 에이전트 | 시작 |
+| 없다 | | | |
 
 코디네이터는 세션을 띄우면 여기에 적는다. 끝난 세션은 결과를 확인하고 보관한 뒤 지운다.
 
@@ -67,7 +68,7 @@
 
 근거는 [measurement.md](Guides/measurement.md) "확정값"과 "총괄 묶음 규약"이다.
 
-- 조건 표는 `Scripts/full-conditions.json`의 21개다. 사다리 `L1`\~`L8`, 빼 보기 `A8-*` 열 행, 하위 실험 셋이다([ADR-0013](Decisions/0013-full-batch-runner-and-condition-table.md)).
+- 조건 표 `Scripts/full-conditions.json`은 `v2` 형식이다(D53). 구성 27개, 183회다. `v1`의 21개 표는 태그 `v1`에 있다.
 - 총괄 묶음의 조건 표에는 조건을 더하지 않는다. 참고 묶음은 따로 둔다.
 - 최종 구성 `q4final`의 표현은 거리 네 구간이다([ADR-0010](Decisions/0010-final-representation-bands.md), [ADR-0011](Decisions/0011-entity-driven-crowd-particles.md)).
   - 0\~40m: 액터(상한 1,000).
@@ -92,7 +93,7 @@
 powershell -ExecutionPolicy Bypass -File Scripts/build.ps1
 powershell -ExecutionPolicy Bypass -File Scripts/run-dev.ps1 -Small -Stage 8
 powershell -ExecutionPolicy Bypass -File Scripts/package.ps1
-powershell -ExecutionPolicy Bypass -File Scripts/run-full.ps1 -DryRun
+powershell -ExecutionPolicy Bypass -File Scripts/run-full.ps1 -Batch Full4 -DryRun
 py -3 -I Scripts/summarize.py --batch Full3
 py -3 -I Scripts/plot.py --batch Full3
 py -3 -I Scripts/plot-readme.py
@@ -165,3 +166,4 @@ Development 전환 점수는 `Full1` 때의 참고값이다(`Measurements/Full1/
 
 - 사용자가 본 "안 보이는 개체"가 200m 밖에서 피격되거나 죽는 개체인지 확인한다(D49).
 - ADR-0018(D50)과 ADR-0019(D52)를 승인한다([목록](Decisions/README.md)).
+- Edge 배경 프로세스를 끄거나, 러너가 창 없는 Edge를 허용하게 고치는 것을 승인한다(D53).
