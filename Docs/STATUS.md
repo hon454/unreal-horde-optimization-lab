@@ -15,7 +15,7 @@
 
 ## 다음 할 일
 
-1. 코디네이터가 [v2-plan.md](v2-plan.md)의 작업 단위를 W10부터 하나씩 맡긴다. W1\~W9는 끝났다(a9a5be2까지). 총괄 묶음(W13)부터는 사용자 검토 뒤에 한다.
+1. 코디네이터가 [v2-plan.md](v2-plan.md)의 작업 단위를 W11부터 하나씩 맡긴다. W1\~W10은 끝났다(54d7998까지). 총괄 묶음(W13)부터는 사용자 검토 뒤에 한다.
 2. 사용자가 [v2-spec.md](v2-spec.md), [v2-plan.md](v2-plan.md), 결정 D33부터([autonomous-decisions.md](Worklog/autonomous-decisions.md))를 검토한다.
 
 사용자가 자리를 비운 동안 코디네이터가 추천안으로 진행한다(2026-11-15 사용자 지시, D33). 두 문서는 잠정 확정이다.
@@ -36,7 +36,7 @@
 | 엔진 회피(`-LabAvoid=1`) | 10,835 | 17.96ms |
 
 - 기본값은 `-LabAvoid` 0(D43), `-LabSeparate` 1(D45), 액터 캡슐 켬(D46), `-LabRepHold` 2,000ms(D48)다.
-- 캡슐을 켠 프레임 p95는 15.87ms다(`V2W5Cost`). 여유는 0.83ms다.
+- 단계 8의 프레임 p95는 15.99ms다(`V2W10Ladder`, D51). 여유는 0.71ms다.
 - 단계 1은 N=500만 목표 안이다(`V2W6Base`, D47).
 
 사용자 요구는 [v2-spec.md](v2-spec.md) 4절과 6절에 있다.
@@ -59,7 +59,7 @@
 
 | 세션 | 작업 단위 | 모델 | 상태 |
 | --- | --- | --- | --- |
-| w10-wire | W10 사다리 배선과 삭제([v2-plan.md](v2-plan.md)) | Opus high, 에이전트 | 시작 |
+| w11-quality | W11 품질 올리기([v2-plan.md](v2-plan.md)) | Opus high, 에이전트 | 시작 |
 
 코디네이터는 세션을 띄우면 여기에 적는다. 끝난 세션은 결과를 확인하고 보관한 뒤 지운다.
 
@@ -90,7 +90,7 @@
 
 ```bash
 powershell -ExecutionPolicy Bypass -File Scripts/build.ps1
-powershell -ExecutionPolicy Bypass -File Scripts/run-dev.ps1 -Small -Stage M5 -Variant q4final
+powershell -ExecutionPolicy Bypass -File Scripts/run-dev.ps1 -Small -Stage 8
 powershell -ExecutionPolicy Bypass -File Scripts/package.ps1
 powershell -ExecutionPolicy Bypass -File Scripts/run-full.ps1 -DryRun
 py -3 -I Scripts/summarize.py --batch Full3
