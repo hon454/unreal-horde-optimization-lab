@@ -169,4 +169,4 @@ Development 전환 점수는 `Full1` 때의 참고값이다(`Measurements/Full1/
 
 ## 사용자에게 요청한 일
 
-- `git checkout -- Config/DefaultEngine.ini`를 돌린다(D56). `Full4` 패키지가 이것을 기다린다.
+없다.
