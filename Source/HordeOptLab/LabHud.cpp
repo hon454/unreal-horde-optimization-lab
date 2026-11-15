@@ -81,7 +81,15 @@ namespace
 		if (Token == TEXT("far_cull=0")) { OutWhat = FString::Printf(TEXT("%d m cull"), Config.FarM); OutChange = TEXT("instances are drawn to the map edge"); return true; }
 		if (Token == TEXT("crowdfx=0")) { OutWhat = TEXT("Niagara crowd"); OutChange = FString::Printf(TEXT("nothing is drawn past %d m"), Config.FarM); return true; }
 		if (Token == TEXT("far_shadow=1")) { OutWhat = TEXT("far shadow cut"); OutChange = TEXT("instances past 80 m cast shadows again"); return true; }
+		// v2 빼 보기(Docs/Worklog/V2.md "W10" 빼 보기 표)
+		if (Token == TEXT("separate=0")) { OutWhat = TEXT("separation"); OutChange = TEXT("minions may overlap"); return true; }
+		if (Token == TEXT("actor_collision=0")) { OutWhat = TEXT("actor capsules"); OutChange = TEXT("near actors have no capsule collision"); return true; }
+		if (Token == TEXT("rep_hold=0")) { OutWhat = TEXT("minimum hold"); OutChange = TEXT("minions may switch back within 2 s"); return true; }
+		if (Token == TEXT("iskm_track_reserve=0")) { OutWhat = TEXT("ISKM track reserve"); OutChange = TEXT("the engine grows ISKM tracks one by one"); return true; }
+		if (Token == TEXT("fx_orb_follow=0")) { OutWhat = TEXT("particle orb follow"); OutChange = TEXT("particles aim at the first orb position"); return true; }
+		if (Token == TEXT("bounds_step=0")) { OutWhat = TEXT("following bounds"); OutChange = TEXT("the ISKM bounds box stays at the start"); return true; }
 		bMinus = false;
+		if (Token == TEXT("avoid=1")) { OutWhat = TEXT("engine avoidance"); OutChange = TEXT("near minions also run engine avoidance"); return true; }
 		if (Token == TEXT("actor_collision=1")) { OutWhat = TEXT("actor collision"); OutChange = TEXT("near actors keep their capsule collision"); return true; }
 		if (Token.StartsWith(TEXT("hydrate_m="))) { OutWhat = FString::Printf(TEXT("actors within %.0f m"), Config.HydrateM); OutChange = OutWhat; return true; }
 		if (Token.StartsWith(TEXT("actor_cap="))) { OutWhat = FString::Printf(TEXT("actor cap %s"), *GroupThousands(Config.ActorCap)); OutChange = OutWhat; return true; }
@@ -103,11 +111,12 @@ namespace
 		if (Id == TEXT("1")) { T.Title = TEXT("All actors (baseline)"); T.Change = TEXT("every minion is a skeletal-mesh actor"); }
 		else if (Id == TEXT("1b")) { T.Title = TEXT("Actors + Budget Allocator"); T.Change = TEXT("+ USkeletalMeshComponentBudgeted, 2 ms budget"); }
 		else if (Id == TEXT("1c")) { T.Title = TEXT("Actors + URO"); T.Change = TEXT("+ Update Rate Optimization on every actor"); }
-		else if (Id == TEXT("2")) { T.Title = TEXT("Logic in Mass, static instances"); T.Change = TEXT("+ Mass entities drawn as instanced meshes, no animation"); }
-		else if (Id == TEXT("3")) { T.Title = FString::Printf(TEXT("Animated instances, cull past %s"), *Far); T.Change = FString::Printf(TEXT("+ vertex animation (VAT), nothing drawn past %s"), *Far); }
-		else if (Id == TEXT("4")) { T.Title = TEXT("Actors up close, animation budget"); T.Change = FString::Printf(TEXT("+ actors within %s, Animation Budget Allocator"), *Hyd); }
+		// v2 사다리(Docs/v2-plan.md "사다리", Docs/Worklog/V2.md "W10" 단계별 스위치 표)
+		else if (Id == TEXT("2")) { T.Title = TEXT("Mass, engine path"); T.Change = FString::Printf(TEXT("+ Mass entities, engine avoidance, actors within %s, static instances to %s"), *Hyd, *Far); }
+		else if (Id == TEXT("3")) { T.Title = TEXT("Hand-written separation"); T.Change = TEXT("+ Lab separation processor instead of engine avoidance"); }
+		else if (Id == TEXT("4")) { T.Title = TEXT("Animated instances, animation budget"); T.Change = TEXT("+ vertex animation (VAT), Animation Budget Allocator, hand-off fixes"); }
 		else if (Id == TEXT("5")) { T.Title = TEXT("Simulation LOD, entity pool"); T.Change = TEXT("+ far minions update less often, entities reused"); }
-		else if (Id == TEXT("6")) { T.Title = TEXT("Skinned instances (ISKM)"); T.Change = TEXT("+ ISKM replaces VAT, fixed bounds"); }
+		else if (Id == TEXT("6")) { T.Title = TEXT("Skinned instances (ISKM)"); T.Change = TEXT("+ ISKM replaces VAT, bounds follow the camera"); }
 		else if (Id == TEXT("7")) { T.Title = FString::Printf(TEXT("Niagara crowd past %s"), *Far); T.Change = TEXT("+ particles where minions are not drawn"); }
 		else if (Id == TEXT("8")) { T.Title = TEXT("Final: quality by distance"); T.Change = FString::Printf(TEXT("+ actors within %s (cap %s), far shadows off"), *Hyd, *GroupThousands(Config.ActorCap)); }
 		else { T.Title = FString::Printf(TEXT("%s / %s"), FLabConfig::StageName(Config.Stage), FLabConfig::VariantName(Config.Variant)); }
@@ -441,8 +450,9 @@ void ALabHud::DrawHUD()
 			Counted += Actors;
 		}
 		// M1은 엔진 ISM 프로세서라 밴드 집계가 없다. 거리와 무관하게 전부 인스턴스다
+		// 사다리 단계 2·3의 인스턴스 수는 전환 집계 프로세서가 센다(ULabRepSwitchCountProcessor)
 		const int32 Instances = Config.Stage == ELabStage::M1 ? Horde : (Crowd ? Crowd->HudInstances.load(std::memory_order_relaxed) : 0);
-		const TCHAR* How = Config.Stage == ELabStage::M1 ? TEXT("static mesh") : Config.UsesIskm() ? TEXT("ISKM") : TEXT("VAT");
+		const TCHAR* How = (Config.Stage == ELabStage::M1 || Config.bStaticIsm) ? TEXT("static mesh") : Config.UsesIskm() ? TEXT("ISKM") : TEXT("VAT");
 		const FString From = bHydrate ? Hyd : FString(TEXT("0"));
 		const FString InstRange = !bCull ? (bHydrate ? FString::Printf(TEXT("%s m+"), *From) : FString(TEXT("all distances")))
 			: FString::Printf(TEXT("%s–%s m"), *From, *Far);

@@ -1,12 +1,13 @@
 ﻿# Development 에디터 빌드를 -game으로 실행한다. 개발·동작 확인·오버레이 스크린샷용이고 수치는 비교에 쓰지 않는다(ADR-0001).
 #   -Small: N=100, P1, 20초 뒤 자동 종료. 완료 확인(AGENTS.md "완료 확인" 2번)에 쓴다.
+#   -Stage: 사다리 단계 1~8(-LabStage=, Docs/v2-plan.md "사다리"). 기본 8(최종 구성). 빼 보기는 -Extra로 스위치를 준다(Docs/Guides/commands.md).
 param(
     [int]$N = 500,
     [ValidateSet("P1", "P2")][string]$Preset = "P1",
     [int]$Seed = 20261106,
-    [ValidateSet("full", "static", "budget", "uro", "pawn", "mass", "manager", "massst", "massav", "massdirlo", "massdirhi", "massevtlo", "massevthi", "vatvert", "vatcull", "vatcullvis", "vatdie0", "vatdie1k", "kill0", "kill1k", "m3uro", "m3budgetdist", "m3budgetsig", "m3lowres", "m3colquery", "m3nocol", "m3colbase", "m3hyd15", "m3hyd50", "m3hydbase", "m2off", "m3noactor", "m3base", "m3qold", "m3syncall", "m3lock0", "m3order", "m3vis30", "m3sig", "m3vis0", "m3vis15", "m3hys20", "m0full", "m0static", "staticpawn", "m1mass", "m2mass", "m3mass", "m4mass", "m4off", "m4m25l50", "m4m25l100", "m4m50l50", "m4avoid", "m4offmove", "m4offpool", "m5iskm", "m5destroy", "m5blend", "m5minss", "m5bounds", "q2crowd", "q4final")][string]$Variant = "full",
-    # 실행 단계(-LabStage=). 비우면 인자를 붙이지 않는다(코드 기본 M0). m4mass·m4offmove 같은 M4 변형은 M4를 줘야 한다(그리는 거리 스크린샷에서 빠뜨려 M0로 돈 일이 있다).
-    [string]$Stage = "",
+    [ValidateSet("1", "2", "3", "4", "5", "6", "7", "8")][string]$Stage = "8",
+    # 로그 파일 이름에 붙는 꼬리표(같은 단계를 인자만 바꿔 여러 번 돌릴 때). 비우면 붙이지 않는다
+    [string]$Tag = "",
     [int]$ResX = 1280,
     [int]$ResY = 720,
     [double]$Duration = 0,
@@ -18,12 +19,11 @@ param(
 
 if ($Small) { $N = 100; $Preset = "P1"; if ($Duration -le 0) { $Duration = 20 } }
 
-$LogName = "LabDev-$Variant-N$N-$Preset.log"
+$LogName = "LabDev-s$Stage$(if ($Tag) { "-$Tag" })-N$N-$Preset.log"
 $GameArgs = @(
     "`"$Project`"", "-game", "-windowed", "-ResX=$ResX", "-ResY=$ResY", "-log", "-LOG=$LogName", "-nosound", "-DisablePython",
-    "-LabN=$N", "-LabPreset=$($Preset.Substring(1))", "-LabSeed=$Seed", "-LabVariant=$Variant"
+    "-LabN=$N", "-LabPreset=$($Preset.Substring(1))", "-LabSeed=$Seed", "-LabStage=$Stage"
 ) + $Extra
-if ($Stage) { $GameArgs += "-LabStage=$Stage" }
 if ($Duration -gt 0) { $GameArgs += "-LabDuration=$Duration" }
 if ($ShotAt -gt 0) { $GameArgs += "-LabShotAt=$ShotAt" }
 
@@ -33,7 +33,7 @@ $Proc = Start-Process -FilePath $Editor -ArgumentList $GameArgs -PassThru
 $Proc.WaitForExit()
 $Log = "$ProjectDir\Saved\Logs\$LogName"
 if (Test-Path $Log) {
-    Select-String -Path $Log -Pattern "lab_config|lab_assets|lab_spawned|lab_applied|lab_summary" | ForEach-Object { $_.Line }
+    Select-String -Path $Log -Pattern "lab_config|lab_ism_processor|lab_assets|lab_spawned|lab_applied|lab_summary" | ForEach-Object { $_.Line }
 }
 Write-Host "EXIT: $($Proc.ExitCode)"
 exit $Proc.ExitCode

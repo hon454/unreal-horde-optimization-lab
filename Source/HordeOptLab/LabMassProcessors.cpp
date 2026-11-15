@@ -932,9 +932,19 @@ void ULabRepSwitchCountProcessor::Execute(FMassEntityManager& EntityManager, FMa
 	int32 NoneToInst = 0, InstToActor = 0, ActorToInst = 0, InstToNone = 0, Other = 0, ShadowOff = 0, ShadowOn = 0;
 	int32 Round = 0, RoundActor = 0, RoundFar = 0, RoundShadow = 0;
 	bool bCapOn = false;
+	// v2 W10: 엔진 ISM 프로세서를 쓰는 사다리 단계(2·3)는 VAT 프로세서의 밴드 집계가 없어 HUD의 인스턴스 수를 여기서 센다(HUD가 보일 때만)
+	const bool bHudInstances = !FLabConfig::Get().UsesVat() && Crowd->bHudCounts.load(std::memory_order_relaxed);
+	int32 HudInstances = 0;
 	EntityQuery.ForEachEntityChunk(Context, [&](FMassExecutionContext& Context)
 	{
 		bCapOn |= Context.GetSharedFragment<FMassVisualizationLODSharedFragment>().bHasAdjustedDistancesFromCount;
+		if (bHudInstances)
+		{
+			for (const FMassRepresentationFragment& R : Context.GetFragmentView<FMassRepresentationFragment>())
+			{
+				HudInstances += R.CurrentRepresentation == EMassRepresentationType::StaticMeshInstance ? 1 : 0;
+			}
+		}
 		if (!Context.GetChunkFragment<FMassVisualizationChunkFragment>().ShouldUpdateVisualization())
 		{
 			return; // 엔진이 이번 프레임에 갱신하지 않은 청크는 Prev가 옛 값이다
@@ -999,6 +1009,10 @@ void ULabRepSwitchCountProcessor::Execute(FMassEntityManager& EntityManager, FMa
 			Last = { Now, From, To, bVisible };
 		}
 	});
+	if (bHudInstances)
+	{
+		Crowd->HudInstances.store(HudInstances, std::memory_order_relaxed);
+	}
 	// 오래된 기록을 지운다(5초마다). 왕복 창(2초)과 최소 유지 시간 중 긴 것보다 오래된 기록은 다시 읽히지 않는다
 	if (Now >= NextPruneTime)
 	{

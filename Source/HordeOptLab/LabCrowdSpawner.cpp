@@ -148,7 +148,15 @@ void ALabCrowdSpawner::SpawnInitial()
 		// 종류별 ISM 메시(2종이면 둘, LabUnitAssets.h). M1은 정적 메시, M2부터 VAT 메시.
 		const int32 Types = FLabUnitTypes::Num();
 		UStaticMesh* CrowdMeshes[LabUnitTypeMax] = { Assets.StaticMesh, LargeAssets.StaticMesh };
-		if (Config.Stage >= ELabStage::M2)
+		// 걷기 루프 길이의 기본값은 액터 걷기 애니 길이다(사다리 단계 2·3: 정지 메시 인스턴스라 VAT 클립이 없다). VAT·ISKM 단계는 아래에서 자기 클립 길이로 덮는다
+		{
+			const FLabMinionAssets* ByType[LabUnitTypeMax] = { &Assets, &LargeAssets };
+			for (int32 Type = 0; Type < Types; ++Type)
+			{
+				if (ByType[Type]->Walk) { Crowd->WalkLengthByType[Type] = ByType[Type]->Walk->GetPlayLength(); }
+			}
+		}
+		if (Config.UsesVat())
 		{
 			// M2: VAT 메시(Scripts/bake-vat.py). 클립 프레임은 데이터 에셋에서 읽는다. 없으면 시작하지 않는다(정지 메시로 재면 M1과 같아진다).
 			const TCHAR* Mode = Config.Variant == ELabVariant::VatVert ? TEXT("Vertex") : TEXT("Bone"); // E2 (b)
@@ -208,7 +216,7 @@ void ALabCrowdSpawner::SpawnInitial()
 			const float SmallActor = Assets.Death ? Assets.Death->GetPlayLength() : 0.f;
 			const float LargeActor = LargeAssets.Death ? LargeAssets.Death->GetPlayLength() : 0.f;
 			if (Types > 1 && SmallActor > 0.f && LargeActor > 0.f) { Crowd->DeathRateActor[1] = LargeActor / SmallActor; }
-			if (Config.Stage >= ELabStage::M2)
+			if (Config.UsesVat())
 			{
 				const FLabVatClips& Small = Crowd->VatClipsByType[0];
 				const int32 SmallFrames = Small.Death.EndFrame - Small.Death.StartFrame + 1;

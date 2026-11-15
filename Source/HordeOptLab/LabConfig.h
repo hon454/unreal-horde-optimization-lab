@@ -238,6 +238,12 @@ struct FLabIskmParams
 struct FLabConfig
 {
 	ELabStage Stage = ELabStage::M0;
+	/** v2 W10 사다리 단계(-LabStage=1~8, Docs/v2-plan.md "사다리"). 0이면 옛 단계·변형 이름으로 골랐다 */
+	int32 Step = 0;
+	/** 사다리 단계 2·3: 하이드레이션 액터는 있고 인스턴스는 엔진 ISM 프로세서(UMassUpdateISMProcessor)와 정지 메시다(VAT 없음) */
+	bool bStaticIsm = false;
+	/** 인스턴스가 VAT로 움직이는가(M2 이상 단계, 단계 2·3 제외). ULabVatISMProcessor 등록과 VAT 에셋 로드 조건 */
+	bool UsesVat() const { return Stage >= ELabStage::M2 && !bStaticIsm; }
 	bool bStageValid = true;   // 아직 없는 단계를 고르면 false. 게임 모드가 종료 코드 2로 끝낸다
 	bool bVariantValid = true; // 모르는 -LabVariant 이름이면 false. 게임 모드가 종료 코드 2로 끝낸다
 	/**

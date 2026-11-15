@@ -31,7 +31,7 @@ class FLabGameModule : public FDefaultGameModuleImpl
 public:
 	virtual void StartupModule() override
 	{
-		const bool bVat = FLabConfig::Get().Stage >= ELabStage::M2;
+		const bool bVat = FLabConfig::Get().UsesVat(); // 사다리 단계 2·3은 하이드레이션이 있어도 엔진 ISM 프로세서다
 		// M5 ISKM 변형(plan.md "M5" 결정 2): VAT 프로세서 자리에 ULabIskmProcessor 하나. ISM 컴포넌트가 없으니 엔진 ISM 갱신도 끈 채로 둔다.
 		// m4offpool·m4offmove는 M5 단계에서도 VAT 그대로다. 엔진 ISKM 갱신(UMassUpdateInstancedSkinnedMeshProcessor)은 Config/DefaultMass.ini에서 꺼 둔 채다.
 		const bool bIskm = FLabConfig::Get().UsesIskm();

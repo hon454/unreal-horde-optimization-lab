@@ -16,12 +16,15 @@ const FLabConfig& FLabConfig::Get()
 		FParse::Value(Cmd, TEXT("-LabDuration="), C.DurationSec);
 		FParse::Value(Cmd, TEXT("-LabWarmup="), C.WarmupSec);
 		FParse::Value(Cmd, TEXT("-LabShotAt="), C.ShotAtSec);
+		bool bFixArg = false;
+		int32 DefaultFixMask = 31;
 		if (FParse::Value(Cmd, TEXT("-LabHydrateFix="), C.HydrateFix))
 		{
 			static const int32 LevelMasks[5] = { 0, 1, 3, 7, 31 };
 			C.HydrateFixMask = LevelMasks[FMath::Clamp(C.HydrateFix, 0, 4)];
+			bFixArg = true;
 		}
-		FParse::Value(Cmd, TEXT("-LabHydrateFixMask="), C.HydrateFixMask);
+		bFixArg |= FParse::Value(Cmd, TEXT("-LabHydrateFixMask="), C.HydrateFixMask);
 		FParse::Value(Cmd, TEXT("-LabFullyParallel="), C.FullyParallel);
 		FParse::Value(Cmd, TEXT("-LabTypes="), C.Types);
 		C.Types = FMath::Clamp(C.Types, 1, 2);
@@ -33,7 +36,23 @@ const FLabConfig& FLabConfig::Get()
 		FString Stage;
 		if (FParse::Value(Cmd, TEXT("-LabStage="), Stage))
 		{
-			if (Stage.Equals(TEXT("M0"), ESearchCase::IgnoreCase)) { C.Stage = ELabStage::M0; }
+			// v2 W10 사다리 단계 1~8(Docs/v2-plan.md "사다리", Docs/Worklog/V2.md "W10"). 단계 번호가 내부 코드 경로(옛 단계·변형)와 단계 기본값을 정한다
+			if (Stage.Len() == 1 && Stage[0] >= TCHAR('1') && Stage[0] <= TCHAR('8'))
+			{
+				C.Step = Stage[0] - TCHAR('0');
+				static const ELabStage StepStages[9] = { ELabStage::M0, ELabStage::M0, ELabStage::M3, ELabStage::M3, ELabStage::M3, ELabStage::M5, ELabStage::M5, ELabStage::M5, ELabStage::M5 };
+				static const ELabVariant StepVariants[9] = { ELabVariant::Full, ELabVariant::Full, ELabVariant::Mass, ELabVariant::Mass, ELabVariant::Mass,
+					ELabVariant::M4OffPool, ELabVariant::M5Bounds, ELabVariant::Q2Crowd, ELabVariant::Q4Final };
+				C.Stage = StepStages[C.Step];
+				C.Variant = StepVariants[C.Step];
+				C.bStaticIsm = C.Step == 2 || C.Step == 3;
+				C.bAvoid = C.Step == 2;      // 단계 2: 엔진 회피, 분리 끔
+				C.bSeparate = C.Step != 2;
+				DefaultFixMask = C.Step >= 4 ? 31 : 0; // 전환 대책과 최소 유지 시간은 단계 4부터(VAT 인스턴스와 액터 사이)
+				if (!bFixArg) { C.HydrateFixMask = DefaultFixMask; }
+				C.RepHoldMs = C.Step >= 4 ? FLabQuality::DefaultRepHoldMs : 0;
+			}
+			else if (Stage.Equals(TEXT("M0"), ESearchCase::IgnoreCase)) { C.Stage = ELabStage::M0; }
 			else if (Stage.Equals(TEXT("M1"), ESearchCase::IgnoreCase)) { C.Stage = ELabStage::M1; }
 			else if (Stage.Equals(TEXT("M2"), ESearchCase::IgnoreCase)) { C.Stage = ELabStage::M2; }
 			else if (Stage.Equals(TEXT("M3"), ESearchCase::IgnoreCase)) { C.Stage = ELabStage::M3; }
@@ -43,7 +62,11 @@ const FLabConfig& FLabConfig::Get()
 		}
 
 		FString Variant;
-		if (FParse::Value(Cmd, TEXT("-LabVariant="), Variant))
+		if (C.Step > 0 && FParse::Value(Cmd, TEXT("-LabVariant="), Variant))
+		{
+			C.bVariantValid = false; // 사다리 단계는 변형을 받지 않는다
+		}
+		else if (FParse::Value(Cmd, TEXT("-LabVariant="), Variant))
 		{
 			if (Variant == TEXT("static") || Variant == TEXT("m0static")) { C.Variant = ELabVariant::Static; } // m0static: M3b 묶음 1 라벨
 			else if (Variant == TEXT("budget")) { C.Variant = ELabVariant::Budget; }
@@ -110,7 +133,7 @@ const FLabConfig& FLabConfig::Get()
 		auto NoteOverride = [&Overrides](const FString& What) { Overrides.Add(What); };
 		{
 			const bool bPlainMassLabel = Variant == TEXT("m3mass") || Variant == TEXT("m3base") || Variant == TEXT("m3colbase") || Variant == TEXT("m3hydbase");
-			bool bOptOut = bPlainMassLabel;
+			bool bOptOut = bPlainMassLabel || C.bStaticIsm; // 사다리 단계 2·3은 애니 예산이 없다(단계 4부터)
 			switch (C.Variant)
 			{
 			case ELabVariant::M3Uro: case ELabVariant::M3BudgetDist: case ELabVariant::M3BudgetSig: case ELabVariant::M3LowRes: case ELabVariant::M3NoActor:
@@ -147,10 +170,10 @@ const FLabConfig& FLabConfig::Get()
 			C.bEntityPool = Pool != 0;
 		}
 		int32 Avoid = -1;
-		if (FParse::Value(Cmd, TEXT("-LabAvoid="), Avoid) && Avoid > 0)
+		if (FParse::Value(Cmd, TEXT("-LabAvoid="), Avoid) && Avoid >= 0)
 		{
-			C.bAvoid = true;
-			NoteOverride(TEXT("avoid=1"));
+			if ((Avoid != 0) != C.bAvoid) { NoteOverride(FString::Printf(TEXT("avoid=%d"), Avoid != 0 ? 1 : 0)); }
+			C.bAvoid = Avoid != 0;
 		}
 		// v2 W4 겹침 방지, 직접 구현(LabConfig.h bSeparate). 기본 1(W5, D45). 0을 주면 끈다
 		int32 Separate = -1;
@@ -283,7 +306,7 @@ const FLabConfig& FLabConfig::Get()
 			}
 		}
 		// 시나리오 쪽 인자: 기본값(확정값)과 다르면 적는다
-		if (C.HydrateFixMask != 31) { NoteOverride(FString::Printf(TEXT("fixmask=%d"), C.HydrateFixMask)); }
+		if (C.HydrateFixMask != DefaultFixMask) { NoteOverride(FString::Printf(TEXT("fixmask=%d"), C.HydrateFixMask)); }
 		if (C.Types != 2) { NoteOverride(FString::Printf(TEXT("types=%d"), C.Types)); }
 		if (C.FarM != 200) { NoteOverride(FString::Printf(TEXT("far=%d"), C.FarM)); }
 		if (C.Seed != 20261106) { NoteOverride(FString::Printf(TEXT("seed=%d"), C.Seed)); }
@@ -453,6 +476,7 @@ TArray<FLabConfig::FTech> FLabConfig::TechList() const
 	const FString Fix = !bM3 ? TEXT("0") : HydrateFixMask == 31 ? TEXT("1") : HydrateFixMask == 0 ? TEXT("0") : FString::Printf(TEXT("m%d"), HydrateFixMask);
 	const FString Sim = !UsesSimLod() ? TEXT("0") : SimLod().bOffMove ? TEXT("1") : TEXT("tick");
 	return {
+		{ TEXT("LabTechVat"), TEXT("vat"), B(UsesVat()) }, // v2 W10: 인스턴스가 VAT로 움직이는가(사다리 단계 2·3은 엔진 ISM 프로세서와 정지 메시)
 		{ TEXT("LabTechHydrate"), TEXT("hyd"), B(UsesHydration()) },
 		{ TEXT("LabTechAnimBudget"), TEXT("bud"), B(UsesBudgetActors()) },
 		{ TEXT("LabTechHydrateFix"), TEXT("fix"), Fix },
@@ -499,6 +523,13 @@ const TCHAR* FLabConfig::ActorCollisionString() const
 
 FLabConfig::FLadder FLabConfig::Ladder() const
 {
+	// v2 사다리 단계(-LabStage=1~8, Docs/v2-plan.md "사다리"). 이름은 HUD(영어, 엔진 글꼴)에 쓴다
+	if (Step > 0)
+	{
+		static const TCHAR* Names[9] = { TEXT(""), TEXT("Actor baseline"), TEXT("Mass, engine path"), TEXT("Lab separation"), TEXT("Animated instances, anim budget"),
+			TEXT("Simulation LOD + entity pool"), TEXT("ISKM + following bounds"), TEXT("Niagara background crowd"), TEXT("") };
+		return { FString::FromInt(Step), Step == 8 ? FString::Printf(TEXT("Actor cap %d, hydrate %.0f m"), ActorCap, HydrateM) : FString(Names[Step]) };
+	}
 	// plan.md "품질 계획" 사다리 표. 이름은 HUD(영어, 엔진 글꼴)에 쓴다. 4단계는 화면 크기 Budget이 켜진 mass다(m3mass 라벨은 Budget을 끈다).
 	switch (Stage)
 	{
@@ -623,8 +654,8 @@ FString FLabConfig::ToLogString() const
 	const FString Crowd = bCrowdFx ? FString::Printf(TEXT(" crowdfx=1 crowdfx_particles=%d crowdfx_inner=%.1f crowdfx_entity=%d crowdfx_outer=%d"), CrowdFxParticles(), CrowdFxInnerCm() / 100.f, bCrowdFxEntity ? 1 : 0, bCrowdFxOuter ? 1 : 0) : FString();
 	// tech는 빼 보기 아홉 기법의 켬·끔이다(Q3). 모든 실행에 붙여 러너와 사람이 기대값과 대조한다.
 	// ladder·overrides·hud·actor_col은 Q5(사다리 단계, 변형 기본값과 다른 인자, HUD 켬, 하이드레이션 액터 캡슐 콜리전). tech 뒤에 늘 붙인다.
-	return FString::Printf(TEXT("lab_config stage=%s n=%d preset=P%d seed=%d variant=%s bench=%d label=%s duration=%.1f types=%d simlod=%s%s%s%s%s%s %s ladder=%s overrides=%s hud=%d actor_col=%s rep_hold=%d fx_orb_follow=%s bounds_step=%s iskm_track_reserve=%s"),
-		StageName(Stage), N, Preset, Seed, VariantName(Variant), bBench ? 1 : 0, *Label, DurationSec, Types, *SimLodString(),
+	return FString::Printf(TEXT("lab_config step=%d stage=%s n=%d preset=P%d seed=%d variant=%s bench=%d label=%s duration=%.1f types=%d simlod=%s%s%s%s%s%s %s ladder=%s overrides=%s hud=%d actor_col=%s rep_hold=%d fx_orb_follow=%s bounds_step=%s iskm_track_reserve=%s"),
+		Step, StageName(Stage), N, Preset, Seed, VariantName(Variant), bBench ? 1 : 0, *Label, DurationSec, Types, *SimLodString(),
 		FarM != 200 ? *FString::Printf(TEXT(" far=%d"), FarM) : TEXT(""), *M5, *Budget, *Health, *Crowd, *TechString(),
 		*Ladder().Id, Overrides.IsEmpty() ? TEXT("-") : *Overrides, bHud ? 1 : 0, ActorCollisionString(), UsesRepHold() ? RepHoldMs : 0,
 		*FxOrbFollowString(), *BoundsStepString(), *IskmTrackReserveString());
