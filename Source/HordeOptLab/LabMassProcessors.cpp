@@ -140,11 +140,7 @@ void ULabApproachProcessor::Execute(FMassEntityManager& EntityManager, FMassExec
 	CSV_CUSTOM_STAT(Lab, SimTickHigh, Ticked[EMassLOD::High], ECsvCustomStatOp::Set);
 	CSV_CUSTOM_STAT(Lab, SimTickMedium, Ticked[EMassLOD::Medium], ECsvCustomStatOp::Set);
 	CSV_CUSTOM_STAT(Lab, SimTickLow, Ticked[EMassLOD::Low], ECsvCustomStatOp::Set);
-	const bool bOffMove = FLabConfig::Get().SimLod().bOffMove;
-	if (bOffMove)
-	{
-		CSV_CUSTOM_STAT(Lab, SimTickOff, Ticked[EMassLOD::Off], ECsvCustomStatOp::Set); // m4offmove만: 200m 밖이 Low 대신 Off다. 다른 변형에는 이 열이 없다
-	}
+	CSV_CUSTOM_STAT(Lab, SimTickOff, Ticked[EMassLOD::Off], ECsvCustomStatOp::Set); // 200m 밖이 Low 대신 Off다
 
 	// 밴드별 걷는 개체 수(필터 없는 같은 쿼리, 청크의 개체 수만 읽는다). 실제 틱 주기 = 평균 프레임 시간 × SimBand ÷ SimTick.
 	int32 Band[5] = {};
@@ -158,10 +154,7 @@ void ULabApproachProcessor::Execute(FMassEntityManager& EntityManager, FMassExec
 	CSV_CUSTOM_STAT(Lab, SimBandHigh, Band[EMassLOD::High], ECsvCustomStatOp::Set);
 	CSV_CUSTOM_STAT(Lab, SimBandMedium, Band[EMassLOD::Medium], ECsvCustomStatOp::Set);
 	CSV_CUSTOM_STAT(Lab, SimBandLow, Band[EMassLOD::Low], ECsvCustomStatOp::Set);
-	if (bOffMove)
-	{
-		CSV_CUSTOM_STAT(Lab, SimBandOff, Band[EMassLOD::Off], ECsvCustomStatOp::Set);
-	}
+	CSV_CUSTOM_STAT(Lab, SimBandOff, Band[EMassLOD::Off], ECsvCustomStatOp::Set);
 
 	static const bool bLog = FParse::Param(FCommandLine::Get(), TEXT("LabSimLodLog"));
 	if (!bLog)
@@ -203,7 +196,7 @@ void ULabApproachProcessor::Execute(FMassEntityManager& EntityManager, FMassExec
 ULabOffMoveProcessor::ULabOffMoveProcessor()
 	: EntityQuery(*this)
 {
-	bAutoRegisterWithProcessingPhases = false; // bOffMove(m4offmove·m4offpool과 M5 단계)에서만 게임 모듈이 켠다(HordeOptLab.cpp)
+	bAutoRegisterWithProcessingPhases = false; // Simulation LOD(단계 5부터)에서만 게임 모듈이 켠다(HordeOptLab.cpp)
 	ExecutionFlags = (int32)EProcessorExecutionFlags::AllNetModes;
 	ExecutionOrder.ExecuteInGroup = UE::Mass::ProcessorGroupNames::Movement; // 범위 피해(LabLogic)는 Movement 뒤에 돈다
 	LabRunAfterSimLod(ExecutionOrder);
@@ -349,8 +342,8 @@ ULabOffMoveEnterObserver::ULabOffMoveEnterObserver()
 	ObservedTypes.Add(FMassOffLODTag::StaticStruct());
 	ObservedOperations = EMassObservedOperationFlags::AddElement; // 새 엔티티는 LastMoveTime 0으로 시작해 따로 다룬다
 	ExecutionFlags = (int32)EProcessorExecutionFlags::AllNetModes;
-	// bOffMove(m4offmove·m4offpool과 M5 단계)에서만 관찰자로 등록한다. 등록은 CDO의 PostInitProperties에서 일어나고 그때 실행 인자는 이미 읽을 수 있다(FLabConfig::Get).
-	bAutoRegisterWithObserverRegistry = FLabConfig::Get().UsesSimLod() && FLabConfig::Get().SimLod().bOffMove;
+	// Simulation LOD(단계 5부터)에서만 관찰자로 등록한다. 등록은 CDO의 PostInitProperties에서 일어나고 그때 실행 인자는 이미 읽을 수 있다(FLabConfig::Get).
+	bAutoRegisterWithObserverRegistry = FLabConfig::Get().UsesSimLod();
 #if !UE_BUILD_TEST
 	// 개발 확인(-LabSimLodLog): Off 태그가 떨어질 때도 불려, 그때의 카메라 거리와 마지막 이동 뒤 흐른 시간을 로그에 남긴다(lab_event offleave).
 	if (FParse::Param(FCommandLine::Get(), TEXT("LabSimLodLog")) || FParse::Param(FCommandLine::Get(), TEXT("LabOrbDiag")))
@@ -453,7 +446,6 @@ void ULabOrbContactProcessor::Execute(FMassEntityManager& EntityManager, FMassEx
 	}
 	const float Now = Crowd->GetWorld()->GetTimeSeconds();
 	const bool bSimLod = FLabConfig::Get().UsesSimLod();
-	const FLabSimLod Sim = FLabConfig::Get().SimLod();
 	{
 		FScopeLock Lock(&Crowd->ResultLock);
 		// M4: 피해 범위의 청크가 이 프레임에 돌지 않으면(탑뷰 P2는 오브 주변이 Medium) 번개 대상이 깜박인다. 대상을 찾은 청크의 틱 간격 동안은 지난 값을 둔다.
@@ -465,11 +457,6 @@ void ULabOrbContactProcessor::Execute(FMassEntityManager& EntityManager, FMassEx
 		Crowd->NearestDistSq = TNumericLimits<float>::Max();
 	}
 	const FVector Center = Crowd->OrbCenter;
-	const ELabVariant Variant = FLabConfig::Get().Variant;
-	if (Variant == ELabVariant::VatDie0 || Variant == ELabVariant::VatDie1k)
-	{
-		return; // E2 (d): 범위 피해로 죽지 않게 한다(사망은 발생기만 만든다)
-	}
 	const float ZoneRadiusSq = FMath::Square(FLabScenario::ZoneRadius);
 	const float DeathDuration = Crowd->DeathDuration;
 
@@ -526,7 +513,7 @@ void ULabOrbContactProcessor::Execute(FMassEntityManager& EntityManager, FMassEx
 			if (bSimLod)
 			{
 				const int32 Lod = LabChunkLod(Context);
-				Crowd->NearestHoldUntil = Now + (Lod == EMassLOD::Medium ? Sim.TickMedium : Lod == EMassLOD::Low ? Sim.TickLow : 0.f) * 1.2f; // 엔진이 간격에 ±10%를 더한다(MassLODTickRateController.h:143)
+				Crowd->NearestHoldUntil = Now + (Lod == EMassLOD::Medium ? FLabSimLod::TickMedium : Lod == EMassLOD::Low ? FLabSimLod::TickLow : 0.f) * 1.2f; // 엔진이 간격에 ±10%를 더한다(MassLODTickRateController.h:143)
 			}
 		}
 	});
@@ -567,10 +554,6 @@ void ULabOrbSnipeProcessor::Execute(FMassEntityManager& EntityManager, FMassExec
 	if (SnipeTick == 0)
 	{
 		return;
-	}
-	if (FLabConfig::Get().Variant == ELabVariant::VatDie0 || FLabConfig::Get().Variant == ELabVariant::VatDie1k)
-	{
-		return; // E2 (d): 저격도 끈다(사망은 발생기만 만든다)
 	}
 	const FVector Center = Crowd->OrbCenter;
 	const FLabSnipeView View = Crowd->SnipeView;
@@ -616,29 +599,19 @@ void ULabOrbSnipeProcessor::Execute(FMassEntityManager& EntityManager, FMassExec
 
 	const float HitDuration = Crowd->HitDuration;
 	const float Now = Crowd->GetWorld()->GetTimeSeconds();
-	const bool bOld = LabUseOldQueries();
 	FScopeLock Lock(&Crowd->ResultLock);
 	Picker.ForEach([&](const TLabSnipeSelector<FMassEntityHandle>::FPick& Pick)
 	{
 		const FMassEntityHandle Target = Pick.Target;
-		if (bOld)
+		// 대상은 순회가 끝난 뒤에야 정해지므로 쿼리 안에서 쓸 수 없다. 태그 추가와 같은 플러시에서 지연 명령으로 쓴다(2초에 5건).
+		Context.Defer().PushCommand<FMassDeferredSetCommand>([Target, HitDuration, Now](FMassEntityManager& Manager)
 		{
-			// m3qold: 정비 전 쿼리 밖 쓰기. 다른 청크의 메모리를 순회 밖에서 바로 고친다(plan.md 코드 정비 1).
-			EntityManager.GetFragmentDataChecked<FLabMinionFragment>(Target).StateTimeLeft = HitDuration;
-			EntityManager.GetFragmentDataChecked<FLabAnimStateFragment>(Target).Set(ELabMinionState::Hit, Now);
-		}
-		else
-		{
-			// 대상은 순회가 끝난 뒤에야 정해지므로 쿼리 안에서 쓸 수 없다. 태그 추가와 같은 플러시에서 지연 명령으로 쓴다(2초에 5건).
-			Context.Defer().PushCommand<FMassDeferredSetCommand>([Target, HitDuration, Now](FMassEntityManager& Manager)
+			if (Manager.IsEntityValid(Target))
 			{
-				if (Manager.IsEntityValid(Target))
-				{
-					Manager.GetFragmentDataChecked<FLabMinionFragment>(Target).StateTimeLeft = HitDuration;
-					Manager.GetFragmentDataChecked<FLabAnimStateFragment>(Target).Set(ELabMinionState::Hit, Now);
-				}
-			});
-		}
+				Manager.GetFragmentDataChecked<FLabMinionFragment>(Target).StateTimeLeft = HitDuration;
+				Manager.GetFragmentDataChecked<FLabAnimStateFragment>(Target).Set(ELabMinionState::Hit, Now);
+			}
+		});
 		Context.Defer().AddTag<FLabHitTag>(Target);
 		StopMoving(Context, Target);
 #if !UE_BUILD_TEST
@@ -784,7 +757,7 @@ ULabSeparationProcessor::ULabSeparationProcessor()
 	// 그 프레임의 이동이 끝난 위치를 고친다. 범위 피해(LabLogic)는 Movement 그룹 뒤라 고친 위치를 본다
 	ExecutionOrder.ExecuteInGroup = UE::Mass::ProcessorGroupNames::Movement;
 	ExecutionOrder.ExecuteAfter.Add(UMassApplyMovementProcessor::StaticClass()->GetFName());
-	if (FLabConfig::Get().UsesSimLod() && FLabConfig::Get().SimLod().bOffMove)
+	if (FLabConfig::Get().UsesSimLod())
 	{
 		ExecutionOrder.ExecuteAfter.Add(ULabOffMoveProcessor::StaticClass()->GetFName()); // 등록되지 않은 이름은 해결기가 빈 노드로 둔다(engine-notes.md 37절). 그래도 쓸 때만 적는다
 	}
@@ -1301,173 +1274,5 @@ void ULabMinionStateProcessor::Execute(FMassEntityManager& EntityManager, FMassE
 				C->RequestRespawn(Count);
 			}
 		});
-	}
-}
-
-// E1 (d) 피해 적용 방식 -----------------------------------------------------
-
-namespace
-{
-	/** 변형에서 초당 건수와 방식을 읽는다. 0이면 E1 (d) 모드가 아니다. */
-	int32 LabDamageRate(bool& bOutEvent)
-	{
-		switch (FLabConfig::Get().Variant)
-		{
-		case ELabVariant::MassDirLo: bOutEvent = false; return 1000;
-		case ELabVariant::MassDirHi: bOutEvent = false; return 10000;
-		case ELabVariant::MassEvtLo: bOutEvent = true; return 1000;
-		case ELabVariant::MassEvtHi: bOutEvent = true; return 10000;
-		case ELabVariant::VatDie1k: bOutEvent = false; return 1000; // E2 (d) 첫 설계: 치명(피격→사망)
-		case ELabVariant::Kill1k: bOutEvent = false; return 1000;   // E2 (d): 치명(피격→사망), 평소 시나리오 위에 더한다
-		default: bOutEvent = false; return 0;
-		}
-	}
-	constexpr float LabNonLethalDamage = 1.f; // 한 건의 피해. 체력 100에서 최소 1까지만 깎는다
-	constexpr float LabNonLethalFloor = 1.f;
-}
-
-ULabDamageGenProcessor::ULabDamageGenProcessor()
-	: EntityQuery(*this)
-{
-	ExecutionFlags = (int32)EProcessorExecutionFlags::AllNetModes;
-	ExecutionOrder.ExecuteInGroup = LabLogicGroupName;
-	ExecutionOrder.ExecuteAfter.Add(ULabMinionStateProcessor::StaticClass()->GetFName());
-}
-
-void ULabDamageGenProcessor::ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager)
-{
-	ProcessorRequirements.AddSubsystemRequirement<ULabCrowdSubsystem>(EMassFragmentAccess::ReadWrite); // DamageHits를 쓴다(원자 변수)
-	EntityQuery.AddRequirement<FLabHealthFragment>(EMassFragmentAccess::ReadWrite);
-	EntityQuery.AddRequirement<FLabMinionFragment>(EMassFragmentAccess::ReadWrite); // E2 (d) 치명 모드가 피격 시간을 쓴다
-	EntityQuery.AddRequirement<FLabAnimStateFragment>(EMassFragmentAccess::ReadWrite); // 치명 모드의 피격 전환
-	EntityQuery.AddTagRequirement<FLabMinionTag>(EMassFragmentPresence::All);
-	EntityQuery.AddTagRequirement<FLabHitTag>(EMassFragmentPresence::None);
-	EntityQuery.AddTagRequirement<FLabDeadTag>(EMassFragmentPresence::None);
-}
-
-void ULabDamageGenProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context)
-{
-	bool bEvent = false;
-	const int32 Rate = LabDamageRate(bEvent);
-	ULabCrowdSubsystem* Crowd = LabCrowdWrite(Context);
-	if (Rate == 0 || !Crowd || Crowd->GetAliveCount() <= 0)
-	{
-		return;
-	}
-	Owed += Rate * Context.GetDeltaTimeSeconds();
-	const int32 Wanted = FMath::FloorToInt(Owed);
-	if (Wanted <= 0)
-	{
-		return;
-	}
-	Owed -= Wanted;
-	const bool bLethal = FLabConfig::Get().Variant == ELabVariant::VatDie1k || FLabConfig::Get().Variant == ELabVariant::Kill1k;
-	// 개체마다 해시로 확률 Wanted / 산 개체 수에 뽑는다. 기대 건수가 Wanted다.
-	// 치명 모드(E2 (d))는 피격·사망 중인 개체가 많아(초당 1천 x 약 2.9초) 걷는 개체 수로 나눠야 기대 건수가 맞는다.
-	const int32 Pool = bLethal ? FMath::Max(1, EntityQuery.GetNumMatchingEntities(EntityManager)) : Crowd->GetAliveCount();
-	const uint32 Threshold = static_cast<uint32>(FMath::Min(1.0, double(Wanted) / Pool) * double(MAX_uint32));
-	const uint32 Frame = static_cast<uint32>(GFrameCounter);
-	const float HitDuration = Crowd->HitDuration;
-	const float Now = Crowd->GetWorld()->GetTimeSeconds();
-
-	TArray<FMassEntityHandle> Targets;
-	EntityQuery.ForEachEntityChunk(Context, [&](FMassExecutionContext& Context)
-	{
-		const TArrayView<FLabHealthFragment> Healths = Context.GetMutableFragmentView<FLabHealthFragment>();
-		const TArrayView<FLabMinionFragment> Minions = Context.GetMutableFragmentView<FLabMinionFragment>();
-		const TArrayView<FLabAnimStateFragment> AnimStates = Context.GetMutableFragmentView<FLabAnimStateFragment>();
-		for (FMassExecutionContext::FEntityIterator It = Context.CreateEntityIterator(); It; ++It)
-		{
-			if (MurmurFinalize32(HashCombineFast(::GetTypeHash(Minions[It].Serial), ::GetTypeHash(Frame))) > Threshold) // 섞지 않은 HashCombineFast는 작은 입력에서 고르게 퍼지지 않는다
-			{
-				continue;
-			}
-			if (bLethal)
-			{
-				// 저격과 같은 경로: 피격 상태로 바꾸고 멈춘다. 피격이 끝나면 상태 프로세서가 사망 → 제거 → 재생성한다.
-				const FMassEntityHandle Entity = Context.GetEntity(It);
-				Minions[It].StateTimeLeft = HitDuration;
-				AnimStates[It].Set(ELabMinionState::Hit, Now);
-				Context.Defer().AddTag<FLabHitTag>(Entity);
-				StopMoving(Context, Entity);
-				++Crowd->DamageHits;
-			}
-			else if (bEvent)
-			{
-				Targets.Add(Context.GetEntity(It));
-			}
-			else
-			{
-				FLabHealthFragment& Health = Healths[It];
-				Health.Health = FMath::Max(LabNonLethalFloor, Health.Health - LabNonLethalDamage);
-				++Crowd->DamageHits;
-			}
-		}
-	});
-
-	if (bEvent && Targets.Num() > 0)
-	{
-		// 피해 이벤트 엔티티는 처리 단계가 끝난 뒤(커맨드 플러시) 한꺼번에 만든다.
-		Context.Defer().PushCommand<FMassDeferredCreateCommand>([Targets = MoveTemp(Targets)](FMassEntityManager& Manager)
-		{
-			static FMassArchetypeHandle Archetype;
-			if (!Archetype.IsValid())
-			{
-				Archetype = Manager.CreateArchetype({ FLabDamageEventFragment::StaticStruct() });
-			}
-			TArray<FMassEntityHandle> Events;
-			TSharedRef<FMassEntityManager::FEntityCreationContext> Creation = Manager.BatchCreateEntities(Archetype, Targets.Num(), Events);
-			for (int32 i = 0; i < Events.Num(); ++i)
-			{
-				FLabDamageEventFragment& Event = Manager.GetFragmentDataChecked<FLabDamageEventFragment>(Events[i]);
-				Event.Target = Targets[i];
-				Event.Amount = LabNonLethalDamage;
-			}
-		});
-	}
-}
-
-ULabDamageApplyProcessor::ULabDamageApplyProcessor()
-	: EventQuery(*this)
-	, HealthQuery(*this)
-{
-	ExecutionFlags = (int32)EProcessorExecutionFlags::AllNetModes;
-	ExecutionOrder.ExecuteInGroup = LabLogicGroupName;
-	ExecutionOrder.ExecuteAfter.Add(ULabDamageGenProcessor::StaticClass()->GetFName());
-}
-
-void ULabDamageApplyProcessor::ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager)
-{
-	ProcessorRequirements.AddSubsystemRequirement<ULabCrowdSubsystem>(EMassFragmentAccess::ReadWrite); // DamageHits를 쓴다(원자 변수)
-	EventQuery.AddRequirement<FLabDamageEventFragment>(EMassFragmentAccess::ReadOnly);
-	HealthQuery.AddRequirement<FLabHealthFragment>(EMassFragmentAccess::ReadWrite);
-	HealthQuery.AddTagRequirement<FLabMinionTag>(EMassFragmentPresence::All);
-}
-
-void ULabDamageApplyProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context)
-{
-	ULabCrowdSubsystem* Crowd = LabCrowdWrite(Context); // 쿼리 밖에서 얻는다
-	TArray<FMassEntityHandle> Consumed;
-	EventQuery.ForEachEntityChunk(Context, [&](FMassExecutionContext& Context)
-	{
-		const TConstArrayView<FLabDamageEventFragment> Events = Context.GetFragmentView<FLabDamageEventFragment>();
-		for (FMassExecutionContext::FEntityIterator It = Context.CreateEntityIterator(); It; ++It)
-		{
-			const FLabDamageEventFragment& Event = Events[It];
-			// 대상이 그사이 지워졌으면(사망·재생성) 건너뛴다.
-			if (EntityManager.IsEntityValid(Event.Target))
-			{
-				if (FLabHealthFragment* Health = EntityManager.GetFragmentDataPtr<FLabHealthFragment>(Event.Target))
-				{
-					Health->Health = FMath::Max(LabNonLethalFloor, Health->Health - Event.Amount);
-					if (Crowd) { ++Crowd->DamageHits; }
-				}
-			}
-			Consumed.Add(Context.GetEntity(It));
-		}
-	});
-	if (Consumed.Num() > 0)
-	{
-		Context.Defer().DestroyEntities(MoveTemp(Consumed));
 	}
 }

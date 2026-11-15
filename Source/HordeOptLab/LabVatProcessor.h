@@ -9,12 +9,11 @@
  * 커스텀 데이터는 위치와 같은 순서로 쌓여야 하므로 같은 반복에서 쓴다(MassVisualizationComponent.cpp:566-571).
  * 구조는 City Sample MassCrowdUpdateISMVertexAnimationProcessor와 같다(../unreal-horde-references/CitySample/Plugins/CitySampleMassCrowd).
  *
- * 엔진 프로세서와 이 프로세서 중 하나만 돈다. 기본은 꺼져 있고, 게임 모듈 시작 때 -LabStage가 M2 이상이면
+ * 엔진 프로세서와 이 프로세서 중 하나만 돈다. 기본은 꺼져 있고, 게임 모듈 시작 때 VAT 단계(사다리 단계 4·5, ISKM을 끈 빼 보기)이면
  * 엔진 것을 끄고 이것을 켠다(HordeOptLab.cpp, plan.md "M2").
  *
  * 애니 상태는 표현 전용 FLabAnimStateFragment(상태, 들어간 시각)에서 읽는다. 재생 시각 = 월드 시각 − 들어간 시각. 걷기는 위상을 음수 시각으로 둔 루프다.
- * 로직 프래그먼트와 태그는 읽지 않는다(M3b 정비 1, Docs/Worklog/M3b.md). 그룹 LabLogic 뒤에 돈다는 선언은 변형 m3order에서만 한다(LabVatProcessor.cpp). 기본은 로직과의 선후가 없다(LabMassProcessors.h LabExplicitLogicOrder).
- * 진단 변형 m3qold는 정비 전처럼 FLabMinionFragment와 태그를 읽고 순서 선언이 없다.
+ * 로직 프래그먼트와 태그는 읽지 않는다(M3b 정비 1, Docs/Worklog/M3b.md). 로직과의 선후는 선언하지 않는다(LabMassProcessors.h).
  * 프레임은 여기서 계산해 커스텀 데이터 0 = Frame, 1 = PrevFrame으로 넘긴다(VAT 머티리얼 AutoPlay 끔, Scripts/bake-vat.py).
  * 걷기 루프 끝(End + 0.99)이 다음 클립 첫 행과 섞이지 않는 근거: 머티리얼 함수 BoneIndexUVs가 int(Frame)으로 행을 자르고 텍스처 필터가 Nearest다(engine-notes.md 12절).
  */

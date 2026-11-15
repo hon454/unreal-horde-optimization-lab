@@ -1,7 +1,6 @@
 #include "LabCrowdSpawner.h"
 #include "HordeOptLab.h"
 #include "LabConfig.h"
-#include "LabCrowdManager.h"
 #include "LabCrowdSubsystem.h"
 #include "LabUnitAssets.h"
 #include "Animation/AnimBlueprintGeneratedClass.h"
@@ -70,11 +69,11 @@ void ALabCrowdSpawner::LoadAssets()
 	if (FLabUnitTypes::Num() == 2)
 	{
 		// 대형(2종): 세트가 하나라도 비면 전부 소형으로 대체하고 경고한다(스모크 전용, 측정 금지). 종류(아키타입·저격 예약·액터 풀)는 그대로 갈린다.
-		// VAT(M2 이상이 읽는다)도 여기서 함께 확인해 대체 여부를 한 번에 정한다. 모드는 변형에 따른다(vatvert만 Vertex).
+		// VAT(단계 4·5가 읽는다)도 여기서 함께 확인해 대체 여부를 한 번에 정한다. 모드는 Bone이다(Vertex 모드 변형은 v2 W10에서 지웠다).
 		FString LargeMissing;
 		LabLoadMinionAssets(LabUnitLarge, LargeAssets, LargeMissing);
 		const FLabUnitAssetPaths& Large = FLabUnitAssetPaths::Get(LabUnitLarge);
-		const TCHAR* Mode = FLabConfig::Get().Variant == ELabVariant::VatVert ? TEXT("Vertex") : TEXT("Bone");
+		const TCHAR* Mode = TEXT("Bone");
 		const FString VatMeshPath = Large.VatMeshPath(Mode);
 		const FString VatDataPath = Large.VatDataPath(Mode);
 		if (VatMeshPath.IsEmpty() || !LoadObject<UStaticMesh>(nullptr, *VatMeshPath, nullptr, LOAD_Quiet | LOAD_NoWarn)) { LargeMissing += LargeMissing.IsEmpty() ? TEXT("vatmesh") : TEXT(",vatmesh"); }
@@ -95,18 +94,6 @@ void ALabCrowdSpawner::LoadAssets()
 	}
 }
 
-TSubclassOf<ALabMinion> ALabCrowdSpawner::MinionClass() const
-{
-	switch (FLabConfig::Get().Variant)
-	{
-	case ELabVariant::Static: return ALabMinionStatic::StaticClass();
-	case ELabVariant::Budget: return ALabMinionBudget::StaticClass();
-	case ELabVariant::Pawn: return ALabMinionPawn::StaticClass();
-	case ELabVariant::StaticPawn: return ALabMinionStaticPawn::StaticClass();
-	default: return ALabMinion::StaticClass();
-	}
-}
-
 void ALabCrowdSpawner::SpawnInitial()
 {
 	LoadAssets();
@@ -123,16 +110,7 @@ void ALabCrowdSpawner::SpawnInitial()
 		RadiusAngles.Emplace(Radius, Angle);
 	}
 
-	if (Config.UsesManager())
-	{
-		// 변형 manager(Docs/Worklog/Q8.md): Mass 엔티티 대신 틱 없는 액터와 매니저 하나. 메시와 피격·사망 시간은 아래 M1 경로와 같은 값이다
-		Manager = GetWorld()->SpawnActor<ALabCrowdManager>();
-		UStaticMesh* ManagerMeshes[LabUnitTypeMax] = { Assets.StaticMesh, LargeAssets.StaticMesh };
-		Manager->Activate(this, GetOrbLocation(), MakeArrayView(ManagerMeshes, FLabUnitTypes::Num()),
-			Assets.Hit ? Assets.Hit->GetPlayLength() : 0.5f, Assets.Death ? Assets.Death->GetPlayLength() : 1.f);
-		SpawnEntitiesAt(RadiusAngles);
-	}
-	else if (Config.Stage == ELabStage::M0)
+	if (Config.IsActorCrowd())
 	{
 		Minions.Reserve(Config.N);
 		for (const FVector2D& RA : RadiusAngles)
@@ -142,10 +120,10 @@ void ALabCrowdSpawner::SpawnInitial()
 	}
 	else
 	{
-		// M1부터 개체는 Mass 엔티티다. 표현은 static 변형과 같은 정적 메시, 피격·사망 시간은 M0 애니 길이와 같다.
+		// 단계 2부터 개체는 Mass 엔티티다. 피격·사망 시간은 단계 1 액터의 애니 길이와 같다.
 		Crowd = GetWorld()->GetSubsystem<ULabCrowdSubsystem>();
 		Crowd->OrbCenter = GetOrbLocation();
-		// 종류별 ISM 메시(2종이면 둘, LabUnitAssets.h). M1은 정적 메시, M2부터 VAT 메시.
+		// 종류별 ISM 메시(2종이면 둘, LabUnitAssets.h). 단계 2·3은 정지 메시(Scripts/make-static-minion.py), 단계 4부터 VAT 메시.
 		const int32 Types = FLabUnitTypes::Num();
 		UStaticMesh* CrowdMeshes[LabUnitTypeMax] = { Assets.StaticMesh, LargeAssets.StaticMesh };
 		// 걷기 루프 길이의 기본값은 액터 걷기 애니 길이다(사다리 단계 2·3: 정지 메시 인스턴스라 VAT 클립이 없다). VAT·ISKM 단계는 아래에서 자기 클립 길이로 덮는다
@@ -159,7 +137,7 @@ void ALabCrowdSpawner::SpawnInitial()
 		if (Config.UsesVat())
 		{
 			// M2: VAT 메시(Scripts/bake-vat.py). 클립 프레임은 데이터 에셋에서 읽는다. 없으면 시작하지 않는다(정지 메시로 재면 M1과 같아진다).
-			const TCHAR* Mode = Config.Variant == ELabVariant::VatVert ? TEXT("Vertex") : TEXT("Bone"); // E2 (b)
+			const TCHAR* Mode = TEXT("Bone");
 			for (int32 Type = 0; Type < Types; ++Type)
 			{
 				const FLabUnitAssetPaths& Paths = FLabUnitAssetPaths::Get(FLabUnitTypes::AssetType(Type)); // 대체 중이면 대형도 소형 VAT
@@ -246,7 +224,7 @@ void ALabCrowdSpawner::SpawnInitial()
 
 int32 ALabCrowdSpawner::GetAliveCount() const
 {
-	return Manager ? Manager->GetAliveCount() : Crowd ? Crowd->GetAliveCount() : Minions.Num();
+	return Crowd ? Crowd->GetAliveCount() : Minions.Num();
 }
 
 FVector ALabCrowdSpawner::GetOrbLocation() const
@@ -266,11 +244,6 @@ void ALabCrowdSpawner::SpawnEntitiesAt(TConstArrayView<FVector2D> RadiusAngles)
 	{
 		Locations.Emplace(Center.X + RA.X * FMath::Cos(RA.Y), Center.Y + RA.X * FMath::Sin(RA.Y), 0.f); // 엔티티 위치는 발밑(지면)이다
 		Serials.Add(NextSerial++);
-	}
-	if (Manager)
-	{
-		Manager->SpawnMinions(Locations, Serials); // 변형 manager: 같은 위치·일련번호 열로 액터를 만든다
-		return;
 	}
 	Crowd->SpawnEntities(Locations, Serials);
 }
@@ -299,7 +272,7 @@ ALabMinion* ALabCrowdSpawner::SpawnAt(float Radius, float Angle)
 
 	FActorSpawnParameters Params;
 	Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	ALabMinion* Minion = GetWorld()->SpawnActor<ALabMinion>(MinionClass(), Location, Facing, Params);
+	ALabMinion* Minion = GetWorld()->SpawnActor<ALabMinion>(ALabMinion::StaticClass(), Location, Facing, Params);
 	Minion->InitMinion(this, FLabUnitTypes::IsLarge(Serial) ? LargeAssets : Assets, Serial); // M0 2종: 대형 에셋(없으면 소형과 같다)
 	Minions.Add(Minion);
 	return Minion;

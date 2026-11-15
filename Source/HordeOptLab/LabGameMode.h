@@ -50,12 +50,13 @@ public:
 
 	/** 상태 오버레이(ALabHud)의 군중 줄. */
 	FString GetHudCrowdLine() const;
-	/** Q5 HUD: 미니언 총수(단계와 무관, 사망 중 포함)와 액터 수(M0은 전부, M3 이상은 하이드레이션 액터, M1·M2는 0) */
+	/** Q5 HUD: 미니언 총수(단계와 무관, 사망 중 포함)와 액터 수(단계 1은 전부, 단계 2부터는 하이드레이션 액터) */
 	int32 GetHudMinions() const;
 	int32 GetHudActors() const;
 
 protected:
-	void ApplyVariantCVars();
+	/** 화면 크기 애니 예산(단계 4부터): a.Budget.Enabled·BudgetMs를 넣고 월드 할당기를 켠다 */
+	void ApplyBudgetCVars();
 	void ApplyBenchCVars();
 	void TickBench();
 	/**
@@ -67,7 +68,7 @@ protected:
 	/**
 	 * Q2 Niagara 배경 무리(-LabCrowdFx=1, Docs/Worklog/Q2.md (마)). Config/DefaultGame.ini [Lab] CrowdFxSystem의 시스템을 오브 위치에 놓고
 	 * 사용자 변수(SmallRate·LargeRate·OuterRadius·Lifetime·Speed)를 넣은 뒤 활성화한다. 워밍업(268초)은 활성화 때 돈다.
-	 * Q2b(-LabCrowdFxEntity=1, 기본): 엔티티 구동 변수(LabSmallRecs·LabLargeRecs·LabNow·LabOrbPos, FLabCrowdFx)가 에셋에 있는지 보고 컴포넌트를 Mass 서브시스템에 넘긴다.
+	 * Q2b: 엔티티 구동 변수(LabSmallRecs·LabLargeRecs·LabNow·LabOrbPos, FLabCrowdFx)가 에셋에 있는지 보고 컴포넌트를 Mass 서브시스템에 넘긴다.
 	 * 배열은 ULabCrowdFxGatherProcessor가 매 프레임 넣는다. 독립 입자의 수명은 안쪽 반경 500m 기준이다(FLabConfig::CrowdFxInnerCm).
 	 */
 	void SetupCrowdFx();

@@ -12,7 +12,6 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "SignificanceManager.h"
 #include "SkeletalMeshComponentBudgeted.h"
 
 ALabMinion::ALabMinion(const FObjectInitializer& ObjectInitializer)
@@ -34,7 +33,7 @@ ALabMinion::ALabMinion(const FObjectInitializer& ObjectInitializer)
 	SkelMesh->SetRelativeLocation(FVector(0.f, 0.f, -Capsule->GetUnscaledCapsuleHalfHeight()));
 	SkelMesh->SetRelativeRotation(FRotator(0.f, -90.f, 0.f));
 
-	// pawn 변형은 CharacterMovement를 만들지 않는다(ALabMinionPawn).
+	// ALabMinionPawn은 CharacterMovement의 틱을 끈다.
 	if (UCharacterMovementComponent* Move = GetCharacterMovement())
 	{
 		Move->bRunPhysicsWithNoController = true;
@@ -90,10 +89,6 @@ void ALabMinion::SetupVisual(const FLabMinionAssets& Assets)
 		bSingleNode = true;
 		SkelMesh->SetAnimationMode(EAnimationMode::AnimationSingleNode);
 	}
-	if (FLabConfig::Get().Variant == ELabVariant::Uro)
-	{
-		SkelMesh->bEnableUpdateRateOptimizations = true;
-	}
 }
 
 void ALabMinion::EnterState(ELabMinionState NewState)
@@ -120,7 +115,7 @@ void ALabMinion::EnterState(ELabMinionState NewState)
 	USkeletalMeshComponent* SkelMesh = GetMesh();
 	if (!SkelMesh->GetSkeletalMeshAsset())
 	{
-		return; // static 변형
+		return; // 메시 에셋이 빠진 체크아웃
 	}
 	if (bSingleNode)
 	{
@@ -169,7 +164,7 @@ void ALabMinion::Tick(float DeltaSeconds)
 		}
 		else
 		{
-			// pawn 변형: 평지라 바닥 검사 없이 위치만 옮기고 진행 방향을 본다(스윕 없음).
+			// ALabMinionPawn: 평지라 바닥 검사 없이 위치만 옮기고 진행 방향을 본다(스윕 없음). 하이드레이션 액터는 틱하지 않아 여기 오지 않는다.
 			SetActorLocationAndRotation(GetActorLocation() + Dir * FLabScenario::MoveSpeed * DeltaSeconds, Dir.Rotation());
 		}
 		return;
@@ -190,30 +185,11 @@ void ALabMinion::Tick(float DeltaSeconds)
 	}
 }
 
-// static 변형 ---------------------------------------------------------------
-
-ALabMinionStatic::ALabMinionStatic(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer)
-{
-	StaticVisual = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticVisual"));
-	StaticVisual->SetupAttachment(GetMesh());
-	StaticVisual->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	StaticVisual->SetGenerateOverlapEvents(false);
-	LabExcludeFromLumen(*StaticVisual);
-}
-
-void ALabMinionStatic::SetupVisual(const FLabMinionAssets& Assets)
-{
-	GetMesh()->SetSkeletalMesh(nullptr);
-	GetMesh()->SetComponentTickEnabled(false);
-	StaticVisual->SetStaticMesh(Assets.StaticMesh);
-}
-
-// pawn 변형 ----------------------------------------------------------------
+// 이동 틱 없는 액터(하이드레이션 액터의 부모) ------------------------------
 
 namespace
 {
-	/** CharacterMovement 틱을 끄고 위치를 직접 옮기게 한다. pawn·staticpawn·M3 하이드레이션 액터가 같은 설정을 쓴다. */
+	/** CharacterMovement 틱을 끄고 위치를 직접 옮기게 한다. 하이드레이션 액터가 이 설정을 물려받는다. */
 	void LabDisableCharacterMovement(UCharacterMovementComponent* Move)
 	{
 		// ACharacter는 CharacterMovement를 필수 하위 오브젝트로 만들어 DoNotCreateDefaultSubobject가 무시된다
@@ -230,65 +206,7 @@ ALabMinionPawn::ALabMinionPawn(const FObjectInitializer& ObjectInitializer)
 	LabDisableCharacterMovement(GetCharacterMovement());
 }
 
-ALabMinionStaticPawn::ALabMinionStaticPawn(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer)
-{
-	bManualMove = true;
-	LabDisableCharacterMovement(GetCharacterMovement());
-}
-
-// budget 변형 ---------------------------------------------------------------
-
-namespace
-{
-	const FName LabMinionSignificanceTag(TEXT("LabMinion"));
-
-	/** 거리 단계(25/50/100/250m) → 1, 0.75, 0.5, 0.25, 그 밖 0. 값이 클수록 중요하다(engine-notes.md 3절). */
-	float LabTierSignificance(USignificanceManager::FManagedObjectInfo* Info, const FTransform& Viewpoint)
-	{
-		const AActor* Actor = CastChecked<AActor>(Info->GetObject());
-		const float Dist = FVector::Dist(Actor->GetActorLocation(), Viewpoint.GetLocation());
-		for (int32 i = 0; i < 4; ++i)
-		{
-			if (Dist <= FLabScenario::BudgetTiers[i])
-			{
-				return 1.f - 0.25f * i;
-			}
-		}
-		return 0.f;
-	}
-}
-
-ALabMinionBudget::ALabMinionBudget(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer.SetDefaultSubobjectClass<USkeletalMeshComponentBudgeted>(ACharacter::MeshComponentName))
-{
-}
-
-void ALabMinionBudget::BeginPlay()
-{
-	Super::BeginPlay();
-	if (USignificanceManager* Sig = USignificanceManager::Get(GetWorld()))
-	{
-		Sig->RegisterObject(this, LabMinionSignificanceTag, &LabTierSignificance,
-			USignificanceManager::EPostSignificanceType::Sequential,
-			[](USignificanceManager::FManagedObjectInfo* Info, float /*Old*/, float New, bool /*bFinal*/)
-			{
-				ACharacter* Character = CastChecked<ACharacter>(Info->GetObject());
-				CastChecked<USkeletalMeshComponentBudgeted>(Character->GetMesh())->SetComponentSignificance(New);
-			});
-	}
-}
-
-void ALabMinionBudget::EndPlay(const EEndPlayReason::Type Reason)
-{
-	if (USignificanceManager* Sig = USignificanceManager::Get(GetWorld()))
-	{
-		Sig->UnregisterObject(this);
-	}
-	Super::EndPlay(Reason);
-}
-
-// M3 하이드레이션 액터 ------------------------------------------------------
+// 하이드레이션 액터 ----------------------------------------------------------
 
 ALabMinionMassActor::ALabMinionMassActor(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -319,7 +237,7 @@ void ALabMinionMassActor::BeginPlay()
 	}
 	SkelMesh->SetCustomPrimitiveDataFloat(0, 0.f);
 	// 캡슐 콜리전(FLabConfig::ActorCollision): v2 W5부터 기본 Trace(저격 트레이스 채널만 막는 QueryOnly, Docs/Worklog/V2.md "W5").
-	// 끔(-LabActorCollision=0)은 옛 m3nocol 처리(E3 (6), Docs/Worklog/Q5.md "1b단위"), 켬(=1, 라벨 m3colbase)은 캡슐 기본값(Pawn 프로필) 그대로, m3colquery는 Pawn 응답의 QueryOnly.
+	// 끔(-LabActorCollision=0)은 옛 m3nocol 처리(E3 (6), Docs/Worklog/Q5.md "1b단위"), 켬(=1)은 캡슐 기본값(Pawn 프로필) 그대로다.
 	// 범위 피해와 저격 대상 선택은 캡슐을 쓰지 않는다. 저격의 캡슐 트레이스는 확인용이다(ALabOrb::TraceSnipeCapsules).
 	const FLabConfig::EActorCollision Collision = FLabConfig::Get().ActorCollision;
 	if (Collision != FLabConfig::EActorCollision::On)
@@ -335,12 +253,8 @@ void ALabMinionMassActor::BeginPlay()
 			Responses.SetResponse(LabSnipeTraceChannel, ECR_Block);
 			Capsule->SetCollisionResponseToChannels(Responses);
 		}
-		// QueryOnly·Trace: 트레이스·스윕은 받고 물리 시뮬레이션 바디는 만들지 않는다. NoCollision: 피직스 상태를 지운다(이동 때 바디 변환을 보내지 않는다)
+		// Trace: 트레이스·스윕은 받고 물리 시뮬레이션 바디는 만들지 않는다. NoCollision: 피직스 상태를 지운다(이동 때 바디 변환을 보내지 않는다)
 		Capsule->SetCollisionEnabled(Collision == FLabConfig::EActorCollision::Off ? ECollisionEnabled::NoCollision : ECollisionEnabled::QueryOnly);
-	}
-	if (FLabConfig::Get().Variant == ELabVariant::M3Uro)
-	{
-		SkelMesh->bEnableUpdateRateOptimizations = true; // E3 (2). 거리 단계는 FAnimUpdateRateParameters 기본값(M0 uro와 같다)
 	}
 }
 
@@ -371,7 +285,7 @@ void ALabMinionMassActor::ShowPoseReady()
 	USkeletalMeshComponent* SkelMesh = GetMesh();
 	SkelMesh->SetRenderInMainPass(true);
 	SkelMesh->SetRenderInDepthPass(true);
-	SkelMesh->SetCastShadow(!IsA<ALabMinionMassActorLow>()); // 저품질 액터는 그림자를 끈다(E3 (5))
+	SkelMesh->SetCastShadow(true);
 }
 
 void ALabMinionMassActor::PrepareForPooling_Implementation()
@@ -407,7 +321,7 @@ void ALabMinionMassActor::PrepareForGame_Implementation()
 	}
 }
 
-// E3 (3) Budget 하이드레이션 액터 --------------------------------------------
+// 화면 크기 애니 예산 하이드레이션 액터 ----------------------------------------
 
 ALabMinionMassActorBudget::ALabMinionMassActorBudget(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer.SetDefaultSubobjectClass<USkeletalMeshComponentBudgeted>(ACharacter::MeshComponentName))
@@ -417,47 +331,13 @@ ALabMinionMassActorBudget::ALabMinionMassActorBudget(const FObjectInitializer& O
 void ALabMinionMassActorBudget::BeginPlay()
 {
 	Super::BeginPlay();
-	PrepareForGame_Implementation();
-}
-
-void ALabMinionMassActorBudget::EndPlay(const EEndPlayReason::Type Reason)
-{
-	if (USignificanceManager* Sig = USignificanceManager::Get(GetWorld()))
-	{
-		Sig->UnregisterObject(this);
-	}
-	Super::EndPlay(Reason);
+	PrepareForGame_Implementation(); // 중요도는 동기화 프로세서가 매 프레임 넘긴다
 }
 
 void ALabMinionMassActorBudget::PrepareForPooling_Implementation()
 {
 	Super::PrepareForPooling_Implementation();
-	if (USignificanceManager* Sig = USignificanceManager::Get(GetWorld()))
-	{
-		Sig->UnregisterObject(this);
-	}
 	CastChecked<USkeletalMeshComponentBudgeted>(GetMesh())->SetComponentSignificance(0.f);
-}
-
-void ALabMinionMassActorBudget::PrepareForGame_Implementation()
-{
-	Super::PrepareForGame_Implementation();
-	if (FLabConfig::Get().Variant != ELabVariant::M3BudgetDist)
-	{
-		return; // (b) 중요도는 동기화 프로세서가 매 프레임 넘긴다
-	}
-	USignificanceManager* Sig = USignificanceManager::Get(GetWorld());
-	if (Sig && !Sig->GetManagedObject(this))
-	{
-		// M0 budget 변형과 같은 거리 단계(ALabMinionBudget::BeginPlay)
-		Sig->RegisterObject(this, LabMinionSignificanceTag, &LabTierSignificance,
-			USignificanceManager::EPostSignificanceType::Sequential,
-			[](USignificanceManager::FManagedObjectInfo* Info, float /*Old*/, float New, bool /*bFinal*/)
-			{
-				ACharacter* Character = CastChecked<ACharacter>(Info->GetObject());
-				CastChecked<USkeletalMeshComponentBudgeted>(Character->GetMesh())->SetComponentSignificance(New);
-			});
-	}
 }
 
 // 2종 대형 액터(M3b) --------------------------------------------------------
@@ -472,21 +352,4 @@ ALabMinionMassActorBudgetLarge::ALabMinionMassActorBudgetLarge(const FObjectInit
 	: Super(ObjectInitializer)
 {
 	UnitType = LabUnitLarge;
-}
-
-// E3 (5) 저품질 액터 ---------------------------------------------------------
-
-ALabMinionMassActorLow::ALabMinionMassActorLow(const FObjectInitializer& ObjectInitializer)
-	: Super(ObjectInitializer)
-{
-}
-
-void ALabMinionMassActorLow::BeginPlay()
-{
-	Super::BeginPlay();
-	USkeletalMeshComponent* SkelMesh = GetMesh();
-	SkelMesh->bEnableUpdateRateOptimizations = true;
-	SkelMesh->SetForcedLOD(SkelMesh->GetNumLODs()); // 1부터 센다(0은 자동). 가장 낮은 LOD
-	SkelMesh->SetCastShadow(false);
-	UE_LOG(LogLab, Verbose, TEXT("lab_lowres lods=%d"), SkelMesh->GetNumLODs());
 }

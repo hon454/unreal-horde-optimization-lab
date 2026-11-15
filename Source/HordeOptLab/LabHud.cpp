@@ -105,12 +105,8 @@ namespace
 		const FString Hyd = FString::Printf(TEXT("%.0f m"), Config.HydrateM);
 		const FString Far = FString::Printf(TEXT("%d m"), Config.FarM);
 		FHudStepText T;
-		T.Tag = Id == TEXT("-") ? FString() : FString::Printf(TEXT("STEP %s / 8"), *Id);
-		if (Id == TEXT("1b") || Id == TEXT("1c")) { T.Tag = FString::Printf(TEXT("STEP %s"), *Id); }
-		// plan.md "품질 계획" 사다리와 Scripts/full-conditions.json의 note를 평이한 영어로 옮긴 것
-		if (Id == TEXT("1")) { T.Title = TEXT("All actors (baseline)"); T.Change = TEXT("every minion is a skeletal-mesh actor"); }
-		else if (Id == TEXT("1b")) { T.Title = TEXT("Actors + Budget Allocator"); T.Change = TEXT("+ USkeletalMeshComponentBudgeted, 2 ms budget"); }
-		else if (Id == TEXT("1c")) { T.Title = TEXT("Actors + URO"); T.Change = TEXT("+ Update Rate Optimization on every actor"); }
+		T.Tag = FString::Printf(TEXT("STEP %s / 8"), *Id);
+		if (Id == TEXT("1")) { T.Title = TEXT("All actors (baseline)"); T.Change = TEXT("every minion is a skeletal-mesh actor with a capsule"); }
 		// v2 사다리(Docs/v2-plan.md "사다리", Docs/Worklog/V2.md "W10" 단계별 스위치 표)
 		else if (Id == TEXT("2")) { T.Title = TEXT("Mass, engine path"); T.Change = FString::Printf(TEXT("+ Mass entities, engine avoidance, actors within %s, static instances to %s"), *Hyd, *Far); }
 		else if (Id == TEXT("3")) { T.Title = TEXT("Hand-written separation"); T.Change = TEXT("+ Lab separation processor instead of engine avoidance"); }
@@ -119,7 +115,6 @@ namespace
 		else if (Id == TEXT("6")) { T.Title = TEXT("Skinned instances (ISKM)"); T.Change = TEXT("+ ISKM replaces VAT, bounds follow the camera"); }
 		else if (Id == TEXT("7")) { T.Title = FString::Printf(TEXT("Niagara crowd past %s"), *Far); T.Change = TEXT("+ particles where minions are not drawn"); }
 		else if (Id == TEXT("8")) { T.Title = TEXT("Final: quality by distance"); T.Change = FString::Printf(TEXT("+ actors within %s (cap %s), far shadows off"), *Hyd, *GroupThousands(Config.ActorCap)); }
-		else { T.Title = FString::Printf(TEXT("%s / %s"), FLabConfig::StageName(Config.Stage), FLabConfig::VariantName(Config.Variant)); }
 
 		// 빼 보기·하위 실험(최종 구성 + 인자): 첫 줄을 "Final minus: <뺀 것>"으로 바꾼다
 		if (Id == TEXT("8") && !Config.Overrides.IsEmpty())
@@ -225,7 +220,6 @@ void ALabHud::DrawOrbPanel()
 	if (OrbPanelWindowTime < 0.)
 	{
 		OrbPanelWindowTime = Now;
-		OrbPanelWindowStart = Pos;
 		OrbPanelLast = Pos;
 	}
 	OrbPanelWindowPath += FVector::Dist2D(Pos, OrbPanelLast);
@@ -233,8 +227,7 @@ void ALabHud::DrawOrbPanel()
 	if (Now - OrbPanelWindowTime >= 0.25)
 	{
 		OrbPanelSpeed = float(OrbPanelWindowPath / (Now - OrbPanelWindowTime));
-				OrbPanelWindowTime = Now;
-		OrbPanelWindowStart = Pos;
+		OrbPanelWindowTime = Now;
 		OrbPanelWindowPath = 0.;
 	}
 	const bool bMoving = OrbPanelSpeed >= 5.f; // 0.05m/s 아래는 정지로 적는다(표시 자릿수의 절반)
@@ -436,7 +429,7 @@ void ALabHud::DrawHUD()
 	const bool bCull = Config.CullsFar();
 	TArray<FHudRow, TInlineAllocator<5>> Rows;
 	int32 Counted = 0;
-	if (Config.Stage == ELabStage::M0)
+	if (Config.IsActorCrowd())
 	{
 		Rows.Add({ TEXT("Actors"), Actors, TEXT("all distances") });
 		Counted = Actors;
@@ -449,10 +442,9 @@ void ALabHud::DrawHUD()
 			Rows.Add({ TEXT("Actors"), Actors, FString::Printf(TEXT("0–%s m"), *Hyd) });
 			Counted += Actors;
 		}
-		// M1은 엔진 ISM 프로세서라 밴드 집계가 없다. 거리와 무관하게 전부 인스턴스다
-		// 사다리 단계 2·3의 인스턴스 수는 전환 집계 프로세서가 센다(ULabRepSwitchCountProcessor)
-		const int32 Instances = Config.Stage == ELabStage::M1 ? Horde : (Crowd ? Crowd->HudInstances.load(std::memory_order_relaxed) : 0);
-		const TCHAR* How = (Config.Stage == ELabStage::M1 || Config.bStaticIsm) ? TEXT("static mesh") : Config.UsesIskm() ? TEXT("ISKM") : TEXT("VAT");
+		// 인스턴스 수: VAT·ISKM 단계는 그 프로세서의 밴드 집계, 단계 2·3(엔진 ISM 프로세서)은 전환 집계 프로세서가 센다(ULabRepSwitchCountProcessor)
+		const int32 Instances = Crowd ? Crowd->HudInstances.load(std::memory_order_relaxed) : 0;
+		const TCHAR* How = !Config.UsesVat() ? TEXT("static mesh") : Config.UsesIskm() ? TEXT("ISKM") : TEXT("VAT");
 		const FString From = bHydrate ? Hyd : FString(TEXT("0"));
 		const FString InstRange = !bCull ? (bHydrate ? FString::Printf(TEXT("%s m+"), *From) : FString(TEXT("all distances")))
 			: FString::Printf(TEXT("%s–%s m"), *From, *Far);
@@ -489,8 +481,7 @@ void ALabHud::DrawHUD()
 #else
 	const TCHAR* BuildName = TEXT("Development build");
 #endif
-	FString FooterText = FString::Printf(TEXT("%s · %s · P%d · %d %s · %s"), FLabConfig::VariantName(Config.Variant), FLabConfig::StageName(Config.Stage),
-		Config.Preset, Config.Types, Config.Types == 1 ? TEXT("type") : TEXT("types"), BuildName);
+	FString FooterText = FString::Printf(TEXT("-LabStage=%d · P%d · %d %s · %s"), Config.Step, Config.Preset, Config.Types, Config.Types == 1 ? TEXT("type") : TEXT("types"), BuildName);
 	if (!Config.Overrides.IsEmpty())
 	{
 		FooterText += TEXT(" · ") + Config.Overrides.Replace(TEXT("|"), TEXT(", "));

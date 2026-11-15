@@ -76,13 +76,13 @@ UMassEntityConfigAsset* ULabCrowdSubsystem::BuildEntityConfig(int32 UnitType, US
 	}
 	if (FLabConfig::Get().UsesAvoidance())
 	{
-		// v2 W3(-LabAvoid=1)와 E1 (c): 엔진 회피. 이웃을 찾으려면 장애물 격자에 등록돼야 하므로 두 Trait을 함께 붙인다. 파라미터는 엔진 기본값.
-		// E4 (c) m4avoid: 같은 Trait. LOD 태그가 있어 회피 프로세서가 High(80m 안)만 처리한다(MassAvoidanceProcessors.cpp:301-303)
+		// v2 W3 엔진 회피(사다리 단계 2, 또는 -LabAvoid=1). 이웃을 찾으려면 장애물 격자에 등록돼야 하므로 두 Trait을 함께 붙인다. 파라미터는 엔진 기본값.
+		// Simulation LOD가 있으면 LOD 태그 때문에 회피 프로세서가 High(80m 안)만 처리한다(MassAvoidanceProcessors.cpp:301-303)
 		AddLabTrait<UMassObstacleAvoidanceTrait>(*EntityConfig);
 		AddLabTrait<UMassNavigationObstacleTrait>(*EntityConfig);
 	}
 
-	// 표현: 애니 없는 ISM 하나. 밴드 없이 모든 LOD에서 같은 ISM이다(plan.md "M1"). 거리 밴드는 M2에서 켠다.
+	// 표현: 메시 설명자 하나(단계 2·3은 정지 메시, 4·5는 VAT 메시. ISKM 단계는 아래에서 바꾼다). 거리 밴드는 아래에서 넣는다.
 	UMassMovableVisualizationTrait* Visual = AddLabTrait<UMassMovableVisualizationTrait>(*EntityConfig);
 	FMassStaticMeshInstanceVisualizationMeshDesc& MeshDesc = Visual->StaticMeshInstanceDesc.Meshes.AddDefaulted_GetRef();
 	MeshDesc.Mesh = Mesh;
@@ -97,13 +97,9 @@ UMassEntityConfigAsset* ULabCrowdSubsystem::BuildEntityConfig(int32 UnitType, US
 		Visual->LODParams.LODMaxCount[LOD] = MAX_int32;
 	}
 
-	// E2 (c): 확정 밴드(30/80/200m, measurement.md "확정값")를 켜고 Off(200m 밖)를 그리지 않는다. 대표(M2)는 M1과 같이 모든 거리를 그린다.
-	// M3부터는 이 밴드가 대표 설정이고, High(0~30m)는 액터다(plan.md "M3").
-	const ELabVariant Variant = FLabConfig::Get().Variant;
-	const bool bM3 = FLabConfig::Get().Stage >= ELabStage::M3;
-	if (bM3)
+	// 확정 밴드(30/80/200m, measurement.md "확정값")를 켜고 Off(200m 밖)를 그리지 않는다. High(가까운 구간)는 액터다(사다리 단계 2부터, 엔진 하이드레이션).
 	{
-		const bool bBudget = Variant == ELabVariant::M3BudgetDist || Variant == ELabVariant::M3BudgetSig || FLabConfig::Get().bScreenSigBudget;
+		const bool bBudget = FLabConfig::Get().UsesBudgetActors();
 		// 종류별 액터 클래스. 엔진 풀은 클래스가 키라(UMassActorSpawnerSubsystem::PooledActors, MassActorSpawnerSubsystem.h:321) 대형은 풀도 따로 생긴다.
 		if (UnitType == LabUnitLarge)
 		{
@@ -113,18 +109,17 @@ UMassEntityConfigAsset* ULabCrowdSubsystem::BuildEntityConfig(int32 UnitType, US
 		{
 			Visual->HighResTemplateActor = bBudget ? ALabMinionMassActorBudget::StaticClass() : ALabMinionMassActor::StaticClass();
 		}
-		// m3noactor와 Q3 빼 보기 -LabHydrate=0은 0~30m도 인스턴스다(M5 ISKM이면 아래에서 ISKM으로 바뀐다). 밴드·상한은 그대로 둔다
+		// 빼 보기 -LabHydrate=0은 가까운 구간도 인스턴스다(ISKM 단계면 아래에서 ISKM으로 바뀐다). 밴드·상한은 그대로 둔다
 		Visual->Params.LODRepresentation[EMassLOD::High] = FLabConfig::Get().UsesHydration() ? EMassRepresentationType::HighResSpawnedActor : EMassRepresentationType::StaticMeshInstance;
-		// 전환 팝핑 대책. VAT → 액터: 액터의 포즈가 준비될 때까지 VAT 인스턴스를 그린다.
-		// 액터 → VAT: 액터를 한 프레임 더 남긴다(엔진 군중 기본값도 켠다, MassCrowdVisualizationTrait.cpp:22). bKeepLowResActors가 켜져 있어야 동작한다(MassRepresentationProcessor.h:27-30).
+		// 전환 팝핑 대책(단계 4부터, FLabConfig::HydrateFixMask). 인스턴스 → 액터: 액터의 포즈가 준비될 때까지 인스턴스를 그린다.
+		// 액터 → 인스턴스: 액터를 한 프레임 더 남긴다(엔진 군중 기본값도 켠다, MassCrowdVisualizationTrait.cpp:22). bKeepLowResActors가 켜져 있어야 동작한다(MassRepresentationProcessor.h:27-30).
+		// 액터 관리 클래스는 단계 2부터 늘 Lab 것이다. 대책을 끄면(마스크 0) 엔진 기본 동작에 액터 태그 붙이기만 더한다(LabActorSyncProcessor.cpp).
 		Visual->Params.RepresentationActorManagementClass = ULabActorManagement::StaticClass();
 		Visual->Params.bWaitForActorVisualReadiness = FLabConfig::Get().HasFix(FLabConfig::FixWait);
 		Visual->Params.bKeepActorExtraFrame = FLabConfig::Get().HasFix(FLabConfig::FixWait);
 	}
-	if (bM3 || Variant == ELabVariant::VatCull || Variant == ELabVariant::VatCullVis)
 	{
-		// E3 (7): 하이드레이션 거리(화면 안 Visible)만 바꾼다(대표 30m). 80m·200m 밴드와 상한은 그대로
-		// Q4: 전환 거리와 액터 상한은 FLabConfig가 정한다(기본 30m·500, m3hyd15·m3hyd50은 15·50m, q4final과 -LabHydrateM·-LabActorCap). 80m·200m 밴드와 Medium 상한은 그대로
+		// 전환 거리와 액터 상한은 FLabConfig가 정한다(단계 2~7은 30m·500, 단계 8은 40m·1,000, -LabHydrateM·-LabActorCap). 80m·200m 밴드와 Medium 상한은 그대로
 		const float HydrateCm = FLabConfig::Get().HydrateCm();
 		// Off 거리: 기본 200m, -LabFarM=으로 옮긴다. Q3 빼 보기 -LabFarCull=0이면 1,000m라 맵 끝까지 그린다(RepOffCm)
 		const float Bands[EMassLOD::Max] = { 0.f, HydrateCm, 8000.f, FLabConfig::Get().RepOffCm() };
@@ -135,42 +130,18 @@ UMassEntityConfigAsset* ULabCrowdSubsystem::BuildEntityConfig(int32 UnitType, US
 			Visual->LODParams.VisibleLODDistance[LOD] = Bands[LOD];
 			Visual->LODParams.LODMaxCount[LOD] = MaxCounts[LOD];
 		}
-		if (Variant == ELabVariant::VatCullVis)
-		{
-			Visual->LODParams.VisibleLODDistance[EMassLOD::Off] = 1.e7f; // 화면 안이면 맵 끝까지 그린다
-		}
 		Visual->Params.LODRepresentation[EMassLOD::Off] = EMassRepresentationType::None;
 		// E3b (8) 표현 LOD 값(plan.md "M3b"). BaseLODDistance는 화면 밖(카메라 뒤 포함), VisibleLODDistance는 화면 안의 밴드 경계다. 히스테리시스 10%(엔진 기본, MassRepresentationFragments.h:309).
-		// M3 대표(m3mass, 별칭 m3vis15)는 결정 1(20k·5k 빠른 회전 캡처)로 화면 밖 Base 15m, 화면 안 Visible 30m다. 그 전 대표(30/30m)는 m3vis30으로 잰다.
-		// Base를 자기 정의로 고정한 변형(m3vis0 0m, m3vis30·m3hys20·m3hyd15·m3hyd50은 Visible과 같게)만 빼고 M3 변형은 모두 15m다. M2의 vatcull·vatcullvis는 bM3가 아니라 닿지 않는다.
-		if (bM3)
-		{
-			const bool bBaseIsVisible = Variant == ELabVariant::M3Vis30 || Variant == ELabVariant::M3Hys20 || Variant == ELabVariant::M3Hyd15 || Variant == ELabVariant::M3Hyd50;
-			Visual->LODParams.BaseLODDistance[EMassLOD::Medium] = Variant == ELabVariant::M3Vis0 ? 0.f : bBaseIsVisible ? HydrateCm : 1500.f;
-			if (Variant == ELabVariant::M3Hys20) { Visual->LODParams.BufferHysteresisOnDistancePercentage = 20.f; }
-		}
-	}
-	if (bM3 && Variant == ELabVariant::M3LowRes)
-	{
-		// E3 (5): 0~15m 액터, 15~30m 저품질 액터, 30~200m VAT 인스턴스, 200m 밖 Off. 액터 상한은 대표와 같은 500을 둘이 나눈다.
-		const float Bands[EMassLOD::Max] = { 0.f, 1500.f, 3000.f, FLabConfig::Get().RepOffCm() };
-		const int32 MaxCounts[EMassLOD::Max] = { 250, 250, MAX_int32, MAX_int32 };
-		for (int32 LOD = 0; LOD < EMassLOD::Max; ++LOD)
-		{
-			Visual->LODParams.BaseLODDistance[LOD] = Bands[LOD];
-			Visual->LODParams.VisibleLODDistance[LOD] = Bands[LOD];
-			Visual->LODParams.LODMaxCount[LOD] = MaxCounts[LOD];
-		}
-		Visual->LowResTemplateActor = ALabMinionMassActorLow::StaticClass();
-		Visual->Params.LODRepresentation[EMassLOD::Medium] = EMassRepresentationType::LowResSpawnedActor;
+		// M3b 결정 1(20k·5k 빠른 회전 캡처)로 화면 밖 Base 15m, 화면 안 Visible은 전환 거리다.
+		Visual->LODParams.BaseLODDistance[EMassLOD::Medium] = 1500.f;
 	}
 
-	// Q4b 원거리 그림자(-LabFarShadow=0, q4final 기본): 인스턴스 단위 그림자 플래그가 없어 메시 설명자를 LOD 중요도 범위로 둘로 나눈다.
+	// Q4b 원거리 그림자(-LabFarShadow=0, 단계 8 기본): 인스턴스 단위 그림자 플래그가 없어 메시 설명자를 LOD 중요도 범위로 둘로 나눈다.
 	// 설명자의 Min/MaxLODSignificance(MassRepresentationTypes.h:97-101, MassSkinnedMeshRepresentationTypes.h:69-75)로 [High, Low)는 그림자 켬, [Low, Max)는 끔이다.
 	// 엔진은 설명자 해시(bCastShadows 포함)마다 컴포넌트를 하나 만들고 SetCastShadow를 부르며(MassVisualizationComponent.cpp:1299-1337, ISM은 :259),
 	// 경계 값마다 범위를 만든다(:1371-1419). 중요도는 LOD 정수 + 밴드 안 비율이라 [1, 2)가 Medium(40~80m), [2, 3)이 Low다(MassLODCalculator.h:412-416, 748-753).
 	// 범위가 바뀐 프레임에는 엔진이 새 범위와 옛 범위 컴포넌트 모두에 위치를 넣고(MassSkinnedMeshRepresentationTypes.h:665-680) 다음 프레임 갱신되지 않은 옛 인스턴스를 지운다(MassVisualizationComponent.cpp:812-827).
-	const bool bSplitFarShadow = bM3 && !FLabConfig::Get().bFarShadow;
+	const bool bSplitFarShadow = !FLabConfig::Get().bFarShadow;
 	const FTransform MeshLocalTransform = MeshDesc.LocalTransform; // 아래 Add가 배열을 다시 잡을 수 있어 MeshDesc 참조를 더 쓰지 않는다
 	if (bSplitFarShadow && Visual->StaticMeshInstanceDesc.Meshes.Num() == 1)
 	{
@@ -183,16 +154,15 @@ UMassEntityConfigAsset* ULabCrowdSubsystem::BuildEntityConfig(int32 UnitType, US
 
 	if (FLabConfig::Get().UsesIskm())
 	{
-		// M5(plan.md "M5" 결정 2·3·6): 정적 메시 인스턴스 자리(30~200m)를 ISKM으로 바꾼다. 엔진 표현 경로(LOD, 액터 전환)는 그대로고 종류마다 ISKM 하나다
+		// ISKM(단계 6부터, plan.md "M5" 결정 2·3·6): 정적 메시 인스턴스 자리를 ISKM으로 바꾼다. 엔진 표현 경로(LOD, 액터 전환)는 그대로고 종류마다 ISKM 하나다
 		// (컴포넌트는 메시 설명자 해시마다 하나, MassVisualizationComponent.cpp:1299-1312). 정적 메시 설명자는 비워 ISM 컴포넌트를 만들지 않는다.
 		const int32 AssetType = FLabUnitTypes::AssetType(UnitType);
-		const FLabIskmParams IskmParams = FLabConfig::Get().IskmParams();
 		FMassSkinnedMeshInstanceVisualizationMeshDesc SkinnedDesc;
 		SkinnedDesc.Asset = IskmMeshes.IsValidIndex(AssetType) ? IskmMeshes[AssetType].Get() : nullptr;
 		SkinnedDesc.TransformProvider = IskmProviders.IsValidIndex(AssetType) ? IskmProviders[AssetType].Get() : nullptr; // ASTPD면 엔진이 컴포넌트마다 인스턴스를 만든다(:1323-1325)
 		SkinnedDesc.LocalTransform = MeshLocalTransform; // VAT와 같은 -90도 회전과 종류 배율
-		SkinnedDesc.bCastShadows = IskmParams.bCastShadows;
-		SkinnedDesc.AnimationMinScreenSize = IskmParams.AnimationMinScreenSize; // 컴포넌트에 SetAnimationMinScreenSize로 넘어간다(:1333)
+		SkinnedDesc.bCastShadows = FLabIskmParams::bCastShadows;
+		SkinnedDesc.AnimationMinScreenSize = FLabIskmParams::AnimationMinScreenSize; // 컴포넌트에 SetAnimationMinScreenSize로 넘어간다(:1333)
 		if (bSplitFarShadow)
 		{
 			// Q4b: 위 VAT 설명자와 같은 두 범위. 컴포넌트마다 트랙 제공자 인스턴스가 따로라(:1323-1325) 범위를 넘을 때 ULabIskmProcessor가 새 컴포넌트의 트랙을 다시 쓴다
@@ -217,7 +187,7 @@ UMassEntityConfigAsset* ULabCrowdSubsystem::BuildEntityConfig(int32 UnitType, US
 		}
 		UE_LOG(LogLab, Log, TEXT("lab_iskm_config type=%d mesh=%s provider=%s shadow=%d far_shadow=%d descs=%d minss=%.2f blend=%.2f"), UnitType, *GetNameSafe(SkinnedDesc.Asset.Get()),
 			*GetNameSafe(SkinnedDesc.TransformProvider.Get()), SkinnedDesc.bCastShadows ? 1 : 0, bSplitFarShadow ? 0 : (SkinnedDesc.bCastShadows ? 1 : 0),
-			Visual->SkinnedMeshInstanceDesc.Meshes.Num(), SkinnedDesc.AnimationMinScreenSize, IskmParams.BlendTime);
+			Visual->SkinnedMeshInstanceDesc.Meshes.Num(), SkinnedDesc.AnimationMinScreenSize, FLabIskmParams::BlendTime);
 	}
 	else if (bSplitFarShadow)
 	{
@@ -452,7 +422,7 @@ void ULabCrowdSubsystem::ExcludeVisualsFromLumen()
 {
 	// ISM 컴포넌트는 표현 프로세서가 필요할 때 만든다. 처음 한 개만 고치면 뒤에 생긴 컴포넌트가 빠져서(그림자 캐시 수정이
 	// 듣지 않았다), 매 틱 컴포넌트를 훑어 아직 설정되지 않은 것만 고친다(비주얼라이저 하나, 컴포넌트 몇 개).
-	const bool bFixedIskmBounds = FLabConfig::Get().UsesIskm() && FLabConfig::Get().IskmParams().bFixedBounds; // m5bounds·q2crowd·q4final
+	const bool bFixedIskmBounds = FLabConfig::Get().UsesFixedBounds(); // 단계 6부터
 	if (bFixedIskmBounds)
 	{
 		UpdateIskmBoundsCenter(); // v2 W8: 상자가 카메라를 따라간다(FLabConfig::BoundsStepM)

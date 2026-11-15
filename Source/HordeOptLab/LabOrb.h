@@ -11,12 +11,12 @@ class USceneComponent;
 class UStaticMeshComponent;
 
 /**
- * 맵 중앙의 목표(테슬라 코일 타워). 피해 범위(보라색 원기둥) 안의 개체는 중심에 가까울수록 센 피해(초당 ZoneDpsEdge~ZoneDpsCenter)를 받고, 저격 간격마다 먼 개체 K개를 쏜다.
+ * 떠다니는 오브(v2, FLabOrbit). 피해 범위(보라색 원기둥) 안의 개체는 중심에 가까울수록 센 피해(초당 ZoneDpsEdge~ZoneDpsCenter)를 받고, 저격 간격마다 먼 개체 K개를 쏜다.
  * 저격 대상은 화면 안의 산 개체 중 거리 구간마다 결정적 해시(스폰 일련번호 + 저격 틱)가 가장 작은 개체다(LabSnipe.h).
- * 겉모습은 Niagara Examples Pack의 BP_TeslaCoil 구성(타워 메시, 구체, NS_TeslaCoil, NS_Boundary_Cylinder)을 같은 배치로 옮긴 것이다.
- * BP는 GAS 상태 효과를 끌고 와서 쓰지 않는다. 타워 이펙트는 모든 실행에서 상시로 돈다. 저격은 대상마다 구체에서 대상까지 곧은 보라 선 하나
+ * 겉모습은 Niagara Examples Pack의 BP_TeslaCoil 구성(구체, NS_TeslaCoil, NS_Boundary_Cylinder)을 옮긴 것이다. 타워 메시는 v1의 멈춘 목표용이라 v2 W10에서 지웠다.
+ * BP는 GAS 상태 효과를 끌고 와서 쓰지 않는다. 이펙트는 모든 실행에서 상시로 돈다. 저격은 대상마다 구체에서 대상까지 곧은 보라 선 하나
  * (엔진 DynamicBeam 기반 NS_LabBolt)로 그린다. 측정 실행에서도 그린다(시나리오의 일부).
- * 액터 위치는 지면(z=0)이다. 타워 메시(높이 90.5 x4 = 362cm)를 z360에서 뒤집어 두므로 바닥이 지면에 닿는다.
+ * 액터 위치는 지면(z=0)이고 구체는 궤도 높이(기본 6m)에 뜬다.
  */
 UCLASS()
 class ALabOrb : public AActor
@@ -42,15 +42,8 @@ public:
 	struct FLabCapsuleTraceStats { int32 Traces = 0; int32 Hits = 0; int32 Blocked = 0; int32 SnipeTraces = 0; };
 	const FLabCapsuleTraceStats& GetCapsuleTraceStats() const { return CapsuleTraceStats; }
 
-	/** 화면 판정용 카메라(직전 프레임에 그린 카메라). 변형 manager의 매니저도 읽는다 */
+	/** 화면 판정용 카메라(직전 프레임에 그린 카메라) */
 	struct FLabSnipeView GetSnipeView() const;
-	/**
-	 * 변형 manager(LabCrowdManager.h): 매니저 틱이 부른다. 오브 틱은 피해·저격을 하지 않고 저격 궤적 수명만 돌린다(FLabConfig::UsesManager).
-	 * AdvanceSnipeClock은 저격 시간을 누적하고 이 프레임에 쏠 저격 틱을 돌려준다(없으면 0). OnMassPrePhysicsStart와 같은 누적이다.
-	 * ShowManagerResults는 번개 대상과 저격 궤적을 그리고 사망 수를 더한다(저격 수는 대상 수).
-	 */
-	uint32 AdvanceSnipeClock(float DeltaSeconds);
-	void ShowManagerResults(const FVector& CoilTarget, TConstArrayView<FVector> SnipeTargets, int32 ZoneKills);
 
 protected:
 	void Snipe();
@@ -89,7 +82,6 @@ protected:
 	UPROPERTY() TObjectPtr<class UNiagaraSystem> StrikeSystem;
 
 	UPROPERTY(VisibleAnywhere) TObjectPtr<USceneComponent> Root;
-	UPROPERTY(VisibleAnywhere) TObjectPtr<UStaticMeshComponent> Tower;
 	UPROPERTY(VisibleAnywhere) TObjectPtr<UStaticMeshComponent> Sphere;
 	UPROPERTY(VisibleAnywhere) TObjectPtr<UNiagaraComponent> CoilFx;
 	UPROPERTY(VisibleAnywhere) TObjectPtr<UNiagaraComponent> ZoneFx;

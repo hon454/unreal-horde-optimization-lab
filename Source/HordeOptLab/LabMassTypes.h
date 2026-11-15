@@ -45,7 +45,7 @@ struct FLabAnimStateFragment : public FMassFragment
 };
 
 /**
- * E4 (d) m4offmove·m4offpool과 M5 단계에서 붙는다(FLabSimLod::bOffMove, LabMassTraits.cpp). ULabOffMoveProcessor가 이 개체를 마지막으로 옮긴 시각(월드 초).
+ * Simulation LOD(사다리 단계 5부터)에서 붙는다(LabMassTraits.cpp). ULabOffMoveProcessor가 이 개체를 마지막으로 옮긴 시각(월드 초).
  * 0이면 아직 옮긴 적이 없다. Off 태그가 붙을 때 ULabOffMoveEnterObserver가 그때 시각으로 맞춘다.
  */
 USTRUCT()
@@ -76,16 +76,6 @@ struct FLabUnitTypeParams : public FMassConstSharedFragment
 	UPROPERTY() float MoveSpeed = 0.f;
 	UPROPERTY() float MaxHealth = 0.f;
 	UPROPERTY() float BoundRadius = 0.f;
-};
-
-/** E1 (d) 이벤트 방식의 피해 한 건. 1프레임만 살고 ULabDamageApplyProcessor가 대상에 적용한 뒤 지운다. */
-USTRUCT()
-struct FLabDamageEventFragment : public FMassFragment
-{
-	GENERATED_BODY()
-
-	FMassEntityHandle Target;
-	float Amount = 0.f;
 };
 
 /** 이 프로젝트의 미니언 엔티티. 프로세서가 엔진 엔티티와 섞이지 않게 거른다. */
@@ -130,7 +120,7 @@ struct FLabPooledTag : public FMassTag
 };
 
 /**
- * M5 ISKM 변형에서만 붙는다(LabMassTraits.cpp). 이 엔티티의 ISKM 트랙에 마지막으로 SetAutoPlayData로 쓴 표현 상태(plan.md "M5" 결정 4).
+ * ISKM(사다리 단계 6부터)에서만 붙는다(LabMassTraits.cpp). 이 엔티티의 ISKM 트랙에 마지막으로 SetAutoPlayData로 쓴 표현 상태(plan.md "M5" 결정 4).
  * ULabIskmProcessor는 FLabAnimStateFragment가 이 값과 다를 때만(상태 전환, 풀에서 다시 나옴) 트랙을 다시 쓴다. 평소 프레임에는 트랙을 건드리지 않는다.
  */
 USTRUCT()

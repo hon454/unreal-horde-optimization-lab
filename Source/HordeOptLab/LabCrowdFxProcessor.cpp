@@ -21,7 +21,7 @@ CSV_DECLARE_CATEGORY_EXTERN(Lab);
 ULabCrowdFxGatherProcessor::ULabCrowdFxGatherProcessor()
 	: EntityQuery(*this)
 {
-	bAutoRegisterWithProcessingPhases = false; // -LabCrowdFx=1 + -LabCrowdFxEntity=1에서만 게임 모듈이 켠다(HordeOptLab.cpp)
+	bAutoRegisterWithProcessingPhases = false; // 배경 무리(사다리 단계 7부터)에서만 게임 모듈이 켠다(HordeOptLab.cpp)
 	ExecutionFlags = (int32)(EProcessorExecutionFlags::Client | EProcessorExecutionFlags::Standalone);
 	ExecutionOrder.ExecuteInGroup = UE::Mass::ProcessorGroupNames::Representation;
 	ExecutionOrder.ExecuteAfter.Add(UE::Mass::ProcessorGroupNames::VisualizationProcessing); // 이번 프레임의 표현(None 여부)이 정해진 뒤

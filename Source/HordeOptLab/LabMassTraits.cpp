@@ -20,13 +20,13 @@ void ULabMinionTrait::BuildTemplate(FMassEntityTemplateBuildContext& BuildContex
 	BuildContext.AddFragment<FLabHealthFragment>();
 	BuildContext.AddFragment<FLabAnimStateFragment>(); // M3b: 표현 전용 상태
 	BuildContext.AddTag<FLabMinionTag>();
-	if (FLabConfig::Get().UsesSimLod() && FLabConfig::Get().SimLod().bOffMove)
+	if (FLabConfig::Get().UsesSimLod())
 	{
-		BuildContext.AddFragment<FLabOffMoveFragment>(); // E4 (d) bOffMove(m4offmove·m4offpool과 M5 단계)만. 다른 변형의 아키타입은 그대로다
+		BuildContext.AddFragment<FLabOffMoveFragment>(); // Simulation LOD(단계 5부터)의 200m 밖 이동만. 다른 단계의 아키타입은 그대로다
 	}
 	if (FLabConfig::Get().UsesIskm())
 	{
-		BuildContext.AddFragment<FLabIskmTrackFragment>(); // M5 ISKM만: 트랙에 마지막으로 쓴 상태(ULabIskmProcessor)
+		BuildContext.AddFragment<FLabIskmTrackFragment>(); // ISKM(단계 6부터)만: 트랙에 마지막으로 쓴 상태(ULabIskmProcessor)
 	}
 
 	FLabUnitTypeParams Params;
@@ -39,7 +39,6 @@ void ULabMinionTrait::BuildTemplate(FMassEntityTemplateBuildContext& BuildContex
 
 ULabSimulationLODTrait::ULabSimulationLODTrait()
 {
-	const FLabSimLod Sim = FLabConfig::Get().SimLod();
 	Params.LODDistance[EMassLOD::High] = 0.f;
 	Params.LODDistance[EMassLOD::Medium] = FLabSimLod::MediumDistance;
 	Params.LODDistance[EMassLOD::Low] = FLabSimLod::LowDistance;
@@ -50,12 +49,10 @@ ULabSimulationLODTrait::ULabSimulationLODTrait()
 	}
 	bEnableVariableTicking = true; // LOD 태그도 함께 붙는다(MassLODTrait.cpp:129)
 	VariableTickParams.TickRates[EMassLOD::High] = 0.f;
-	VariableTickParams.TickRates[EMassLOD::Medium] = Sim.TickMedium;
-	VariableTickParams.TickRates[EMassLOD::Low] = Sim.TickLow;
-	VariableTickParams.TickRates[EMassLOD::Off] = 0.f; // 새 엔티티의 첫 프레임만 Off다. 기다리지 않고 바로 LOD를 받게 한다
-	if (Sim.bOffMove)
+	VariableTickParams.TickRates[EMassLOD::Medium] = FLabSimLod::TickMedium;
+	VariableTickParams.TickRates[EMassLOD::Low] = FLabSimLod::TickLow;
 	{
-		// E4 (d) m4offmove: 200m 밖을 Low 대신 Off로 둔다. 엔진이 FMassOffLODTag를 붙여 이동·조향 넷이 이 개체를 돌지 않는다(engine-notes.md 5절).
+		// E4 (d)(지금은 Simulation LOD의 유일한 구성): 200m 밖을 Low 대신 Off로 둔다. 엔진이 FMassOffLODTag를 붙여 이동·조향 넷이 이 개체를 돌지 않는다(engine-notes.md 5절).
 		// Low와 Off의 거리가 같으면 계산기가 Off를 먼저 고른다(MassLODCalculator.h:867-870). Off → Medium에는 히스테리시스가 없다(:873, 한 단계 차이에만 있다).
 		// 새 엔티티는 청크에 들어가며 청크 수정 번호를 바꾸므로 간격을 기다리지 않고 다음 갱신에 돈다(MassLODTickRateController.h:153).
 		// -LabFarM=(기본 200m)이 표현 LOD의 Off 거리와 이 거리를 함께 옮긴다. 기본값이면 지금까지와 같이 Low 거리와 같다.
@@ -66,7 +63,7 @@ ULabSimulationLODTrait::ULabSimulationLODTrait()
 		const float FarCm = FLabConfig::Get().FarCm();
 		Params.LODDistance[EMassLOD::Off] = FarCm <= FLabSimLod::LowDistance ? FLabSimLod::LowDistance
 			: FLabSimLod::LowDistance + (FarCm + 1000.f - FLabSimLod::LowDistance) / (1.f - Params.BufferHysteresisOnDistancePercentage / 100.f);
-		VariableTickParams.TickRates[EMassLOD::Off] = Sim.TickLow;
+		VariableTickParams.TickRates[EMassLOD::Off] = FLabSimLod::TickLow;
 	}
 }
 

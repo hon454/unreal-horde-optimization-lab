@@ -105,7 +105,6 @@ public:
 	// 누적 사망 수. 프로세서(워커일 수 있음)가 ResultLock 안에서 더하고 게임 스레드(게임 모드·HUD)가 잠금 없이 읽으므로 원자 변수다
 	std::atomic<int32> KillCount{0};
 	std::atomic<int32> SnipeCount{0};
-	std::atomic<int64> DamageHits{0}; // E1 (d): 체력에 실제로 적용된 비치명 피해 건수(확인용)
 	/**
 	 * 애니 갱신 통계(종류별): 액터×프레임 합, 그중 애니 갱신을 하지 않은 수(보간 + 건너뜀), 그중 보간한 수. 건너뜀 = Skips − Interps.
 	 * ULabActorSyncProcessor가 더하고 게임 모드가 측정 구간 차이를 CSV 메타데이터 LabLargeActor*·LabSmallActor*로 쓴다.
@@ -137,7 +136,7 @@ public:
 	std::atomic<bool> bHudCounts{false};
 	std::atomic<int32> HudInstances{0};
 	/**
-	 * Q2b 엔티티 구동 입자(-LabCrowdFx=1, -LabCrowdFxEntity=1). 게임 모드가 배경 무리 컴포넌트를 켠 뒤 넣고, ULabCrowdFxGatherProcessor(게임 스레드)가 매 프레임 배열과 시각을 넣는다.
+	 * Q2b 엔티티 구동 입자(배경 무리, 사다리 단계 7부터). 게임 모드가 배경 무리 컴포넌트를 켠 뒤 넣고, ULabCrowdFxGatherProcessor(게임 스레드)가 매 프레임 배열과 시각을 넣는다.
 	 * bCrowdFx*는 에셋에 그 사용자 변수가 있는지(게임 모드가 활성화 전에 한 번 확인한다). 없는 값은 넣지 않는다(없는 이름은 Niagara가 부를 때마다 경고를 남긴다).
 	 */
 	TWeakObjectPtr<class UNiagaraComponent> CrowdFx;

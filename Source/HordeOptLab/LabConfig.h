@@ -3,74 +3,6 @@
 #include "CoreMinimal.h"
 #include "LabSeparation.h"
 
-/** 미니언 표현 변형(M0 E0). 실행 인자 -LabVariant=로 고른다. plan.md "M0". */
-enum class ELabVariant : uint8
-{
-	Full,   // ACharacter + 스켈레탈 메시 + 애니메이션
-	Static, // 같은 ACharacter + UStaticMeshComponent, 애니메이션 없음
-	Budget, // Full + USkeletalMeshComponentBudgeted + Significance 거리 단계 + a.Budget.BudgetMs FLabScenario::BudgetMs
-	Uro,    // Full + URO만
-	Pawn,   // Full에서 CharacterMovement 틱을 끄고 위치를 직접 이동
-	Mass,   // M1부터의 기본. 단계가 표현을 정하므로 M0에서는 Full과 같다
-	MassSt, // M1 E1 (b): mass.FullyParallel 0(Mass 처리를 게임 스레드 하나에서)
-	MassAv, // M1 E1 (c): 엔진 회피(UMassObstacleAvoidanceTrait + UMassNavigationObstacleTrait) 켬
-	// M1 E1 (d) 피해 적용 방식: 비치명 피해를 초당 1천(lo)·1만(hi) 건 무작위 개체에 넣는다(체력 최소 1, 사망 없음).
-	MassDirLo, // 직접 깎기, 초당 1천
-	MassDirHi, // 직접 깎기, 초당 1만
-	MassEvtLo, // 피해 이벤트 엔티티로 모아 깎기, 초당 1천
-	MassEvtHi, // 피해 이벤트 엔티티로 모아 깎기, 초당 1만
-	// M2 E2 하위 실험(-LabStage=M2와 함께). 대표는 Mass(모든 거리를 Bone VAT로 그림)
-	VatVert,    // E2 (b): Vertex 모드 VAT(텍스처 메모리 비교)
-	VatCull,    // E2 (c)(1): 200m 밖은 그리지 않는다(거리만, 확정값 "200m~ 없음")
-	VatCullVis, // E2 (c)(2): 화면 밖일 때만 200m 밖을 그리지 않는다(BaseLODDistance 200m, VisibleLODDistance 맵 끝)
-	VatDie0,    // E2 (d) 첫 설계(쓰지 않음): 범위 피해·저격을 꺼서 개체가 오브 주위에 쌓였다. 사망 비용이 아니라 밀집을 쟀다
-	VatDie1k,   // E2 (d) 첫 설계(쓰지 않음): VatDie0 + 초당 1천 명 피격→사망
-	Kill0,      // E2 (d): 평소 시나리오(범위 피해·저격으로 초당 약 10명 사망). Mass와 같고 같은 묶음에서 잴 이름만 다르다
-	Kill1k,     // E2 (d): 평소 시나리오 + 초당 1천 명을 무작위로 피격→사망(인스턴스 제거·재생성 비용)
-	// M3 E3 계단(-LabStage=M3와 함께). 대표는 Mass(하이드레이션만)
-	M3Uro,       // E3 (2): 액터 메시에 URO
-	M3BudgetDist,// E3 (3a): URO 대신 Animation Budget Allocator, 중요도는 거리 단계(M0 budget과 같은 25/50/100/250m)
-	M3BudgetSig, // E3 (3b): Budget Allocator, 중요도는 Mass LODSignificance 변환값(1 - LODSignificance / 3)
-	M3NoActor,   // 진단: M3 단계 그대로 두되 0~30m도 VAT 인스턴스(액터 없음). 액터가 다른 프로세서 비용에 주는 영향을 가른다
-	M3LowRes,    // E3 (5): 0~15m 액터, 15~30m 저품질 액터(URO, 가장 낮은 메시 LOD, 그림자 끔), 30~200m VAT 인스턴스
-	M3ColQuery,  // E3 (6): 액터 캡슐을 QueryOnly로, 오버랩·물리 볼륨 갱신 끔(트레이스로 맞히는 게임의 절충)
-	M3NoCol,     // E3 (6): 액터 캡슐 콜리전 끔(판정을 Mass가 갖는 퍼핏 구조)
-	M3Hyd15,     // E3 (7): 하이드레이션 거리 15m(대표 30m). 나머지 밴드·상한은 그대로
-	M3Hyd50,     // E3 (7): 하이드레이션 거리 50m
-	// M3b(plan.md "M3b"). 별칭 m0full = Full, m0static = Static, m1mass·m2mass·m3mass = Mass(묶음 1 라벨이 단계별로 갈리게 이름만 다르다)
-	StaticPawn,  // M0 코드 정비 5: static(정적 메시, 애니 없음) + pawn(CharacterMovement 틱 끔). 컨테이너 전환만의 값을 보는 대조군
-	M3QOld,      // 진단: 정비 전 구조. VAT·ActorSync가 로직 프래그먼트와 태그를 읽고, 저격이 쿼리 밖에서 쓰고, 로직 뒤 순서 선언 없음(코드 정비 1·2 A/B)
-	M3SyncAll,   // 진단: ActorSync가 액터 태그 필터 없이 전 엔티티를 순회(코드 정비 4 A/B)
-	M3Vis0,      // E3b (8): 화면 밖 High 밴드 0m(카메라 뒤는 액터로 만들지 않음), 화면 안 30m. 대조군
-	M3Vis15,     // E3b (8): 화면 밖 High 밴드 15m, 화면 안 30m(MetaHuman Crowd 비율). 결정 1로 M3 기본값이 되어 m3mass와 같다. run-m3b.ps1이 쓰는 이름이라 남긴다
-	M3Vis30,     // E3b (8) 기준점: 결정 1 전의 M3 대표값(화면 밖 Base 30m, 화면 안 Visible 30m)
-	M3Hys20,     // E3b (8): 30/30m에 히스테리시스 20%(엔진 기본 10)
-	M3Lock0,     // 진단: 정비 코드 그대로, mass.commands.LockObserversDuringFlushing만 0(ini의 1을 이 변형에서만 덮는다). m3mass가 M3 묶음보다 0.7ms 느린 원인 가르기
-	M3Sig,       // E3 (3c): Budget Allocator, 중요도는 화면 크기(바운드 반경 ÷ 카메라 거리). 비교 상대는 (3a) m3budgetdist. 새 스탯 LargeActorSkips
-	M3Order,     // A/B: VatISM·ActorSync에 ExecuteAfter(LabLogic)를 선언한 쪽. 기본(m3mass)은 선언 없음(옛 m3noorder 동작). 20k P1 m3noorder 15.52 vs m3mass 16.12ms
-	// M4 E4(-LabStage=M4와 함께, plan.md "M4"). 대표는 Mass(별칭 m4mass): Simulation LOD 80/200m, 로직 틱 Medium 0.5초 / Low 1.0초
-	M4Off,       // E4 (a) 끔: Trait과 LOD 태그는 그대로, 틱 간격만 전부 0(매 프레임). m3mass → m4off는 태그로 아키타입이 늘어난 비용, m4off → m4mass는 틱 간격의 효과
-	M4M25L50,    // E4 (b): Medium 0.25초 / Low 0.5초
-	M4M25L100,   // E4 (b): Medium 0.25초 / Low 1.0초
-	M4M50L50,    // E4 (b): Medium 0.5초 / Low 0.5초
-	M4OffMove,   // E4 (d): 200m 밖을 Simulation LOD의 Off로 두어 엔진 이동·조향 넷에서 빼고(넷 모두 FMassOffLODTag를 None으로 요구한다) ULabOffMoveProcessor가 틱이 온 프레임에 흐른 시간만큼 오브로 직진시킨다. Docs/Worklog/M4.md "E4 (d) Low 밴드 이동"
-	M4Avoid,     // E4 (c): 대표 + 엔진 회피 Trait. 회피 프로세서는 High 태그만 처리하므로(MassAvoidanceProcessors.cpp:301-303) 80m 안만 비켜 간다
-	// M5 E5(-LabStage=M5와 함께, plan.md "M5"). M5 단계의 Simulation LOD는 모두 m4offmove 구성(200m 밖 Off + Lab 이동 프로세서)이다.
-	// 별칭 m5mass = M5Iskm. m4offmove는 M5 단계에서도 지난 묶음과 같은 구성(VAT, 엔티티 풀링 없음)이다.
-	M4OffPool,   // 기준점: m4offmove + 엔티티 풀링(원거리 표현은 VAT)
-	M5Iskm,      // M5 대표: 원거리 표현 ISKM(BlendTime 0, AnimationMinScreenSize -1, 그림자 켬) + 엔티티 풀링
-	M5Destroy,   // E5 (b) 누수 진단: m5iskm에서 엔티티 풀링 끔(사망 개체를 파괴하고 새로 만든다)
-	M5Blend,     // 참고: m5iskm + BlendTime 0.25초
-	M5MinSS,     // 참고: m5iskm + AnimationMinScreenSize 0.1(엔진 r.Skinning.DefaultAnimationMinScreenSize 기본값)
-	M5Bounds,    // 참고: m5iskm + ISKM 컴포넌트 고정 바운드(SetPrimitiveBoundsOverride). 프레임 끝 인스턴스별 CalcBounds 반복이 SendAllEndOfFrameUpdates 증가분의 원인인지 가른다(Docs/Worklog/M5.md "트레이스 검토")
-	// Q2(-LabStage=M5와 함께, plan.md "품질 계획" Q2). 이름은 Q5에서 단계 이름과 함께 바뀔 수 있다.
-	Q2Crowd,     // m5bounds + Niagara 배경 무리(-LabCrowdFx 기본 1). 표현·풀링·Budget은 m5bounds와 같다
-	// Q4(-LabStage=M5와 함께, plan.md "품질 계획" Q4, Docs/Worklog/Q4.md). 사다리 8단계 = 최종 구성 후보
-	Q4Final,     // q2crowd + Q4에서 고른 액터 상한·전환 거리(FLabQuality::Q4FinalActorCap·Q4FinalHydrateM). 나머지는 q2crowd와 같다
-	// 참고 묶음 Mgr1(-LabStage=M1과 함께, plan.md "참고 묶음 Mgr1", Docs/Worklog/Q8.md). 비교 상대는 M1 mass(사다리 2단계)다
-	Manager,     // 틱 없는 액터(ALabManagedMinion)가 개체 데이터를 들고 매니저 하나(ALabCrowdManager)가 매 프레임 모두 계산해 공유 ISM에 쓴다. Mass 엔티티를 만들지 않는다
-};
-
 /**
  * 근거리 품질 설정(Q4, Docs/Worklog/Q4.md). 액터 상한 = 표현 LOD High의 LODMaxCount(두 종류의 템플릿이 같은 LOD 파라미터라 한 공유 프래그먼트를 써서 합계 상한이다,
  * MassVisualizationTrait.cpp:145 GetOrCreateSharedFragment), 전환 거리 = 화면 안 High 경계(VisibleLODDistance[Medium]). 화면 밖 경계(15m, M3b 결정 1)는 그대로다.
@@ -78,13 +10,13 @@ enum class ELabVariant : uint8
  */
 struct FLabQuality
 {
-	static constexpr int32 DefaultActorCap = 500;   // 확정값 LODMaxCount High(measurement.md)
-	static constexpr float DefaultHydrateM = 30.f;  // 확정값 거리 밴드 0~30m
+	static constexpr int32 DefaultActorCap = 500;   // 확정값 LODMaxCount High(measurement.md). 사다리 단계 2~7
+	static constexpr float DefaultHydrateM = 30.f;  // 확정값 거리 밴드 0~30m. 사다리 단계 2~7
 	static constexpr float MaxHydrateM = 79.f;      // 80m(Medium/Low 경계, 확정값)를 넘지 않는다
-	// Q4 묶음에서 고른 값(Docs/Worklog/Q4.md "최종 구성"): 1만 P1 프레임 p95 11.98ms(13.3ms 안), 액터 평균 709개. 1만에서는 상한이 걸리지 않고 2만에서 1,000개로 막는다
-	static constexpr int32 Q4FinalActorCap = 1000;
+	// 사다리 단계 8(품질 올리기)의 값. Q4 묶음에서 골랐다(Docs/Worklog/Q4.md "최종 구성"): 1만에서는 상한이 걸리지 않고 2만에서 1,000개로 막는다
+	static constexpr int32 FinalActorCap = 1000;
 	// Q4b 표현 LOD 재편: 79m → 40m. Q4 묶음에서 대형 액터의 애니 갱신 건너뜀 비율이 40m 0.03~0.07, 50m 0.25~0.31, 79m 0.66이었다
-	static constexpr float Q4FinalHydrateM = 40.f;
+	static constexpr float FinalHydrateM = 40.f;
 	// v2 W7 표현 전환의 최소 유지 시간(ms, FLabConfig::RepHoldMs). 근거는 Docs/Worklog/V2.md "W7": 액터 경계 왕복의 간격이 대부분 1~2초라
 	// 1,000ms는 이동 조건의 왕복을 거의 줄이지 못했고(개발 빌드 초당 약 4 → 3.5), 2,000ms(왕복 창과 같은 값)는 상한 500 조건의 왕복(초당 13~63)을 0으로 만들었다
 	static constexpr int32 DefaultRepHoldMs = 2000;
@@ -102,19 +34,16 @@ struct FLabEquivalence
 };
 
 /**
- * Q2 Niagara 배경 무리(/Game/Lab/FX/NS_LabCrowd, Docs/Worklog/Q2.md). 그리는 끝 밖을 실제 미니언과 연결되지 않은 GPU 입자로 채운다.
- * 입자는 바깥 고리에서 생겨 미니언과 같은 속도로 오브를 향해 걷고, 수명이 끝나는 안쪽 반경에서 사라진다(페이드 없음).
+ * Q2 Niagara 배경 무리(/Game/Lab/FX/NS_LabCrowd, Docs/Worklog/Q2.md). 사다리 단계 7부터.
+ * 엔티티 구동 이미터가 그려지지 않는 걷는 엔티티의 자리에 입자를 그리고(Q2b), 독립 이미터가 맵 밖(500~1,000m)을 채운다.
+ * 독립 입자는 바깥 고리에서 생겨 미니언과 같은 속도로 오브를 향해 걷고, 수명이 끝나는 안쪽 반경(맵 반경)에서 사라진다(페이드 없음).
  */
 struct FLabCrowdFx
 {
 	static constexpr float OuterRadius = 100000.f; // 1,000m. 바닥 반쪽 길이 1,020m(Scripts/create-bench-map.py)
 	static constexpr float LargeShare = 0.1f;      // 2종의 대형 비율(일련번호 10의 배수가 대형, LabUnitAssets.h). 1종이면 0
-	// 실제 미니언이 Off에서 그려지기 시작하는 카메라 거리 = Lerp(Low 경계 80m, 그리는 끝, 1 − 히스테리시스 10%)(MassLODCalculator.h:864-886, 표현 LOD 기본 히스테리시스 10%,
-	// MassRepresentationFragments.h:309). 그리는 끝 200m면 188m다. 밴드 80m는 LabCrowdSubsystem.cpp의 표현 LOD 밴드와 같은 값이다.
-	static constexpr float RepLowCm = 8000.f;
-	static constexpr float RepHysteresis = 0.1f;
 	/**
-	 * Q2b 엔티티 구동 입자(-LabCrowdFxEntity, 기본 1, Docs/Worklog/Q2.md "Q2b"). 그려지지 않는 걷는 엔티티(표현 None)의 위치를 매 프레임 종류별 Niagara 배열로 넘긴다(ULabCrowdFxGatherProcessor).
+	 * Q2b 엔티티 구동 입자(Docs/Worklog/Q2.md "Q2b"). 그려지지 않는 걷는 엔티티(표현 None)의 위치를 매 프레임 종류별 Niagara 배열로 넘긴다(ULabCrowdFxGatherProcessor).
 	 * 원소 = (X, Y, T0, 위상): 월드 좌표(cm), 그 위치에 있던 월드 시각(초), 걷기 위상(초, = −StateStartTime). 에셋은 P = P0 + 오브 방향 × Speed × max(LabNow − T0, 0)로 외삽한다.
 	 * 이름은 에셋 단위와의 약속이다. 에셋에 없으면 경고 한 번 남기고 그 값만 넣지 않는다.
 	 */
@@ -125,18 +54,16 @@ struct FLabCrowdFx
 };
 
 /**
- * M4 Simulation LOD 설정. 거리는 카메라 기준이고 화면 안팎을 가리지 않는다(MassLODLogic.h:42).
- * 기본은 Off 밴드를 두지 않는다: 엔진의 Off는 위치를 이동 목표(오브)로 옮기고 이동·조향에서 뺀다(engine-notes.md 5절).
- * bOffMove(m4offmove·m4offpool과 M5 단계)만 200m 밖을 Off로 둔다. 순간 이동 프로세서는 M4부터 등록하지 않고(HordeOptLab.cpp) Lab 프로세서가 대신 옮긴다.
+ * Simulation LOD 설정(사다리 단계 5부터). 거리는 카메라 기준이고 화면 안팎을 가리지 않는다(MassLODLogic.h:42).
+ * 200m 밖은 Off 밴드다: 엔진이 FMassOffLODTag를 붙여 엔진 이동·조향에서 빼고 ULabOffMoveProcessor가 틱 간격마다 옮긴다(engine-notes.md 5절).
+ * 엔진의 Off 순간 이동 프로세서(UMassOffLODNavigationProcessor)는 이 단계부터 등록하지 않는다(HordeOptLab.cpp).
  */
 struct FLabSimLod
 {
 	static constexpr float MediumDistance = 8000.f;  // High 0~80m
-	static constexpr float LowDistance = 20000.f;    // Medium 80~200m, Low 200m~
-	float TickMedium = 0.5f; // 초. High는 0(매 프레임)
-	float TickLow = 1.0f;
-	bool bAvoidance = false;
-	bool bOffMove = false;   // E4 (d): Low 밴드 대신 Off 밴드(간격은 TickLow), 이동은 ULabOffMoveProcessor
+	static constexpr float LowDistance = 20000.f;    // Medium 80~200m, Off 200m~
+	static constexpr float TickMedium = 0.5f; // 초. High는 0(매 프레임)
+	static constexpr float TickLow = 1.0f;    // Off 밴드의 간격
 };
 
 /**
@@ -166,11 +93,9 @@ struct FLabScenario
 	// v2 떠다니는 오브(Docs/v2-spec.md 2절, autonomous-decisions.md D34). 궤도의 중심은 맵의 중심이다
 	static constexpr float OrbitRadius = 5730.f;     // 궤도 반지름 57.3m
 	static constexpr float OrbitSpeed = 200.f;       // 궤도 속도 2m/s. 한 바퀴 180초(2π × 57.3 ÷ 2)
-	static constexpr float OrbHeight = 600.f;        // 구체 높이 6m. 타워는 그리지 않는다
+	static constexpr float OrbHeight = 600.f;        // 구체 높이 6m
 	static constexpr float TopDownHeight = 10000.f;  // P2 탑뷰 100m. 가장 가까운 개체도 100m 떨어져 근거리 밴드(초안 30m)에 들지 않는다. 300m는 너무 멀었다
 
-	// budget 변형의 Significance 거리 단계(25/50/100/250m). plan.md "M0"
-	static constexpr float BudgetTiers[4] = { 2500.f, 5000.f, 10000.f, 25000.f };
 	// 애니메이션 예산 기본값(ms). 할당기를 켜는 모든 실행이 쓰고, -LabBudgetMs= 비교도 이 값과 한다. 4ms 근거: Docs/Decisions/0016-animation-budget-value.md
 	static constexpr float BudgetMs = 4.f;
 };
@@ -201,7 +126,7 @@ struct FLabOrbit
 		const double A = double(SpeedCms) / double(RadiusCm) * T;
 		return FVector(RadiusCm * FMath::Cos(A), RadiusCm * FMath::Sin(A), 0.);
 	}
-	/** 구체 중심의 높이(cm). 띄우지 않으면 타워 위 400(LabOrb.cpp) */
+	/** 구체 중심의 높이(cm). 0이면 v1의 타워 꼭대기 높이 400(타워 메시는 v2 W10에서 지웠다) */
 	float SphereZ() const { return HeightCm > 0.f ? HeightCm : 400.f; }
 	/** CSV 메타데이터 LabOrbit: "r57.3/v2/h6" 꼴(m, m/s, m) */
 	FString ToString() const
@@ -210,42 +135,28 @@ struct FLabOrbit
 	}
 };
 
-/**
- * 최적화 단계(마일스톤). 모든 단계가 한 빌드에 공존하고 -LabStage=로 고른다(ADR-0004).
- * 스포너·오브·카메라·러너·CSV는 모든 단계가 공유하고, 단계는 개체를 표현하고 움직이는 방식만 바꾼다.
- * 마일스톤을 끝낼 때 이전 단계를 지우지 않고 새 단계를 더한다.
- */
-enum class ELabStage : uint8
-{
-	M0, // 액터 군중(변형은 ELabVariant)
-	M1, // Mass 코어: 같은 로직을 Fragment·Processor로, 표현은 애니 없는 ISM
-	M2, // Representation LOD: 같은 ISM에 VAT 애니메이션(걷기·피격·죽기). 대표 설정은 모든 거리를 그린다
-	M3, // 액터 하이드레이션: 0~30m는 액터(최대 500), 30~200m VAT 인스턴스, 200m 밖 Off
-	M4, // Simulation LOD: M3 표현 그대로, 로직 프로세서 둘(접근·범위 피해)이 80m 밖에서 틱 간격을 늘린다(FLabSimLod). 저격과 상태 타이머는 매 프레임 돈다
-	M5, // ISKM: m4offmove 구성 위에서 30~200m 표현을 VAT ISM → ISKM으로 바꾼다(ULabIskmProcessor). 엔티티 풀링 기본 켬(-LabEntityPool)
-};
-
-/** M5 ISKM 렌더·재생 설정(plan.md "M5" 결정 5·6). 변형이 정한다. */
+/** ISKM 렌더·재생 설정(plan.md "M5" 결정 5·6). 사다리 단계 6부터 */
 struct FLabIskmParams
 {
-	float BlendTime = 0.f;               // 클립 전환 크로스페이드(초). 대표 0 = VAT와 같이 끊어 바꾸기
-	float AnimationMinScreenSize = -1.f; // < 0 항상 재생. 0이면 엔진 r.Skinning.DefaultAnimationMinScreenSize(MassSkinnedMeshRepresentationTypes.h:96-101)
-	bool bCastShadows = true;            // 엔진 설명자 기본값은 false(MassSkinnedMeshRepresentationTypes.h:79)
-	bool bFixedBounds = false;           // m5bounds: 컴포넌트 바운드를 고정한다(ULabCrowdSubsystem::ExcludeVisualsFromLumen)
+	static constexpr float BlendTime = 0.f;               // 클립 전환 크로스페이드(초). 0 = VAT와 같이 끊어 바꾸기
+	static constexpr float AnimationMinScreenSize = -1.f; // < 0 항상 재생(MassSkinnedMeshRepresentationTypes.h:96-101)
+	static constexpr bool bCastShadows = true;            // 엔진 설명자 기본값은 false(MassSkinnedMeshRepresentationTypes.h:79)
 };
 
-/** 실행 인자. 프로세스 시작 시 한 번 읽는다. */
+/**
+ * 실행 인자. 프로세스 시작 시 한 번 읽는다.
+ * v2 W10(Docs/Worklog/V2.md "W10"): 사다리 단계 하나(-LabStage=1~8)가 무엇을 켜는지 정하고, 빼 보기와 하위 실험은 스위치 인자로 기법 하나를 바꾼다.
+ * 단계는 한 빌드 안의 실행 모드다(ADR-0004). 단계별 스위치 표는 Docs/Worklog/V2.md "W10"과 Docs/Guides/commands.md에 있다.
+ */
 struct FLabConfig
 {
-	ELabStage Stage = ELabStage::M0;
-	/** v2 W10 사다리 단계(-LabStage=1~8, Docs/v2-plan.md "사다리"). 0이면 옛 단계·변형 이름으로 골랐다 */
-	int32 Step = 0;
-	/** 사다리 단계 2·3: 하이드레이션 액터는 있고 인스턴스는 엔진 ISM 프로세서(UMassUpdateISMProcessor)와 정지 메시다(VAT 없음) */
-	bool bStaticIsm = false;
-	/** 인스턴스가 VAT로 움직이는가(M2 이상 단계, 단계 2·3 제외). ULabVatISMProcessor 등록과 VAT 에셋 로드 조건 */
-	bool UsesVat() const { return Stage >= ELabStage::M2 && !bStaticIsm; }
-	bool bStageValid = true;   // 아직 없는 단계를 고르면 false. 게임 모드가 종료 코드 2로 끝낸다
-	bool bVariantValid = true; // 모르는 -LabVariant 이름이면 false. 게임 모드가 종료 코드 2로 끝낸다
+	/**
+	 * 사다리 단계(-LabStage=1~8, 기본 8 = 최종 구성, Docs/v2-plan.md "사다리"). 1 액터 기준선, 2 Mass 엔진 기본 경로, 3 직접 짠 분리,
+	 * 4 애니메이션 표현(VAT·애니 예산·전환 대책), 5 Simulation LOD + 엔티티 풀, 6 ISKM, 7 배경 무리, 8 품질 올리기.
+	 */
+	int32 Step = 8;
+	bool bStageValid = true;   // -LabStage가 1~8이 아니면 false(옛 이름 M0~M5 포함). 게임 모드가 종료 코드 2로 끝낸다
+	bool bVariantValid = true; // -LabVariant를 주면 false(v2 W10에서 변형을 지웠다). 게임 모드가 종료 코드 2로 끝낸다
 	/**
 	 * -LabHud: 상태 오버레이를 켠 채 시작(F1로도 토글). Q5부터 -LabBench와 함께 줘도 켜진다(촬영 실행 = 측정과 같은 조건 + HUD).
 	 * 측정 실행은 주지 않는다. 켜졌는지는 CSV 메타데이터 LabHud로 남아 러너가 거른다(Docs/Worklog/Q5.md "HUD").
@@ -261,21 +172,14 @@ struct FLabConfig
 	float HealthFixed = 0.f;
 	/** Q1 개체 체력: 시드와 스폰 일련번호의 결정적 해시로 [HealthMin, HealthMax] 균등. 초기 배치·재생성·풀 재사용·액터 단계 모두 이 함수 하나를 쓴다 */
 	float HealthFor(uint32 Serial) const;
-	ELabVariant Variant = ELabVariant::Full;
 	bool bBench = false;       // 벤치마크 러너(M0 7번)
 	FString Label;
 	float WarmupSec = -1.f;    // -LabWarmup=<초>. 0 이상이면 -LabBench 워밍업을 그 길이로 한다(기본은 FLabBench: 이동 60초, 정지 15초)
 	float DurationSec = 0.f;   // 0보다 크면 그 시간 뒤 종료(개발용 -Small 실행). -LabBench에서는 측정 구간 길이(기본 60초 대신, M5 E5 (b) 960)
 	float ShotAtSec = 0.f;     // 0보다 크면 그 시각에 QHD 스크린샷 한 장(Saved/Screenshots/)
 	/**
-	 * M3 전환(하이드레이션) 대책 단계. 대책을 하나씩 쌓아 온 과정을 같은 장면으로 다시 보이려고 둔다(-LabHydrateFix=, 기본 4 = 전부).
-	 * 0 상태만 맞춤, 1 + 시작 시각 맞추기, 2 + 준비될 때까지 VAT 유지(액터 숨김), 3 숨김 대신 화면·그림자에서만 빼기, 4 + 엔진 이동 높이 맞추기.
-	 * 근거와 캡처는 Measurements/M3/shots/transition/README.md.
-	 */
-	int32 HydrateFix = 4;
-	/**
-	 * 전환 대책을 하나씩 따로 켜고 끈다(-LabHydrateFixMask=, 기본 31 = 전부). 문제 크기를 대책마다 따로 재려고 둔다.
-	 * -LabHydrateFix=L을 주면 단계 L에 맞는 마스크가 된다(0→0, 1→1, 2→3, 3→7, 4→31).
+	 * 전환 대책(Measurements/M3/shots/transition/README.md)을 하나씩 켜고 끈다(-LabHydrateFixMask=, 비트는 EHydrateFix). 기본은 사다리 단계 4부터 31(전부), 그 앞은 0.
+	 * 빼 보기 -LabHydrateFixMask=0이 전부 끈다. CSV 메타데이터 LabHydrateFixMask, LabTechHydrateFix.
 	 */
 	int32 HydrateFixMask = 31;
 	/**
@@ -284,49 +188,47 @@ struct FLabConfig
 	 * -LabTypes=1이면 M3b까지의 1종 결과가 그대로다(LabUnitAssets.h).
 	 */
 	int32 Types = 2;
-	/** -LabFullyParallel=0이면 mass.FullyParallel을 0으로 둔다(직렬 트레이스, run-m3b.ps1 -SerialArgs). -1은 건드리지 않음. massst 변형과 같은 경로 */
+	/** -LabFullyParallel=0이면 mass.FullyParallel을 0으로 둔다(직렬 트레이스). -1은 건드리지 않음 */
 	int32 FullyParallel = -1;
 	/**
 	 * 그리는 거리 실험(-LabFarM=<미터>, 기본 200 = 확정값, Docs/Worklog/M4.md "그리는 거리 인자").
-	 * 표현 LOD의 Off 거리(이 밖은 그리지 않는다)와 m4offmove의 Simulation LOD Off 거리를 함께 옮긴다. 30m·80m 경계, Simulation LOD의 Low 경계(200m), 저격 구간, 밴드 집계 경계는 그대로다.
+	 * 표현 LOD의 Off 거리(이 밖은 그리지 않는다)와 Simulation LOD Off 거리를 함께 옮긴다. 30m·80m 경계, Simulation LOD의 Low 경계(200m), 저격 구간, 밴드 집계 경계는 그대로다.
 	 * 200보다 작은 값은 200으로 올린다(Low 경계보다 안쪽의 Off는 다루지 않는다).
 	 */
 	int32 FarM = 200;
 	float FarCm() const { return float(FarM) * 100.f; }
 	/**
-	 * M5 엔티티 풀링(-LabEntityPool=0/1, plan.md "M5" 결정 1). 사망 개체를 파괴하지 않고 풀에 두었다가 재생성 때 다시 꺼낸다(ISKM 트랙 누수 우회).
-	 * 기본: M5 단계 1, 다른 단계 0. 변형 m4offpool은 어느 단계에서든 1, m4offmove·m5destroy는 0. 인자를 주면 그 값이 이긴다.
+	 * 엔티티 풀링(-LabEntityPool=0/1, plan.md "M5" 결정 1). 사망 개체를 파괴하지 않고 풀에 두었다가 재생성 때 다시 꺼낸다(ISKM 트랙 누수 우회).
+	 * 기본: 사다리 단계 5부터 1. 인자를 주면 그 값이 이긴다.
 	 */
 	bool bEntityPool = false;
 	/**
-	 * v2 W3 겹침 방지(-LabAvoid=0/1, Docs/v2-spec.md 3절). 1이면 Mass 단계의 엔티티에 엔진 회피 Trait 둘을 붙인다
-	 * (UMassObstacleAvoidanceTrait, UMassNavigationObstacleTrait, 파라미터는 엔진 기본값). 기본 0. 변형 massav·m4avoid는 이 값과 무관하게 켠다.
+	 * v2 W3 엔진 회피(-LabAvoid=0/1, Docs/v2-spec.md 3절). 1이면 엔티티에 엔진 회피 Trait 둘을 붙인다
+	 * (UMassObstacleAvoidanceTrait, UMassNavigationObstacleTrait, 파라미터는 엔진 기본값). 기본: 사다리 단계 2만 1(D43).
 	 * Simulation LOD를 쓰는 단계에서는 엔진 회피 프로세서가 High(80m 안)만 처리한다(MassAvoidanceProcessors.cpp:301-303).
 	 */
 	bool bAvoid = false;
 	/**
-	 * v2 W4 겹침 방지, 직접 구현(-LabSeparate=0/1, Docs/v2-spec.md 3절, Docs/Worklog/V2.md "W4"). 1이면 ULabSeparationProcessor가 겹친 개체의 위치를 직접 떼어 놓는다.
-	 * 기본 1(v2 W5부터, D45). -LabSeparate=0이 끈다. 엔진 회피(-LabAvoid)와 따로 켜고 끈다. CSV 메타데이터 LabTechSeparate.
-	 * M0(v2 W6)에서는 분리 프로세서가 아니라 액터 캡슐끼리 막기를 켜고 끈다(UsesActorBlocking).
+	 * 겹침 방지(-LabSeparate=0/1, Docs/v2-spec.md 3절). Mass 단계는 ULabSeparationProcessor가 겹친 개체의 위치를 직접 떼어 놓는다(v2 W4, D45).
+	 * 단계 1은 액터 캡슐끼리 막기다(UsesActorBlocking, v2 W6, D47). 기본: 단계 2만 0(엔진 회피를 쓴다), 그 밖 1. CSV 메타데이터 LabTechSeparate.
 	 */
 	bool bSeparate = true;
 	/**
-	 * v2 W7 표현 전환의 최소 유지 시간(ms, -LabRepHold=<ms>, 0이면 끔, Docs/v2-spec.md 4.1, Docs/Worklog/V2.md "W7"). 기본 FLabQuality::DefaultRepHoldMs.
-	 * 한 번 표현 무리(액터·인스턴스·없음)가 바뀐 엔티티는 이 시간 안에 바로 전의 무리로 되돌아가지 않는다(ULabRepHoldProcessor). 액터 상한은 넘지 않는다.
-	 * M3 이상 단계(액터가 있는 단계)에서만 등록한다(UsesRepHold). CSV 메타데이터 LabRepHold.
+	 * v2 W7 표현 전환의 최소 유지 시간(ms, -LabRepHold=<ms>, 0이면 끔, Docs/v2-spec.md 4.1, Docs/Worklog/V2.md "W7"). 기본: 사다리 단계 4부터 FLabQuality::DefaultRepHoldMs, 그 앞은 0.
+	 * 한 번 표현 무리(액터·인스턴스·없음)가 바뀐 엔티티는 이 시간 안에 바로 전의 무리로 되돌아가지 않는다(ULabRepHoldProcessor). 액터 상한은 넘지 않는다. CSV 메타데이터 LabRepHold.
 	 */
 	int32 RepHoldMs = FLabQuality::DefaultRepHoldMs;
-	bool UsesRepHold() const { return Stage >= ELabStage::M3 && RepHoldMs > 0 && !UsesManager(); }
+	bool UsesRepHold() const { return IsMass() && RepHoldMs > 0; }
 	/**
 	 * v2 W8 움직이는 오브용 기법(Docs/v2-spec.md 4.2, Docs/Worklog/V2.md "W8").
 	 * bFxOrbFollow(-LabFxOrbFollow=0/1, 기본 1): 엔티티 구동 입자의 외삽 목표 User.LabOrbPos를 매 프레임 오브의 지금 위치로 넣는다(ULabCrowdFxGatherProcessor).
-	 * 0이면 W7까지처럼 활성화 전에 한 번만 넣는다. 엔티티 구동 입자를 쓸 때만 뜻이 있다. CSV 메타데이터 LabFxOrbFollow.
+	 * 0이면 W7까지처럼 활성화 전에 한 번만 넣는다. 배경 무리를 쓸 때만 뜻이 있다. CSV 메타데이터 LabFxOrbFollow.
 	 */
 	bool bFxOrbFollow = true;
 	/**
 	 * v2 W8 ISKM 바운드 상자가 카메라를 따라간다(-LabBoundsStepM=<m>, 기본 FLabQuality::DefaultBoundsStepM). 카메라가 상자 중심에서 수평으로 이 거리 넘게 벗어나면
 	 * 상자 중심을 카메라로 옮긴다(ULabCrowdSubsystem::ApplyFixedIskmBounds). 상자 반폭은 그리는 끝 × 1.1 + 이 거리 + 여유 10m다.
-	 * 0이면 W7까지처럼 처음 오브 위치 둘레에 고정한다. 고정 바운드를 쓸 때만 뜻이 있다(IskmParams().bFixedBounds). CSV 메타데이터 LabBoundsStepM.
+	 * 0이면 W7까지처럼 처음 오브 위치 둘레에 고정한다. 고정 바운드를 쓸 때만 뜻이 있다(UsesFixedBounds). CSV 메타데이터 LabBoundsStepM.
 	 */
 	float BoundsStepM = FLabQuality::DefaultBoundsStepM;
 	/**
@@ -342,159 +244,136 @@ struct FLabConfig
 	/** 분리 파라미터(LabSeparation.h). Test 빌드는 기본값만 쓴다. 개발 빌드는 -LabSepIter=, -LabSepRelax=, -LabSepMaxStep=, -LabSepVel=로 바꿔 본다 */
 	FLabSeparationParams Separation;
 	/**
-	 * Budget Allocator, 중요도 = 화면 크기(-LabScreenSigBudget=0/1). 액터를 Budget 템플릿으로 만들고 ActorSync가 화면 크기를 중요도로 넣는다.
-	 * 기본: M3·M4·M5 단계 1, 그 밖 0. 변형 m3sig는 항상 1. 비교 상대인 m3mass(와 m3base·m3colbase·m3hydbase)·m3uro·m3budgetdist·m3budgetsig·m3lowres·m3noactor와
-	 * M3 하위 실험·진단 변형은 0. 인자를 주면 그 값이 이긴다. M3 이상 단계에서만 뜻이 있다.
+	 * Animation Budget Allocator, 중요도 = 화면 크기(-LabScreenSigBudget=0/1). 액터를 Budget 템플릿으로 만들고 ActorSync가 화면 크기를 중요도로 넣는다.
+	 * 기본: 사다리 단계 4부터 1. 인자를 주면 그 값이 이긴다(빼 보기 -LabScreenSigBudget=0).
 	 */
 	bool bScreenSigBudget = false;
 	/**
-	 * 애니메이션 예산(ms, -LabBudgetMs=<값>, 기본 FLabScenario::BudgetMs = 4, ADR-0016). 할당기를 켜는 실행에서 a.Budget.BudgetMs에 넣는다(ALabGameMode::ApplyVariantCVars).
-	 * 0 이하면 예산을 끈다. 끄는 길은 빼 보기 A8-budget(-LabScreenSigBudget=0)과 같다: bScreenSigBudget을 거짓으로 둬 액터를 Budget 템플릿으로 만들지 않는다.
-	 * 변형이 스스로 정하는 예산(M0 budget, m3budgetdist, m3budgetsig)은 0 이하를 받아도 켜진 채로 남는다. 기본값과 다르면 LabOverrides에 budget_ms=<값>으로 남는다.
+	 * 애니메이션 예산(ms, -LabBudgetMs=<값>, 기본 FLabScenario::BudgetMs = 4, ADR-0016). 할당기를 켜는 실행에서 a.Budget.BudgetMs에 넣는다(ALabGameMode::ApplyBudgetCVars).
+	 * 0 이하면 예산을 끈다(-LabScreenSigBudget=0과 같다). 기본값과 다르면 LabOverrides에 budget_ms=<값>으로 남는다.
 	 */
 	float BudgetMs = FLabScenario::BudgetMs;
-	/**
-	 * Q2 Niagara 배경 무리(-LabCrowdFx=0/1). 기본: 변형 q2crowd만 1, 그 밖 0(기존 단계·변형의 동작은 그대로). 인자를 주면 그 값이 이긴다.
-	 * 단계와 기본값의 연결은 Q3·Q5에서 단계 이름과 함께 정한다(Docs/Worklog/Q2.md (마)).
-	 */
+	/** Q2 Niagara 배경 무리(-LabCrowdFx=0/1). 기본: 사다리 단계 7부터 1. 인자를 주면 그 값이 이긴다(빼 보기 -LabCrowdFx=0) */
 	bool bCrowdFx = false;
 	/**
-	 * Q2b(-LabCrowdFxEntity=0/1, 기본 1). 1: 그려지지 않는 엔티티 자리에 입자를 그리고(엔티티 구동 이미터), 독립 입자는 맵 밖(500~1,000m)만 채운다.
-	 * 0: Q2 3단위의 옛 방식(전부 독립 입자, 안쪽 반경 172.8m, 엔티티 배열을 넣지 않음). bCrowdFx일 때만 뜻이 있다.
-	 */
-	bool bCrowdFxEntity = true;
-	/**
 	 * Q5b(-LabCrowdFxOuter=0/1, 기본 1). 0이면 바깥 독립 이미터(Small·Large)의 스폰율을 0으로 넣어(CrowdFxTotalRate) 입자를 내지 않는다. 에셋은 고치지 않는다.
-	 * 스폰율을 활성화 전에 넣으므로 워밍업도 0으로 돌아 미리 채워지는 입자가 없다. 엔티티 구동 이미터는 스폰율을 읽지 않아 그대로다.
-	 * Niagara 대 ISKM 비교 조건 S8-fxent(Scripts/full-conditions.json, Docs/Worklog/Q5.md "Q5b 비교 조건"). bCrowdFx일 때만 뜻이 있다.
+	 * 스폰율을 활성화 전에 넣으므로 워밍업도 0으로 돌아 미리 채워지는 입자가 없다. 엔티티 구동 이미터는 스폰율을 읽지 않아 그대로다. bCrowdFx일 때만 뜻이 있다.
 	 */
 	bool bCrowdFxOuter = true;
-	/** 개발용: 독립 입자가 사라지는 안쪽 반경(-LabCrowdFxInnerM=<미터>, 0 = 기본 CrowdFxInnerCm). 200m 경계 비교 촬영에 쓴다. Test 빌드에서는 읽지 않는다 */
-	float CrowdFxInnerOverrideM = 0.f;
 	/** 실제 미니언과 같은 흐름(개/초): N / 맵 반경 × 이동 속도(Docs/Worklog/Q2.md "장면 수치"). N 1만이면 60. -LabCrowdFxOuter=0이면 0 */
 	float CrowdFxTotalRate() const;
 	float CrowdFxSmallRate() const;
 	float CrowdFxLargeRate() const;
-	/**
-	 * 독립 입자가 사라지는 안쪽 반경(오브 기준, cm). 수명은 이 값을 따라간다.
-	 * 엔티티 구동(bCrowdFxEntity, 기본)이면 맵 반경 500m다. 그 안은 엔티티가 있고 그려지지 않는 엔티티는 엔티티 구동 이미터가 그린다.
-	 * 옛 방식(-LabCrowdFxEntity=0)은 P1 카메라 앞에서 실제 미니언이 나타나는 자리다:
-	 * 카메라 거리 H = Lerp(80m, 그리는 끝, 0.9)를 높이 9m로 수평 거리로 바꾸고 카메라가 오브 뒤 15m인 만큼 뺀다. 그리는 끝 200m면 172.8m(Docs/Worklog/Q2.md "200m 경계의 위치").
-	 * P2에서도 같은 값을 쓴다(P2는 입자가 화면에 없고, 프리셋에 따라 입자 수가 바뀌지 않게 한다).
-	 */
-	float CrowdFxInnerCm() const;
-	/** (바깥 반경 − 안쪽 반경) / 이동 속도. 0 이하면 켜지 않는다(그리는 끝이 1,000m 이상) */
+	/** 독립 입자가 사라지는 안쪽 반경(오브 기준, cm) = 맵 반경 500m. 그 안은 엔티티가 있고 그려지지 않는 엔티티는 엔티티 구동 이미터가 그린다(Q2b) */
+	float CrowdFxInnerCm() const { return FLabScenario::MapRadius; }
+	/** (바깥 반경 − 안쪽 반경) / 이동 속도 */
 	float CrowdFxLifetime() const;
 	/** 독립 입자의 정상 상태 수 계산값 = 스폰율 × 수명. 꺼져 있으면 0. CSV 메타데이터 LabCrowdFxParticles. 엔티티 구동 입자 수는 CSV 스탯 Lab/CrowdRecs다 */
 	int32 CrowdFxParticles() const;
-	/** 엔티티 구동 입자를 쓰는가(bCrowdFx && bCrowdFxEntity). ULabCrowdFxGatherProcessor 등록 조건(HordeOptLab.cpp) */
-	bool UsesCrowdFxEntity() const { return bCrowdFx && bCrowdFxEntity; }
+	/** 엔티티 구동 입자를 쓰는가. ULabCrowdFxGatherProcessor 등록 조건(HordeOptLab.cpp) */
+	bool UsesCrowdFxEntity() const { return IsMass() && bCrowdFx; }
 	/**
-	 * Q3 빼 보기 스위치(plan.md "품질 계획" 빼 보기 표, Docs/Worklog/Q3.md). 변형이 정한 구성에서 기법 하나만 뺀다. 새 인자 다섯은 0을 줄 때만 뜻이 있다(끄기 전용).
-	 * 1이나 다른 값은 변형·단계의 기본 동작 그대로다. 그 단계에 없는 기법을 켜지 않는다. 나머지 네 행은 기존 인자를 쓴다
-	 * (-LabScreenSigBudget=0 애니 예산, -LabHydrateFixMask=0 전환 대책, -LabEntityPool=0 엔티티 풀, -LabCrowdFx=0 배경 무리).
+	 * Q3 빼 보기 스위치(Docs/Worklog/V2.md "W10" 빼 보기 표). 단계가 정한 구성에서 기법 하나만 뺀다. 0을 줄 때만 뜻이 있다(끄기 전용).
+	 * 1이나 다른 값은 단계의 기본 동작 그대로다. 그 단계에 없는 기법을 켜지 않는다.
 	 */
-	bool bNoHydrate = false;     // -LabHydrate=0: 0~30m도 인스턴스(M5는 ISKM)로 그린다. 액터 0(m3noactor와 같은 경로)
-	bool bNoSimLod = false;      // -LabSimLod=0: Simulation LOD Trait을 붙이지 않는다. 로직은 매 프레임, 이동은 전 개체가 엔진 이동·조향(M3 단계와 같다)
-	bool bNoIskm = false;        // -LabIskm=0: M5 단계에서도 30~200m를 VAT ISM으로 그린다(m4offpool의 표현)
-	bool bNoFixedBounds = false; // -LabFixedBounds=0: ISKM 컴포넌트 고정 바운드를 넣지 않는다(m5iskm의 바운드)
+	bool bNoHydrate = false;     // -LabHydrate=0: 액터 구간도 인스턴스(ISKM 단계는 ISKM)로 그린다. 액터 0
+	bool bNoSimLod = false;      // -LabSimLod=0: Simulation LOD Trait을 붙이지 않는다. 로직은 매 프레임, 이동은 전 개체가 엔진 이동·조향(단계 4와 같다)
+	bool bNoIskm = false;        // -LabIskm=0: ISKM 단계에서도 40~200m를 VAT ISM으로 그린다(단계 5의 표현)
+	bool bNoFixedBounds = false; // -LabFixedBounds=0: ISKM 컴포넌트 고정 바운드를 넣지 않는다
 	bool bNoFarCull = false;     // -LabFarCull=0: 표현 LOD의 Off(그리지 않음)를 두지 않고 맵 끝까지 그린다. Simulation LOD Off 거리와 배경 무리 안쪽 반경은 그대로
 	/**
-	 * Q4 근거리 품질(FLabQuality). 기본은 변형이 정한다(대부분 500·30m, m3hyd15·m3hyd50은 15·50m, q4final은 Q4에서 고른 값). 인자가 이긴다.
-	 * -LabActorCap=<개수>: 액터 상한(두 종류 합계). -LabHydrateM=<미터>: 화면 안에서 액터로 바뀌는 카메라 거리(1~79m). M3 이상 단계에서만 뜻이 있고 m3lowres는 자기 값을 쓴다.
+	 * Q4 근거리 품질(FLabQuality). 기본: 사다리 단계 2~7은 500·30m, 단계 8은 1,000·40m. 인자가 이긴다.
+	 * -LabActorCap=<개수>: 액터 상한(두 종류 합계). -LabHydrateM=<미터>: 화면 안에서 액터로 바뀌는 카메라 거리(1~79m). Mass 단계에서만 뜻이 있다.
 	 */
 	int32 ActorCap = FLabQuality::DefaultActorCap;
 	float HydrateM = FLabQuality::DefaultHydrateM;
 	float HydrateCm() const { return HydrateM * 100.f; }
 	/**
-	 * Q4b 원거리 그림자(-LabFarShadow=0|1). 거짓이면 표현 LOD Low(80m~그리는 끝) 인스턴스가 그림자를 그리지 않는다. M3 이상 단계에서만 뜻이 있다.
-	 * 기본: q4final 거짓(끔), 그 밖 참(지금까지의 동작). 인자가 이긴다. 인스턴스 단위 그림자 플래그가 없어서 메시 설명자를 LOD 중요도 범위로 둘로 나눈다
-	 * (High~Low 그림자 켬, Low~Max 그림자 끔, 엔진이 설명자마다 컴포넌트를 하나씩 만든다). ISKM과 VAT ISM(-LabIskm=0) 모두 같다. CSV 메타데이터 LabFarShadow.
+	 * Q4b 원거리 그림자(-LabFarShadow=0|1). 거짓이면 표현 LOD Low(80m~그리는 끝) 인스턴스가 그림자를 그리지 않는다. Mass 단계에서만 뜻이 있다.
+	 * 기본: 단계 8 거짓(끔), 그 밖 참. 인자가 이긴다. 인스턴스 단위 그림자 플래그가 없어서 메시 설명자를 LOD 중요도 범위로 둘로 나눈다
+	 * (High~Low 그림자 켬, Low~Max 그림자 끔, 엔진이 설명자마다 컴포넌트를 하나씩 만든다). ISKM과 VAT ISM 모두 같다. CSV 메타데이터 LabFarShadow.
 	 */
 	bool bFarShadow = true;
-	/** CSV 메타데이터 LabFarShadow: "1" 켬, "0" 끔, M3 미만 단계 "-" */
-	const TCHAR* FarShadowString() const { return Stage < ELabStage::M3 ? TEXT("-") : bFarShadow ? TEXT("1") : TEXT("0"); }
+	/** CSV 메타데이터 LabFarShadow: "1" 켬, "0" 끔, 액터 단계 "-" */
+	const TCHAR* FarShadowString() const { return !IsMass() ? TEXT("-") : bFarShadow ? TEXT("1") : TEXT("0"); }
 	/**
-	 * 하이드레이션 액터(M3 이상, ALabMinionMassActor 계열)의 캡슐 콜리전. v1에서는 기본이 끔이었다(plan.md M3b "함께 바꾸는 설정", Q5 1b단위에서 코드에 넣었다). v2 W5부터 기본은 Trace다(아래).
-	 * Off: NoCollision + 오버랩·물리 볼륨 갱신 끔(옛 m3nocol 처리). QueryOnly: 같은 두 갱신 끔 + QueryOnly(m3colquery). On: ACharacter 캡슐의 Pawn 프로필 그대로
-	 * (Mass 액터 풀이 꺼낼 때 SetActorEnableCollision(true)를 부른다, MassActorSpawnerSubsystem.cpp:327).
-	 * 변형 기본값: m3colquery는 QueryOnly, 라벨 m3colbase는 On(E3 (6)의 "그대로" 기준점의 뜻을 지킨다), 그 밖은 Off. -LabActorCollision=1이 켜고 =0이 끈다(인자가 이긴다).
-	 * 판정(범위 피해, 저격)은 엔티티 위치의 수평 거리로 하고 캡슐을 쓰지 않는다. M0 액터(ALabMinion, CharacterMovement가 캡슐로 바닥을 찾는다)는 이 값과 무관하게 늘 켬이다
-	 * (v2 W6: Pawn 프로필 + 저격 채널 막음, 메타데이터 "pawn", ALabMinion::InitMinion).
-	 * v2 W5(Docs/v2-spec.md 3절 기능 3, Docs/Worklog/V2.md "W5"): 기본이 Trace다. QueryOnly + 모든 채널 무시 + 저격 트레이스 채널(LabSnipe, LabSnipe.h)만 막음, 오버랩·물리 볼륨 갱신 끔.
+	 * 하이드레이션 액터(ALabMinionMassActor 계열)의 캡슐 콜리전(v2 W5, Docs/v2-spec.md 3절 기능 3, Docs/Worklog/V2.md "W5").
+	 * Trace(기본): QueryOnly + 모든 채널 무시 + 저격 트레이스 채널(LabSnipe, LabSnipe.h)만 막음, 오버랩·물리 볼륨 갱신 끔.
 	 * 캡슐끼리는 서로 무시하고 이동은 스윕 없는 텔레포트라 밀지 않는다. 오브가 액터 구간의 저격 대상에 이 채널로 라인 트레이스를 쏴 맞는지 센다(ALabOrb::TraceSnipeCapsules).
-	 * -LabActorCollision=0 끔, =1 Pawn 프로필 켬(옛 S8-col), =2 Trace. m3colquery·m3colbase는 옛 값 그대로다.
+	 * Off(-LabActorCollision=0): NoCollision + 두 갱신 끔. On(=1): ACharacter 캡슐의 Pawn 프로필 그대로(Mass 액터 풀이 꺼낼 때 SetActorEnableCollision(true), MassActorSpawnerSubsystem.cpp:327).
+	 * 판정(범위 피해, 저격 대상 선택)은 엔티티 위치의 수평 거리로 하고 캡슐을 쓰지 않는다. 단계 1 액터(ALabMinion)는 이 값과 무관하게 늘 켬이다
+	 * (v2 W6: Pawn 프로필 + 저격 채널 막음, 메타데이터 "pawn", ALabMinion::InitMinion).
 	 */
-	enum class EActorCollision : uint8 { Off, QueryOnly, On, Trace };
+	enum class EActorCollision : uint8 { Off, On, Trace };
 	EActorCollision ActorCollision = EActorCollision::Trace;
-	/** 하이드레이션 액터 캡슐 콜리전의 실제 적용값. "trace" 기본(W5), "0" 끔(-LabActorCollision=0), "1" 켬(-LabActorCollision=1, m3colbase), "query" m3colquery. 액터가 없는 단계는 "-". CSV 메타데이터 LabActorCollision */
+	/** 하이드레이션 액터 캡슐 콜리전의 실제 적용값. "trace" 기본, "0" 끔, "1" 켬, 단계 1 "pawn", 액터가 없으면 "-". CSV 메타데이터 LabActorCollision */
 	const TCHAR* ActorCollisionString() const;
 	/**
-	 * 변형이 정한 기본값과 다르게 준 인자(Q5). "hydrate_m=70|actor_collision=1" 꼴(CSV 메타데이터 행이 쉼표로 나뉘어 | 로 잇는다), 없으면 빈 문자열. 사다리 단계를 그대로 고른 실행인지 가리는 데 쓴다.
+	 * 단계 기본값과 다르게 준 인자(Q5). "hydrate_m=70|actor_collision=1" 꼴(CSV 메타데이터 행이 쉼표로 나뉘어 | 로 잇는다), 없으면 빈 문자열. 사다리 단계를 그대로 고른 실행인지 가리는 데 쓴다.
 	 * CSV 메타데이터 LabOverrides(빈 값이면 "-"), HUD 둘째 줄.
 	 */
 	FString Overrides;
-	/**
-	 * 사다리(plan.md "품질 계획") 단계. Id는 "1"~"8", 하위 변형 "1b"(M0 budget)·"1c"(M0 uro), 사다리 밖이면 "-". Name은 HUD에 쓰는 영어 이름.
-	 * 변형과 단계만 본다. 인자로 바꾼 것은 Overrides에 따로 있다. CSV 메타데이터 LabLadder.
-	 */
+	/** 사다리 단계의 번호와 HUD 이름(영어). CSV 메타데이터 LabLadder(= LabStage) */
 	struct FLadder { FString Id; FString Name; };
 	FLadder Ladder() const;
-	/** 변형 manager(M1 단계에서만 유효). 참이면 스포너가 Mass 엔티티 대신 틱 없는 액터와 매니저를 만든다(LabCrowdManager.h) */
-	bool UsesManager() const { return Stage == ELabStage::M1 && Variant == ELabVariant::Manager; }
-	/** M3 이상 단계에서 0~30m를 액터로 바꾸는가(하이드레이션). m3noactor와 -LabHydrate=0은 거짓 */
-	bool UsesHydration() const;
-	/** 표현 LOD의 Off(그리는 끝 밖을 그리지 않음)가 있는가. M3 이상 단계와 M2의 vatcull·vatcullvis에서 참, -LabFarCull=0이면 거짓 */
-	bool CullsFar() const;
+
+	/** 사다리 단계 1: 모든 개체가 액터(ALabMinion)다. Mass 엔티티를 만들지 않는다 */
+	bool IsActorCrowd() const { return Step == 1; }
+	/** 사다리 단계 2부터: 개체가 Mass 엔티티이고 표현 LOD가 액터(가까이)·인스턴스·없음을 고른다 */
+	bool IsMass() const { return Step >= 2; }
+	/** 인스턴스가 움직이는가(단계 4부터: 4·5와 ISKM을 끈 빼 보기는 VAT, 6부터 ISKM). 단계 2·3은 엔진 ISM 프로세서(UMassUpdateISMProcessor)와 정지 메시다. CSV 메타데이터 LabTechInstAnim */
+	bool UsesVat() const { return Step >= 4; }
+	/** 가까운 개체를 하이드레이션 액터로 그리는가(Mass 단계, -LabHydrate=0이면 거짓) */
+	bool UsesHydration() const { return IsMass() && !bNoHydrate; }
+	/** 표현 LOD의 Off(그리는 끝 밖을 그리지 않음)가 있는가. Mass 단계에서 참, -LabFarCull=0이면 거짓 */
+	bool CullsFar() const { return IsMass() && !bNoFarCull; }
 	/**
 	 * 표현 LOD의 Off 거리(cm). 지우기를 끄면 맵 반경의 두 배(1,000m)라 맵 안의 개체(카메라에서 최대 515m)는 Off에 들지 않는다.
 	 * 1e7로 두지 않는 것은 풀 엔티티를 세워 두는 자리(약 14km, LabCrowdSubsystem.cpp LabPoolParkLocation)가 Off로 남아야 그리지 않기 때문이다.
 	 */
 	float RepOffCm() const { return bNoFarCull ? FLabScenario::MapRadius * 2.f : FarCm(); }
 	/** 그리는 범위의 반경(cm, 오브 기준). 고정 바운드 크기에 쓴다. 지우기를 끄면 맵 반경 */
-	float DrawExtentCm() const;
-	/** Animation Budget Allocator로 도는 액터 템플릿을 쓰는가(M0 budget, M3 이상의 m3budgetdist·m3budgetsig·화면 크기 Budget) */
-	bool UsesBudgetActors() const;
+	float DrawExtentCm() const { return bNoFarCull ? FLabScenario::MapRadius : FarCm(); }
+	/** Animation Budget Allocator로 도는 액터 템플릿을 쓰는가(화면 크기 Budget) */
+	bool UsesBudgetActors() const { return IsMass() && bScreenSigBudget; }
+	/** Simulation LOD Trait을 붙이고 로직 프로세서 둘(접근·범위 피해)이 청크 필터를 거는가(단계 5부터, -LabSimLod=0이면 거짓). 200m 밖은 Off 밴드와 ULabOffMoveProcessor다 */
+	bool UsesSimLod() const { return Step >= 5 && !bNoSimLod; }
+	/** 40~200m를 ISKM으로 그리는가(단계 6부터, -LabIskm=0이면 거짓) */
+	bool UsesIskm() const { return Step >= 6 && !bNoIskm; }
+	/** ISKM 컴포넌트에 고정 바운드를 넣는가(ISKM을 쓸 때, -LabFixedBounds=0이면 거짓). 상자는 카메라를 따라간다(BoundsStepM) */
+	bool UsesFixedBounds() const { return UsesIskm() && !bNoFixedBounds; }
+	/** 엔티티에 엔진 회피 Trait을 붙이는가(Mass 단계, bAvoid) */
+	bool UsesAvoidance() const { return IsMass() && bAvoid; }
+	/** 겹친 개체를 직접 떼어 놓는가(Mass 단계, bSeparate, ULabSeparationProcessor 등록 조건) */
+	bool UsesSeparation() const { return IsMass() && bSeparate; }
 	/**
-	 * 빼 보기 아홉 기법의 켬·끔(설정 기준). 메타데이터 키(LabTech*)와 로그 키, 값("1"/"0", 전환 대책 일부만 켜면 "m<마스크>", M4 틱 간격만이면 "tick").
+	 * v2 W6 액터 기준선의 겹침 방지(Docs/Worklog/V2.md "W6"). 단계 1 액터의 캡슐이 서로(Pawn 채널) 막고 CharacterMovement가 스윕 이동으로 비켜 미끄러진다.
+	 * 캡슐 반지름은 몸통 반지름(소형 40, 대형 94)이다. -LabSeparate=0이면 캡슐끼리 무시한다(W5까지의 단계 1). CSV 메타데이터 LabTechSeparate는 둘 중 하나가 켜지면 1이다
+	 */
+	bool UsesActorBlocking() const { return IsActorCrowd() && bSeparate; }
+
+	/**
+	 * 빼 보기 기법의 켬·끔(설정 기준). 메타데이터 키(LabTech*)와 로그 키, 값("1"/"0", 전환 대책 일부만 켜면 "m<마스크>").
 	 * 기법끼리 딸린 효과(하이드레이션을 끄면 예산을 받을 액터가 없다, ISKM을 끄면 고정 바운드를 넣을 컴포넌트가 없다)는 여기서 지우지 않고
-	 * 실제 적용값 메타데이터(LabBudget, LabIskmBounds)로 본다. 그래서 빼 보기 한 행은 아홉 값 중 하나만 0이다.
+	 * 실제 적용값 메타데이터(LabBudget, LabIskmBounds)로 본다.
 	 */
 	struct FTech { const TCHAR* MetaKey; const TCHAR* LogKey; FString Value; };
 	TArray<FTech> TechList() const;
-	/** "tech=hyd:1,bud:1,..." 꼴(lab_config 로그 끝) */
+	/** "tech=anim:1,hyd:1,..." 꼴(lab_config 로그 끝) */
 	FString TechString() const;
-	/** M5 단계의 ISKM 변형(m5iskm·m5destroy·m5blend·m5minss·m5bounds, 기본 변형)이면 참. m4offpool·m4offmove는 M5 단계에서도 VAT다. -LabIskm=0이면 거짓 */
-	bool UsesIskm() const;
-	FLabIskmParams IskmParams() const;
 	enum EHydrateFix : int32
 	{
 		FixStartTime = 1,  // 시작 시각 맞추기(AnimBP Start Position)
-		FixWait = 2,       // 준비될 때까지 VAT 유지 + 되돌아갈 때 한 프레임 더 + 그동안 액터 숨김
+		FixWait = 2,       // 준비될 때까지 인스턴스 유지 + 되돌아갈 때 한 프레임 더 + 그동안 액터 숨김
 		FixPassHide = 4,   // 숨김을 액터 숨김 대신 메인·깊이 패스·그림자에서만 빼기(FixWait일 때만 뜻이 있다)
 		FixLift = 8,       // 엔진 이동(TeleportActor)에 캡슐 반높이 더하기
 		FixTintReset = 16, // 풀에 넣을 때 진홍색 지우기
 	};
 	bool HasFix(EHydrateFix F) const { return (HydrateFixMask & F) != 0; }
 
-	/** M4부터 참(-LabSimLod=0이면 거짓). Simulation LOD Trait을 붙이고 로직 프로세서 둘(접근·범위 피해)이 청크 필터를 건다 */
-	bool UsesSimLod() const { return Stage >= ELabStage::M4 && !bNoSimLod; }
-	/** 엔티티에 엔진 회피 Trait을 붙이는가(변형 massav·m4avoid 또는 -LabAvoid=1). M0에는 Mass가 없다 */
-	bool UsesAvoidance() const;
-	/** 겹친 개체를 직접 떼어 놓는가(기본 참, -LabSeparate=0이면 거짓, ULabSeparationProcessor 등록 조건). M0에는 Mass가 없다 */
-	bool UsesSeparation() const { return Stage != ELabStage::M0 && bSeparate && !UsesManager(); }
-	/**
-	 * v2 W6 액터 기준선의 겹침 방지(Docs/Worklog/V2.md "W6"). M0 액터의 캡슐이 서로(Pawn 채널) 막고 CharacterMovement가 스윕 이동으로 비켜 미끄러진다.
-	 * 캡슐 반지름은 몸통 반지름(소형 40, 대형 94)이다. 기본 참, -LabSeparate=0이면 캡슐끼리 무시한다(W5까지의 M0). CSV 메타데이터 LabTechSeparate는 둘 중 하나가 켜지면 1이다
-	 */
-	bool UsesActorBlocking() const { return Stage == ELabStage::M0 && bSeparate; }
-	/** 변형에서 정한 M4 틱 간격과 회피 여부(UsesSimLod일 때만 뜻이 있다) */
-	FLabSimLod SimLod() const;
-	/** 로그와 CSV 메타데이터용. "80/200m tick=0/0.5/1.0 avoid=0" 꼴, M3까지는 "-" */
+	/** 로그와 CSV 메타데이터용. "80/200m tick=0/0.50/1.00" 꼴, Simulation LOD가 없으면 "-" */
 	FString SimLodString() const;
 
 	static const FLabConfig& Get();
-	static const TCHAR* VariantName(ELabVariant V);
-	static const TCHAR* StageName(ELabStage S);
 	FString ToLogString() const;
 };

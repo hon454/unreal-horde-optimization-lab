@@ -3,7 +3,7 @@
 #include "HordeOptLab.h"
 #include "LabConfig.h"
 #include "LabCrowdSubsystem.h"
-#include "LabMassProcessors.h" // LabLogicGroupName, LabUseOldQueries
+#include "LabMassProcessors.h" // LabLogicGroupName
 #include "MassActorSpawnerSubsystem.h"
 #include "MassEntityManager.h"
 #include "SkeletalMeshComponentBudgeted.h"
@@ -27,16 +27,6 @@
 #include "Misc/Parse.h"
 
 CSV_DECLARE_CATEGORY_EXTERN(Lab);
-
-namespace
-{
-	/** 액터 태그 필터를 쓰는가. m3qold(정비 전)와 m3syncall(필터만 없음)은 태그를 붙이지도 거르지도 않는다. */
-	bool LabUseActorTag()
-	{
-		const ELabVariant V = FLabConfig::Get().Variant;
-		return V != ELabVariant::M3QOld && V != ELabVariant::M3SyncAll;
-	}
-}
 
 bool ULabActorManagement::IsActorReadyForRepresentation(const AActor& Actor) const
 {
@@ -72,7 +62,7 @@ EMassActorSpawnRequestAction ULabActorManagement::OnPostActorSpawn(const FMassAc
 	{
 		Minion->HideUntilPoseReady();
 	}
-	if (Request.SpawnedActor && LabUseActorTag())
+	if (Request.SpawnedActor)
 	{
 		// 액터가 엔티티에 붙는 유일한 길목이다(새 스폰과 풀 재사용 모두, MassActorSpawnerSubsystem.cpp:255,480). 스포너 서브시스템 틱(게임 스레드)에서
 		// 불리고 그때 Mass 처리가 워커에서 돌고 있을 수 있어 아키타입을 바로 바꾸지 않고 지연 명령으로 태그를 붙인다(MassEntityManager.h:1625).
@@ -85,13 +75,9 @@ ULabActorSyncProcessor::ULabActorSyncProcessor()
 	: EntityQuery(*this)
 {
 	ExecutionFlags = (int32)(EProcessorExecutionFlags::Client | EProcessorExecutionFlags::Standalone);
-	ExecutionOrder.ExecuteAfter.Add(UE::Mass::ProcessorGroupNames::Representation);
-	if (LabExplicitLogicOrder())
-	{
-		ExecutionOrder.ExecuteAfter.Add(LabLogicGroupName); // A/B m3order만. 기본은 로직과의 선후가 없다(LabMassProcessors.h LabExplicitLogicOrder)
-	}
+	ExecutionOrder.ExecuteAfter.Add(UE::Mass::ProcessorGroupNames::Representation); // 로직과의 선후는 선언하지 않는다(LabMassProcessors.h)
 	bRequiresGameThreadExecution = true;
-	// M3부터만 돈다. 게임 모듈이 단계를 보고 켠다(HordeOptLab.cpp). M1·M2 실행에 빈 순회 비용을 더하지 않는다.
+	// Mass 단계(사다리 단계 2부터)에서만 돈다. 게임 모듈이 단계를 보고 켠다(HordeOptLab.cpp).
 	bAutoRegisterWithProcessingPhases = false;
 }
 
@@ -101,21 +87,11 @@ void ULabActorSyncProcessor::ConfigureQueries(const TSharedRef<FMassEntityManage
 	EntityQuery.AddRequirement<FTransformFragment>(EMassFragmentAccess::ReadOnly);
 	EntityQuery.AddRequirement<FMassActorFragment>(EMassFragmentAccess::ReadWrite);
 	EntityQuery.AddRequirement<FMassRepresentationFragment>(EMassFragmentAccess::ReadOnly);
-	if (LabUseOldQueries())
-	{
-		EntityQuery.AddRequirement<FLabMinionFragment>(EMassFragmentAccess::ReadOnly); // m3qold: 로직 프래그먼트를 읽는다
-	}
-	else
-	{
-		EntityQuery.AddRequirement<FLabAnimStateFragment>(EMassFragmentAccess::ReadOnly);
-	}
+	EntityQuery.AddRequirement<FLabAnimStateFragment>(EMassFragmentAccess::ReadOnly);
 	EntityQuery.AddRequirement<FMassRepresentationLODFragment>(EMassFragmentAccess::ReadOnly);
 	EntityQuery.AddConstSharedRequirement<FLabUnitTypeParams>(EMassFragmentPresence::All); // 2종: 청크의 종류(VAT 클립, 반경, 대형 스탯)
 	EntityQuery.AddTagRequirement<FLabMinionTag>(EMassFragmentPresence::All);
-	if (LabUseActorTag())
-	{
-		EntityQuery.AddTagRequirement<FLabActorTag>(EMassFragmentPresence::All); // 액터가 붙은 아키타입만 연다(M3b 정비 4)
-	}
+	EntityQuery.AddTagRequirement<FLabActorTag>(EMassFragmentPresence::All); // 액터가 붙은 아키타입만 연다(M3b 정비 4)
 }
 
 void ULabActorSyncProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context)
@@ -130,16 +106,13 @@ void ULabActorSyncProcessor::Execute(FMassEntityManager& EntityManager, FMassExe
 	const float Now = World->GetTimeSeconds();
 	const float HitDuration = Crowd->HitDuration;
 	const float DeathDuration = Crowd->DeathDuration;
-	const bool bSigBudget = FLabConfig::Get().Variant == ELabVariant::M3BudgetSig;
-	const bool bScreenSig = FLabConfig::Get().bScreenSigBudget; // E3 (3c). M3~M5 단계 기본 켬
+	const bool bScreenSig = FLabConfig::Get().UsesBudgetActors(); // E3 (3c). 사다리 단계 4부터 기본 켬
 	const FVector CameraLocation = Crowd->SnipeView.Location;
 	// 애니 갱신 통계(종류별): 동기화한 액터 수, 그중 이번 프레임 애니 갱신을 하지 않은 수(보간 + 건너뜀), 그중 보간한 수
 	int32 LargeActors = 0, LargeSkips = 0, LargeInterps = 0;
 	int32 SmallActors = 0, SmallSkips = 0, SmallInterps = 0;
 	const bool bFixStartTime = FLabConfig::Get().HasFix(FLabConfig::FixStartTime);
 	const bool bFixWait = FLabConfig::Get().HasFix(FLabConfig::FixWait);
-	const bool bOld = LabUseOldQueries();
-	const bool bActorTag = LabUseActorTag();
 	int32 Actors = 0;
 	// Q4 품질 지표(모든 빌드): 화면 안에 보이는 액터 수와 그중 카메라 30m(3D, 표현 LOD와 같은 거리) 안의 수. 화면 판정은 저격과 같은 시야(몸통 높이 +90cm)
 	const FLabSnipeView QualityView = Crowd->SnipeView;
@@ -161,18 +134,13 @@ void ULabActorSyncProcessor::Execute(FMassEntityManager& EntityManager, FMassExe
 		const TConstArrayView<FTransformFragment> Transforms = Context.GetFragmentView<FTransformFragment>();
 		const TArrayView<FMassActorFragment> ActorList = Context.GetMutableFragmentView<FMassActorFragment>();
 		const TConstArrayView<FMassRepresentationFragment> Representations = Context.GetFragmentView<FMassRepresentationFragment>();
-		const TConstArrayView<FLabAnimStateFragment> AnimStates = bOld ? TConstArrayView<FLabAnimStateFragment>() : Context.GetFragmentView<FLabAnimStateFragment>();
-		const TConstArrayView<FLabMinionFragment> Minions = bOld ? Context.GetFragmentView<FLabMinionFragment>() : TConstArrayView<FLabMinionFragment>();
+		const TConstArrayView<FLabAnimStateFragment> AnimStates = Context.GetFragmentView<FLabAnimStateFragment>();
 		const TConstArrayView<FMassRepresentationLODFragment> LODs = Context.GetFragmentView<FMassRepresentationLODFragment>();
-		// 종류(2종)는 청크 단위다. VAT 클립 길이(걷기 위상), 바운드 반경(m3sig), 대형 스탯에 쓴다.
+		// 종류(2종)는 청크 단위다. 걷기 루프 길이, 바운드 반경(화면 크기 중요도), 대형 스탯에 쓴다.
 		const FLabUnitTypeParams& TypeParams = Context.GetConstSharedFragment<FLabUnitTypeParams>();
-		// 걷기 루프 길이: M2~M4는 VAT 클립 프레임 수 ÷ 샘플 레이트(전과 같은 값), M5 ISKM은 ASTPD 시퀀스 길이(스포너가 채운다, plan.md "M5" 결정 4)
+		// 걷기 루프 길이: 단계 2·3은 액터 걷기 애니 길이, VAT 단계는 클립 프레임 수 ÷ 샘플 레이트, ISKM 단계는 ASTPD 시퀀스 길이(스포너가 채운다, plan.md "M5" 결정 4)
 		const float WalkLength = Crowd->WalkLengthByType[TypeParams.UnitType];
 		const bool bLargeChunk = TypeParams.UnitType == LabUnitLarge;
-		// m3qold: 상태는 아키타입 태그에서. 새 구조: 엔티티마다 표현 프래그먼트에서(아래 루프 안).
-		const bool bHit = bOld && Context.DoesArchetypeHaveTag(*FLabHitTag::StaticStruct());
-		const bool bDead = bOld && Context.DoesArchetypeHaveTag(*FLabDeadTag::StaticStruct());
-		const ELabMinionState ChunkState = bDead ? ELabMinionState::Dead : bHit ? ELabMinionState::Hit : ELabMinionState::Walk;
 
 		for (FMassExecutionContext::FEntityIterator It = Context.CreateEntityIterator(); It; ++It)
 		{
@@ -197,12 +165,9 @@ void ULabActorSyncProcessor::Execute(FMassEntityManager& EntityManager, FMassExe
 			{
 				// 태그는 있는데 액터가 없다 = 엔진이 액터를 떼어 풀에 넣었다(ReleaseActorOrCancelSpawning은 static이라 훅이 없다, MassRepresentationProcessor.cpp:481).
 				// 표현 종류가 아니라 액터 포인터로 판단한다: 액터를 한 프레임 더 두는 동안(bKeepActorExtraFrame) LOD가 되돌아오면 엔진이 같은 액터를 다시 써서
-				// OnPostActorSpawn이 다시 불리지 않기 때문이다. 필터가 없는 변형에서는 스폰 요청 중인 엔티티도 여기로 온다.
-				if (bActorTag)
-				{
-					Context.Defer().RemoveTag<FLabActorTag>(Entity);
-					++TagsRemoved;
-				}
+				// OnPostActorSpawn이 다시 불리지 않기 때문이다.
+				Context.Defer().RemoveTag<FLabActorTag>(Entity);
+				++TagsRemoved;
 				continue;
 			}
 			if (Rep != EMassRepresentationType::HighResSpawnedActor && Rep != EMassRepresentationType::LowResSpawnedActor)
@@ -231,21 +196,10 @@ void ULabActorSyncProcessor::Execute(FMassEntityManager& EntityManager, FMassExe
 			}
 #endif
 			// 상태와 재생 시각(VAT 인스턴스와 같은 식, LabVatProcessor.cpp)
-			ELabMinionState State;
-			float T;
-			if (bOld)
-			{
-				const FLabMinionFragment& Minion = Minions[It];
-				State = ChunkState;
-				T = bDead ? DeathDuration - Minion.StateTimeLeft : bHit ? HitDuration - Minion.StateTimeLeft : FMath::Fmod(Now + LabWalkPhase(Minion.Serial), WalkLength);
-			}
-			else
-			{
-				const FLabAnimStateFragment& Anim = AnimStates[It];
-				State = Anim.State;
-				T = Now - Anim.StateStartTime;
-				if (State == ELabMinionState::Walk) { T = FMath::Fmod(T, WalkLength); }
-			}
+			const FLabAnimStateFragment& AnimState = AnimStates[It];
+			const ELabMinionState State = AnimState.State;
+			float T = Now - AnimState.StateStartTime;
+			if (State == ELabMinionState::Walk) { T = FMath::Fmod(T, WalkLength); }
 
 			// Q1b: 사망 클립이 DeathDuration에 맞춰 끝나도록 애니 재생 배율을 건다(시즈 < 1). 풀의 액터가 다시 살아 나올 때 1로 되돌린다.
 			const float DeathRate = State == ELabMinionState::Dead ? Crowd->DeathRateActor[TypeParams.UnitType] : 1.f;
@@ -343,18 +297,10 @@ void ULabActorSyncProcessor::Execute(FMassEntityManager& EntityManager, FMassExe
 				SkelMesh->ClearMotionVector();       // SkinnedMeshComponent.h:430 뼈 속도(모션 블러·TAA)를 지운다
 			}
 
-			if (bSigBudget)
-			{
-				// E3 (3b): Mass는 0이 High, Budget은 큰 값이 중요하다(engine-notes.md 3절)
-				if (USkeletalMeshComponentBudgeted* Budgeted = Cast<USkeletalMeshComponentBudgeted>(SkelMesh))
-				{
-					Budgeted->SetComponentSignificance(1.f - FMath::Clamp(LODs[It].LODSignificance / 3.f, 0.f, 1.f));
-				}
-			}
-			else if (bScreenSig)
+			if (bScreenSig)
 			{
 				// E3 (3c): 중요도 = 화면 크기 = 바운드 반경 ÷ 카메라 거리(Significance Manager의 기본형). 크기와 거리를 한 수로 합친다.
-				// 할당기는 큰 값을 먼저 틱하고 절대값은 쓰지 않는다(AnimationBudgetAllocator.cpp:327-342). 비교 상대는 (3a) 거리 단계(m3budgetdist).
+				// 할당기는 큰 값을 먼저 틱하고 절대값은 쓰지 않는다(AnimationBudgetAllocator.cpp:327-342). 거리 단계·LOD 중요도 방식(E3 (3a)·(3b))은 v2 W10에서 지웠다.
 				if (USkeletalMeshComponentBudgeted* Budgeted = Cast<USkeletalMeshComponentBudgeted>(SkelMesh))
 				{
 					Budgeted->SetComponentSignificance(TypeParams.BoundRadius / FMath::Max(FVector::Dist(Xf.GetLocation(), CameraLocation), 1.f));

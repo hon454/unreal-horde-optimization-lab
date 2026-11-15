@@ -21,7 +21,7 @@ struct FLabMinionAssets
 	UPROPERTY() TObjectPtr<class UAnimSequence> Walk;
 	UPROPERTY() TObjectPtr<class UAnimSequence> Hit;
 	UPROPERTY() TObjectPtr<class UAnimSequence> Death;
-	UPROPERTY() TObjectPtr<class UStaticMesh> StaticMesh; // static 변형
+	UPROPERTY() TObjectPtr<class UStaticMesh> StaticMesh; // 사다리 단계 2·3의 정지 메시 인스턴스(Scripts/make-static-minion.py)
 	/**
 	 * M0 액터의 슬롯 0에 넣을 머티리얼. 대형만 채운다(M3 하이드레이션 액터와 같은 M_LabMinionLargeActor, 짙은 회색).
 	 * 소형은 비어 있어 Paragon 원본 머티리얼 그대로다. M0는 사망 진행도를 머티리얼에 넘기지 않으므로 사망 색은 나오지 않는다(소형과 같다).
@@ -74,7 +74,6 @@ protected:
 	void EnterState(ELabMinionState NewState);
 
 	UPROPERTY() TObjectPtr<ALabCrowdSpawner> Spawner;
-	UPROPERTY() TObjectPtr<UStaticMeshComponent> StaticVisual;
 
 	const FLabMinionAssets* AssetsRef = nullptr;
 	uint32 Serial = 0;
@@ -83,36 +82,12 @@ protected:
 	float Health = 0.f;
 	float StateTimeLeft = 0.f;
 	bool bSingleNode = false;
-	bool bManualMove = false; // pawn 변형: CharacterMovement 틱 없이 위치를 직접 옮긴다
-};
-
-/** static 변형: 스켈레탈 메시 대신 UStaticMeshComponent, 애니메이션 없음. */
-UCLASS()
-class ALabMinionStatic : public ALabMinion
-{
-	GENERATED_BODY()
-public:
-	ALabMinionStatic(const FObjectInitializer& ObjectInitializer);
-protected:
-	virtual void SetupVisual(const FLabMinionAssets& Assets) override;
+	bool bManualMove = false; // ALabMinionPawn(하이드레이션 액터의 부모): CharacterMovement 틱 없이 위치를 직접 옮긴다
 };
 
 /**
- * staticpawn 변형(M3b 코드 정비 5): static의 정적 메시 + pawn의 CharacterMovement 틱 끔. 애니메이션도 이동 컴포넌트 틱도 없는 액터라
- * "액터 → Mass 컨테이너 전환"만의 값을 보는 M0 대조군이다. static은 CharacterMovement를 유지해 17배가 전환만의 값이 아니었다(plan.md "M3b").
- */
-UCLASS()
-class ALabMinionStaticPawn : public ALabMinionStatic
-{
-	GENERATED_BODY()
-public:
-	ALabMinionStaticPawn(const FObjectInitializer& ObjectInitializer);
-};
-
-/**
- * pawn 변형: CharacterMovement의 틱을 끄고 위치를 직접 옮긴다(ACharacter는 이 컴포넌트를 필수로 만든다). 캡슐·스켈레탈 메시·AnimBP는 full과 같다.
- * "액터를 최대한 가볍게 만들어도 여기까지"를 보는 액터 쪽 천장이다.
- * APawn을 새로 만들지 않고 ACharacter에서 이동 틱만 꺼서 스포너·오브 코드를 그대로 쓴다.
+ * CharacterMovement의 틱을 끄고 위치를 직접 옮기는 액터(ACharacter는 이 컴포넌트를 필수로 만든다). 캡슐·스켈레탈 메시·AnimBP는 ALabMinion과 같다.
+ * v1의 pawn 변형(액터 쪽 천장)이었고, v2 W10부터는 하이드레이션 액터의 부모로만 남는다.
  */
 UCLASS()
 class ALabMinionPawn : public ALabMinion
@@ -122,20 +97,9 @@ public:
 	ALabMinionPawn(const FObjectInitializer& ObjectInitializer);
 };
 
-/** budget 변형: 메시가 USkeletalMeshComponentBudgeted이고 Significance Manager 거리 단계로 중요도를 받는다. */
-UCLASS()
-class ALabMinionBudget : public ALabMinion
-{
-	GENERATED_BODY()
-public:
-	ALabMinionBudget(const FObjectInitializer& ObjectInitializer);
-	virtual void BeginPlay() override;
-	virtual void EndPlay(const EEndPlayReason::Type Reason) override;
-};
-
 /**
- * M3 하이드레이션 액터. Mass가 0~30m 엔티티에 붙였다 떼는 표현일 뿐이고 로직은 엔티티에 있다(plan.md "M3").
- * pawn 변형과 같은 부품(캡슐, 스켈레탈 메시, ABP_LabMinion, CharacterMovement 틱 끔)이라 E0 수치와 견줄 수 있다.
+ * 하이드레이션 액터(사다리 단계 2부터). Mass가 가까운 엔티티에 붙였다 떼는 표현일 뿐이고 로직은 엔티티에 있다(plan.md "M3").
+ * 부품은 캡슐, 스켈레탈 메시, ABP_LabMinion, CharacterMovement 틱 끔이다(ALabMinionPawn).
  * 위치·애니 상태·죽기 색은 ULabActorSyncProcessor가 매 프레임 쓴다. 액터 자신은 틱하지 않는다.
  * 머티리얼은 VAT 인스턴스와 같은 M_LabMinionActor(Scripts/bake-vat.py)라 전환 때 색이 튀지 않는다.
  * 엔진 풀은 액터를 숨기기만 하고 컴포넌트 틱은 남겨 두므로(engine-notes.md 4절) 풀에 들어갈 때 메시 틱을 끈다.
@@ -174,8 +138,8 @@ public:
 };
 
 /**
- * E3 (3): 메시가 USkeletalMeshComponentBudgeted인 하이드레이션 액터. 중요도는 (a) Significance Manager 거리 단계(M0 budget과 같다) 또는
- * (b) 동기화 프로세서가 넘기는 Mass LODSignificance 변환값. 풀에 들어가면 중요도 0(숨긴 액터가 예산을 쓰지 않게, engine-notes.md 4절).
+ * E3 (3c): 메시가 USkeletalMeshComponentBudgeted인 하이드레이션 액터(화면 크기 애니 예산, 사다리 단계 4부터). 중요도는 동기화 프로세서가 화면 크기로 넘긴다.
+ * 풀에 들어가면 중요도 0(숨긴 액터가 예산을 쓰지 않게, engine-notes.md 4절).
  */
 UCLASS()
 class ALabMinionMassActorBudget : public ALabMinionMassActor
@@ -184,9 +148,7 @@ class ALabMinionMassActorBudget : public ALabMinionMassActor
 public:
 	ALabMinionMassActorBudget(const FObjectInitializer& ObjectInitializer);
 	virtual void BeginPlay() override;
-	virtual void EndPlay(const EEndPlayReason::Type Reason) override;
 	virtual void PrepareForPooling_Implementation() override;
-	virtual void PrepareForGame_Implementation() override;
 };
 
 /**
@@ -201,21 +163,11 @@ public:
 	ALabMinionMassActorLarge(const FObjectInitializer& ObjectInitializer);
 };
 
-/** 2종 대형 + E3 (3) Budget(m3budgetdist·m3budgetsig·m3sig). */
+/** 2종 대형 + 화면 크기 애니 예산. */
 UCLASS()
 class ALabMinionMassActorBudgetLarge : public ALabMinionMassActorBudget
 {
 	GENERATED_BODY()
 public:
 	ALabMinionMassActorBudgetLarge(const FObjectInitializer& ObjectInitializer);
-};
-
-/** E3 (5): 저품질 액터(City Sample의 LowRes 단계에 해당). URO, 가장 낮은 메시 LOD 고정, 그림자 끔. */
-UCLASS()
-class ALabMinionMassActorLow : public ALabMinionMassActor
-{
-	GENERATED_BODY()
-public:
-	ALabMinionMassActorLow(const FObjectInitializer& ObjectInitializer);
-	virtual void BeginPlay() override;
 };

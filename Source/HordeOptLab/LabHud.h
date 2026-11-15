@@ -9,7 +9,7 @@
  * 측정 실행은 -LabHud를 주지 않고, 켜졌는지는 CSV 메타데이터 LabHud로 남는다.
  * 왼쪽 위 반투명 판 하나에 GIF 독자용으로 사다리 단계(번호, 이름, 앞 단계에서 바꾼 것. 빼 보기는 "Final minus: ..."), 프레임 시간(1초 평균)과 목표 16.7ms,
  * Game·Render·GPU 시간(1초 평균), 호드 총수와 표현별 개체 수(액터·인스턴스·입자·그리지 않음)와 카메라 거리 구간, 최근 5초 프레임 시간 그래프(16.7ms 선),
- * 맨 아래 작은 줄에 내부 변형 이름·단계·프리셋·빌드를 그린다(Docs/Worklog/Q5-hud.md). 캔버스 타일과 글자만 쓰므로 Test 패키지에서도 그려진다(디버그 드로우와 stat 시스템을 쓰지 않는다,
+ * 맨 아래 작은 줄에 단계 인자·프리셋·빌드를 그린다(Docs/Worklog/Q5-hud.md). 캔버스 타일과 글자만 쓰므로 Test 패키지에서도 그려진다(디버그 드로우와 stat 시스템을 쓰지 않는다,
  * engine-notes.md 20절). 글꼴은 엔진 Roboto를 화면 높이에 맞는 포인트 크기로 래스터화해 QHD와 720p 모두 선명하다.
  */
 UCLASS()
@@ -25,19 +25,17 @@ public:
 
 protected:
 	/**
-	 * 시험 실행 Spike1(-LabMotionAids=1, Docs/Worklog/V2.md "시험 실행"): 화면 오른쪽 위에 고정한 작은 판(왼쪽 위 상태 오버레이와 같은 여백·배율·바탕). 넓은 평지에서 카메라가 오브를 따라가면
-	 * 오브가 움직이는 것이 화면에 보이지 않아서 오브의 월드 위치(m)와 속도(m/s), 월드 기준 진행 방향 화살표(위 +X, 오른쪽 +Y)를 적는다.
-	 * 값은 인자가 아니라 오브 액터의 실제 위치와 프레임 사이 이동에서 구한다(속도는 0.25초 창의 이동 거리 ÷ 시간). 상태 오버레이(bVisible)와 무관하게 그린다.
+	 * v2 오브 판(Docs/v2-spec.md 6절): 화면 오른쪽 위에 고정한 작은 판(왼쪽 위 상태 오버레이와 같은 여백·배율·바탕). 넓은 평지에서 카메라가 오브를 따라가면
+	 * 오브가 움직이는 것이 화면에 보이지 않아서 오브의 월드 위치(m)와 속도(m/s)를 적는다. 화살표는 없다.
+	 * 값은 인자가 아니라 오브 액터의 실제 위치와 프레임 사이 이동에서 구한다(속도는 0.25초 창의 이동 거리 ÷ 시간). 상태 오버레이(bVisible)와 함께 켜고 끈다.
 	 */
 	void DrawOrbPanel();
 	TWeakObjectPtr<class ALabOrb> OrbForPanel;
 	FVector OrbPanelLast = FVector::ZeroVector;        // 지난 프레임의 오브 위치
-	FVector OrbPanelWindowStart = FVector::ZeroVector; // 속도 창이 시작할 때의 위치
 	double OrbPanelWindowTime = -1.;                   // 속도 창이 시작한 월드 시각
 	double OrbPanelWindowPath = 0.;                    // 창 안에서 움직인 거리(cm)
 	float OrbPanelSpeed = 0.f;                         // 표시하는 속도(cm/s)
-	FVector OrbPanelDir = FVector::ZeroVector;         // 표시하는 진행 방향(월드, 단위 벡터)
-	// 카메라 판(오브 판 바로 아래, Spike2): 카메라가 오브 둘레를 도는 각속도(도/초, rpm), 한 바퀴 시간, 지금 보는 방향(오브 판과 같은 월드 기준 화살표)
+	// 카메라 판(오브 판 바로 아래): 카메라가 오브 둘레를 도는 각속도(도/초, rpm)와 한 바퀴 시간
 	float CamPanelAngleLast = 0.f;   // 지난 프레임의 방위각(도)
 	double CamPanelWindowTime = -1.; // 각속도 창이 시작한 월드 시각
 	double CamPanelWindowTurn = 0.;  // 창 안에서 돈 각(도, 부호 있음)

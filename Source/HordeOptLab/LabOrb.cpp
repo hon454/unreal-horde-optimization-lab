@@ -35,13 +35,7 @@ ALabOrb::ALabOrb()
 	Root = CreateDefaultSubobject<USceneComponent>(TEXT("Root"));
 	RootComponent = Root;
 
-	// 상대 배치는 BP_TeslaCoil과 같다(SM_TorchBase z360 roll180 x4, Sphere z400, 시스템 둘은 루트).
-	Tower = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Tower"));
-	Tower->SetupAttachment(Root);
-	Tower->SetRelativeLocationAndRotation(FVector(0.f, 0.f, 360.f), FRotator(0.f, 0.f, 180.f));
-	Tower->SetRelativeScale3D(FVector(4.f));
-	Tower->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
+	// 상대 배치는 BP_TeslaCoil과 같다(Sphere z400, 시스템 둘은 루트). 구체 높이는 BeginPlay에서 궤도 높이로 옮긴다.
 	Sphere = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Sphere"));
 	Sphere->SetupAttachment(Root);
 	Sphere->SetRelativeLocation(FVector(0.f, 0.f, 400.f));
@@ -49,7 +43,7 @@ ALabOrb::ALabOrb()
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> SphereMesh(TEXT("/Engine/BasicShapes/Sphere.Sphere"));
 	Sphere->SetStaticMesh(SphereMesh.Object);
 
-	// 이펙트와 타워는 Niagara Examples Pack에서 옮긴 것(Scripts/migrate-assets.py "orbfx"). 없으면 구체만 남는다.
+	// 이펙트는 Niagara Examples Pack에서 옮긴 것(Scripts/migrate-assets.py "orbfx"). 없으면 구체만 남는다.
 	CoilFx = CreateDefaultSubobject<UNiagaraComponent>(TEXT("CoilFx"));
 	CoilFx->SetupAttachment(Root);
 	CoilFx->SetRelativeLocation(FVector(0.f, 0.f, 400.f)); // 구체 중심. 시스템의 발광(플레어)이 컴포넌트 원점에 생긴다
@@ -72,21 +66,14 @@ void ALabOrb::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (const FLabOrbit& Orbit = FLabConfig::Get().Orbit; Orbit.HeightCm > 0.f)
 	{
-		// Spike1: 타워 없이 구체만 띄운다. 번개(CoilFx)는 구체 중심에서 지면의 대상으로 내려온다
-		Tower->SetVisibility(false);
-		Tower->SetCastShadow(false);
+		// 구체를 궤도 높이에 띄운다. 번개(CoilFx)는 구체 중심에서 지면의 대상으로 내려온다
+		const FLabOrbit& Orbit = FLabConfig::Get().Orbit;
 		Sphere->SetRelativeLocation(FVector(0.f, 0.f, Orbit.SphereZ()));
 		CoilFx->SetRelativeLocation(FVector(0.f, 0.f, Orbit.SphereZ()));
 	}
 
 	UMaterialInterface* Metal = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/NiagaraExamples/Gallery/Materials/M_Target_Metal.M_Target_Metal"), nullptr, LOAD_Quiet | LOAD_NoWarn);
-	if (UStaticMesh* TowerMesh = LoadObject<UStaticMesh>(nullptr, TEXT("/Game/NiagaraExamples/Gallery/StaticMesh/SM_TorchBase.SM_TorchBase"), nullptr, LOAD_Quiet | LOAD_NoWarn))
-	{
-		Tower->SetStaticMesh(TowerMesh);
-		Tower->SetMaterial(0, Metal);
-	}
 	if (Metal)
 	{
 		Sphere->SetMaterial(0, Metal);
@@ -169,12 +156,7 @@ void ALabOrb::Tick(float DeltaSeconds)
 		TickMass(DeltaSeconds, Crowd);
 		return;
 	}
-	if (FLabConfig::Get().UsesManager())
-	{
-		TickStrikes(DeltaSeconds); // 변형 manager: 피해·저격은 매니저가 하고 결과를 ShowManagerResults로 넘긴다
-		return;
-	}
-
+	// 단계 1 액터 군중: 오브 틱이 직접 피해·저격을 한다
 	const FVector Center = GetActorLocation();
 	// 피해는 중심에 가까울수록 세다: 가장자리 ZoneDpsEdge → 중심 ZoneDpsCenter.
 	const float ZoneRadiusSq = FMath::Square(FLabScenario::ZoneRadius);
@@ -200,7 +182,7 @@ void ALabOrb::Tick(float DeltaSeconds)
 	}
 
 	// 번개는 범위 안에서 가장 가까운 개체로 뻗는다. 원본 BP도 User.PositionTarget을 대상(플레이어) 위치로 갱신한다.
-	// 대상이 없으면 타워 밑동으로 떨어진다. 파라미터 하나만 바꾸므로 비용은 개체 수와 무관하다.
+	// 대상이 없으면 오브 아래 지면으로 떨어진다. 파라미터 하나만 바꾸므로 비용은 개체 수와 무관하다.
 	const FVector Target = Nearest ? Nearest->GetActorLocation() : Center;
 	CoilFx->SetVariablePosition(TEXT("User.PositionTarget"), Target);
 
@@ -212,30 +194,7 @@ void ALabOrb::Tick(float DeltaSeconds)
 		SnipeAccumulator -= FLabScenario::SnipeInterval;
 		Snipe();
 	}
-	WriteCapsuleStats(); // v2 W6: M0도 Mass 단계와 같은 CSV 스탯을 남긴다
-}
-
-uint32 ALabOrb::AdvanceSnipeClock(float DeltaSeconds)
-{
-	uint32 Fired = 0;
-	SnipeAccumulator += DeltaSeconds;
-	while (SnipeAccumulator >= FLabScenario::SnipeInterval)
-	{
-		SnipeAccumulator -= FLabScenario::SnipeInterval;
-		Fired = ++SnipeTick;
-	}
-	return Fired;
-}
-
-void ALabOrb::ShowManagerResults(const FVector& CoilTarget, TConstArrayView<FVector> SnipeTargets, int32 ZoneKills)
-{
-	KillCount += ZoneKills;
-	SnipeCount += SnipeTargets.Num();
-	CoilFx->SetVariablePosition(TEXT("User.PositionTarget"), CoilTarget);
-	for (const FVector& Target : SnipeTargets)
-	{
-		SpawnStrikeFx(Target);
-	}
+	WriteCapsuleStats(); // v2 W6: 단계 1도 Mass 단계와 같은 CSV 스탯을 남긴다
 }
 
 FLabSnipeView ALabOrb::GetSnipeView() const

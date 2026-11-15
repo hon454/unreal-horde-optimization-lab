@@ -19,10 +19,8 @@ public:
 
 	void SpawnInitial();
 	void OnMinionFinished(ALabMinion* Minion);
-	/** M1부터: 지워진 엔티티 수만큼 가장자리 링에서 새로 만든다. ULabCrowdSubsystem이 부른다. 변형 manager는 ALabCrowdManager가 부른다(같은 스트림) */
+	/** 단계 2부터: 지워진 엔티티 수만큼 가장자리 링에서 새로 만든다. ULabCrowdSubsystem이 부른다 */
 	void RespawnEntities(int32 Count);
-	/** 변형 manager의 매니저. 다른 변형에서는 nullptr */
-	class ALabCrowdManager* GetManager() const { return Manager; }
 
 	/** 오브의 지금 지면 위치. Spike1 궤도(FLabOrbit)를 켜지 않으면 원점이다 */
 	FVector GetOrbLocation() const;
@@ -41,7 +39,6 @@ public:
 
 protected:
 	ALabMinion* SpawnAt(float Radius, float Angle);
-	TSubclassOf<ALabMinion> MinionClass() const;
 	void LoadAssets();
 	void SpawnEntitiesAt(TConstArrayView<FVector2D> RadiusAngles);
 
@@ -49,8 +46,7 @@ protected:
 	UPROPERTY() FLabMinionAssets LargeAssets; // 2종 대형(-LabTypes=2). 대형 에셋이 하나라도 없으면 Assets와 같다(대체, 스모크 전용. LabUnitAssets.h)
 	UPROPERTY() TArray<TObjectPtr<ALabMinion>> Minions;
 
-	UPROPERTY() TObjectPtr<class ULabCrowdSubsystem> Crowd; // M1부터
-	UPROPERTY() TObjectPtr<class ALabCrowdManager> Manager; // 변형 manager만(FLabConfig::UsesManager). 있으면 Crowd는 비어 있다
+	UPROPERTY() TObjectPtr<class ULabCrowdSubsystem> Crowd; // 단계 2부터
 	FRandomStream Stream;
 	uint32 NextSerial = 0;
 	int32 RespawnCount = 0;

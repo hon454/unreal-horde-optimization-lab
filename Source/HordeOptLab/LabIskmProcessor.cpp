@@ -270,7 +270,7 @@ void ULabIskmProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutio
 	}
 	const float Now = World->GetTimeSeconds();
 	const float DeathDuration = Crowd->DeathDuration;
-	const float BlendTime = FLabConfig::Get().IskmParams().BlendTime;
+	const float BlendTime = FLabIskmParams::BlendTime;
 	const FVector ViewLocation = Crowd->SnipeView.Location;
 	int32 BandCounts[4] = { 0, 0, 0, 0 };
 	// Q4 품질 지표: 화면 안에서 아직 인스턴스로 그리는 개체(액터 준비 대기 포함) 중 카메라 30m 안·전환 거리 안의 수(3D 거리, 표현 LOD와 같다)

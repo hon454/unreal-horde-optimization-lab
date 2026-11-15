@@ -2,7 +2,6 @@
 #include "HordeOptLab.h"
 #include "LabCameraRig.h"
 #include "LabConfig.h"
-#include "LabCrowdManager.h"
 #include "LabCrowdSpawner.h"
 #include "LabCrowdSubsystem.h"
 #include "LabUnitAssets.h"
@@ -27,7 +26,6 @@
 #include "Misc/CommandLine.h"
 #include "Misc/Parse.h"
 #include "IAnimationBudgetAllocator.h"
-#include "SignificanceManager.h"
 #include "RHI.h" // GRHIAdapterName, GRHIAdapterUserDriverVersion
 #include "NiagaraComponent.h"
 #include "NiagaraFunctionLibrary.h"
@@ -96,7 +94,7 @@ FString ALabGameMode::AppliedString() const
 	// Q3: 설정(lab_config tech=)이 아니라 실제로 적용된 값. 빼 보기 러너가 설정과 함께 대조한다.
 	const ULabCrowdSubsystem* Crowd = GetWorld()->GetSubsystem<ULabCrowdSubsystem>();
 	const bool bCrowd = Crowd && Crowd->IsActive();
-	return FString::Printf(TEXT("stage=%s budget=%d pool=%d iskm_bounds=%d fixmask=%d crowdfx_active=%d %s"), FLabConfig::StageName(FLabConfig::Get().Stage), IsBudgetActive() ? 1 : 0,
+	return FString::Printf(TEXT("stage=%d budget=%d pool=%d iskm_bounds=%d fixmask=%d crowdfx_active=%d %s"), FLabConfig::Get().Step, IsBudgetActive() ? 1 : 0,
 		FLabConfig::Get().bEntityPool ? 1 : 0, bCrowd ? Crowd->GetIskmBoundsApplied() : 0, FLabConfig::Get().HydrateFixMask, CrowdFx && CrowdFx->IsActive() ? 1 : 0, *FLabConfig::Get().TechString());
 }
 
@@ -110,11 +108,7 @@ int32 ALabGameMode::ComputeNear30() const
 	{
 		return 0;
 	}
-	if (const ALabCrowdManager* Manager = Spawner->GetManager())
-	{
-		return Manager->GetNear30(); // 변형 manager: 매니저가 같은 정의로 센다
-	}
-	// M0: ULabNearOrbCountProcessor와 같은 정의. 액터 위치는 캡슐 중심이라 높이를 빼고 수평 거리로 잰다
+	// 단계 1: ULabNearOrbCountProcessor와 같은 정의. 액터 위치는 캡슐 중심이라 높이를 빼고 수평 거리로 잰다
 	const FVector Center = Orb->GetActorLocation();
 	const double RadiusSq = FMath::Square(double(FLabEquivalence::NearOrbCm));
 	int32 Count = 0;
@@ -137,9 +131,9 @@ void ALabGameMode::GetOverlapCounts(int32& OutPairs, int32& OutDeep) const
 		OutPairs = Crowd->OverlapPairs.load();
 		OutDeep = Crowd->OverlapDeep.load();
 	}
-	else if (Spawner && FLabConfig::Get().Stage == ELabStage::M0)
+	else if (Spawner && FLabConfig::Get().IsActorCrowd())
 	{
-		OutPairs = Spawner->GetActorOverlapPairs(); // v2 W6: M0 액터(ALabCrowdSpawner::SampleActorOverlaps)
+		OutPairs = Spawner->GetActorOverlapPairs(); // v2 W6: 단계 1 액터(ALabCrowdSpawner::SampleActorOverlaps)
 		OutDeep = Spawner->GetActorOverlapDeep();
 	}
 }
@@ -165,9 +159,9 @@ int32 ALabGameMode::GetHudActors() const
 {
 	if (const ULabCrowdSubsystem* Crowd = GetWorld()->GetSubsystem<ULabCrowdSubsystem>(); Crowd && Crowd->IsActive())
 	{
-		return FLabConfig::Get().Stage >= ELabStage::M3 ? Crowd->ActorCount.load() : 0;
+		return Crowd->ActorCount.load();
 	}
-	return Spawner ? Spawner->GetMinions().Num() : 0; // M0: 모든 개체가 액터다
+	return Spawner ? Spawner->GetMinions().Num() : 0; // 단계 1: 모든 개체가 액터다
 }
 
 ALabGameMode::ALabGameMode()
@@ -185,32 +179,28 @@ void ALabGameMode::StartPlay()
 	UE_LOG(LogLab, Log, TEXT("%s"), *Config.ToLogString());
 	if (!Config.bStageValid)
 	{
-		// 아직 구현하지 않은 단계. 러너가 실패로 알아보도록 종료 코드 2로 끝낸다.
-		UE_LOG(LogLab, Error, TEXT("lab_stage_unknown"));
+		// 사다리 단계(1~8)가 아니다. 옛 이름(M0~M5)도 여기로 온다. 러너가 실패로 알아보도록 종료 코드 2로 끝낸다.
+		FString Stage;
+		FParse::Value(FCommandLine::Get(), TEXT("-LabStage="), Stage);
+		UE_LOG(LogLab, Error, TEXT("lab_stage_unknown stage=%s (use -LabStage=1..8)"), *Stage);
 		LabRequestExit(2, TEXT("LabStage"));
 		return;
 	}
 	if (!Config.bVariantValid)
 	{
-		// 모르는 변형 이름. 단계와 같이 러너가 실패로 알아보도록 종료 코드 2로 끝낸다.
+		// v2 W10에서 변형을 지웠다. 옛 명령이 조용히 다른 구성으로 돌지 않게 종료 코드 2로 끝낸다.
 		FString Variant;
 		FParse::Value(FCommandLine::Get(), TEXT("-LabVariant="), Variant);
-		UE_LOG(LogLab, Error, TEXT("lab_variant_unknown variant=%s"), *Variant);
+		UE_LOG(LogLab, Error, TEXT("lab_variant_removed variant=%s (use -LabStage=1..8 and switches)"), *Variant);
 		LabRequestExit(2, TEXT("LabVariant"));
 		return;
 	}
 
-	ApplyVariantCVars();
-	if (Config.Variant == ELabVariant::MassSt || Config.FullyParallel == 0)
+	ApplyBudgetCVars();
+	if (Config.FullyParallel == 0)
 	{
-		// E1 (b): Mass 처리 단계를 태스크 그래프에 나누지 않는다. 런타임에 바꿔도 단계가 다시 구성된다(MassProcessingPhaseManager.cpp:576).
-		// M3b 직렬 트레이스는 -LabFullyParallel=0으로 같은 경로를 쓴다(run-m3b.ps1 -SerialArgs).
+		// 직렬 트레이스: Mass 처리 단계를 태스크 그래프에 나누지 않는다. 런타임에 바꿔도 단계가 다시 구성된다(MassProcessingPhaseManager.cpp:576).
 		IConsoleManager::Get().FindConsoleVariable(TEXT("mass.FullyParallel"))->Set(0, ECVF_SetByCode);
-	}
-	if (Config.Variant == ELabVariant::M3Lock0)
-	{
-		// 진단 D안: DefaultEngine.ini의 1을 이 변형에서만 0으로 덮는다. LabFixedCVarString이 실제 값을 읽어 LabCVars 메타데이터에 0으로 찍힌다.
-		LabSetCVar(TEXT("mass.commands.LockObserversDuringFlushing"), TEXT("0"));
 	}
 #if !UE_BUILD_TEST
 	// 결정 6 바닥 띠(개발 전용). P2(탑뷰)에서는 끈다. CVar는 lab_build 로그와 CSV 메타데이터 LabCVars에 찍히도록 여기서 먼저 둔다.
@@ -247,10 +237,6 @@ void ALabGameMode::StartPlay()
 		SetupCrowdFx();
 	}
 	Spawner->SpawnInitial();
-	if (ALabCrowdManager* Manager = Spawner->GetManager())
-	{
-		Manager->SetOrb(Orb); // 변형 manager: 매니저 틱이 오브의 저격 시계와 이펙트를 쓴다
-	}
 	StartFrame = GFrameCounter;
 
 	Camera = World->SpawnActor<ALabCameraRig>();
@@ -339,12 +325,9 @@ void ALabGameMode::SetupCrowdFx()
 	}
 	// Q2c 입자 그림자: 엔티티 구동 입자의 그림자를 원거리 그림자 스위치(-LabFarShadow)에 묶는다. 시스템 bOverrideCastShadow가 꺼져 있어 컴포넌트 CastShadow가
 	// 그대로 쓰이고(NiagaraComponent.cpp:4678), 메시 배치 그림자는 프록시 CastsDynamicShadow && 렌더러 bCastShadows && 섹션 값의 곱이다(NiagaraRendererMeshes.cpp:1290).
-	// 그래서 컴포넌트를 끄면 모든 이미터가 꺼지고, 켜도 렌더러에서 꺼 둔 바깥 독립 이미터(Small·Large)는 켜지지 않는다. 옛 방식(엔티티 구동 끔)은 건드리지 않는다.
+	// 그래서 컴포넌트를 끄면 모든 이미터가 꺼지고, 켜도 렌더러에서 꺼 둔 바깥 독립 이미터(Small·Large)는 켜지지 않는다.
 	const bool bFxShadowSpawn = CrowdFx->CastShadow;
-	if (Config.bCrowdFxEntity)
-	{
-		CrowdFx->SetCastShadow(Config.bFarShadow);
-	}
+	CrowdFx->SetCastShadow(Config.bFarShadow);
 	CrowdFx->SetVariableFloat(TEXT("User.SmallRate"), Config.CrowdFxSmallRate());
 	CrowdFx->SetVariableFloat(TEXT("User.LargeRate"), Config.CrowdFxLargeRate());
 	CrowdFx->SetVariableFloat(TEXT("User.OuterRadius"), FLabCrowdFx::OuterRadius);
@@ -354,7 +337,6 @@ void ALabGameMode::SetupCrowdFx()
 	// Q2b 엔티티 구동 입자: 에셋에 약속한 사용자 변수가 있는지 활성화 전에 한 번 본다(값을 넣으면 없는 이름도 덮어쓰기 저장소에 더해지므로 넣기 전에 본다).
 	// 없는 변수는 프로세서가 넣지 않는다. Niagara의 배열 함수는 없는 이름에 부를 때마다 경고를 남긴다(NiagaraFunctionLibrary.cpp:716-719).
 	FString EntityParams;
-	if (Config.bCrowdFxEntity)
 	{
 		const FNiagaraParameterStore& Params = CrowdFx->GetOverrideParameters();
 		auto Has = [&Params](const TCHAR* Name) { return Params.FindParameterOffset(FNiagaraVariableBase(FNiagaraTypeDefinition::GetFloatDef(), FName(Name)), /*IgnoreType*/ true) != nullptr; };
@@ -384,23 +366,22 @@ void ALabGameMode::SetupCrowdFx()
 	}
 
 	CrowdFx->Activate(true);
-	UE_LOG(LogLab, Log, TEXT("lab_crowdfx on=1 system=%s small_rate=%.2f large_rate=%.2f outer=%.0f inner=%.0f lifetime=%.2f speed=%.0f particles=%d entity=%d fx_shadow=%d fx_shadow_spawn=%d%s fx_loc=%s orb_loc=%s"),
+	UE_LOG(LogLab, Log, TEXT("lab_crowdfx on=1 system=%s small_rate=%.2f large_rate=%.2f outer=%.0f inner=%.0f lifetime=%.2f speed=%.0f particles=%d fx_shadow=%d fx_shadow_spawn=%d%s fx_loc=%s orb_loc=%s"),
 		*System->GetName(), Config.CrowdFxSmallRate(), Config.CrowdFxLargeRate(), FLabCrowdFx::OuterRadius, Config.CrowdFxInnerCm(), Lifetime, FLabScenario::MoveSpeed, Config.CrowdFxParticles(),
-		Config.bCrowdFxEntity ? 1 : 0, CrowdFx->CastShadow ? 1 : 0, bFxShadowSpawn ? 1 : 0, *EntityParams,
+		CrowdFx->CastShadow ? 1 : 0, bFxShadowSpawn ? 1 : 0, *EntityParams,
 		*CrowdFx->GetComponentLocation().ToCompactString(), *Orb->GetActorLocation().ToCompactString());
 }
 
-void ALabGameMode::ApplyVariantCVars()
+void ALabGameMode::ApplyBudgetCVars()
 {
-	const ELabVariant V = FLabConfig::Get().Variant;
-	if (V != ELabVariant::Budget && V != ELabVariant::M3BudgetDist && V != ELabVariant::M3BudgetSig && !FLabConfig::Get().bScreenSigBudget)
+	if (!FLabConfig::Get().UsesBudgetActors())
 	{
 		return;
 	}
 	// a.Budget.Enabled 기본값은 0이다(AnimationBudgetAllocatorCVars.cpp:7).
 	LabSetCVar(TEXT("a.Budget.Enabled"), TEXT("1"));
-	// 예산 값은 -LabBudgetMs=로 바꾼다(기본 FLabScenario::BudgetMs = 4, ADR-0016). 0 이하는 FLabConfig가 이미 화면 크기 Budget을 껐으므로 여기 오는 것은 변형이 정한 예산뿐이다. 그때는 기본값을 쓴다.
-	const float BudgetMs = FLabConfig::Get().BudgetMs > 0.f ? FLabConfig::Get().BudgetMs : FLabScenario::BudgetMs;
+	// 예산 값은 -LabBudgetMs=로 바꾼다(기본 FLabScenario::BudgetMs = 4, ADR-0016). 0 이하는 FLabConfig가 이미 화면 크기 Budget을 껐으므로 여기 오지 않는다.
+	const float BudgetMs = FLabConfig::Get().BudgetMs;
 	LabSetCVar(TEXT("a.Budget.BudgetMs"), *FString::SanitizeFloat(BudgetMs));
 	// CVar만으로는 켜지지 않는다. 월드마다 만들어지는 할당기는 bEnabled(false)로 시작한다(AnimationBudgetAllocator.cpp:71).
 	// 이걸 빠뜨린 2026-11-07 첫 E0의 budget 3조건은 무효로 하고 다시 쟀다.
@@ -441,22 +422,22 @@ void ALabGameMode::TickBench()
 			CSV_METADATA(TEXT("LabSeed"), *FString::FromInt(Config.Seed));
 			CSV_METADATA(TEXT("LabOrbit"), *Config.Orbit.ToString()); // v2 떠다니는 오브
 			CSV_METADATA(TEXT("LabWindow"), *FString::Printf(TEXT("%g+%g"), FLabBench::Warmup(Config.Orbit.IsMoving(), Config.WarmupSec), FLabBench::Measure(Config.Orbit.IsMoving(), Config.DurationSec))); // 워밍업+측정(초)
-			CSV_METADATA(TEXT("LabVariant"), FLabConfig::VariantName(Config.Variant));
 			CSV_METADATA(TEXT("LabLabel"), *Config.Label);
 			// M3b 2종: 종류 수와 에셋 상태. substituted(대형 에셋 없음, 소형으로 대체)는 스모크 전용이라 비교에 쓰지 않는다(LabUnitAssets.h).
 			CSV_METADATA(TEXT("LabTypes"), *FString::FromInt(Config.Types));
 			CSV_METADATA(TEXT("LabTypesAssets"), Config.Types == 2 ? (FLabUnitTypes::bLargeSubstituted ? TEXT("substituted") : TEXT("ok")) : TEXT("-"));
 			CSV_METADATA(TEXT("LabFarM"), *FString::FromInt(Config.FarM)); // 그리는 거리(표현 LOD Off, m4offmove는 Simulation LOD Off도). 기본 200
-			CSV_METADATA(TEXT("LabSimLod"), *Config.SimLodString()); // M4: 거리와 틱 간격. M3까지는 "-"
+			CSV_METADATA(TEXT("LabSimLod"), *Config.SimLodString()); // 거리와 틱 간격. Simulation LOD가 없으면 "-"
 			// Q2 Niagara 배경 무리: 켬 여부와 정상 상태 입자 수 계산값(스폰율 × 수명). 시스템을 못 찾아 켜지 못했으면 LabCrowdFxActive 0
 			CSV_METADATA(TEXT("LabCrowdFx"), Config.bCrowdFx ? TEXT("1") : TEXT("0"));
 			CSV_METADATA(TEXT("LabCrowdFxParticles"), *FString::FromInt(Config.CrowdFxParticles()));
 			CSV_METADATA(TEXT("LabCrowdFxActive"), CrowdFx && CrowdFx->IsActive() ? TEXT("1") : TEXT("0"));
-			// Q2b: 엔티티 구동 입자(1) / 옛 방식 전부 독립 입자(0) / 배경 무리 끔(-). 엔티티 구동 입자 수는 CSV 스탯 Lab/CrowdRecs, 모으기 시간은 Lab/CrowdFxGather
-			CSV_METADATA(TEXT("LabCrowdFxEntity"), !Config.bCrowdFx ? TEXT("-") : Config.bCrowdFxEntity ? TEXT("1") : TEXT("0"));
-			// Q3 빼 보기(plan.md "총괄 묶음 러너"): 단계, 실제로 적용된 값(Budget 할당기, 엔티티 풀, 고정 바운드가 들어간 ISKM 컴포넌트 수, 전환 대책 마스크),
-			// 아홉 기법의 설정 켬·끔(LabTech*, FLabConfig::TechList). 러너가 실행마다 기대값과 대조한다.
-			CSV_METADATA(TEXT("LabStage"), FLabConfig::StageName(Config.Stage));
+			// Q2b: 엔티티 구동 입자(1) / 배경 무리 끔(-). 엔티티 구동 입자 수는 CSV 스탯 Lab/CrowdRecs, 모으기 시간은 Lab/CrowdFxGather.
+			// v2 W10에서 옛 방식(전부 독립 입자, 0)을 지웠다
+			CSV_METADATA(TEXT("LabCrowdFxEntity"), !Config.bCrowdFx ? TEXT("-") : TEXT("1"));
+			// Q3 빼 보기: 사다리 단계(1~8, v2 W10부터. 그전에는 M0~M5), 실제로 적용된 값(Budget 할당기, 엔티티 풀, 고정 바운드가 들어간 ISKM 컴포넌트 수, 전환 대책 마스크),
+			// 기법의 설정 켬·끔(LabTech*, FLabConfig::TechList). 러너가 실행마다 기대값과 대조한다. v2 W10에서 LabVariant를 지웠다
+			CSV_METADATA(TEXT("LabStage"), *FString::FromInt(Config.Step));
 			CSV_METADATA(TEXT("LabBudget"), IsBudgetActive() ? TEXT("1") : TEXT("0"));
 			// 실제로 걸린 예산(a.Budget.BudgetMs의 값). 할당기가 꺼져 있으면 "-". 참고 묶음 Budget1이 조건을 가리는 키다
 			{
@@ -469,10 +450,10 @@ void ALabGameMode::TickBench()
 				CSV_METADATA(TEXT("LabIskmBounds"), *FString::FromInt(Crowd && Crowd->IsActive() ? Crowd->GetIskmBoundsApplied() : 0));
 			}
 			CSV_METADATA(TEXT("LabHydrateFixMask"), *FString::FromInt(Config.HydrateFixMask));
-			// Q4 근거리 품질: 액터 상한(두 종류 합계)과 화면 안 전환 거리(m). M3 미만 단계에서는 쓰이지 않는 값이다
+			// Q4 근거리 품질: 액터 상한(두 종류 합계)과 화면 안 전환 거리(m). 단계 1에서는 쓰이지 않는 값이다
 			CSV_METADATA(TEXT("LabActorCap"), *FString::FromInt(Config.ActorCap));
 			CSV_METADATA(TEXT("LabHydrateM"), *FString::Printf(TEXT("%.0f"), Config.HydrateM));
-			CSV_METADATA(TEXT("LabFarShadow"), Config.FarShadowString()); // Q4b: 표현 LOD Low(80m~) 인스턴스 그림자. M3 미만 "-"
+			CSV_METADATA(TEXT("LabFarShadow"), Config.FarShadowString()); // Q4b: 표현 LOD Low(80m~) 인스턴스 그림자. 단계 1 "-"
 			for (const FLabConfig::FTech& Tech : Config.TechList())
 			{
 				CSV_METADATA(Tech.MetaKey, *Tech.Value);
@@ -482,7 +463,7 @@ void ALabGameMode::TickBench()
 			CSV_METADATA(TEXT("LabLadder"), *Config.Ladder().Id);
 			CSV_METADATA(TEXT("LabOverrides"), Config.Overrides.IsEmpty() ? TEXT("-") : *Config.Overrides);
 			CSV_METADATA(TEXT("LabActorCollision"), Config.ActorCollisionString());
-			// v2 W7: 표현 전환의 최소 유지 시간(ms). 규칙이 등록되지 않은 실행(끔, M3 미만 단계)은 0
+			// v2 W7: 표현 전환의 최소 유지 시간(ms). 규칙이 등록되지 않은 실행(끔, 단계 1~3)은 0
 			CSV_METADATA(TEXT("LabRepHold"), *FString::FromInt(Config.UsesRepHold() ? Config.RepHoldMs : 0));
 			// v2 W8: 입자 외삽 목표를 매 프레임 넣는가(1/0), ISKM 바운드 상자를 옮기는 간격(m, 0 고정). 그 기법을 쓰지 않는 실행은 "-"
 			CSV_METADATA(TEXT("LabFxOrbFollow"), *Config.FxOrbFollowString());
@@ -677,16 +658,6 @@ void ALabGameMode::Tick(float DeltaSeconds)
 		}
 	}
 
-	// budget 변형: Significance Manager는 게임이 시점을 넘겨 갱신해야 한다(SignificanceManager.h:118 Update).
-	if ((FLabConfig::Get().Variant == ELabVariant::Budget || FLabConfig::Get().Variant == ELabVariant::M3BudgetDist) && Camera)
-	{
-		if (USignificanceManager* Sig = USignificanceManager::Get(GetWorld()))
-		{
-			const FTransform View = Camera->GetActorTransform();
-			Sig->Update(TArrayView<const FTransform>(&View, 1));
-		}
-	}
-
 	// Q5 동등성 통계(모든 단계, 같은 뜻, Docs/Worklog/Q5.md "동등성 통계"): 살아 있는 총수(사망 중 포함, 늘 N이어야 한다), 누적 사망 수, 오브 30m 안 개체 수.
 	// 초당 사망 수는 Lab/Deaths의 측정 구간 증가분 ÷ 측정 시간이다(실행 끝 메타데이터 LabDeathRate에도 있다).
 	LastAlive = Spawner->GetAliveCount();
@@ -694,9 +665,9 @@ void ALabGameMode::Tick(float DeltaSeconds)
 	CSV_CUSTOM_STAT(Lab, Alive, LastAlive, ECsvCustomStatOp::Set);
 	CSV_CUSTOM_STAT(Lab, Deaths, GetDeathCount(), ECsvCustomStatOp::Set);
 	CSV_CUSTOM_STAT(Lab, Near30, LastNear30, ECsvCustomStatOp::Set);
-	// v2 W3 겹친 쌍의 수(LabOverlap.h). 0.5초마다 센 값이다. M0 액터 단계는 스포너가 같은 정의로 센다(v2 W6). 변형 manager는 세지 않는다(0)
+	// v2 W3 겹친 쌍의 수(LabOverlap.h). 0.5초마다 센 값이다. 단계 1 액터는 스포너가 같은 정의로 센다(v2 W6)
 	{
-		if (FLabConfig::Get().Stage == ELabStage::M0)
+		if (FLabConfig::Get().IsActorCrowd())
 		{
 			Spawner->SampleActorOverlaps(GetWorld()->GetTimeSeconds());
 		}
@@ -751,10 +722,6 @@ void ALabGameMode::Tick(float DeltaSeconds)
 	if (Duration > 0.f && Elapsed >= Duration && !bQuitRequested)
 	{
 		bQuitRequested = true;
-		if (const ULabCrowdSubsystem* Crowd = GetWorld()->GetSubsystem<ULabCrowdSubsystem>(); Crowd && Crowd->DamageHits > 0)
-		{
-			UE_LOG(LogLab, Log, TEXT("lab_damage hits=%lld per_sec=%.0f"), Crowd->DamageHits.load(), Crowd->DamageHits.load() / FMath::Max(Elapsed, 0.01f));
-		}
 		UE_LOG(LogLab, Log, TEXT("lab_applied %s"), *AppliedString()); // Q3: 개발 실행에서도 실제 적용값을 남긴다(벤치마크는 측정 시작 때)
 		int32 OverlapPairs = 0;
 		int32 OverlapDeep = 0;

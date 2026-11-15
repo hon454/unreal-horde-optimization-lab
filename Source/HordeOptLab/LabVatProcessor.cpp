@@ -1,6 +1,6 @@
 #include "LabVatProcessor.h"
 #include "LabCrowdSubsystem.h"
-#include "LabMassProcessors.h" // LabLogicGroupName, LabUseOldQueries
+#include "LabMassProcessors.h" // LabLogicGroupName
 #include "LabMassTypes.h"
 #include "MassCommonFragments.h"
 #include "MassExecutionContext.h"
@@ -31,13 +31,9 @@ namespace
 
 ULabVatISMProcessor::ULabVatISMProcessor()
 {
-	// 기본은 등록하지 않는다. 게임 모듈이 단계를 보고 켠다(HordeOptLab.cpp).
+	// 기본은 등록하지 않는다. 게임 모듈이 단계를 보고 켠다(HordeOptLab.cpp). 로직과의 선후는 선언하지 않는다(LabMassProcessors.h).
+	// 엔진의 Representation 뒤 선언은 부모 생성자가 더한다(MassUpdateISMProcessor.cpp:20).
 	bAutoRegisterWithProcessingPhases = false;
-	if (LabExplicitLogicOrder())
-	{
-		// A/B m3order만: 로직 그룹 뒤 선언. 기본은 로직과의 선후가 없다(FLabAnimStateFragment 겹침은 청크 단위 충돌일 뿐이다, LabMassProcessors.h LabExplicitLogicOrder). 엔진의 Representation 뒤 선언은 부모 생성자가 더한다(MassUpdateISMProcessor.cpp:20).
-		ExecutionOrder.ExecuteAfter.Add(LabLogicGroupName);
-	}
 }
 
 void ULabVatISMProcessor::ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager)
@@ -45,14 +41,7 @@ void ULabVatISMProcessor::ConfigureQueries(const TSharedRef<FMassEntityManager>&
 	ProcessorRequirements.AddSubsystemRequirement<ULabCrowdSubsystem>(EMassFragmentAccess::ReadWrite); // HUD 집계와 개발 진단을 쓴다(원자 변수)
 	Super::ConfigureQueries(EntityManager);
 	EntityQuery.AddConstSharedRequirement<FLabUnitTypeParams>(EMassFragmentPresence::All); // 2종: 청크의 종류로 VAT 클립을 고른다
-	if (LabUseOldQueries())
-	{
-		EntityQuery.AddRequirement<FLabMinionFragment>(EMassFragmentAccess::ReadOnly); // m3qold: 로직 프래그먼트를 읽어 로직 넷과 자원을 다툰다
-	}
-	else
-	{
-		EntityQuery.AddRequirement<FLabAnimStateFragment>(EMassFragmentAccess::ReadOnly);
-	}
+	EntityQuery.AddRequirement<FLabAnimStateFragment>(EMassFragmentAccess::ReadOnly);
 }
 
 void ULabVatISMProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context)
@@ -65,10 +54,8 @@ void ULabVatISMProcessor::Execute(FMassEntityManager& EntityManager, FMassExecut
 		return;
 	}
 	const float Now = World->GetTimeSeconds();
-	const float HitDuration = Crowd->HitDuration;
 	const float DeathDuration = Crowd->DeathDuration;
 	const FVector ViewLocation = Crowd->SnipeView.Location;
-	const bool bOld = LabUseOldQueries();
 	int32 BandCounts[4] = { 0, 0, 0, 0 };
 	// Q4 품질 지표(ISKM 프로세서와 같은 정의): 화면 안에서 아직 VAT 인스턴스로 그리는 개체 중 카메라 30m·전환 거리 안의 수(3D 거리)
 	const FLabSnipeView QualityView = Crowd->SnipeView;
@@ -104,11 +91,8 @@ void ULabVatISMProcessor::Execute(FMassEntityManager& EntityManager, FMassExecut
 		const TConstArrayView<FTransformFragment> TransformList = Context.GetFragmentView<FTransformFragment>();
 		const TArrayView<FMassRepresentationFragment> RepresentationList = Context.GetMutableFragmentView<FMassRepresentationFragment>();
 		const TConstArrayView<FMassRepresentationLODFragment> RepresentationLODList = Context.GetFragmentView<FMassRepresentationLODFragment>();
-		// 새 구조: 표현 상태만 읽는다. m3qold: 로직 프래그먼트와 아키타입 태그로 상태를 안다.
-		const TConstArrayView<FLabAnimStateFragment> AnimStates = bOld ? TConstArrayView<FLabAnimStateFragment>() : Context.GetFragmentView<FLabAnimStateFragment>();
-		const TConstArrayView<FLabMinionFragment> Minions = bOld ? Context.GetFragmentView<FLabMinionFragment>() : TConstArrayView<FLabMinionFragment>();
-		const bool bHit = bOld && Context.DoesArchetypeHaveTag(*FLabHitTag::StaticStruct());
-		const bool bDead = bOld && Context.DoesArchetypeHaveTag(*FLabDeadTag::StaticStruct());
+		// 표현 상태만 읽는다(M3b 정비 1)
+		const TConstArrayView<FLabAnimStateFragment> AnimStates = Context.GetFragmentView<FLabAnimStateFragment>();
 #if !UE_BUILD_TEST
 		const bool bSimOff = Context.DoesArchetypeHaveTag(*FMassOffLODTag::StaticStruct());
 #endif
@@ -134,21 +118,10 @@ void ULabVatISMProcessor::Execute(FMassEntityManager& EntityManager, FMassExecut
 						RepresentationLOD.LODSignificance, Representation.PrevLODSignificance);
 					if (bTiming) { CyXf += FPlatformTime::Cycles64() - X0; }
 
-					// 상태와 재생 시각. 새 구조는 표현 프래그먼트 하나에서, m3qold는 태그 + 로직의 남은 시간에서 구한다.
-					ELabMinionState State;
-					float T;
-					if (bOld)
-					{
-						const FLabMinionFragment& Minion = Minions[EntityIt];
-						State = bDead ? ELabMinionState::Dead : bHit ? ELabMinionState::Hit : ELabMinionState::Walk;
-						T = bDead ? DeathDuration - Minion.StateTimeLeft : bHit ? HitDuration - Minion.StateTimeLeft : Now + LabWalkPhase(Minion.Serial);
-					}
-					else
-					{
-						const FLabAnimStateFragment& Anim = AnimStates[EntityIt];
-						State = Anim.State;
-						T = Now - Anim.StateStartTime;
-					}
+					// 상태와 재생 시각은 표현 프래그먼트 하나에서 구한다.
+					const FLabAnimStateFragment& Anim = AnimStates[EntityIt];
+					const ELabMinionState State = Anim.State;
+					const float T = Now - Anim.StateStartTime;
 					const FLabVatClip& Clip = State == ELabMinionState::Dead ? Clips.Death : State == ELabMinionState::Hit ? Clips.Hit : Clips.Walk;
 					const bool bLoop = State == ELabMinionState::Walk;
 					FLabVatFrameData Data;
@@ -218,11 +191,8 @@ void ULabVatISMProcessor::Execute(FMassEntityManager& EntityManager, FMassExecut
 	{
 		Crowd->HudInstances.store(BandCounts[0] + BandCounts[1] + BandCounts[2] + BandCounts[3], std::memory_order_relaxed);
 	}
-	if (FLabConfig::Get().Stage >= ELabStage::M3) // 액터가 있는 단계만(M1·M2 CSV 열은 그대로)
-	{
-		CSV_CUSTOM_STAT(Lab, ViewInst30, ViewInst30, ECsvCustomStatOp::Set);
-		CSV_CUSTOM_STAT(Lab, ViewInstHyd, ViewInstHyd, ECsvCustomStatOp::Set);
-	}
+	CSV_CUSTOM_STAT(Lab, ViewInst30, ViewInst30, ECsvCustomStatOp::Set); // VAT 단계(4·5)는 모두 액터가 있다
+	CSV_CUSTOM_STAT(Lab, ViewInstHyd, ViewInstHyd, ECsvCustomStatOp::Set);
 #if !UE_BUILD_TEST
 	// 개발 확인(-LabSimLodLog): 1초마다 그 프레임에 그린 인스턴스 수를 카메라 거리 구간(30/80/200m)별로 남긴다. off_drawn은 Simulation LOD가 Off인 채 그려진 수다(m4offmove에서 0이어야 한다).
 	static const bool bBandLog = FParse::Param(FCommandLine::Get(), TEXT("LabSimLodLog"));

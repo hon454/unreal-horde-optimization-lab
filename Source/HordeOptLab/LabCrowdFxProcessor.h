@@ -10,7 +10,7 @@
  * Q2b 엔티티 구동 배경 무리(Docs/Worklog/Q2.md "Q2b"). 그려지지 않는(표현 None) 걷는 미니언 엔티티의 위치를 종류별로 모아 Niagara 배열 사용자 변수로 넘긴다.
  * 배경 무리 입자가 실제 엔티티 자리에 그려져, 엔티티가 표현 LOD에 들어올 때(카메라 188m) 같은 자리에서 입자가 메시로 바뀐다.
  *
- * - 등록: -LabCrowdFx=1이고 -LabCrowdFxEntity=1(기본)일 때만 게임 모듈이 켠다(HordeOptLab.cpp). 그 밖의 단계·변형에는 프로세서가 없어 비용이 0이다.
+ * - 등록: 배경 무리를 켠 실행(사다리 단계 7부터, -LabCrowdFx=0이 끈다)에서만 게임 모듈이 켠다(HordeOptLab.cpp). 그 밖의 단계에는 프로세서가 없어 비용이 0이다.
  * - 자리: Representation 그룹, VisualizationProcessing 뒤(이번 프레임의 CurrentRepresentation을 읽는다). 엔진 ISKM 프로세서와 같은 자리다(MassUpdateSkinnedMeshProcessor.cpp:21-23).
  * - 게임 스레드: Niagara 컴포넌트에 배열을 넣으므로 게임 스레드에서 돈다(UNiagaraDataInterfaceArrayFunctionLibrary).
  * - 조건: FLabMinionTag 있음, FLabPooledTag 없음, CurrentRepresentation == None, 표현 상태 Walk. FMassOffLODTag로 거르지 않는다.

@@ -26,22 +26,12 @@
 /** Lab 로직 프로세서 그룹. 표현 프로세서가 ExecuteAfter로 가리킨다. */
 inline const FName LabLogicGroupName(TEXT("LabLogic"));
 
-/** 진단 변형 m3qold: 정비 전 쿼리 구조(표현이 로직 프래그먼트와 태그를 읽고, 저격이 쿼리 밖에서 쓰고, 표현에 로직 뒤 순서 선언이 없다). */
-inline bool LabUseOldQueries()
-{
-	return FLabConfig::Get().Variant == ELabVariant::M3QOld;
-}
-
-/**
- * A/B 변형 m3order만 표현 프로세서(VatISM·ActorSync)에 ExecuteAfter(LabLogic)를 선언한다.
- * 기본은 선언 없음: 로직과 표현 사이에 선후가 없다. 로직이 FLabAnimStateFragment를 쓰고 표현이 읽는 겹침은 청크 단위 접근 충돌일 뿐 프로세서의 선후를 만들지 않는다
- * (MassProcessingQueueTypes.cpp:203-254, engine-notes.md 13절). 표현이 같은 프레임 로직보다 먼저 돌면 상태 변화가 한 프레임 늦게 보인다(Docs/Guides/code-tour.md "순서가 정해져 있지 않은 곳").
- * 20k P1에서 선언이 0.4~0.7ms 느렸다(m3noorder 15.52 vs m3mass 16.12ms, Docs/Worklog/M3b.md "코드 A/B").
+/*
+ * 표현 프로세서(VatISM·ISKM·ActorSync)는 LabLogic 뒤라는 선언을 하지 않는다. 로직과 표현 사이에 선후가 없다. 로직이 FLabAnimStateFragment를 쓰고 표현이 읽는 겹침은
+ * 청크 단위 접근 충돌일 뿐 프로세서의 선후를 만들지 않는다(MassProcessingQueueTypes.cpp:203-254, engine-notes.md 13절). 표현이 같은 프레임 로직보다 먼저 돌면
+ * 상태 변화가 한 프레임 늦게 보인다(Docs/Guides/code-tour.md "순서가 정해져 있지 않은 곳"). 20k P1에서 선언이 0.4~0.7ms 느렸다(Docs/Worklog/M3b.md "코드 A/B").
+ * 선언을 넣은 A/B 변형(m3order)과 정비 전 쿼리 구조 변형(m3qold)은 v2 W10에서 지웠다.
  */
-inline bool LabExplicitLogicOrder()
-{
-	return FLabConfig::Get().Variant == ELabVariant::M3Order;
-}
 
 /** 살아 있는 개체의 이동 목표를 오브로 둔다. 실제 이동은 엔진 조향(UMassSteerToMoveTargetProcessor)과 이동 프로세서가 한다. */
 UCLASS()
@@ -126,37 +116,6 @@ protected:
 	virtual void ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager) override;
 	virtual void Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context) override;
 	FMassEntityQuery EntityQuery;
-};
-
-/**
- * E1 (d) 비치명 피해 발생기. 초당 정해진 건수를 무작위 개체에 넣는다. 개체마다 해시(일련번호, 프레임)로 뽑아 기대 건수를 맞춘다.
- * 직접 방식은 그 자리에서 체력을 깎고(최소 1), 이벤트 방식은 피해 이벤트 엔티티를 만든다. 두 방식 모두 같은 순회를 하므로 차이는 적용 방식뿐이다.
- */
-UCLASS()
-class ULabDamageGenProcessor : public UMassProcessor
-{
-	GENERATED_BODY()
-public:
-	ULabDamageGenProcessor();
-protected:
-	virtual void ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager) override;
-	virtual void Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context) override;
-	FMassEntityQuery EntityQuery;
-	double Owed = 0.0; // 아직 넣지 못한 건수(소수점 누적)
-};
-
-/** E1 (d) 이벤트 방식: 피해 이벤트 엔티티를 모아 대상 체력에 적용하고(최소 1) 이벤트를 지운다. */
-UCLASS()
-class ULabDamageApplyProcessor : public UMassProcessor
-{
-	GENERATED_BODY()
-public:
-	ULabDamageApplyProcessor();
-protected:
-	virtual void ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager) override;
-	virtual void Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context) override;
-	FMassEntityQuery EventQuery;
-	FMassEntityQuery HealthQuery; // 미니언 체력에 쓴다는 것을 의존성 해석기에 알리려고 등록만 한다
 };
 
 /**
