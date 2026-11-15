@@ -1,6 +1,6 @@
 # v2 사양 문서
 
-- 상태: 잠정 확정(2026-11-15). 사용자가 자리를 비운 동안 코디네이터가 추천안으로 정했다. 사용자 검토를 기다린다.
+- 상태: 확정(2026-11-15, 사용자 승인).
 - 결정의 근거, 대안, 득실은 [autonomous-decisions.md](Worklog/autonomous-decisions.md)의 D33부터에 있다. 방향은 [ADR-0017](Decisions/0017-roaming-orb-and-equal-function-ladder.md)이 정했다.
 - 이 문서는 "무엇을 만들고 무엇으로 재는가"를 정한다. 순서와 작업 단위는 [v2-plan.md](v2-plan.md)에 있다.
 - 근거 수치는 시험 실행 묶음 `Spike1`, `Spike2`의 값이다([Worklog/V2.md](Worklog/V2.md)). 설계 근거로만 쓰고 공개 문서에는 쓰지 않는다.

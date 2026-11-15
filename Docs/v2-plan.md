@@ -1,6 +1,6 @@
 # v2 계획 문서
 
-- 상태: 잠정 확정(2026-11-15). 사용자가 자리를 비운 동안 코디네이터가 추천안으로 정했다. 사용자 검토를 기다린다.
+- 상태: 확정(2026-11-15, 사용자 승인). 조건 표는 리뷰([V2-review.md](Worklog/V2-review.md) "사용자 판단")의 수정을 반영한다.
 - 무엇을 만드는지는 [v2-spec.md](v2-spec.md)에 있다. 결정의 근거와 대안은 [autonomous-decisions.md](Worklog/autonomous-decisions.md)의 D33부터에 있다.
 - 경위는 [Worklog/V2.md](Worklog/V2.md)에 쌓는다. 작업 단위마다 절 하나다.
 
