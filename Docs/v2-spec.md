@@ -51,6 +51,7 @@
 
 - 출발값은 [ADR-0010](Decisions/0010-final-representation-bands.md)과 [ADR-0011](Decisions/0011-entity-driven-crowd-particles.md) 그대로다: 액터 0\~40m(상한 1,000), ISKM 40\~80m 그림자 켬, ISKM 80\~200m 그림자 끔, 200\~500m 엔티티 구동 입자, 500\~1,000m 독립 입자.
 - 기능(겹침 방지, 캡슐)이 들어간 뒤 목표 사양을 넘으면 액터 상한과 전환 거리를 조정한다. 조정은 "품질 올리기" 작업 단위에서 재서 정하고 ADR 초안으로 남긴다.
+- W11이 값을 쟀다. 액터 상한 1,000과 액터 거리 40m는 그대로 둔다. 단계 8의 액터 메시에 고정 바운드를 더한다([ADR-0019](Decisions/0019-step8-actor-cap-distance-and-fixed-skel-bounds.md) 제안됨, D52).
 
 ### 4.1 전환(사용자 요구)
 
