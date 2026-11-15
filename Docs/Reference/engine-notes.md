@@ -604,3 +604,31 @@
 | ISKM 인스턴스 컬링은 인스턴스 데이터로 한다 | ISKM 프록시는 인스턴스 장면 데이터 버퍼(`SetupInstanceSceneDataBuffers`)를 쓴다. 인스턴스 로컬 바운드는 프리미티브 바운드와 따로 만든다(15절 "ISKM 고정 바운드"). 실행에서도 카메라가 상자 안이면 상자 밖의 인스턴스가 그려졌다(Worklog "W8"). 상자는 카메라를 품는 한 컴포넌트 단위 컬링(절두체, 가림)에만 쓰인다 | `ENG/Private/InstancedSkinnedMeshSceneProxy.cpp:59,78` |
 | Position 사용자 변수 넣기 | `SetVariableVec3`는 덮어쓰기 저장소에 그 이름의 Position 변수가 있으면 `SetVariablePosition`으로 넘긴다. 시스템 인스턴스가 있으면 둘 다 `SetVariable_Deferred`로 미뤄 다음 시스템 틱에 반영한다. 매 프레임 넣는 `User.LabNow`(float)와 같은 길이다 | `NI/Source/Niagara/Private/NiagaraComponent.cpp:2779-2786, 2814-2827` |
 | 메시 입자의 카메라 거리 컬링 | 렌더러의 `MinCameraDistance`·`MaxCameraDistance`는 GPU 장면 인스턴스 쓰기 셰이더가 입자마다 판정한다. 기준은 메시 바운딩 중심의 월드 위치와 주 뷰 카메라 원점 사이 거리다 | `NI/Source/Niagara/Private/NiagaraRendererMeshes.cpp:131`, `NI/Shaders/Private/NiagaraUpdateMeshGPUSceneInstances.usf:170-180` |
+
+## 42. ISKM 트랙 수가 늘 때 이전 뼈대 슬롯이 깨진다(2026-11-15, v2 W9)
+
+줄임말: **ENG** = `Engine/Source/Runtime/Engine`, **RD** = `Engine/Source/Runtime/Renderer/Private`, **MR** = `Engine/Plugins/Runtime/MassGameplay/Source/MassRepresentation`, **SH** = `Engine/Shaders/Private`. 실행 결과는 [Worklog/V2.md](../Worklog/V2.md) "W9"에 있다.
+
+| 항목 | 확인한 것 | 위치 |
+| --- | --- | --- |
+| 인스턴스의 뼈대 자리는 트랙 번호다 | Mass는 인스턴스의 애니메이션 번호를 엔티티의 트랙 번호로 둔다. ASTPD 인스턴스는 뼈대 데이터 오프셋을 `트랙 번호 × 2`(지금·이전 슬롯)로 돌려준다 | `MR/Private/MassVisualizationComponent.cpp:789-800, 880-891`, `ENG/Private/Animation/AnimSequenceTransformProviderData.cpp:1346-1354` |
+| 트랙 수 = 트랙 풀의 끝 번호 | `GetUniqueAnimationCount`는 `TrackPools[0].GetNumTracks()` = `Datas.Num()`이다. `AllocateTrack`은 가장 낮은 빈 번호(`FindAndSetFirstZeroBit`)를 쓰고, 빈 번호가 없으면 끝에 붙인다. Mass는 트랙을 엔티티가 처음 그 컴포넌트에 들어올 때 만들고, 해제는 정지 ISM 전환 경로(`:1156`) 하나뿐이다. 그래서 개체가 처음 들어올 때마다 트랙 수가 1 는다 | `ENG/Private/Animation/AnimSequenceTransformProviderData.cpp:1341-1344`, `ENG/Classes/Animation/AnimTrackPool.h:102-118, 274`, `MR/Private/MassVisualizationComponent.cpp:773, 864, 1156` |
+| 트랙 수가 바뀌면 뼈대 버퍼를 다시 할당한다 | 패치에서 트랙 수가 바뀌면 `SetUniqueAnimationCount`를 부른다. 다음 렌더 프레임에 그 컴포넌트를 할당 목록에 넣고, 필요한 크기(트랙 수 × 뼈 수 × 2)가 다르면 옛 자리를 `Free`한 뒤 새 자리를 `Allocate`한다. 옛 자리는 `PreviousTransformBufferOffset`에 남겨 복사한다 | `ENG/Private/Animation/AnimSequenceTransformProviderData.cpp:278-284`, `RD/Skinning/SkinningSceneExtension.cpp:1124-1135, 1336-1352` |
+| 복사가 겹친 자리를 같은 UAV로 병렬 복사한다 | 옛 자리 → 새 자리 복사는 조각 모음이 아니면 스테이징 버퍼 없이 같은 UAV를 읽고 쓴다(`USE_STAGING_BUFFER=0`). 셰이더 주석은 "allocate-before-free guarantees no overlap"이라 가정하지만 C++은 먼저 해제한다. `FSpanAllocator::Allocate`는 맞는 빈 구간이 없으면 해제 대기 구간을 합치고(`Consolidate`, 이웃한 빈 구간을 잇는다) 다시 첫 맞춤으로 찾는다. 그래서 방금 해제한 옛 자리와 앞쪽 빈 구간을 이은 구간의 시작, 곧 옛 자리와 겹치는 앞쪽 자리를 줄 수 있다. 겹친 채로 병렬 복사하면 이전 슬롯이 깨진다 | `RD/Skinning/SkinningSceneExtension.cpp:1857-1866, 1915-1929`, `SH/Skinning/CopyPreviousTransforms.usf:12, 45-50`, `ENG/Public/SpanAllocator.h:23-31, 63-69`, `ENG/Private/SpanAllocator.cpp:58-103, 124-138` |
+| 증상 | 이전 슬롯이 깨진 프레임에는 그 컴포넌트의 모든 인스턴스가 이전 자세를 틀리게 읽어 속도 버퍼가 튄다. 모션 블러가 화면 곳곳의 같은 종류 개체를 한 프레임 길게 끈다. 트랙 수가 느는 동안(개체가 컴포넌트에 처음 들어오는 동안)만 나고, 모든 개체가 트랙을 가지면 멈춘다. M5 진단의 "37\~66초에만, 두 번째 바퀴에는 없다"와 맞는다 | 실행 라벨 `LabBurst-w9-base-vel`, `LabBurst-w9-p1-reserve0`(Worklog "W9") |
+| 활성 트랙은 인스턴스가 없어도 평가된다 | 렌더 쪽 제공자는 활성 트랙 전부를 매 프레임 평가한다. 해제된 트랙은 평가하지 않는다. 새로 활성화된 트랙(지난 패치에서 비활성)은 이전 위치가 없어 지금 자세를 이전 슬롯에도 쓴다 | `RD/Skinning/AnimSequenceTransformProvider.cpp:1456-1491, 1338-1365`, `ENG/Private/Animation/AnimSequenceTransformProviderData.cpp:167-172` |
+
+알려진 문제로 올라온 이슈는 찾지 못했다(2026-11-15 검색). 엔진을 고치면 `AllocSpaceForPrimitive`에서 새 자리를 먼저 할당하고 옛 자리를 나중에 해제하거나, 겹칠 때 스테이징 버퍼로 복사하면 된다. 이 프로젝트는 엔진을 고치지 않고 Lab 코드에서 트랙 수가 바뀌지 않게 한다(`ULabIskmProcessor`, `-LabIskmTrackReserve`, 기본 1). 컴포넌트가 처음 쓰이는 프레임에 트랙 풀의 끝 번호를 종류의 개체 수 × 1.1 + 64로 늘려 둔다.
+
+```cpp
+// Source/HordeOptLab/LabIskmProcessor.cpp LabReserveTracks: 컴포넌트마다 한 번
+TArray<int32> Temp;
+while (int32(Provider->GetUniqueAnimationCount()) < Capacity)
+{
+	Temp.Add(Provider->AllocateTrack());
+}
+for (const int32 TrackIndex : Temp)
+{
+	Provider->DeallocateTrack(TrackIndex); // 끝 번호는 그대로 남고, 엔진의 다음 AllocateTrack은 빈 번호를 다시 쓴다
+}
+```

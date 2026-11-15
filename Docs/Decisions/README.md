@@ -25,6 +25,7 @@
 | [0015](0015-readme-figures.md) | 루트 README도 비교가 요점인 수치는 SVG 그림으로 보이고, 표는 찾아 읽는 목록에만 쓴다 | 승인됨 |
 | [0016](0016-animation-budget-value.md) | Animation Budget Allocator의 예산을 2ms에서 4ms로 올린다(호드 1만에서 건너뜀 0, 2만에서 p95가 16.7ms 안) | 승인됨 |
 | [0017](0017-roaming-orb-and-equal-function-ladder.md) | `v2` 브랜치에서 시나리오와 시뮬레이션을 다시 만든다: 떠다니는 오브, 모든 단계가 같은 기능(겹침 방지, 캡슐 콜리전), 엔진 기본 경로가 첫 Mass 단계, 최종 구성에 정지 조건 | 승인됨 |
+| [0018](0018-iskm-flash-track-reserve.md) | ISKM 번쩍임은 컴포넌트마다 트랙 풀을 미리 늘려 막고 모션 블러는 엔진 기본값으로 둔다(0007 대체) | 제안됨 |
 
 ## ADR 이전의 결정
 

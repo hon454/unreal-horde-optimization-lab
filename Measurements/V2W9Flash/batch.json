@@ -1,0 +1,19 @@
+﻿{
+    "batch":  "V2W9Flash",
+    "build":  "78ad9984c2c917742e554e2a8fd6e6d72847b109 (dirty)",
+    "start":  "2026-11-15 13:00:02",
+    "end":  "2026-11-15 13:28:45",
+    "n":  "10000",
+    "preset":  "P3",
+    "radius_m":  "57.3",
+    "height_m":  "6",
+    "speeds":  [
+                   "2"
+               ],
+    "duration_sec":  180,
+    "runs":  3,
+    "planned":  7,
+    "ok":  7,
+    "failed":  0,
+    "gave_up":  0
+}
