@@ -22,7 +22,7 @@ STATUS.md "명령"에는 매번 쓰는 것만 둔다. 여기에는 스크립트 
 | `run-bench.ps1 ... [-RunIndex i] [-Trace] [-ExtraArgs "..."]` (M3b) | `-RunIndex`는 r<i> 하나만(실행 단위 섞기), `-Trace`는 `Saved/Traces/<라벨>.utrace`(`-trace=cpu,gpu,frame,counters,mass`), `-ExtraArgs`는 게임 인자 덧붙임 | |
 | `noise-table.py <라벨 접두사...>` (M3b) | 접두사별 실행의 프레임 p50·p95, Game·Render p50을 표로 내고 중앙값·최소\~최대·표준편차를 붙인다. 잡음 진단용. 예: `py -3 -I Scripts/noise-table.py M3b-m3mass-N20000-P1aff- M3b-m3mass-N20000-P1noaff-` | |
 
-`run-bench.ps1`, `run-full.ps1`, `capture-full.ps1`, `run-budget.ps1`, `run-mgr.ps1`, `run-pool.ps1`, `run-q4.ps1`, `run-transition.ps1`는 `v1`의 러너다. `-LabVariant`와 옛 단계 이름(`M0`\~`M5`)을 넘기므로 v2 W10 뒤의 빌드에서는 종료 코드 2로 끝난다. 총괄 묶음 러너와 조건 표는 W12에서 새 단계로 다시 만든다.
+`run-full.ps1`, `capture-full.ps1`, `full-conditions.json`, `ablation-check.py`, `equivalence-check.py`는 v2 W12에서 새 단계(`-LabStage=1`\~`8`)로 다시 만들었다(아래 "총괄 묶음 러너·검사·요약·촬영"). `run-bench.ps1`, `run-budget.ps1`, `run-mgr.ps1`, `run-pool.ps1`, `run-q4.ps1`, `run-transition.ps1`는 `v1`의 러너다. `-LabVariant`와 옛 단계 이름(`M0`\~`M5`)을 넘기므로 v2 W10 뒤의 빌드에서는 종료 코드 2로 끝난다.
 
 ## 사다리 단계와 스위치(v2 W10)
 
@@ -74,7 +74,7 @@ STATUS.md "명령"에는 매번 쓰는 것만 둔다. 여기에는 스크립트 
 
 ### 빼 보기(v2 W10)
 
-단계 8에 스위치 하나를 더한다. 조건 표의 이름과 행 수는 W12가 정한다.
+단계 8에 스위치 하나를 더한다. 총괄 묶음의 조건 표는 위 열일곱 가운데 열네 행(`a8res`, `a8fxf`, `a8stp`와 하위 실험 `s8iso`는 `-Only extra`로만)과 하위 실험 `s8av`다. 근거는 [Worklog/V2.md](../Worklog/V2.md) "W12"에 있다.
 
 | 구성(`run-spike.ps1`) | 빼는 것 | 인자 | 바뀌는 메타데이터 |
 | --- | --- | --- | --- |
@@ -96,7 +96,7 @@ STATUS.md "명령"에는 매번 쓰는 것만 둔다. 여기에는 스크립트 
 | `a8shd` | 80m 밖 그림자 끔 → 켬 | `-LabFarShadow=1` | `LabFarShadow` 1 |
 | `a8fsb` | 액터 메시 고정 바운드 → 피직스 에셋 바운드(v2 W11) | `-LabFixedSkelBounds=0` | `LabFixedSkelBounds` 0 |
 
-- 하위 실험 `s8iso`(단계 8 + `-LabQueryIsolate=1`, v2 W11)가 러너에 있다. `s8av`(엔진 회피 더하기)도 있다.
+- 하위 실험 `s8iso`(단계 8 + `-LabQueryIsolate=1`, v2 W11)와 `s8av`(엔진 회피 더하기)가 `run-spike.ps1`과 조건 표에 있다. `run-dev-stages.ps1 -Ablations`는 빼 보기 열일곱 개와 두 하위 실험, 정지 조건을 돈다.
 - v2 W11부터 `run-spike.ps1`은 `s8` 뒤에 조각을 이어 붙인 구성 이름을 받는다: `fsb`·`fsb0`(고정 바운드 켬·끔), `iso`·`iso0`(칸 나누기), `c<개수>`(`-LabActorCap`), `h<미터>`(`-LabHydrateM`), `shd0`·`shd1`(`-LabFarShadow`). 예: `s8h45`, `s8c750`. 조각마다 기대 메타데이터 하나를 대조한다.
 
 ```bash
@@ -111,8 +111,8 @@ powershell -ExecutionPolicy Bypass -File Scripts/run-spike.ps1 -Batch <묶음> -
 
 1. 렌더 CVar 고정(measurement.md "렌더 고정")과 `-LabN= -LabPreset= -LabSeed= -LabStage=` 적용. 모든 값을 로그 `lab_config`에 한 줄로 남긴다.
 2. 스포너가 정상 상태 분포로 N개 배치. 카메라를 프리셋에 놓는다.
-3. 15초 워밍업. 그 사이 N 유지 확인(사망·재생성이 동작하는지).
-4. `csvprofile start`(압축 끔, 라벨을 파일 이름으로). 60초.
+3. 워밍업(이동 60초, 정지 15초, `-LabWarmup=`으로 바꾼다). 그 사이 N 유지 확인(사망·재생성이 동작하는지).
+4. `csvprofile start`(압축 끔, 라벨을 파일 이름으로). 측정 구간(이동 180초, 정지 60초, `-LabDuration=`으로 바꾼다).
 5. `csvprofile stop`. 프레임 수, N, 전환 수 등 요약을 로그 `lab_summary`에 남긴다. 조건이 깨졌으면(N 불일치 등) 종료 코드 1.
 6. `-Trace`면 2\~5 동안 `-trace=cpu,gpu,frame,counters,mass`로 트레이스를 남긴다. 트레이스 실행의 수치는 비교에 쓰지 않는다(이벤트 기록 비용).
 
@@ -182,6 +182,8 @@ py -3 -I Scripts/turn-fill.py Saved/Logs/LabDev-s8-turn-N10000-P1.log
 
 ## 총괄 묶음 조건과 HUD(Q5)
 
+이 절은 `v1`의 기록이다(조건 이름 `L1`\~`L8`, `A8-*`는 v2의 조건 표에 없다). v2의 조건 표와 러너는 아래 "총괄 묶음 러너·검사·요약·촬영"에 있다. `-LabHud`, `-LabShotAt`, `-LabActorCollision`, `-LabBudgetMs`의 뜻은 그대로다.
+
 총괄 묶음(`Full1`, 지금은 `Full2`)의 조건(사다리 8단계 `L1`\~`L8`, 빼 보기 열 행 `A8-*`, 하위 실험 `S1-budget`·`S1-uro`·`S8-col`)은 `Scripts/full-conditions.json`에 인자 줄과 기대 메타데이터로 있다. 표와 경위는 [Worklog/Q5.md](../Worklog/Q5.md).
 
 | 인자 | 뜻 |
@@ -203,9 +205,9 @@ py -3 -I Scripts/ablation-check.py <CSV> --cond L8-q4final --shot
 
 1. 측정 전에 잴 조건, 라벨, 걸리는 시간을 채팅에 알리고 답을 받는다.
 2. `package.ps1`로 그 커밋의 Test 패키지를 만든다. 패키지 폴더에 커밋 해시를 남긴다.
-3. 묶음의 맨 첫 실행 1회만 버린다(`run-bench.ps1`은 기본으로 r0을 돌린다. 첫 조건 뒤로는 `-SkipR0`나 `-RunIndex`를 준다). 그 뒤 조건별 3회.
-4. 실행마다 `Saved/Lab/<라벨>.summary.txt`와 CSV 메타데이터를 확인한다(Test 패키지는 로그를 쓰지 않는다. 개발 빌드는 로그의 `lab_config`·`lab_summary`). N이 유지되지 않았거나 프레임 수가 비정상이면 그 실행을 버리고 라벨을 바꿔 다시 잰다.
-5. `summarize.py` → `runs.csv`, `summary.csv`. 차이 판정은 measurement.md.
+3. 묶음의 맨 첫 실행 1회(`r0`)만 버린다(`run-full.ps1`이 기본으로 돈다). 그 뒤 조건별 3회, 회차가 바깥 루프다.
+4. 실행마다 러너가 CSV 메타데이터를 조건 표의 기대값과 대조한다(`ablation-check.py`). Test 패키지는 로그를 쓰지 않는다(개발 빌드는 로그의 `lab_config`·`lab_summary`). N이 유지되지 않았거나 프레임 수가 비정상이면 러너가 그 실행을 실패로 적고 묶음 끝에서 새 회차 번호로 한 번 다시 잰다.
+5. `summarize.py` → `runs.csv`, `summary.csv`. `equivalence-check.py` → `equivalence.csv`. `spikes.py`. 차이 판정은 measurement.md.
 6. STATUS.md "측정 결과"에 묶음을 적는다. 마일스톤이 끝나면 Worklog로 옮긴다.
 
 ## 스크린샷·영상 실행
@@ -282,42 +284,44 @@ curl -s -X POST http://127.0.0.1:8001/mcp -H "Content-Type: application/json" -H
 
 ## 총괄 묶음 러너·검사·요약·촬영
 
-조건과 기대값은 `Scripts/full-conditions.json`이 정한다(조건 이름을 스크립트에 박지 않는다). 러너는 패키지 exe를 직접 부르고(`run-bench.ps1`을 거치지 않는다), 시작할 때 `UnrealEditor`·게임·`chrome.exe`가 떠 있으면 멈춘다. 측정 중에는 PC를 쓰지 않는다. 경위와 설계 선택은 [Worklog/Q5.md](../Worklog/Q5.md) "2단위".
+v2 W12에서 다시 만들었다. 조건과 기대 메타데이터는 `Scripts/full-conditions.json`(v2: 구성, 묶음 종류, 시나리오 값, 동등성 범위)이 정한다. 러너는 패키지 exe를 직접 부르고 시작할 때 방해 프로세스(`UnrealEditor`, 게임, `ShaderCompileWorker`, `UnrealBuildTool`, `chrome`, `ffmpeg`, 창이 있는 `msedge`·`firefox`)가 떠 있으면 멈춘다. 측정 중에는 PC를 쓰지 않는다. 경위와 설계 선택은 [Worklog/V2.md](../Worklog/V2.md) "W12"에 있다. `v1`의 인자와 조건은 태그 `v1`의 이 문서에 있다.
 
 ```bash
-# 계획만 본다(게임을 띄우지 않는다): 조건 수, 라벨 목록(실행 순서), 예시 명령, 예상 시간
-powershell -ExecutionPolicy Bypass -File Scripts/run-full.ps1 -DryRun
-# 예행 묶음(짧은 측정 구간, 작은 보조 N): 라벨 Reh1-...
-powershell -ExecutionPolicy Bypass -File Scripts/run-full.ps1 -Batch Reh1 -TargetN 10000 -MaxNList 30000 -ActorNList 2000 -Runs 1 -DurationOverride 10
-# 본 묶음(몇 시간). 기본 이름 Full1은 이미 쓴 이름이라 새 묶음은 -Batch로 새 이름을 준다(지금 묶음은 Full2)
-powershell -ExecutionPolicy Bypass -File Scripts/run-full.ps1 -Batch Full2
+# 계획만 본다(게임을 띄우지 않는다): 묶음 종류별 슬롯·실행 수·예상 시간, 슬롯마다 명령줄, 실행 순서, 라벨 검사
+powershell -ExecutionPolicy Bypass -File Scripts/run-full.ps1 -Batch Full4 -DryRun
+# 마른 실행 묶음(종류마다 하나씩, 1회씩): 라벨 V2W12Dry-...
+powershell -ExecutionPolicy Bypass -File Scripts/run-full.ps1 -Batch V2W12Dry -Runs 1 -NFilter "500,10000,20000" -Pick "ladder:s1,ladder:s8,ablation:a8fsb,still:s8,maxn:s8,actor:s1,trace:s2"
+# 총괄 묶음 Full4(약 11.5시간, 사용자 검토 뒤에 한다)
+powershell -ExecutionPolicy Bypass -File Scripts/run-full.ps1 -Batch Full4
 # 끊겼으면 이어 한다(progress.log에 있는 라벨은 건너뛴다)
-powershell -ExecutionPolicy Bypass -File Scripts/run-full.ps1 -Resume
-# 일부만: -Only ladder|ablation|maxn|actor|sub|aa|trace (쉼표로 여러 개)
-powershell -ExecutionPolicy Bypass -File Scripts/run-full.ps1 -Only ladder,ablation -Runs 1
+powershell -ExecutionPolicy Bypass -File Scripts/run-full.ps1 -Batch Full4 -Resume
+# 일부만: -Only ladder,ablation,still,sub,maxn,actor,aa,trace,traceser,extra (쉼표로 이은 한 문자열)
+powershell -ExecutionPolicy Bypass -File Scripts/run-full.ps1 -Batch Full4 -Only ladder,ablation -Runs 1
 
-# 묶음 검사와 요약
-py -3 -I Scripts/equivalence-check.py --batch Full2
-py -3 -I Scripts/spikes.py --batch Full2
-py -3 -I Scripts/summarize.py --milestone Full2
-py -3 -I Scripts/plot.py --batch Full2   # 목표 총수는 batch.json의 target_n, `--target-n`으로 덮어쓴다
+# 묶음 검사와 요약(러너가 끝에 summarize와 equivalence를 돌린다)
+py -3 -I Scripts/summarize.py --batch Full4
+py -3 -I Scripts/equivalence-check.py --batch Full4
+py -3 -I Scripts/spikes.py --batch Full4
+py -3 -I Scripts/plot.py --batch Full4          # 확인용은 --out <폴더>
+py -3 -I Scripts/ablation-check.py --selftest    # 조건 표의 기대 키와 묶음 종류의 구성을 검사
+py -3 -I Scripts/ablation-check.py <CSV> --build <커밋 해시 앞 12자>
 
 # 촬영(측정이 끝난 뒤 따로)
-powershell -ExecutionPolicy Bypass -File Scripts/capture-full.ps1 -DryRun
-powershell -ExecutionPolicy Bypass -File Scripts/capture-full.ps1
+powershell -ExecutionPolicy Bypass -File Scripts/capture-full.ps1 -Batch Full4 -DryRun
+powershell -ExecutionPolicy Bypass -File Scripts/capture-full.ps1 -Batch Full4
 ```
 
 | 인자(`run-full.ps1`) | 뜻 |
 | --- | --- |
-| `-Batch` | 묶음 이름(기본 `Full1`, 이미 쓴 이름이다). 폴더 `Measurements/<Batch>/`, 라벨 접두사. 예행은 `Reh1`처럼 다른 이름. 참고 묶음·엔티티 풀 묶음의 명령은 [measurement.md](measurement.md) "참고 묶음 규약"·"엔티티 풀 묶음 규약" |
-| `-Only` | 묶음 종류만: `ladder`(8단계 x 목표 총수 x P1·P2), `ablation`(빼 보기 9행 x P1), `maxn`(단계 2\~8 x `-MaxNList` x P1), `actor`(단계 1 x `-ActorNList` x P1), `sub`(JSON의 하위 실험 x P1), `aa`(L8 기준점 3회, 회차 11\~13), `trace`(8단계 x 병렬·직렬, `Saved/Traces/`) |
-| `-Runs` | 조건마다 회차 수(기본 3) |
-| `-TargetN`, `-MaxNList`, `-ActorNList` | 목표 총수(기본 10000), 최대 N 보조 목록(기본 `5000,20000,30000`), 액터 보조 목록(기본 `500,1000,2000`) |
-| `-DurationOverride <초>` | 측정 구간을 `-LabDuration`으로 줄인다(예행 전용). 워밍업 15초는 게임 코드 상수라 줄지 않는다 |
-| `-Order round\|cond` | 기본 `round`: 회차가 바깥 루프(r1 전 조건, r2 전 조건 역순, r3 전 조건). `cond`: 같은 조건 연달아 |
-| `-Resume`, `-DryRun`, `-SkipR0`, `-NoFgCheck` | 이어 하기, 계획만, r0 건너뛰기, 앞 창 검사 끄기(측정에는 쓰지 않는다) |
-| `-StartupSec`, `-TimeoutFactor` | 예상 시간 계산용 프로세스 시작 시간(기본 30초), 시간 제한 = 배수(기본 3) x 한 실행 예상 시간 |
+| `-Batch` | 묶음 이름(필수). 폴더 `Measurements/<Batch>/`, 라벨 접두사. 같은 이름과 라벨은 다시 쓰지 않는다(`progress.log`가 있으면 `-Resume` 아니면 거부) |
+| `-Only` | 묶음 종류만: `ladder`(8단계 × 1만 × 이동), `ablation`(빼 보기 14행 × 이동), `still`(단계 8과 빼 보기 × 정지), `sub`(`s8av`), `maxn`(단계 2\~8 × {5천, 2만}), `actor`(단계 1 × {500, 1천, 2천}), `aa`(단계 8 반복, 회차 11\~13), `trace`(단계 1\~8), `traceser`(단계 2\~8 직렬), `extra`(후보 4개. 적어야 돈다). 비우면 `extra`를 뺀 전부 |
+| `-Pick`, `-NFilter` | 예행용. `-Pick "ladder:s1,still:*"`은 묶음 종류:구성이 맞는 슬롯만, `-NFilter 500,10000`은 그 N인 슬롯만 남긴다 |
+| `-Runs` | 반복 묶음의 회차 수를 덮어쓴다(기본은 조건 표의 3). 트레이스와 A/A는 조건 표 값이다 |
+| `-Order round\|cond` | 기본 `round`: 회차가 바깥 루프(r1 전 슬롯, r2 전 슬롯 역순, r3). `cond`: 같은 조건 연달아 |
+| `-Resume`, `-DryRun`, `-SkipR0`, `-NoFgCheck`, `-NoClock` | 이어 하기, 계획만, `r0` 건너뛰기, 앞 창 검사 끄기, CPU 클럭 기록 끄기(측정에는 앞 창 검사를 끄지 않는다) |
+| `-StartupSec`, `-TimeoutFactor` | 예상 시간 계산용 프로세스 시작 시간(기본 30초), 시간 제한 = 배수(기본 3) × 한 실행 예상 시간 |
+| `-ExePath`, `-ExeArgsPrefix`, `-PkgRootOverride`, `-NoProcCheck` | 러너 시험용(게임 없이 파싱·재시도·이어 하기 점검). 측정에는 쓰지 않는다 |
 
-러너가 남기는 것(`Measurements/<Batch>/`): `progress.log`(탭 구분: 시각, 라벨, `OK`\|`FAIL`\|`DISCARD`, 프레임 p50, p95, 이유), `failures.csv`(실패 이유), `batch.json`(`Packaged/Test/commit.txt` 첫 줄, 시작·끝, 조건 수, 계획 실행 수, 성공·실패·포기), 끝에서 `equivalence-check.py`가 쓰는 `equivalence.csv`. 성공한 CSV는 `Saved/Profiling/CSV/`, 실패한 것은 `failed/` 또는 `fg-failed/`로 간다(요약이 읽지 않는다). 라벨은 `<Batch>-<단계>-<변형>-N<N>-P<1\|2>-r<i>`, 트레이스는 `<Batch>trace-`·`<Batch>traceser-`, 촬영은 `<Batch>shot-`이다. 실패한 실행은 묶음 끝에서 회차 + `Runs`로 한 번 다시 재고(r1\~r3 -> r4\~r6, A/A는 14\~16) 또 실패하면 포기한다.
+`capture-full.ps1`은 조건 표의 `capture` 절(단계 1\~8, 이동, 1만)을 `-LabHud -LabShotAt=45 -LabDuration=40 -LabWarmup=15`로 띄워 창이 뜬 24초 뒤부터 8초를 ffmpeg(`gdigrab`, 게임 창 클라이언트 영역의 물리 화면 좌표로 `-i desktop` 영역 녹화, `__COMPAT_LAYER=HighDpiAware`)로 녹화하고 960px 15fps 움직이는 WebP(`libwebp_anim -q:v 60 -loop 0`)로 만든다(`-Format gif`면 팔레트 2패스 GIF). 화면 메시지는 `-ExecCmds=DisableAllScreenMessages`로 끈다. 결과는 git 밖 `Saved/Capture/<Batch>/<라벨>.webp`, 경로는 `Measurements/<Batch>/captures.csv`에 적는다. 인자 `-Steps 8`, `-Seconds`, `-RecordDelaySec`, `-Width`, `-Fps`, `-Quality`, `-Format`, `-Run`, `-WarmupSec`(기본 15).
 
-`capture-full.ps1`은 사다리 8단계를 `-LabHud -LabShotAt=45 -LabDuration=40`으로 띄워 창이 뜬 24초 뒤부터 8초를 ffmpeg(`gdigrab`, 게임 창 클라이언트 영역의 물리 화면 좌표로 `-i desktop` 영역 녹화, ffmpeg는 `__COMPAT_LAYER=HighDpiAware`로 DPI 인식)로 녹화하고 960px 15fps 움직이는 WebP(`libwebp_anim -q:v 60 -loop 0`)로 만든다(`-Format gif`면 팔레트 2패스 GIF). 화면 메시지("CsvProfiler frame")는 `-ExecCmds=DisableAllScreenMessages`로 끈다. 결과는 git 밖 `Saved/Capture/<Batch>/<라벨>.webp`, 경로는 `Measurements/<Batch>/captures.csv`에 적는다. 인자 `-Steps 8`, `-Seconds`(기본 8), `-RecordDelaySec`, `-Width`, `-Fps`, `-Quality`(기본 60), `-Format`, `-Run`(같은 라벨을 다시 쓰지 않도록 회차를 바꾼다).
+러너가 쓰는 조건 이름은 `<V0|V1>-<구성>`(V0 이동, V1 정지)이다. 라벨은 `<묶음>-V0-s8-N10000-P1-r1`이다. 소형 확인 묶음(`run-spike.ps1`)의 라벨 `<묶음>-V<속도 번호>-<구성>-...`과 같은 모양이라 `summarize.py`가 둘 다 읽는다. 소형 묶음에서 속도 번호는 `-Speeds`의 순서다.
