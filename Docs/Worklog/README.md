@@ -8,4 +8,5 @@
 - [Posts.md](Posts.md): 글 작업 기록(글마다 한 절).
 - [CodeTour.md](CodeTour.md): 최종 구성 코드 투어(`Docs/Guides/code-tour.md`)를 쓴 기록.
 - [V2.md](V2.md): `v2` 브랜치의 작업 기록(점검, 방향 결정, 시험 실행).
+- [V2-review.md](V2-review.md): 총괄 묶음 전에 한 `v2` 리뷰(W1\~W12, D33\~D53, 사용자 답변).
 - [Setup.md](Setup.md): 클론 뒤 에셋 복구 스크립트(`Scripts/restore-assets.ps1`)와 준비 가이드(`Docs/Guides/setup.md`)를 만든 기록.

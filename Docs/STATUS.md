@@ -15,12 +15,13 @@
 
 ## 다음 할 일
 
-1. 사용자가 [v2-spec.md](v2-spec.md), [v2-plan.md](v2-plan.md), 결정 D33\~D53([autonomous-decisions.md](Worklog/autonomous-decisions.md))을 검토한다.
-2. 사용자 검토 뒤에 코디네이터가 W13(총괄 묶음 `Full4`, 약 11.5시간)을 맡긴다.
+1. 사용자가 리뷰([V2-review.md](Worklog/V2-review.md))의 M1\~M8을 하나씩 정한다.
+2. 코디네이터가 정한 수정을 새 세션에 맡긴다.
+3. 수정 뒤에 코디네이터가 W13(총괄 묶음 `Full4`)을 맡긴다.
 
 W1\~W12는 끝났다. 묶음 `V2W12Dry`는 8회가 모두 통과했다. 자율 진행(D33)은 여기서 멈춘다. 두 문서는 잠정 확정이다.
 
-검토 보고서는 <https://claude.ai/artifact/NjHoQq7ku9Z3jfYXan3VyE>에 있다. 사용자가 답했다(2026-11-15). 코디네이터는 리뷰 뒤에 반영한다.
+검토 보고서는 <https://claude.ai/artifact/NjHoQq7ku9Z3jfYXan3VyE>에 있다. 사용자가 답했다(2026-11-15). 승인 표시와 ADR 상태는 아직 반영하지 않았다.
 
 시험 실행의 결과([Worklog/V2.md](Worklog/V2.md) "묶음 Spike1", "묶음 Spike2"):
 
@@ -61,7 +62,7 @@ W1\~W12는 끝났다. 묶음 `V2W12Dry`는 8회가 모두 통과했다. 자율 �
 
 | 세션 | 작업 단위 | 모델 | 상태 |
 | --- | --- | --- | --- |
-| `v2-review` | 검토 답변과 D33\~D53의 리뷰 | Opus high | 진행 중 |
+| 없다 | | | |
 
 코디네이터는 세션을 띄우면 여기에 적는다. 끝난 세션은 결과를 확인하고 보관한 뒤 지운다.
 
