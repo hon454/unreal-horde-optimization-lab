@@ -5,6 +5,8 @@
 #include "LabMassProcessors.h"
 #include "LabIskmProcessor.h"
 #include "LabCrowdFxProcessor.h"
+#include "LabSmoothOrientation.h"
+#include "SmoothOrientation/MassSmoothOrientationProcessors.h"
 #include "MassUpdateISMProcessor.h"
 #include "MassNavigationProcessors.h"
 #include "Modules/ModuleManager.h"
@@ -59,6 +61,16 @@ public:
 		// M6 수정 B: 그리는 끝 밖의 피격·사망 개체를 ISKM으로 그린다(단계 7·8, -LabFarHitIskm=0이 끈다). 끈 실행은 프로세서 구성이 전과 같다
 		const bool bFarHitIskm = FLabConfig::Get().UsesFarHitIskm();
 		LabSetAutoRegister(GetMutableDefault<ULabFarHitIskmProcessor>(), bFarHitIskm);
+		// 방향 보간 병렬 사본(-LabSmoothOrient=1, 기본 0, LabSmoothOrientation.h). 켬이면 엔진 프로세서를 끄고 사본을 켠다. 끈 실행은 프로세서 구성이 그대로다.
+		// 개발 검사(-LabSmoothOrientCheck)는 엔진 프로세서를 그대로 두고 사본(예측)과 검사 프로세서를 더한다
+		const bool bSmoothCheck = FLabConfig::Get().bSmoothOrientCheck;
+		const bool bSmoothOrient = FLabConfig::Get().bSmoothOrient && !bSmoothCheck;
+		if (bSmoothOrient || bSmoothCheck)
+		{
+			LabSetAutoRegister(GetMutableDefault<UMassSmoothOrientationProcessor>(), !bSmoothOrient);
+			LabSetAutoRegister(GetMutableDefault<ULabSmoothOrientationProcessor>(), true);
+			LabSetAutoRegister(GetMutableDefault<ULabSmoothOrientationCheckProcessor>(), bSmoothCheck);
+		}
 		// v2 W11: QueryOnly 바디(하이드레이션 액터 캡슐 Trace)를 가속 구조의 따로 된 칸에 넣는다(-LabQueryIsolate, engine-notes.md 38·44절).
 		// 칸은 물리 씬의 가속 구조를 만들 때 생기므로(PBDRigidsEvolution.cpp CreateEmptyCollection) 첫 월드를 만들기 전인 여기서 넣는다. 끈 실행은 CVar를 건드리지 않는다
 		if (FLabConfig::Get().bQueryIsolate)
@@ -73,8 +85,9 @@ public:
 			}
 		}
 		// crowdfx_entity·separate·rep_hold는 켰을 때만 붙인다(다른 실행의 로그는 그대로다)
-		UE_LOG(LogLab, Log, TEXT("lab_ism_processor %s simlod=%d offmove=%d%s%s%s%s"), bIskm ? TEXT("iskm") : bVat ? TEXT("vat") : TEXT("engine"), bSimLod ? 1 : 0, bOffMove ? 1 : 0,
-			bCrowdFxEntity ? TEXT(" crowdfx_entity=1") : TEXT(""), bSeparate ? TEXT(" separate=1") : TEXT(""), bRepHold ? TEXT(" rep_hold=1") : TEXT(""), bFarHitIskm ? TEXT(" far_hit_iskm=1") : TEXT(""));
+		UE_LOG(LogLab, Log, TEXT("lab_ism_processor %s simlod=%d offmove=%d%s%s%s%s%s"), bIskm ? TEXT("iskm") : bVat ? TEXT("vat") : TEXT("engine"), bSimLod ? 1 : 0, bOffMove ? 1 : 0,
+			bCrowdFxEntity ? TEXT(" crowdfx_entity=1") : TEXT(""), bSeparate ? TEXT(" separate=1") : TEXT(""), bRepHold ? TEXT(" rep_hold=1") : TEXT(""), bFarHitIskm ? TEXT(" far_hit_iskm=1") : TEXT(""),
+			bSmoothCheck ? TEXT(" smooth_orient=check") : bSmoothOrient ? TEXT(" smooth_orient=1") : TEXT(""));
 	}
 };
 

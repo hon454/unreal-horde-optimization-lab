@@ -254,6 +254,16 @@ struct FLabConfig
 	 * 엔티티 구동 입자와 ISKM을 함께 쓰는 실행(단계 7·8)에서만 뜻이 있다(UsesFarHitIskm). 시나리오 규칙이라 빼 보기가 아니다. CSV 메타데이터 LabFarHitIskm, 그 밖의 실행은 "-".
 	 */
 	bool bFarHitIskm = true;
+	/**
+	 * 방향 보간 병렬 사본(-LabSmoothOrient=0/1, 기본 0, 모든 단계). 1이면 엔진 UMassSmoothOrientationProcessor를 끄고 같은 식을 청크 병렬로 도는
+	 * ULabSmoothOrientationProcessor를 켠다(LabSmoothOrientation.h, Docs/Worklog/V2.md "방향 보간 병렬 사본"). 0이면 프로세서 구성이 그대로다.
+	 * 사다리에 넣지 않은 시험 스위치라 메타데이터 키가 따로 없다. 켜면 LabOverrides에 smooth_orient=1이 붙는다.
+	 * 개발 빌드 진단(Test 빌드는 늘 거짓): bSmoothOrientCheck(-LabSmoothOrientCheck)는 엔진 프로세서를 두고 사본의 예측과 비트 단위로 견준다.
+	 * bSmoothOrientSerial(-LabSmoothOrientSerial)은 사본을 한 스레드로 돌린다(엔진과 같은 순회, 시간 견주기).
+	 */
+	bool bSmoothOrient = false;
+	bool bSmoothOrientCheck = false;
+	bool bSmoothOrientSerial = false;
 	/** 로그와 CSV 메타데이터 값. 그 기법을 쓰지 않는 실행은 "-" */
 	FString FxOrbFollowString() const;
 	FString BoundsStepString() const;

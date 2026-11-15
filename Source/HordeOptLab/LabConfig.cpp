@@ -105,6 +105,13 @@ const FLabConfig& FLabConfig::Get()
 		Switch(TEXT("-LabFarHandoff="), TEXT("far_handoff"), C.bFarHandoff);
 		// M6 수정 B(LabConfig.h bFarHitIskm). 기본 1이고 단계 7·8에서만 뜻이 있다
 		Switch(TEXT("-LabFarHitIskm="), TEXT("far_hit_iskm"), C.bFarHitIskm);
+		// 방향 보간 병렬 사본(LabConfig.h bSmoothOrient). 기본 0
+		Switch(TEXT("-LabSmoothOrient="), TEXT("smooth_orient"), C.bSmoothOrient);
+#if !UE_BUILD_TEST
+		// 개발 진단(LabSmoothOrientation.h). 검사는 엔진 프로세서를 두므로 사본 켬보다 앞선다
+		C.bSmoothOrientCheck = FParse::Param(Cmd, TEXT("LabSmoothOrientCheck"));
+		C.bSmoothOrientSerial = FParse::Param(Cmd, TEXT("LabSmoothOrientSerial"));
+#endif
 #if !UE_BUILD_TEST
 		// 개발 빌드에서만 분리 파라미터를 바꿔 본다(LabSeparation.h). Test 빌드는 기본값이다
 		{

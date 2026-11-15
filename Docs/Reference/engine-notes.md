@@ -707,3 +707,15 @@ for (const int32 TrackIndex : Temp)
 | 쿼리 밖 쓰기는 보호되지 않는다 | 쿼리의 전역 칸은 그 `ForEachEntityChunk`가 끝날 때 놓인다(`FScopedEntityQueryContext` 소멸자 → 쿼리 뒤 콜백 → `ProcessChunks` 끝). 그 뒤 모아 둔 포인터로 프래그먼트를 쓰면, 같은 프래그먼트를 읽는 다른 프로세서의 쿼리가 그동안 돌 수 있다 | `Engine/Source/Runtime/MassEntity/Private/MassEntityQuery.cpp:41-71`, `ME/MassProcessingQueueTypes.cpp:693-765` |
 | 게임 스레드 러너는 고를 프로세서가 없으면 돈다 | `RunMainThread`는 준비되고 충돌이 없는 게임 스레드 프로세서를 고르고, 없으면 `WaitForChange`(`YieldThread` 루프)로 기다린다. 그 시간은 트레이스에서 `MassProcessingQueue Main-Thread Runner Task`의 Excl이다 | `ME/MassProcessingQueue.cpp:592-617`, `Engine/Source/Runtime/MassEntity/Public/MassProcessingQueueTypes.h:760-778` |
 | 회전 프로세서는 개체마다 독립이다 | `UMassSmoothOrientationProcessor`의 HighRes 쿼리는 `ForEachEntityChunk`(한 스레드)로 돈다. 개체마다 이동 목표와 바라는 속도를 읽고 회전(`SetRotation`)과 `DesiredFacing`만 쓴다. 위치를 읽지도 쓰지도 않는다. 그룹은 Movement이고 `ExecuteAfter`가 없다 | `Engine/Plugins/AI/MassAI/Source/MassNavigation/Private/MassSmoothOrientationProcessors.cpp:20-112` |
+
+## 49. 방향 보간 프로세서의 두 쿼리와 순서, 병렬 청크(2026-11-16, 방향 보간 병렬 사본)
+
+줄임말: **MN** = `Engine/Plugins/AI/MassAI/Source/MassNavigation`, **ME** = `Engine/Source/Runtime/MassEntity/Private`. 48절의 회전 프로세서 줄을 넓힌다. 실행 결과는 [Worklog/V2.md](../Worklog/V2.md) "방향 보간 병렬 사본"에 있다.
+
+| 항목 | 확인한 것 | 위치 |
+| --- | --- | --- |
+| 쿼리는 둘이다 | HighRes(Off 태그 없음, 위의 식)와 LowRes(Off 태그 있음, 가변 틱 청크 필터). LowRes는 회전을 `FindBetweenNormals(ForwardVector, MoveTarget.Forward)`로 바로 맞춘다. 둘 다 `ForEachEntityChunk`(한 스레드)다 | `MN/Private/MassSmoothOrientationProcessors.cpp:28-41,117-134` |
+| 입력의 순서가 정해져 있지 않다 | 앞 선언이 없어서 이동 목표(이 프로젝트는 Tasks 그룹의 `ULabApproachProcessor`), 바라는 속도(ApplyForces 그룹 `UMassApplyForceProcessor`), 가변 틱 값(LOD 그룹 `UMassSimulationLODProcessor`)이 쓰이기 전에도 뒤에도 돌 수 있다. LowRes 청크 필터의 답도 순서에 따라 갈린다 | 같은 파일 24-25, `Engine/Plugins/Runtime/MassGameplay/Source/MassMovement/Private/MassMovementProcessors.cpp:25-26,56`, `Engine/Plugins/Runtime/MassGameplay/Source/MassLOD/Private/MassSimulationLOD.cpp:76-77` |
+| 수학 함수는 헤더 인라인이다 | `GetYawFromDirection`, `LerpAngle`, `ExponentialSmoothingAngle`. 프로젝트 모듈로 옮긴 사본의 결과가 엔진 DLL과 비트 단위로 같았다(개발 검사 2,363만 번) | `MN/Public/MassNavigationUtils.h:19,34,41` |
+| 처리 큐의 병렬 청크 | `mass.ForceInlineProcessorExecution`(기본 참)에서 `ParallelForEachEntityChunk`의 청크는 하나씩 `UE::Tasks`로 띄워지고, 쿼리 뒤 콜백(`ProcessChunks`)이 모두 끝나기를 기다린다. 게임 스레드 프로세서여도 청크는 작업자로 간다. 쿼리 전 전역 충돌 기다림은 병렬이어도 그대로다 | `ME/MassEntityQuery.cpp:530-647`, `ME/MassProcessingQueueTypes.cpp:585-636,706-758` |
+| 엔진 프로세서는 상속으로 바꿀 수 없다 | 쿼리 두 개가 `private`이고 클래스가 `MinimalAPI`다. 같은 일을 하려면 쿼리를 새로 선언한 사본이 필요하다. `StaticClass`는 쓸 수 있어 CDO의 자동 등록은 끌 수 있다 | `MN/Public/SmoothOrientation/MassSmoothOrientationProcessors.h:14-29` |
