@@ -245,9 +245,16 @@ void ALabCrowdSpawner::TickFarStream(float DeltaSeconds)
 		int32 Small = 0;
 		for (const FLabFarRec& Rec : FarStream.GetRecs()) { Small += FLabUnitTypes::TypeOf(Rec.Serial) == LabUnitSmall ? 1 : 0; }
 		const int32 Pops = FarStream.PopsTotal;
-		UE_LOG(LogLab, Log, TEXT("lab_farstream t=%.1f records=%d small=%d large=%d front_m=%.1f front_center_m=%.1f inside_map=%d pops=%d spawn_m_min=%.1f spawn_m_mean=%.1f spawn_m_max=%.1f short=%d"),
+		// tick_ms·pop_ms: 5초 동안의 합(ms). pop_calls: Pop을 부른 수. packed_ok: 입자 원소가 기록과 맞는다(FLabFarStream::CheckPacked).
+		// rebuilds: 후보 목록을 다시 만든 수. check_n·mismatch: -LabFarStreamCheck일 때 전수 훑기와 견준 수와 다른 수(실행 전체 누계)
+		UE_LOG(LogLab, Log, TEXT("lab_farstream t=%.1f records=%d small=%d large=%d front_m=%.1f front_center_m=%.1f inside_map=%d pops=%d spawn_m_min=%.1f spawn_m_mean=%.1f spawn_m_max=%.1f short=%d tick_ms=%.3f pop_ms=%.3f pop_calls=%d packed_ok=%d rebuilds=%d check_n=%d mismatch=%d"),
 			Now, FarStream.GetRecs().Num(), Small, FarStream.GetRecs().Num() - Small, FarStream.FrontCm / 100.f, FarStream.FrontCenterCm / 100.f, FarStream.InsideMap, Pops,
-			Pops > 0 ? FarStream.SpawnDistMin / 100.f : 0.f, Pops > 0 ? float(FarStream.SpawnDistSum / Pops / 100.) : 0.f, FarStream.SpawnDistMax / 100.f, FarStream.PopsShort);
+			Pops > 0 ? FarStream.SpawnDistMin / 100.f : 0.f, Pops > 0 ? float(FarStream.SpawnDistSum / Pops / 100.) : 0.f, FarStream.SpawnDistMax / 100.f, FarStream.PopsShort,
+			FPlatformTime::ToMilliseconds64(FarStream.TickCycles), FPlatformTime::ToMilliseconds64(FarStream.PopCycles), FarStream.PopCalls, FarStream.CheckPacked() ? 1 : 0,
+			FarStream.ShortRebuilds, FarStream.PickChecks, FarStream.PickMismatch);
+		FarStream.TickCycles = FarStream.PopCycles = 0;
+		FarStream.PopCalls = 0;
+		FarStream.ShortRebuilds = 0;
 		FarStream.PopsTotal = 0;
 		FarStream.PopsShort = 0;
 		FarStream.SpawnDistSum = 0.;

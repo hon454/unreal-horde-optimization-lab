@@ -1158,6 +1158,7 @@ void ULabRepHoldProcessor::Execute(FMassEntityManager& EntityManager, FMassExecu
 
 ULabFarHitIskmProcessor::ULabFarHitIskmProcessor()
 	: EntityQuery(*this)
+	, CatchUpQuery(*this)
 {
 	bAutoRegisterWithProcessingPhases = false; // FLabConfig::UsesFarHitIskm일 때만 게임 모듈이 켠다(HordeOptLab.cpp)
 	ExecutionFlags = (int32)(EProcessorExecutionFlags::Client | EProcessorExecutionFlags::Standalone);
@@ -1179,20 +1180,34 @@ float ULabFarHitIskmProcessor::HitStartOf(const FLabAnimStateFragment& Anim, flo
 void ULabFarHitIskmProcessor::ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager)
 {
 	ProcessorRequirements.AddSubsystemRequirement<ULabCrowdSubsystem>(EMassFragmentAccess::ReadWrite);
+	// 주 쿼리는 위치를 쓰지 않는다. 병렬 처리 큐는 직접 프래그먼트 쓰기·읽기가 겹치는 쿼리끼리 아키타입과 무관하게 서로 막는다
+	// (mass.ForceInlineProcessorExecution 기본 참, MassProcessingQueueTypes.cpp:331-340). 위치를 쓰면 매 프레임 겹침 방지(위치 쓰기)가 끝나기를 기다린다(Docs/Worklog/V2.md "M6 코드 비용 줄이기")
 	EntityQuery.AddRequirement<FMassRepresentationLODFragment>(EMassFragmentAccess::ReadWrite);
 	EntityQuery.AddRequirement<FMassRepresentationFragment>(EMassFragmentAccess::ReadOnly);
-	EntityQuery.AddRequirement<FTransformFragment>(EMassFragmentAccess::ReadWrite); // 따라잡기
 	EntityQuery.AddRequirement<FLabAnimStateFragment>(EMassFragmentAccess::ReadOnly);
-	EntityQuery.AddRequirement<FLabOffMoveFragment>(EMassFragmentAccess::ReadWrite, EMassFragmentPresence::Optional); // Simulation LOD 단계에만 있다
+	EntityQuery.AddRequirement<FLabOffMoveFragment>(EMassFragmentAccess::ReadOnly, EMassFragmentPresence::Optional); // Simulation LOD 단계에만 있다
 	EntityQuery.AddConstSharedRequirement<FLabUnitTypeParams>(EMassFragmentPresence::All);
 	EntityQuery.AddTagRequirement<FLabMinionTag>(EMassFragmentPresence::All);
 	EntityQuery.AddTagRequirement<FLabPooledTag>(EMassFragmentPresence::None);
 	EntityQuery.AddTagRequirement<FLabHitTag>(EMassFragmentPresence::Any);
 	EntityQuery.AddTagRequirement<FLabDeadTag>(EMassFragmentPresence::Any);
+	// 따라잡기(위치 쓰기). 주 쿼리가 따라잡을 개체를 모은 프레임에만 돈다(초당 약 1번). Off 태그 아키타입만 Off 이동이 옮긴다(주 쿼리의 bOffMoved와 같은 조건)
+	CatchUpQuery.AddRequirement<FTransformFragment>(EMassFragmentAccess::ReadWrite);
+	CatchUpQuery.AddRequirement<FLabOffMoveFragment>(EMassFragmentAccess::ReadWrite);
+	CatchUpQuery.AddConstSharedRequirement<FLabUnitTypeParams>(EMassFragmentPresence::All);
+	CatchUpQuery.AddTagRequirement<FLabMinionTag>(EMassFragmentPresence::All);
+	CatchUpQuery.AddTagRequirement<FMassOffLODTag>(EMassFragmentPresence::All);
+	CatchUpQuery.AddTagRequirement<FLabPooledTag>(EMassFragmentPresence::None);
+	CatchUpQuery.AddTagRequirement<FLabHitTag>(EMassFragmentPresence::Any);
+	CatchUpQuery.AddTagRequirement<FLabDeadTag>(EMassFragmentPresence::Any);
 }
 
 void ULabFarHitIskmProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context)
 {
+#if !UE_BUILD_TEST
+	const uint64 ExecStart = FPlatformTime::Cycles64();
+	uint64 FirstChunk = 0;
+#endif
 	ULabCrowdSubsystem* Crowd = LabCrowdWrite(Context);
 	if (!Crowd)
 	{
@@ -1209,13 +1224,16 @@ void ULabFarHitIskmProcessor::Execute(FMassEntityManager& EntityManager, FMassEx
 #endif
 	EntityQuery.ForEachEntityChunk(Context, [&](FMassExecutionContext& Context)
 	{
+#if !UE_BUILD_TEST
+		FirstChunk = FirstChunk ? FirstChunk : FPlatformTime::Cycles64();
+		++LogChunks;
+		LogEnts += Context.GetNumEntities();
+#endif
 		const TArrayView<FMassRepresentationLODFragment> LODs = Context.GetMutableFragmentView<FMassRepresentationLODFragment>();
 		const TConstArrayView<FMassRepresentationFragment> Representations = Context.GetFragmentView<FMassRepresentationFragment>();
-		const TArrayView<FTransformFragment> Transforms = Context.GetMutableFragmentView<FTransformFragment>();
 		const TConstArrayView<FLabAnimStateFragment> AnimStates = Context.GetFragmentView<FLabAnimStateFragment>();
-		const TArrayView<FLabOffMoveFragment> OffMoves = Context.GetMutableFragmentView<FLabOffMoveFragment>();
+		const TConstArrayView<FLabOffMoveFragment> OffMoves = Context.GetFragmentView<FLabOffMoveFragment>();
 		const bool bOffMoved = OffMoves.Num() > 0 && Context.DoesArchetypeHaveTag(*FMassOffLODTag::StaticStruct());
-		const float Speed = Context.GetConstSharedFragment<FLabUnitTypeParams>().MoveSpeed;
 		for (FMassExecutionContext::FEntityIterator It = Context.CreateEntityIterator(); It; ++It)
 		{
 			FMassRepresentationLODFragment& L = LODs[It];
@@ -1246,7 +1264,9 @@ void ULabFarHitIskmProcessor::Execute(FMassEntityManager& EntityManager, FMassEx
 #if !UE_BUILD_TEST
 				if (bTmpDiag && Now - HitStart < 0.3)
 				{
-					const FVector P = Transforms[It].GetTransform().GetLocation();
+					// 진단 전용 읽기. 주 쿼리는 위치를 요구하지 않으므로 엔티티 매니저로 읽는다(따라잡기 전 값, 전과 같다)
+					const FTransformFragment* TransformPtr = EntityManager.GetFragmentDataPtr<FTransformFragment>(Entity);
+					const FVector P = TransformPtr ? TransformPtr->GetTransform().GetLocation() : FVector::ZeroVector;
 					UE_LOG(LogLab, Log, TEXT("lab_farhit_trace frame=%llu ent=%s lod=%d sig=%.2f vis=%d rep=%d prev=%d pos=%.0f,%.0f,%.0f"), (unsigned long long)GFrameCounter, *Entity.DebugGetDescription(),
 						int32(L.LOD), L.LODSignificance, int32(L.Visibility), int32(Representations[It].CurrentRepresentation), int32(Representations[It].PrevRepresentation), P.X, P.Y, P.Z);
 				}
@@ -1256,25 +1276,14 @@ void ULabFarHitIskmProcessor::Execute(FMassEntityManager& EntityManager, FMassEx
 			{
 				continue;
 			}
-			// 따라잡기: 마지막 이동(약 1초 간격) 뒤 맞기까지 걸었을 거리를 한 번 옮긴다. 입자는 그동안 그 거리를 외삽해 그렸다
+			// 따라잡기: 마지막 이동(약 1초 간격) 뒤 맞기까지 걸었을 거리를 한 번 옮긴다. 입자는 그동안 그 거리를 외삽해 그렸다.
+			// 위치는 아래 따라잡기 쿼리가 같은 프레임에 옮긴다(표현 프로세서보다 앞이라 이번 프레임의 그리기가 옮긴 자리를 본다)
 			if (bOffMoved && OffMoves[It].LastMoveTime > 0. && OffMoves[It].LastMoveTime < HitStart)
 			{
-				FTransform& Transform = Transforms[It].GetMutableTransform();
-				FVector ToOrb = Orb - Transform.GetLocation();
-				ToOrb.Z = 0.;
-				const double Dist = ToOrb.Length();
-				const double Step = FMath::Min(double(Speed) * (HitStart - OffMoves[It].LastMoveTime), Dist);
-				if (Dist > KINDA_SMALL_NUMBER)
-				{
-					Transform.AddToTranslation(ToOrb / Dist * Step);
-				}
-				OffMoves[It].LastMoveTime = HitStart;
-#if !UE_BUILD_TEST
-				++LogCatchUps;
-				LogCatchUpMax = FMath::Max(LogCatchUpMax, Step);
-#endif
+				CatchUps.Add({ Entity, HitStart });
 			}
-			L.LOD = EMassLOD::Low; // 중요도(Off = 3.0)는 그대로라 [Off, Max) 설명자로 간다			++Bumped;
+			L.LOD = EMassLOD::Low; // 중요도(Off = 3.0)는 그대로라 [Off, Max) 설명자로 간다
+			++Bumped;
 			if (!Found)
 			{
 				// 처음 올린 프레임에 이미 그려져 있던 개체(맞은 뒤 그리는 끝을 넘어 나갔다)는 늦음 집계에서 뺀다(2)
@@ -1287,10 +1296,49 @@ void ULabFarHitIskmProcessor::Execute(FMassEntityManager& EntityManager, FMassEx
 			}
 		}
 	});
+	if (CatchUps.Num() > 0)
+	{
+		// 따라잡을 개체가 있는 프레임에만 위치를 쓰는 쿼리를 돈다. 고르는 조건과 식은 전과 같다(맞은 시각은 주 쿼리에서 모은 값)
+		CatchUpQuery.ForEachEntityChunk(Context, [&](FMassExecutionContext& Context)
+		{
+			const TArrayView<FTransformFragment> Transforms = Context.GetMutableFragmentView<FTransformFragment>();
+			const TArrayView<FLabOffMoveFragment> OffMoves = Context.GetMutableFragmentView<FLabOffMoveFragment>();
+			const float Speed = Context.GetConstSharedFragment<FLabUnitTypeParams>().MoveSpeed;
+			for (FMassExecutionContext::FEntityIterator It = Context.CreateEntityIterator(); It; ++It)
+			{
+				const FMassEntityHandle Entity = Context.GetEntity(It);
+				const FCatchUp* Pick = CatchUps.FindByPredicate([Entity](const FCatchUp& C) { return C.Entity == Entity; });
+				if (!Pick || OffMoves[It].LastMoveTime <= 0. || OffMoves[It].LastMoveTime >= Pick->HitStart)
+				{
+					continue;
+				}
+				FTransform& Transform = Transforms[It].GetMutableTransform();
+				FVector ToOrb = Orb - Transform.GetLocation();
+				ToOrb.Z = 0.;
+				const double Dist = ToOrb.Length();
+				const double Step = FMath::Min(double(Speed) * (Pick->HitStart - OffMoves[It].LastMoveTime), Dist);
+				if (Dist > KINDA_SMALL_NUMBER)
+				{
+					Transform.AddToTranslation(ToOrb / Dist * Step);
+				}
+				OffMoves[It].LastMoveTime = Pick->HitStart;
+#if !UE_BUILD_TEST
+				++LogCatchUps;
+				LogCatchUpMax = FMath::Max(LogCatchUpMax, Step);
+#endif
+			}
+		});
+		CatchUps.Reset();
+	}
 	CSV_CUSTOM_STAT(Lab, FarHitTracked, Tracked, ECsvCustomStatOp::Set);
 	CSV_CUSTOM_STAT(Lab, FarHitWaiting, Waiting, ECsvCustomStatOp::Set);
 #if !UE_BUILD_TEST
-	// 개발 확인(5초마다): 프레임 평균 올린 수와 기다린 수, 처음 그린 개체 수와 맞은 뒤 그때까지의 시간(평균·최대), 따라잡기 수와 최대 거리(cm), 기록 크기
+	// 개발 확인(5초마다): 프레임 평균 올린 수와 기다린 수, 처음 그린 개체 수와 맞은 뒤 그때까지의 시간(평균·최대), 따라잡기 수와 최대 거리(cm), 기록 크기,
+	// 비용 진단: 실행 시간(평균·최대 ms), 첫 청크까지의 시간(평균 ms, 병렬 처리 큐의 쿼리 자원 기다림이 든다), 프레임 평균 청크·엔티티 수
+	const uint64 ExecEnd = FPlatformTime::Cycles64();
+	LogExecCycles += ExecEnd - ExecStart;
+	LogWaitCycles += (FirstChunk ? FirstChunk : ExecEnd) - ExecStart;
+	LogExecMaxMs = FMath::Max(LogExecMaxMs, FPlatformTime::ToMilliseconds64(ExecEnd - ExecStart));
 	++LogFrames;
 	LogBumped += Bumped;
 	LogWaiting += Waiting;
@@ -1302,12 +1350,16 @@ void ULabFarHitIskmProcessor::Execute(FMassEntityManager& EntityManager, FMassEx
 	else if (Now - LogSince >= 5.)
 	{
 		const double F = double(FMath::Max(LogFrames, 1));
-		UE_LOG(LogLab, Log, TEXT("lab_farhit t=%.1f bumped=%.2f tracked=%.2f waiting=%.2f first=%lld delay_mean_s=%.3f delay_max_s=%.3f catchups=%lld catchup_max_cm=%.1f map=%d"),
-			Now, LogBumped / F, LogTracked / F, LogWaiting / F, LogFirst, LogFirst > 0 ? LogDelaySum / LogFirst : 0., LogDelayMax, LogCatchUps, LogCatchUpMax, Crowd->FarHitBumped.Num());
+		UE_LOG(LogLab, Log, TEXT("lab_farhit t=%.1f bumped=%.2f tracked=%.2f waiting=%.2f first=%lld delay_mean_s=%.3f delay_max_s=%.3f catchups=%lld catchup_max_cm=%.1f map=%d exec_ms=%.4f exec_max_ms=%.3f wait_ms=%.4f chunks=%.2f ents=%.2f"),
+			Now, LogBumped / F, LogTracked / F, LogWaiting / F, LogFirst, LogFirst > 0 ? LogDelaySum / LogFirst : 0., LogDelayMax, LogCatchUps, LogCatchUpMax, Crowd->FarHitBumped.Num(),
+			FPlatformTime::ToMilliseconds64(LogExecCycles) / F, LogExecMaxMs, FPlatformTime::ToMilliseconds64(LogWaitCycles) / F, LogChunks / F, LogEnts / F);
 		LogSince = Now;
 		LogFrames = 0;
 		LogBumped = LogWaiting = LogTracked = LogFirst = LogCatchUps = 0;
 		LogDelaySum = LogDelayMax = LogCatchUpMax = 0.;
+		LogExecCycles = LogWaitCycles = 0;
+		LogChunks = LogEnts = 0;
+		LogExecMaxMs = 0.;
 	}
 #endif
 }

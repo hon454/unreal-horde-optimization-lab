@@ -42,6 +42,8 @@ protected:
 	int64 DiagRing[2] = {}; // 오브 수평 거리 [480m, 490m), [490m, 500m]
 	double DiagMs = 0.;
 	double DiagMaxMs = 0.;
+	double DiagFarMs = 0.; // 바깥 기록을 붙인 시간(M6 수정 A, Docs/Worklog/V2.md "M6 코드 비용 줄이기")
+	double DiagSetMs = 0.; // Niagara 배열에 넣은 시간
 	float DiagMaxLag = 0.f; // 원소의 지금 − T0 최대(초). Off 밴드 틱 간격(1초 ± 10%)을 넘지 않아야 한다
 	float DiagMinCamM = TNumericLimits<float>::Max(); // 원소(그려지지 않은 걷는 엔티티) 중 카메라에 가장 가까운 3D 거리(m). 메시 렌더러 MinCameraDistance를 정하는 근거
 	/**

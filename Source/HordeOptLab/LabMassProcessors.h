@@ -201,6 +201,9 @@ protected:
  * (ULabCrowdSubsystem::BuildEntityConfig). 그 범위의 컴포넌트만 바운드 상자를 맵 전체로 넓힌다(ULabCrowdSubsystem::ApplyFixedIskmBounds).
  * Off 청크는 표현을 0.5초(± 10%)마다만 다시 보므로(engine-notes.md 21·45절) ISKM이 늦게 나올 수 있다. 그동안 모으기 프로세서가 그 개체를 입자로 남긴다(멈춘 걷기 자세).
  * 따라잡기: 200m 밖 걷는 개체는 약 1초마다 옮겨지고 입자는 그 사이를 외삽한다. 맞은 개체는 멈추므로 마지막 이동 뒤 맞기까지의 거리를 한 번 옮겨 입자가 그리던 자리에 둔다.
+ * 비용: 병렬 처리 큐는 직접 프래그먼트 쓰기·읽기가 겹치는 두 쿼리를 아키타입과 무관하게 서로 막는다(mass.ForceInlineProcessorExecution 기본 참, MassProcessingQueueTypes.cpp:331-340).
+ *   그래서 주 쿼리는 위치를 쓰지 않고, 따라잡기는 따로 된 쿼리가 따라잡을 개체가 있는 프레임에만 한다. 주 쿼리가 위치를 쓰면 게임 스레드가 매 프레임 겹침 방지(작업자 스레드, 위치 쓰기)를
+ *   기다렸다(Test 1만 단계 8에서 프레임당 약 0.7ms, Docs/Worklog/V2.md "M6 코드 비용 줄이기").
  * CSV 스탯: Lab/FarHitTracked(올린 적이 있는 산 피격·사망 개체 수), Lab/FarHitWaiting(그중 아직 한 번도 그리지 않은 수).
  */
 UCLASS()
@@ -214,12 +217,19 @@ public:
 protected:
 	virtual void ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager) override;
 	virtual void Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context) override;
-	FMassEntityQuery EntityQuery;
+	FMassEntityQuery EntityQuery;  // 피격·사망 개체. 위치를 쓰지 않는다(아래 비용 주석)
+	FMassEntityQuery CatchUpQuery; // 따라잡기(위치·Off 이동 쓰기). CatchUps가 있는 프레임에만 돈다
+	struct FCatchUp { FMassEntityHandle Entity; float HitStart = 0.f; };
+	TArray<FCatchUp> CatchUps; // 이번 프레임 따라잡을 개체(게임 스레드 전용, 프레임마다 비운다)
 #if !UE_BUILD_TEST
 	double LogSince = 0.;
 	int64 LogBumped = 0, LogWaiting = 0, LogTracked = 0, LogFirst = 0, LogCatchUps = 0;
 	int32 LogFrames = 0;
 	double LogDelaySum = 0., LogDelayMax = 0., LogCatchUpMax = 0.;
+	// 비용 진단(개발 전용, Docs/Worklog/V2.md "M6 코드 비용 줄이기"): 실행 시간, 첫 청크까지의 시간(쿼리 자원 기다림), 청크·엔티티 수의 합
+	uint64 LogExecCycles = 0, LogWaitCycles = 0;
+	int64 LogChunks = 0, LogEnts = 0;
+	double LogExecMaxMs = 0.;
 #endif
 };
 

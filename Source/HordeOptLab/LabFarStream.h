@@ -45,6 +45,12 @@ public:
 	/** 기록의 지금 자리(오브 쪽 외삽, 오브를 넘지 않는다). 엔티티 구동 입자 식과 같다(Scripts/create-crowd-fx.md 5-5) */
 	FVector2D LocationAt(const FLabFarRec& Rec, double Now, const FVector& Orb) const;
 	const TArray<FLabFarRec>& GetRecs() const { return Recs; }
+	/**
+	 * 종류 Type 기록의 입자 원소(X, Y, T0, 걷기 위상). 모으기 프로세서가 엔티티 원소 뒤에 그대로 붙인다.
+	 * 기록이 바뀔 때(이동, 꺼내기, 더하기)만 그 원소를 고친다. 원소 순서는 Recs 순서와 다를 수 있다. 입자는 원소마다 그 프레임에만 그려지므로 순서는 화면에 닿지 않는다
+	 * (Scripts/create-crowd-fx.md 5절, Docs/Worklog/V2.md "M6 코드 비용 줄이기")
+	 */
+	TConstArrayView<FVector4f> GetPacked(int32 Type) const { return Packed[Type]; }
 
 	// 집계(게임 스레드). 개발 로그 lab_farstream와 CSV 스탯 Lab/FarFrontM
 	int32 PopsTotal = 0;
@@ -55,10 +61,46 @@ public:
 	float FrontCm = 0.f;      // 마지막으로 잰 맨 앞 기록의 오브 거리(1초마다)
 	float FrontCenterCm = 0.f; // 그 기록의 맵 중심 거리
 	int32 InsideMap = 0;      // 맵 반경 안에 들어온 기록 수(1초마다)
+#if !UE_BUILD_TEST
+	// 비용 진단(개발 전용, Docs/Worklog/V2.md "M6 코드 비용 줄이기"). 개발 로그 lab_farstream가 읽고 지운다
+	uint64 TickCycles = 0;
+	uint64 PopCycles = 0;
+	int32 PopCalls = 0;
+	/** 원소가 기록과 맞는지(개수, 자리표, 값). 개발 로그 lab_farstream의 packed_ok */
+	bool CheckPacked() const;
+#endif
 
 private:
 	void AddAtRing(double Now, uint32 Serial);
+	/** Recs 끝에 Rec을 더하고 원소를 만든다 */
+	void AddRec(const FLabFarRec& Rec);
+	/** Recs[Index]를 RemoveAtSwap으로 지우고 원소도 지운다 */
+	void RemoveRecAtSwap(int32 Index);
+	static FVector4f PackOf(const FLabFarRec& Rec);
 	TArray<FLabFarRec> Recs;
+	// 종류별 입자 원소와 그 자리표: RecSlot[i] = Recs[i]의 원소 자리, SlotOwner[종류][자리] = 그 원소의 Recs 색인
+	TArray<FVector4f> Packed[LabUnitTypeMax];
+	TArray<int32> SlotOwner[LabUnitTypeMax];
+	TArray<int32> RecSlot;
+	/**
+	 * 후보 목록(Pop이 전수 훑기 대신 훑는다, Docs/Worklog/V2.md "M6 코드 비용 줄이기"). A(기록, R) = |자리 − R| + 속도 × T0라 두면 Pop의 키 = A(지금 오브) − 속도 × 지금이다.
+	 * 목록 = 만들 때 A(기준 오브 R) ≤ 문턱인 기록. 이동은 A(R)를 줄이지 않고(|자리' − 자리| ≤ 속도 × (지금 − T0)) 새 기록은 더할 때 A(R)를 문턱과 견주므로 목록 밖 기록은 늘 문턱보다 크다.
+	 * |A(오브) − A(R)| ≤ |오브 − R|이라 목록에서 고른 Count번째 키 + 속도 × 지금 + |오브 − R| < 문턱이면 전수 훑기와 같은 결과다. 아니면 R = 지금 오브로 다시 만든다.
+	 */
+	void RebuildShort(int32 Type, int32 Count, const FVector2D& O);
+	double AOf(const FLabFarRec& Rec, const FVector2D& R) const { return FVector2D::Distance(FVector2D(Rec.X, Rec.Y), R) + double(Speed) * Rec.T0; }
+	static constexpr double ShortMarginCm = 2000.; // 문턱 = Count번째로 작은 A + 20m. 1만에서 소형 약 360개, 약 4초마다 다시 만든다
+	TArray<int32> Short[LabUnitTypeMax];
+	TArray<int32> ShortPos; // Recs[i]의 목록 자리(없으면 INDEX_NONE)
+	FVector2D ShortRef[LabUnitTypeMax];
+	double ShortThr[LabUnitTypeMax] = {};
+	bool bShortValid[LabUnitTypeMax] = {};
+	TArray<double> ScratchA;
+public:
+	int32 ShortRebuilds = 0; // 집계(개발 로그 lab_farstream의 rebuilds)
+	int32 PickChecks = 0;    // -LabFarStreamCheck: 전수 훑기와 견준 수
+	int32 PickMismatch = 0;  // 그중 다른 수(0이어야 한다)
+private:
 	FRandomStream Stream;
 	float Speed = 300.f;
 	int32 Cursor = 0;

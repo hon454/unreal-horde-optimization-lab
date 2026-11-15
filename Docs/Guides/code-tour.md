@@ -36,7 +36,7 @@ Lab 프로세서는 모두 기본 처리 단계인 PrePhysics에 등록된다(`U
 | 9 | `ULabOrbSnipeProcessor`(LabLogic) | 범위 피해 뒤 |
 | 10 | `ULabMinionStateProcessor`(LabLogic) | 저격 뒤 |
 | 11 | `ULabRepHoldProcessor`(Representation) | LOD 뒤, VisualizationProcessing 앞. 게임 스레드 |
-| 11b | `ULabFarHitIskmProcessor`(Representation) | LOD와 `ULabRepHoldProcessor` 뒤, VisualizationProcessing 앞. 게임 스레드. 단계 7·8(M6 수정 B) |
+| 11b | `ULabFarHitIskmProcessor`(Representation) | LOD와 `ULabRepHoldProcessor` 뒤, VisualizationProcessing 앞. 게임 스레드. 단계 7·8(M6 수정 B). 주 쿼리는 위치를 쓰지 않는다. 따라잡기(위치 쓰기)는 따로 된 쿼리가 그 프레임에 따라잡을 개체가 있을 때만 돈다(engine-notes 47절) |
 | 12 | `UMassVisualizationProcessor`(Representation.VisualizationProcessing) | LOD 뒤 |
 | 13 | `ULabIskmProcessor`, `ULabCrowdFxGatherProcessor`, `ULabRepSwitchCountProcessor`(Representation) | VisualizationProcessing 뒤. 셋 사이는 정해져 있지 않다. 셋 다 게임 스레드 |
 | 14 | `ULabActorSyncProcessor`(그룹 없음) | Representation 뒤. 게임 스레드 |

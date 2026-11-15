@@ -215,18 +215,26 @@ void ULabCrowdFxGatherProcessor::Execute(FMassEntityManager& EntityManager, FMas
 	const int32 EntityRecs = Recs[LabUnitSmall].Num() + Recs[LabUnitLarge].Num();
 	int32 FarRecs = 0;
 	const int32 EntityRecsByType[LabUnitTypeMax] = { Recs[LabUnitSmall].Num(), Recs[LabUnitLarge].Num() }; // 개발 확인 로그는 엔티티 원소만 센다
+#if !UE_BUILD_TEST
+	const uint64 FarStartCycles = FPlatformTime::Cycles64();
+#endif
 	if (FLabConfig::Get().DrawsFarStream())
 	{
 		if (const FLabFarStream* Far = Crowd->GetFarStream())
 		{
-			for (const FLabFarRec& Rec : Far->GetRecs())
+			// 원소(X, Y, float T0, LabWalkPhase(일련번호))는 기록이 바뀔 때만 FLabFarStream이 고친다. 여기서는 종류별로 통째로 붙인다(FLabFarStream::GetPacked)
+			for (int32 Type = 0; Type < LabUnitTypeMax; ++Type)
 			{
-				// T0는 엔티티 원소와 같은 float 월드 초다. 위상은 엔티티가 될 때와 같은 LabWalkPhase(일련번호)
-				Recs[FMath::Min(FLabUnitTypes::TypeOf(Rec.Serial), LabUnitTypeMax - 1)].Emplace(Rec.X, Rec.Y, float(Rec.T0), LabWalkPhase(Rec.Serial));
+				const TConstArrayView<FVector4f> Packed = Far->GetPacked(Type);
+				Recs[Type].Append(Packed.GetData(), Packed.Num());
 			}
 			FarRecs = Far->GetRecs().Num();
 		}
 	}
+#if !UE_BUILD_TEST
+	const uint64 SetStartCycles = FPlatformTime::Cycles64();
+	DiagFarMs += FPlatformTime::ToMilliseconds64(SetStartCycles - FarStartCycles);
+#endif
 
 	// 에셋에 있는 변수만 넣는다. 1종(-LabTypes=1)이면 대형 배열은 빈 배열로 넣어 지난 값을 지운다
 	if (Crowd->bCrowdFxSmallRecs)
@@ -241,6 +249,9 @@ void ULabCrowdFxGatherProcessor::Execute(FMassEntityManager& EntityManager, FMas
 	{
 		Fx->SetVariableFloat(NowName, Now);
 	}
+#if !UE_BUILD_TEST
+	DiagSetMs += FPlatformTime::ToMilliseconds64(FPlatformTime::Cycles64() - SetStartCycles);
+#endif
 	// v2 W8: 외삽 목표를 매 프레임 오브의 지금 위치로 넣는다. 접근과 200m 밖 이동이 이번 프레임에 보는 OrbCenter와 같은 값이다.
 	// -LabFxOrbFollow=0이면 W7까지처럼 활성화 전에 넣은 값(시작 때 오브 위치, 원점)이 남는다.
 	if (Crowd->bCrowdFxOrbPos && FLabConfig::Get().bFxOrbFollow)
@@ -287,10 +298,11 @@ void ULabCrowdFxGatherProcessor::Execute(FMassEntityManager& EntityManager, FMas
 	{
 		const double F = double(FMath::Max(DiagFrames, 1));
 		const double RecsAll = double(DiagRecs[0] + DiagRecs[1]) / F;
-		UE_LOG(LogLab, Log, TEXT("lab_crowdrecs t=%.1f frames=%d small=%.0f large=%.0f recs=%.0f hitdead=%.1f none=%.0f drawn=%.0f entities=%.0f off_recs=%.0f max_lag_s=%.3f min_cam_m=%.1f ring480=%.1f ring490=%.1f gather_ms=%.3f gather_max_ms=%.3f small_param=%d large_param=%d now_param=%d"),
+		UE_LOG(LogLab, Log, TEXT("lab_crowdrecs t=%.1f frames=%d small=%.0f large=%.0f recs=%.0f hitdead=%.1f none=%.0f drawn=%.0f entities=%.0f off_recs=%.0f max_lag_s=%.3f min_cam_m=%.1f ring480=%.1f ring490=%.1f gather_ms=%.3f gather_max_ms=%.3f far_ms=%.4f set_ms=%.4f small_param=%d large_param=%d now_param=%d"),
 			Now, DiagFrames, DiagRecs[0] / F, DiagRecs[1] / F, RecsAll, DiagHitDead / F, RecsAll + DiagHitDead / F, DiagDrawn / F, RecsAll + (DiagHitDead + DiagDrawn) / F,
-			DiagOff / F, DiagMaxLag, DiagMinCamM, DiagRing[0] / F, DiagRing[1] / F, DiagMs / F, DiagMaxMs,
+			DiagOff / F, DiagMaxLag, DiagMinCamM, DiagRing[0] / F, DiagRing[1] / F, DiagMs / F, DiagMaxMs, DiagFarMs / F, DiagSetMs / F,
 			Crowd->bCrowdFxSmallRecs ? 1 : 0, Crowd->bCrowdFxLargeRecs ? 1 : 0, Crowd->bCrowdFxNow ? 1 : 0);
+		DiagFarMs = DiagSetMs = 0.;
 		DiagSince = Now;
 		DiagFrames = 0;
 		FMemory::Memzero(DiagRecs);
