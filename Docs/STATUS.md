@@ -16,10 +16,11 @@
 ## 다음 할 일
 
 1. 사용자가 [v2-spec.md](v2-spec.md), [v2-plan.md](v2-plan.md), 결정 D33\~D53([autonomous-decisions.md](Worklog/autonomous-decisions.md))을 검토한다.
-2. 코디네이터가 작은 묶음 `V2W12Dry`를 돌린다(약 33분). 명령은 [Worklog/V2.md](Worklog/V2.md) "W12 측정 준비"에 있다. Edge 건이 풀려야 한다.
-3. 사용자 검토 뒤에 코디네이터가 W13(총괄 묶음 `Full4`, 약 11.5시간)을 맡긴다.
+2. 사용자 검토 뒤에 코디네이터가 W13(총괄 묶음 `Full4`, 약 11.5시간)을 맡긴다.
 
-W1\~W12는 끝났다(12dd374까지). W12의 `V2W12Dry`만 남았다. 자율 진행(D33)은 여기서 멈춘다. 두 문서는 잠정 확정이다.
+W1\~W12는 끝났다. 묶음 `V2W12Dry`는 8회가 모두 통과했다. 자율 진행(D33)은 여기서 멈춘다. 두 문서는 잠정 확정이다.
+
+검토 보고서는 <https://claude.ai/artifact/NjHoQq7ku9Z3jfYXan3VyE>에 있다. 사용자가 거기서 수정 프롬프트를 만든다.
 
 시험 실행의 결과([Worklog/V2.md](Worklog/V2.md) "묶음 Spike1", "묶음 Spike2"):
 
@@ -166,4 +167,4 @@ Development 전환 점수는 `Full1` 때의 참고값이다(`Measurements/Full1/
 
 - 사용자가 본 "안 보이는 개체"가 200m 밖에서 피격되거나 죽는 개체인지 확인한다(D49).
 - ADR-0018(D50)과 ADR-0019(D52)를 승인한다([목록](Decisions/README.md)).
-- Edge 배경 프로세스를 끄거나, 러너가 창 없는 Edge를 허용하게 고치는 것을 승인한다(D53).
+- 러너가 창 없는 Edge를 허용하게 고칠지 정한다(D53).

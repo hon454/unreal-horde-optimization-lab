@@ -1,0 +1,26 @@
+﻿{
+    "batch":  "V2W12Dry",
+    "state":  "done",
+    "commit":  "903c3385a45ce3ec804375680e9fc68023184985 (dirty)",
+    "started":  "2026-11-15 18:48:53",
+    "ended":  "2026-11-15 19:23:14",
+    "resumes":  0,
+    "order":  "round",
+    "runs_override":  1,
+    "target_n":  10000,
+    "only":  "ladder,ablation,still,sub,maxn,actor,aa,trace,traceser",
+    "pick":  "ladder:s1,ladder:s8,ablation:a8fsb,still:s8,maxn:s8,actor:s1,trace:s2",
+    "n_filter":  "500,10000,20000",
+    "orbit":  "r57.3/h6",
+    "measure_sec":  180,
+    "power_plan":  "381b4222-f694-41f0-9685-ff5bb260df2e  (균형 조정)",
+    "base_mhz":  3401,
+    "conditions":  7,
+    "planned_runs":  7,
+    "planned_runs_ok":  7,
+    "planned_runs_missing":  0,
+    "failed_runs":  0,
+    "giveups":  [
+
+                ]
+}

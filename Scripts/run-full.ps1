@@ -315,7 +315,8 @@ function Invoke-Run($j, $Label) {
             $FgNote = "fg=$($In.Count - $Non)/$($In.Count) $Focus"
             Add-Content -Path $summary -Value ("`n" + $FgNote)
             if ($In.Count -eq 0 -or $Non -gt 0) { $FgFail = $true }
-            $pv = @($In | Where-Object { $_.Perf -ge 0 } | ForEach-Object { $_.Perf })
+            # 카운터가 가끔 0을 돌려준다(V2W12Dry에서 한 표본). 0은 뺀다.
+            $pv = @($In | Where-Object { $_.Perf -gt 0 } | ForEach-Object { $_.Perf })
             if ($pv.Count -gt 0) {
                 $m = ($pv | Measure-Object -Average -Minimum -Maximum)
                 Add-Content -Path $ClockCsv -Encoding UTF8 -Value ("{0},{1},{2:F1},{3:F1},{4:F1},{5:F0},{6}" -f $Label, $pv.Count, $m.Average, $m.Minimum, $m.Maximum, ($m.Average * $BaseMhz / 100.0), $busy)

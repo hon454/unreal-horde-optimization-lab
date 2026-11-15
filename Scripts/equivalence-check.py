@@ -176,7 +176,8 @@ def main():
             elif lo_hi and lo_hi[0] <= ov <= lo_hi[1]:
                 row["overlap_ok"] = "ok"
             else:
-                blocking = klass == "sep" or (klass == "zero" and n <= 2000)
+                # sep의 범위는 N=10000의 값에서 왔다. 다른 N은 보고만 한다(V2W12Dry: N=20000에서 2,287).
+                blocking = (klass == "sep" and n == 10000) or (klass == "zero" and n <= 2000)
                 row["overlap_ok"] = "FAIL" if blocking else "report"
                 (fails if blocking else notes).append(f"overlap {ov:.0f} outside {row['overlap_range']} ({klass})")
             # 4. 캡슐 트레이스

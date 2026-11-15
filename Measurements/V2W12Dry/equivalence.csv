@@ -1,0 +1,7 @@
+n,speed,cond,runs,equiv,alive_min,alive_max,death_rate,death_rate_min,death_rate_max,death_rate_ref,death_rate_dev_pct,death_rate_ok,near30_mean,near30_mean_min,near30_mean_max,near30_mean_ref,near30_mean_dev_pct,near30_mean_ok,overlap_mean,overlap_class,overlap_range,overlap_ok,capsule_traces,capsule_miss,capsule_ok,round_per_sec,round_ok,pass,note
+500,V0,V0-s1,1,report,500,500,3.883,3.883,3.883,,,no peers,17.97,17.97,17.97,,,no peers,0.0,zero,0..50,ok,468,0,ok,,no value,ok,
+10000,V0,V0-a8fsb,1,strict,10000,10000,56.738,56.738,56.738,56.722,0.03,ok,925.0,925.0,925.0,926.88,-0.2,ok,224.4,sep,120..280,ok,91,0,ok,0.0,ok,ok,
+10000,V0,V0-s1,1,report,10000,10000,28.925,28.925,28.925,56.722,-49.01,report,731.28,731.28,731.28,926.88,-21.1,report,7.0,zero,0..50,ok,480,0,ok,,no value,report,death_rate dev -49.01%; near30_mean dev -21.10%
+10000,V0,V0-s8,1,strict,10000,10000,56.722,56.722,56.722,56.722,0.0,ok,926.88,926.88,926.88,926.88,0.0,ok,209.6,sep,120..280,ok,90,0,ok,0.0,ok,ok,
+10000,V1,V1-s8,1,strict,10000,10000,61.65,61.65,61.65,61.65,0.0,ok,622.85,622.85,622.85,622.85,0.0,ok,0.0,sep,0..10,ok,90,0,ok,0.0,ok,ok,
+20000,V0,V0-s8,1,strict,20000,20000,111.937,111.937,111.937,111.937,0.0,ok,1824.49,1824.49,1824.49,1824.49,0.0,ok,2286.5,sep,120..280,report,91,0,ok,0.0,ok,report,overlap 2287 outside 120..280 (sep)

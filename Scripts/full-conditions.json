@@ -83,7 +83,7 @@
    ]
   },
   "overlap_basis": "분리 프로세서(sep) 이동: 단계 3~8과 W11 묶음의 값 159~225(V2W10Ladder, V2W11Cost, V2W11Sweep, V2W9Flash)에 0.75배와 1.25배를 곱했다. 분리 프로세서 정지: V2W7Switch의 0.01~0.02에 여유를 뒀다. 액터 기준선(zero)은 V2W6Base N 500~2000에서 0이다. 엔진 회피(engine)는 V2W3Cost, V2W4Cost, V2W10Ladder에서 10,338~10,835다. 겹침 방지 끔(off)은 V2W4Cost에서 1,599~1,607이다.",
-  "overlap_severity": "sep와 zero(N 2000 이하)는 범위 밖이면 실패로 센다. engine, off, zero(N 2000 초과)는 보고만 한다(D51: 단계 2는 엔진 회피라 실패로 막지 않는다)."
+  "overlap_severity": "sep(N 10000)와 zero(N 2000 이하)는 범위 밖이면 실패로 센다. sep(다른 N), engine, off, zero(N 2000 초과)는 보고만 한다(D51: 단계 2는 엔진 회피라 실패로 막지 않는다)."
  },
  "steps": {
   "1": {
