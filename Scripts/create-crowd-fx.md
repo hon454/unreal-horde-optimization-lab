@@ -76,7 +76,7 @@ MCP에 Python 실행 툴이 없어, 스크립트를 파일로 쓰고 SlateInspec
 
 MCP로 만들 때 남는 것: MCP `SetEmitterData`는 `PostEditChange`를 부르지 않아 `InterpolatedSpawnMode`를 바꿔도 스폰 스크립트의 용도(템플릿의 `ParticleSpawnScriptInterpolated`)가 바뀌지 않는다. 그래서 로드할 때마다 `LogNiagara: Disabling interpolated spawn because emitter flag and script type don't match` 경고가 이미터마다 한 줄 나오고 엔진이 메모리에서 용도를 고친다(`NiagaraEmitter.cpp:861-878`). GPU 계산 스크립트는 이미터 값(NoInterpolation)으로 컴파일되므로 동작은 같다(`NiagaraScript.cpp:1187-1193`). 경고를 없애려면 에디터에서 두 이미터의 Interpolated Spawn Mode를 UI로 한 번 바꿨다가 NoInterpolation으로 되돌리고 저장한다. 에디터에서 손으로 만들면 UI가 용도를 바꾸므로 이 문제가 없다.
 
-확인: 배열은 실행 때 코드가 넣으므로 에디터 뷰포트에는 엔티티 구동 입자가 없다. `run-dev.ps1 -N 10000 -Preset P1 -Duration 25 -ShotAt 20 -Stage M5 -Variant q4final`의 로그에 `lab_crowdfx ... small_recs=1 large_recs=1 now=1 orb_pos=1`이 있고 `lab_crowdfx_param missing=`이 없어야 한다. 독립 이미터를 잠시 끄고(`SetEmitterData` `bIsEnabled` false, 확인 뒤 되돌려 저장) 같은 실행을 하면 500m 밖이 비고 188\~500m가 엔티티 구동 입자로 찬다.
+확인: 배열은 실행 때 코드가 넣으므로 에디터 뷰포트에는 엔티티 구동 입자가 없다. `run-dev.ps1 -N 10000 -Preset P1 -Duration 25 -ShotAt 20 -Stage 8`의 로그에 `lab_crowdfx ... small_recs=1 large_recs=1 now=1 orb_pos=1`이 있고 `lab_crowdfx_param missing=`이 없어야 한다. 독립 이미터를 잠시 끄고(`SetEmitterData` `bIsEnabled` false, 확인 뒤 되돌려 저장) 같은 실행을 하면 500m 밖이 비고 188\~500m가 엔티티 구동 입자로 찬다.
 
 ## 6. 입자 전용 저폴리 메시(2026-11-12)
 
@@ -87,6 +87,6 @@ MCP로 만들 때 남는 것: MCP `SetEmitterData`는 `PostEditChange`를 부르
    1. 두 인스턴스의 부모를 바꾼다. Python `MaterialEditingLibrary.set_material_instance_parent(MI_LabCrowdSmall, MI_LabMinionVAT_Bone_Lod4)`(대형 `MI_LabCrowdLarge` ← `MI_LabMinionLargeVAT_Bone_Lod4`), `update_material_instance`, 저장. 정적 스위치 `AutoPlay`·`UseDynamicParameters`가 true로 남는지 본다. BoneWeight 텍스처와 그 크기 파라미터가 LOD마다 달라 부모를 바꿔야 한다(engine-notes 26절).
    2. NS `GetRendererData`로 네 이미터(`Small`, `SmallEnt`, `Large`, `LargeEnt`)의 `Meshes` 배열을 읽고 `Meshes[0].mesh`만 `SM_LabMinionVAT_Bone_Lod4`(대형 `SM_LabMinionLargeVAT_Bone_Lod4`)로 바꿔 `SetRendererData`로 `Meshes`를 통째로 넣는다(스케일·회전·`LODMode`는 읽은 값 그대로). `OverrideMaterials`는 그대로 둔다.
    3. `GetSystemCompileState`가 오류·경고 없음인지 보고 `AssetTools.save_assets`로 `NS_LabCrowd`, `MI_LabCrowdSmall`, `MI_LabCrowdLarge`를 저장한다.
-3. 확인: `run-dev.ps1 -Small -Stage M5 -Variant q4final`의 로그 `lab_crowdfx`에 `particles=` 값과 `small_recs=1 large_recs=1`이 있다. 화면 비교는 같은 시드 P1 20초 스크린샷의 지평선 띠다(`Measurements/CrowdFx2/shots/lod-compare-horizon.jpg`).
+3. 확인: `run-dev.ps1 -Small -Stage 8`의 로그 `lab_crowdfx`에 `particles=` 값과 `small_recs=1 large_recs=1`이 있다. 화면 비교는 같은 시드 P1 20초 스크린샷의 지평선 띠다(`Measurements/CrowdFx2/shots/lod-compare-horizon.jpg`).
 
 비교용으로 다른 메시를 시험할 때는 에셋을 바꾸지 않고 `NS_LabCrowd`를 다른 경로에 복제해 메시와 인스턴스를 바꾼 뒤 실행 인자 `-ini:Game:[Lab]:CrowdFxSystem=<복제본 경로>`로 고른다. Git Bash에서 부르면 `/Game/...`이 Windows 경로로 바뀌므로 `MSYS_NO_PATHCONV=1`을 둔다. 복제본은 끝나면 지운다.

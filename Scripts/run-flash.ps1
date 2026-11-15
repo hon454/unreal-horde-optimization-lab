@@ -7,8 +7,7 @@
 param(
     [Parameter(Mandatory)][string]$Name,
     [string]$Cmds = "",
-    [string]$Variant = "q4final",
-    [string]$Stage = "M5",
+    [string]$Stage = "8",
     [int]$N = 10000,
     [double]$ShotAt = 60,
     [int]$Burst = 1800,
@@ -24,9 +23,9 @@ $Extra = @("-benchmark", "-fps=60", "-LabShotBurst=$Burst", "-LabFlashDiag")
 if ($Cmds) { $Extra += "-ExecCmds=`"$Cmds`"" }
 $Extra += $Args2
 # 같은 프로세스에서 부른다(powershell -File로 다시 띄우면 공백 든 인자가 쪼개진다, Worklog/M5.md "미니언 깜빡임 진단")
-& "$PSScriptRoot\run-dev.ps1" -N $N -Preset P1 -Duration $Duration -ShotAt $ShotAt -Variant $Variant -Stage $Stage -Extra $Extra
+& "$PSScriptRoot\run-dev.ps1" -N $N -Preset P1 -Duration $Duration -ShotAt $ShotAt -Stage $Stage -Tag $Name -Extra $Extra
 $Code = $LASTEXITCODE
 if (Test-Path "$Shots\LabBurst") { Move-Item "$Shots\LabBurst" $Out } else { New-Item -ItemType Directory -Force -Path $Out | Out-Null }
-Copy-Item "$ProjectDir\Saved\Logs\LabDev-$Variant-N$N-P1.log" "$Out\run.log"
+Copy-Item "$ProjectDir\Saved\Logs\LabDev-s$Stage-$Name-N$N-P1.log" "$Out\run.log"
 Write-Host "BURST: $Out EXIT: $Code"
 exit $Code

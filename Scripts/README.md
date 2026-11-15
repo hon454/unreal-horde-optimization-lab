@@ -8,13 +8,14 @@
 | --- | --- |
 | `common.ps1` | 엔진 경로(`EngineAssociation` → 레지스트리), 공통 검사 |
 | `build.ps1` | Development 에디터 빌드 |
-| `run-dev.ps1` | Development `-game` 실행(개발·오버레이·스크린샷) |
+| `run-dev.ps1`, `run-dev-stages.ps1` | Development `-game` 실행(개발·오버레이·스크린샷). `-Stage 1`\~`8`이 사다리 단계다. `run-dev-stages.ps1`은 단계마다 작은 실행(`-Ablations`면 빼 보기도) |
 | `package.ps1` | Test 패키지 |
-| `run-bench.ps1` | Test 패키지 벤치마크 한 조건(라벨, 반복, 앞 창 검사, 트레이스) |
+| `run-bench.ps1` | Test 패키지 벤치마크 한 조건(라벨, 반복, 앞 창 검사, 트레이스). `v1` 러너라 v2 W10 뒤의 빌드에서는 돌지 않는다(`-LabVariant`). 아래 `run-full.ps1`, `capture-full.ps1`, `run-budget.ps1`, `run-mgr.ps1`, `run-pool.ps1`도 같다. W12가 새 단계로 바꾼다 |
 | `run-full.ps1`, `full-conditions.json` | 총괄 묶음 러너와 조건 표(사다리 8단계, 빼 보기 열 행, 하위 실험). 조건의 인자와 기대 메타데이터는 JSON이 정한다 |
 | `ablation-check.py`, `equivalence-check.py` | 실행마다 CSV 메타데이터를 조건 표와 대조하고, 단계 사이의 동등성(초당 사망, 30m 안 개체 수)을 검사한다 |
 | `run-pool.ps1`, `pool-timeline.py` | 엔티티 풀 묶음(16분 실행 두 번)과 1분 구간 정리 |
-| `run-spike.ps1`, `spike-check.py`, `spike-timeline.py` | 시험 실행 묶음 `Spike1`(떠다니는 오브: 궤도 속도 × 구성 둘 × 5회, 따라가는 카메라 P3)의 러너, 메타데이터 대조, 5초 구간의 가까운 개체 수 정리(`Measurements/Spike1/timeline.csv`). 경위는 [Docs/Worklog/V2.md](../Docs/Worklog/V2.md) "시험 실행" |
+| `run-spike.ps1`, `spike-check.py`, `spike-timeline.py` | v2 작은 묶음(`Spike1`부터 `V2W<n>`까지)의 러너, 메타데이터 대조, 구간별 정리(`Measurements/<묶음>/timeline.csv`). v2 W10부터 구성은 사다리 단계 `s1`\~`s8`과 빼 보기 `a8*`다(commands.md "사다리 단계와 스위치(v2 W10)"). 경위는 [Docs/Worklog/V2.md](../Docs/Worklog/V2.md) |
+| `run-flash.ps1`, `flash-scan.py` | v2 W9 ISKM 번쩍임 진단의 연속 캡처 러너와 튄 프레임 지표(개발 빌드) |
 | `run-budget.ps1`, `check-budget.py`, `plot-budget.py` | 참고 묶음 `Budget1`(예산 값 6 × 호드 2 × 3회)의 러너, 메타데이터 대조, 그림(`Docs/figures/budget1/`) |
 | `run-mgr.ps1`, `check-mgr.py` | 참고 묶음 `Mgr1`(변형 `manager`, 2단계, 2단계 직렬 × 호드 1만·2만 × 3회)의 러너와 메타데이터 대조 |
 | `mgr-trace-table.py` | 참고 묶음 `MgrT1`(`run-mgr.ps1 -Trace`)의 트레이스 내보내기 CSV → `Measurements/MgrT1/timers.csv`(스레드별 타이머, 프레임당 ms) |
@@ -35,7 +36,7 @@
 | --- | --- |
 | `restore-assets.ps1`, `restore-assets.manifest.txt` | 클론 뒤 한 번: 아래 스크립트를 순서대로 불러 git 밖 에셋을 복구하고 목록과 대조한다(`-DryRun`, `-Force`, `-AssetHost`). 순서는 [Docs/Guides/setup.md](../Docs/Guides/setup.md) |
 | `migrate-assets.py` | Fab 원본 팩에서 쓰는 에셋만 옮긴다 |
-| `make-static-minion.py`, `lab_unit_colors.py` | `static` 변형과 M1의 정적 메시, 미니언 색 값 |
+| `make-static-minion.py`, `lab_unit_colors.py` | 사다리 단계 2·3의 정지 메시 인스턴스(`SM_LabMinion`), 미니언 색 값 |
 | `bake-vat.py` | VAT 베이크(M2\~M4 원거리 표현, 액터 머티리얼) |
 | `create-iskm.py` | ISKM 에셋(M5) |
 | `create-bench-map.py` | 맵 `L_Bench` |

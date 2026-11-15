@@ -632,3 +632,15 @@ for (const int32 TrackIndex : Temp)
 	Provider->DeallocateTrack(TrackIndex); // 끝 번호는 그대로 남고, 엔진의 다음 AllocateTrack은 빈 번호를 다시 쓴다
 }
 ```
+
+## 43. 하이드레이션과 엔진 ISM 프로세서, 엔진의 액터 동기화 경로(2026-11-15, v2 W10)
+
+줄임말: **MR** = `Engine/Plugins/Runtime/MassGameplay/Source/MassRepresentation`, **MA** = `Engine/Plugins/Runtime/MassGameplay/Source/MassActors`. 사다리 단계 2(Mass 엔진 기본 경로)를 정할 때 확인했다. 결정은 [Worklog/V2.md](../Worklog/V2.md) "W10"에 있다.
+
+| 항목 | 확인한 것 | 위치 |
+| --- | --- | --- |
+| 엔진 ISM 갱신 프로세서는 인스턴스 표현만 쓴다 | `UMassUpdateISMProcessor::Execute`는 `CurrentRepresentation == StaticMeshInstance`인 엔티티만 인스턴스 변환을 쌓는다. 액터를 붙이고 떼는 일은 표현 프로세서가 한다. 그래서 High 밴드가 액터인 표현 LOD(하이드레이션)와 엔진 ISM 프로세서를 함께 쓸 수 있다. 순서 선언은 `Representation` 뒤다 | `MR/Private/MassUpdateISMProcessor.cpp:20, 56-61` |
+| 엔진의 액터 동기화는 퍼핏 Trait과 변환기다 | 엔티티 → 액터 복사는 변환기(`UMassSceneComponentLocationToActorTranslator`, `UMassCharacterMovementToActorTranslator`, `UMassTransformToActorCapsuleTranslator` 등)가 한다. 변환기는 `UMassAgentSyncTrait` 하위 Trait(`UMassAgentFeetLocationSyncTrait` 등)이 붙인 `FMassSceneComponentWrapperFragment`를 읽는다. 그 프래그먼트는 액터가 엔티티에 묶일 때 부르는 객체 프래그먼트 초기화 함수가 채운다. 이 길은 액터에 `UMassAgentComponent`(퍼핏, 33절 "퍼핏")를 두는 구조다. 애니메이션 상태를 넘기는 변환기는 없다 | `MA/Public/MassAgentTraits.h:15-61`, `MA/Private/MassAgentTraits.cpp:151-165`, `MA/Public/Translators/MassSceneComponentLocationTranslator.h:43-49`, `MA/Private/Translators/MassSceneComponentLocationTranslator.cpp:53-54` |
+| 변환기의 자리 | `UMassSceneComponentLocationToActorTranslator`는 그룹 `UpdateWorldFromMass`, `Movement` 뒤다. 엔티티 쪽 복사(`…ToMassTranslator`)는 `SyncWorldToMass`다 | `MA/Private/Translators/MassSceneComponentLocationTranslator.cpp:17, 53-54` |
+
+이 프로젝트의 하이드레이션 액터는 `UMassAgentComponent` 없이 표현 프로세서의 액터 관리(`ULabActorManagement`)로 붙고, 위치·애니 상태·사망 색은 `ULabActorSyncProcessor`가 매 프레임 넣는다(v1 M3부터). 사다리 단계 2도 이 동기화를 쓴다.

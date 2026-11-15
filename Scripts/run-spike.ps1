@@ -1,5 +1,5 @@
-﻿# 시험 실행 묶음(Spike<n>) 러너(ADR-0017, Docs/Worklog/V2.md "시험 실행"). 떠다니는 오브의 궤도 속도 × 구성 둘을 Test 패키지에서 잰다.
-#   구성 final: 최종 구성(-LabStage=M5 -LabVariant=q4final). 구성 nofix: 고정 목표용 기법 셋을 끈 것(+ -LabSimLod=0 -LabFixedBounds=0 -LabCrowdFx=0, 빼 보기 A8-simlod·A8-bounds·A8-crowdfx의 인자).
+﻿# 작은 묶음 러너(ADR-0017, Docs/Worklog/V2.md "시험 실행"). 떠다니는 오브의 궤도 속도 × 구성을 Test 패키지에서 잰다.
+#   v2 W10부터 구성은 사다리 단계 s1~s8(-LabStage=1~8)과 단계 8의 빼 보기 a8*, 직렬 트레이스용 s<n>ser다(아래 $ConfigTable).
 #   모든 조건이 같은 궤도 반지름·높이를 쓴다. 카메라는 P1(오브를 따라간다, v2 W1부터 기본)이다. 속도 0이 정지 조건이다.
 #   v2 W1부터: -WarmupSec(기본 -1 = 게임의 기본값: 이동 60초, 정지 15초)과 -DurationSec을 늘 넘긴다. 그전 묶음(Spike1, Spike2)은 P3·15초 워밍업이었다.
 # 라벨: <Batch>-V<속도 번호>-<구성>-N<N>-P1-r<i>. 속도 번호는 -Speeds의 순서다(0부터). summarize.py가 조건 "V<번호>-<구성>"으로 요약한다.
@@ -16,8 +16,12 @@ param(
     # 쉼표로 이은 궤도 속도(m/s). 예: "0,1.5,3,6". -File로 부를 때 배열이 한 문자열로 넘어오므로 문자열로 받는다
     [Parameter(Mandatory = $true)][string]$Speeds,
     [int]$Runs = 5,
-    # 쉼표로 이은 구성 이름. Spike2는 "final"만 잰다
-    [string]$Configs = "final,nofix",
+    # 쉼표로 이은 구성 이름. 예: "s8,a8sep"
+    [string]$Configs = "s8",
+    # v2 W10: 구성마다 개체 수를 따로 준다(쉼표로 이은 <구성>=<N>). 준 구성은 -N/-Ns 대신 이 N 하나로 잰다. 예: "s1=1000"(액터 기준선)
+    [string]$ConfigNs = "",
+    # v2 W10: 구성마다 회차 수를 따로 준다(쉼표로 이은 <구성>=<회차>). 준 구성은 -Runs 대신 이 회차까지만 잰다. 예: -Runs 1 -ConfigRuns "s8=3"
+    [string]$ConfigRuns = "",
     [int]$DurationSec = 180,
     [int]$WarmupSec = -1,
     [int]$StartupSec = 30,
@@ -43,51 +47,62 @@ $BatchDir = "$ProjectDir\Measurements\$Batch"
 $ProgressLog = "$BatchDir\progress.log"
 $FailuresCsv = "$BatchDir\failures.csv"
 
-# v2 W5부터 분리 프로세서(-LabSeparate)의 기본값이 1이다(D45). final·m1·finalser·m1ser는 분리 켬이고, 분리 끔은 접미사 nosep이다.
-# W4의 finalsep·m1sep·finalsepser·m1sepser는 지금의 final·m1·finalser·m1ser와 같아 지웠다. 엔진 회피 구성(av)은 W3·W4와 같은 뜻이 되게 분리를 끈다.
-# v2 W5부터 하이드레이션 액터 캡슐의 기본값이 Trace(LabActorCollision=trace)다. 캡슐 끔은 접미사 nocap(-LabActorCollision=0)이다.
-$ConfigTable = @(
-    # v2 W7부터 final은 최소 유지 시간 2,000ms(LabRepHold=2000)를 대조한다. v2 W8부터 입자 외삽 목표 매 프레임(LabFxOrbFollow=1)과 바운드 상자 간격 10m(LabBoundsStepM=10)도 대조한다
-    # v2 W9부터 final은 ISKM 트랙 풀 미리 늘리기(LabIskmTrackReserve=1)도 대조한다
-    @{ Name = "final"; Args = @("-LabStage=M5", "-LabVariant=q4final"); Expect = @("LabStage=M5", "LabVariant=q4final", "LabTechSimLod=1", "LabTechFixedBounds=1", "LabTechCrowdFx=1", "LabTechAvoid=0", "LabTechSeparate=1", "LabActorCollision=trace", "LabRepHold=2000", "LabFxOrbFollow=1", "LabBoundsStepM=10", "LabIskmTrackReserve=1") },
-    # v2 W9 ISKM 번쩍임: W8까지의 동작(엔진이 트랙을 하나씩 늘린다)
-    @{ Name = "finalreserve0"; Args = @("-LabStage=M5", "-LabVariant=q4final", "-LabIskmTrackReserve=0"); Expect = @("LabStage=M5", "LabVariant=q4final", "LabTechSeparate=1", "LabActorCollision=trace", "LabRepHold=2000", "LabFxOrbFollow=1", "LabBoundsStepM=10", "LabIskmTrackReserve=0") },
-    # v2 W8 움직이는 오브용 기법: W7까지의 동작(외삽 목표 한 번, 상자 고정), 외삽 목표만 끔, 상자 간격 1m(자주 옮기는 비용)
-    @{ Name = "finalw7"; Args = @("-LabStage=M5", "-LabVariant=q4final", "-LabFxOrbFollow=0", "-LabBoundsStepM=0"); Expect = @("LabStage=M5", "LabVariant=q4final", "LabTechSeparate=1", "LabActorCollision=trace", "LabRepHold=2000", "LabFxOrbFollow=0", "LabBoundsStepM=0") },
-    @{ Name = "finalfx0"; Args = @("-LabStage=M5", "-LabVariant=q4final", "-LabFxOrbFollow=0"); Expect = @("LabStage=M5", "LabVariant=q4final", "LabTechSeparate=1", "LabActorCollision=trace", "LabRepHold=2000", "LabFxOrbFollow=0", "LabBoundsStepM=10") },
-    @{ Name = "finalstep1"; Args = @("-LabStage=M5", "-LabVariant=q4final", "-LabBoundsStepM=1"); Expect = @("LabStage=M5", "LabVariant=q4final", "LabTechSeparate=1", "LabActorCollision=trace", "LabRepHold=2000", "LabFxOrbFollow=1", "LabBoundsStepM=1") },
-    # v2 W7 전환: 최소 유지 시간 끔(-LabRepHold=0)과 액터 상한을 낮춘 조건(-LabActorCap=500, 2m/s에서 상한에 닿게 한다. 상한 규칙을 확인하는 조건)
-    @{ Name = "finalhold0"; Args = @("-LabStage=M5", "-LabVariant=q4final", "-LabRepHold=0"); Expect = @("LabStage=M5", "LabVariant=q4final", "LabTechSeparate=1", "LabActorCollision=trace", "LabRepHold=0") },
-    @{ Name = "finalcap500"; Args = @("-LabStage=M5", "-LabVariant=q4final", "-LabActorCap=500"); Expect = @("LabStage=M5", "LabVariant=q4final", "LabTechSeparate=1", "LabActorCollision=trace", "LabActorCap=500", "LabRepHold=2000") },
-    @{ Name = "finalcap500hold0"; Args = @("-LabStage=M5", "-LabVariant=q4final", "-LabActorCap=500", "-LabRepHold=0"); Expect = @("LabStage=M5", "LabVariant=q4final", "LabTechSeparate=1", "LabActorCollision=trace", "LabActorCap=500", "LabRepHold=0") },
-    @{ Name = "finalnocap"; Args = @("-LabStage=M5", "-LabVariant=q4final", "-LabActorCollision=0"); Expect = @("LabStage=M5", "LabVariant=q4final", "LabTechSimLod=1", "LabTechAvoid=0", "LabTechSeparate=1", "LabActorCollision=0") },
-    # v2 W5 직렬 트레이스용(아래 W3 직렬 구성과 같은 방식). 수치는 비교에 쓰지 않는다
-    @{ Name = "finalnocapser"; Args = @("-LabStage=M5", "-LabVariant=q4final", "-LabActorCollision=0", "-LabFullyParallel=0"); Expect = @("LabStage=M5", "LabVariant=q4final", "LabTechSeparate=1", "LabActorCollision=0") },
-    @{ Name = "finalnosep"; Args = @("-LabStage=M5", "-LabVariant=q4final", "-LabSeparate=0"); Expect = @("LabStage=M5", "LabVariant=q4final", "LabTechSimLod=1", "LabTechAvoid=0", "LabTechSeparate=0") },
-    @{ Name = "nofix"; Args = @("-LabStage=M5", "-LabVariant=q4final", "-LabSimLod=0", "-LabFixedBounds=0", "-LabCrowdFx=0"); Expect = @("LabStage=M5", "LabVariant=q4final", "LabTechSimLod=0", "LabTechFixedBounds=0", "LabTechCrowdFx=0") },
-    # v2 W3: 엔진 회피(-LabAvoid=1). finalav는 최종 구성(80m 안만 회피), m1·m1av는 첫 Mass 단계(전 개체가 매 프레임 돈다)
-    @{ Name = "finalav"; Args = @("-LabStage=M5", "-LabVariant=q4final", "-LabAvoid=1", "-LabSeparate=0"); Expect = @("LabStage=M5", "LabVariant=q4final", "LabTechSimLod=1", "LabTechAvoid=1", "LabTechSeparate=0") },
-    @{ Name = "m1"; Args = @("-LabStage=M1", "-LabVariant=m1mass"); Expect = @("LabStage=M1", "LabTechAvoid=0", "LabTechSeparate=1") },
-    @{ Name = "m1nosep"; Args = @("-LabStage=M1", "-LabVariant=m1mass", "-LabSeparate=0"); Expect = @("LabStage=M1", "LabTechAvoid=0", "LabTechSeparate=0") },
-    @{ Name = "m1av"; Args = @("-LabStage=M1", "-LabVariant=m1mass", "-LabAvoid=1", "-LabSeparate=0"); Expect = @("LabStage=M1", "LabTechAvoid=1", "LabTechSeparate=0") },
-    # v2 W3 직렬 트레이스용(-LabFullyParallel=0, Mass 프로세서가 Game 스레드에서 차례로 돈다). 프로세서별 비용을 대기 없이 읽는다. 수치는 비교에 쓰지 않는다
-    @{ Name = "finalser"; Args = @("-LabStage=M5", "-LabVariant=q4final", "-LabFullyParallel=0"); Expect = @("LabStage=M5", "LabVariant=q4final", "LabTechAvoid=0", "LabTechSeparate=1", "LabActorCollision=trace") },
-    @{ Name = "finalnosepser"; Args = @("-LabStage=M5", "-LabVariant=q4final", "-LabSeparate=0", "-LabFullyParallel=0"); Expect = @("LabStage=M5", "LabVariant=q4final", "LabTechAvoid=0", "LabTechSeparate=0") },
-    @{ Name = "finalavser"; Args = @("-LabStage=M5", "-LabVariant=q4final", "-LabAvoid=1", "-LabSeparate=0", "-LabFullyParallel=0"); Expect = @("LabStage=M5", "LabVariant=q4final", "LabTechAvoid=1", "LabTechSeparate=0") },
-    @{ Name = "m1ser"; Args = @("-LabStage=M1", "-LabVariant=m1mass", "-LabFullyParallel=0"); Expect = @("LabStage=M1", "LabTechAvoid=0", "LabTechSeparate=1") },
-    @{ Name = "m1avser"; Args = @("-LabStage=M1", "-LabVariant=m1mass", "-LabAvoid=1", "-LabSeparate=0", "-LabFullyParallel=0"); Expect = @("LabStage=M1", "LabTechAvoid=1", "LabTechSeparate=0") },
-    # v2 W6 액터 기준선(사다리 1단계). 캡슐끼리 막기(LabTechSeparate=1), 캡슐 Pawn 프로필 + 저격 채널(LabActorCollision=pawn). m0nosep은 캡슐끼리 무시(W5까지의 M0)
-    @{ Name = "m0"; Args = @("-LabStage=M0", "-LabVariant=full"); Expect = @("LabStage=M0", "LabVariant=full", "LabLadder=1", "LabTechSeparate=1", "LabActorCollision=pawn") },
-    @{ Name = "m0nosep"; Args = @("-LabStage=M0", "-LabVariant=full", "-LabSeparate=0"); Expect = @("LabStage=M0", "LabVariant=full", "LabTechSeparate=0", "LabActorCollision=pawn") }
+# v2 W10: 구성은 사다리 단계(s1~s8, -LabStage=1~8)와 단계 8의 빼 보기(a8*)다. 옛 단계·변형 이름(M0~M5, -LabVariant)은 지웠고 옛 구성(final, m1 등)도 함께 지웠다.
+# 단계별 스위치 표와 빼 보기 표는 Docs/Worklog/V2.md "W10"과 Docs/Guides/commands.md에 있다. 기대값은 그 표의 CSV 메타데이터 값이다.
+$StepExpect = @{
+    "1" = @("LabStage=1", "LabLadder=1", "LabTechHydrate=0", "LabTechAvoid=0", "LabTechSeparate=1", "LabActorCollision=pawn", "LabRepHold=0")
+    "2" = @("LabStage=2", "LabTechInstAnim=0", "LabTechHydrate=1", "LabTechAnimBudget=0", "LabTechHydrateFix=0", "LabTechSimLod=0", "LabTechFarCull=1", "LabTechAvoid=1", "LabTechSeparate=0", "LabActorCollision=trace", "LabRepHold=0", "LabActorCap=500", "LabHydrateM=30")
+    "3" = @("LabStage=3", "LabTechInstAnim=0", "LabTechHydrate=1", "LabTechAnimBudget=0", "LabTechHydrateFix=0", "LabTechSimLod=0", "LabTechAvoid=0", "LabTechSeparate=1", "LabActorCollision=trace", "LabRepHold=0")
+    "4" = @("LabStage=4", "LabTechInstAnim=1", "LabTechAnimBudget=1", "LabTechHydrateFix=1", "LabTechPool=0", "LabTechSimLod=0", "LabTechIskm=0", "LabTechAvoid=0", "LabTechSeparate=1", "LabActorCollision=trace", "LabRepHold=2000")
+    "5" = @("LabStage=5", "LabTechInstAnim=1", "LabTechPool=1", "LabTechSimLod=1", "LabTechIskm=0", "LabTechSeparate=1", "LabActorCollision=trace", "LabRepHold=2000")
+    "6" = @("LabStage=6", "LabTechIskm=1", "LabTechFixedBounds=1", "LabTechCrowdFx=0", "LabBoundsStepM=10", "LabIskmTrackReserve=1", "LabTechSeparate=1", "LabRepHold=2000")
+    "7" = @("LabStage=7", "LabTechIskm=1", "LabTechCrowdFx=1", "LabFxOrbFollow=1", "LabActorCap=500", "LabHydrateM=30", "LabFarShadow=1", "LabRepHold=2000")
+    "8" = @("LabStage=8", "LabLadder=8", "LabTechSimLod=1", "LabTechIskm=1", "LabTechFixedBounds=1", "LabTechCrowdFx=1", "LabTechAvoid=0", "LabTechSeparate=1", "LabActorCollision=trace", "LabRepHold=2000",
+            "LabFxOrbFollow=1", "LabBoundsStepM=10", "LabIskmTrackReserve=1", "LabActorCap=1000", "LabHydrateM=40", "LabFarShadow=0")
+}
+$ConfigTable = @()
+foreach ($s in 1..8) { $ConfigTable += @{ Name = "s$s"; Args = @("-LabStage=$s"); Expect = @($StepExpect["$s"]) } }
+# 빼 보기: 단계 8에서 스위치 하나. Expect는 바뀌는 메타데이터 값이다. LabOverrides는 정지 조건(orbit=…)과 섞이므로 대조하지 않는다
+$Ablations = @(
+    @{ Name = "a8hyd"; Arg = "-LabHydrate=0"; Expect = @("LabTechHydrate=0", "LabActorCollision=-") },
+    @{ Name = "a8bud"; Arg = "-LabScreenSigBudget=0"; Expect = @("LabTechAnimBudget=0", "LabBudget=0") },
+    @{ Name = "a8fix"; Arg = "-LabHydrateFixMask=0"; Expect = @("LabTechHydrateFix=0", "LabHydrateFixMask=0") },
+    @{ Name = "a8hold"; Arg = "-LabRepHold=0"; Expect = @("LabRepHold=0") },
+    @{ Name = "a8pool"; Arg = "-LabEntityPool=0"; Expect = @("LabTechPool=0", "LabPool=0") },
+    @{ Name = "a8sim"; Arg = "-LabSimLod=0"; Expect = @("LabTechSimLod=0", "LabSimLod=-") },
+    @{ Name = "a8iskm"; Arg = "-LabIskm=0"; Expect = @("LabTechIskm=0", "LabIskmTrackReserve=-", "LabBoundsStepM=-") },
+    @{ Name = "a8bnd"; Arg = "-LabFixedBounds=0"; Expect = @("LabTechFixedBounds=0", "LabIskmBounds=0", "LabBoundsStepM=-") },
+    @{ Name = "a8far"; Arg = "-LabFarCull=0"; Expect = @("LabTechFarCull=0") },
+    @{ Name = "a8fx"; Arg = "-LabCrowdFx=0"; Expect = @("LabTechCrowdFx=0", "LabCrowdFxActive=0", "LabFxOrbFollow=-") },
+    @{ Name = "a8sep"; Arg = "-LabSeparate=0"; Expect = @("LabTechSeparate=0") },
+    @{ Name = "a8cap"; Arg = "-LabActorCollision=0"; Expect = @("LabActorCollision=0") },
+    @{ Name = "a8res"; Arg = "-LabIskmTrackReserve=0"; Expect = @("LabIskmTrackReserve=0") },
+    @{ Name = "a8fxf"; Arg = "-LabFxOrbFollow=0"; Expect = @("LabFxOrbFollow=0") },
+    @{ Name = "a8stp"; Arg = "-LabBoundsStepM=0"; Expect = @("LabBoundsStepM=0") },
+    @{ Name = "a8shd"; Arg = "-LabFarShadow=1"; Expect = @("LabFarShadow=1") },
+    # 하위 실험(빼 보기가 아니라 더하기): 단계 8에 엔진 회피를 더한다(D43의 비교)
+    @{ Name = "s8av"; Arg = "-LabAvoid=1"; Expect = @("LabTechAvoid=1") }
 )
+foreach ($a in $Ablations) {
+    $keys = @($a.Expect | ForEach-Object { ($_ -split "=")[0] })
+    $base = @($StepExpect["8"] | Where-Object { $keys -notcontains (($_ -split "=")[0]) })
+    $ConfigTable += @{ Name = $a.Name; Args = @("-LabStage=8", $a.Arg); Expect = $base + @($a.Expect) }
+}
+# 직렬 트레이스용(-LabFullyParallel=0, Mass 프로세서가 Game 스레드에서 차례로 돈다). 수치는 비교에 쓰지 않는다
+foreach ($s in 2..8) { $ConfigTable += @{ Name = "s${s}ser"; Args = @("-LabStage=$s", "-LabFullyParallel=0"); Expect = @($StepExpect["$s"]) } }
 $ConfigNames = @($Configs -split "," | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne "" })
-$UseConfigs = @($ConfigTable | Where-Object { $ConfigNames -contains $_.Name })
+$UseConfigs = @($ConfigNames | ForEach-Object { $cfgName = $_; $ConfigTable | Where-Object { $_.Name -eq $cfgName } }) # -Configs의 순서대로(r0은 첫 구성)
 if ($UseConfigs.Count -ne $ConfigNames.Count) { Write-Host "FAIL: unknown config in -Configs '$Configs' ($(($ConfigTable | ForEach-Object { $_.Name }) -join ', '))"; exit 1 }
 $SpeedList = @($Speeds -split "," | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne "" })
 $NList = if ($Ns) { @($Ns -split "," | ForEach-Object { [int]$_.Trim() } | Where-Object { $_ -gt 0 }) } else { @($N) }
+$ConfigN = @{}
+foreach ($pair in @($ConfigNs -split "," | Where-Object { $_.Trim() -ne "" })) { $k, $v = $pair.Trim() -split "="; $ConfigN[$k] = [int]$v }
 $Conds = @()
 for ($i = 0; $i -lt $SpeedList.Count; $i++) {
-    foreach ($c in $UseConfigs) { foreach ($n in $NList) { $Conds += @{ Step = "V$i"; Speed = $SpeedList[$i]; Config = $c; N = $n } } }
+    foreach ($c in $UseConfigs) {
+        $cn = if ($ConfigN.ContainsKey($c.Name)) { @($ConfigN[$c.Name]) } else { $NList }
+        foreach ($n in $cn) { $Conds += @{ Step = "V$i"; Speed = $SpeedList[$i]; Config = $c; N = $n } }
+    }
 }
 $SkipList = @($SkipConds -split "," | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne "" })
 if ($SkipList.Count -gt 0) { $Conds = @($Conds | Where-Object { $SkipList -notcontains "$($_.Step)-$($_.Config.Name)" }) }
@@ -107,9 +122,15 @@ function Get-Expect($c, $label) {
 # 실행 목록: r0(첫 조건, 버림) + 회차마다 전 조건
 $Jobs = @()
 if (-not $SkipR0) { $Jobs += @{ Cond = $Conds[0]; Run = 0 } }
-for ($r = 1; $r -le $Runs; $r++) {
+$ConfigRun = @{}
+foreach ($pair in @($ConfigRuns -split "," | Where-Object { $_.Trim() -ne "" })) { $k, $v = $pair.Trim() -split "="; $ConfigRun[$k] = [int]$v }
+$MaxRuns = @(@($Runs) + @($ConfigRun.Values) | Measure-Object -Maximum).Maximum
+for ($r = 1; $r -le $MaxRuns; $r++) {
     $order = if ($r % 2 -eq 1) { $Conds } else { $o = @($Conds); [array]::Reverse($o); $o }
-    foreach ($c in $order) { $Jobs += @{ Cond = $c; Run = $r } }
+    foreach ($c in $order) {
+        $limit = if ($ConfigRun.ContainsKey($c.Config.Name)) { $ConfigRun[$c.Config.Name] } else { $Runs }
+        if ($r -le $limit) { $Jobs += @{ Cond = $c; Run = $r } }
+    }
 }
 
 if ($DryRun) {
@@ -218,10 +239,10 @@ $Ok = 0; $Fail = 0
 foreach ($j in $Jobs) {
     if (Invoke-Run $j.Cond $j.Run) { $Ok++ } else { $Fail++; if ($j.Run -gt 0) { $Retry += $j } }
 }
-# 실패한 실행은 묶음 끝에서 새 회차 번호(회차 + Runs)로 한 번만 다시 잰다
+# 실패한 실행은 묶음 끝에서 새 회차 번호(회차 + 가장 큰 회차 수)로 한 번만 다시 잰다
 $GaveUp = 0
 foreach ($j in $Retry) {
-    if (Invoke-Run $j.Cond ($j.Run + $Runs)) { $Ok++ } else { $GaveUp++; Write-Host "GIVEUP $(Label-Of $j.Cond ($j.Run + $Runs))" }
+    if (Invoke-Run $j.Cond ($j.Run + $MaxRuns)) { $Ok++ } else { $GaveUp++; Write-Host "GIVEUP $(Label-Of $j.Cond ($j.Run + $MaxRuns))" }
 }
 $Info = [ordered]@{ batch = $Batch; build = $Commit; start = $Start; end = (Now); n = ($NList -join ","); preset = "P3"; radius_m = $RadiusM; height_m = $HeightM; speeds = $SpeedList;
     duration_sec = $DurationSec; runs = $Runs; planned = $Jobs.Count; ok = $Ok; failed = $Fail; gave_up = $GaveUp }

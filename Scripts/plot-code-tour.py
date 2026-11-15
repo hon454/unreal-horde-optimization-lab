@@ -15,8 +15,8 @@ INK, SUB, LINE, BG, CARD = "#111827", "#4b5563", "#e5e7eb", "#ffffff", "#f8fafc"
 BLUE, TEAL, PINK, AMBER, DARK, GRAY = "#2563eb", "#0d9488", "#db2777", "#b45309", "#374151", "#9ca3af"
 W = 800
 
-# Ladder steps 4, 7 and 8 spend earned frame time on quality (same split as plot-readme.py).
-SPEND = {4, 7, 8}
+# v2 ladder (Docs/v2-plan.md "사다리"): steps 4, 6 and 7 add quality, step 8 spends the earned frame time.
+SPEND = {4, 6, 7, 8}
 
 
 def esc(t):
@@ -76,7 +76,7 @@ def frame_flow():
 
     # Mass PrePhysics frame.
     fy = y
-    o.append(f'<text x="24" y="{fy + 4}" font-size="17" font-weight="700">Mass 처리(PrePhysics 단계). 시작할 때 오브 위치·카메라·저격 요청을 받는다</text>')
+    o.append(f'<text x="24" y="{fy + 4}" font-size="17" font-weight="700">Mass 처리(PrePhysics 단계). 시작할 때 오브 궤도 위치·카메라·저격 요청을 받는다</text>')
     y = fy + 22
     lx, rx, cw = 44, 410, 346
     h = card(o, lx, y, rx + cw - lx, "1 거리 판정(LOD 그룹)",
@@ -92,7 +92,7 @@ def frame_flow():
     h = card(o, lx, ly, cw, "2 접근과 조향", ["ULabApproachProcessor(Tasks)", "다음 UMassSteerToMoveTargetProcessor"], steps=(2,))
     arrow(o, lx + cw / 2, ly + h, lx + cw / 2, ly + h + 30)
     ly += h + 32
-    h = card(o, lx, ly, cw, "3 이동(Movement)", ["엔진 이동·회전", "ULabOffMoveProcessor: 200m 밖"], steps=(2, 5))
+    h = card(o, lx, ly, cw, "3 이동", ["Movement 그룹: 엔진 이동·회전", "ULabOffMoveProcessor: 200m 밖", "다음 ULabSeparationProcessor: 겹침"], steps=(2, 3, 5))
     arrow(o, lx + cw / 2, ly + h, lx + cw / 2, ly + h + 30)
     ly += h + 32
     h = card(o, lx, ly, cw, "4 Lab 로직(LabLogic)", ["ULabOrbContactProcessor: 범위 피해", "다음 ULabOrbSnipeProcessor: 저격",
@@ -101,20 +101,20 @@ def frame_flow():
 
     # Right column: representation.
     ry = y
-    h = card(o, rx, ry, cw, "5 표현 전환", ["UMassVisualizationProcessor", "액터 · ISKM · 그리지 않음"], steps=(3, 8))
+    h = card(o, rx, ry, cw, "5 표현 전환", ["ULabRepHoldProcessor: 2초 유지", "다음 UMassVisualizationProcessor", "액터 · ISKM · 그리지 않음"], steps=(2, 4, 8))
     arrow(o, rx + cw / 2, ry + h, rx + cw / 2, ry + h + 30)
     ry += h + 32
-    h = card(o, rx, ry, cw, "6 ISKM과 입자 갱신", ["ULabIskmProcessor", "ULabCrowdFxGatherProcessor", "둘 사이의 순서는 없다"],
+    h = card(o, rx, ry, cw, "6 표현 갱신", ["ULabIskmProcessor", "ULabCrowdFxGatherProcessor", "ULabRepSwitchCountProcessor", "셋 사이의 순서는 없다"],
              steps=(6, 7), gt=True)
     arrow(o, rx + cw / 2, ry + h, rx + cw / 2, ry + h + 30)
     ry += h + 32
-    h = card(o, rx, ry, cw, "7 액터 동기화", ["ULabActorSyncProcessor"], steps=(4,), gt=True)
+    h = card(o, rx, ry, cw, "7 액터 동기화", ["ULabActorSyncProcessor"], steps=(2,), gt=True)
     ry += h
 
     y = max(ly, ry) + 32
     o.append(f'<text x="44" y="{y}" font-size="16" font-weight="700" fill="{AMBER}">왼쪽 열(로직)과 오른쪽 열(표현) 사이에는 순서 선언이 없다.</text>')
     o.append(f'<text x="44" y="{y + 24}" font-size="16" fill="{SUB}">태그 변경과 풀·재생성은 지연 명령이라 명령 버퍼를 비울 때 적용된다.</text>')
-    o.append(f'<text x="44" y="{y + 48}" font-size="16" fill="{SUB}">ULabNearOrbCountProcessor(오브 30m 안 개체 수)는 순서 선언이 없다.</text>')
+    o.append(f'<text x="44" y="{y + 48}" font-size="16" fill="{SUB}">ULabNearOrbCountProcessor와 ULabOverlapCountProcessor(집계)는 순서 선언이 없다.</text>')
     y += 70
     o.insert(len(o), f'<rect x="24" y="{fy + 12}" width="{W - 48}" height="{y - fy - 12}" rx="12" fill="none" '
                      f'stroke="{GRAY}" stroke-dasharray="6 5"/>')

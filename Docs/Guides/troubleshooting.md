@@ -11,8 +11,8 @@
 | Paragon 미니언이 배치 직후 래그돌처럼 늘어진다 | 피직스 에셋의 바디 Physics Type을 Default로 바꾼다 | [references.md](../Reference/references.md) 포럼 스레드 |
 | Test 패키지에서 `stat anim`, `ProfileGPU`, `a.Budget.Debug`가 동작하지 않는다 | 정상이다. Test에서는 컴파일되지 않는다. Development(`run-dev.ps1`)로 찍는다 | [ADR-0001](../Decisions/0001-test-package-for-measurement.md) |
 | Mass 하이드레이션 액터가 풀에 돌아간 뒤에도 애니메이션 예산을 쓴다 | `IMassActorPoolableInterface` 구현에서 중요도 0, 틱 끔을 확인한다 | [engine-notes.md](../Reference/engine-notes.md) "액터 풀링" |
-| `run-dev.ps1 -Extra`에 준 인자 일부가 빠지거나 듣지 않는다 | 게임 인자 여럿은 한 문자열로 넘긴다: `-Extra "-LabStage=M3 -LabTypes=2"` | [Worklog/M3b.md](../Worklog/M3b.md) "2종(에셋)" |
-| 개발 실행이 M0 액터로 돈다 | `-LabStage=`를 빠뜨렸다. 코드 기본값이 M0다. `-Extra "-LabStage=M<N>"`을 붙인다 | `Source/HordeOptLab/LabConfig.cpp` |
+| `run-dev.ps1 -Extra`에 준 인자 일부가 빠지거나 듣지 않는다 | 게임 인자 여럿은 한 문자열로 넘긴다: `-Extra "-LabSeparate=0 -LabTypes=2"` | [Worklog/M3b.md](../Worklog/M3b.md) "2종(에셋)" |
+| 실행이 곧바로 종료 코드 2로 끝나고 로그에 `lab_stage_unknown`이나 `lab_variant_removed`가 있다 | v2 W10에서 옛 단계 이름(`M0`\~`M5`)과 `-LabVariant=`를 지웠다. `-LabStage=1`\~`8`과 스위치 인자로 바꾼다. 코드 기본값은 단계 8이다 | [commands.md](commands.md) "사다리 단계와 스위치(v2 W10)" |
 | 촬영한 GIF에 게임 창의 왼쪽 위 일부만 담기고 나머지가 검다(화면 배율 150%) | ffmpeg `gdigrab -i title=`이 DPI를 몰라 창 크기를 논리 픽셀로 읽는다. `capture-full.ps1`은 DPI 인식 좌표로 클라이언트 영역을 구해 `-i desktop`에 offset과 크기를 준다(624d6ae). 직접 ffmpeg를 부를 때도 같은 방식을 쓴다 | [Worklog/Q5.md](../Worklog/Q5.md) "후처리 스크립트 수정(2026-11-12)" |
 | `run-full.ps1`가 "too few frames or unparsable check output"으로 실행을 버린다(액터 1만 조건) | 측정 구간의 프레임 수가 100 미만이다. 프레임당 400\~470ms면 10초 구간에 26\~30프레임이다. `-DurationOverride`는 예행 전용이고 정식 60초 구간에서 통과하는지는 아직 재지 않았다. 검사 값(100)은 러너 코드에 있다 | [Worklog/Q5.md](../Worklog/Q5.md) "예행 묶음 Reh2", `Scripts/run-full.ps1` |
 | Unreal MCP `AddUserVariables`로 Niagara 배열(Vector 4 Array 등) 사용자 변수를 만들었는데 오류 없이 아무것도 생기지 않는다 | 엔진이 데이터 인터페이스 변수를 직접 넣는 경로를 막아 놓았다. 다이내믹 입력의 배열 입력을 `SetStackInputData`로 그 이름의 사용자 변수에 연결한다 | [engine-notes.md](../Reference/engine-notes.md) 24절, [Worklog/Q2.md](../Worklog/Q2.md) |
