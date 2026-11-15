@@ -73,6 +73,8 @@ foreach ($s in @(1, 8)) {
 $base8 = @($StepExpect["8"] | Where-Object { $_ -notmatch '^LabFarHandoff=|^LabFarHitIskm=' })
 $ConfigTable += @{ Name = "s8m6a"; Args = @("-LabStage=8", "-LabFarHitIskm=0"); Expect = $base8 + @("LabFarHandoff=1", "LabFarHitIskm=0") }
 $ConfigTable += @{ Name = "s8m6b"; Args = @("-LabStage=8", "-LabFarHandoff=0"); Expect = $base8 + @("LabFarHandoff=0", "LabFarHitIskm=1") }
+# 방향 보간 병렬 사본(묶음 V2SmoothOri, Docs/Worklog/V2.md "방향 보간 병렬 사본"): 단계 8 + -LabSmoothOrient=1. 메타데이터 키가 따로 없어 기대값은 s8과 같다(LabOverrides는 대조하지 않는다)
+$ConfigTable += @{ Name = "s8so"; Args = @("-LabStage=8", "-LabSmoothOrient=1"); Expect = @($StepExpect["8"]) }
 # 빼 보기: 단계 8에서 스위치 하나. Expect는 바뀌는 메타데이터 값이다. LabOverrides는 정지 조건(orbit=…)과 섞이므로 대조하지 않는다
 $Ablations = @(
     @{ Name = "a8hyd"; Arg = "-LabHydrate=0"; Expect = @("LabTechHydrate=0", "LabActorCollision=-") },
