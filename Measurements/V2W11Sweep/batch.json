@@ -1,0 +1,19 @@
+﻿{
+    "batch":  "V2W11Sweep",
+    "build":  "903c3385a45ce3ec804375680e9fc68023184985 (dirty)",
+    "start":  "2026-11-15 16:51:31",
+    "end":  "2026-11-15 17:44:50",
+    "n":  "10000",
+    "preset":  "P3",
+    "radius_m":  "57.3",
+    "height_m":  "6",
+    "speeds":  [
+                   "2"
+               ],
+    "duration_sec":  180,
+    "runs":  3,
+    "planned":  13,
+    "ok":  13,
+    "failed":  0,
+    "gave_up":  0
+}
