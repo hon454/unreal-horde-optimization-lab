@@ -593,3 +593,14 @@
 | 상한을 끄는 설정 | `UMassVisualizationLODProcessor::bDoAdjustmentFromCount`(기본 참). 거짓이면 상한 자체가 없다 | `MG/MassRepresentation/Public/MassVisualizationLODProcessor.h:62` |
 | LOD를 고칠 자리 | 표현 LOD 프로세서는 그룹 `LOD`, 표현 프로세서(`UMassRepresentationProcessor` 계열)는 그룹 `Representation`이고 `LOD` 뒤다. `UMassVisualizationProcessor`는 그 안의 `Representation.VisualizationProcessing`이다. 그래서 `Representation` 그룹에서 `LOD` 뒤, `VisualizationProcessing` 앞에 둔 프로세서는 이번 프레임의 LOD가 정해진 뒤, 표현이 바뀌기 전에 돈다 | `MassVisualizationLODProcessor.cpp:15-16`, `MassRepresentationProcessor.cpp:56-57,523`, `MG/MassRepresentation/Public/MassRepresentationTypes.h:30` |
 | 먼 청크의 LOD | 화면 거리 밖(`FMassVisibilityCulledByDistanceTag`) 청크는 표현이 갱신되는 프레임(0.5초 ± 10%)에만 LOD를 다시 셈한다. 그 청크에는 표현이 없음인 개체만 모인다(표현이 있으면 `CanBeSeen` 청크로 옮긴다) | `MassVisualizationLODProcessor.cpp:41-45`, `MassRepresentationProcessor.cpp:575-600,604-616` |
+
+## 41. 움직이는 카메라에서의 ISKM 바운드와 입자 사용자 변수(2026-11-15, v2 W8)
+
+줄임말: **ENG** = `Engine/Source/Runtime/Engine`, **RD** = `Engine/Source/Runtime/Renderer/Private`, **NI** = `Engine/Plugins/FX/Niagara`. 실행 결과는 [Worklog/V2.md](../Worklog/V2.md) "W8"에 있다.
+
+| 항목 | 확인한 것 | 위치 |
+| --- | --- | --- |
+| ISKM 바운드는 인스턴스 갱신과 함께 넘어간다 | `SendRenderInstanceData_Concurrent`는 `InstanceDataManager.FlushChanges`가 참이면 `UpdateBounds()` 뒤 `UpdatePrimitiveInstances(this)`를 부른다. `FScene::UpdatePrimitiveInstances`는 그때의 `Primitive->Bounds`를 `WorldBounds`로 렌더 스레드에 넘긴다. 그래서 인스턴스가 매 프레임 움직이는 컴포넌트는 `SetPrimitiveBoundsOverride`로 상자만 바꿔도 다음 프레임에 새 바운드가 쓰인다. 렌더 상태를 다시 만들 필요가 없다 | `ENG/Private/Components/InstancedSkinnedMeshComponent.cpp:495-498`, `RD/RendererScene.cpp:1789-1794` |
+| ISKM 인스턴스 컬링은 인스턴스 데이터로 한다 | ISKM 프록시는 인스턴스 장면 데이터 버퍼(`SetupInstanceSceneDataBuffers`)를 쓴다. 인스턴스 로컬 바운드는 프리미티브 바운드와 따로 만든다(15절 "ISKM 고정 바운드"). 실행에서도 카메라가 상자 안이면 상자 밖의 인스턴스가 그려졌다(Worklog "W8"). 상자는 카메라를 품는 한 컴포넌트 단위 컬링(절두체, 가림)에만 쓰인다 | `ENG/Private/InstancedSkinnedMeshSceneProxy.cpp:59,78` |
+| Position 사용자 변수 넣기 | `SetVariableVec3`는 덮어쓰기 저장소에 그 이름의 Position 변수가 있으면 `SetVariablePosition`으로 넘긴다. 시스템 인스턴스가 있으면 둘 다 `SetVariable_Deferred`로 미뤄 다음 시스템 틱에 반영한다. 매 프레임 넣는 `User.LabNow`(float)와 같은 길이다 | `NI/Source/Niagara/Private/NiagaraComponent.cpp:2779-2786, 2814-2827` |
+| 메시 입자의 카메라 거리 컬링 | 렌더러의 `MinCameraDistance`·`MaxCameraDistance`는 GPU 장면 인스턴스 쓰기 셰이더가 입자마다 판정한다. 기준은 메시 바운딩 중심의 월드 위치와 주 뷰 카메라 원점 사이 거리다 | `NI/Source/Niagara/Private/NiagaraRendererMeshes.cpp:131`, `NI/Shaders/Private/NiagaraUpdateMeshGPUSceneInstances.usf:170-180` |

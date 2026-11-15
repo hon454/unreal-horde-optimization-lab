@@ -1,0 +1,19 @@
+﻿{
+    "batch":  "V2W8Orb",
+    "build":  "3bcd4dcd4fcd22853f03d9ec45f8cabc1c5fbfe2 (dirty)",
+    "start":  "2026-11-15 11:05:50",
+    "end":  "2026-11-15 11:59:10",
+    "n":  "10000",
+    "preset":  "P3",
+    "radius_m":  "57.3",
+    "height_m":  "6",
+    "speeds":  [
+                   "2"
+               ],
+    "duration_sec":  180,
+    "runs":  3,
+    "planned":  13,
+    "ok":  13,
+    "failed":  0,
+    "gave_up":  0
+}
