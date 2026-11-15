@@ -85,6 +85,9 @@ struct FLabQuality
 	static constexpr int32 Q4FinalActorCap = 1000;
 	// Q4b 표현 LOD 재편: 79m → 40m. Q4 묶음에서 대형 액터의 애니 갱신 건너뜀 비율이 40m 0.03~0.07, 50m 0.25~0.31, 79m 0.66이었다
 	static constexpr float Q4FinalHydrateM = 40.f;
+	// v2 W7 표현 전환의 최소 유지 시간(ms, FLabConfig::RepHoldMs). 근거는 Docs/Worklog/V2.md "W7": 액터 경계 왕복의 간격이 대부분 1~2초라
+	// 1,000ms는 이동 조건의 왕복을 거의 줄이지 못했고(개발 빌드 초당 약 4 → 3.5), 2,000ms(왕복 창과 같은 값)는 상한 500 조건의 왕복(초당 13~63)을 0으로 만들었다
+	static constexpr int32 DefaultRepHoldMs = 2000;
 };
 
 /**
@@ -299,6 +302,13 @@ struct FLabConfig
 	 * M0(v2 W6)에서는 분리 프로세서가 아니라 액터 캡슐끼리 막기를 켜고 끈다(UsesActorBlocking).
 	 */
 	bool bSeparate = true;
+	/**
+	 * v2 W7 표현 전환의 최소 유지 시간(ms, -LabRepHold=<ms>, 0이면 끔, Docs/v2-spec.md 4.1, Docs/Worklog/V2.md "W7"). 기본 FLabQuality::DefaultRepHoldMs.
+	 * 한 번 표현 무리(액터·인스턴스·없음)가 바뀐 엔티티는 이 시간 안에 바로 전의 무리로 되돌아가지 않는다(ULabRepHoldProcessor). 액터 상한은 넘지 않는다.
+	 * M3 이상 단계(액터가 있는 단계)에서만 등록한다(UsesRepHold). CSV 메타데이터 LabRepHold.
+	 */
+	int32 RepHoldMs = FLabQuality::DefaultRepHoldMs;
+	bool UsesRepHold() const { return Stage >= ELabStage::M3 && RepHoldMs > 0 && !UsesManager(); }
 	/** 분리 파라미터(LabSeparation.h). Test 빌드는 기본값만 쓴다. 개발 빌드는 -LabSepIter=, -LabSepRelax=, -LabSepMaxStep=, -LabSepVel=로 바꿔 본다 */
 	FLabSeparationParams Separation;
 	/**

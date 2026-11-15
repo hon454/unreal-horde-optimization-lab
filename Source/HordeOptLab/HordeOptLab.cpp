@@ -52,9 +52,12 @@ public:
 		// v2 W4: 겹침 방지 직접 구현(W5부터 기본 켬, -LabSeparate=0이 끈다). 끈 실행은 프로세서 구성이 W4 전과 같다
 		const bool bSeparate = FLabConfig::Get().UsesSeparation();
 		LabSetAutoRegister(GetMutableDefault<ULabSeparationProcessor>(), bSeparate);
-		// crowdfx_entity·separate는 켰을 때만 붙인다(다른 실행의 로그는 그대로다)
-		UE_LOG(LogLab, Log, TEXT("lab_ism_processor %s simlod=%d offmove=%d%s%s"), bIskm ? TEXT("iskm") : bVat ? TEXT("vat") : TEXT("engine"), bSimLod ? 1 : 0, bOffMove ? 1 : 0,
-			bCrowdFxEntity ? TEXT(" crowdfx_entity=1") : TEXT(""), bSeparate ? TEXT(" separate=1") : TEXT(""));
+		// v2 W7: 표현 전환의 최소 유지 시간(-LabRepHold=<ms>). 끈 실행은 프로세서 구성이 W7 전과 같다
+		const bool bRepHold = FLabConfig::Get().UsesRepHold();
+		LabSetAutoRegister(GetMutableDefault<ULabRepHoldProcessor>(), bRepHold);
+		// crowdfx_entity·separate·rep_hold는 켰을 때만 붙인다(다른 실행의 로그는 그대로다)
+		UE_LOG(LogLab, Log, TEXT("lab_ism_processor %s simlod=%d offmove=%d%s%s%s"), bIskm ? TEXT("iskm") : bVat ? TEXT("vat") : TEXT("engine"), bSimLod ? 1 : 0, bOffMove ? 1 : 0,
+			bCrowdFxEntity ? TEXT(" crowdfx_entity=1") : TEXT(""), bSeparate ? TEXT(" separate=1") : TEXT(""), bRepHold ? TEXT(" rep_hold=1") : TEXT(""));
 	}
 };
 

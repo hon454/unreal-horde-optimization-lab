@@ -121,6 +121,13 @@ public:
 	/** v2 W3 겹친 쌍의 수(LabOverlap.h). ULabOverlapCountProcessor가 0.5초마다 쓴다. 게임 모드가 CSV 스탯 Lab/OverlapPairs·Lab/OverlapDeep로 남긴다 */
 	std::atomic<int32> OverlapPairs{0};
 	std::atomic<int32> OverlapDeep{0};
+	/**
+	 * v2 W7 표현 전환 기록(Docs/Worklog/V2.md "W7"). 엔티티마다 마지막으로 표현 무리(0 액터, 1 인스턴스, 2 없음)가 바뀐 시각과 방향이다. 바뀐 적이 있는 엔티티만 들어간다.
+	 * ULabRepSwitchCountProcessor(표현 뒤)가 쓰고 ULabRepHoldProcessor(표현 LOD 뒤, 표현 앞)가 읽는다. 둘 다 게임 스레드 전용 프로세서라 동시에 돌지 않는다.
+	 * 그래서 잠금 없이 두어도 아래 특성의 ThreadSafeWrite 전제(동시에 쓰는 일이 없다)가 깨지지 않는다. 다른 프로세서는 만지지 않는다.
+	 */
+	struct FLabRepSwitch { double Time = 0.; uint8 From = 0; uint8 To = 0; bool bVisible = false; };
+	TMap<FMassEntityHandle, FLabRepSwitch> RepLastSwitch;
 	/** Q5 HUD: 이 프레임 동기화한 하이드레이션 액터 수(CSV 스탯 Lab/Actors와 같은 값, ULabActorSyncProcessor가 쓴다) */
 	std::atomic<int32> ActorCount{0};
 	/**

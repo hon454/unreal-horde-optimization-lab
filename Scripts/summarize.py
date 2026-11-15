@@ -48,6 +48,20 @@ FULL_FIELDS = FULL_TEXT + FULL_NUM + FULL_THREAD
 BUDGET_TEXT = ["budget_ms"]
 BUDGET_NUM = ["large_skipped_ratio", "large_interp_ratio", "small_skipped_ratio", "small_interp_ratio", "budgeted_anim_ms"]
 BUDGET_FIELDS = BUDGET_TEXT + BUDGET_NUM
+# v2 W7 표현 전환(Docs/Worklog/V2.md "W7", ULabRepSwitchCountProcessor·ULabRepHoldProcessor). 모든 묶음의 맨 끝에 붙인다(옛 묶음의 열 순서는 그대로, 값은 빈칸).
+# rep_hold_ms = 메타데이터 LabRepHold(최소 유지 시간, 0 끔). sw_* = 초당 전환 수(스탯 합 ÷ 측정 구간 길이): 없음→인스턴스, 인스턴스→액터, 액터→인스턴스, 인스턴스→없음,
+# 그 밖(없음↔액터), 그림자 끔(80m 밖으로, LOD Medium→Low), 그림자 켬. 왕복(2초 안에 같은 경계를 반대로 다시 넘은 수, 초당): sw_round(표현 무리, Spike1부터의 뜻),
+# 그 가운데 sw_round_actor(40m 액터 경계)·sw_round_far(200m 경계), sw_round_shadow(80m 그림자 경계), sw_round_all = sw_round + sw_round_shadow.
+# rep_held·rep_cap_blocked = 초당 되돌린 전환 수·상한 때문에 막은 새 액터 수(규칙 끔이면 빈칸), rep_cap_on_ratio = 액터 상한이 걸린 프레임의 비율, actors_max = Lab/Actors 최댓값.
+# summary에는 중앙값을 쓰고 sw_round_all·sw_round_actor는 _min·_max도 쓴다
+SWITCH_TEXT = ["rep_hold_ms"]
+SWITCH_STATS = [("sw_none_to_inst", "Lab/SwNoneToInst"), ("sw_inst_to_actor", "Lab/SwInstToActor"), ("sw_actor_to_inst", "Lab/SwActorToInst"),
+                ("sw_inst_to_none", "Lab/SwInstToNone"), ("sw_other", "Lab/SwOther"), ("sw_shadow_off", "Lab/SwShadowOff"), ("sw_shadow_on", "Lab/SwShadowOn"),
+                ("sw_round", "Lab/SwRound"), ("sw_round_actor", "Lab/SwRoundActor"), ("sw_round_far", "Lab/SwRoundFar"), ("sw_round_shadow", "Lab/SwRoundShadow"),
+                ("rep_held", "Lab/RepHeld"), ("rep_cap_blocked", "Lab/RepCapBlocked")]
+SWITCH_NUM = [k for k, _ in SWITCH_STATS] + ["sw_round_all", "rep_cap_on_ratio", "actors_max"]
+SWITCH_RANGE = ["sw_round_all", "sw_round_actor"]
+SWITCH_FIELDS = SWITCH_TEXT + SWITCH_NUM
 
 _full_by_label = None
 
@@ -314,6 +328,28 @@ def quality_fields(header, data, meta):
     return out
 
 
+def switch_fields(header, data, meta, frame):
+    """v2 W7 표현 전환 열. 스탯 열이 없으면 빈칸."""
+    out = {k: "" for k in SWITCH_FIELDS}
+    out["rep_hold_ms"] = meta.get("labrephold", "")
+    span = sum(frame) / 1000.0 if frame else 0.0
+    if span <= 0:
+        return out
+    for key, stat in SWITCH_STATS:
+        vals = column(header, data, [stat])
+        if vals:
+            out[key] = round(sum(vals) / span, 3)
+    if out["sw_round"] != "" and out["sw_round_shadow"] != "":
+        out["sw_round_all"] = round(out["sw_round"] + out["sw_round_shadow"], 3)
+    cap = column(header, data, ["Lab/RepCapOn"])
+    if cap:
+        out["rep_cap_on_ratio"] = round(statistics.fmean(cap), 4)
+    act = column(header, data, ["Lab/Actors"])
+    if act:
+        out["actors_max"] = int(max(act))
+    return out
+
+
 def fg_ok(label):
     """패키지 Saved/Lab/<라벨>.summary.txt 끝의 `fg=30/30`(측정 구간 포그라운드가 게임인 표본 수 / 전체 표본 수). 없으면 빈칸(옛 실행)."""
     p = ROOT / "Packaged" / "Test" / "Windows" / "HordeOptLab" / "Saved" / "Lab" / f"{label}.summary.txt"
@@ -412,6 +448,7 @@ def summarize_run(path, pc):
         row["game_p95_ms"] = percentile(column(header, data, COLS["game"]), 0.95)
         row["gpu_p95_ms"] = percentile(column(header, data, COLS["gpu"]), 0.95)
         row.update(budget_fields(header, data, meta))
+    row.update(switch_fields(header, data, meta, frame))
     return row
 
 
@@ -428,7 +465,7 @@ def main():
     runs_path = out_dir / "runs.csv"
     full = bool(BATCH_NAME_RE.match(args.milestone))
     failed = failed_labels(args.milestone) if full else set()
-    run_fields = RUN_FIELDS + (FULL_FIELDS + BUDGET_FIELDS if full else [])
+    run_fields = RUN_FIELDS + (FULL_FIELDS + BUDGET_FIELDS if full else []) + SWITCH_FIELDS
 
     existing = {}
     if runs_path.exists():
@@ -492,6 +529,9 @@ def main():
         fields += BUDGET_TEXT
         for c in BUDGET_NUM:
             fields += [c, f"{c}_min", f"{c}_max"]
+    fields += SWITCH_TEXT
+    for c in SWITCH_NUM:
+        fields += [c] + ([f"{c}_min", f"{c}_max"] if c in SWITCH_RANGE else [])
     with open(out_dir / "summary.csv", "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=fields)
         w.writeheader()
@@ -537,6 +577,13 @@ def main():
                 for c in BUDGET_NUM:
                     vals = [float(r[c]) for r in rs if str(r.get(c, "")) != ""]
                     out[c] = round(statistics.median(vals), 4) if vals else ""
+                    out[f"{c}_min"] = min(vals) if vals else ""
+                    out[f"{c}_max"] = max(vals) if vals else ""
+            out["rep_hold_ms"] = "/".join(sorted({str(r.get("rep_hold_ms", "")) for r in rs if str(r.get("rep_hold_ms", "")) != ""}))
+            for c in SWITCH_NUM:
+                vals = [float(r[c]) for r in rs if str(r.get(c, "")) != ""]
+                out[c] = round(statistics.median(vals), 3) if vals else ""
+                if c in SWITCH_RANGE:
                     out[f"{c}_min"] = min(vals) if vals else ""
                     out[f"{c}_max"] = max(vals) if vals else ""
             w.writerow(out)

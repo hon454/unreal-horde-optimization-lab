@@ -23,9 +23,13 @@ SWITCH = [("none_to_inst", "Lab/SwNoneToInst"), ("inst_to_actor", "Lab/SwInstToA
 EXTRA = [("overlap", "Lab/OverlapPairs"), ("overlap_deep", "Lab/OverlapDeep")]
 # 저격 캡슐 트레이스(v2 W5, ALabOrb::GetCapsuleTraceStats). 누적 값이라 구간 증가분을 쓴다: 초당 트레이스 수, 대상 적중 비율, 캡슐에 맞은 비율(적중 + 막힘). 맨 뒤에 붙인다
 CAPSULE = [("traces", "Lab/CapsuleTraces"), ("hits", "Lab/CapsuleHits"), ("blocked", "Lab/CapsuleBlocked")]
+# v2 W7 경계별 전환(ULabRepSwitchCountProcessor)과 최소 유지 시간(ULabRepHoldProcessor). 초당 수, rep_cap_on_ratio는 상한이 걸린 프레임의 비율. 맨 뒤에 붙인다
+SWITCH2 = [("shadow_off", "Lab/SwShadowOff"), ("shadow_on", "Lab/SwShadowOn"), ("round_actor", "Lab/SwRoundActor"), ("round_far", "Lab/SwRoundFar"),
+           ("round_shadow", "Lab/SwRoundShadow"), ("rep_held", "Lab/RepHeld"), ("rep_cap_blocked", "Lab/RepCapBlocked")]
 FIELDS = (["label", "orbit", "bin", "t_end", "frames", "frame_p50", "frame_p95"] + [f"{k}_{s}" for k, _ in STATS for s in ("mean", "max")]
           + [f"sw_{k}_per_s" for k, _ in SWITCH] + ["deaths_per_s"] + [f"{k}_{s}" for k, _ in EXTRA for s in ("mean", "max")]
-          + ["capsule_traces_per_s", "capsule_hit_ratio", "capsule_any_ratio"])
+          + ["capsule_traces_per_s", "capsule_hit_ratio", "capsule_any_ratio"]
+          + [f"sw_{k}_per_s" for k, _ in SWITCH2] + ["rep_cap_on_ratio"])
 
 
 def main():
@@ -43,7 +47,8 @@ def main():
         ft = column(header, data, ["FrameTime"])
         if not ft:
             continue
-        cols = {k: column(header, data, [name]) for k, name in STATS + SWITCH + EXTRA}
+        cols = {k: column(header, data, [name]) for k, name in STATS + SWITCH + EXTRA + SWITCH2}
+        capon = column(header, data, ["Lab/RepCapOn"])
         deaths = column(header, data, ["Lab/Deaths"])
         caps = {k: column(header, data, [name]) for k, name in CAPSULE}
         orbit = meta.get("laborbit", meta.get("LabOrbit", ""))
@@ -63,9 +68,11 @@ def main():
                 v = cols[k][s:e] if len(cols[k]) == len(ft) else []
                 row[f"{k}_mean"] = round(sum(v) / len(v), 1) if v else ""
                 row[f"{k}_max"] = int(max(v)) if v else ""
-            for k, _ in SWITCH:
+            for k, _ in SWITCH + SWITCH2:
                 v = cols[k][s:e] if len(cols[k]) == len(ft) else []
                 row[f"sw_{k}_per_s"] = round(sum(v) / span, 2) if v and span > 0 else ""
+            cv = capon[s:e] if len(capon) == len(ft) else []
+            row["rep_cap_on_ratio"] = round(sum(cv) / len(cv), 3) if cv else ""
             # 초당 사망: 누적 사망 수(Lab/Deaths)의 구간 증가분 ÷ 구간 길이. 구간 앞 프레임의 값에서 잰다
             dv = deaths[max(s - 1, 0):e] if len(deaths) == len(ft) else []
             row["deaths_per_s"] = round((dv[-1] - dv[0]) / span, 2) if len(dv) > 1 and span > 0 else ""

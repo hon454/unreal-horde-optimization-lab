@@ -159,6 +159,15 @@ const FLabConfig& FLabConfig::Get()
 			if ((Separate != 0) != C.bSeparate) { NoteOverride(FString::Printf(TEXT("separate=%d"), Separate != 0 ? 1 : 0)); }
 			C.bSeparate = Separate != 0;
 		}
+		// v2 W7 표현 전환의 최소 유지 시간(LabConfig.h RepHoldMs). 0이면 끈다
+		{
+			int32 RepHold = -1;
+			if (FParse::Value(Cmd, TEXT("-LabRepHold="), RepHold) && RepHold >= 0)
+			{
+				if (RepHold != C.RepHoldMs) { NoteOverride(FString::Printf(TEXT("rep_hold=%d"), RepHold)); }
+				C.RepHoldMs = RepHold;
+			}
+		}
 #if !UE_BUILD_TEST
 		// 개발 빌드에서만 분리 파라미터를 바꿔 본다(LabSeparation.h). Test 빌드는 기본값이다
 		{
@@ -590,8 +599,8 @@ FString FLabConfig::ToLogString() const
 	const FString Crowd = bCrowdFx ? FString::Printf(TEXT(" crowdfx=1 crowdfx_particles=%d crowdfx_inner=%.1f crowdfx_entity=%d crowdfx_outer=%d"), CrowdFxParticles(), CrowdFxInnerCm() / 100.f, bCrowdFxEntity ? 1 : 0, bCrowdFxOuter ? 1 : 0) : FString();
 	// tech는 빼 보기 아홉 기법의 켬·끔이다(Q3). 모든 실행에 붙여 러너와 사람이 기대값과 대조한다.
 	// ladder·overrides·hud·actor_col은 Q5(사다리 단계, 변형 기본값과 다른 인자, HUD 켬, 하이드레이션 액터 캡슐 콜리전). tech 뒤에 늘 붙인다.
-	return FString::Printf(TEXT("lab_config stage=%s n=%d preset=P%d seed=%d variant=%s bench=%d label=%s duration=%.1f types=%d simlod=%s%s%s%s%s%s %s ladder=%s overrides=%s hud=%d actor_col=%s"),
+	return FString::Printf(TEXT("lab_config stage=%s n=%d preset=P%d seed=%d variant=%s bench=%d label=%s duration=%.1f types=%d simlod=%s%s%s%s%s%s %s ladder=%s overrides=%s hud=%d actor_col=%s rep_hold=%d"),
 		StageName(Stage), N, Preset, Seed, VariantName(Variant), bBench ? 1 : 0, *Label, DurationSec, Types, *SimLodString(),
 		FarM != 200 ? *FString::Printf(TEXT(" far=%d"), FarM) : TEXT(""), *M5, *Budget, *Health, *Crowd, *TechString(),
-		*Ladder().Id, Overrides.IsEmpty() ? TEXT("-") : *Overrides, bHud ? 1 : 0, ActorCollisionString());
+		*Ladder().Id, Overrides.IsEmpty() ? TEXT("-") : *Overrides, bHud ? 1 : 0, ActorCollisionString(), UsesRepHold() ? RepHoldMs : 0);
 }

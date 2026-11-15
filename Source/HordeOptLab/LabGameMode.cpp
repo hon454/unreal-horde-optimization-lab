@@ -478,6 +478,8 @@ void ALabGameMode::TickBench()
 			CSV_METADATA(TEXT("LabLadder"), *Config.Ladder().Id);
 			CSV_METADATA(TEXT("LabOverrides"), Config.Overrides.IsEmpty() ? TEXT("-") : *Config.Overrides);
 			CSV_METADATA(TEXT("LabActorCollision"), Config.ActorCollisionString());
+			// v2 W7: 표현 전환의 최소 유지 시간(ms). 규칙이 등록되지 않은 실행(끔, M3 미만 단계)은 0
+			CSV_METADATA(TEXT("LabRepHold"), *FString::FromInt(Config.UsesRepHold() ? Config.RepHoldMs : 0));
 			CSV_METADATA(TEXT("LabHud"), IsHudShown() ? TEXT("1") : TEXT("0"));
 			CSV_METADATA(TEXT("LabShotAt"), *FString::Printf(TEXT("%.0f"), Config.ShotAtSec));
 			// 측정 방법 5번(plan.md "M3b"): 빌드 커밋, 고정 CVar 값, GPU 드라이버. summarize.py BUILD_KEYS(labbuild·labcvars·labdriver)와 이름을 맞춘다.

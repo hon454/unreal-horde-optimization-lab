@@ -22,6 +22,8 @@ param(
     [int]$WarmupSec = -1,
     [int]$StartupSec = 30,
     [switch]$SkipR0,
+    # v2 W7: 쉼표로 이은 조건 이름(V<속도 번호>-<구성>)은 재지 않는다. 예: "V0-finalcap500,V0-finalcap500hold0"(상한 조건은 이동에서만 잰다)
+    [string]$SkipConds = "",
     # Insights 트레이스를 Saved/Traces/<라벨>.utrace로 남긴다. 트레이스 실행의 수치는 비교에 쓰지 않는다(이벤트 기록 비용)
     [switch]$Trace,
     [switch]$DryRun
@@ -45,7 +47,12 @@ $FailuresCsv = "$BatchDir\failures.csv"
 # W4의 finalsep·m1sep·finalsepser·m1sepser는 지금의 final·m1·finalser·m1ser와 같아 지웠다. 엔진 회피 구성(av)은 W3·W4와 같은 뜻이 되게 분리를 끈다.
 # v2 W5부터 하이드레이션 액터 캡슐의 기본값이 Trace(LabActorCollision=trace)다. 캡슐 끔은 접미사 nocap(-LabActorCollision=0)이다.
 $ConfigTable = @(
-    @{ Name = "final"; Args = @("-LabStage=M5", "-LabVariant=q4final"); Expect = @("LabStage=M5", "LabVariant=q4final", "LabTechSimLod=1", "LabTechFixedBounds=1", "LabTechCrowdFx=1", "LabTechAvoid=0", "LabTechSeparate=1", "LabActorCollision=trace") },
+    # v2 W7부터 final은 최소 유지 시간 2,000ms(LabRepHold=2000)를 대조한다
+    @{ Name = "final"; Args = @("-LabStage=M5", "-LabVariant=q4final"); Expect = @("LabStage=M5", "LabVariant=q4final", "LabTechSimLod=1", "LabTechFixedBounds=1", "LabTechCrowdFx=1", "LabTechAvoid=0", "LabTechSeparate=1", "LabActorCollision=trace", "LabRepHold=2000") },
+    # v2 W7 전환: 최소 유지 시간 끔(-LabRepHold=0)과 액터 상한을 낮춘 조건(-LabActorCap=500, 2m/s에서 상한에 닿게 한다. 상한 규칙을 확인하는 조건)
+    @{ Name = "finalhold0"; Args = @("-LabStage=M5", "-LabVariant=q4final", "-LabRepHold=0"); Expect = @("LabStage=M5", "LabVariant=q4final", "LabTechSeparate=1", "LabActorCollision=trace", "LabRepHold=0") },
+    @{ Name = "finalcap500"; Args = @("-LabStage=M5", "-LabVariant=q4final", "-LabActorCap=500"); Expect = @("LabStage=M5", "LabVariant=q4final", "LabTechSeparate=1", "LabActorCollision=trace", "LabActorCap=500", "LabRepHold=2000") },
+    @{ Name = "finalcap500hold0"; Args = @("-LabStage=M5", "-LabVariant=q4final", "-LabActorCap=500", "-LabRepHold=0"); Expect = @("LabStage=M5", "LabVariant=q4final", "LabTechSeparate=1", "LabActorCollision=trace", "LabActorCap=500", "LabRepHold=0") },
     @{ Name = "finalnocap"; Args = @("-LabStage=M5", "-LabVariant=q4final", "-LabActorCollision=0"); Expect = @("LabStage=M5", "LabVariant=q4final", "LabTechSimLod=1", "LabTechAvoid=0", "LabTechSeparate=1", "LabActorCollision=0") },
     # v2 W5 직렬 트레이스용(아래 W3 직렬 구성과 같은 방식). 수치는 비교에 쓰지 않는다
     @{ Name = "finalnocapser"; Args = @("-LabStage=M5", "-LabVariant=q4final", "-LabActorCollision=0", "-LabFullyParallel=0"); Expect = @("LabStage=M5", "LabVariant=q4final", "LabTechSeparate=1", "LabActorCollision=0") },
@@ -75,6 +82,8 @@ $Conds = @()
 for ($i = 0; $i -lt $SpeedList.Count; $i++) {
     foreach ($c in $UseConfigs) { foreach ($n in $NList) { $Conds += @{ Step = "V$i"; Speed = $SpeedList[$i]; Config = $c; N = $n } } }
 }
+$SkipList = @($SkipConds -split "," | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne "" })
+if ($SkipList.Count -gt 0) { $Conds = @($Conds | Where-Object { $SkipList -notcontains "$($_.Step)-$($_.Config.Name)" }) }
 function Label-Of($c, $run) { return "$Batch-$($c.Step)-$($c.Config.Name)-N$($c.N)-P1-r$run" }
 function Get-GameArgs($c, $label) {
     $a = @($Doc.common_args) + @($c.Config.Args) + @("-LabN=$($c.N)", "-LabPreset=1", "-LabLabel=$label",

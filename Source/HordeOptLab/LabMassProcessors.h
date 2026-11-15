@@ -9,6 +9,7 @@
 #include "LabSeparation.h"
 #include "MassCommonFragments.h"   // FTransformFragment
 #include "MassMovementFragments.h" // FMassDesiredMovementFragment
+#include "MassRepresentationFragments.h" // FMassRepresentationLODFragment, EMassRepresentationType(v2 W7 전환 프로세서)
 #include "LabMassProcessors.generated.h"
 
 /**
@@ -175,11 +176,15 @@ protected:
 };
 
 /**
- * 시험 실행 Spike1(Docs/Worklog/V2.md "시험 실행"): 표현 전환 수를 방향별로 센다. 오브와 카메라가 움직이면 높은 품질 → 낮은 품질 전환과 경계에서의 왕복이 생긴다.
+ * 표현 전환 수(시험 실행 Spike1에서 시작, v2 W7에서 본 구현으로 정리, Docs/Worklog/V2.md "W7"). 경계별·방향별로 센다. 모든 단계에서 등록한다(대상이 없으면 일하지 않는다).
  * 엔진 표현 프로세서가 이번 프레임에 갱신한 청크(FMassVisualizationChunkFragment::ShouldUpdateVisualization, MassRepresentationProcessor.cpp:529)에서
  * PrevRepresentation != CurrentRepresentation인 엔티티가 이번 프레임에 전환한 것이다(:118-121. 액터 준비 대기 중에는 Prev가 고정되므로 대기가 끝난 프레임에 한 번 센다).
+ * 경계: 액터 ↔ 인스턴스(최종 구성 40m), 인스턴스 ↔ 없음(200m, 최종 구성에서 없음은 입자), 인스턴스끼리 그림자 켬 ↔ 끔(표현 LOD Medium ↔ Low, 80m, Q4b).
  * CSV 스탯(프레임마다 그 프레임의 수): Lab/SwNoneToInst(없음·입자 → 인스턴스), Lab/SwInstToActor, Lab/SwActorToInst, Lab/SwInstToNone, Lab/SwOther(없음 ↔ 액터),
- * Lab/SwRound(같은 엔티티가 RoundTripSec 안에 같은 경계를 반대로 다시 넘은 수). 궤도 인자(FLabOrbit)를 하나라도 준 실행에서만 등록한다.
+ * Lab/SwShadowOff(Medium → Low), Lab/SwShadowOn(Low → Medium),
+ * Lab/SwRound(표현 무리의 왕복: 같은 엔티티가 RoundTripSec 안에 같은 경계를 반대로 다시 넘은 수. Spike1부터의 뜻 그대로), 그 가운데 Lab/SwRoundActor(액터 경계), Lab/SwRoundFar(200m 경계),
+ * 그리고 따로 Lab/SwRoundShadow(80m 경계의 왕복), Lab/RepCapOn(이번 프레임에 액터 상한이 거리를 당겼으면 1, FMassVisualizationLODSharedFragment::bHasAdjustedDistancesFromCount).
+ * 전환 기록은 ULabCrowdSubsystem::RepLastSwitch에 쓰고 ULabRepHoldProcessor가 읽는다.
  */
 UCLASS()
 class ULabRepSwitchCountProcessor : public UMassProcessor
@@ -188,12 +193,46 @@ class ULabRepSwitchCountProcessor : public UMassProcessor
 public:
 	ULabRepSwitchCountProcessor();
 	static constexpr double RoundTripSec = 2.;
+	/** 표현 무리: 0 액터, 1 인스턴스(ISKM·VAT ISM), 2 없음(그리는 끝 밖, 최종 구성에서는 입자) */
+	static uint8 ClassOf(EMassRepresentationType Type);
 protected:
 	virtual void ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager) override;
 	virtual void Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context) override;
 	FMassEntityQuery EntityQuery;
-	struct FLastSwitch { double Time = 0.; uint8 From = 0; uint8 To = 0; };
-	TMap<FMassEntityHandle, FLastSwitch> LastSwitch; // 전환한 엔티티만 들어간다(게임 스레드 전용)
+	struct FShadowSwitch { double Time = 0.; bool bOff = false; };
+	TMap<FMassEntityHandle, FShadowSwitch> ShadowLast; // 80m 경계를 넘은 엔티티만 들어간다(게임 스레드 전용)
+	double NextPruneTime = 0.;
+#if !UE_BUILD_TEST
+	// 개발 확인 로그(lab_repsw, 10초마다): 액터 경계 왕복을 원인별로 나눈다. 화면 안팎이 두 전환 사이에 바뀐 것(Vis), 아닌 것(Dist), 그중 상한이 걸린 프레임(Cap)
+	double LogSince = 0.;
+	int64 LogSw[8] = {};
+	int64 LogRoundActorVis = 0, LogRoundActorDist = 0, LogRoundActorCap = 0, LogRoundFar = 0, LogRoundShadow = 0, LogCapFrames = 0, LogFrames = 0;
+	int64 LogRoundDistHist[6] = {}; // 액터 경계 왕복의 카메라 거리(0~10, 10~20, 20~30, 30~40, 40~50, 50m~)
+#endif
+};
+
+/**
+ * v2 W7 표현 전환의 최소 유지 시간(-LabRepHold=<ms>, FLabConfig::UsesRepHold일 때만 등록, Docs/v2-spec.md 4.1, Docs/Worklog/V2.md "W7").
+ * 자리: 그룹 LOD, 엔진 표현 LOD 프로세서(UMassVisualizationLODProcessor) 뒤. 표현 프로세서(Representation 그룹, LOD 그룹 뒤)가 이번 프레임의 LOD로 표현을 바꾸기 전에 LOD를 고친다.
+ * 규칙: 엔진이 고른 LOD가 지금 표현과 다른 무리를 가리키고, 그 엔티티가 RepHoldMs 안에 반대 방향으로 바뀐 적이 있으면(ULabCrowdSubsystem::RepLastSwitch) LOD를 지난 프레임 값으로 되돌린다.
+ * 액터 상한: 되돌려 남긴 액터 때문에 LOD High 엔티티가 상한(LODMaxCount[High])을 넘으면, 이번 프레임 새로 액터가 될 엔티티를 먼 순으로 막는다.
+ * 그래도 넘으면 남긴 액터를 먼 순으로 놓아 준다. 먼 정도는 화면 안이면 화면 안 경계, 밖이면 화면 밖 경계로 나눈 거리다(엔진 상한의 거리 구간과 같은 정규화, MassLODCalculator.h:534-642).
+ * 엔진 Representation LOD는 액터 경계(High)에 히스테리시스가 없고 상한에서 거리를 매 프레임 다시 당긴다(engine-notes.md 19절, 40절). 이 규칙이 그 자리의 왕복을 막는다.
+ * CSV 스탯: Lab/RepHeld(이번 프레임 되돌린 수), Lab/RepCapBlocked(상한 때문에 막은 새 액터 수).
+ */
+UCLASS()
+class ULabRepHoldProcessor : public UMassProcessor
+{
+	GENERATED_BODY()
+public:
+	ULabRepHoldProcessor();
+protected:
+	virtual void ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager) override;
+	virtual void Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context) override;
+	FMassEntityQuery EntityQuery;
+	struct FCandidate { FMassRepresentationLODFragment* LOD = nullptr; uint8 Restore = 0; float Key = 0.f; };
+	TArray<FCandidate> Promotions;    // 이번 프레임 새로 액터가 될 엔티티(되돌리지 않은 것)
+	TArray<FCandidate> HeldDemotions; // 되돌려 액터로 남긴 엔티티. Restore는 엔진이 고른 LOD
 };
 
 /**

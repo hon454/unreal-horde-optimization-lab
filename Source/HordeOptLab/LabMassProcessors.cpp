@@ -12,8 +12,9 @@
 #include "MassMovementFragments.h"
 #include "Movement/MassMovementProcessors.h" // ULabSeparationProcessor의 순서(UMassApplyMovementProcessor 뒤)
 #include "MassNavigationFragments.h"
-#include "MassRepresentationFragments.h" // ULabRepSwitchCountProcessor
+#include "MassRepresentationFragments.h" // ULabRepSwitchCountProcessor, ULabRepHoldProcessor
 #include "MassRepresentationTypes.h"
+#include "MassLODFragments.h" // FMassViewerInfoFragment(ULabRepHoldProcessor)
 #include "MassSimulationLOD.h"
 #include "HordeOptLab.h"
 #include "ProfilingDebugging/CsvProfiler.h"
@@ -833,7 +834,12 @@ void ULabSeparationProcessor::Execute(FMassEntityManager& EntityManager, FMassEx
 #endif
 }
 
-// 표현 전환 수(Spike1) ---------------------------------------------------------
+// 표현 전환 수(Spike1에서 시작, v2 W7에서 경계별로 정리) -------------------------
+
+uint8 ULabRepSwitchCountProcessor::ClassOf(EMassRepresentationType Type)
+{
+	return UE::Mass::Representation::IsValidActorRepresentation(Type) ? 0 : Type == EMassRepresentationType::None ? 2 : 1;
+}
 
 ULabRepSwitchCountProcessor::ULabRepSwitchCountProcessor()
 	: EntityQuery(*this)
@@ -843,12 +849,18 @@ ULabRepSwitchCountProcessor::ULabRepSwitchCountProcessor()
 	// ULabIskmProcessor와 같은 자리: 엔진 표현 프로세서가 이번 프레임의 Prev·Current를 쓴 뒤
 	ExecutionOrder.ExecuteInGroup = UE::Mass::ProcessorGroupNames::Representation;
 	ExecutionOrder.ExecuteAfter.Add(UE::Mass::ProcessorGroupNames::VisualizationProcessing);
-	bRequiresGameThreadExecution = true; // LastSwitch 맵
+	bRequiresGameThreadExecution = true; // 전환 기록 맵(ULabCrowdSubsystem::RepLastSwitch, ShadowLast)
 }
 
 void ULabRepSwitchCountProcessor::ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager)
 {
+	ProcessorRequirements.AddSubsystemRequirement<ULabCrowdSubsystem>(EMassFragmentAccess::ReadWrite); // 전환 기록을 쓴다(W2 방식, engine-notes.md 35절)
 	EntityQuery.AddRequirement<FMassRepresentationFragment>(EMassFragmentAccess::ReadOnly);
+	EntityQuery.AddRequirement<FMassRepresentationLODFragment>(EMassFragmentAccess::ReadOnly); // 80m 경계(LOD Medium ↔ Low)와 화면 안팎
+#if !UE_BUILD_TEST
+	EntityQuery.AddRequirement<FMassViewerInfoFragment>(EMassFragmentAccess::ReadOnly); // 개발 확인 로그의 카메라 거리
+#endif
+	EntityQuery.AddSharedRequirement<FMassVisualizationLODSharedFragment>(EMassFragmentAccess::ReadOnly); // 상한이 걸렸는지
 	EntityQuery.AddChunkRequirement<FMassVisualizationChunkFragment>(EMassFragmentAccess::ReadOnly);
 	EntityQuery.AddTagRequirement<FLabMinionTag>(EMassFragmentPresence::All);
 	EntityQuery.AddTagRequirement<FLabPooledTag>(EMassFragmentPresence::None);
@@ -856,29 +868,34 @@ void ULabRepSwitchCountProcessor::ConfigureQueries(const TSharedRef<FMassEntityM
 
 void ULabRepSwitchCountProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context)
 {
+	ULabCrowdSubsystem* Crowd = LabCrowdWrite(Context);
 	const UWorld* World = Context.GetWorld();
-	if (!World)
+	if (!Crowd || !World)
 	{
 		return;
 	}
 	const double Now = World->GetTimeSeconds();
-	// 표현을 세 무리로 묶는다: 0 액터, 1 인스턴스(ISKM·VAT ISM), 2 없음(200m 밖, 최종 구성에서는 입자)
-	auto ClassOf = [](EMassRepresentationType Type) -> uint8
-	{
-		return UE::Mass::Representation::IsValidActorRepresentation(Type) ? 0 : Type == EMassRepresentationType::None ? 2 : 1;
-	};
-	int32 NoneToInst = 0, InstToActor = 0, ActorToInst = 0, InstToNone = 0, Other = 0, Round = 0;
+	TMap<FMassEntityHandle, ULabCrowdSubsystem::FLabRepSwitch>& LastSwitch = Crowd->RepLastSwitch;
+	int32 NoneToInst = 0, InstToActor = 0, ActorToInst = 0, InstToNone = 0, Other = 0, ShadowOff = 0, ShadowOn = 0;
+	int32 Round = 0, RoundActor = 0, RoundFar = 0, RoundShadow = 0;
+	bool bCapOn = false;
 	EntityQuery.ForEachEntityChunk(Context, [&](FMassExecutionContext& Context)
 	{
+		bCapOn |= Context.GetSharedFragment<FMassVisualizationLODSharedFragment>().bHasAdjustedDistancesFromCount;
 		if (!Context.GetChunkFragment<FMassVisualizationChunkFragment>().ShouldUpdateVisualization())
 		{
 			return; // 엔진이 이번 프레임에 갱신하지 않은 청크는 Prev가 옛 값이다
 		}
 		const TConstArrayView<FMassRepresentationFragment> Representations = Context.GetFragmentView<FMassRepresentationFragment>();
+		const TConstArrayView<FMassRepresentationLODFragment> LODs = Context.GetFragmentView<FMassRepresentationLODFragment>();
+#if !UE_BUILD_TEST
+		const TConstArrayView<FMassViewerInfoFragment> Viewers = Context.GetFragmentView<FMassViewerInfoFragment>();
+#endif
 		for (FMassExecutionContext::FEntityIterator It = Context.CreateEntityIterator(); It; ++It)
 		{
 			const FMassRepresentationFragment& R = Representations[It];
-			if (R.PrevRepresentation == R.CurrentRepresentation || R.IsWaitingForActorVisualReadiness())
+			const FMassRepresentationLODFragment& L = LODs[It];
+			if (R.IsWaitingForActorVisualReadiness())
 			{
 				continue;
 			}
@@ -886,6 +903,19 @@ void ULabRepSwitchCountProcessor::Execute(FMassEntityManager& EntityManager, FMa
 			const uint8 To = ClassOf(R.CurrentRepresentation);
 			if (From == To)
 			{
+				// 80m 경계: 인스턴스인 채로 LOD가 Medium(그림자 켬) ↔ Low(그림자 끔)로 바뀐 프레임(Q4b, LabCrowdSubsystem.cpp의 설명자 범위 [High, Low)·[Low, Max))
+				const bool bOff = L.PrevLOD == EMassLOD::Medium && L.LOD == EMassLOD::Low;
+				const bool bOn = L.PrevLOD == EMassLOD::Low && L.LOD == EMassLOD::Medium;
+				if (To == 1 && (bOff || bOn))
+				{
+					if (bOff) { ++ShadowOff; } else { ++ShadowOn; }
+					FShadowSwitch& Last = ShadowLast.FindOrAdd(Context.GetEntity(It));
+					if (Last.Time > 0. && Now - Last.Time <= RoundTripSec && Last.bOff != bOff)
+					{
+						++RoundShadow;
+					}
+					Last = { Now, bOff };
+				}
 				continue;
 			}
 			if (From == 2 && To == 1) { ++NoneToInst; }
@@ -893,20 +923,195 @@ void ULabRepSwitchCountProcessor::Execute(FMassEntityManager& EntityManager, FMa
 			else if (From == 0 && To == 1) { ++ActorToInst; }
 			else if (From == 1 && To == 2) { ++InstToNone; }
 			else { ++Other; }
-			FLastSwitch& Last = LastSwitch.FindOrAdd(Context.GetEntity(It));
+			const bool bVisible = L.Visibility == EMassVisibility::CanBeSeen;
+			ULabCrowdSubsystem::FLabRepSwitch& Last = LastSwitch.FindOrAdd(Context.GetEntity(It));
 			if (Last.Time > 0. && Now - Last.Time <= RoundTripSec && Last.From == To && Last.To == From)
 			{
 				++Round;
+				const bool bActorEdge = (From | To) == 1; // {0, 1}
+				const bool bFarEdge = From + To == 3;     // {1, 2}
+				RoundActor += bActorEdge ? 1 : 0;
+				RoundFar += bFarEdge ? 1 : 0;
+#if !UE_BUILD_TEST
+				if (bActorEdge)
+				{
+					(Last.bVisible != bVisible ? LogRoundActorVis : LogRoundActorDist) += 1;
+					LogRoundActorCap += Context.GetSharedFragment<FMassVisualizationLODSharedFragment>().bHasAdjustedDistancesFromCount ? 1 : 0;
+					const float DistM = FMath::Sqrt(Viewers[It].ClosestViewerDistanceSq) / 100.f;
+					LogRoundDistHist[FMath::Clamp(int32(DistM / 10.f), 0, 5)] += 1;
+				}
+				LogRoundFar += bFarEdge ? 1 : 0;
+#endif
 			}
-			Last = { Now, From, To };
+			Last = { Now, From, To, bVisible };
 		}
 	});
+	// 오래된 기록을 지운다(5초마다). 왕복 창(2초)과 최소 유지 시간 중 긴 것보다 오래된 기록은 다시 읽히지 않는다
+	if (Now >= NextPruneTime)
+	{
+		NextPruneTime = Now + 5.;
+		const double Keep = FMath::Max(RoundTripSec, FLabConfig::Get().RepHoldMs / 1000.);
+		for (auto MapIt = LastSwitch.CreateIterator(); MapIt; ++MapIt)
+		{
+			if (Now - MapIt.Value().Time > Keep) { MapIt.RemoveCurrent(); }
+		}
+		for (auto MapIt = ShadowLast.CreateIterator(); MapIt; ++MapIt)
+		{
+			if (Now - MapIt.Value().Time > RoundTripSec) { MapIt.RemoveCurrent(); }
+		}
+	}
 	CSV_CUSTOM_STAT(Lab, SwNoneToInst, NoneToInst, ECsvCustomStatOp::Set);
 	CSV_CUSTOM_STAT(Lab, SwInstToActor, InstToActor, ECsvCustomStatOp::Set);
 	CSV_CUSTOM_STAT(Lab, SwActorToInst, ActorToInst, ECsvCustomStatOp::Set);
 	CSV_CUSTOM_STAT(Lab, SwInstToNone, InstToNone, ECsvCustomStatOp::Set);
 	CSV_CUSTOM_STAT(Lab, SwOther, Other, ECsvCustomStatOp::Set);
 	CSV_CUSTOM_STAT(Lab, SwRound, Round, ECsvCustomStatOp::Set);
+	CSV_CUSTOM_STAT(Lab, SwShadowOff, ShadowOff, ECsvCustomStatOp::Set);
+	CSV_CUSTOM_STAT(Lab, SwShadowOn, ShadowOn, ECsvCustomStatOp::Set);
+	CSV_CUSTOM_STAT(Lab, SwRoundActor, RoundActor, ECsvCustomStatOp::Set);
+	CSV_CUSTOM_STAT(Lab, SwRoundFar, RoundFar, ECsvCustomStatOp::Set);
+	CSV_CUSTOM_STAT(Lab, SwRoundShadow, RoundShadow, ECsvCustomStatOp::Set);
+	CSV_CUSTOM_STAT(Lab, RepCapOn, bCapOn ? 1 : 0, ECsvCustomStatOp::Set);
+
+#if !UE_BUILD_TEST
+	// 개발 확인: 10초마다 경계별 전환 수와 액터 경계 왕복의 원인
+	const int32 Sw[8] = { NoneToInst, InstToActor, ActorToInst, InstToNone, Other, ShadowOff, ShadowOn, Round };
+	for (int32 i = 0; i < 8; ++i) { LogSw[i] += Sw[i]; }
+	LogRoundShadow += RoundShadow;
+	LogCapFrames += bCapOn ? 1 : 0;
+	++LogFrames;
+	if (LogSince <= 0.)
+	{
+		LogSince = Now;
+	}
+	else if (Now - LogSince >= 10.)
+	{
+		const double Span = Now - LogSince;
+		UE_LOG(LogLab, Log, TEXT("lab_repsw t=%.1f per_s none>inst=%.1f inst>actor=%.1f actor>inst=%.1f inst>none=%.1f other=%.1f shadow_off=%.1f shadow_on=%.1f round=%.2f round_actor_vis=%.2f round_actor_dist=%.2f round_actor_cap=%.2f round_far=%.2f round_shadow=%.2f cap_frames=%.2f round_actor_dist_m=%lld/%lld/%lld/%lld/%lld/%lld map=%d"),
+			Now, LogSw[0] / Span, LogSw[1] / Span, LogSw[2] / Span, LogSw[3] / Span, LogSw[4] / Span, LogSw[5] / Span, LogSw[6] / Span, LogSw[7] / Span,
+			LogRoundActorVis / Span, LogRoundActorDist / Span, LogRoundActorCap / Span, LogRoundFar / Span, LogRoundShadow / Span, double(LogCapFrames) / FMath::Max<int64>(LogFrames, 1),
+			LogRoundDistHist[0], LogRoundDistHist[1], LogRoundDistHist[2], LogRoundDistHist[3], LogRoundDistHist[4], LogRoundDistHist[5], LastSwitch.Num());
+		LogSince = Now;
+		FMemory::Memzero(LogSw);
+		FMemory::Memzero(LogRoundDistHist);
+		LogRoundActorVis = LogRoundActorDist = LogRoundActorCap = LogRoundFar = LogRoundShadow = LogCapFrames = LogFrames = 0;
+	}
+#endif
+}
+
+// 표현 전환의 최소 유지 시간(v2 W7) ---------------------------------------------
+
+ULabRepHoldProcessor::ULabRepHoldProcessor()
+	: EntityQuery(*this)
+{
+	bAutoRegisterWithProcessingPhases = false; // FLabConfig::UsesRepHold일 때만 게임 모듈이 켠다(HordeOptLab.cpp)
+	ExecutionFlags = (int32)(EProcessorExecutionFlags::Client | EProcessorExecutionFlags::Standalone);
+	// 엔진 표현 LOD 프로세서(LOD 그룹) 뒤, 엔진 표현 프로세서(VisualizationProcessing) 앞. LOD 그룹 안에 두지 않아 LOD 그룹 뒤의 Lab 로직을 기다리게 하지 않는다
+	ExecutionOrder.ExecuteInGroup = UE::Mass::ProcessorGroupNames::Representation;
+	ExecutionOrder.ExecuteAfter.Add(UE::Mass::ProcessorGroupNames::LOD);
+	ExecutionOrder.ExecuteBefore.Add(UE::Mass::ProcessorGroupNames::VisualizationProcessing);
+	bRequiresGameThreadExecution = true; // 전환 기록 맵을 읽는다(ULabCrowdSubsystem::RepLastSwitch)
+}
+
+void ULabRepHoldProcessor::ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager)
+{
+	ProcessorRequirements.AddSubsystemRequirement<ULabCrowdSubsystem>(EMassFragmentAccess::ReadOnly);
+	EntityQuery.AddRequirement<FMassRepresentationLODFragment>(EMassFragmentAccess::ReadWrite);
+	EntityQuery.AddRequirement<FMassRepresentationFragment>(EMassFragmentAccess::ReadOnly);
+	EntityQuery.AddRequirement<FMassViewerInfoFragment>(EMassFragmentAccess::ReadOnly);
+	EntityQuery.AddConstSharedRequirement<FMassRepresentationParameters>();
+	EntityQuery.AddConstSharedRequirement<FMassVisualizationLODParameters>();
+	EntityQuery.AddTagRequirement<FLabMinionTag>(EMassFragmentPresence::All);
+	EntityQuery.AddTagRequirement<FLabPooledTag>(EMassFragmentPresence::None);
+}
+
+void ULabRepHoldProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context)
+{
+	const ULabCrowdSubsystem* Crowd = LabCrowdRead(Context);
+	const UWorld* World = Context.GetWorld();
+	if (!Crowd || !World)
+	{
+		return;
+	}
+	const double Now = World->GetTimeSeconds();
+	const double HoldSec = FLabConfig::Get().RepHoldMs / 1000.;
+	const TMap<FMassEntityHandle, ULabCrowdSubsystem::FLabRepSwitch>& LastSwitch = Crowd->RepLastSwitch;
+	Promotions.Reset();
+	HeldDemotions.Reset();
+	int32 HighCount = 0; // 이번 프레임 끝의 LOD High 엔티티 수(되돌린 것 반영)
+	int32 Cap = MAX_int32;
+	int32 Held = 0;
+	EntityQuery.ForEachEntityChunk(Context, [&](FMassExecutionContext& Context)
+	{
+		const FMassRepresentationParameters& Params = Context.GetConstSharedFragment<FMassRepresentationParameters>();
+		const FMassVisualizationLODParameters& LODParams = Context.GetConstSharedFragment<FMassVisualizationLODParameters>();
+		Cap = FMath::Min(Cap, LODParams.LODMaxCount[EMassLOD::High]); // 두 종류가 같은 파라미터라 공유 프래그먼트 하나, 상한 하나다(engine-notes.md 19절)
+		const float VisibleEdge = FMath::Max(LODParams.VisibleLODDistance[EMassLOD::Medium], 1.f);
+		const float BaseEdge = FMath::Max(LODParams.BaseLODDistance[EMassLOD::Medium], 1.f);
+		const TArrayView<FMassRepresentationLODFragment> LODs = Context.GetMutableFragmentView<FMassRepresentationLODFragment>();
+		const TConstArrayView<FMassRepresentationFragment> Representations = Context.GetFragmentView<FMassRepresentationFragment>();
+		const TConstArrayView<FMassViewerInfoFragment> Viewers = Context.GetFragmentView<FMassViewerInfoFragment>();
+		for (FMassExecutionContext::FEntityIterator It = Context.CreateEntityIterator(); It; ++It)
+		{
+			FMassRepresentationLODFragment& L = LODs[It];
+			const FMassRepresentationFragment& R = Representations[It];
+			const bool bHigh = L.LOD == EMassLOD::High;
+			HighCount += bHigh ? 1 : 0;
+			const uint8 Wanted = ULabRepSwitchCountProcessor::ClassOf(Params.LODRepresentation[FMath::Min(int32(L.LOD), int32(EMassLOD::Off))]);
+			const uint8 Current = ULabRepSwitchCountProcessor::ClassOf(R.CurrentRepresentation);
+			if (Wanted == Current || R.IsWaitingForActorVisualReadiness() || R.ActorSpawnRequestHandle.IsValid() || R.bIsPendingDestruction)
+			{
+				continue; // 바뀌지 않거나 엔진이 액터 준비 중이다(그 흐름은 엔진에 맡긴다)
+			}
+			// 지난 프레임의 LOD는 지금 표현과 같은 무리다(표현 프로세서가 그 LOD로 표현을 정했다). 없거나 High면 Medium으로 되돌린다
+			const uint8 Restore = (L.PrevLOD != EMassLOD::High && L.PrevLOD < EMassLOD::Max) ? uint8(L.PrevLOD) : uint8(EMassLOD::Medium);
+			const float Edge = L.Visibility == EMassVisibility::CanBeSeen ? VisibleEdge : BaseEdge;
+			const float Key = FMath::Sqrt(Viewers[It].ClosestViewerDistanceSq) / Edge;
+			const ULabCrowdSubsystem::FLabRepSwitch* Last = LastSwitch.Find(Context.GetEntity(It));
+			const bool bReverse = Last && Now - Last->Time < HoldSec && Last->From == Wanted && Last->To == Current;
+			if (!bReverse)
+			{
+				if (Wanted == 0)
+				{
+					Promotions.Add({ &L, Restore, Key });
+				}
+				continue;
+			}
+			++Held;
+			if (Current == 0)
+			{
+				// 액터 → 인스턴스(또는 없음)를 막는다: 이번 프레임도 High로 남긴다
+				HeldDemotions.Add({ &L, uint8(L.LOD), Key });
+				L.LOD = EMassLOD::High;
+				++HighCount;
+			}
+			else
+			{
+				if (bHigh) { --HighCount; }
+				L.LOD = EMassLOD::Type(Restore);
+			}
+		}
+	});
+	// 액터 상한: 남긴 액터 때문에 상한을 넘으면 새 액터를 먼 순으로 막고, 그래도 넘으면 남긴 액터를 먼 순으로 놓아 준다
+	int32 CapBlocked = 0;
+	int32 Excess = HighCount - Cap;
+	if (Excess > 0)
+	{
+		Promotions.Sort([](const FCandidate& A, const FCandidate& B) { return A.Key > B.Key; });
+		for (int32 i = 0; i < Promotions.Num() && Excess > 0; ++i, --Excess)
+		{
+			Promotions[i].LOD->LOD = EMassLOD::Type(Promotions[i].Restore);
+			++CapBlocked;
+		}
+		HeldDemotions.Sort([](const FCandidate& A, const FCandidate& B) { return A.Key > B.Key; });
+		for (int32 i = 0; i < HeldDemotions.Num() && Excess > 0; ++i, --Excess)
+		{
+			HeldDemotions[i].LOD->LOD = EMassLOD::Type(HeldDemotions[i].Restore);
+			--Held;
+		}
+	}
+	CSV_CUSTOM_STAT(Lab, RepHeld, Held, ECsvCustomStatOp::Set);
+	CSV_CUSTOM_STAT(Lab, RepCapBlocked, CapBlocked, ECsvCustomStatOp::Set);
 }
 
 // 상태 타이머 ----------------------------------------------------------------
