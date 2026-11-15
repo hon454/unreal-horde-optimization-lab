@@ -135,7 +135,8 @@
     "LabTechSeparate": "1",
     "LabActorCollision": "pawn",
     "LabRepHold": "0",
-    "LabFarHitIskm": "-"
+    "LabFarHitIskm": "-",
+    "LabSmoothOrient": "-"
    }
   },
   {
@@ -163,7 +164,8 @@
     "LabRepHold": "0",
     "LabActorCap": "500",
     "LabHydrateM": "30",
-    "LabFarHitIskm": "-"
+    "LabFarHitIskm": "-",
+    "LabSmoothOrient": "0"
    }
   },
   {
@@ -188,7 +190,8 @@
     "LabTechSeparate": "1",
     "LabActorCollision": "trace",
     "LabRepHold": "0",
-    "LabFarHitIskm": "-"
+    "LabFarHitIskm": "-",
+    "LabSmoothOrient": "1"
    }
   },
   {
@@ -214,7 +217,8 @@
     "LabTechSeparate": "1",
     "LabActorCollision": "trace",
     "LabRepHold": "2000",
-    "LabFarHitIskm": "-"
+    "LabFarHitIskm": "-",
+    "LabSmoothOrient": "1"
    }
   },
   {
@@ -237,7 +241,8 @@
     "LabTechSeparate": "1",
     "LabActorCollision": "trace",
     "LabRepHold": "2000",
-    "LabFarHitIskm": "-"
+    "LabFarHitIskm": "-",
+    "LabSmoothOrient": "1"
    }
   },
   {
@@ -260,7 +265,8 @@
     "LabIskmTrackReserve": "1",
     "LabTechSeparate": "1",
     "LabRepHold": "2000",
-    "LabFarHitIskm": "-"
+    "LabFarHitIskm": "-",
+    "LabSmoothOrient": "1"
    }
   },
   {
@@ -283,7 +289,8 @@
     "LabHydrateM": "30",
     "LabFarShadow": "1",
     "LabRepHold": "2000",
-    "LabFarHitIskm": "1"
+    "LabFarHitIskm": "1",
+    "LabSmoothOrient": "1"
    }
   },
   {
@@ -316,7 +323,8 @@
     "LabFarShadow": "0",
     "LabFixedSkelBounds": "1",
     "LabQueryIsolate": "0",
-    "LabFarHitIskm": "1"
+    "LabFarHitIskm": "1",
+    "LabSmoothOrient": "1"
    }
   },
   {

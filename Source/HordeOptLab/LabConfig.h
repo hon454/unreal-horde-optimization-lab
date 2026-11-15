@@ -255,15 +255,20 @@ struct FLabConfig
 	 */
 	bool bFarHitIskm = true;
 	/**
-	 * 방향 보간 병렬 사본(-LabSmoothOrient=0/1, 기본 0, 모든 단계). 1이면 엔진 UMassSmoothOrientationProcessor를 끄고 같은 식을 청크 병렬로 도는
-	 * ULabSmoothOrientationProcessor를 켠다(LabSmoothOrientation.h, Docs/Worklog/V2.md "방향 보간 병렬 사본"). 0이면 프로세서 구성이 그대로다.
-	 * 사다리에 넣지 않은 시험 스위치라 메타데이터 키가 따로 없다. 켜면 LabOverrides에 smooth_orient=1이 붙는다.
-	 * 개발 빌드 진단(Test 빌드는 늘 거짓): bSmoothOrientCheck(-LabSmoothOrientCheck)는 엔진 프로세서를 두고 사본의 예측과 비트 단위로 견준다.
+	 * 방향 보간 병렬 사본(-LabSmoothOrient=0/1). 1이면 엔진 UMassSmoothOrientationProcessor를 끄고 같은 식을 청크 병렬로 도는
+	 * ULabSmoothOrientationProcessor를 켠다(LabSmoothOrientation.h, Docs/Worklog/V2.md "방향 보간 병렬 사본"). 0이면 엔진 프로세서가 돈다.
+	 * 기본: 사다리 단계 3부터 1, 단계 2는 0(엔진 경로 기준선, Docs/Worklog/V2.md "방향 보간 병렬 사본: 사다리 배선"). 인자가 이기고 기본값과 다르면 LabOverrides에 smooth_orient=<값>이 붙는다.
+	 * Mass 단계에서만 뜻이 있다(UsesSmoothOrient). CSV 메타데이터 LabSmoothOrient, lab_config smooth_orient=.
+	 * 개발 빌드 진단(Test 빌드는 늘 거짓): bSmoothOrientCheck(-LabSmoothOrientCheck)는 엔진 프로세서를 두고 사본의 예측과 비트 단위로 견준다(메타데이터 "check").
 	 * bSmoothOrientSerial(-LabSmoothOrientSerial)은 사본을 한 스레드로 돌린다(엔진과 같은 순회, 시간 견주기).
 	 */
 	bool bSmoothOrient = false;
 	bool bSmoothOrientCheck = false;
 	bool bSmoothOrientSerial = false;
+	/** 엔진 회전 프로세서 대신 사본이 회전을 쓰는가(Mass 단계, bSmoothOrient, 개발 검사가 아님). 게임 모듈의 등록 조건(HordeOptLab.cpp) */
+	bool UsesSmoothOrient() const { return IsMass() && bSmoothOrient && !bSmoothOrientCheck; }
+	/** CSV 메타데이터 LabSmoothOrient: "1" 사본, "0" 엔진 프로세서, 개발 검사 "check", 액터 단계 "-" */
+	const TCHAR* SmoothOrientString() const { return !IsMass() ? TEXT("-") : bSmoothOrientCheck ? TEXT("check") : bSmoothOrient ? TEXT("1") : TEXT("0"); }
 	/** 로그와 CSV 메타데이터 값. 그 기법을 쓰지 않는 실행은 "-" */
 	FString FxOrbFollowString() const;
 	FString BoundsStepString() const;

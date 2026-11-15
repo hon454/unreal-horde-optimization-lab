@@ -46,6 +46,7 @@ const FLabConfig& FLabConfig::Get()
 		// 단계 기본값. 한 단계는 앞 단계에서 한 묶음만 바꾼다
 		C.bAvoid = C.Step == 2;                          // 2: 엔진 회피(D43). 3부터는 끔
 		C.bSeparate = C.Step != 2;                       // 1: 액터 캡슐끼리 막기, 3부터: Lab 분리 프로세서(D45, D47)
+		C.bSmoothOrient = C.Step >= 3;                   // 3부터: 방향 보간 병렬 사본(Docs/Worklog/V2.md "방향 보간 병렬 사본: 사다리 배선"). 2는 엔진 프로세서(엔진 경로 기준)
 		C.bScreenSigBudget = C.Step >= 4;                // 4: 화면 크기 애니 예산
 		const int32 DefaultFixMask = C.Step >= 4 ? 31 : 0; // 4: 전환 대책 다섯과 최소 유지 시간(VAT 인스턴스와 액터 사이)
 		C.HydrateFixMask = DefaultFixMask;
@@ -105,7 +106,7 @@ const FLabConfig& FLabConfig::Get()
 		Switch(TEXT("-LabFarHandoff="), TEXT("far_handoff"), C.bFarHandoff);
 		// M6 수정 B(LabConfig.h bFarHitIskm). 기본 1이고 단계 7·8에서만 뜻이 있다
 		Switch(TEXT("-LabFarHitIskm="), TEXT("far_hit_iskm"), C.bFarHitIskm);
-		// 방향 보간 병렬 사본(LabConfig.h bSmoothOrient). 기본 0
+		// 방향 보간 병렬 사본(LabConfig.h bSmoothOrient). 단계 3부터 기본 1
 		Switch(TEXT("-LabSmoothOrient="), TEXT("smooth_orient"), C.bSmoothOrient);
 #if !UE_BUILD_TEST
 		// 개발 진단(LabSmoothOrientation.h). 검사는 엔진 프로세서를 두므로 사본 켬보다 앞선다
@@ -318,10 +319,10 @@ FString FLabConfig::ToLogString() const
 	const FString Health = HealthFixed > 0.f ? FString::Printf(TEXT(" health_fixed=%.0f"), HealthFixed) : FString();
 	const FString Crowd = bCrowdFx ? FString::Printf(TEXT(" crowdfx=1 crowdfx_particles=%d crowdfx_outer=%d"), CrowdFxParticles(), bCrowdFxOuter ? 1 : 0) : FString();
 	// tech는 빼 보기 기법의 켬·끔이다(Q3). 모든 실행에 붙여 러너와 사람이 기대값과 대조한다.
-	return FString::Printf(TEXT("lab_config stage=%d n=%d preset=P%d seed=%d bench=%d label=%s duration=%.1f types=%d simlod=%s%s pool=%d screensig_budget=%d actor_cap=%d hydrate_m=%.0f far_shadow=%s%s%s %s overrides=%s hud=%d actor_col=%s rep_hold=%d fixmask=%d fx_orb_follow=%s bounds_step=%s iskm_track_reserve=%s fixed_skel_bounds=%s query_isolate=%d far_handoff=%d far_hit_iskm=%s"),
+	return FString::Printf(TEXT("lab_config stage=%d n=%d preset=P%d seed=%d bench=%d label=%s duration=%.1f types=%d simlod=%s%s pool=%d screensig_budget=%d actor_cap=%d hydrate_m=%.0f far_shadow=%s%s%s %s overrides=%s hud=%d actor_col=%s rep_hold=%d fixmask=%d fx_orb_follow=%s bounds_step=%s iskm_track_reserve=%s fixed_skel_bounds=%s query_isolate=%d far_handoff=%d far_hit_iskm=%s smooth_orient=%s"),
 		Step, N, Preset, Seed, bBench ? 1 : 0, *Label, DurationSec, Types, *SimLodString(), *Far, bEntityPool ? 1 : 0, bScreenSigBudget ? 1 : 0, ActorCap, HydrateM, FarShadowString(),
 		*Health, *Crowd, *TechString(), Overrides.IsEmpty() ? TEXT("-") : *Overrides, bHud ? 1 : 0, ActorCollisionString(), UsesRepHold() ? RepHoldMs : 0, HydrateFixMask,
-		*FxOrbFollowString(), *BoundsStepString(), *IskmTrackReserveString(), FixedSkelBoundsString(), bQueryIsolate ? 1 : 0, bFarHandoff ? 1 : 0, *FarHitIskmString());
+		*FxOrbFollowString(), *BoundsStepString(), *IskmTrackReserveString(), FixedSkelBoundsString(), bQueryIsolate ? 1 : 0, bFarHandoff ? 1 : 0, *FarHitIskmString(), SmoothOrientString());
 }
 
 FString FLabConfig::FarHitIskmString() const

@@ -6,12 +6,12 @@
 #include "LabSmoothOrientation.generated.h"
 
 /**
- * 방향 보간의 병렬 사본(-LabSmoothOrient=1, 기본 0, Docs/Worklog/V2.md "방향 보간 병렬 사본").
+ * 방향 보간의 병렬 사본(-LabSmoothOrient=0/1, 사다리 단계 3부터 기본 1, Docs/Worklog/V2.md "방향 보간 병렬 사본"과 "방향 보간 병렬 사본: 사다리 배선").
  * 엔진 UMassSmoothOrientationProcessor(MassSmoothOrientationProcessors.cpp:20-135)와 같은 쿼리, 그룹(Movement, 앞뒤 선언 없음), 넷 모드, 식이다.
  * 다른 점은 두 쿼리를 ParallelForEachEntityChunk로 돈다는 것 하나다. 개체마다 자기 프래그먼트(회전, DesiredFacing)만 쓰고 공유 상태가 없어 결과는 같다.
  * 엔진 프로세서는 한 스레드(ForEachEntityChunk)라 Test 1만 단계 8에서 작업자 하나가 약 0.58ms를 쓰고, 그동안 위치를 읽는 표현 LOD(게임 스레드)가 기다렸다
  * (Docs/Worklog/V2.md "분리 프로세서 기다림", engine-notes.md 48절).
- * 게임 모듈이 FLabConfig::bSmoothOrient일 때만 엔진 프로세서를 끄고 이것을 켠다(HordeOptLab.cpp). 끈 실행은 프로세서 구성이 그대로다.
+ * 게임 모듈이 FLabConfig::UsesSmoothOrient일 때만 엔진 프로세서를 끄고 이것을 켠다(HordeOptLab.cpp). 끈 실행(단계 1·2, -LabSmoothOrient=0)은 엔진 프로세서가 돈다.
  * 개발 빌드 진단: -LabSmoothOrientCheck는 엔진 프로세서를 그대로 두고 이것을 엔진 프로세서 앞에서 "예측"으로 돌린다(프래그먼트를 쓰지 않는다).
  * ULabSmoothOrientationCheckProcessor가 엔진 프로세서 뒤에서 엔진이 쓴 값과 비트 단위로 견준다. -LabSmoothOrientSerial은 사본을 한 스레드로 돌린다(시간 견주기).
  */

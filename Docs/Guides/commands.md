@@ -32,7 +32,7 @@ STATUS.md "명령"에는 매번 쓰는 것만 둔다. 여기에는 스크립트 
 | --- | --- | --- |
 | 1 | 액터 기준선: 모든 개체가 `ALabMinion`(캡슐, `CharacterMovement`, 캡슐끼리 막기) | `M0 full` |
 | 2 | Mass, 엔진 기본 경로: 엔진 이동·회피·표현, 가까운 개체는 하이드레이션 액터(캡슐 Trace), 나머지는 엔진 `UMassUpdateISMProcessor`의 정지 메시 인스턴스, 200m 밖 그리지 않음 | 없음(새 조합) |
-| 3 | 직접 짠 로직: 엔진 회피 대신 `ULabSeparationProcessor` | `M3` + 정지 메시(새 조합) |
+| 3 | 직접 짠 로직: 엔진 회피 대신 `ULabSeparationProcessor`, 엔진 방향 보간 대신 같은 결과의 병렬 사본 `ULabSmoothOrientationProcessor` | `M3` + 정지 메시(새 조합) |
 | 4 | 애니메이션 표현: VAT 인스턴스, 액터 애니 예산(화면 크기), 전환 대책 다섯, 최소 유지 시간 2초 | `M3 mass` + 예산 |
 | 5 | Simulation LOD(80/200m, 200m 밖 자체 이동) + 엔티티 풀 | `M5 m4offpool` |
 | 6 | ISKM(카메라를 따라가는 고정 바운드, 트랙 예약) | `M5 m5bounds` |
@@ -48,6 +48,7 @@ STATUS.md "명령"에는 매번 쓰는 것만 둔다. 여기에는 스크립트 
 | `LabActorCollision`(`-LabActorCollision`) | pawn | trace | trace | trace | trace | trace | trace | trace |
 | `LabTechAvoid`(`-LabAvoid`) | 0 | 1 | 0 | 0 | 0 | 0 | 0 | 0 |
 | `LabTechSeparate`(`-LabSeparate`) | 1 | 0 | 1 | 1 | 1 | 1 | 1 | 1 |
+| `LabSmoothOrient`(`-LabSmoothOrient`) | - | 0 | 1 | 1 | 1 | 1 | 1 | 1 |
 | `LabTechInstAnim` | 0 | 0 | 0 | 1 | 1 | 1 | 1 | 1 |
 | `LabTechAnimBudget`(`-LabScreenSigBudget`) | 0 | 0 | 0 | 1 | 1 | 1 | 1 | 1 |
 | `LabTechHydrateFix`(`-LabHydrateFixMask`) | 0 | 0 | 0 | 1 | 1 | 1 | 1 | 1 |
@@ -67,9 +68,10 @@ STATUS.md "명령"에는 매번 쓰는 것만 둔다. 여기에는 스크립트 
 | `LabQueryIsolate`(`-LabQueryIsolate`, v2 W11) | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
 
 - `-LabFixedSkelBounds=1`은 하이드레이션 액터 메시에 `bComponentUseFixedSkelBounds`를 켜고 `BoundsScale` 1.1을 곱한다(`FLabQuality::FixedSkelBoundsScale`). `-LabQueryIsolate=1`은 게임 모듈 시작 때 `p.Chaos.AccelerationStructureIsolateQueryOnlyObjects`를 1로 둔다. 메타데이터 `LabQueryIsolate`는 그 CVar의 실제 값이다. 근거는 [Worklog/V2.md](../Worklog/V2.md) "W11"과 [engine-notes.md](../Reference/engine-notes.md) 44절이다.
+- `-LabSmoothOrient=1`은 엔진 `UMassSmoothOrientationProcessor`를 끄고 같은 식을 청크 병렬로 도는 `ULabSmoothOrientationProcessor`를 켠다. 결과는 엔진과 비트 단위로 같다. 개발 빌드의 `-LabSmoothOrientCheck`는 엔진 프로세서를 두고 사본과 견준다(메타데이터 `check`, 로그 `lab_smoothori_check`). 근거는 [Worklog/V2.md](../Worklog/V2.md) "방향 보간 병렬 사본"과 "방향 보간 병렬 사본: 사다리 배선"이다.
 
 - 메타데이터 `LabStage`와 `LabLadder`는 단계 번호다. 인자로 단계 기본값과 다르게 준 것은 `LabOverrides`에 `|`로 이어 남는다.
-- 0/1 스위치(`-LabAvoid`, `-LabSeparate`, `-LabScreenSigBudget`, `-LabEntityPool`, `-LabCrowdFx`, `-LabFxOrbFollow`, `-LabIskmTrackReserve`, `-LabFarShadow`, `-LabFixedSkelBounds`, `-LabQueryIsolate`)는 두 방향 모두 받는다. `-LabHydrate`, `-LabSimLod`, `-LabIskm`, `-LabFixedBounds`, `-LabFarCull`은 0일 때만 뜻이 있다(끄기 전용).
+- 0/1 스위치(`-LabAvoid`, `-LabSeparate`, `-LabScreenSigBudget`, `-LabEntityPool`, `-LabCrowdFx`, `-LabFxOrbFollow`, `-LabIskmTrackReserve`, `-LabFarShadow`, `-LabFixedSkelBounds`, `-LabQueryIsolate`, `-LabSmoothOrient`)는 두 방향 모두 받는다. `-LabHydrate`, `-LabSimLod`, `-LabIskm`, `-LabFixedBounds`, `-LabFarCull`은 0일 때만 뜻이 있다(끄기 전용).
 - 정지 조건은 `-LabOrbOrbitSpeed=0`이다. 단계 8과 빼 보기에만 붙인다([v2-plan.md](../v2-plan.md) "사다리").
 
 ### 빼 보기(v2 W10)
@@ -96,7 +98,7 @@ STATUS.md "명령"에는 매번 쓰는 것만 둔다. 여기에는 스크립트 
 | `a8shd` | 80m 밖 그림자 끔 → 켬 | `-LabFarShadow=1` | `LabFarShadow` 1 |
 | `a8fsb` | 액터 메시 고정 바운드 → 피직스 에셋 바운드(v2 W11) | `-LabFixedSkelBounds=0` | `LabFixedSkelBounds` 0 |
 
-- 하위 실험 `s8iso`(단계 8 + `-LabQueryIsolate=1`, v2 W11)와 `s8av`(엔진 회피 더하기)가 `run-spike.ps1`과 조건 표에 있다. `run-dev-stages.ps1 -Ablations`는 빼 보기 열일곱 개와 두 하위 실험, 정지 조건을 돈다.
+- 하위 실험 `s8iso`(단계 8 + `-LabQueryIsolate=1`, v2 W11)와 `s8av`(엔진 회피 더하기)가 `run-spike.ps1`과 조건 표에 있다. `run-dev-stages.ps1 -Ablations`는 빼 보기 열일곱 개와 두 하위 실험, 정지 조건을 돈다. `run-spike.ps1`의 `s8sooff`(단계 8 + `-LabSmoothOrient=0`)는 방향 보간 사본을 끈 확인용 구성이고 조건 표에는 없다.
 - v2 W11부터 `run-spike.ps1`은 `s8` 뒤에 조각을 이어 붙인 구성 이름을 받는다: `fsb`·`fsb0`(고정 바운드 켬·끔), `iso`·`iso0`(칸 나누기), `c<개수>`(`-LabActorCap`), `h<미터>`(`-LabHydrateM`), `shd0`·`shd1`(`-LabFarShadow`). 예: `s8h45`, `s8c750`. 조각마다 기대 메타데이터 하나를 대조한다.
 
 ```bash

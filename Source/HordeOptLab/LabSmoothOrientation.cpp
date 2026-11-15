@@ -114,7 +114,7 @@ ULabSmoothOrientationProcessor::ULabSmoothOrientationProcessor()
 	: HighResEntityQuery(*this)
 	, LowResEntityQuery_Conditional(*this)
 {
-	bAutoRegisterWithProcessingPhases = false; // FLabConfig::bSmoothOrient(또는 개발 검사)일 때만 게임 모듈이 켠다(HordeOptLab.cpp)
+	bAutoRegisterWithProcessingPhases = false; // FLabConfig::UsesSmoothOrient(단계 3부터 기본, 또는 개발 검사)일 때만 게임 모듈이 켠다(HordeOptLab.cpp)
 	// 엔진 UMassSmoothOrientationProcessor 생성자와 같다(MassSmoothOrientationProcessors.cpp:24-25)
 	ExecutionFlags = (int32)EProcessorExecutionFlags::AllNetModes;
 	ExecutionOrder.ExecuteInGroup = UE::Mass::ProcessorGroupNames::Movement;

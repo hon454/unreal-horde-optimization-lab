@@ -61,10 +61,10 @@ public:
 		// M6 수정 B: 그리는 끝 밖의 피격·사망 개체를 ISKM으로 그린다(단계 7·8, -LabFarHitIskm=0이 끈다). 끈 실행은 프로세서 구성이 전과 같다
 		const bool bFarHitIskm = FLabConfig::Get().UsesFarHitIskm();
 		LabSetAutoRegister(GetMutableDefault<ULabFarHitIskmProcessor>(), bFarHitIskm);
-		// 방향 보간 병렬 사본(-LabSmoothOrient=1, 기본 0, LabSmoothOrientation.h). 켬이면 엔진 프로세서를 끄고 사본을 켠다. 끈 실행은 프로세서 구성이 그대로다.
+		// 방향 보간 병렬 사본(-LabSmoothOrient, 단계 3부터 기본 1, LabSmoothOrientation.h). 켬이면 엔진 프로세서를 끄고 사본을 켠다. 끈 실행(단계 1·2)은 엔진 프로세서 그대로다.
 		// 개발 검사(-LabSmoothOrientCheck)는 엔진 프로세서를 그대로 두고 사본(예측)과 검사 프로세서를 더한다
-		const bool bSmoothCheck = FLabConfig::Get().bSmoothOrientCheck;
-		const bool bSmoothOrient = FLabConfig::Get().bSmoothOrient && !bSmoothCheck;
+		const bool bSmoothCheck = FLabConfig::Get().IsMass() && FLabConfig::Get().bSmoothOrientCheck;
+		const bool bSmoothOrient = FLabConfig::Get().UsesSmoothOrient();
 		if (bSmoothOrient || bSmoothCheck)
 		{
 			LabSetAutoRegister(GetMutableDefault<UMassSmoothOrientationProcessor>(), !bSmoothOrient);
