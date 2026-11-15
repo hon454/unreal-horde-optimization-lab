@@ -388,7 +388,9 @@ void ULabIskmProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutio
 			if (bEntering && TrackReserve[0] > 0)
 			{
 				// v2 W9: 컴포넌트가 처음 쓰이는 프레임에(엔진이 이 프레임 끝 EndVisualChanges에서 트랙을 만들기 전에) 트랙 풀을 늘려 둔다. 이미 늘린 컴포넌트는 건너뛴다
-				LabReserveTracks(Info, LODSignificance, TrackReserve[Context.GetConstSharedFragment<FLabUnitTypeParams>().UnitType == LabUnitLarge ? 1 : 0], ReservedProviders);
+				// M6 수정 B: [Off, Max) 범위(그리는 끝 밖의 피격·사망)는 한 번에 몇 개뿐이라 64로 둔다(2초마다 저격 2발, 제거까지 약 2초)
+				const int32 Capacity = LODSignificance >= float(EMassLOD::Off) ? 64 : TrackReserve[Context.GetConstSharedFragment<FLabUnitTypeParams>().UnitType == LabUnitLarge ? 1 : 0];
+				LabReserveTracks(Info, LODSignificance, Capacity, ReservedProviders);
 			}
 			const bool bStateChanged = Track.AppliedState != int8(Anim.State) || Track.AppliedStartTime != Anim.StateStartTime;
 #if !UE_BUILD_TEST

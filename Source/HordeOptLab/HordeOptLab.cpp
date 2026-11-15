@@ -56,6 +56,9 @@ public:
 		// v2 W7: 표현 전환의 최소 유지 시간(-LabRepHold=<ms>). 끈 실행은 프로세서 구성이 W7 전과 같다
 		const bool bRepHold = FLabConfig::Get().UsesRepHold();
 		LabSetAutoRegister(GetMutableDefault<ULabRepHoldProcessor>(), bRepHold);
+		// M6 수정 B: 그리는 끝 밖의 피격·사망 개체를 ISKM으로 그린다(단계 7·8, -LabFarHitIskm=0이 끈다). 끈 실행은 프로세서 구성이 전과 같다
+		const bool bFarHitIskm = FLabConfig::Get().UsesFarHitIskm();
+		LabSetAutoRegister(GetMutableDefault<ULabFarHitIskmProcessor>(), bFarHitIskm);
 		// v2 W11: QueryOnly 바디(하이드레이션 액터 캡슐 Trace)를 가속 구조의 따로 된 칸에 넣는다(-LabQueryIsolate, engine-notes.md 38·44절).
 		// 칸은 물리 씬의 가속 구조를 만들 때 생기므로(PBDRigidsEvolution.cpp CreateEmptyCollection) 첫 월드를 만들기 전인 여기서 넣는다. 끈 실행은 CVar를 건드리지 않는다
 		if (FLabConfig::Get().bQueryIsolate)
@@ -70,8 +73,8 @@ public:
 			}
 		}
 		// crowdfx_entity·separate·rep_hold는 켰을 때만 붙인다(다른 실행의 로그는 그대로다)
-		UE_LOG(LogLab, Log, TEXT("lab_ism_processor %s simlod=%d offmove=%d%s%s%s"), bIskm ? TEXT("iskm") : bVat ? TEXT("vat") : TEXT("engine"), bSimLod ? 1 : 0, bOffMove ? 1 : 0,
-			bCrowdFxEntity ? TEXT(" crowdfx_entity=1") : TEXT(""), bSeparate ? TEXT(" separate=1") : TEXT(""), bRepHold ? TEXT(" rep_hold=1") : TEXT(""));
+		UE_LOG(LogLab, Log, TEXT("lab_ism_processor %s simlod=%d offmove=%d%s%s%s%s"), bIskm ? TEXT("iskm") : bVat ? TEXT("vat") : TEXT("engine"), bSimLod ? 1 : 0, bOffMove ? 1 : 0,
+			bCrowdFxEntity ? TEXT(" crowdfx_entity=1") : TEXT(""), bSeparate ? TEXT(" separate=1") : TEXT(""), bRepHold ? TEXT(" rep_hold=1") : TEXT(""), bFarHitIskm ? TEXT(" far_hit_iskm=1") : TEXT(""));
 	}
 };
 

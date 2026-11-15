@@ -195,6 +195,35 @@ protected:
 };
 
 /**
+ * M6 수정 B(-LabFarHitIskm, FLabConfig::UsesFarHitIskm일 때만 등록, Docs/Worklog/V2.md "M6 수정의 상세 계획안"). 그리는 끝(200m) 밖에서 피격·사망한 개체를 제거될 때까지 ISKM으로 그린다.
+ * 자리: 그룹 Representation, 엔진 표현 LOD 프로세서(LOD 그룹)와 ULabRepHoldProcessor 뒤, 엔진 표현 프로세서(VisualizationProcessing) 앞.
+ * 규칙: 피격·사망 태그가 있고 표현 LOD가 Off인 개체의 LOD를 Low로 올린다. LOD 중요도는 엔진 값(Off = 3.0)을 그대로 두어 [Off, Max) 범위의 설명자(그림자 끔)로 간다
+ * (ULabCrowdSubsystem::BuildEntityConfig). 그 범위의 컴포넌트만 바운드 상자를 맵 전체로 넓힌다(ULabCrowdSubsystem::ApplyFixedIskmBounds).
+ * Off 청크는 표현을 0.5초(± 10%)마다만 다시 보므로(engine-notes.md 21·45절) ISKM이 늦게 나올 수 있다. 그동안 모으기 프로세서가 그 개체를 입자로 남긴다(멈춘 걷기 자세).
+ * 따라잡기: 200m 밖 걷는 개체는 약 1초마다 옮겨지고 입자는 그 사이를 외삽한다. 맞은 개체는 멈추므로 마지막 이동 뒤 맞기까지의 거리를 한 번 옮겨 입자가 그리던 자리에 둔다.
+ * CSV 스탯: Lab/FarHitTracked(올린 적이 있는 산 피격·사망 개체 수), Lab/FarHitWaiting(그중 아직 한 번도 그리지 않은 수).
+ */
+UCLASS()
+class ULabFarHitIskmProcessor : public UMassProcessor
+{
+	GENERATED_BODY()
+public:
+	ULabFarHitIskmProcessor();
+	/** 맞은 시각(피격 시작). 사망 상태면 사망 시작 − 피격 시간 */
+	static float HitStartOf(const struct FLabAnimStateFragment& Anim, float HitDuration);
+protected:
+	virtual void ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager) override;
+	virtual void Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context) override;
+	FMassEntityQuery EntityQuery;
+#if !UE_BUILD_TEST
+	double LogSince = 0.;
+	int64 LogBumped = 0, LogWaiting = 0, LogTracked = 0, LogFirst = 0, LogCatchUps = 0;
+	int32 LogFrames = 0;
+	double LogDelaySum = 0., LogDelayMax = 0., LogCatchUpMax = 0.;
+#endif
+};
+
+/**
  * v2 W4 겹침 방지, 직접 구현(W5부터 기본 켬, -LabSeparate=0이 끈다, LabSeparation.h, Docs/Worklog/V2.md "W4"). 게임 모듈이 FLabConfig::UsesSeparation()일 때만 등록한다(HordeOptLab.cpp).
  * 대상은 겹친 쌍의 수(ULabOverlapCountProcessor)와 같은 개체다: 살아 있는 미니언(걷기·피격), 사망 중인 개체와 풀 제외. Simulation LOD 밴드를 가리지 않고 매 프레임 돈다.
  * 자리: 그룹 Movement, 엔진 이동(UMassApplyMovementProcessor)과 Off 밴드 이동(ULabOffMoveProcessor) 뒤. 그 프레임에 옮겨진 위치를 고치고,

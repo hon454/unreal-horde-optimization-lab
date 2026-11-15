@@ -3,6 +3,7 @@
 #include "LabConfig.h"
 #include "LabCrowdSubsystem.h"
 #include "LabFarStream.h"
+#include "LabMassProcessors.h" // ULabFarHitIskmProcessor::HitStartOf
 #include "LabMassTypes.h"
 #include "MassCommonFragments.h"
 #include "MassCommonTypes.h"
@@ -35,6 +36,7 @@ void ULabCrowdFxGatherProcessor::ConfigureQueries(const TSharedRef<FMassEntityMa
 	EntityQuery.AddRequirement<FTransformFragment>(EMassFragmentAccess::ReadOnly);
 	EntityQuery.AddRequirement<FMassRepresentationFragment>(EMassFragmentAccess::ReadOnly);
 	EntityQuery.AddRequirement<FLabAnimStateFragment>(EMassFragmentAccess::ReadOnly);
+	EntityQuery.AddRequirement<FLabMinionFragment>(EMassFragmentAccess::ReadOnly); // M6 수정 B: 기다리는 피격 개체의 걷기 위상(일련번호)
 	// m4offmove·m4offpool과 M5 단계에서만 있다(LabMassTraits.cpp). 붙은 단계에서는 Off 태그와 무관하게 모든 미니언 아키타입에 있다
 	EntityQuery.AddRequirement<FLabOffMoveFragment>(EMassFragmentAccess::ReadOnly, EMassFragmentPresence::Optional);
 	EntityQuery.AddConstSharedRequirement<FLabUnitTypeParams>(EMassFragmentPresence::All);
@@ -70,6 +72,10 @@ void ULabCrowdFxGatherProcessor::Execute(FMassEntityManager& EntityManager, FMas
 	int32 HitDead = 0;
 	int32 Drawn = 0;
 	int32 OffRecs = 0;
+	int32 Frozen = 0; // M6 수정 B: ISKM을 기다리는 피격·사망 개체를 멈춘 입자로 넣은 수
+	const bool bFarHitIskm = FLabConfig::Get().UsesFarHitIskm();
+	const float HitDuration = Crowd->HitDuration;
+	const FVector OrbNow = Crowd->OrbCenter;
 #if !UE_BUILD_TEST
 	const FVector Orb = Crowd->OrbCenter;
 	const FVector Camera = Crowd->SnipeView.Location; // 표현 LOD와 같은 기준(카메라까지 3D 거리)
@@ -92,6 +98,7 @@ void ULabCrowdFxGatherProcessor::Execute(FMassEntityManager& EntityManager, FMas
 		const TConstArrayView<FTransformFragment> Transforms = Context.GetFragmentView<FTransformFragment>();
 		const TConstArrayView<FMassRepresentationFragment> Representations = Context.GetFragmentView<FMassRepresentationFragment>();
 		const TConstArrayView<FLabAnimStateFragment> AnimStates = Context.GetFragmentView<FLabAnimStateFragment>();
+		const TConstArrayView<FLabMinionFragment> Minions = Context.GetFragmentView<FLabMinionFragment>();
 		const TConstArrayView<FLabOffMoveFragment> OffMoves = Context.GetFragmentView<FLabOffMoveFragment>(); // 없는 단계에서는 비어 있다
 		// Off 태그 아키타입만 ULabOffMoveProcessor가 틱 간격마다 옮긴다. 그 밖(188~200m의 Medium 포함)은 엔진 이동이 매 프레임 옮겨 위치가 지금 값이다
 		const bool bOffMoved = OffMoves.Num() > 0 && Context.DoesArchetypeHaveTag(*FMassOffLODTag::StaticStruct());
@@ -140,6 +147,26 @@ void ULabCrowdFxGatherProcessor::Execute(FMassEntityManager& EntityManager, FMas
 			if (Anim.State != ELabMinionState::Walk)
 			{
 				++HitDead; // 멈춘 개체(위 헤더 주석). 사망 상태는 태그보다 먼저 표현 상태로 바뀌므로 태그가 아니라 상태로 거른다
+				if (bFarHitIskm)
+				{
+					// M6 수정 B: ISKM이 나올 때까지(Off 청크 갱신, 최대 약 0.55초) 맞은 순간의 걷기 자세로 멈춘 입자로 남긴다.
+					// 자리는 입자가 그리던 자리다: 마지막 이동 뒤 맞기까지 걸은 거리를 더한다(ULabFarHitIskmProcessor가 같은 값을 한 번 옮긴다). T0 = 지금이라 외삽하지 않는다.
+					// 위상 = 걷기 위상 + 맞은 시각 − 지금이라 재생 시각(지금 + 위상)이 맞은 순간에 멈춘다
+					const float HitStart = ULabFarHitIskmProcessor::HitStartOf(Anim, HitDuration);
+					FVector L = Transforms[It].GetTransform().GetLocation();
+					if (bOffMoved && OffMoves[It].LastMoveTime > 0. && OffMoves[It].LastMoveTime < HitStart)
+					{
+						FVector ToOrb = OrbNow - L;
+						ToOrb.Z = 0.;
+						const double Dist = ToOrb.Length();
+						if (Dist > KINDA_SMALL_NUMBER)
+						{
+							L += ToOrb / Dist * FMath::Min(double(FLabScenario::MoveSpeed) * (HitStart - OffMoves[It].LastMoveTime), Dist);
+						}
+					}
+					Out.Emplace(float(L.X), float(L.Y), Now, LabWalkPhase(Minions[It].Serial) + HitStart - Now);
+					++Frozen;
+				}
 				continue;
 			}
 			const FVector Location = Transforms[It].GetTransform().GetLocation();
@@ -229,6 +256,7 @@ void ULabCrowdFxGatherProcessor::Execute(FMassEntityManager& EntityManager, FMas
 	CSV_CUSTOM_STAT(Lab, CrowdRecsSmall, Recs[LabUnitSmall].Num(), ECsvCustomStatOp::Set);
 	CSV_CUSTOM_STAT(Lab, CrowdRecsLarge, Recs[LabUnitLarge].Num(), ECsvCustomStatOp::Set);
 	CSV_CUSTOM_STAT(Lab, CrowdFarRecs, FarRecs, ECsvCustomStatOp::Set);
+	CSV_CUSTOM_STAT(Lab, CrowdRecsFrozen, Frozen, ECsvCustomStatOp::Set);
 	CSV_CUSTOM_STAT(Lab, CrowdRecsHitDead, HitDead, ECsvCustomStatOp::Set);
 
 #if !UE_BUILD_TEST

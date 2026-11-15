@@ -472,6 +472,8 @@ void ALabGameMode::TickBench()
 			CSV_METADATA(TEXT("LabIskmTrackReserve"), *Config.IskmTrackReserveString());
 			// M6 수정 A(ADR-0020): 바깥 기록과 맨 앞 기록 재생성(1/0, 모든 단계). 맨 앞 기록의 오브 거리는 CSV 스탯 Lab/FarFrontM, 이동·꺼내기 시간은 Lab/FarStream
 			CSV_METADATA(TEXT("LabFarHandoff"), Config.bFarHandoff ? TEXT("1") : TEXT("0"));
+			// M6 수정 B: 그리는 끝 밖의 피격·사망 개체를 ISKM으로 그리는가(1/0). 엔티티 구동 입자와 ISKM을 함께 쓰지 않는 실행은 "-". 올린 개체 수는 CSV 스탯 Lab/FarHitTracked
+			CSV_METADATA(TEXT("LabFarHitIskm"), *Config.FarHitIskmString());
 			// v2 W11 액터 비용 후보: 하이드레이션 액터 메시의 고정 바운드(1/0, 액터가 없으면 "-"), QueryOnly 바디 칸 나누기(실제 CVar 값)
 			CSV_METADATA(TEXT("LabFixedSkelBounds"), Config.FixedSkelBoundsString());
 			{

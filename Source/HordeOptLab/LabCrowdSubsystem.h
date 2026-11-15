@@ -129,6 +129,14 @@ public:
 	 */
 	struct FLabRepSwitch { double Time = 0.; uint8 From = 0; uint8 To = 0; bool bVisible = false; };
 	TMap<FMassEntityHandle, FLabRepSwitch> RepLastSwitch;
+	/**
+	 * M6 수정 B: ULabFarHitIskmProcessor가 LOD를 올린 엔티티(값 0 아직 그리지 않음, 1 그림, 2 처음부터 그려져 있었음). 게임 스레드 전용(위 RepLastSwitch와 같다).
+	 * 풀 엔티티를 다시 쓸 때(SpawnEntities) 지우고 그 엔티티의 표현 전환 기록도 지운다. 그러지 않으면 새 자리(맵 가장자리)에서 표현 유지 규칙이 ISKM을 2초 동안 남긴다.
+	 */
+	TMap<FMassEntityHandle, uint8> FarHitBumped;
+	/** M6 수정 B: [Off, Max) 범위의 ISKM 컴포넌트(맵 전체 바운드 상자, ApplyFixedIskmBounds). 비교에만 쓴다 */
+	TArray<const UInstancedSkinnedMeshComponent*, TInlineAllocator<LabUnitTypeMax>> FarHitIskmComponents;
+	static float FarHitBoundsHalfXY();
 	/** Q5 HUD: 이 프레임 동기화한 하이드레이션 액터 수(CSV 스탯 Lab/Actors와 같은 값, ULabActorSyncProcessor가 쓴다) */
 	std::atomic<int32> ActorCount{0};
 	/**

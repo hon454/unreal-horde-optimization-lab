@@ -249,10 +249,16 @@ struct FLabConfig
 	 * 시나리오 규칙이라 빼 보기가 아니다. CSV 메타데이터 LabFarHandoff, lab_config far_handoff=.
 	 */
 	bool bFarHandoff = true;
+	/**
+	 * M6 수정 B(-LabFarHitIskm=0/1, 기본 1). 그리는 끝(200m) 밖에서 피격·사망한 개체를 제거될 때까지 그림자 없는 ISKM으로 그린다(ULabFarHitIskmProcessor).
+	 * 엔티티 구동 입자와 ISKM을 함께 쓰는 실행(단계 7·8)에서만 뜻이 있다(UsesFarHitIskm). 시나리오 규칙이라 빼 보기가 아니다. CSV 메타데이터 LabFarHitIskm, 그 밖의 실행은 "-".
+	 */
+	bool bFarHitIskm = true;
 	/** 로그와 CSV 메타데이터 값. 그 기법을 쓰지 않는 실행은 "-" */
 	FString FxOrbFollowString() const;
 	FString BoundsStepString() const;
 	FString IskmTrackReserveString() const;
+	FString FarHitIskmString() const;
 	/** 분리 파라미터(LabSeparation.h). Test 빌드는 기본값만 쓴다. 개발 빌드는 -LabSepIter=, -LabSepRelax=, -LabSepMaxStep=, -LabSepVel=로 바꿔 본다 */
 	FLabSeparationParams Separation;
 	/**
@@ -284,6 +290,8 @@ struct FLabConfig
 	int32 CrowdFxParticles() const;
 	/** 엔티티 구동 입자를 쓰는가. ULabCrowdFxGatherProcessor 등록 조건(HordeOptLab.cpp) */
 	bool UsesCrowdFxEntity() const { return IsMass() && bCrowdFx; }
+	/** M6 수정 B를 쓰는가: 엔티티 구동 입자와 ISKM이 함께 있고 스위치가 켜졌다(단계 7·8 기본). ULabFarHitIskmProcessor 등록 조건 */
+	bool UsesFarHitIskm() const { return UsesCrowdFxEntity() && UsesIskm() && bFarHitIskm; }
 	/** M6 수정 A의 기록을 엔티티 구동 입자로 그리는가(바깥 무리를 끄는 -LabCrowdFxOuter=0이면 그리지 않는다) */
 	bool DrawsFarStream() const { return UsesCrowdFxEntity() && bFarHandoff && bCrowdFxOuter; }
 	/**

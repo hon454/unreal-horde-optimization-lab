@@ -29,6 +29,8 @@
 #include "ProfilingDebugging/CsvProfiler.h"
 #include "Misc/CommandLine.h"
 #include "Misc/Parse.h"
+#include "MassRepresentationSubsystem.h"         // M6 수정 B: [Off, Max) 범위의 ISKM 컴포넌트 찾기
+#include "MassSkinnedMeshRepresentationTypes.h"
 
 CSV_DECLARE_CATEGORY_EXTERN(Lab);
 
@@ -177,6 +179,22 @@ UMassEntityConfigAsset* ULabCrowdSubsystem::BuildEntityConfig(int32 UnitType, US
 		{
 			Visual->SkinnedMeshInstanceDesc.Meshes.Add(SkinnedDesc);
 		}
+		if (FLabConfig::Get().UsesFarHitIskm())
+		{
+			// M6 수정 B: 그리는 끝 밖의 피격·사망 개체(ULabFarHitIskmProcessor가 LOD만 Low로 올리고 중요도는 Off = 3.0)를 위한 [Off, Max) 설명자. 그림자를 끈다.
+			// 이 범위의 컴포넌트만 바운드 상자를 맵 전체로 넓힌다(ApplyFixedIskmBounds). 기존 설명자는 [.., Off)로 줄인다. Off 개체는 표현이 없음이라 이 범위를 쓰지 않았다
+			FMassSkinnedMeshInstanceVisualizationMeshDesc FarHitDesc = Visual->SkinnedMeshInstanceDesc.Meshes.Last();
+			for (FMassSkinnedMeshInstanceVisualizationMeshDesc& Desc : Visual->SkinnedMeshInstanceDesc.Meshes)
+			{
+				if (Desc.MaxLODSignificance > float(EMassLOD::Off))
+				{
+					Desc.SetSignificanceRange(EMassLOD::Type(FMath::FloorToInt32(Desc.MinLODSignificance)), EMassLOD::Off);
+				}
+			}
+			FarHitDesc.SetSignificanceRange(EMassLOD::Off, EMassLOD::Max);
+			FarHitDesc.bCastShadows = false;
+			Visual->SkinnedMeshInstanceDesc.Meshes.Add(FarHitDesc);
+		}
 		Visual->StaticMeshInstanceDesc.Meshes.Reset();
 		for (int32 LOD = 0; LOD < EMassLOD::Max; ++LOD)
 		{
@@ -237,6 +255,10 @@ void ULabCrowdSubsystem::SpawnEntities(TConstArrayView<FVector> Locations, TCons
 			const int32 i = Indices[k];
 			const FMassEntityHandle Entity = EntityPool[Type].Pop(EAllowShrinking::No);
 			ReinitPooledEntity(EntityManager, Entity, Locations[i], Serials[i]);
+			if (FarHitBumped.Remove(Entity) > 0)
+			{
+				RepLastSwitch.Remove(Entity); // M6 수정 B: 그리는 끝 밖에서 ISKM으로 올린 전환 기록을 새 개체가 물려받지 않게 한다(LabCrowdSubsystem.h FarHitBumped)
+			}
 			Reused.Add(Entity);
 		}
 		if (bPool)
@@ -381,6 +403,15 @@ float ULabCrowdSubsystem::IskmBoundsHalfXY()
 	return FLabConfig::Get().DrawExtentCm() * 1.1f + (StepCm > 0.f ? StepCm : FLabScenario::OrbViewBack) + 1000.f;
 }
 
+float ULabCrowdSubsystem::FarHitBoundsHalfXY()
+{
+	// M6 수정 B: 저격 대상은 오브에서 맵 반경까지다(LabSnipe.h FLabSnipeBands). 카메라는 오브 뒤 15m라 카메라에서 맵 반경 + 15m 안이다. 여기에 10%를 곱하고,
+	// 상자 중심에서 카메라가 벗어날 수 있는 거리(간격, 간격 0이면 처음 오브 위치에서 궤도 지름 + 15m)와 여유 10m를 더한다. 그림자를 끈 컴포넌트에만 쓴다(그림자 범위는 늘지 않는다)
+	const float StepCm = FLabConfig::Get().BoundsStepM * 100.f;
+	const float DriftCm = StepCm > 0.f ? StepCm : 2.f * FLabConfig::Get().Orbit.RadiusCm + FLabScenario::OrbViewBack;
+	return (FLabScenario::MapRadius + FLabScenario::OrbViewBack) * 1.1f + DriftCm + 1000.f;
+}
+
 void ULabCrowdSubsystem::UpdateIskmBoundsCenter()
 {
 	const float StepCm = FLabConfig::Get().BoundsStepM * 100.f;
@@ -416,9 +447,11 @@ void ULabCrowdSubsystem::ApplyFixedIskmBounds(UInstancedSkinnedMeshComponent& Co
 {
 	// 높이는 대형의 죽기 자세까지 덮는다. 카메라 높이(9m)도 안이다.
 	// 월드 좌표다: UpdateBounds는 CalcBounds(컴포넌트 변환)을 부르고, 그때 InverseTransformBy(GetComponentTransform().Inverse() * LocalToWorld)가 항등이라 값이 그대로 나온다(InstancedSkinnedMeshComponent.cpp:1249-1253).
-	const float HalfXY = IskmBoundsHalfXY();
+	// M6 수정 B: [Off, Max) 범위(그리는 끝 밖의 피격·사망, 그림자 끔) 컴포넌트는 맵 전체 상자다
+	const float HalfXY = FarHitIskmComponents.Contains(&Component) ? FarHitBoundsHalfXY() : IskmBoundsHalfXY();
 	const FBox Fixed(IskmBoundsCenter + FVector(-HalfXY, -HalfXY, -500.f), IskmBoundsCenter + FVector(HalfXY, HalfXY, 1500.f));
-	if (!Component.GetPrimitiveBoundsOverride().IsValid || bIskmBoundsMoved)
+	const FBox Current = Component.GetPrimitiveBoundsOverride();
+	if (!Current.IsValid || bIskmBoundsMoved || !Current.Equals(Fixed, 1.0))
 	{
 		// 컴포넌트는 ConstructSkinnedMeshComponents에서 늦게 생기므로 찾은 첫 틱에 넣는다. 인스턴스 갱신 때의 UpdateBounds도 이 값을 쓴다(:494-497)
 		// v2 W8: 상자를 옮긴 틱에도 다시 넣는다. 인스턴스가 매 프레임 움직여 프레임 끝의 FlushChanges가 참이고, 그때 UpdateBounds와 UpdatePrimitiveInstances가
@@ -445,6 +478,32 @@ void ULabCrowdSubsystem::ExcludeVisualsFromLumen()
 	{
 		UpdateIskmBoundsCenter(); // v2 W8: 상자가 카메라를 따라간다(FLabConfig::BoundsStepM)
 		CSV_CUSTOM_STAT(Lab, IskmBoundsMoves, bIskmBoundsMoved ? 1 : 0, ECsvCustomStatOp::Set);
+		if (FLabConfig::Get().UsesFarHitIskm())
+		{
+			// M6 수정 B: [Off, Max) 범위의 컴포넌트를 찾는다. 컴포넌트는 처음 쓰일 때 생기므로 매 틱 본다(종류마다 정보 하나, 몇 개뿐이다)
+			FarHitIskmComponents.Reset();
+			if (UMassRepresentationSubsystem* Representation = GetWorld()->GetSubsystem<UMassRepresentationSubsystem>())
+			{
+				FMassInstancedSkinnedMeshInfoArrayView Infos = Representation->GetMutableInstancedSkinnedMeshInfos();
+				for (int32 InfoIndex = 0; InfoIndex < Infos.Num(); ++InfoIndex)
+				{
+					FMassInstancedSkinnedMeshInfo& Info = Infos[InfoIndex];
+					FMassLODInstancedSkinnedMeshSignificanceRange* Range = Info.IsValid() ? Info.GetLODSignificanceRange(float(EMassLOD::Off)) : nullptr;
+					if (!Range || !Range->InstancedSkinnedMeshSharedDataPtr)
+					{
+						continue;
+					}
+					for (const FInstancedSkinnedMeshComponentSharedDataKey& Key : Range->SkinnedMeshComponentRefs)
+					{
+						const FMassInstancedSkinnedMeshComponentSharedData* Shared = Range->InstancedSkinnedMeshSharedDataPtr->GetDataForKey(Key);
+						if (const UInstancedSkinnedMeshComponent* Component = Shared ? Shared->GetInstancedSkinnedMeshComponent() : nullptr)
+						{
+							FarHitIskmComponents.AddUnique(Component);
+						}
+					}
+				}
+			}
+		}
 	}
 	for (TActorIterator<AMassVisualizer> It(GetWorld()); It; ++It)
 	{

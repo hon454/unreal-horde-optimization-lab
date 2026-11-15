@@ -1154,6 +1154,157 @@ void ULabRepHoldProcessor::Execute(FMassEntityManager& EntityManager, FMassExecu
 	CSV_CUSTOM_STAT(Lab, RepCapBlocked, CapBlocked, ECsvCustomStatOp::Set);
 }
 
+// 200m 밖 피격·사망 개체의 ISKM(M6 수정 B) ---------------------------------------
+
+ULabFarHitIskmProcessor::ULabFarHitIskmProcessor()
+	: EntityQuery(*this)
+{
+	bAutoRegisterWithProcessingPhases = false; // FLabConfig::UsesFarHitIskm일 때만 게임 모듈이 켠다(HordeOptLab.cpp)
+	ExecutionFlags = (int32)(EProcessorExecutionFlags::Client | EProcessorExecutionFlags::Standalone);
+	ExecutionOrder.ExecuteInGroup = UE::Mass::ProcessorGroupNames::Representation;
+	ExecutionOrder.ExecuteAfter.Add(UE::Mass::ProcessorGroupNames::LOD);
+	if (FLabConfig::Get().UsesRepHold())
+	{
+		ExecutionOrder.ExecuteAfter.Add(ULabRepHoldProcessor::StaticClass()->GetFName()); // 유지 규칙이 LOD를 되돌린 뒤에 올린다(이 규칙이 이긴다)
+	}
+	ExecutionOrder.ExecuteBefore.Add(UE::Mass::ProcessorGroupNames::VisualizationProcessing);
+	bRequiresGameThreadExecution = true; // 올린 엔티티 기록(ULabCrowdSubsystem::FarHitBumped)을 쓴다
+}
+
+float ULabFarHitIskmProcessor::HitStartOf(const FLabAnimStateFragment& Anim, float HitDuration)
+{
+	return Anim.State == ELabMinionState::Dead ? Anim.StateStartTime - HitDuration : Anim.StateStartTime;
+}
+
+void ULabFarHitIskmProcessor::ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager)
+{
+	ProcessorRequirements.AddSubsystemRequirement<ULabCrowdSubsystem>(EMassFragmentAccess::ReadWrite);
+	EntityQuery.AddRequirement<FMassRepresentationLODFragment>(EMassFragmentAccess::ReadWrite);
+	EntityQuery.AddRequirement<FMassRepresentationFragment>(EMassFragmentAccess::ReadOnly);
+	EntityQuery.AddRequirement<FTransformFragment>(EMassFragmentAccess::ReadWrite); // 따라잡기
+	EntityQuery.AddRequirement<FLabAnimStateFragment>(EMassFragmentAccess::ReadOnly);
+	EntityQuery.AddRequirement<FLabOffMoveFragment>(EMassFragmentAccess::ReadWrite, EMassFragmentPresence::Optional); // Simulation LOD 단계에만 있다
+	EntityQuery.AddConstSharedRequirement<FLabUnitTypeParams>(EMassFragmentPresence::All);
+	EntityQuery.AddTagRequirement<FLabMinionTag>(EMassFragmentPresence::All);
+	EntityQuery.AddTagRequirement<FLabPooledTag>(EMassFragmentPresence::None);
+	EntityQuery.AddTagRequirement<FLabHitTag>(EMassFragmentPresence::Any);
+	EntityQuery.AddTagRequirement<FLabDeadTag>(EMassFragmentPresence::Any);
+}
+
+void ULabFarHitIskmProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context)
+{
+	ULabCrowdSubsystem* Crowd = LabCrowdWrite(Context);
+	if (!Crowd)
+	{
+		return;
+	}
+	const double Now = Crowd->GetWorld()->GetTimeSeconds();
+	const float HitDuration = Crowd->HitDuration;
+	const FVector Orb = Crowd->OrbCenter;
+	int32 Bumped = 0;  // 이번 프레임 LOD를 올린 수(엔진이 Off로 다시 셈한 프레임만)
+	int32 Tracked = 0; // 올린 적이 있는 산 피격·사망 개체
+	int32 Waiting = 0; // 그중 아직 한 번도 그리지 않은 수
+#if !UE_BUILD_TEST
+	static const bool bTmpDiag = FParse::Param(FCommandLine::Get(), TEXT("LabFarHitDiag")); // 사건마다 한 줄(lab_farhit_bump, lab_farhit_drawn)
+#endif
+	EntityQuery.ForEachEntityChunk(Context, [&](FMassExecutionContext& Context)
+	{
+		const TArrayView<FMassRepresentationLODFragment> LODs = Context.GetMutableFragmentView<FMassRepresentationLODFragment>();
+		const TConstArrayView<FMassRepresentationFragment> Representations = Context.GetFragmentView<FMassRepresentationFragment>();
+		const TArrayView<FTransformFragment> Transforms = Context.GetMutableFragmentView<FTransformFragment>();
+		const TConstArrayView<FLabAnimStateFragment> AnimStates = Context.GetFragmentView<FLabAnimStateFragment>();
+		const TArrayView<FLabOffMoveFragment> OffMoves = Context.GetMutableFragmentView<FLabOffMoveFragment>();
+		const bool bOffMoved = OffMoves.Num() > 0 && Context.DoesArchetypeHaveTag(*FMassOffLODTag::StaticStruct());
+		const float Speed = Context.GetConstSharedFragment<FLabUnitTypeParams>().MoveSpeed;
+		for (FMassExecutionContext::FEntityIterator It = Context.CreateEntityIterator(); It; ++It)
+		{
+			FMassRepresentationLODFragment& L = LODs[It];
+			const FMassEntityHandle Entity = Context.GetEntity(It);
+			const bool bNone = Representations[It].CurrentRepresentation == EMassRepresentationType::None;
+			const FLabAnimStateFragment& Anim = AnimStates[It];
+			const float HitStart = HitStartOf(Anim, HitDuration);
+			uint8* Found = Crowd->FarHitBumped.Find(Entity);
+			if (Found)
+			{
+				// 올린 뒤에는 표현 LOD의 히스테리시스(200~220m는 Low에 남는다, engine-notes.md 45절) 때문에 LOD가 Off로 돌아오지 않는 프레임이 있다. 그래서 LOD와 무관하게 본다
+				++Tracked;
+				if (*Found == 0 && !bNone)
+				{
+					*Found = 1;
+#if !UE_BUILD_TEST
+					const double Delay = Now - HitStart; // 맞은 뒤 처음 ISKM으로 그린 프레임까지(지난 프레임의 표현이다)
+					++LogFirst;
+					LogDelaySum += Delay;
+					LogDelayMax = FMath::Max(LogDelayMax, Delay);
+					if (bTmpDiag) { UE_LOG(LogLab, Log, TEXT("lab_farhit_drawn frame=%llu ent=%s delay=%.3f state=%d"), (unsigned long long)GFrameCounter, *Entity.DebugGetDescription(), Delay, int32(Anim.State)); }
+#endif
+				}
+				else if (*Found == 0)
+				{
+					++Waiting; // 청크가 아직 표현을 다시 보지 않았다. 모으기 프로세서가 입자로 남긴다
+				}
+			}
+			if (L.LOD != EMassLOD::Off)
+			{
+				continue;
+			}
+			// 따라잡기: 마지막 이동(약 1초 간격) 뒤 맞기까지 걸었을 거리를 한 번 옮긴다. 입자는 그동안 그 거리를 외삽해 그렸다
+			if (bOffMoved && OffMoves[It].LastMoveTime > 0. && OffMoves[It].LastMoveTime < HitStart)
+			{
+				FTransform& Transform = Transforms[It].GetMutableTransform();
+				FVector ToOrb = Orb - Transform.GetLocation();
+				ToOrb.Z = 0.;
+				const double Dist = ToOrb.Length();
+				const double Step = FMath::Min(double(Speed) * (HitStart - OffMoves[It].LastMoveTime), Dist);
+				if (Dist > KINDA_SMALL_NUMBER)
+				{
+					Transform.AddToTranslation(ToOrb / Dist * Step);
+				}
+				OffMoves[It].LastMoveTime = HitStart;
+#if !UE_BUILD_TEST
+				++LogCatchUps;
+				LogCatchUpMax = FMath::Max(LogCatchUpMax, Step);
+#endif
+			}
+			L.LOD = EMassLOD::Low; // 중요도(Off = 3.0)는 그대로라 [Off, Max) 설명자로 간다
+			++Bumped;
+			if (!Found)
+			{
+				// 처음 올린 프레임에 이미 그려져 있던 개체(맞은 뒤 그리는 끝을 넘어 나갔다)는 늦음 집계에서 뺀다(2)
+				Crowd->FarHitBumped.Add(Entity, bNone ? 0 : 2);
+				++Tracked;
+				Waiting += bNone ? 1 : 0;
+#if !UE_BUILD_TEST
+				if (bTmpDiag) { UE_LOG(LogLab, Log, TEXT("lab_farhit_bump frame=%llu ent=%s none=%d state=%d since_hit=%.3f"), (unsigned long long)GFrameCounter, *Entity.DebugGetDescription(), bNone ? 1 : 0, int32(Anim.State), Now - HitStart); }
+#endif
+			}
+		}
+	});
+	CSV_CUSTOM_STAT(Lab, FarHitTracked, Tracked, ECsvCustomStatOp::Set);
+	CSV_CUSTOM_STAT(Lab, FarHitWaiting, Waiting, ECsvCustomStatOp::Set);
+#if !UE_BUILD_TEST
+	// 개발 확인(5초마다): 프레임 평균 올린 수와 기다린 수, 처음 그린 개체 수와 맞은 뒤 그때까지의 시간(평균·최대), 따라잡기 수와 최대 거리(cm), 기록 크기
+	++LogFrames;
+	LogBumped += Bumped;
+	LogWaiting += Waiting;
+	LogTracked += Tracked;
+	if (LogSince <= 0.)
+	{
+		LogSince = Now;
+	}
+	else if (Now - LogSince >= 5.)
+	{
+		const double F = double(FMath::Max(LogFrames, 1));
+		UE_LOG(LogLab, Log, TEXT("lab_farhit t=%.1f bumped=%.2f tracked=%.2f waiting=%.2f first=%lld delay_mean_s=%.3f delay_max_s=%.3f catchups=%lld catchup_max_cm=%.1f map=%d"),
+			Now, LogBumped / F, LogTracked / F, LogWaiting / F, LogFirst, LogFirst > 0 ? LogDelaySum / LogFirst : 0., LogDelayMax, LogCatchUps, LogCatchUpMax, Crowd->FarHitBumped.Num());
+		LogSince = Now;
+		LogFrames = 0;
+		LogBumped = LogWaiting = LogTracked = LogFirst = LogCatchUps = 0;
+		LogDelaySum = LogDelayMax = LogCatchUpMax = 0.;
+	}
+#endif
+}
+
 // 상태 타이머 ----------------------------------------------------------------
 
 ULabMinionStateProcessor::ULabMinionStateProcessor()
