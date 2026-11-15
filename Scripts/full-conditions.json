@@ -46,7 +46,8 @@
   "LabHud": "0",
   "LabShotAt": "0",
   "LabOk": "1",
-  "LabPreset": "P1"
+  "LabPreset": "P1",
+  "LabFarHandoff": "1"
  },
  "equivalence": {
   "death_rate_tol": 0.01,
@@ -133,7 +134,8 @@
     "LabTechAvoid": "0",
     "LabTechSeparate": "1",
     "LabActorCollision": "pawn",
-    "LabRepHold": "0"
+    "LabRepHold": "0",
+    "LabFarHitIskm": "-"
    }
   },
   {
@@ -160,7 +162,8 @@
     "LabActorCollision": "trace",
     "LabRepHold": "0",
     "LabActorCap": "500",
-    "LabHydrateM": "30"
+    "LabHydrateM": "30",
+    "LabFarHitIskm": "-"
    }
   },
   {
@@ -184,7 +187,8 @@
     "LabTechAvoid": "0",
     "LabTechSeparate": "1",
     "LabActorCollision": "trace",
-    "LabRepHold": "0"
+    "LabRepHold": "0",
+    "LabFarHitIskm": "-"
    }
   },
   {
@@ -209,7 +213,8 @@
     "LabTechAvoid": "0",
     "LabTechSeparate": "1",
     "LabActorCollision": "trace",
-    "LabRepHold": "2000"
+    "LabRepHold": "2000",
+    "LabFarHitIskm": "-"
    }
   },
   {
@@ -231,7 +236,8 @@
     "LabTechIskm": "0",
     "LabTechSeparate": "1",
     "LabActorCollision": "trace",
-    "LabRepHold": "2000"
+    "LabRepHold": "2000",
+    "LabFarHitIskm": "-"
    }
   },
   {
@@ -253,7 +259,8 @@
     "LabBoundsStepM": "10",
     "LabIskmTrackReserve": "1",
     "LabTechSeparate": "1",
-    "LabRepHold": "2000"
+    "LabRepHold": "2000",
+    "LabFarHitIskm": "-"
    }
   },
   {
@@ -275,7 +282,8 @@
     "LabActorCap": "500",
     "LabHydrateM": "30",
     "LabFarShadow": "1",
-    "LabRepHold": "2000"
+    "LabRepHold": "2000",
+    "LabFarHitIskm": "1"
    }
   },
   {
@@ -307,7 +315,8 @@
     "LabHydrateM": "40",
     "LabFarShadow": "0",
     "LabFixedSkelBounds": "1",
-    "LabQueryIsolate": "0"
+    "LabQueryIsolate": "0",
+    "LabFarHitIskm": "1"
    }
   },
   {
@@ -419,7 +428,8 @@
    "expect": {
     "LabTechIskm": "0",
     "LabIskmTrackReserve": "-",
-    "LabBoundsStepM": "-"
+    "LabBoundsStepM": "-",
+    "LabFarHitIskm": "-"
    }
   },
   {
@@ -468,7 +478,8 @@
    "expect": {
     "LabTechCrowdFx": "0",
     "LabCrowdFxActive": "0",
-    "LabFxOrbFollow": "-"
+    "LabFxOrbFollow": "-",
+    "LabFarHitIskm": "-"
    }
   },
   {

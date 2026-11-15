@@ -50,19 +50,25 @@ $FailuresCsv = "$BatchDir\failures.csv"
 # v2 W10: 구성은 사다리 단계(s1~s8, -LabStage=1~8)와 단계 8의 빼 보기(a8*)다. 옛 단계·변형 이름(M0~M5, -LabVariant)은 지웠고 옛 구성(final, m1 등)도 함께 지웠다.
 # 단계별 스위치 표와 빼 보기 표는 Docs/Worklog/V2.md "W10"과 Docs/Guides/commands.md에 있다. 기대값은 그 표의 CSV 메타데이터 값이다.
 $StepExpect = @{
-    "1" = @("LabStage=1", "LabLadder=1", "LabTechHydrate=0", "LabTechAvoid=0", "LabTechSeparate=1", "LabActorCollision=pawn", "LabRepHold=0")
-    "2" = @("LabStage=2", "LabTechInstAnim=0", "LabTechHydrate=1", "LabTechAnimBudget=0", "LabTechHydrateFix=0", "LabTechSimLod=0", "LabTechFarCull=1", "LabTechAvoid=1", "LabTechSeparate=0", "LabActorCollision=trace", "LabRepHold=0", "LabActorCap=500", "LabHydrateM=30")
-    "3" = @("LabStage=3", "LabTechInstAnim=0", "LabTechHydrate=1", "LabTechAnimBudget=0", "LabTechHydrateFix=0", "LabTechSimLod=0", "LabTechAvoid=0", "LabTechSeparate=1", "LabActorCollision=trace", "LabRepHold=0")
-    "4" = @("LabStage=4", "LabTechInstAnim=1", "LabTechAnimBudget=1", "LabTechHydrateFix=1", "LabTechPool=0", "LabTechSimLod=0", "LabTechIskm=0", "LabTechAvoid=0", "LabTechSeparate=1", "LabActorCollision=trace", "LabRepHold=2000")
-    "5" = @("LabStage=5", "LabTechInstAnim=1", "LabTechPool=1", "LabTechSimLod=1", "LabTechIskm=0", "LabTechSeparate=1", "LabActorCollision=trace", "LabRepHold=2000")
-    "6" = @("LabStage=6", "LabTechIskm=1", "LabTechFixedBounds=1", "LabTechCrowdFx=0", "LabBoundsStepM=10", "LabIskmTrackReserve=1", "LabTechSeparate=1", "LabRepHold=2000")
-    "7" = @("LabStage=7", "LabTechIskm=1", "LabTechCrowdFx=1", "LabFxOrbFollow=1", "LabActorCap=500", "LabHydrateM=30", "LabFarShadow=1", "LabRepHold=2000")
+    "1" = @("LabStage=1", "LabLadder=1", "LabTechHydrate=0", "LabTechAvoid=0", "LabTechSeparate=1", "LabActorCollision=pawn", "LabRepHold=0", "LabFarHandoff=1", "LabFarHitIskm=-")
+    "2" = @("LabStage=2", "LabTechInstAnim=0", "LabTechHydrate=1", "LabTechAnimBudget=0", "LabTechHydrateFix=0", "LabTechSimLod=0", "LabTechFarCull=1", "LabTechAvoid=1", "LabTechSeparate=0", "LabActorCollision=trace", "LabRepHold=0", "LabActorCap=500", "LabHydrateM=30", "LabFarHandoff=1", "LabFarHitIskm=-")
+    "3" = @("LabStage=3", "LabTechInstAnim=0", "LabTechHydrate=1", "LabTechAnimBudget=0", "LabTechHydrateFix=0", "LabTechSimLod=0", "LabTechAvoid=0", "LabTechSeparate=1", "LabActorCollision=trace", "LabRepHold=0", "LabFarHandoff=1", "LabFarHitIskm=-")
+    "4" = @("LabStage=4", "LabTechInstAnim=1", "LabTechAnimBudget=1", "LabTechHydrateFix=1", "LabTechPool=0", "LabTechSimLod=0", "LabTechIskm=0", "LabTechAvoid=0", "LabTechSeparate=1", "LabActorCollision=trace", "LabRepHold=2000", "LabFarHandoff=1", "LabFarHitIskm=-")
+    "5" = @("LabStage=5", "LabTechInstAnim=1", "LabTechPool=1", "LabTechSimLod=1", "LabTechIskm=0", "LabTechSeparate=1", "LabActorCollision=trace", "LabRepHold=2000", "LabFarHandoff=1", "LabFarHitIskm=-")
+    "6" = @("LabStage=6", "LabTechIskm=1", "LabTechFixedBounds=1", "LabTechCrowdFx=0", "LabBoundsStepM=10", "LabIskmTrackReserve=1", "LabTechSeparate=1", "LabRepHold=2000", "LabFarHandoff=1", "LabFarHitIskm=-")
+    "7" = @("LabStage=7", "LabTechIskm=1", "LabTechCrowdFx=1", "LabFxOrbFollow=1", "LabActorCap=500", "LabHydrateM=30", "LabFarShadow=1", "LabRepHold=2000", "LabFarHandoff=1", "LabFarHitIskm=1")
     "8" = @("LabStage=8", "LabLadder=8", "LabTechSimLod=1", "LabTechIskm=1", "LabTechFixedBounds=1", "LabTechCrowdFx=1", "LabTechAvoid=0", "LabTechSeparate=1", "LabActorCollision=trace", "LabRepHold=2000",
             "LabFxOrbFollow=1", "LabBoundsStepM=10", "LabIskmTrackReserve=1", "LabActorCap=1000", "LabHydrateM=40", "LabFarShadow=0",
-            "LabFixedSkelBounds=1", "LabQueryIsolate=0") # v2 W11: 액터 메시 고정 바운드는 단계 8 기본, 칸 나누기는 끔
+            "LabFixedSkelBounds=1", "LabQueryIsolate=0", "LabFarHandoff=1", "LabFarHitIskm=1") # M6 수정 A·B는 장면 규칙(모든 단계 켬). v2 W11: 액터 메시 고정 바운드는 단계 8 기본, 칸 나누기는 끔
 }
 $ConfigTable = @()
 foreach ($s in 1..8) { $ConfigTable += @{ Name = "s$s"; Args = @("-LabStage=$s"); Expect = @($StepExpect["$s"]) } }
+# M6 수정 A·B를 끈 확인용 구성(묶음 V2M6Fix, Docs/Worklog/V2.md "M6 수정"). 장면 규칙이라 빼 보기 표에 넣지 않는다
+foreach ($s in @(1, 8)) {
+    $off = @("LabFarHandoff=0") + $(if ($s -eq 8) { @("LabFarHitIskm=0") } else { @("LabFarHitIskm=-") })
+    $base = @($StepExpect["$s"] | Where-Object { $_ -notmatch '^LabFarHandoff=|^LabFarHitIskm=' })
+    $ConfigTable += @{ Name = "s${s}m6off"; Args = @("-LabStage=$s", "-LabFarHandoff=0 -LabFarHitIskm=0"); Expect = $base + $off }
+}
 # 빼 보기: 단계 8에서 스위치 하나. Expect는 바뀌는 메타데이터 값이다. LabOverrides는 정지 조건(orbit=…)과 섞이므로 대조하지 않는다
 $Ablations = @(
     @{ Name = "a8hyd"; Arg = "-LabHydrate=0"; Expect = @("LabTechHydrate=0", "LabActorCollision=-") },

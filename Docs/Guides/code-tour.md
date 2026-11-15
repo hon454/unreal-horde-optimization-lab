@@ -4,7 +4,7 @@
 
 ## 요약과 읽는 순서
 
-미니언 1만은 모두 Mass 엔티티다. 오브는 맵 중심 둘레의 원 궤도를 2m/s로 돈다. 오브를 향해 걷는 이동은 엔진 조향·이동 프로세서가 맡고, 카메라에서 200m 밖은 Lab 프로세서가 틱 간격마다 한 번에 옮긴다. 겹친 개체는 Lab 분리 프로세서가 떼어 놓는다. 피해·저격·상태 전환은 Lab 로직 프로세서 셋이 한다. 표현은 엔진의 표현 LOD가 카메라 거리로 고른다. 0\~40m는 액터(최대 1,000, 캡슐은 저격 트레이스 전용, 메시 바운드는 에셋의 고정 바운드), 40\~200m는 ISKM 인스턴스(80m 밖은 그림자 끔), 200m 밖은 그리지 않고 Niagara 입자가 엔티티 자리에 걷는 모습을 그린다. Lab 표현 프로세서 셋이 각자 액터, ISKM, 입자에 그 프레임의 상태를 넣는다. 한 번 표현이 바뀐 개체는 2초 안에 바로 전의 표현으로 되돌아가지 않는다. 죽은 엔티티는 파괴하지 않고 풀에 넣었다가 맵 가장자리에서 다시 쓴다.
+미니언 1만은 모두 Mass 엔티티다. 오브는 맵 중심 둘레의 원 궤도를 2m/s로 돈다. 오브를 향해 걷는 이동은 엔진 조향·이동 프로세서가 맡고, 카메라에서 200m 밖은 Lab 프로세서가 틱 간격마다 한 번에 옮긴다. 겹친 개체는 Lab 분리 프로세서가 떼어 놓는다. 피해·저격·상태 전환은 Lab 로직 프로세서 셋이 한다. 표현은 엔진의 표현 LOD가 카메라 거리로 고른다. 0\~40m는 액터(최대 1,000, 캡슐은 저격 트레이스 전용, 메시 바운드는 에셋의 고정 바운드), 40\~200m는 ISKM 인스턴스(80m 밖은 그림자 끔), 200m 밖은 그리지 않고 Niagara 입자가 엔티티 자리에 걷는 모습을 그린다. 200m 밖에서 맞은 개체만 제거될 때까지 그림자 없는 ISKM이다. Lab 표현 프로세서 셋이 각자 액터, ISKM, 입자에 그 프레임의 상태를 넣는다. 한 번 표현이 바뀐 개체는 2초 안에 바로 전의 표현으로 되돌아가지 않는다. 죽은 엔티티는 파괴하지 않고 풀에 넣었다가, 맵 밖 무리(코드가 굴리는 기록 1만 개)에서 오브에 가장 가까운 기록의 자리에서 다시 쓴다.
 
 처음 읽을 때는 이 넷이면 된다.
 
@@ -36,6 +36,7 @@ Lab 프로세서는 모두 기본 처리 단계인 PrePhysics에 등록된다(`U
 | 9 | `ULabOrbSnipeProcessor`(LabLogic) | 범위 피해 뒤 |
 | 10 | `ULabMinionStateProcessor`(LabLogic) | 저격 뒤 |
 | 11 | `ULabRepHoldProcessor`(Representation) | LOD 뒤, VisualizationProcessing 앞. 게임 스레드 |
+| 11b | `ULabFarHitIskmProcessor`(Representation) | LOD와 `ULabRepHoldProcessor` 뒤, VisualizationProcessing 앞. 게임 스레드. 단계 7·8(M6 수정 B) |
 | 12 | `UMassVisualizationProcessor`(Representation.VisualizationProcessing) | LOD 뒤 |
 | 13 | `ULabIskmProcessor`, `ULabCrowdFxGatherProcessor`, `ULabRepSwitchCountProcessor`(Representation) | VisualizationProcessing 뒤. 셋 사이는 정해져 있지 않다. 셋 다 게임 스레드 |
 | 14 | `ULabActorSyncProcessor`(그룹 없음) | Representation 뒤. 게임 스레드 |
@@ -52,7 +53,7 @@ Avoidance 그룹과 `SyncWorldToMass` 그룹에는 최종 구성의 엔티티를
 ### 스폰과 재생성
 
 - **시작.** `ALabGameMode::StartPlay`가 스포너 `ALabCrowdSpawner`, 오브 `ALabOrb`, 카메라 `ALabCameraRig`를 만들고, 배경 무리 Niagara 컴포넌트를 맵 중심에 켠 뒤(`SetupCrowdFx`) `ALabCrowdSpawner::SpawnInitial`을 부른다([LabGameMode.cpp](../../Source/HordeOptLab/LabGameMode.cpp)). 스포너는 시드 스트림에서 맵 중심 둘레의 반지름 [8m, 500m]과 각도를 뽑고, ISKM 에셋을 읽은 뒤 `ULabCrowdSubsystem::Activate`로 종류별 EntityConfig를 만들고 `SpawnEntities`로 엔티티를 만든다([LabCrowdSpawner.cpp](../../Source/HordeOptLab/LabCrowdSpawner.cpp)). 단계 2(Mass)부터 같은 길이다.
-- **재생성.** 사망이 끝난 엔티티는 상태 타이머(아래 "오브의 피해와 저격")가 지연 명령으로 `ULabCrowdSubsystem::RecycleAndRespawn`에 넘긴다. 이 함수는 엔티티를 종류별 풀에 넣고 `RequestRespawn` → `ALabCrowdSpawner::RespawnEntities`로 맵 가장자리 고리 [490m, 500m]의 위치와 새 일련번호를 받는다. `SpawnEntities`가 같은 종류의 풀 엔티티를 먼저 꺼내 `ReinitPooledEntity`로 위치·체력·상태를 다시 넣고, 모자랄 때만 새로 만든다. 쓰이지 않고 남은 엔티티는 그리는 거리 밖에 세워 두고 `FLabPooledTag`를 붙인다. 단계 5(Simulation LOD + 엔티티 풀)에서 들어왔다(파괴하면 ISKM 트랙이 남는 엔진 문제의 우회, engine-notes 3절).
+- **재생성.** 사망이 끝난 엔티티는 상태 타이머(아래 "오브의 피해와 저격")가 지연 명령으로 `ULabCrowdSubsystem::RecycleAndRespawn`에 넘긴다. 이 함수는 엔티티를 종류별 풀에 넣고 `RequestRespawn`(종류별 수) → `ALabCrowdSpawner::RespawnEntities`로 위치와 일련번호를 받는다. 위치는 맵 밖 무리의 기록(`FLabFarStream`, [LabFarStream.cpp](../../Source/HordeOptLab/LabFarStream.cpp)) 가운데 같은 종류에서 오브에 가장 가까운 것의 지금 자리이고, 일련번호는 그 기록의 것이다. 꺼낸 수만큼 1,000m 고리에 새 기록이 더해진다. 기록 N개는 게임 모드 틱이 약 1초에 한 번씩 오브 쪽으로 옮긴다(`ALabCrowdSpawner::TickFarStream`). `-LabFarHandoff=0`이면 맵 가장자리 고리 [490m, 500m]의 무작위 자리와 새 일련번호다. `SpawnEntities`가 같은 종류의 풀 엔티티를 먼저 꺼내 `ReinitPooledEntity`로 위치·체력·상태를 다시 넣고, 모자랄 때만 새로 만든다. 쓰이지 않고 남은 엔티티는 그리는 거리 밖에 세워 두고 `FLabPooledTag`를 붙인다. 단계 5(Simulation LOD + 엔티티 풀)에서 들어왔다(파괴하면 ISKM 트랙이 남는 엔진 문제의 우회, engine-notes 3절).
 
 ### 이동과 겹침 방지
 
@@ -82,7 +83,7 @@ Avoidance 그룹과 `SyncWorldToMass` 그룹에는 최종 구성의 엔티티를
 
 ### 입자 갱신
 
-`ULabCrowdFxGatherProcessor`(게임 스레드)가 그려지지 않는(표현 None) 걷는 엔티티의 위치, 그 위치에 있던 시각, 걷기 위상을 종류별 배열로 모아 Niagara 사용자 변수 `User.LabSmallRecs`·`User.LabLargeRecs`에 넣는다(`UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayVector4`). 같은 프로세서가 외삽 목표 `User.LabOrbPos`를 매 프레임 오브의 지금 위치로 넣는다(`-LabFxOrbFollow=0`이면 활성화 전에 한 번). 입자는 GPU에서 그 위치부터 오브 쪽으로 외삽해 걷는다. 맵 밖(500\~1,000m)은 엔티티와 무관한 입자가 맵 중심 둘레의 고리에서 채운다. 컴포넌트는 `ALabGameMode::SetupCrowdFx`가 시작 때 맵 중심에 한 번 켠다. 단계 7(배경 무리)에서 들어왔다.
+`ULabCrowdFxGatherProcessor`(게임 스레드)가 그려지지 않는(표현 None) 걷는 엔티티의 위치, 그 위치에 있던 시각, 걷기 위상을 종류별 배열로 모아 Niagara 사용자 변수 `User.LabSmallRecs`·`User.LabLargeRecs`에 넣는다(`UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayVector4`). 같은 프로세서가 외삽 목표 `User.LabOrbPos`를 매 프레임 오브의 지금 위치로 넣는다(`-LabFxOrbFollow=0`이면 활성화 전에 한 번). 입자는 GPU에서 그 위치부터 오브 쪽으로 외삽해 걷는다. 맵 밖(500\~1,000m)은 맵 밖 무리의 기록을 같은 배열 뒤에 붙여 그린다. 기록이 엔티티가 되는 프레임에 같은 자리·같은 위상의 엔티티 원소로 바뀌어 화면이 그대로다(M6 수정 A). 그리는 끝 밖에서 맞은 개체는 `ULabFarHitIskmProcessor`(표현 LOD 뒤, 표현 앞)가 표현 LOD를 Low로 올려 그림자 없는 ISKM으로 그린다. ISKM이 나오기 전 프레임에는 멈춘 원소로 넣는다(M6 수정 B). 컴포넌트는 `ALabGameMode::SetupCrowdFx`가 시작 때 맵 중심에 한 번 켠다. 단계 7(배경 무리)에서 들어왔다.
 
 ### 오브의 피해와 저격
 

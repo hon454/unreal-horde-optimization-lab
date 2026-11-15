@@ -55,7 +55,7 @@ MCP에 Python 실행 툴이 없어, 스크립트를 파일로 쓰고 SlateInspec
 
 ## 5. 엔티티 구동 이미터(Q2b)
 
-그려지지 않는 엔티티(표현 None)의 위치를 코드(`ULabCrowdFxGatherProcessor`)가 매 프레임 배열로 넣고, 이미터는 그 배열 길이만큼 입자를 그 프레임에만 그린다. 위 3절의 `Small`·`Large`는 500m 밖 독립 이미터로 그대로 둔다(안쪽 반경은 코드가 `User.Lifetime`으로 정한다). 계약은 [Docs/Worklog/Q2.md](../Docs/Worklog/Q2.md) "Q2b"의 "에셋 단위에 넘길 것", 경위는 같은 절의 "에셋 단위 진행". 2026-11-12에 이 순서로 만들었다.
+그려지지 않는 엔티티(표현 None)의 위치를 코드(`ULabCrowdFxGatherProcessor`)가 매 프레임 배열로 넣고, 이미터는 그 배열 길이만큼 입자를 그 프레임에만 그린다. 위 3절의 `Small`·`Large`는 500m 밖 독립 이미터로 그대로 둔다(안쪽 반경은 코드가 `User.Lifetime`으로 정한다). M6 수정 A(ADR-0020, `-LabFarHandoff=1` 기본)부터는 코드가 독립 이미터의 스폰율을 0으로 넣고, 맵 밖 무리의 기록(`FLabFarStream`)을 같은 배열의 엔티티 원소 뒤에 붙인다. 원소 형식(X, Y, T0, 위상)이 같아 아래 식을 그대로 쓴다. M6 수정 B(`-LabFarHitIskm=1` 기본)는 그리는 끝 밖에서 맞은 개체가 ISKM으로 나올 때까지 멈춘 원소(T0 = 지금, 위상 = 걷기 위상 + 맞은 시각 − 지금)를 넣는다. 독립 이미터는 끄는 스위치(`-LabFarHandoff=0`)를 위해 에셋에 남긴다. 계약은 [Docs/Worklog/Q2.md](../Docs/Worklog/Q2.md) "Q2b"의 "에셋 단위에 넘길 것", 경위는 같은 절의 "에셋 단위 진행". 2026-11-12에 이 순서로 만들었다.
 
 1. 사용자 변수. `AddUserVariables`로 `LabNow`(float 0), `LabOrbPos`(`/Script/Niagara.NiagaraPosition`, 0). `Vector`(`/Script/CoreUObject.Vector`)로 넣으면 다른 Vec3(`Vector3f`)와 형이 다르니 Position을 쓴다. 코드의 `SetVariableVec3`가 Position 변수면 Position으로 넣는다. 배열 변수 `LabSmallRecs`·`LabLargeRecs`(Vector 4 Array)는 `AddUserVariables`로 만들 수 없다(오류 없이 아무것도 생기지 않는다. 엔진 `FNiagaraParameterStore::SetParameter_InternalUseOnly`가 DI를 받지 않는다). 아래 5-4에서 다이내믹 입력의 배열 입력을 `User.LabSmallRecs`에 `Linked`로 연결하면 그 이름의 사용자 변수가 DI 인스턴스와 함께 생긴다. `Lifetime` 기본값은 166.6667(= (100,000 − 50,000) / 300)로 바꿨다(코드가 실행 때 넣는다).
 2. 시스템 `SetSystemData`: `bOverrideCastShadow` false(켜 두면 컴포넌트가 시스템 값으로 그림자를 정해 이미터별로 가를 수 없다). 나머지는 3절 그대로다(워밍업 268초는 독립 이미터의 새 수명 166.67초를 덮는다).
