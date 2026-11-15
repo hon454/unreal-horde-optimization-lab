@@ -578,3 +578,18 @@
 | 캐릭터끼리 밀기 없음 | `HandleImpact`의 `ApplyImpactPhysicsForces`는 맞은 바디가 물리 시뮬레이션 중일 때만 힘을 준다. 캐릭터 캡슐은 시뮬레이션하지 않아 서로 밀지 않고 막기만 한다 | `CMC:7784-7812,7814-7825` |
 | 끼었을 때의 로그 | `OnCharacterStuckInGeometry`는 `LogCharacterMovement`의 `Log` 수준이다(경고·오류 아님) | `CMC:5513-5528` |
 | RVO 회피 | `bUseRVOAvoidance` 기본 거짓. 켜면 속도 계산 끝에 `CalcAvoidanceVelocity`가 `UAvoidanceManager`의 속도로 바꾼다(고려 반경 기본 500cm). 속도 조향이라 막기를 대신하지 않는다 | `CMC:822,829,3953-3955,4105-4141` |
+
+## 40. 표현 전환의 히스테리시스, 화면 안팎, 상한, 순서(2026-11-15, v2 W7)
+
+줄임말: **MG** = `Engine/Plugins/Runtime/MassGameplay/Source`, **LC** = `MG/MassLOD/Public/MassLODCalculator.h`. Lab의 전환 지표(`ULabRepSwitchCountProcessor`)와 최소 유지 시간(`ULabRepHoldProcessor`)이 이 사실에 기댄다.
+
+| 항목 | 확인한 것 | 위치 |
+| --- | --- | --- |
+| 거리 히스테리시스가 걸리는 경계 | `ComputeLODFromSettings`는 Off부터 내려오며 거리를 비교하고, 한 단계 위로 오를 때만 `Lerp(D[i], D[i+1], 1 − 비율)` 밖이면 옛 LOD를 남긴다. 반복이 `LODDistIdx > 0`에서 멈춰 High(액터)로 들어가고 나가는 경계에는 히스테리시스가 없다(19절과 같다). 그래서 "경계마다 10%"는 그림자 경계(80m, 들어올 때 76m)와 먼 경계(200m, 들어올 때 188m)에만 맞다 | `LC:862-895` |
+| 상한이 거리를 당기는 때 | `UMassVisualizationLODProcessor::Execute`는 매 프레임 `CalculateLOD`(가까운 청크 전부) → `AdjustDistancesFromCount` → `AdjustLODFromCount`를 부른다. 당긴 거리는 그 프레임의 거리 구간 수(LOD당 250개, 화면 안 구간을 먼저)로 다시 셈한다. 당긴 경계에도 위의 같은 함수를 쓰므로 액터 경계의 히스테리시스는 없다 | `MG/MassRepresentation/Private/MassVisualizationLODProcessor.cpp:79-111`, `LC:534-642,674-760`, `MG/MassLOD/Public/MassLODTypes.h:23` |
+| 상한이 걸렸는지 | 공유 프래그먼트 `FMassVisualizationLODSharedFragment::bHasAdjustedDistancesFromCount`(public). 표현 LOD 프로세서가 매 프레임 쓴다. 당긴 거리 자체(`RuntimeData.AdjustedBaseLODDistance` 등)는 계산기의 protected 멤버라 밖에서 읽을 수 없다 | `MG/MassRepresentation/Public/MassRepresentationFragments.h:333-345`, `MassVisualizationLODProcessor.cpp:100`, `LC:207-245,287` |
+| 화면 안팎 판정의 히스테리시스 | `CalculateVisibility`는 화면 안이던 개체에 `DistanceToFrustum + DistanceToFrustumHysteresis`, 아니던 개체에 `DistanceToFrustum`을 쓴다. 두 값의 기본은 0이다. 그래서 화면 안 경계(40m)와 화면 밖 경계(15m) 사이에 있는 개체는 화면 가장자리를 넘을 때마다 액터 ↔ 인스턴스가 바뀐다. `FMassVisualizationLODParameters::DistanceToFrustumHysteresis`(cm)가 엔진 설정이다 | `LC:358-361`, `MG/MassRepresentation/Public/MassRepresentationFragments.h:317-325`, `MG/MassRepresentation/Private/MassVisualizationTrait.cpp:52-53`, `MassRepresentationFragments.cpp:10` |
+| 최소 유지 시간에 해당하는 설정 | 없다. `FMassRepresentationParameters`와 `FMassVisualizationLODParameters`의 설정은 LOD별 표현, 거리, 히스테리시스 비율, 상한, 화면 거리와 그 히스테리시스, 준비 대기 플래그다. 표현 프로세서는 매 프레임 `LODRepresentation[LOD]`를 원하는 표현으로 보고 다르면 바로 바꾼다 | `MassRepresentationFragments.h:161-230,299-330`, `MG/MassRepresentation/Private/MassRepresentationProcessor.cpp:117-125,202` |
+| 상한을 끄는 설정 | `UMassVisualizationLODProcessor::bDoAdjustmentFromCount`(기본 참). 거짓이면 상한 자체가 없다 | `MG/MassRepresentation/Public/MassVisualizationLODProcessor.h:62` |
+| LOD를 고칠 자리 | 표현 LOD 프로세서는 그룹 `LOD`, 표현 프로세서(`UMassRepresentationProcessor` 계열)는 그룹 `Representation`이고 `LOD` 뒤다. `UMassVisualizationProcessor`는 그 안의 `Representation.VisualizationProcessing`이다. 그래서 `Representation` 그룹에서 `LOD` 뒤, `VisualizationProcessing` 앞에 둔 프로세서는 이번 프레임의 LOD가 정해진 뒤, 표현이 바뀌기 전에 돈다 | `MassVisualizationLODProcessor.cpp:15-16`, `MassRepresentationProcessor.cpp:56-57,523`, `MG/MassRepresentation/Public/MassRepresentationTypes.h:30` |
+| 먼 청크의 LOD | 화면 거리 밖(`FMassVisibilityCulledByDistanceTag`) 청크는 표현이 갱신되는 프레임(0.5초 ± 10%)에만 LOD를 다시 셈한다. 그 청크에는 표현이 없음인 개체만 모인다(표현이 있으면 `CanBeSeen` 청크로 옮긴다) | `MassVisualizationLODProcessor.cpp:41-45`, `MassRepresentationProcessor.cpp:575-600,604-616` |

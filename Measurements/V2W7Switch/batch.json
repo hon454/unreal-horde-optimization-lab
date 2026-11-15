@@ -1,0 +1,20 @@
+﻿{
+    "batch":  "V2W7Switch",
+    "build":  "022f9f593b190b2d162f8f244b2202b07995fe48 (dirty)",
+    "start":  "2026-11-15 09:07:27",
+    "end":  "2026-11-15 10:20:09",
+    "n":  "10000",
+    "preset":  "P3",
+    "radius_m":  "57.3",
+    "height_m":  "6",
+    "speeds":  [
+                   "0",
+                   "2"
+               ],
+    "duration_sec":  180,
+    "runs":  3,
+    "planned":  19,
+    "ok":  19,
+    "failed":  0,
+    "gave_up":  0
+}
