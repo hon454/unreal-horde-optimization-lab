@@ -17,7 +17,7 @@
 
 사용자가 리뷰의 M1\~M8을 정했다([V2-review.md](Worklog/V2-review.md) "사용자 판단").
 
-1. 사용자가 판정 초과의 대응을 고른다(D59, D61). `Full4`는 그 뒤다.
+1. 코디네이터가 단계 8의 품질 값 낮추기를 사용자와 정한다(D59). `Full4`는 그 뒤다.
 2. 코드 세션이 M3(엔진 회피 파라미터)을 잰다.
 3. 코디네이터가 패키지와 태그 `v2-full4` 뒤에 W13(총괄 묶음 `Full4`, 216회, 약 13.7시간)을 맡긴다.
 
@@ -168,4 +168,4 @@ Development 전환 점수는 `Full1` 때의 참고값이다(`Measurements/Full1/
 
 ## 사용자에게 요청한 일
 
-- 단계 8이 판정을 넘는다. 대응을 고른다([autonomous-decisions.md](Worklog/autonomous-decisions.md) D59, D61).
+- 병렬 사본을 사다리에 넣을지 정한다([autonomous-decisions.md](Worklog/autonomous-decisions.md) D61).
