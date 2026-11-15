@@ -8,7 +8,7 @@
 # 실행 순서: 회차가 바깥 루프(r1 전 조건 -> r2 -> r3), 짝수 회차는 슬롯 순서를 뒤집는다(표류가 조건에 고르게 퍼지게). -Order cond면 조건 단위. 묶음 맨 첫 실행 r0 하나는 버린다.
 # 실행마다 끝난 직후 ablation-check.py로 메타데이터를 대조한다. 실패(종료 코드, CSV 없음, 앞 창이 게임이 아님, 대조 틀림, 시간 초과)는 Measurements/<묶음>/failures.csv에 적고 넘어간다.
 # 묶음 끝에서 실패분만 새 회차 번호(회차 + 그 묶음 종류의 회차 수)로 한 번 다시 잰다. 실패 CSV는 Saved/Profiling/CSV/failed/ 또는 fg-failed/로 옮겨 요약에서 빠진다.
-# 리뷰 M4: 실패 재측정 뒤에 느린 실행(Game p50과 Render p50이 그 조건 중앙값보다 함께 3% 넘게 긴 실행, Scripts/batch_rules.py)을 새 회차(7~9)로 한 번 다시 잰다.
+# 리뷰 M4: 실패 재측정 뒤에 느린 실행(Game p50과 Render p50이 그 조건 중앙값보다 함께 2% 넘게 긴 실행, Scripts/batch_rules.py)을 새 회차(7~9)로 한 번 다시 잰다.
 #   다시 잰 실행도 느리면 더 재지 않는다. 표시는 runs.csv slow_mark와 slow.csv에 남고 summary.csv runs_used가 요약에 쓴 회차를 적는다.
 #   끝에서 summarize.py, spikes.py, equivalence-check.py, batch-check.py(A/A 3회 차이 0.5ms, 단계 8 모든 실행 p95 16.7ms 이하, 느린 실행)를 부르고, 검사가 실패하면 종료 코드 1이다.
 # 리뷰 M7: 패키지의 commit.txt에 dirty가 있으면 시작하지 않는다(-AllowDirty는 시험용). 패키지 커밋에는 태그 v2-full4를 단다(measurement.md "측정 인프라 동결").

@@ -27,7 +27,7 @@ if ($Ablations) {
         @{ Tag = "a8stp"; Stage = "8"; Extra = "-LabBoundsStepM=0" },
         @{ Tag = "a8shd"; Stage = "8"; Extra = "-LabFarShadow=1" },
         @{ Tag = "a8fsb"; Stage = "8"; Extra = "-LabFixedSkelBounds=0" },
-        @{ Tag = "s8av"; Stage = "8"; Extra = "-LabAvoid=1" },
+        @{ Tag = "s8av"; Stage = "8"; Extra = "-LabAvoid=1 -LabSeparate=0" },
         @{ Tag = "s8iso"; Stage = "8"; Extra = "-LabQueryIsolate=1" },
         @{ Tag = "s8still"; Stage = "8"; Extra = "-LabOrbOrbitSpeed=0" }
     )

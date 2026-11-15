@@ -9,7 +9,7 @@
    (단계 3~8)의 중앙값의 중앙값. 조건 표의 equiv가 strict인 조건은 어기면 실패, report인 조건(단계 1, 단계 2, 겹침 방지 끔, 엔진 회피 더하기)은 값만 보고한다.
    단계 2는 엔진 회피가 오브 둘레에 무리를 쌓아 두 값이 정의상 다르다(V2W10Ladder: 초당 사망 48.5 대 56.7, 30m 안 1,997 대 927. D51).
 3. 겹친 쌍의 평균(runs.csv overlap_mean): 구성의 overlap 종류(sep, zero, engine, off)로 고른다. 근거는 조건 표의 overlap_basis.
-   sep(분리 프로세서)은 모든 N에서 같은 (N, 속도)의 엄격 단계 조건 중앙값의 ±25%(리뷰 M5. 값이 작으면 ±1쌍은 늘 허용)이고 어기면 실패다.
+   sep(분리 프로세서)은 모든 N에서 같은 (N, 속도)의 엄격 단계 조건 중앙값의 0.5배~2배(리뷰 M5. 단계 사이의 차이는 1.4배, 무너진 경우는 3배 이상. 값이 작으면 ±1쌍은 늘 허용)이고 어기면 실패다.
    zero(N 2000 이하)는 조건 표의 범위 밖이면 실패, engine, off, zero(N 2000 초과)는 범위 밖이어도 보고만 한다. 단계 2가 벗어나는 것은 실패로 막지 않는다(D51).
    탑뷰(P2) 실행은 같은 기준에 견주되 모두 보고만 한다.
 4. 캡슐 트레이스: LabActorCollision이 trace나 pawn이면 트레이스 수가 0보다 크고 적중 + 막힘 = 트레이스 수(빗나감 0)여야 한다. 어기면 실패.
@@ -179,8 +179,7 @@ def main():
             ref_ov = ref["overlap"]
             if klass == "sep":
                 # 리뷰 M5: 분리 프로세서는 같은 (N, 속도)의 엄격 단계 조건 중앙값의 ±overlap_rel_tol. 값이 작은 정지 조건을 위해 overlap_rel_floor쌍은 늘 허용한다
-                half = max(eq["overlap_rel_tol"] * ref_ov, eq["overlap_rel_floor"]) if ref_ov is not None else None
-                lo_hi = (ref_ov - half, ref_ov + half) if half is not None else None
+                lo_hi = (min(eq["overlap_rel_lo"] * ref_ov, ref_ov - eq["overlap_rel_floor"]), max(eq["overlap_rel_hi"] * ref_ov, ref_ov + eq["overlap_rel_floor"])) if ref_ov is not None else None
                 row["overlap_range"] = f"{lo_hi[0]:.1f}..{lo_hi[1]:.1f}" if lo_hi else ""
             else:
                 lo_hi = eq["overlap_mean"].get(klass if klass == "zero" else f"{klass}_{moving}")
@@ -249,7 +248,7 @@ def main():
         print(f'N={r["n"]:>6} {r["cond"]:<14} runs={r["runs"]} death={r["death_rate"]}/s ({r["death_rate_dev_pct"]}%) near30={r["near30_mean"]} ({r["near30_mean_dev_pct"]}%) '
               f'overlap={r["overlap_mean"]} capsule_miss={r["capsule_miss"]} round={r["round_per_sec"]}/s {r["pass"]} {r["note"]}')
     print(f"equivalence: {len(rows)} conditions, {len(rows) - bad - reports} pass, {reports} report, {bad} FAIL "
-          f"(tol death {eq['death_rate_tol']:.0%}, near30 {eq['near30_tol']:.0%}, alive exact, overlap sep +-{eq['overlap_rel_tol']:.0%} of the strict steps, other classes by range) -> {out}")
+          f"(tol death {eq['death_rate_tol']:.0%}, near30 {eq['near30_tol']:.0%}, alive exact, overlap sep {eq['overlap_rel_lo']}x..{eq['overlap_rel_hi']}x of the strict steps, other classes by range) -> {out}")
     if not have_table:
         print(f"note: Measurements/{a.batch}/runs.csv not found; overlap and round-trip checks skipped (run summarize.py --batch {a.batch} first)")
     if skipped:

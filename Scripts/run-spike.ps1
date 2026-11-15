@@ -85,7 +85,7 @@ $Ablations = @(
     # 하위 실험: 단계 8에 QueryOnly 칸 나누기를 더한다(v2 W11, 묶음 V2W11Cost에서 실행 간 범위 안이라 기본값에 넣지 않았다)
     @{ Name = "s8iso"; Arg = "-LabQueryIsolate=1"; Expect = @("LabQueryIsolate=1") },
     # 하위 실험(빼 보기가 아니라 더하기): 단계 8에 엔진 회피를 더한다(D43의 비교)
-    @{ Name = "s8av"; Arg = "-LabAvoid=1"; Expect = @("LabTechAvoid=1") }
+    @{ Name = "s8av"; Arg = "-LabAvoid=1 -LabSeparate=0"; Expect = @("LabTechAvoid=1", "LabTechSeparate=0") }
 )
 foreach ($a in $Ablations) {
     $keys = @($a.Expect | ForEach-Object { ($_ -split "=")[0] })

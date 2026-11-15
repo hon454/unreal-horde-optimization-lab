@@ -52,7 +52,8 @@
   "death_rate_tol": 0.01,
   "near30_tol": 0.01,
   "round_trip_max_per_sec": 0.5,
-  "overlap_rel_tol": 0.25,
+  "overlap_rel_lo": 0.5,
+  "overlap_rel_hi": 2.0,
   "overlap_rel_floor": 1.0,
   "overlap_mean": {
    "zero": [
@@ -76,7 +77,7 @@
     3000
    ]
   },
-  "overlap_basis": "분리 프로세서(sep)는 절대 범위를 쓰지 않는다. 같은 (N, 속도)의 엄격 단계 조건(단계 3~8) 중앙값의 ±overlap_rel_tol(25%)이고, 값이 작은 정지 조건을 위해 ±overlap_rel_floor(1쌍) 이상은 늘 허용한다(리뷰 M5: 절대 범위는 N=1만의 값에서 와서 N=2만의 붕괴를 가렸다). 액터 기준선(zero)은 V2W6Base N 500~2000에서 0이다. 엔진 회피(engine)는 V2W3Cost, V2W4Cost, V2W10Ladder에서 10,338~10,835다. 겹침 방지 끔(off)은 V2W4Cost에서 1,599~1,607이다.",
+  "overlap_basis": "분리 프로세서(sep)는 절대 범위를 쓰지 않는다. 같은 (N, 속도)의 엄격 단계 조건(단계 3~8) 중앙값의 overlap_rel_lo(0.5배)~overlap_rel_hi(2배)이고, 값이 작은 정지 조건을 위해 ±overlap_rel_floor(1쌍) 이상은 늘 허용한다(리뷰 M5: 절대 범위는 N=1만의 값에서 와서 N=2만의 붕괴를 가렸다. 사용자 판단: 단계 사이의 차이는 1.4배, 무너진 경우는 3배 이상이고 2만에서 11배). 액터 기준선(zero)은 V2W6Base N 500~2000에서 0이다. 엔진 회피(engine)는 V2W3Cost, V2W4Cost, V2W10Ladder에서 10,338~10,835다. 겹침 방지 끔(off)은 V2W4Cost에서 1,599~1,607이다.",
   "overlap_severity": "sep은 모든 N에서 상대 기준을 어기면 실패로 센다. zero(N 2000 이하)는 범위 밖이면 실패로 센다. engine, off, zero(N 2000 초과)는 보고만 한다(D51: 단계 2는 엔진 회피라 실패로 막지 않는다). 탑뷰(P2) 실행은 모두 보고만 한다."
  },
  "steps": {
