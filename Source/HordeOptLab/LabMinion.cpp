@@ -236,6 +236,9 @@ void ALabMinionMassActor::BeginPlay()
 		SetActorScale3D(FVector(Scale));
 	}
 	SkelMesh->SetCustomPrimitiveDataFloat(0, 0.f);
+	// v2 W11(-LabFixedSkelBounds, Docs/Worklog/V2.md "W11"): 애니 갱신마다 피직스 에셋 바디로 바운드를 다시 셈하지 않고 메시 에셋의 고정 바운드를 쓴다
+	// (PhysAnim.cpp FinalizeAnimationUpdate → InvalidateCachedBounds·UpdateBounds, SkinnedMeshComponent.cpp CalcMeshBound). 보이지 않는 컴포넌트는 엔진이 이미 이 길을 쓴다
+	SkelMesh->bComponentUseFixedSkelBounds = FLabConfig::Get().bFixedSkelBounds;
 	// 캡슐 콜리전(FLabConfig::ActorCollision): v2 W5부터 기본 Trace(저격 트레이스 채널만 막는 QueryOnly, Docs/Worklog/V2.md "W5").
 	// 끔(-LabActorCollision=0)은 옛 m3nocol 처리(E3 (6), Docs/Worklog/Q5.md "1b단위"), 켬(=1)은 캡슐 기본값(Pawn 프로필) 그대로다.
 	// 범위 피해와 저격 대상 선택은 캡슐을 쓰지 않는다. 저격의 캡슐 트레이스는 확인용이다(ALabOrb::TraceSnipeCapsules).

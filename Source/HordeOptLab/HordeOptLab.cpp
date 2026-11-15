@@ -8,6 +8,7 @@
 #include "MassUpdateISMProcessor.h"
 #include "MassNavigationProcessors.h"
 #include "Modules/ModuleManager.h"
+#include "HAL/IConsoleManager.h"
 
 /**
  * 사다리 단계에 따라 프로세서 등록을 켜고 끈다(-LabStage=1~8, FLabConfig).
@@ -55,6 +56,19 @@ public:
 		// v2 W7: 표현 전환의 최소 유지 시간(-LabRepHold=<ms>). 끈 실행은 프로세서 구성이 W7 전과 같다
 		const bool bRepHold = FLabConfig::Get().UsesRepHold();
 		LabSetAutoRegister(GetMutableDefault<ULabRepHoldProcessor>(), bRepHold);
+		// v2 W11: QueryOnly 바디(하이드레이션 액터 캡슐 Trace)를 가속 구조의 따로 된 칸에 넣는다(-LabQueryIsolate, engine-notes.md 38·44절).
+		// 칸은 물리 씬의 가속 구조를 만들 때 생기므로(PBDRigidsEvolution.cpp CreateEmptyCollection) 첫 월드를 만들기 전인 여기서 넣는다. 끈 실행은 CVar를 건드리지 않는다
+		if (FLabConfig::Get().bQueryIsolate)
+		{
+			if (IConsoleVariable* Var = IConsoleManager::Get().FindConsoleVariable(TEXT("p.Chaos.AccelerationStructureIsolateQueryOnlyObjects")))
+			{
+				Var->Set(1, ECVF_SetByCode);
+			}
+			else
+			{
+				UE_LOG(LogLab, Warning, TEXT("lab_cvar_missing p.Chaos.AccelerationStructureIsolateQueryOnlyObjects"));
+			}
+		}
 		// crowdfx_entity·separate·rep_hold는 켰을 때만 붙인다(다른 실행의 로그는 그대로다)
 		UE_LOG(LogLab, Log, TEXT("lab_ism_processor %s simlod=%d offmove=%d%s%s%s"), bIskm ? TEXT("iskm") : bVat ? TEXT("vat") : TEXT("engine"), bSimLod ? 1 : 0, bOffMove ? 1 : 0,
 			bCrowdFxEntity ? TEXT(" crowdfx_entity=1") : TEXT(""), bSeparate ? TEXT(" separate=1") : TEXT(""), bRepHold ? TEXT(" rep_hold=1") : TEXT(""));

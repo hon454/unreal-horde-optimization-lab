@@ -309,6 +309,17 @@ struct FLabConfig
 	/** 하이드레이션 액터 캡슐 콜리전의 실제 적용값. "trace" 기본, "0" 끔, "1" 켬, 단계 1 "pawn", 액터가 없으면 "-". CSV 메타데이터 LabActorCollision */
 	const TCHAR* ActorCollisionString() const;
 	/**
+	 * v2 W11 액터 비용 후보(Docs/Worklog/V2.md "W11", engine-notes.md 44절).
+	 * bFixedSkelBounds(-LabFixedSkelBounds=0/1): 하이드레이션 액터 메시의 bComponentUseFixedSkelBounds. 참이면 애니가 갱신될 때마다 피직스 에셋 바디로 바운드를 다시 셈하지 않고
+	 * 메시 에셋의 고정 바운드를 쓴다(SkinnedMeshComponent.cpp CalcMeshBound). CSV 메타데이터 LabFixedSkelBounds("1"/"0", 액터가 없으면 "-").
+	 * bQueryIsolate(-LabQueryIsolate=0/1): p.Chaos.AccelerationStructureIsolateQueryOnlyObjects. 참이면 QueryOnly 바디(액터 캡슐 Trace)가 가속 구조의 따로 된 칸에 들어간다.
+	 * 물리 씬을 만들기 전에 넣어야 해서 게임 모듈 시작 때 넣는다(HordeOptLab.cpp). CSV 메타데이터 LabQueryIsolate(실제 CVar 값).
+	 * 기본은 둘 다 W11의 결정(FLabQuality)을 따른다. 인자가 이긴다.
+	 */
+	bool bFixedSkelBounds = false;
+	bool bQueryIsolate = false;
+	const TCHAR* FixedSkelBoundsString() const { return !UsesHydration() ? TEXT("-") : bFixedSkelBounds ? TEXT("1") : TEXT("0"); }
+	/**
 	 * 단계 기본값과 다르게 준 인자(Q5). "hydrate_m=70|actor_collision=1" 꼴(CSV 메타데이터 행이 쉼표로 나뉘어 | 로 잇는다), 없으면 빈 문자열. 사다리 단계를 그대로 고른 실행인지 가리는 데 쓴다.
 	 * CSV 메타데이터 LabOverrides(빈 값이면 "-"), HUD 둘째 줄.
 	 */

@@ -360,9 +360,20 @@ void ULabActorSyncProcessor::Execute(FMassEntityManager& EntityManager, FMassExe
 #if !UE_BUILD_TEST
 		// 남는 액터 진단: 월드의 하이드레이션 액터를 상태별로 센다(보임 / 숨김(풀) / 화면 패스 꺼짐(대기)).
 		int32 Total = 0, Hidden = 0, Visible = 0, Shadow = 0, LargeShown = 0, LargeWrongScale = 0;
+		// v2 W11 고정 바운드 확인(-LabFixedSkelBounds): 보이는 액터의 바운드 구 반경(종류별, cm)과 예측 LOD의 평균. 바운드가 컬링과 LOD 고르기에 쓰인다
+		double BoundsR[2] = { 0.0, 0.0 }; int32 BoundsN[2] = { 0, 0 }; double LodSum = 0.0; int32 DeadShown = 0; double DeadBoundsR = 0.0;
 		for (TActorIterator<ALabMinionMassActor> AIt(World); AIt; ++AIt)
 		{
 			++Total;
+			if (!AIt->IsHidden() && AIt->GetMesh()->bRenderInMainPass)
+			{
+				const USkeletalMeshComponent* BM = AIt->GetMesh();
+				const int32 Ty = AIt->GetUnitType() == LabUnitLarge ? 1 : 0;
+				BoundsR[Ty] += BM->Bounds.SphereRadius;
+				++BoundsN[Ty];
+				LodSum += BM->GetPredictedLODLevel();
+				if (AIt->AppliedState == ELabMinionState::Dead && Ty == 0) { ++DeadShown; DeadBoundsR += BM->Bounds.SphereRadius; }
+			}
 			if (AIt->GetUnitType() == LabUnitLarge && !AIt->IsHidden())
 			{
 				// 대형 배율 확인: 풀에서 재사용된 액터의 스케일이 1로 돌아가 있지 않은지 센다
@@ -375,6 +386,9 @@ void ULabActorSyncProcessor::Execute(FMassEntityManager& EntityManager, FMassExe
 			if (!AIt->IsHidden() && M->CastShadow) { ++Shadow; }
 		}
 		UE_LOG(LogLab, Log, TEXT("lab_actors synced=%d rebinds=%d world_total=%d hidden=%d visible=%d shadow_casting=%d large_shown=%d large_wrong_scale=%d"), Actors, Rebinds, Total, Hidden, Visible, Shadow, LargeShown, LargeWrongScale);
+		const int32 ShownN = BoundsN[0] + BoundsN[1];
+		UE_LOG(LogLab, Log, TEXT("lab_actor_bounds fixed=%d small_n=%d small_r=%.1f large_n=%d large_r=%.1f dead_small_n=%d dead_small_r=%.1f lod_mean=%.3f"), FLabConfig::Get().bFixedSkelBounds ? 1 : 0,
+			BoundsN[0], BoundsN[0] ? BoundsR[0] / BoundsN[0] : 0.0, BoundsN[1], BoundsN[1] ? BoundsR[1] / BoundsN[1] : 0.0, DeadShown, DeadShown ? DeadBoundsR / DeadShown : 0.0, ShownN ? LodSum / ShownN : 0.0);
 #endif
 	}
 	if (DbgHoles > 0 || DbgOverlaps > 0 || DbgSwitches > 0)

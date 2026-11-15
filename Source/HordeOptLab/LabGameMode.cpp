@@ -470,6 +470,12 @@ void ALabGameMode::TickBench()
 			CSV_METADATA(TEXT("LabBoundsStepM"), *Config.BoundsStepString());
 			// v2 W9: ISKM 컴포넌트의 트랙 풀을 미리 늘려 두는가(1/0). ISKM을 쓰지 않는 실행은 "-"
 			CSV_METADATA(TEXT("LabIskmTrackReserve"), *Config.IskmTrackReserveString());
+			// v2 W11 액터 비용 후보: 하이드레이션 액터 메시의 고정 바운드(1/0, 액터가 없으면 "-"), QueryOnly 바디 칸 나누기(실제 CVar 값)
+			CSV_METADATA(TEXT("LabFixedSkelBounds"), Config.FixedSkelBoundsString());
+			{
+				const IConsoleVariable* IsolateVar = IConsoleManager::Get().FindConsoleVariable(TEXT("p.Chaos.AccelerationStructureIsolateQueryOnlyObjects"));
+				CSV_METADATA(TEXT("LabQueryIsolate"), IsolateVar ? *IsolateVar->GetString() : TEXT("-"));
+			}
 			CSV_METADATA(TEXT("LabHud"), IsHudShown() ? TEXT("1") : TEXT("0"));
 			CSV_METADATA(TEXT("LabShotAt"), *FString::Printf(TEXT("%.0f"), Config.ShotAtSec));
 			// 측정 방법 5번(plan.md "M3b"): 빌드 커밋, 고정 CVar 값, GPU 드라이버. summarize.py BUILD_KEYS(labbuild·labcvars·labdriver)와 이름을 맞춘다.

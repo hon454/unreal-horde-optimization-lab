@@ -149,6 +149,9 @@ const FLabConfig& FLabConfig::Get()
 				C.ActorCollision = Wanted;
 			}
 		}
+		// v2 W11 액터 비용 후보(LabConfig.h bFixedSkelBounds, bQueryIsolate)
+		Switch(TEXT("-LabFixedSkelBounds="), TEXT("fixed_skel_bounds"), C.bFixedSkelBounds);
+		Switch(TEXT("-LabQueryIsolate="), TEXT("query_isolate"), C.bQueryIsolate);
 		// Q4 근거리 품질: 단계 기본값(8은 1,000·40m), 그다음 인자
 		const int32 DefaultCap = C.ActorCap;
 		const float DefaultHydrateM = C.HydrateM;
@@ -302,10 +305,10 @@ FString FLabConfig::ToLogString() const
 	const FString Health = HealthFixed > 0.f ? FString::Printf(TEXT(" health_fixed=%.0f"), HealthFixed) : FString();
 	const FString Crowd = bCrowdFx ? FString::Printf(TEXT(" crowdfx=1 crowdfx_particles=%d crowdfx_outer=%d"), CrowdFxParticles(), bCrowdFxOuter ? 1 : 0) : FString();
 	// tech는 빼 보기 기법의 켬·끔이다(Q3). 모든 실행에 붙여 러너와 사람이 기대값과 대조한다.
-	return FString::Printf(TEXT("lab_config stage=%d n=%d preset=P%d seed=%d bench=%d label=%s duration=%.1f types=%d simlod=%s%s pool=%d screensig_budget=%d actor_cap=%d hydrate_m=%.0f far_shadow=%s%s%s %s overrides=%s hud=%d actor_col=%s rep_hold=%d fixmask=%d fx_orb_follow=%s bounds_step=%s iskm_track_reserve=%s"),
+	return FString::Printf(TEXT("lab_config stage=%d n=%d preset=P%d seed=%d bench=%d label=%s duration=%.1f types=%d simlod=%s%s pool=%d screensig_budget=%d actor_cap=%d hydrate_m=%.0f far_shadow=%s%s%s %s overrides=%s hud=%d actor_col=%s rep_hold=%d fixmask=%d fx_orb_follow=%s bounds_step=%s iskm_track_reserve=%s fixed_skel_bounds=%s query_isolate=%d"),
 		Step, N, Preset, Seed, bBench ? 1 : 0, *Label, DurationSec, Types, *SimLodString(), *Far, bEntityPool ? 1 : 0, bScreenSigBudget ? 1 : 0, ActorCap, HydrateM, FarShadowString(),
 		*Health, *Crowd, *TechString(), Overrides.IsEmpty() ? TEXT("-") : *Overrides, bHud ? 1 : 0, ActorCollisionString(), UsesRepHold() ? RepHoldMs : 0, HydrateFixMask,
-		*FxOrbFollowString(), *BoundsStepString(), *IskmTrackReserveString());
+		*FxOrbFollowString(), *BoundsStepString(), *IskmTrackReserveString(), FixedSkelBoundsString(), bQueryIsolate ? 1 : 0);
 }
 
 FString FLabConfig::IskmTrackReserveString() const

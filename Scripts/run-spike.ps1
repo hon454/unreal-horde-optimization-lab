@@ -58,7 +58,8 @@ $StepExpect = @{
     "6" = @("LabStage=6", "LabTechIskm=1", "LabTechFixedBounds=1", "LabTechCrowdFx=0", "LabBoundsStepM=10", "LabIskmTrackReserve=1", "LabTechSeparate=1", "LabRepHold=2000")
     "7" = @("LabStage=7", "LabTechIskm=1", "LabTechCrowdFx=1", "LabFxOrbFollow=1", "LabActorCap=500", "LabHydrateM=30", "LabFarShadow=1", "LabRepHold=2000")
     "8" = @("LabStage=8", "LabLadder=8", "LabTechSimLod=1", "LabTechIskm=1", "LabTechFixedBounds=1", "LabTechCrowdFx=1", "LabTechAvoid=0", "LabTechSeparate=1", "LabActorCollision=trace", "LabRepHold=2000",
-            "LabFxOrbFollow=1", "LabBoundsStepM=10", "LabIskmTrackReserve=1", "LabActorCap=1000", "LabHydrateM=40", "LabFarShadow=0")
+            "LabFxOrbFollow=1", "LabBoundsStepM=10", "LabIskmTrackReserve=1", "LabActorCap=1000", "LabHydrateM=40", "LabFarShadow=0",
+            "LabFixedSkelBounds=0", "LabQueryIsolate=0") # v2 W11 액터 비용 후보(기본 끔)
 }
 $ConfigTable = @()
 foreach ($s in 1..8) { $ConfigTable += @{ Name = "s$s"; Args = @("-LabStage=$s"); Expect = @($StepExpect["$s"]) } }
@@ -91,6 +92,34 @@ foreach ($a in $Ablations) {
 # 직렬 트레이스용(-LabFullyParallel=0, Mass 프로세서가 Game 스레드에서 차례로 돈다). 수치는 비교에 쓰지 않는다
 foreach ($s in 2..8) { $ConfigTable += @{ Name = "s${s}ser"; Args = @("-LabStage=$s", "-LabFullyParallel=0"); Expect = @($StepExpect["$s"]) } }
 $ConfigNames = @($Configs -split "," | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne "" })
+# v2 W11 품질 조정(Docs/Worklog/V2.md "W11"): 단계 8에 조각을 이어 붙인 이름. 조각마다 인자 하나와 기대 메타데이터 하나다(구분자 없이 잇는다. 라벨의 구성 자리는 영숫자만 받는다).
+#   fsb = -LabFixedSkelBounds=1(액터 메시 고정 바운드), iso = -LabQueryIsolate=1(QueryOnly 바디 칸 나누기), fsb0·iso0 = 끔,
+#   c<개수> = -LabActorCap=<개수>, h<미터> = -LabHydrateM=<미터>, shd0·shd1 = -LabFarShadow=0|1. 예: s8fsb, s8fsbisoh45, s8c750
+$W11Tokens = [ordered]@{
+    "fsb0" = @("-LabFixedSkelBounds=0", "LabFixedSkelBounds=0"); "fsb" = @("-LabFixedSkelBounds=1", "LabFixedSkelBounds=1")
+    "iso0" = @("-LabQueryIsolate=0", "LabQueryIsolate=0"); "iso" = @("-LabQueryIsolate=1", "LabQueryIsolate=1")
+    "shd0" = @("-LabFarShadow=0", "LabFarShadow=0"); "shd1" = @("-LabFarShadow=1", "LabFarShadow=1")
+}
+foreach ($cfgName in $ConfigNames) {
+    if (($ConfigTable | Where-Object { $_.Name -eq $cfgName }) -or $cfgName -notmatch '^s8[a-z0-9]+$') { continue }
+    $rest = $cfgName.Substring(2); $args8 = @("-LabStage=8"); $exp8 = @(); $ok = $true
+    while ($rest.Length -gt 0) {
+        $hit = $null
+        foreach ($k in $W11Tokens.Keys) { if ($rest.StartsWith($k)) { $hit = $k; break } }
+        if ($hit) { $args8 += $W11Tokens[$hit][0]; $exp8 += $W11Tokens[$hit][1]; $rest = $rest.Substring($hit.Length); continue }
+        $m = [regex]::Match($rest, '^(c|h)(\d+)')
+        if ($m.Success) {
+            if ($m.Groups[1].Value -eq "c") { $args8 += "-LabActorCap=$($m.Groups[2].Value)"; $exp8 += "LabActorCap=$($m.Groups[2].Value)" }
+            else { $args8 += "-LabHydrateM=$($m.Groups[2].Value)"; $exp8 += "LabHydrateM=$($m.Groups[2].Value)" }
+            $rest = $rest.Substring($m.Length); continue
+        }
+        $ok = $false; break
+    }
+    if (-not $ok) { continue }
+    $keys = @($exp8 | ForEach-Object { ($_ -split "=")[0] })
+    $base = @($StepExpect["8"] | Where-Object { $keys -notcontains (($_ -split "=")[0]) })
+    $ConfigTable += @{ Name = $cfgName; Args = $args8; Expect = $base + $exp8 }
+}
 $UseConfigs = @($ConfigNames | ForEach-Object { $cfgName = $_; $ConfigTable | Where-Object { $_.Name -eq $cfgName } }) # -Configs의 순서대로(r0은 첫 구성)
 if ($UseConfigs.Count -ne $ConfigNames.Count) { Write-Host "FAIL: unknown config in -Configs '$Configs' ($(($ConfigTable | ForEach-Object { $_.Name }) -join ', '))"; exit 1 }
 $SpeedList = @($Speeds -split "," | ForEach-Object { $_.Trim() } | Where-Object { $_ -ne "" })
