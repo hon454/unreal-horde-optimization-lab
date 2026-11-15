@@ -22,6 +22,12 @@ struct FLabQuality
 	static constexpr int32 DefaultRepHoldMs = 2000;
 	// v2 W8 ISKM 바운드 상자를 카메라로 옮기는 간격(m, FLabConfig::BoundsStepM). 근거는 Docs/Worklog/V2.md "W8"
 	static constexpr float DefaultBoundsStepM = 10.f;
+	/**
+	 * v2 W11 액터 메시 고정 바운드(FLabConfig::bFixedSkelBounds). 사다리 단계 8의 기본값이다(Docs/Worklog/V2.md "W11", 묶음 V2W11Cost: 프레임 p50 −0.80ms, 소형 애니 건너뜀 0.12 → 0).
+	 * 메시 에셋의 고정 바운드는 피직스 에셋으로 셈한 바운드보다 작다(개발 빌드 구 반경 소형 140 대 151cm, 죽는 소형 140 대 154cm). 그대로 두면 LOD가 거칠어지고
+	 * 쓰러지는 몸이 상자 밖으로 나갈 수 있어 BoundsScale을 곱한다(SkinnedMeshComponent.cpp CalcMeshBound 끝). 1.1이면 소형 154cm로 죽는 자세의 피직스 바운드 평균과 같다.
+	 */
+	static constexpr float FixedSkelBoundsScale = 1.1f;
 };
 
 /**
@@ -314,7 +320,7 @@ struct FLabConfig
 	 * 메시 에셋의 고정 바운드를 쓴다(SkinnedMeshComponent.cpp CalcMeshBound). CSV 메타데이터 LabFixedSkelBounds("1"/"0", 액터가 없으면 "-").
 	 * bQueryIsolate(-LabQueryIsolate=0/1): p.Chaos.AccelerationStructureIsolateQueryOnlyObjects. 참이면 QueryOnly 바디(액터 캡슐 Trace)가 가속 구조의 따로 된 칸에 들어간다.
 	 * 물리 씬을 만들기 전에 넣어야 해서 게임 모듈 시작 때 넣는다(HordeOptLab.cpp). CSV 메타데이터 LabQueryIsolate(실제 CVar 값).
-	 * 기본은 둘 다 W11의 결정(FLabQuality)을 따른다. 인자가 이긴다.
+	 * 기본: 고정 바운드는 단계 8만 참(BoundsScale FLabQuality::FixedSkelBoundsScale을 함께 곱한다), 칸 나누기는 모든 단계에서 거짓(묶음 V2W11Cost에서 실행 간 범위 안). 인자가 이긴다.
 	 */
 	bool bFixedSkelBounds = false;
 	bool bQueryIsolate = false;

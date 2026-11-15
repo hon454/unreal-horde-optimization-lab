@@ -59,7 +59,7 @@ $StepExpect = @{
     "7" = @("LabStage=7", "LabTechIskm=1", "LabTechCrowdFx=1", "LabFxOrbFollow=1", "LabActorCap=500", "LabHydrateM=30", "LabFarShadow=1", "LabRepHold=2000")
     "8" = @("LabStage=8", "LabLadder=8", "LabTechSimLod=1", "LabTechIskm=1", "LabTechFixedBounds=1", "LabTechCrowdFx=1", "LabTechAvoid=0", "LabTechSeparate=1", "LabActorCollision=trace", "LabRepHold=2000",
             "LabFxOrbFollow=1", "LabBoundsStepM=10", "LabIskmTrackReserve=1", "LabActorCap=1000", "LabHydrateM=40", "LabFarShadow=0",
-            "LabFixedSkelBounds=0", "LabQueryIsolate=0") # v2 W11 액터 비용 후보(기본 끔)
+            "LabFixedSkelBounds=1", "LabQueryIsolate=0") # v2 W11: 액터 메시 고정 바운드는 단계 8 기본, 칸 나누기는 끔
 }
 $ConfigTable = @()
 foreach ($s in 1..8) { $ConfigTable += @{ Name = "s$s"; Args = @("-LabStage=$s"); Expect = @($StepExpect["$s"]) } }
@@ -81,6 +81,9 @@ $Ablations = @(
     @{ Name = "a8fxf"; Arg = "-LabFxOrbFollow=0"; Expect = @("LabFxOrbFollow=0") },
     @{ Name = "a8stp"; Arg = "-LabBoundsStepM=0"; Expect = @("LabBoundsStepM=0") },
     @{ Name = "a8shd"; Arg = "-LabFarShadow=1"; Expect = @("LabFarShadow=1") },
+    @{ Name = "a8fsb"; Arg = "-LabFixedSkelBounds=0"; Expect = @("LabFixedSkelBounds=0") }, # v2 W11 액터 메시 고정 바운드
+    # 하위 실험: 단계 8에 QueryOnly 칸 나누기를 더한다(v2 W11, 묶음 V2W11Cost에서 실행 간 범위 안이라 기본값에 넣지 않았다)
+    @{ Name = "s8iso"; Arg = "-LabQueryIsolate=1"; Expect = @("LabQueryIsolate=1") },
     # 하위 실험(빼 보기가 아니라 더하기): 단계 8에 엔진 회피를 더한다(D43의 비교)
     @{ Name = "s8av"; Arg = "-LabAvoid=1"; Expect = @("LabTechAvoid=1") }
 )

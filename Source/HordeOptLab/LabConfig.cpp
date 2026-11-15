@@ -55,6 +55,7 @@ const FLabConfig& FLabConfig::Get()
 		C.ActorCap = C.Step == 8 ? FLabQuality::FinalActorCap : FLabQuality::DefaultActorCap; // 8: 품질 올리기
 		C.HydrateM = C.Step == 8 ? FLabQuality::FinalHydrateM : FLabQuality::DefaultHydrateM;
 		C.bFarShadow = C.Step != 8;
+		C.bFixedSkelBounds = C.Step == 8;                // 8: 액터 메시 고정 바운드(v2 W11, 번 시간을 품질에 쓰는 단계의 비용 줄이기)
 
 		// Q5: 단계 기본값과 다르게 준 인자를 모은다(LabOverrides, HUD). 기본값과 같은 값을 준 인자는 넣지 않는다.
 		TArray<FString> Overrides;
