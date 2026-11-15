@@ -121,7 +121,7 @@ struct FLabCrowdFx
 	static constexpr const TCHAR* SmallRecsParam = TEXT("User.LabSmallRecs"); // Niagara Array Float4
 	static constexpr const TCHAR* LargeRecsParam = TEXT("User.LabLargeRecs"); // Niagara Array Float4
 	static constexpr const TCHAR* NowParam = TEXT("User.LabNow");             // float, 월드 초(매 프레임)
-	static constexpr const TCHAR* OrbPosParam = TEXT("User.LabOrbPos");       // Vector(또는 Position), 오브 월드 위치(활성화 전 한 번)
+	static constexpr const TCHAR* OrbPosParam = TEXT("User.LabOrbPos");       // Vector(또는 Position), 오브 월드 위치(활성화 전 한 번, v2 W8부터 매 프레임. FLabConfig::bFxOrbFollow)
 };
 
 /**
