@@ -1,0 +1,19 @@
+﻿{
+    "batch":  "V2W10Ladder",
+    "build":  "6c748c9ffa5abd1f5f0654f2c8eb5e7ec9f14c3f (dirty)",
+    "start":  "2026-11-15 14:25:24",
+    "end":  "2026-11-15 15:10:31",
+    "n":  "10000",
+    "preset":  "P3",
+    "radius_m":  "57.3",
+    "height_m":  "6",
+    "speeds":  [
+                   "2"
+               ],
+    "duration_sec":  180,
+    "runs":  1,
+    "planned":  11,
+    "ok":  11,
+    "failed":  0,
+    "gave_up":  0
+}
