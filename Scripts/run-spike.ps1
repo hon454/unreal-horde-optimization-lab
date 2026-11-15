@@ -48,7 +48,10 @@ $FailuresCsv = "$BatchDir\failures.csv"
 # v2 W5부터 하이드레이션 액터 캡슐의 기본값이 Trace(LabActorCollision=trace)다. 캡슐 끔은 접미사 nocap(-LabActorCollision=0)이다.
 $ConfigTable = @(
     # v2 W7부터 final은 최소 유지 시간 2,000ms(LabRepHold=2000)를 대조한다. v2 W8부터 입자 외삽 목표 매 프레임(LabFxOrbFollow=1)과 바운드 상자 간격 10m(LabBoundsStepM=10)도 대조한다
-    @{ Name = "final"; Args = @("-LabStage=M5", "-LabVariant=q4final"); Expect = @("LabStage=M5", "LabVariant=q4final", "LabTechSimLod=1", "LabTechFixedBounds=1", "LabTechCrowdFx=1", "LabTechAvoid=0", "LabTechSeparate=1", "LabActorCollision=trace", "LabRepHold=2000", "LabFxOrbFollow=1", "LabBoundsStepM=10") },
+    # v2 W9부터 final은 ISKM 트랙 풀 미리 늘리기(LabIskmTrackReserve=1)도 대조한다
+    @{ Name = "final"; Args = @("-LabStage=M5", "-LabVariant=q4final"); Expect = @("LabStage=M5", "LabVariant=q4final", "LabTechSimLod=1", "LabTechFixedBounds=1", "LabTechCrowdFx=1", "LabTechAvoid=0", "LabTechSeparate=1", "LabActorCollision=trace", "LabRepHold=2000", "LabFxOrbFollow=1", "LabBoundsStepM=10", "LabIskmTrackReserve=1") },
+    # v2 W9 ISKM 번쩍임: W8까지의 동작(엔진이 트랙을 하나씩 늘린다)
+    @{ Name = "finalreserve0"; Args = @("-LabStage=M5", "-LabVariant=q4final", "-LabIskmTrackReserve=0"); Expect = @("LabStage=M5", "LabVariant=q4final", "LabTechSeparate=1", "LabActorCollision=trace", "LabRepHold=2000", "LabFxOrbFollow=1", "LabBoundsStepM=10", "LabIskmTrackReserve=0") },
     # v2 W8 움직이는 오브용 기법: W7까지의 동작(외삽 목표 한 번, 상자 고정), 외삽 목표만 끔, 상자 간격 1m(자주 옮기는 비용)
     @{ Name = "finalw7"; Args = @("-LabStage=M5", "-LabVariant=q4final", "-LabFxOrbFollow=0", "-LabBoundsStepM=0"); Expect = @("LabStage=M5", "LabVariant=q4final", "LabTechSeparate=1", "LabActorCollision=trace", "LabRepHold=2000", "LabFxOrbFollow=0", "LabBoundsStepM=0") },
     @{ Name = "finalfx0"; Args = @("-LabStage=M5", "-LabVariant=q4final", "-LabFxOrbFollow=0"); Expect = @("LabStage=M5", "LabVariant=q4final", "LabTechSeparate=1", "LabActorCollision=trace", "LabRepHold=2000", "LabFxOrbFollow=0", "LabBoundsStepM=10") },

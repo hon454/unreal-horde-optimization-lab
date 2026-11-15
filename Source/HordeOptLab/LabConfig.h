@@ -323,9 +323,16 @@ struct FLabConfig
 	 * 0이면 W7까지처럼 처음 오브 위치 둘레에 고정한다. 고정 바운드를 쓸 때만 뜻이 있다(IskmParams().bFixedBounds). CSV 메타데이터 LabBoundsStepM.
 	 */
 	float BoundsStepM = FLabQuality::DefaultBoundsStepM;
+	/**
+	 * v2 W9 ISKM 번쩍임(Docs/v2-spec.md 4.3, Docs/Worklog/V2.md "W9"). 컴포넌트마다 처음 쓰이는 프레임에 트랙 풀의 크기를 종류의 개체 수 × 1.1 + 64로 늘려 둔다(ULabIskmProcessor, LabReserveTracks).
+	 * 트랙 수가 늘 때마다 렌더러가 뼈대 버퍼를 다시 할당하면서 겹친 자리로 이전 슬롯을 복사해 그 컴포넌트 전체의 속도가 한 프레임 튄다(engine-notes.md 42절).
+	 * 0(-LabIskmTrackReserve=0)이면 W8까지처럼 엔진이 트랙을 하나씩 늘린다. ISKM을 쓸 때만 뜻이 있다. CSV 메타데이터 LabIskmTrackReserve.
+	 */
+	bool bIskmTrackReserve = true;
 	/** 로그와 CSV 메타데이터 값. 그 기법을 쓰지 않는 실행은 "-" */
 	FString FxOrbFollowString() const;
 	FString BoundsStepString() const;
+	FString IskmTrackReserveString() const;
 	/** 분리 파라미터(LabSeparation.h). Test 빌드는 기본값만 쓴다. 개발 빌드는 -LabSepIter=, -LabSepRelax=, -LabSepMaxStep=, -LabSepVel=로 바꿔 본다 */
 	FLabSeparationParams Separation;
 	/**

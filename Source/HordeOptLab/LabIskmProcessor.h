@@ -32,4 +32,6 @@ protected:
 	virtual void ConfigureQueries(const TSharedRef<FMassEntityManager>& EntityManager) override;
 	virtual void Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context) override;
 	FMassEntityQuery EntityQuery;
+	/** v2 W9: 트랙 풀을 미리 늘려 둔 ISKM 컴포넌트의 트랙 제공자(FLabConfig::bIskmTrackReserve). 게임 스레드에서만 만진다. */
+	TArray<TWeakObjectPtr<class UAnimSequenceTransformProviderDataInstance>> ReservedProviders;
 };

@@ -487,6 +487,8 @@ void ALabGameMode::TickBench()
 			// v2 W8: 입자 외삽 목표를 매 프레임 넣는가(1/0), ISKM 바운드 상자를 옮기는 간격(m, 0 고정). 그 기법을 쓰지 않는 실행은 "-"
 			CSV_METADATA(TEXT("LabFxOrbFollow"), *Config.FxOrbFollowString());
 			CSV_METADATA(TEXT("LabBoundsStepM"), *Config.BoundsStepString());
+			// v2 W9: ISKM 컴포넌트의 트랙 풀을 미리 늘려 두는가(1/0). ISKM을 쓰지 않는 실행은 "-"
+			CSV_METADATA(TEXT("LabIskmTrackReserve"), *Config.IskmTrackReserveString());
 			CSV_METADATA(TEXT("LabHud"), IsHudShown() ? TEXT("1") : TEXT("0"));
 			CSV_METADATA(TEXT("LabShotAt"), *FString::Printf(TEXT("%.0f"), Config.ShotAtSec));
 			// 측정 방법 5번(plan.md "M3b"): 빌드 커밋, 고정 CVar 값, GPU 드라이버. summarize.py BUILD_KEYS(labbuild·labcvars·labdriver)와 이름을 맞춘다.

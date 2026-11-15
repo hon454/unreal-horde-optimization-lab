@@ -140,4 +140,5 @@ struct FLabIskmTrackFragment : public FMassFragment
 
 	int8 AppliedState = -1; // ELabMinionState, -1이면 아직 쓴 적이 없다
 	float AppliedStartTime = 0.f;
+	uint64 LastFrame = MAX_uint64;  // v2 W9: ISKM으로 마지막에 그린 프레임(GFrameCounter). 지난 프레임이 아니면 이번 프레임에 컴포넌트에 (다시) 들어온다
 };

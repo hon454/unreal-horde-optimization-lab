@@ -2,6 +2,7 @@
 #include "HordeOptLab.h"
 #include "LabConfig.h"
 #include "LabCrowdSubsystem.h"
+#include "LabUnitAssets.h"
 #include "LabMassTypes.h"
 #include "LabVatProcessor.h" // LabLogScreenEvent(개발 빌드 전환 사건 로그)
 #include "MassRepresentationTypes.h" // UE::Mass::Representation::IsValidActorRepresentation
@@ -54,6 +55,107 @@ namespace
 		}
 		return bWrote;
 	}
+
+	/**
+	 * v2 W9 ISKM 번쩍임: 이 범위의 컴포넌트마다 처음 한 번 트랙 풀의 크기(트랙 번호의 끝)를 Capacity로 늘려 둔다. Capacity개를 할당한 뒤 모두 해제한다.
+	 * 왜: 렌더러는 트랙 수(UniqueAnimationCount = 트랙 풀의 Datas.Num(), AnimSequenceTransformProviderData.cpp:1341-1344)가 바뀔 때마다 그 컴포넌트의 뼈대 변환 버퍼를
+	 * 다시 할당하고(SkinningSceneExtension.cpp:1336-1352), 옛 자리의 지금·이전 슬롯을 새 자리로 복사한다(:1857-1866, CopyPreviousTransforms.usf).
+	 * 그런데 옛 자리를 먼저 Free하고 새 자리를 Allocate해서(:1346-1351) FSpanAllocator가 해제 대기 구간을 합쳐(SpanAllocator.h:27-30) 옛 자리와 겹치는 앞쪽 자리를 줄 수 있다.
+	 * 겹친 채로 같은 UAV를 병렬 복사하면(셰이더 주석은 "allocate-before-free guarantees no overlap"이라 가정한다) 이전 슬롯이 깨져 그 프레임에 컴포넌트의 모든 인스턴스가 틀린 속도를 받는다.
+	 * 트랙 번호의 끝을 미리 늘려 두면 해제된 번호를 다시 쓰므로(AnimTrackPool.h AllocateTrack은 가장 낮은 빈 번호) 트랙 수가 바뀌지 않아 재할당이 일어나지 않는다.
+	 * 비용: 버퍼는 Capacity × 뼈 수 × 2슬롯을 차지한다. GPU 평가는 활성 트랙만 한다(AnimSequenceTransformProvider.cpp:1456).
+	 */
+	void LabReserveTracks(FMassInstancedSkinnedMeshInfo& Info, float LODSignificance, int32 Capacity, TArray<TWeakObjectPtr<UAnimSequenceTransformProviderDataInstance>>& Reserved)
+	{
+		FMassLODInstancedSkinnedMeshSignificanceRange* Range = Info.GetLODSignificanceRange(LODSignificance);
+		if (!Range || !Range->InstancedSkinnedMeshSharedDataPtr)
+		{
+			return;
+		}
+		for (const FInstancedSkinnedMeshComponentSharedDataKey& Key : Range->SkinnedMeshComponentRefs)
+		{
+			FMassInstancedSkinnedMeshComponentSharedData* Shared = Range->InstancedSkinnedMeshSharedDataPtr->Find(Key);
+			UInstancedSkinnedMeshComponent* Component = Shared ? Shared->GetMutableInstancedSkinnedMeshComponent() : nullptr;
+			UAnimSequenceTransformProviderDataInstance* Provider = Component ? Cast<UAnimSequenceTransformProviderDataInstance>(Component->GetTransformProvider()) : nullptr;
+			if (!Provider || Reserved.Contains(Provider))
+			{
+				continue;
+			}
+			Reserved.Add(Provider);
+			const int32 Before = int32(Provider->GetUniqueAnimationCount());
+			TArray<int32> Temp;
+			while (int32(Provider->GetUniqueAnimationCount()) < Capacity)
+			{
+				Temp.Add(Provider->AllocateTrack());
+			}
+			for (const int32 TrackIndex : Temp)
+			{
+				Provider->DeallocateTrack(TrackIndex);
+			}
+			UE_LOG(LogLab, Log, TEXT("lab_iskm_reserve component=%s tracks_before=%d capacity=%d tracks_after=%d"), *Component->GetName(), Before, Capacity, int32(Provider->GetUniqueAnimationCount()));
+		}
+	}
+
+#if !UE_BUILD_TEST
+	/** v2 W9 개발 진단: ISKM 컴포넌트마다 "이름:트랙 수(UniqueAnimationCount)/인스턴스 수"를 잇는다. 트랙 수가 바뀐 프레임에 렌더러가 뼈대 버퍼를 다시 할당한다. */
+	FString LabTrackCountString(UMassRepresentationSubsystem& RepresentationSubsystem)
+	{
+		FString Out;
+		TArray<const UInstancedSkinnedMeshComponent*, TInlineAllocator<8>> Seen;
+		FMassInstancedSkinnedMeshInfoArrayView Infos = RepresentationSubsystem.GetMutableInstancedSkinnedMeshInfos();
+		for (int32 InfoIndex = 0; InfoIndex < Infos.Num(); ++InfoIndex)
+		{
+			FMassInstancedSkinnedMeshInfo& Info = Infos[InfoIndex];
+			if (!Info.IsValid())
+			{
+				continue;
+			}
+			for (int32 Lod = 0; Lod < EMassLOD::Max; ++Lod)
+			{
+				FMassLODInstancedSkinnedMeshSignificanceRange* Range = Info.GetLODSignificanceRange(float(Lod));
+				if (!Range || !Range->InstancedSkinnedMeshSharedDataPtr)
+				{
+					continue;
+				}
+				for (const FInstancedSkinnedMeshComponentSharedDataKey& Key : Range->SkinnedMeshComponentRefs)
+				{
+					const FMassInstancedSkinnedMeshComponentSharedData* Shared = Range->InstancedSkinnedMeshSharedDataPtr->GetDataForKey(Key);
+					const UInstancedSkinnedMeshComponent* Component = Shared ? Shared->GetInstancedSkinnedMeshComponent() : nullptr;
+					if (!Component || Seen.Contains(Component))
+					{
+						continue;
+					}
+					Seen.Add(Component);
+					const UTransformProviderData* Provider = Component->GetTransformProvider();
+					Out += FString::Printf(TEXT(" %s=%u/%d"), *Component->GetName(), Provider ? Provider->GetUniqueAnimationCount() : 0u, Component->GetInstanceCount());
+				}
+			}
+		}
+		return Out;
+	}
+
+	/** v2 W9 개발 진단: 엔티티의 지금 트랙(쓰기 전)이 무슨 클립을 재생하는지 읽는다. 트랙이 없으면 -1. */
+	int32 LabPeekTrackSeq(FMassInstancedSkinnedMeshInfo& Info, float LODSignificance, FMassEntityHandle Entity)
+	{
+		FMassLODInstancedSkinnedMeshSignificanceRange* Range = Info.GetLODSignificanceRange(LODSignificance);
+		if (!Range || !Range->InstancedSkinnedMeshSharedDataPtr)
+		{
+			return -1;
+		}
+		for (const FInstancedSkinnedMeshComponentSharedDataKey& Key : Range->SkinnedMeshComponentRefs)
+		{
+			FMassInstancedSkinnedMeshComponentSharedData* Shared = Range->InstancedSkinnedMeshSharedDataPtr->Find(Key);
+			UInstancedSkinnedMeshComponent* Component = Shared ? Shared->GetMutableInstancedSkinnedMeshComponent() : nullptr;
+			const int32* TrackId = Shared ? Shared->GetEntityToTrackMap().Find(Entity) : nullptr;
+			const UAnimSequenceTransformProviderDataInstance* Provider = Component ? Cast<UAnimSequenceTransformProviderDataInstance>(Component->GetTransformProvider()) : nullptr;
+			if (TrackId && Provider)
+			{
+				return Provider->GetSequenceIndex(*TrackId, 0);
+			}
+		}
+		return -1;
+	}
+#endif
 
 #if !UE_BUILD_TEST
 	/**
@@ -195,6 +297,22 @@ void ULabIskmProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutio
 #endif
 	int32 TrackWrites = 0;  // 이 프로세서가 기존 트랙에 직접 쓴 수(상태 전환, 풀에서 다시 나옴)
 	int32 TrackFirst = 0;    // 트랙이 없어 엔진이 이 프레임에 만들 수
+	const uint64 Frame = GFrameCounter; // v2 W9: 컴포넌트에 (다시) 들어오는 프레임 판정(FLabIskmTrackFragment::LastFrame)
+	// v2 W9: 종류별 트랙 풀 크기(FLabConfig::bIskmTrackReserve). 엔티티는 컴포넌트마다 트랙 하나를 갖으므로 종류의 개체 수에 여유(10% + 64)를 더한다. 0이면 늘리지 않는다
+	int32 TrackReserve[2] = { 0, 0 };
+	if (FLabConfig::Get().bIskmTrackReserve)
+	{
+		const int32 N = FLabConfig::Get().N;
+		const int32 NumLarge = FLabUnitTypes::Num() == 2 ? (N + 9) / 10 : 0; // 일련번호 % 10 == 0이 대형(LabUnitAssets.h FLabUnitTypes::IsLarge)
+		TrackReserve[0] = FMath::CeilToInt32((N - NumLarge) * 1.1f) + 64;
+		TrackReserve[1] = FMath::CeilToInt32(NumLarge * 1.1f) + 64;
+	}
+#if !UE_BUILD_TEST
+	// v2 W9 개발 진단(-LabFlashDiag): 프레임마다 컴포넌트에 들어온 개체를 옛 트랙의 클립별로 세고(lab_flash), 화면 좌표를 남긴다(lab_event iskm_enter, iskm_state)
+	static const bool bFlashDiag = FParse::Param(FCommandLine::Get(), TEXT("LabFlashDiag"));
+	int32 EnterBySeq[4] = { 0, 0, 0, 0 }; // [0] 트랙 없음, [1 + s] 옛 트랙이 클립 s(0 걷기, 1 피격, 2 죽기)
+	int32 EnterRange = 0, StateWrites = 0;
+#endif
 	UMassRepresentationSubsystem* RepresentationSubsystemForStats = Context.GetMutableSubsystem<UMassRepresentationSubsystem>(); // 쿼리 밖에서 얻는다
 
 	EntityQuery.ForEachEntityChunk(Context, [&](FMassExecutionContext& Context)
@@ -264,7 +382,34 @@ void ULabIskmProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutio
 			const bool bRangeChanged = Info.GetLODSignificanceRangesNum() > 1 && Representation.PrevLODSignificance >= 0.f
 				&& Info.GetLODSignificanceRange(Representation.PrevLODSignificance) != Info.GetLODSignificanceRange(LODSignificance);
 			FLabIskmTrackFragment& Track = Tracks[EntityIt];
-			if (bRangeChanged || Track.AppliedState != int8(Anim.State) || Track.AppliedStartTime != Anim.StateStartTime)
+			// v2 W9: 지난 프레임에 이 범위의 컴포넌트에 그리지 않았으면 이번 프레임에 (다시) 들어온다(Off·액터에서, 풀에서 다시 나옴, 범위 경계)
+			const bool bEntering = Track.LastFrame + 1 != Frame || bRangeChanged;
+			Track.LastFrame = Frame;
+			if (bEntering && TrackReserve[0] > 0)
+			{
+				// v2 W9: 컴포넌트가 처음 쓰이는 프레임에(엔진이 이 프레임 끝 EndVisualChanges에서 트랙을 만들기 전에) 트랙 풀을 늘려 둔다. 이미 늘린 컴포넌트는 건너뛴다
+				LabReserveTracks(Info, LODSignificance, TrackReserve[Context.GetConstSharedFragment<FLabUnitTypeParams>().UnitType == LabUnitLarge ? 1 : 0], ReservedProviders);
+			}
+			const bool bStateChanged = Track.AppliedState != int8(Anim.State) || Track.AppliedStartTime != Anim.StateStartTime;
+#if !UE_BUILD_TEST
+			if (bFlashDiag && (bEntering || bStateChanged))
+			{
+				const int32 OldSeq = LabPeekTrackSeq(Info, LODSignificance, Entity);
+				if (bEntering)
+				{
+					++EnterBySeq[FMath::Clamp(OldSeq + 1, 0, 3)];
+					EnterRange += bRangeChanged ? 1 : 0;
+					// x = 옛 트랙의 클립(-1 없음) + 10 × 범위 경계. 화면 좌표는 1280x720 기준
+					LabLogScreenEvent(TEXT("iskm_enter"), Crowd->SnipeView, Transform.GetLocation(), float(OldSeq) + (bRangeChanged ? 10.f : 0.f));
+				}
+				else
+				{
+					++StateWrites;
+					LabLogScreenEvent(TEXT("iskm_state"), Crowd->SnipeView, Transform.GetLocation(), float(FMath::Max(OldSeq, 0) * 10 + int32(Anim.State)));
+				}
+			}
+#endif
+			if (bRangeChanged || bStateChanged)
 			{
 #if !UE_BUILD_TEST
 				// Q4b 개발 확인(-LabRangeLog): 걷는 개체가 범위를 넘는 프레임에 옛 컴포넌트 트랙의 재생 위치를 읽고, 다음 프레임에 새 컴포넌트 트랙의 위치를 읽어 기대 위치(걷기 루프 시각)와 함께 남긴다
@@ -347,6 +492,17 @@ void ULabIskmProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutio
 #endif
 		}
 	});
+
+#if !UE_BUILD_TEST
+	if (bFlashDiag)
+	{
+		// enter_none/walk/hit/dead: 컴포넌트에 들어온 개체를 옛 트랙의 클립으로 나눈 수, range: 그중 범위 경계, state: 컴포넌트 안의 상태 전환 쓰기
+		// 뒤의 이름=a/b: 컴포넌트마다 트랙 수(지난 프레임까지, 엔진 EndVisualChanges는 이 프로세서 뒤에 돈다)/인스턴스 수. 트랙 수가 바뀐 프레임에 렌더러가 뼈대 버퍼를 다시 할당한다
+		UE_LOG(LogLab, Log, TEXT("lab_flash frame=%llu t=%.3f enter_none=%d enter_walk=%d enter_hit=%d enter_dead=%d range=%d state=%d%s"),
+			(unsigned long long)Frame, Now, EnterBySeq[0], EnterBySeq[1], EnterBySeq[2], EnterBySeq[3], EnterRange, StateWrites,
+			RepresentationSubsystemForStats ? *LabTrackCountString(*RepresentationSubsystemForStats) : TEXT(""));
+	}
+#endif
 
 	CSV_CUSTOM_STAT(Lab, ViewInst30, ViewInst30, ECsvCustomStatOp::Set);   // Q4 (나) 대체 지표의 나머지: 화면 안 30m에서 아직 인스턴스
 	CSV_CUSTOM_STAT(Lab, ViewInstHyd, ViewInstHyd, ECsvCustomStatOp::Set); // Q4: 화면 안 전환 거리 안에서 아직 인스턴스(상한이 막는 정도)

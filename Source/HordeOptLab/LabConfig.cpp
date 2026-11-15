@@ -183,6 +183,15 @@ const FLabConfig& FLabConfig::Get()
 				C.BoundsStepM = BoundsStepM;
 			}
 		}
+		// v2 W9 ISKM 번쩍임(LabConfig.h bIskmTrackReserve)
+		{
+			int32 TrackReserve = -1;
+			if (FParse::Value(Cmd, TEXT("-LabIskmTrackReserve="), TrackReserve) && TrackReserve >= 0)
+			{
+				if ((TrackReserve != 0) != C.bIskmTrackReserve) { NoteOverride(FString::Printf(TEXT("iskm_track_reserve=%d"), TrackReserve != 0 ? 1 : 0)); }
+				C.bIskmTrackReserve = TrackReserve != 0;
+			}
+		}
 #if !UE_BUILD_TEST
 		// 개발 빌드에서만 분리 파라미터를 바꿔 본다(LabSeparation.h). Test 빌드는 기본값이다
 		{
@@ -614,11 +623,16 @@ FString FLabConfig::ToLogString() const
 	const FString Crowd = bCrowdFx ? FString::Printf(TEXT(" crowdfx=1 crowdfx_particles=%d crowdfx_inner=%.1f crowdfx_entity=%d crowdfx_outer=%d"), CrowdFxParticles(), CrowdFxInnerCm() / 100.f, bCrowdFxEntity ? 1 : 0, bCrowdFxOuter ? 1 : 0) : FString();
 	// tech는 빼 보기 아홉 기법의 켬·끔이다(Q3). 모든 실행에 붙여 러너와 사람이 기대값과 대조한다.
 	// ladder·overrides·hud·actor_col은 Q5(사다리 단계, 변형 기본값과 다른 인자, HUD 켬, 하이드레이션 액터 캡슐 콜리전). tech 뒤에 늘 붙인다.
-	return FString::Printf(TEXT("lab_config stage=%s n=%d preset=P%d seed=%d variant=%s bench=%d label=%s duration=%.1f types=%d simlod=%s%s%s%s%s%s %s ladder=%s overrides=%s hud=%d actor_col=%s rep_hold=%d fx_orb_follow=%s bounds_step=%s"),
+	return FString::Printf(TEXT("lab_config stage=%s n=%d preset=P%d seed=%d variant=%s bench=%d label=%s duration=%.1f types=%d simlod=%s%s%s%s%s%s %s ladder=%s overrides=%s hud=%d actor_col=%s rep_hold=%d fx_orb_follow=%s bounds_step=%s iskm_track_reserve=%s"),
 		StageName(Stage), N, Preset, Seed, VariantName(Variant), bBench ? 1 : 0, *Label, DurationSec, Types, *SimLodString(),
 		FarM != 200 ? *FString::Printf(TEXT(" far=%d"), FarM) : TEXT(""), *M5, *Budget, *Health, *Crowd, *TechString(),
 		*Ladder().Id, Overrides.IsEmpty() ? TEXT("-") : *Overrides, bHud ? 1 : 0, ActorCollisionString(), UsesRepHold() ? RepHoldMs : 0,
-		*FxOrbFollowString(), *BoundsStepString());
+		*FxOrbFollowString(), *BoundsStepString(), *IskmTrackReserveString());
+}
+
+FString FLabConfig::IskmTrackReserveString() const
+{
+	return UsesIskm() ? FString(bIskmTrackReserve ? TEXT("1") : TEXT("0")) : FString(TEXT("-"));
 }
 
 FString FLabConfig::FxOrbFollowString() const
