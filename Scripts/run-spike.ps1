@@ -69,6 +69,10 @@ foreach ($s in @(1, 8)) {
     $base = @($StepExpect["$s"] | Where-Object { $_ -notmatch '^LabFarHandoff=|^LabFarHitIskm=' })
     $ConfigTable += @{ Name = "s${s}m6off"; Args = @("-LabStage=$s", "-LabFarHandoff=0 -LabFarHitIskm=0"); Expect = $base + $off }
 }
+# M6 수정 가르기(묶음 V2M6Split): 단계 8에서 수정 A만 켬(s8m6a), 수정 B만 켬(s8m6b)
+$base8 = @($StepExpect["8"] | Where-Object { $_ -notmatch '^LabFarHandoff=|^LabFarHitIskm=' })
+$ConfigTable += @{ Name = "s8m6a"; Args = @("-LabStage=8", "-LabFarHitIskm=0"); Expect = $base8 + @("LabFarHandoff=1", "LabFarHitIskm=0") }
+$ConfigTable += @{ Name = "s8m6b"; Args = @("-LabStage=8", "-LabFarHandoff=0"); Expect = $base8 + @("LabFarHandoff=0", "LabFarHitIskm=1") }
 # 빼 보기: 단계 8에서 스위치 하나. Expect는 바뀌는 메타데이터 값이다. LabOverrides는 정지 조건(orbit=…)과 섞이므로 대조하지 않는다
 $Ablations = @(
     @{ Name = "a8hyd"; Arg = "-LabHydrate=0"; Expect = @("LabTechHydrate=0", "LabActorCollision=-") },
