@@ -2,6 +2,7 @@
 #include "HordeOptLab.h"
 #include "LabConfig.h"
 #include "LabCrowdSubsystem.h"
+#include "LabFarStream.h"
 #include "LabMassTypes.h"
 #include "MassCommonFragments.h"
 #include "MassCommonTypes.h"
@@ -182,6 +183,24 @@ void ULabCrowdFxGatherProcessor::Execute(FMassEntityManager& EntityManager, FMas
 		}
 	});
 
+	// M6 수정 A(ADR-0020 결정 3): 바깥 기록을 엔티티 원소 뒤에 붙인다. 원소 형식(X, Y, T0, 위상)이 같아 에셋의 외삽 식을 그대로 쓴다.
+	// 기록을 꺼낸 프레임에 같은 자리·같은 위상의 엔티티가 None 엔티티로 들어오므로 같은 이미터가 같은 자리에 그린다
+	const int32 EntityRecs = Recs[LabUnitSmall].Num() + Recs[LabUnitLarge].Num();
+	int32 FarRecs = 0;
+	const int32 EntityRecsByType[LabUnitTypeMax] = { Recs[LabUnitSmall].Num(), Recs[LabUnitLarge].Num() }; // 개발 확인 로그는 엔티티 원소만 센다
+	if (FLabConfig::Get().DrawsFarStream())
+	{
+		if (const FLabFarStream* Far = Crowd->GetFarStream())
+		{
+			for (const FLabFarRec& Rec : Far->GetRecs())
+			{
+				// T0는 엔티티 원소와 같은 float 월드 초다. 위상은 엔티티가 될 때와 같은 LabWalkPhase(일련번호)
+				Recs[FMath::Min(FLabUnitTypes::TypeOf(Rec.Serial), LabUnitTypeMax - 1)].Emplace(Rec.X, Rec.Y, float(Rec.T0), LabWalkPhase(Rec.Serial));
+			}
+			FarRecs = Far->GetRecs().Num();
+		}
+	}
+
 	// 에셋에 있는 변수만 넣는다. 1종(-LabTypes=1)이면 대형 배열은 빈 배열로 넣어 지난 값을 지운다
 	if (Crowd->bCrowdFxSmallRecs)
 	{
@@ -203,11 +222,13 @@ void ULabCrowdFxGatherProcessor::Execute(FMassEntityManager& EntityManager, FMas
 		Fx->SetVariableVec3(OrbPosName, Crowd->OrbCenter);
 		Crowd->CrowdFxOrbPos = Crowd->OrbCenter;
 	}
-	const int32 Total = Recs[LabUnitSmall].Num() + Recs[LabUnitLarge].Num();
+	// Lab/CrowdRecs는 전과 같이 엔티티 원소 수다. 소형·대형 스탯은 넣은 배열 크기(기록 포함), 기록 수는 Lab/CrowdFarRecs
+	const int32 Total = EntityRecs;
 	Crowd->CrowdRecsLast = Total;
 	CSV_CUSTOM_STAT(Lab, CrowdRecs, Total, ECsvCustomStatOp::Set);
 	CSV_CUSTOM_STAT(Lab, CrowdRecsSmall, Recs[LabUnitSmall].Num(), ECsvCustomStatOp::Set);
 	CSV_CUSTOM_STAT(Lab, CrowdRecsLarge, Recs[LabUnitLarge].Num(), ECsvCustomStatOp::Set);
+	CSV_CUSTOM_STAT(Lab, CrowdFarRecs, FarRecs, ECsvCustomStatOp::Set);
 	CSV_CUSTOM_STAT(Lab, CrowdRecsHitDead, HitDead, ECsvCustomStatOp::Set);
 
 #if !UE_BUILD_TEST
@@ -216,7 +237,7 @@ void ULabCrowdFxGatherProcessor::Execute(FMassEntityManager& EntityManager, FMas
 	++DiagFrames;
 	for (int32 Type = 0; Type < LabUnitTypeMax; ++Type)
 	{
-		DiagRecs[Type] += Recs[Type].Num();
+		DiagRecs[Type] += EntityRecsByType[Type];
 	}
 	DiagHitDead += HitDead;
 	DiagDrawn += Drawn;

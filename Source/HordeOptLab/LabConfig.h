@@ -243,6 +243,12 @@ struct FLabConfig
 	 * 0(-LabIskmTrackReserve=0)이면 W8까지처럼 엔진이 트랙을 하나씩 늘린다. ISKM을 쓸 때만 뜻이 있다. CSV 메타데이터 LabIskmTrackReserve.
 	 */
 	bool bIskmTrackReserve = true;
+	/**
+	 * M6 수정 A(ADR-0020, -LabFarHandoff=0/1, 기본 1, 모든 단계). 맵 밖 무리를 코드가 기록 N개로 굴리고(FLabFarStream), 죽은 개체는 같은 종류에서 오브에 가장 가까운 기록의 자리에서 다시 생긴다.
+	 * 단계 7·8은 기록을 엔티티 구동 입자 배열 뒤에 붙여 그리고 독립 이미터의 스폰율을 0으로 넣는다. 0이면 옛 동작(맵 중심 490~500m 고리의 무작위 자리, 독립 입자)이다.
+	 * 시나리오 규칙이라 빼 보기가 아니다. CSV 메타데이터 LabFarHandoff, lab_config far_handoff=.
+	 */
+	bool bFarHandoff = true;
 	/** 로그와 CSV 메타데이터 값. 그 기법을 쓰지 않는 실행은 "-" */
 	FString FxOrbFollowString() const;
 	FString BoundsStepString() const;
@@ -266,7 +272,7 @@ struct FLabConfig
 	 * 스폰율을 활성화 전에 넣으므로 워밍업도 0으로 돌아 미리 채워지는 입자가 없다. 엔티티 구동 이미터는 스폰율을 읽지 않아 그대로다. bCrowdFx일 때만 뜻이 있다.
 	 */
 	bool bCrowdFxOuter = true;
-	/** 실제 미니언과 같은 흐름(개/초): N / 맵 반경 × 이동 속도(Docs/Worklog/Q2.md "장면 수치"). N 1만이면 60. -LabCrowdFxOuter=0이면 0 */
+	/** 실제 미니언과 같은 흐름(개/초): N / 맵 반경 × 이동 속도(Docs/Worklog/Q2.md "장면 수치"). N 1만이면 60. -LabCrowdFxOuter=0이면 0. M6 수정 A(bFarHandoff)도 0(기록이 바깥 무리를 그린다) */
 	float CrowdFxTotalRate() const;
 	float CrowdFxSmallRate() const;
 	float CrowdFxLargeRate() const;
@@ -278,6 +284,8 @@ struct FLabConfig
 	int32 CrowdFxParticles() const;
 	/** 엔티티 구동 입자를 쓰는가. ULabCrowdFxGatherProcessor 등록 조건(HordeOptLab.cpp) */
 	bool UsesCrowdFxEntity() const { return IsMass() && bCrowdFx; }
+	/** M6 수정 A의 기록을 엔티티 구동 입자로 그리는가(바깥 무리를 끄는 -LabCrowdFxOuter=0이면 그리지 않는다) */
+	bool DrawsFarStream() const { return UsesCrowdFxEntity() && bFarHandoff && bCrowdFxOuter; }
 	/**
 	 * Q3 빼 보기 스위치(Docs/Worklog/V2.md "W10" 빼 보기 표). 단계가 정한 구성에서 기법 하나만 뺀다. 0을 줄 때만 뜻이 있다(끄기 전용).
 	 * 1이나 다른 값은 단계의 기본 동작 그대로다. 그 단계에 없는 기법을 켜지 않는다.

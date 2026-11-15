@@ -220,6 +220,8 @@ void ULabCrowdSubsystem::SpawnEntities(TConstArrayView<FVector> Locations, TCons
 #endif
 	}
 	const bool bPool = FLabConfig::Get().bEntityPool;
+	const bool bFarHandoffNow = FLabConfig::Get().bFarHandoff;
+	const double SpawnTime = World->GetTimeSeconds();
 	TArray<FMassEntityHandle> Reused;
 	for (int32 Type = 0; Type < EntityConfigs.Num(); ++Type)
 	{
@@ -259,6 +261,10 @@ void ULabCrowdSubsystem::SpawnEntities(TConstArrayView<FVector> Locations, TCons
 			EntityManager.GetFragmentDataChecked<FLabMinionFragment>(Entities[k]).Serial = Serials[i];
 			EntityManager.GetFragmentDataChecked<FLabHealthFragment>(Entities[k]).Health = FLabConfig::Get().HealthFor(Serials[i]);
 			EntityManager.GetFragmentDataChecked<FLabAnimStateFragment>(Entities[k]).Set(ELabMinionState::Walk, -LabWalkPhase(Serials[i])); // 재생 시각 = Now + 위상
+			if (FLabOffMoveFragment* OffMove = bFarHandoffNow ? EntityManager.GetFragmentDataPtr<FLabOffMoveFragment>(Entities[k]) : nullptr)
+			{
+				OffMove->LastMoveTime = SpawnTime; // M6 수정 A: ReinitPooledEntity와 같다. 처음 배치(시각 0)는 0이라 전과 같다
+			}
 		}
 		Creation.Reset(); // 옵저버(엔진 초기화 프로세서)가 여기서 돈다
 		AliveCount += Entities.Num();
@@ -301,7 +307,11 @@ void ULabCrowdSubsystem::ReinitPooledEntity(FMassEntityManager& EntityManager, F
 	if (FMassVelocityFragment* Velocity = EntityManager.GetFragmentDataPtr<FMassVelocityFragment>(Entity)) { Velocity->Value = FVector::ZeroVector; }
 	if (FMassForceFragment* Force = EntityManager.GetFragmentDataPtr<FMassForceFragment>(Entity)) { Force->Value = FVector::ZeroVector; }
 	if (FMassDesiredMovementFragment* Desired = EntityManager.GetFragmentDataPtr<FMassDesiredMovementFragment>(Entity)) { Desired->DesiredVelocity = FVector::ZeroVector; }
-	if (FLabOffMoveFragment* OffMove = EntityManager.GetFragmentDataPtr<FLabOffMoveFragment>(Entity)) { OffMove->LastMoveTime = 0.; } // 새 엔티티와 같이 첫 이동은 한 프레임만(LabMassProcessors.cpp)
+	if (FLabOffMoveFragment* OffMove = EntityManager.GetFragmentDataPtr<FLabOffMoveFragment>(Entity))
+	{
+		// 새 엔티티와 같이 첫 이동은 한 프레임만(LabMassProcessors.cpp). M6 수정 A: 자리는 꺼낸 기록의 지금 값이라 지금부터 옮긴다(입자 원소의 T0도 지금이 된다)
+		OffMove->LastMoveTime = FLabConfig::Get().bFarHandoff ? GetWorld()->GetTimeSeconds() : 0.;
+	}
 }
 
 void ULabCrowdSubsystem::RecycleAndRespawn(TConstArrayView<FMassEntityHandle> Finished)
@@ -322,7 +332,9 @@ void ULabCrowdSubsystem::RecycleAndRespawn(TConstArrayView<FMassEntityHandle> Fi
 		++Count;
 	}
 	// 2. 파괴 경로와 같은 재생성(같은 스트림, 같은 일련번호 열). SpawnEntities가 풀을 먼저 쓴다.
-	RequestRespawn(Count);
+	const int32 CountByType[LabUnitTypeMax] = { EntityPool[0].Num() - OldNum[0], EntityPool[1].Num() - OldNum[1] };
+	check(CountByType[0] + CountByType[1] == Count);
+	RequestRespawn(CountByType);
 	// 3. 다시 쓰이지 않고 남은 이번 엔티티만 세워 두고 풀 태그를 붙인다(종류가 맞지 않아 남은 것).
 	TArray<FMassEntityHandle> Parked;
 	for (int32 Type = 0; Type < LabUnitTypeMax; ++Type)
@@ -344,13 +356,19 @@ void ULabCrowdSubsystem::RecycleAndRespawn(TConstArrayView<FMassEntityHandle> Fi
 	}
 }
 
-void ULabCrowdSubsystem::RequestRespawn(int32 Count)
+void ULabCrowdSubsystem::RequestRespawn(const int32 (&CountByType)[LabUnitTypeMax])
 {
-	AliveCount -= Count;
+	AliveCount -= CountByType[0] + CountByType[1];
 	if (ALabCrowdSpawner* S = Spawner.Get())
 	{
-		S->RespawnEntities(Count);
+		S->RespawnEntities(CountByType);
 	}
+}
+
+const FLabFarStream* ULabCrowdSubsystem::GetFarStream() const
+{
+	const ALabCrowdSpawner* S = Spawner.Get();
+	return S ? S->GetFarStream() : nullptr;
 }
 
 float ULabCrowdSubsystem::IskmBoundsHalfXY()

@@ -219,7 +219,56 @@ void ALabCrowdSpawner::SpawnInitial()
 			Assets.Hit ? Assets.Hit->GetPlayLength() : 0.5f, Assets.Death ? Assets.Death->GetPlayLength() : 1.f);
 		SpawnEntitiesAt(RadiusAngles);
 	}
+	if (Config.bFarHandoff)
+	{
+		// M6 수정 A(ADR-0020): 엔티티 N개 뒤의 일련번호로 바깥 기록 N개를 둔다. 처음 배치와 엔티티의 일련번호 열은 그대로다
+		const uint32 FirstSerial = NextSerial;
+		NextSerial = FarStream.Init(Config.N, Config.Seed, NextSerial, FLabScenario::MoveSpeed);
+		UE_LOG(LogLab, Log, TEXT("lab_farstream_init records=%d serials=%u..%u inner=%.0f outer=%.0f"), FarStream.GetRecs().Num(), FirstSerial, NextSerial - 1, FLabFarStream::InnerCm, FLabFarStream::OuterCm);
+	}
 	UE_LOG(LogLab, Log, TEXT("lab_spawned n=%d"), GetAliveCount());
+}
+
+void ALabCrowdSpawner::TickFarStream(float DeltaSeconds)
+{
+	if (!FarStream.IsActive())
+	{
+		return;
+	}
+	const double Now = GetWorld()->GetTimeSeconds();
+	FarStream.Tick(Now, DeltaSeconds, GetOrbLocation());
+#if !UE_BUILD_TEST
+	// 개발 확인(5초마다): 맨 앞 기록의 오브 거리와 맵 중심 거리, 맵 안에 들어온 기록 수, 이 5초에 꺼낸 수와 그 자리의 오브 거리(최소·평균·최대), 모자라 옛 규칙으로 만든 수
+	if (Now >= FarLogNext)
+	{
+		FarLogNext = Now + 5.;
+		int32 Small = 0;
+		for (const FLabFarRec& Rec : FarStream.GetRecs()) { Small += FLabUnitTypes::TypeOf(Rec.Serial) == LabUnitSmall ? 1 : 0; }
+		const int32 Pops = FarStream.PopsTotal;
+		UE_LOG(LogLab, Log, TEXT("lab_farstream t=%.1f records=%d small=%d large=%d front_m=%.1f front_center_m=%.1f inside_map=%d pops=%d spawn_m_min=%.1f spawn_m_mean=%.1f spawn_m_max=%.1f short=%d"),
+			Now, FarStream.GetRecs().Num(), Small, FarStream.GetRecs().Num() - Small, FarStream.FrontCm / 100.f, FarStream.FrontCenterCm / 100.f, FarStream.InsideMap, Pops,
+			Pops > 0 ? FarStream.SpawnDistMin / 100.f : 0.f, Pops > 0 ? float(FarStream.SpawnDistSum / Pops / 100.) : 0.f, FarStream.SpawnDistMax / 100.f, FarStream.PopsShort);
+		FarStream.PopsTotal = 0;
+		FarStream.PopsShort = 0;
+		FarStream.SpawnDistSum = 0.;
+		FarStream.SpawnDistMin = TNumericLimits<float>::Max();
+		FarStream.SpawnDistMax = 0.f;
+	}
+#endif
+}
+
+void ALabCrowdSpawner::PopFarRecords(int32 Type, int32 Count, TArray<FVector>& OutLocations, TArray<uint32>& OutSerials)
+{
+	const int32 Got = FarStream.Pop(Type, Count, GetWorld()->GetTimeSeconds(), GetOrbLocation(), NextSerial, OutLocations, OutSerials);
+	for (int32 k = Got; k < Count; ++k)
+	{
+		// 그 종류의 기록이 없다(1만 실행에서 대형 기록 약 1,000개라 생기지 않는다). 옛 고리에서 만들되 종류가 맞는 일련번호를 쓴다
+		const float Radius = Stream.FRandRange(FLabScenario::MapRadius - FLabScenario::RespawnRingWidth, FLabScenario::MapRadius);
+		const float Angle = Stream.FRandRange(0.f, UE_TWO_PI);
+		while (FLabUnitTypes::TypeOf(NextSerial) != Type) { ++NextSerial; }
+		OutLocations.Emplace(Radius * FMath::Cos(Angle), Radius * FMath::Sin(Angle), 0.);
+		OutSerials.Add(NextSerial++);
+	}
 }
 
 int32 ALabCrowdSpawner::GetAliveCount() const
@@ -248,8 +297,22 @@ void ALabCrowdSpawner::SpawnEntitiesAt(TConstArrayView<FVector2D> RadiusAngles)
 	Crowd->SpawnEntities(Locations, Serials);
 }
 
-void ALabCrowdSpawner::RespawnEntities(int32 Count)
+void ALabCrowdSpawner::RespawnEntities(const int32 (&CountByType)[LabUnitTypeMax])
 {
+	const int32 Count = CountByType[LabUnitSmall] + CountByType[LabUnitLarge];
+	if (FarStream.IsActive())
+	{
+		// M6 수정 A: 죽은 개체와 같은 종류의 맨 앞 기록 자리에서 만든다. 소형 먼저, 대형 다음(실행마다 같은 순서)
+		TArray<FVector> Locations;
+		TArray<uint32> Serials;
+		for (int32 Type = 0; Type < LabUnitTypeMax; ++Type)
+		{
+			PopFarRecords(Type, CountByType[Type], Locations, Serials);
+		}
+		Crowd->SpawnEntities(Locations, Serials);
+		RespawnCount += Count;
+		return;
+	}
 	// M0 OnMinionFinished와 같은 스트림, 같은 링에서 뽑는다.
 	TArray<FVector2D> RadiusAngles;
 	for (int32 i = 0; i < Count; ++i)
@@ -265,9 +328,14 @@ void ALabCrowdSpawner::RespawnEntities(int32 Count)
 ALabMinion* ALabCrowdSpawner::SpawnAt(float Radius, float Angle)
 {
 	const uint32 Serial = NextSerial++;
-	// 대형은 캡슐이 배율만큼 커지므로 캡슐 중심 높이도 같은 배율로 올린다(소형은 배율 1이라 전과 같다)
 	const FVector Center = FVector::ZeroVector; // 맵의 중심
-	const FVector Location(Center.X + Radius * FMath::Cos(Angle), Center.Y + Radius * FMath::Sin(Angle), SpawnZ * FLabUnitAssetPaths::Get(FLabUnitTypes::TypeOf(Serial)).Scale);
+	return SpawnActorAt(FVector(Center.X + Radius * FMath::Cos(Angle), Center.Y + Radius * FMath::Sin(Angle), 0.), Serial);
+}
+
+ALabMinion* ALabCrowdSpawner::SpawnActorAt(const FVector& Ground, uint32 Serial)
+{
+	// 대형은 캡슐이 배율만큼 커지므로 캡슐 중심 높이도 같은 배율로 올린다(소형은 배율 1이라 전과 같다)
+	const FVector Location(Ground.X, Ground.Y, SpawnZ * FLabUnitAssetPaths::Get(FLabUnitTypes::TypeOf(Serial)).Scale);
 	const FRotator Facing = (GetOrbLocation() - Location).GetSafeNormal2D().Rotation();
 
 	FActorSpawnParameters Params;
@@ -307,8 +375,19 @@ void ALabCrowdSpawner::SampleActorOverlaps(double Now)
 void ALabCrowdSpawner::OnMinionFinished(ALabMinion* Minion)
 {
 	Minions.RemoveSwap(Minion);
+	const int32 Type = Minion->GetUnitType();
 	Minion->Destroy();
 
+	if (FarStream.IsActive())
+	{
+		// M6 수정 A: Mass 단계와 같은 규칙(같은 종류의 맨 앞 기록 자리와 일련번호)
+		TArray<FVector> Locations;
+		TArray<uint32> Serials;
+		PopFarRecords(Type, 1, Locations, Serials);
+		SpawnActorAt(Locations[0], Serials[0]);
+		++RespawnCount;
+		return;
+	}
 	// 재생성 위치도 같은 스트림에서 뽑는다. 사망 순서는 실행마다 다를 수 있어 위치 열만 재현된다(measurement.md "시드").
 	const float Radius = Stream.FRandRange(FLabScenario::MapRadius - FLabScenario::RespawnRingWidth, FLabScenario::MapRadius);
 	const float Angle = Stream.FRandRange(0.f, UE_TWO_PI);

@@ -470,6 +470,8 @@ void ALabGameMode::TickBench()
 			CSV_METADATA(TEXT("LabBoundsStepM"), *Config.BoundsStepString());
 			// v2 W9: ISKM 컴포넌트의 트랙 풀을 미리 늘려 두는가(1/0). ISKM을 쓰지 않는 실행은 "-"
 			CSV_METADATA(TEXT("LabIskmTrackReserve"), *Config.IskmTrackReserveString());
+			// M6 수정 A(ADR-0020): 바깥 기록과 맨 앞 기록 재생성(1/0, 모든 단계). 맨 앞 기록의 오브 거리는 CSV 스탯 Lab/FarFrontM, 이동·꺼내기 시간은 Lab/FarStream
+			CSV_METADATA(TEXT("LabFarHandoff"), Config.bFarHandoff ? TEXT("1") : TEXT("0"));
 			// v2 W11 액터 비용 후보: 하이드레이션 액터 메시의 고정 바운드(1/0, 액터가 없으면 "-"), QueryOnly 바디 칸 나누기(실제 CVar 값)
 			CSV_METADATA(TEXT("LabFixedSkelBounds"), Config.FixedSkelBoundsString());
 			{
@@ -666,6 +668,7 @@ void ALabGameMode::Tick(float DeltaSeconds)
 
 	// Q5 동등성 통계(모든 단계, 같은 뜻, Docs/Worklog/Q5.md "동등성 통계"): 살아 있는 총수(사망 중 포함, 늘 N이어야 한다), 누적 사망 수, 오브 30m 안 개체 수.
 	// 초당 사망 수는 Lab/Deaths의 측정 구간 증가분 ÷ 측정 시간이다(실행 끝 메타데이터 LabDeathRate에도 있다).
+	Spawner->TickFarStream(DeltaSeconds); // M6 수정 A: 바깥 기록을 옮긴다(모든 단계, 끄면 일하지 않는다)
 	LastAlive = Spawner->GetAliveCount();
 	LastNear30 = ComputeNear30();
 	CSV_CUSTOM_STAT(Lab, Alive, LastAlive, ECsvCustomStatOp::Set);

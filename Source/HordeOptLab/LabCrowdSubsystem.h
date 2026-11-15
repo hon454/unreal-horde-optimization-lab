@@ -48,8 +48,10 @@ public:
 
 	/** 땅 위(z=0) 위치와 일련번호로 엔티티를 만든다. 진행 방향은 오브를 본다. 2종이면 일련번호로 종류를 갈라 각 템플릿으로 만든다(순서 유지). */
 	void SpawnEntities(TConstArrayView<FVector> Locations, TConstArrayView<uint32> Serials);
-	/** 사망 프로세서가 지운 엔티티 수만큼 스포너에 재생성을 맡긴다(게임 스레드, 커맨드 플러시 중). */
-	void RequestRespawn(int32 Count);
+	/** 사망 프로세서가 지운 엔티티 수만큼(종류별) 스포너에 재생성을 맡긴다(게임 스레드, 커맨드 플러시 중). M6 수정 A는 같은 종류의 바깥 기록을 꺼낸다 */
+	void RequestRespawn(const int32 (&CountByType)[LabUnitTypeMax]);
+	/** M6 수정 A의 바깥 기록(스포너가 가진다). 꺼져 있으면 nullptr. 게임 스레드에서만 부른다 */
+	const class FLabFarStream* GetFarStream() const;
 	/**
 	 * M5 엔티티 풀링(-LabEntityPool=1): 사망이 끝난 엔티티를 종류별 풀에 넣고 같은 수만큼 재생성을 맡긴다(게임 스레드, 커맨드 플러시 중).
 	 * 재생성 위치와 일련번호는 파괴 경로(RequestRespawn)와 같은 스포너 스트림에서 나온다. SpawnEntities가 일련번호의 종류에 맞는 풀 엔티티를 먼저 다시 쓰고,

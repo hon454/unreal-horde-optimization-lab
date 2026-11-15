@@ -1195,6 +1195,7 @@ void ULabMinionStateProcessor::Execute(FMassEntityManager& EntityManager, FMassE
 	const float Now = Crowd->GetWorld()->GetTimeSeconds();
 	const bool bSimLod = FLabConfig::Get().UsesSimLod();
 	TArray<FMassEntityHandle> Finished;
+	int32 FinishedByType[LabUnitTypeMax] = { 0, 0 }; // 파괴 경로의 종류별 수(M6 수정 A가 같은 종류의 바깥 기록을 꺼낸다)
 	EntityQuery.ForEachEntityChunk(Context, [&](FMassExecutionContext& Context)
 	{
 		const bool bDead = Context.DoesArchetypeHaveTag(*FLabDeadTag::StaticStruct());
@@ -1230,6 +1231,7 @@ void ULabMinionStateProcessor::Execute(FMassEntityManager& EntityManager, FMassE
 			if (bDead)
 			{
 				Finished.Add(Entity);
+				++FinishedByType[FLabUnitTypes::TypeOf(Minion.Serial)];
 #if !UE_BUILD_TEST
 				LabLogScreenEvent(TEXT("removed"), Crowd->SnipeView, Transforms[It].GetTransform().GetLocation()); // 개발용 진단: 사망 후 제거 위치
 #endif
@@ -1264,14 +1266,16 @@ void ULabMinionStateProcessor::Execute(FMassEntityManager& EntityManager, FMassE
 	else if (Finished.Num() > 0)
 	{
 		// 지연 파괴 + 재생성(plan.md "M1"). 재생성 위치와 일련번호는 M0과 같이 스포너의 시드 스트림에서 나온다.
-		const int32 Count = Finished.Num();
+		const int32 Small = FinishedByType[LabUnitSmall];
+		const int32 Large = FinishedByType[LabUnitLarge];
 		Context.Defer().DestroyEntities(MoveTemp(Finished));
 		TWeakObjectPtr<ULabCrowdSubsystem> WeakCrowd(Crowd);
-		Context.Defer().PushCommand<FMassDeferredCreateCommand>([WeakCrowd, Count](FMassEntityManager&)
+		Context.Defer().PushCommand<FMassDeferredCreateCommand>([WeakCrowd, Small, Large](FMassEntityManager&)
 		{
 			if (ULabCrowdSubsystem* C = WeakCrowd.Get())
 			{
-				C->RequestRespawn(Count);
+				const int32 CountByType[LabUnitTypeMax] = { Small, Large };
+				C->RequestRespawn(CountByType);
 			}
 		});
 	}
