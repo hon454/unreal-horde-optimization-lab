@@ -25,6 +25,9 @@ CSV_DECLARE_CATEGORY_EXTERN(Lab);
 
 namespace
 {
+	/** M6 수정 B: 그리는 끝 밖의 피격·사망 개체(LOD Low, 중요도 Off = 3.0)의 범위인가 */
+	bool LodSignificanceIsFarHit(float LODSignificance) { return LODSignificance >= float(EMassLOD::Off); }
+
 	/**
 	 * 엔티티의 기존 트랙에 애니 데이터를 쓴다. 트랙이 아직 없으면(처음 ISKM으로 보이는 프레임) false를 돌려준다.
 	 * 그때는 엔진이 같은 프레임 EndVisualChanges에서 트랙을 만들고 이 프레임에 쌓은 애니 데이터로 쓴다(MassVisualizationComponent.cpp:771-775, 862-866).
@@ -388,8 +391,8 @@ void ULabIskmProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutio
 			if (bEntering && TrackReserve[0] > 0)
 			{
 				// v2 W9: 컴포넌트가 처음 쓰이는 프레임에(엔진이 이 프레임 끝 EndVisualChanges에서 트랙을 만들기 전에) 트랙 풀을 늘려 둔다. 이미 늘린 컴포넌트는 건너뛴다
-				// M6 수정 B: [Off, Max) 범위(그리는 끝 밖의 피격·사망)는 한 번에 몇 개뿐이라 64로 둔다(2초마다 저격 2발, 제거까지 약 2초)
-				const int32 Capacity = LODSignificance >= float(EMassLOD::Off) ? 64 : TrackReserve[Context.GetConstSharedFragment<FLabUnitTypeParams>().UnitType == LabUnitLarge ? 1 : 0];
+				// M6 수정 B: [Off, Max) 범위(그리는 끝 밖의 피격·사망)는 따로 된 컴포넌트이고(ULabCrowdSubsystem::BuildEntityConfig) 한 번에 몇 개뿐이라 64로 둔다(2초마다 저격 2발, 제거까지 약 2초)
+				const int32 Capacity = LodSignificanceIsFarHit(LODSignificance) ? 64 : TrackReserve[Context.GetConstSharedFragment<FLabUnitTypeParams>().UnitType == LabUnitLarge ? 1 : 0];
 				LabReserveTracks(Info, LODSignificance, Capacity, ReservedProviders);
 			}
 			const bool bStateChanged = Track.AppliedState != int8(Anim.State) || Track.AppliedStartTime != Anim.StateStartTime;
@@ -465,6 +468,20 @@ void ULabIskmProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutio
 			}
 #endif
 
+#if !UE_BUILD_TEST
+			{
+				static const bool bTmpTrace = FParse::Param(FCommandLine::Get(), TEXT("LabFarHitDiag"));
+				if (bTmpTrace && Anim.State != ELabMinionState::Walk && LODSignificance >= 2.f && T < 0.3f)
+				{
+					float Pos = -1.f, TrackRate = 0.f;
+					int32 Seq = INDEX_NONE;
+					const bool bTrack = LabReadTrack(Info, LODSignificance, Entity, Pos, TrackRate, Seq);
+					UE_LOG(LogLab, Log, TEXT("lab_iskm_trace frame=%llu ent=%s sig=%.2f prev_sig=%.2f state=%d t=%.3f track=%d seq=%d pos=%.3f entering=%d range_changed=%d state_changed=%d loc=%s"),
+						(unsigned long long)Frame, *Entity.DebugGetDescription(), LODSignificance, Representation.PrevLODSignificance, int32(Anim.State), T, bTrack ? 1 : 0, Seq, Pos,
+						bEntering ? 1 : 0, bRangeChanged ? 1 : 0, bStateChanged ? 1 : 0, *Transform.GetLocation().ToCompactString());
+				}
+			}
+#endif
 			Representation.PrevTransform = Transform;
 			Representation.PrevLODSignificance = LODSignificance;
 #if !UE_BUILD_TEST

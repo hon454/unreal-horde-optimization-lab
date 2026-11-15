@@ -193,6 +193,10 @@ UMassEntityConfigAsset* ULabCrowdSubsystem::BuildEntityConfig(int32 UnitType, US
 			}
 			FarHitDesc.SetSignificanceRange(EMassLOD::Off, EMassLOD::Max);
 			FarHitDesc.bCastShadows = false;
+			// 엔진은 설명자 해시마다 컴포넌트를 하나 만들고 해시에 중요도 범위가 없다(MassVisualizationComponent.cpp:1298, MassSkinnedMeshRepresentationTypes.h:118-135).
+			// 단계 8의 [Low, Off) 설명자(그림자 끔)와 해시가 같으면 두 범위가 한 컴포넌트를 함께 써서, 맵 전체 상자가 80~200m 인스턴스 수천 개의 컴포넌트에 들어간다.
+			// 해시에 드는 값 하나를 같은 뜻으로 바꿔 따로 된 컴포넌트를 만든다(단계 7과 같은 구조, 트랙 풀 64). 0보다 작으면 늘 재생한다(MassSkinnedMeshRepresentationTypes.h:95-101)
+			FarHitDesc.AnimationMinScreenSize = FLabIskmParams::AnimationMinScreenSize - 1.f;
 			Visual->SkinnedMeshInstanceDesc.Meshes.Add(FarHitDesc);
 		}
 		Visual->StaticMeshInstanceDesc.Meshes.Reset();

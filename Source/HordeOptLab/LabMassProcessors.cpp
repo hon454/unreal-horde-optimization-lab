@@ -1243,6 +1243,14 @@ void ULabFarHitIskmProcessor::Execute(FMassEntityManager& EntityManager, FMassEx
 				{
 					++Waiting; // 청크가 아직 표현을 다시 보지 않았다. 모으기 프로세서가 입자로 남긴다
 				}
+#if !UE_BUILD_TEST
+				if (bTmpDiag && Now - HitStart < 0.3)
+				{
+					const FVector P = Transforms[It].GetTransform().GetLocation();
+					UE_LOG(LogLab, Log, TEXT("lab_farhit_trace frame=%llu ent=%s lod=%d sig=%.2f vis=%d rep=%d prev=%d pos=%.0f,%.0f,%.0f"), (unsigned long long)GFrameCounter, *Entity.DebugGetDescription(),
+						int32(L.LOD), L.LODSignificance, int32(L.Visibility), int32(Representations[It].CurrentRepresentation), int32(Representations[It].PrevRepresentation), P.X, P.Y, P.Z);
+				}
+#endif
 			}
 			if (L.LOD != EMassLOD::Off)
 			{
@@ -1266,8 +1274,7 @@ void ULabFarHitIskmProcessor::Execute(FMassEntityManager& EntityManager, FMassEx
 				LogCatchUpMax = FMath::Max(LogCatchUpMax, Step);
 #endif
 			}
-			L.LOD = EMassLOD::Low; // 중요도(Off = 3.0)는 그대로라 [Off, Max) 설명자로 간다
-			++Bumped;
+			L.LOD = EMassLOD::Low; // 중요도(Off = 3.0)는 그대로라 [Off, Max) 설명자로 간다			++Bumped;
 			if (!Found)
 			{
 				// 처음 올린 프레임에 이미 그려져 있던 개체(맞은 뒤 그리는 끝을 넘어 나갔다)는 늦음 집계에서 뺀다(2)
