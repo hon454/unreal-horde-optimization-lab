@@ -695,3 +695,15 @@ for (const int32 TrackIndex : Temp)
 | 전역 충돌은 쿼리 시작 전에 기다린다 | `ForEachEntityChunk`의 질의 전 콜백이 `WaitForQueryResources`로 `ChunkGlobalContentionIndex`를 잡는다(`Reserve`, 잡을 때까지 `WaitForChange`). 그 시간은 부른 프로세서의 실행 시간에 잡히고 자체 타이머가 없다 | `ME/MassProcessingQueueTypes.cpp:640-650,678-691`, `ME/MassProcessingQueue.cpp:324-360` |
 | 서브시스템 요구는 쿼리 충돌에 들지 않는다 | `bAggregateRequirements`(기본 거짓)이면 프로세서 단위로 선언한 서브시스템은 프로세서 충돌(`ContentionIndex`)에만 든다. 쿼리의 데이터 접근에는 쿼리에 선언한 서브시스템만 든다 | `ME/MassProcessingQueueTypes.cpp:137-163`, `Engine/Source/Runtime/MassEntity/Public/MassProcessor.h:261-264` |
 | 프로세서는 쿼리를 골라 돌릴 수 있다 | 실행 중 쿼리는 `SetCurrentQuery`가 소유 쿼리 목록에서 찾는다. 쿼리 순서는 자유이고 돌리지 않은 쿼리를 검사하지 않는다. 그래서 드물게 쓰는 프래그먼트는 따로 된 쿼리로 빼고 필요한 프레임에만 돌릴 수 있다 | `ME/MassProcessingQueueTypes.cpp:547-559` |
+
+## 48. 병렬 처리 큐의 프로세서 충돌과 게임 스레드 러너(2026-11-16, 분리 프로세서 기다림)
+
+줄임말: **ME** = `Engine/Source/Runtime/MassEntity/Private`. 실행 결과는 [Worklog/V2.md](../Worklog/V2.md) "분리 프로세서 기다림"에 있다.
+
+| 항목 | 확인한 것 | 위치 |
+| --- | --- | --- |
+| 서브시스템 충돌은 `ThreadSafeWrite`를 보지 않는다 | 실행 큐는 프로세서 단위 서브시스템 요구를 비트셋에 그대로 담고, 한쪽이 쓰고 다른 쪽이 읽거나 쓰면 두 프로세서를 서로 막는 쌍으로 둔다(`SubsystemsCollide`). `TMassExternalSubsystemTraits::ThreadSafeWrite`는 의존성 해결기만 읽는다. 그래서 같은 서브시스템을 한 프로세서는 ReadWrite, 다른 프로세서는 ReadOnly로 선언하면 둘은 동시에 돌지 않는다 | `ME/MassProcessingQueueTypes.cpp:137-138,203-214,376-382`, `ME/MassProcessorDependencySolver.cpp:1078` |
+| 프로세서 충돌 칸은 쿼리 밖에서 쥔다 | 러너가 프로세서를 고를 때 그 충돌 칸(`ContentionIndex`)을 잡는다. 쿼리 전 콜백이 그 칸을 놓고 쿼리의 전역 칸을 잡는다. 쿼리의 청크를 다 돌리면 전역 칸을 놓고 프로세서 칸을 다시 잡는다. 그래서 쿼리 밖의 긴 일은 프로세서 충돌 상대를 막고, 같은 프래그먼트를 읽는 쿼리는 막지 않는다 | `ME/MassProcessingQueue.cpp:369-380`, `ME/MassProcessingQueueTypes.cpp:678-691,693-765` |
+| 쿼리 밖 쓰기는 보호되지 않는다 | 쿼리의 전역 칸은 그 `ForEachEntityChunk`가 끝날 때 놓인다(`FScopedEntityQueryContext` 소멸자 → 쿼리 뒤 콜백 → `ProcessChunks` 끝). 그 뒤 모아 둔 포인터로 프래그먼트를 쓰면, 같은 프래그먼트를 읽는 다른 프로세서의 쿼리가 그동안 돌 수 있다 | `Engine/Source/Runtime/MassEntity/Private/MassEntityQuery.cpp:41-71`, `ME/MassProcessingQueueTypes.cpp:693-765` |
+| 게임 스레드 러너는 고를 프로세서가 없으면 돈다 | `RunMainThread`는 준비되고 충돌이 없는 게임 스레드 프로세서를 고르고, 없으면 `WaitForChange`(`YieldThread` 루프)로 기다린다. 그 시간은 트레이스에서 `MassProcessingQueue Main-Thread Runner Task`의 Excl이다 | `ME/MassProcessingQueue.cpp:592-617`, `Engine/Source/Runtime/MassEntity/Public/MassProcessingQueueTypes.h:760-778` |
+| 회전 프로세서는 개체마다 독립이다 | `UMassSmoothOrientationProcessor`의 HighRes 쿼리는 `ForEachEntityChunk`(한 스레드)로 돈다. 개체마다 이동 목표와 바라는 속도를 읽고 회전(`SetRotation`)과 `DesiredFacing`만 쓴다. 위치를 읽지도 쓰지도 않는다. 그룹은 Movement이고 `ExecuteAfter`가 없다 | `Engine/Plugins/AI/MassAI/Source/MassNavigation/Private/MassSmoothOrientationProcessors.cpp:20-112` |

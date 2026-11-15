@@ -47,6 +47,7 @@ Avoidance 그룹과 `SyncWorldToMass` 그룹에는 최종 구성의 엔티티를
 ### 순서가 정해져 있지 않은 곳
 
 - **로직과 표현 사이.** 8\~10(LabLogic)과 11\~14(표현)를 잇는 선언이 없다. 로직이 상태를 쓰고(`FLabAnimStateFragment` 쓰기) 표현이 읽지만, 이 겹침은 청크 단위의 접근 충돌일 뿐 프로세서 전체의 선후를 만들지 않는다(engine-notes 13절). 표현이 같은 프레임 로직보다 먼저 돌면 상태 변화가 한 프레임 늦게 보인다. 선언을 넣은 A/B 실험은 2만 개체에서 0.4\~0.7ms 느려 넣지 않았다([LabMassProcessors.h](../../Source/HordeOptLab/LabMassProcessors.h) 첫머리 주석).
+- **겹침 방지와 표현 사이.** 7(겹침 방지)과 11\~14(표현)를 잇는 선언도 없다. 겹침 방지는 위치를 모은 뒤 쿼리 밖에서 풀고 쓴다. 그동안 11b는 고를 수 없다. 둘 다 `ULabCrowdSubsystem`을 프로세서 단위로 선언해(11b 쓰기, 7 읽기) 실행 큐가 서로 막기 때문이다(engine-notes 48절). 11b 뒤의 표현 프로세서도 함께 기다린다. 그래서 대부분의 프레임(단계 8 트레이스에서 81%)은 표현이 민 뒤의 위치를 읽고, 나머지 프레임은 민 전 위치나 쓰는 중의 위치를 읽는다([Worklog/V2.md](../Worklog/V2.md) "분리 프로세서 기다림").
 - **액터 동기화와 표현 프로세서.** `ULabActorSyncProcessor`는 `ExecuteAfter(Representation)`을 선언한다. 의존성 해결기는 이 이름을 하위 그룹까지 펼치지만 실행 큐는 그룹 이름이 정확히 같은 프로세서만 기다린다(engine-notes 13절). 그래서 실행 때는 그룹이 정확히 `Representation`인 11과 13의 프로세서를 기다리고, 13이 12 뒤라 결과적으로 12 뒤에 온다.
 - **오브 틱과 Mass 처리.** `ALabOrb`, `ALabCameraRig`, `ALabGameMode`의 액터 틱은 틱 그룹을 바꾸지 않아 기본값 `TG_PrePhysics`이고, Mass PrePhysics 틱 함수와 같은 그룹이다. 둘 사이의 선후 선언은 없다. 엔진은 Mass PrePhysics 틱 함수를 높은 우선순위로 올리지만(`mass.MakePrePhysicsTickFunctionHighPriority` 기본 1) 이것은 선후 보장이 아니다. 그래서 오브는 Mass 처리에 넘기는 값(오브 위치, 화면 판정 카메라, 저격 요청)을 자기 틱에서 쓰지 않는다. `ALabOrb::OnMassPrePhysicsStart`가 Mass PrePhysics 단계가 시작할 때(게임 스레드, 프로세서를 띄우기 전) 궤도 위치로 오브를 옮기고 값을 쓴다. 카메라 캐시는 PostPhysics 뒤에만 바뀌므로 모든 프로세서가 직전 프레임에 그린 카메라를 보고, 저격 요청은 늘 그 프레임의 저격 프로세서가 한 번 가져간다.
 
@@ -59,7 +60,7 @@ Avoidance 그룹과 `SyncWorldToMass` 그룹에는 최종 구성의 엔티티를
 
 - **접근.** `ULabApproachProcessor`가 걷는 엔티티마다 `FMassMoveTargetFragment`를 오브의 지금 위치 쪽으로 채운다. 실제 이동은 엔진의 `UMassSteerToMoveTargetProcessor`(조향), `UMassApplyMovementProcessor`(이동), `UMassSmoothOrientationProcessor`(회전)가 한다. 단계 2부터 같다. 단계 5부터 접근은 청크 필터(`ShouldTickChunkThisFrame`)를 걸어 80\~200m 청크는 0.5초 간격으로만 돈다.
 - **200m 밖.** 카메라에서 200m 밖은 Simulation LOD가 Off라 엔진 이동·조향이 돌지 않는다. `ULabOffMoveProcessor`가 틱 간격(1초)이 온 청크만 마지막으로 옮긴 뒤 흐른 시간 × 걷는 속도만큼 오브의 지금 위치 쪽으로 곧게 옮긴다. Off에 들어오는 순간은 관찰자 `ULabOffMoveEnterObserver`가 지연 명령 플러시 때 받아 마지막 이동 시각을 맞춘다. 단계 5에서 들어왔다. 엔진이 Off 엔티티를 이동 목표로 순간 이동시키는 `UMassOffLODNavigationProcessor`는 이 단계부터 등록하지 않는다([HordeOptLab.cpp](../../Source/HordeOptLab/HordeOptLab.cpp)).
-- **겹침 방지.** `ULabSeparationProcessor`가 그 프레임에 옮겨진 위치에서 균일 격자로 이웃을 찾아, 몸통 반지름(소형 40, 대형 94)의 합보다 가까운 쌍을 직접 떼어 놓는다([LabSeparation.h](../../Source/HordeOptLab/LabSeparation.h)). 사망 중인 개체는 밀지도 밀리지도 않는다. 단계 3(직접 짠 로직)에서 들어왔다. 단계 2는 엔진 회피(`UMassObstacleAvoidanceTrait`)를 쓰고, 단계 1은 액터 캡슐끼리 막는다.
+- **겹침 방지.** `ULabSeparationProcessor`가 그 프레임에 옮겨진 위치에서 균일 격자로 이웃을 찾아, 몸통 반지름(소형 40, 대형 94)의 합보다 가까운 쌍을 직접 떼어 놓는다([LabSeparation.h](../../Source/HordeOptLab/LabSeparation.h)). 모으기와 쓰기는 한 스레드, 풀이는 Jacobi 2회다. 반복마다 격자를 다시 만들고(한 스레드) 이웃 계산을 ParallelFor로 나눈다. 사망 중인 개체는 밀지도 밀리지도 않는다. 단계 3(직접 짠 로직)에서 들어왔다. 단계 2는 엔진 회피(`UMassObstacleAvoidanceTrait`)를 쓰고, 단계 1은 액터 캡슐끼리 막는다.
 
 ### 거리 판정과 표현 전환
 
