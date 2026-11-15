@@ -26,6 +26,11 @@
 #include "LabMinion.h"
 #include "LabActorSyncProcessor.h"
 #include "Engine/World.h"
+#include "ProfilingDebugging/CsvProfiler.h"
+#include "Misc/CommandLine.h"
+#include "Misc/Parse.h"
+
+CSV_DECLARE_CATEGORY_EXTERN(Lab);
 
 namespace
 {
@@ -378,16 +383,58 @@ void ULabCrowdSubsystem::RequestRespawn(int32 Count)
 	}
 }
 
+float ULabCrowdSubsystem::IskmBoundsHalfXY()
+{
+	// 그리는 끝(히스테리시스 10%, MassRepresentationFragments.h:309) + 상자 중심에서 카메라가 벗어날 수 있는 거리 + 여유 10m.
+	// W7까지(간격 0): 상자 중심은 처음 오브 위치이고 카메라는 오브 뒤 15m라 벗어나는 거리가 OrbViewBack이다.
+	// v2 W8(간격 > 0): 상자 중심은 카메라이고 카메라가 간격만큼 벗어나면 옮긴다.
+	// Q3 빼 보기 -LabFarCull=0(끝까지 그리기)이면 그리는 범위가 맵 반경이라 상자도 맵을 덮는다(DrawExtentCm).
+	const float StepCm = FLabConfig::Get().BoundsStepM * 100.f;
+	return FLabConfig::Get().DrawExtentCm() * 1.1f + (StepCm > 0.f ? StepCm : FLabScenario::OrbViewBack) + 1000.f;
+}
+
+void ULabCrowdSubsystem::UpdateIskmBoundsCenter()
+{
+	const float StepCm = FLabConfig::Get().BoundsStepM * 100.f;
+	bIskmBoundsMoved = false;
+	if (!bIskmBoundsCenterSet)
+	{
+		// 첫 틱. W7까지와 같이 처음 오브 위치에서 시작한다(카메라가 아직 없을 수 있다)
+		IskmBoundsCenter = FVector(OrbCenter.X, OrbCenter.Y, 0.);
+		bIskmBoundsCenterSet = true;
+		return;
+	}
+	if (StepCm <= 0.f || !SnipeView.bValid)
+	{
+		return; // 간격 0: 처음 자리에 고정(W7까지)
+	}
+	const FVector Camera(SnipeView.Location.X, SnipeView.Location.Y, 0.);
+	if (FVector::DistSquared2D(Camera, IskmBoundsCenter) > FMath::Square(StepCm))
+	{
+		IskmBoundsCenter = Camera;
+		bIskmBoundsMoved = true;
+		++IskmBoundsMoves;
+#if !UE_BUILD_TEST
+		static const bool bOrbDiag = FParse::Param(FCommandLine::Get(), TEXT("LabOrbDiag"));
+		if (bOrbDiag)
+		{
+			UE_LOG(LogLab, Log, TEXT("lab_iskmbox_move frame=%llu t=%.2f center=%s"), (unsigned long long)GFrameCounter, GetWorld()->GetTimeSeconds(), *IskmBoundsCenter.ToCompactString());
+		}
+#endif
+	}
+}
+
 void ULabCrowdSubsystem::ApplyFixedIskmBounds(UInstancedSkinnedMeshComponent& Component)
 {
-	// 그리는 끝(히스테리시스 10%, MassRepresentationFragments.h:309) + 카메라가 오브에서 떨어진 거리 + 여유. 오브는 움직이지 않는다. 높이는 대형의 죽기 자세까지 덮는다.
+	// 높이는 대형의 죽기 자세까지 덮는다. 카메라 높이(9m)도 안이다.
 	// 월드 좌표다: UpdateBounds는 CalcBounds(컴포넌트 변환)을 부르고, 그때 InverseTransformBy(GetComponentTransform().Inverse() * LocalToWorld)가 항등이라 값이 그대로 나온다(InstancedSkinnedMeshComponent.cpp:1249-1253).
-	// Q3 빼 보기 -LabFarCull=0(끝까지 그리기)이면 그리는 범위가 맵 반경이라 상자도 맵을 덮는다(DrawExtentCm).
-	const float HalfXY = FLabConfig::Get().DrawExtentCm() * 1.1f + FLabScenario::OrbViewBack + 1000.f;
-	const FBox Fixed(OrbCenter + FVector(-HalfXY, -HalfXY, -500.f), OrbCenter + FVector(HalfXY, HalfXY, 1500.f));
-	if (!Component.GetPrimitiveBoundsOverride().IsValid)
+	const float HalfXY = IskmBoundsHalfXY();
+	const FBox Fixed(IskmBoundsCenter + FVector(-HalfXY, -HalfXY, -500.f), IskmBoundsCenter + FVector(HalfXY, HalfXY, 1500.f));
+	if (!Component.GetPrimitiveBoundsOverride().IsValid || bIskmBoundsMoved)
 	{
 		// 컴포넌트는 ConstructSkinnedMeshComponents에서 늦게 생기므로 찾은 첫 틱에 넣는다. 인스턴스 갱신 때의 UpdateBounds도 이 값을 쓴다(:494-497)
+		// v2 W8: 상자를 옮긴 틱에도 다시 넣는다. 인스턴스가 매 프레임 움직여 프레임 끝의 FlushChanges가 참이고, 그때 UpdateBounds와 UpdatePrimitiveInstances가
+		// 새 바운드를 렌더 스레드로 넘긴다(InstancedSkinnedMeshComponent.cpp:495-498, RendererScene.cpp:1789-1794 WorldBounds). 따로 렌더 상태를 다시 만들지 않는다.
 		Component.SetPrimitiveBoundsOverride(Fixed);
 		Component.UpdateBounds();
 	}
@@ -405,9 +452,14 @@ void ULabCrowdSubsystem::ExcludeVisualsFromLumen()
 {
 	// ISM 컴포넌트는 표현 프로세서가 필요할 때 만든다. 처음 한 개만 고치면 뒤에 생긴 컴포넌트가 빠져서(그림자 캐시 수정이
 	// 듣지 않았다), 매 틱 컴포넌트를 훑어 아직 설정되지 않은 것만 고친다(비주얼라이저 하나, 컴포넌트 몇 개).
+	const bool bFixedIskmBounds = FLabConfig::Get().UsesIskm() && FLabConfig::Get().IskmParams().bFixedBounds; // m5bounds·q2crowd·q4final
+	if (bFixedIskmBounds)
+	{
+		UpdateIskmBoundsCenter(); // v2 W8: 상자가 카메라를 따라간다(FLabConfig::BoundsStepM)
+		CSV_CUSTOM_STAT(Lab, IskmBoundsMoves, bIskmBoundsMoved ? 1 : 0, ECsvCustomStatOp::Set);
+	}
 	for (TActorIterator<AMassVisualizer> It(GetWorld()); It; ++It)
 	{
-		const bool bFixedIskmBounds = FLabConfig::Get().UsesIskm() && FLabConfig::Get().IskmParams().bFixedBounds; // m5bounds만
 	// M5: ISKM 컴포넌트도 같은 비주얼라이저 밑에 생긴다(MassVisualizationComponent.cpp:1305). 스켈레탈 메시는 원래 Lumen 장면 밖이지만(engine-notes.md) 같은 설정을 맞춘다.
 		TArray<UPrimitiveComponent*> Components;
 		It->GetComponents(Components);

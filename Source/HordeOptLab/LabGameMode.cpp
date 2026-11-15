@@ -327,9 +327,10 @@ void ALabGameMode::SetupCrowdFx()
 		UE_LOG(LogLab, Warning, TEXT("lab_crowdfx on=0 reason=inner_beyond_outer inner=%.0f outer=%.0f"), Config.CrowdFxInnerCm(), FLabCrowdFx::OuterRadius);
 		return;
 	}
-	// 오브에 붙이지 않고 오브 위치에 둔다. 시스템이 로컬 공간이라 부모의 회전을 따라가지 않게 하려는 것이다(오브는 움직이지 않는다).
+	// 오브에 붙이지 않고 맵의 중심(원점)에 둔다. 바깥 독립 입자는 로컬 공간이라 컴포넌트 둘레의 고리이고, 재생성 링도 맵의 중심 둘레다(v2 W1, LabCrowdSpawner.cpp).
+	// 그래서 오브가 움직여도 두 고리가 어긋나지 않는다(v2 W8). W7까지는 오브 위치에 두었고, 시작 때 오브가 원점에 있어 같은 자리였다.
 	// bPreCullCheck를 끈다: 켜면 스폰 때 시스템의 컬링 거리로 생성 자체를 건너뛸 수 있다. 자동 활성화도 끄고 사용자 변수를 먼저 넣는다(워밍업이 활성화 때 이 값으로 돈다).
-	CrowdFx = UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, System, Orb->GetActorLocation(), FRotator::ZeroRotator, FVector(1.f),
+	CrowdFx = UNiagaraFunctionLibrary::SpawnSystemAtLocation(this, System, FVector::ZeroVector, FRotator::ZeroRotator, FVector(1.f),
 		/*bAutoDestroy*/ false, /*bAutoActivate*/ false, ENCPoolMethod::None, /*bPreCullCheck*/ false);
 	if (!CrowdFx)
 	{
@@ -363,9 +364,11 @@ void ALabGameMode::SetupCrowdFx()
 		Crowd->bCrowdFxLargeRecs = Has(FLabCrowdFx::LargeRecsParam) && HasArray4(FLabCrowdFx::LargeRecsParam);
 		Crowd->bCrowdFxNow = Has(FLabCrowdFx::NowParam);
 		const bool bOrbPos = Has(FLabCrowdFx::OrbPosParam);
+		Crowd->bCrowdFxOrbPos = bOrbPos; // v2 W8: 모으기 프로세서가 매 프레임 넣는다(-LabFxOrbFollow=0이면 여기서 한 번만)
 		if (bOrbPos)
 		{
 			CrowdFx->SetVariableVec3(FLabCrowdFx::OrbPosParam, Orb->GetActorLocation()); // Position 형이면 엔진이 Position으로 넣는다(NiagaraComponent.cpp SetVariableVec3)
+			Crowd->CrowdFxOrbPos = Orb->GetActorLocation();
 		}
 		const TCHAR* Names[4] = { FLabCrowdFx::SmallRecsParam, FLabCrowdFx::LargeRecsParam, FLabCrowdFx::NowParam, FLabCrowdFx::OrbPosParam };
 		const bool bOk[4] = { Crowd->bCrowdFxSmallRecs, Crowd->bCrowdFxLargeRecs, Crowd->bCrowdFxNow, bOrbPos };
@@ -381,9 +384,10 @@ void ALabGameMode::SetupCrowdFx()
 	}
 
 	CrowdFx->Activate(true);
-	UE_LOG(LogLab, Log, TEXT("lab_crowdfx on=1 system=%s small_rate=%.2f large_rate=%.2f outer=%.0f inner=%.0f lifetime=%.2f speed=%.0f particles=%d entity=%d fx_shadow=%d fx_shadow_spawn=%d%s"),
+	UE_LOG(LogLab, Log, TEXT("lab_crowdfx on=1 system=%s small_rate=%.2f large_rate=%.2f outer=%.0f inner=%.0f lifetime=%.2f speed=%.0f particles=%d entity=%d fx_shadow=%d fx_shadow_spawn=%d%s fx_loc=%s orb_loc=%s"),
 		*System->GetName(), Config.CrowdFxSmallRate(), Config.CrowdFxLargeRate(), FLabCrowdFx::OuterRadius, Config.CrowdFxInnerCm(), Lifetime, FLabScenario::MoveSpeed, Config.CrowdFxParticles(),
-		Config.bCrowdFxEntity ? 1 : 0, CrowdFx->CastShadow ? 1 : 0, bFxShadowSpawn ? 1 : 0, *EntityParams);
+		Config.bCrowdFxEntity ? 1 : 0, CrowdFx->CastShadow ? 1 : 0, bFxShadowSpawn ? 1 : 0, *EntityParams,
+		*CrowdFx->GetComponentLocation().ToCompactString(), *Orb->GetActorLocation().ToCompactString());
 }
 
 void ALabGameMode::ApplyVariantCVars()
@@ -480,6 +484,9 @@ void ALabGameMode::TickBench()
 			CSV_METADATA(TEXT("LabActorCollision"), Config.ActorCollisionString());
 			// v2 W7: 표현 전환의 최소 유지 시간(ms). 규칙이 등록되지 않은 실행(끔, M3 미만 단계)은 0
 			CSV_METADATA(TEXT("LabRepHold"), *FString::FromInt(Config.UsesRepHold() ? Config.RepHoldMs : 0));
+			// v2 W8: 입자 외삽 목표를 매 프레임 넣는가(1/0), ISKM 바운드 상자를 옮기는 간격(m, 0 고정). 그 기법을 쓰지 않는 실행은 "-"
+			CSV_METADATA(TEXT("LabFxOrbFollow"), *Config.FxOrbFollowString());
+			CSV_METADATA(TEXT("LabBoundsStepM"), *Config.BoundsStepString());
 			CSV_METADATA(TEXT("LabHud"), IsHudShown() ? TEXT("1") : TEXT("0"));
 			CSV_METADATA(TEXT("LabShotAt"), *FString::Printf(TEXT("%.0f"), Config.ShotAtSec));
 			// 측정 방법 5번(plan.md "M3b"): 빌드 커밋, 고정 CVar 값, GPU 드라이버. summarize.py BUILD_KEYS(labbuild·labcvars·labdriver)와 이름을 맞춘다.

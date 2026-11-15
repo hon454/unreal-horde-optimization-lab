@@ -144,6 +144,8 @@ public:
 	bool bCrowdFxSmallRecs = false;
 	bool bCrowdFxLargeRecs = false;
 	bool bCrowdFxNow = false;
+	bool bCrowdFxOrbPos = false; // v2 W8: User.LabOrbPos가 에셋에 있다. 모으기 프로세서가 매 프레임 오브 위치를 넣는다(FLabConfig::bFxOrbFollow)
+	FVector CrowdFxOrbPos = FVector::ZeroVector; // v2 W8: 마지막으로 User.LabOrbPos에 넣은 값(게임 모드가 활성화 전에, 모으기 프로세서가 매 프레임)
 	/** 지난 프레임에 넣은 엔티티 구동 원소 수(소형 + 대형). 게임 모드의 개발 로그 lab_crowdfx_count가 읽는다 */
 	int32 CrowdRecsLast = 0;
 	// M5 엔티티 풀링 집계(게임 스레드). 재생성 중 풀에서 다시 쓴 수와 새로 만든 수, 풀에 남은 수는 EntityPool의 Num
@@ -155,6 +157,15 @@ public:
 	 * Q4b 원거리 그림자 끔이면 종류마다 컴포넌트가 둘이라(그림자 켬·끔) 컴포넌트가 아니라 메시 종류를 센다. 2종이면 2이고 P2(Medium이 비어 있다)에서도 같다.
 	 */
 	int32 GetIskmBoundsApplied() const { return IskmBoundsAssets.Num(); }
+	/**
+	 * v2 W8 ISKM 바운드 상자(게임 스레드, 오브 틱이 부르는 ExcludeVisualsFromLumen이 쓴다). 중심은 처음 오브 위치에서 시작하고,
+	 * FLabConfig::BoundsStepM > 0이면 카메라가 그 거리 넘게 벗어날 때 카메라로 옮긴다. 개발 진단은 이 상자 밖의 ISKM 인스턴스를 센다.
+	 */
+	FVector IskmBoundsCenter = FVector::ZeroVector;
+	bool bIskmBoundsCenterSet = false;
+	bool bIskmBoundsMoved = false; // 이번 틱에 옮겼다
+	int32 IskmBoundsMoves = 0;     // 누적 옮긴 횟수
+	static float IskmBoundsHalfXY();
 #if !UE_BUILD_TEST
 	/**
 	 * 개발용 프레임 진단(-LabFrameLog, E3b (8) 화질 캡처): 화면 안 30m에서 아직 VAT 인스턴스로 그리는 개체 수와 보이는 액터 수를 프레임마다 로그에 남긴다.
@@ -162,12 +173,18 @@ public:
 	 */
 	struct FFrameDiag { std::atomic<int32> NearVat{0}; std::atomic<int32> NearActors{0}; std::atomic<int32> ViewActors{0}; };
 	FFrameDiag FrameDiag[2];
+	/** v2 W8 개발 진단(-LabOrbDiag): Off 태그가 떨어질 때 마지막 200m 밖 이동 뒤 흐른 초. 관찰자(게임 스레드)가 쓰고 200m 밖 이동의 진단 로그가 읽는다 */
+	std::atomic<int64> OffLeaveCount{0};
+	std::atomic<double> OffLeaveLagSum{0.};
+	std::atomic<double> OffLeaveLagMax{0.};
 #endif
 
 private:
 	UMassEntityConfigAsset* BuildEntityConfig(int32 UnitType, UStaticMesh* Mesh);
 	/** m5bounds: ISKM 컴포넌트에 고정 바운드를 넣고, 인스턴스가 들어온 뒤 실제로 적용됐는지 한 번 로그에 남긴다 */
 	void ApplyFixedIskmBounds(UInstancedSkinnedMeshComponent& Component);
+	/** v2 W8: 이번 틱의 상자 중심을 정한다(첫 틱은 오브 위치, 그 뒤 간격을 넘으면 카메라) */
+	void UpdateIskmBoundsCenter();
 	TArray<const UInstancedSkinnedMeshComponent*, TInlineAllocator<LabUnitTypeMax * 2>> IskmBoundsConfirmed; // 비교에만 쓴다(역참조하지 않는다)
 	TArray<const UObject*, TInlineAllocator<LabUnitTypeMax>> IskmBoundsAssets; // 확인한 컴포넌트의 스켈레탈 메시(비교에만 쓴다)
 	/** 풀 엔티티를 새 개체로 되살린다(위치·일련번호·체력·상태·이동). 태그는 부른 쪽이 한꺼번에 바꾼다 */

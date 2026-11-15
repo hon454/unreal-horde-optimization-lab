@@ -36,5 +36,10 @@ protected:
 	int32 TurnLogged = -1;      // lab_turn을 남긴 마지막 회전 번호
 	uint64 TurnStartFrame = 0;  // 진행 중인 회전의 첫 프레임
 	int32 TurnStarted = -1;     // TurnStartFrame을 적은 회전 번호
+	/** v2 W8 개발 전용 확대(LabCameraRig.cpp Apply): 0이면 끔 */
+	float DiagFov = 0.f;
+	float DiagAimM = 195.f;
+	float DiagYawOff = 0.f;
+	float DiagYaw = -1000.f; // -999 아래면 끔
 #endif
 };

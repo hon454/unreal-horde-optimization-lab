@@ -88,6 +88,8 @@ struct FLabQuality
 	// v2 W7 표현 전환의 최소 유지 시간(ms, FLabConfig::RepHoldMs). 근거는 Docs/Worklog/V2.md "W7": 액터 경계 왕복의 간격이 대부분 1~2초라
 	// 1,000ms는 이동 조건의 왕복을 거의 줄이지 못했고(개발 빌드 초당 약 4 → 3.5), 2,000ms(왕복 창과 같은 값)는 상한 500 조건의 왕복(초당 13~63)을 0으로 만들었다
 	static constexpr int32 DefaultRepHoldMs = 2000;
+	// v2 W8 ISKM 바운드 상자를 카메라로 옮기는 간격(m, FLabConfig::BoundsStepM). 근거는 Docs/Worklog/V2.md "W8"
+	static constexpr float DefaultBoundsStepM = 10.f;
 };
 
 /**
@@ -309,6 +311,21 @@ struct FLabConfig
 	 */
 	int32 RepHoldMs = FLabQuality::DefaultRepHoldMs;
 	bool UsesRepHold() const { return Stage >= ELabStage::M3 && RepHoldMs > 0 && !UsesManager(); }
+	/**
+	 * v2 W8 움직이는 오브용 기법(Docs/v2-spec.md 4.2, Docs/Worklog/V2.md "W8").
+	 * bFxOrbFollow(-LabFxOrbFollow=0/1, 기본 1): 엔티티 구동 입자의 외삽 목표 User.LabOrbPos를 매 프레임 오브의 지금 위치로 넣는다(ULabCrowdFxGatherProcessor).
+	 * 0이면 W7까지처럼 활성화 전에 한 번만 넣는다. 엔티티 구동 입자를 쓸 때만 뜻이 있다. CSV 메타데이터 LabFxOrbFollow.
+	 */
+	bool bFxOrbFollow = true;
+	/**
+	 * v2 W8 ISKM 바운드 상자가 카메라를 따라간다(-LabBoundsStepM=<m>, 기본 FLabQuality::DefaultBoundsStepM). 카메라가 상자 중심에서 수평으로 이 거리 넘게 벗어나면
+	 * 상자 중심을 카메라로 옮긴다(ULabCrowdSubsystem::ApplyFixedIskmBounds). 상자 반폭은 그리는 끝 × 1.1 + 이 거리 + 여유 10m다.
+	 * 0이면 W7까지처럼 처음 오브 위치 둘레에 고정한다. 고정 바운드를 쓸 때만 뜻이 있다(IskmParams().bFixedBounds). CSV 메타데이터 LabBoundsStepM.
+	 */
+	float BoundsStepM = FLabQuality::DefaultBoundsStepM;
+	/** 로그와 CSV 메타데이터 값. 그 기법을 쓰지 않는 실행은 "-" */
+	FString FxOrbFollowString() const;
+	FString BoundsStepString() const;
 	/** 분리 파라미터(LabSeparation.h). Test 빌드는 기본값만 쓴다. 개발 빌드는 -LabSepIter=, -LabSepRelax=, -LabSepMaxStep=, -LabSepVel=로 바꿔 본다 */
 	FLabSeparationParams Separation;
 	/**

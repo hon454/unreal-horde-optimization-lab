@@ -168,6 +168,21 @@ const FLabConfig& FLabConfig::Get()
 				C.RepHoldMs = RepHold;
 			}
 		}
+		// v2 W8 움직이는 오브용 기법(LabConfig.h bFxOrbFollow, BoundsStepM)
+		{
+			int32 FxOrbFollow = -1;
+			if (FParse::Value(Cmd, TEXT("-LabFxOrbFollow="), FxOrbFollow) && FxOrbFollow >= 0)
+			{
+				if ((FxOrbFollow != 0) != C.bFxOrbFollow) { NoteOverride(FString::Printf(TEXT("fx_orb_follow=%d"), FxOrbFollow != 0 ? 1 : 0)); }
+				C.bFxOrbFollow = FxOrbFollow != 0;
+			}
+			float BoundsStepM = -1.f;
+			if (FParse::Value(Cmd, TEXT("-LabBoundsStepM="), BoundsStepM) && BoundsStepM >= 0.f)
+			{
+				if (BoundsStepM != C.BoundsStepM) { NoteOverride(FString::Printf(TEXT("bounds_step=%g"), BoundsStepM)); }
+				C.BoundsStepM = BoundsStepM;
+			}
+		}
 #if !UE_BUILD_TEST
 		// 개발 빌드에서만 분리 파라미터를 바꿔 본다(LabSeparation.h). Test 빌드는 기본값이다
 		{
@@ -599,8 +614,19 @@ FString FLabConfig::ToLogString() const
 	const FString Crowd = bCrowdFx ? FString::Printf(TEXT(" crowdfx=1 crowdfx_particles=%d crowdfx_inner=%.1f crowdfx_entity=%d crowdfx_outer=%d"), CrowdFxParticles(), CrowdFxInnerCm() / 100.f, bCrowdFxEntity ? 1 : 0, bCrowdFxOuter ? 1 : 0) : FString();
 	// tech는 빼 보기 아홉 기법의 켬·끔이다(Q3). 모든 실행에 붙여 러너와 사람이 기대값과 대조한다.
 	// ladder·overrides·hud·actor_col은 Q5(사다리 단계, 변형 기본값과 다른 인자, HUD 켬, 하이드레이션 액터 캡슐 콜리전). tech 뒤에 늘 붙인다.
-	return FString::Printf(TEXT("lab_config stage=%s n=%d preset=P%d seed=%d variant=%s bench=%d label=%s duration=%.1f types=%d simlod=%s%s%s%s%s%s %s ladder=%s overrides=%s hud=%d actor_col=%s rep_hold=%d"),
+	return FString::Printf(TEXT("lab_config stage=%s n=%d preset=P%d seed=%d variant=%s bench=%d label=%s duration=%.1f types=%d simlod=%s%s%s%s%s%s %s ladder=%s overrides=%s hud=%d actor_col=%s rep_hold=%d fx_orb_follow=%s bounds_step=%s"),
 		StageName(Stage), N, Preset, Seed, VariantName(Variant), bBench ? 1 : 0, *Label, DurationSec, Types, *SimLodString(),
 		FarM != 200 ? *FString::Printf(TEXT(" far=%d"), FarM) : TEXT(""), *M5, *Budget, *Health, *Crowd, *TechString(),
-		*Ladder().Id, Overrides.IsEmpty() ? TEXT("-") : *Overrides, bHud ? 1 : 0, ActorCollisionString(), UsesRepHold() ? RepHoldMs : 0);
+		*Ladder().Id, Overrides.IsEmpty() ? TEXT("-") : *Overrides, bHud ? 1 : 0, ActorCollisionString(), UsesRepHold() ? RepHoldMs : 0,
+		*FxOrbFollowString(), *BoundsStepString());
+}
+
+FString FLabConfig::FxOrbFollowString() const
+{
+	return UsesCrowdFxEntity() ? FString(bFxOrbFollow ? TEXT("1") : TEXT("0")) : FString(TEXT("-"));
+}
+
+FString FLabConfig::BoundsStepString() const
+{
+	return UsesIskm() && IskmParams().bFixedBounds ? FString::Printf(TEXT("%g"), BoundsStepM) : FString(TEXT("-"));
 }

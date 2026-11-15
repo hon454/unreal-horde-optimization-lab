@@ -47,8 +47,12 @@ $FailuresCsv = "$BatchDir\failures.csv"
 # W4의 finalsep·m1sep·finalsepser·m1sepser는 지금의 final·m1·finalser·m1ser와 같아 지웠다. 엔진 회피 구성(av)은 W3·W4와 같은 뜻이 되게 분리를 끈다.
 # v2 W5부터 하이드레이션 액터 캡슐의 기본값이 Trace(LabActorCollision=trace)다. 캡슐 끔은 접미사 nocap(-LabActorCollision=0)이다.
 $ConfigTable = @(
-    # v2 W7부터 final은 최소 유지 시간 2,000ms(LabRepHold=2000)를 대조한다
-    @{ Name = "final"; Args = @("-LabStage=M5", "-LabVariant=q4final"); Expect = @("LabStage=M5", "LabVariant=q4final", "LabTechSimLod=1", "LabTechFixedBounds=1", "LabTechCrowdFx=1", "LabTechAvoid=0", "LabTechSeparate=1", "LabActorCollision=trace", "LabRepHold=2000") },
+    # v2 W7부터 final은 최소 유지 시간 2,000ms(LabRepHold=2000)를 대조한다. v2 W8부터 입자 외삽 목표 매 프레임(LabFxOrbFollow=1)과 바운드 상자 간격 10m(LabBoundsStepM=10)도 대조한다
+    @{ Name = "final"; Args = @("-LabStage=M5", "-LabVariant=q4final"); Expect = @("LabStage=M5", "LabVariant=q4final", "LabTechSimLod=1", "LabTechFixedBounds=1", "LabTechCrowdFx=1", "LabTechAvoid=0", "LabTechSeparate=1", "LabActorCollision=trace", "LabRepHold=2000", "LabFxOrbFollow=1", "LabBoundsStepM=10") },
+    # v2 W8 움직이는 오브용 기법: W7까지의 동작(외삽 목표 한 번, 상자 고정), 외삽 목표만 끔, 상자 간격 1m(자주 옮기는 비용)
+    @{ Name = "finalw7"; Args = @("-LabStage=M5", "-LabVariant=q4final", "-LabFxOrbFollow=0", "-LabBoundsStepM=0"); Expect = @("LabStage=M5", "LabVariant=q4final", "LabTechSeparate=1", "LabActorCollision=trace", "LabRepHold=2000", "LabFxOrbFollow=0", "LabBoundsStepM=0") },
+    @{ Name = "finalfx0"; Args = @("-LabStage=M5", "-LabVariant=q4final", "-LabFxOrbFollow=0"); Expect = @("LabStage=M5", "LabVariant=q4final", "LabTechSeparate=1", "LabActorCollision=trace", "LabRepHold=2000", "LabFxOrbFollow=0", "LabBoundsStepM=10") },
+    @{ Name = "finalstep1"; Args = @("-LabStage=M5", "-LabVariant=q4final", "-LabBoundsStepM=1"); Expect = @("LabStage=M5", "LabVariant=q4final", "LabTechSeparate=1", "LabActorCollision=trace", "LabRepHold=2000", "LabFxOrbFollow=1", "LabBoundsStepM=1") },
     # v2 W7 전환: 최소 유지 시간 끔(-LabRepHold=0)과 액터 상한을 낮춘 조건(-LabActorCap=500, 2m/s에서 상한에 닿게 한다. 상한 규칙을 확인하는 조건)
     @{ Name = "finalhold0"; Args = @("-LabStage=M5", "-LabVariant=q4final", "-LabRepHold=0"); Expect = @("LabStage=M5", "LabVariant=q4final", "LabTechSeparate=1", "LabActorCollision=trace", "LabRepHold=0") },
     @{ Name = "finalcap500"; Args = @("-LabStage=M5", "-LabVariant=q4final", "-LabActorCap=500"); Expect = @("LabStage=M5", "LabVariant=q4final", "LabTechSeparate=1", "LabActorCollision=trace", "LabActorCap=500", "LabRepHold=2000") },

@@ -13,6 +13,8 @@
 #include "NiagaraDataInterfaceArrayFunctionLibrary.h"
 #include "ProfilingDebugging/CsvProfiler.h"
 #include "Engine/World.h"
+#include "Misc/CommandLine.h"
+#include "Misc/Parse.h"
 
 CSV_DECLARE_CATEGORY_EXTERN(Lab);
 
@@ -73,6 +75,13 @@ void ULabCrowdFxGatherProcessor::Execute(FMassEntityManager& EntityManager, FMas
 	int32 Ring[2] = {};
 	float MaxLag = 0.f;
 	double MinCamSq = TNumericLimits<double>::Max();
+	// v2 W8 개발 진단(-LabOrbDiag). 입자 식의 오브 위치는 지난 프레임까지 넣은 값이다(이번 프레임 값은 아래에서 넣는다)
+	static const bool bOrbDiag = FParse::Param(FCommandLine::Get(), TEXT("LabOrbDiag"));
+	const FVector2D FxOrb(Crowd->CrowdFxOrbPos.X, Crowd->CrowdFxOrbPos.Y);
+	const FVector2D NowOrb(Orb.X, Orb.Y);
+	const FLabSnipeView View = Crowd->SnipeView;
+	TMap<FMassEntityHandle, FLabFxPrev> NextPrev;
+	int32 CoverHidden = 0;
 #endif
 
 	EntityQuery.ForEachEntityChunk(Context, [&](FMassExecutionContext& Context)
@@ -87,6 +96,40 @@ void ULabCrowdFxGatherProcessor::Execute(FMassEntityManager& EntityManager, FMas
 		const bool bOffMoved = OffMoves.Num() > 0 && Context.DoesArchetypeHaveTag(*FMassOffLODTag::StaticStruct());
 		for (FMassExecutionContext::FEntityIterator It = Context.CreateEntityIterator(); It; ++It)
 		{
+#if !UE_BUILD_TEST
+			if (bOrbDiag && View.bValid && AnimStates[It].State != ELabMinionState::Walk && Representations[It].CurrentRepresentation == EMassRepresentationType::None)
+			{
+				// 그려지지 않는 피격·사망 개체(입자로도 그리지 않는다) 중 화면 안
+				const FVector L = Transforms[It].GetTransform().GetLocation();
+				if (View.Contains(L + FVector(0.f, 0.f, 90.f))) { ++DiagHitDeadView; }
+			}
+			if (bOrbDiag && View.bValid && AnimStates[It].State == ELabMinionState::Walk)
+			{
+				// 덮임: 화면 안 카메라 150~215m의 걷는 엔티티를 무엇이 그리는가. 입자는 카메라 175m 안에서 그리지 않는다(Scripts/create-crowd-fx.md 5-3 MinCameraDistance)
+				const FVector L = Transforms[It].GetTransform().GetLocation();
+				const double CamDist = FVector::Dist(L, Camera);
+				if (CamDist >= 15000. && CamDist <= 21500. && View.Contains(L + FVector(0.f, 0.f, 90.f)))
+				{
+					if (Representations[It].CurrentRepresentation != EMassRepresentationType::None) { ++DiagCoverDrawn; }
+					else if (CamDist >= 17500.) { ++DiagCoverFx; }
+					else { ++DiagCoverHidden; ++CoverHidden; }
+				}
+				// 전환: 지난 프레임 입자였고 이번 프레임 그려진다. 메시 자리·방향과 지난 입자 자리·방향을 견준다
+				if (Representations[It].CurrentRepresentation != EMassRepresentationType::None)
+				{
+					if (const FLabFxPrev* Prev = DiagPrev.Find(Context.GetEntity(It)))
+					{
+						const double Jump = (FVector2D(L.X, L.Y) - Prev->Pos).Length();
+						const FVector Fwd = Transforms[It].GetTransform().GetRotation().GetForwardVector();
+						const FVector2D MeshDir = FVector2D(Fwd.X, Fwd.Y).GetSafeNormal();
+						const double Turn = FMath::RadiansToDegrees(FMath::Acos(FMath::Clamp(MeshDir | Prev->Dir, -1., 1.)));
+						DiagJumpMax = FMath::Max(DiagJumpMax, Jump); DiagJumpSum += Jump;
+						DiagTurnMax = FMath::Max(DiagTurnMax, Turn); DiagTurnSum += Turn;
+						++DiagJumpCount;
+					}
+				}
+			}
+#endif
 			if (Representations[It].CurrentRepresentation != EMassRepresentationType::None)
 			{
 				++Drawn;
@@ -112,6 +155,29 @@ void ULabCrowdFxGatherProcessor::Execute(FMassEntityManager& EntityManager, FMas
 			const double OrbDist = FVector::Dist2D(Location, Orb);
 			if (OrbDist >= 48000. && OrbDist < 49000.) { ++Ring[0]; }
 			else if (OrbDist >= 49000. && OrbDist <= 50000.) { ++Ring[1]; }
+			if (bOrbDiag)
+			{
+				// 입자 자리(에셋의 식: P0 + normalize(LabOrbPos − P0) × Speed × max(지금 − T0, 0), Scripts/create-crowd-fx.md 5-5)와
+				// 엔티티가 지금 있어야 할 자리(같은 식에 오브의 지금 위치)를 견준다. 200m 밖 이동이 다음 틱에 옮길 방향이 오브의 지금 위치다
+				const FVector2D P0(Location.X, Location.Y);
+				const double Dt = FMath::Max(double(Now - T0), 0.);
+				const FVector2D FxDir = (FxOrb - P0).GetSafeNormal();
+				const FVector2D TrueDir = (NowOrb - P0).GetSafeNormal();
+				const FVector2D FxPos = P0 + FxDir * FLabScenario::MoveSpeed * Dt;
+				const double CamDist = FVector::Dist(Location, Camera);
+				if (CamDist >= 17500. && CamDist <= 26000.)
+				{
+					const double PosErr = (FxPos - (P0 + TrueDir * FLabScenario::MoveSpeed * Dt)).Length();
+					const double DirErr = FMath::RadiansToDegrees(FMath::Acos(FMath::Clamp(FxDir | TrueDir, -1., 1.)));
+					DiagPosErrMax = FMath::Max(DiagPosErrMax, PosErr); DiagPosErrSum += PosErr;
+					DiagDirErrMax = FMath::Max(DiagDirErrMax, DirErr); DiagDirErrSum += DirErr;
+					++DiagErrCount;
+				}
+				if (CamDist <= 23000.)
+				{
+					NextPrev.Add(Context.GetEntity(It), FLabFxPrev{ FxPos, FxDir });
+				}
+			}
 #endif
 		}
 	});
@@ -128,6 +194,14 @@ void ULabCrowdFxGatherProcessor::Execute(FMassEntityManager& EntityManager, FMas
 	if (Crowd->bCrowdFxNow)
 	{
 		Fx->SetVariableFloat(NowName, Now);
+	}
+	// v2 W8: 외삽 목표를 매 프레임 오브의 지금 위치로 넣는다. 접근과 200m 밖 이동이 이번 프레임에 보는 OrbCenter와 같은 값이다.
+	// -LabFxOrbFollow=0이면 W7까지처럼 활성화 전에 넣은 값(시작 때 오브 위치, 원점)이 남는다.
+	if (Crowd->bCrowdFxOrbPos && FLabConfig::Get().bFxOrbFollow)
+	{
+		static const FName OrbPosName(FLabCrowdFx::OrbPosParam);
+		Fx->SetVariableVec3(OrbPosName, Crowd->OrbCenter);
+		Crowd->CrowdFxOrbPos = Crowd->OrbCenter;
 	}
 	const int32 Total = Recs[LabUnitSmall].Num() + Recs[LabUnitLarge].Num();
 	Crowd->CrowdRecsLast = Total;
@@ -176,6 +250,38 @@ void ULabCrowdFxGatherProcessor::Execute(FMassEntityManager& EntityManager, FMas
 		DiagMs = DiagMaxMs = 0.;
 		DiagMaxLag = 0.f;
 		DiagMinCamM = TNumericLimits<float>::Max();
+	}
+	if (bOrbDiag)
+	{
+		DiagPrev = MoveTemp(NextPrev);
+		DiagCoverHiddenMax = FMath::Max(DiagCoverHiddenMax, CoverHidden);
+		static double OrbDiagSince = 0.;
+		static int32 OrbDiagFrames = 0;
+		++OrbDiagFrames;
+		if (OrbDiagSince <= 0.)
+		{
+			OrbDiagSince = Now;
+		}
+		else if (Now - OrbDiagSince >= 5.)
+		{
+			// pos_err·dir_err: 그려지지 않은 걷는 엔티티(카메라 175~260m)의 입자 오차(cm, 도). jump·turn: 입자 → 메시 전환 순간의 자리 차이(cm)와 방향 차이(도).
+			// cover_*: 화면 안 카메라 150~215m 걷는 엔티티의 프레임 평균(그림, 입자, 아무것도 안 그림), hidden_max는 한 프레임 최대
+			const double F = double(FMath::Max(OrbDiagFrames, 1));
+			UE_LOG(LogLab, Log, TEXT("lab_orbdiag t=%.1f fx_follow=%d fx_orb=%s orb=%s pos_err_mean=%.1f pos_err_max=%.1f dir_err_mean=%.2f dir_err_max=%.2f err_n=%lld jump_mean=%.1f jump_max=%.1f turn_mean=%.2f turn_max=%.2f switches=%lld cover_drawn=%.1f cover_fx=%.1f cover_hidden=%.2f hidden_max=%d hitdead_view=%.2f"),
+				Now, FLabConfig::Get().bFxOrbFollow ? 1 : 0, *FxOrb.ToString(), *NowOrb.ToString(),
+				DiagErrCount > 0 ? DiagPosErrSum / DiagErrCount : 0., DiagPosErrMax, DiagErrCount > 0 ? DiagDirErrSum / DiagErrCount : 0., DiagDirErrMax, DiagErrCount,
+				DiagJumpCount > 0 ? DiagJumpSum / DiagJumpCount : 0., DiagJumpMax, DiagJumpCount > 0 ? DiagTurnSum / DiagJumpCount : 0., DiagTurnMax, DiagJumpCount,
+				DiagCoverDrawn / F, DiagCoverFx / F, DiagCoverHidden / F, DiagCoverHiddenMax, DiagHitDeadView / F);
+			DiagHitDeadView = 0;
+			OrbDiagSince = Now;
+			OrbDiagFrames = 0;
+			DiagPosErrMax = DiagPosErrSum = DiagDirErrMax = DiagDirErrSum = 0.;
+			DiagErrCount = 0;
+			DiagJumpMax = DiagJumpSum = DiagTurnMax = DiagTurnSum = 0.;
+			DiagJumpCount = 0;
+			DiagCoverDrawn = DiagCoverFx = DiagCoverHidden = 0;
+			DiagCoverHiddenMax = 0;
+		}
 	}
 #endif
 }

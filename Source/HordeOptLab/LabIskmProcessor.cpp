@@ -184,6 +184,15 @@ void ULabIskmProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutio
 	static int32 RangeLogged = 0;
 	static TArray<FMassEntityHandle> RangePending; // 게임 스레드 전용 프로세서라 정적 배열로 둔다
 #endif
+#if !UE_BUILD_TEST
+	// v2 W8 개발 진단(-LabOrbDiag): 바운드 상자(ULabCrowdSubsystem::IskmBoundsCenter ± IskmBoundsHalfXY) 밖의 ISKM 인스턴스 수(전체, 화면 안)
+	static const bool bOrbDiag = FParse::Param(FCommandLine::Get(), TEXT("LabOrbDiag"));
+	const bool bBoxDiag = bOrbDiag && Crowd->bIskmBoundsCenterSet;
+	const float BoxHalf = ULabCrowdSubsystem::IskmBoundsHalfXY();
+	const FVector BoxCenter = Crowd->IskmBoundsCenter;
+	int32 OutBox = 0, OutBoxView = 0;
+	double MaxCamFromBox = 0.;
+#endif
 	int32 TrackWrites = 0;  // 이 프로세서가 기존 트랙에 직접 쓴 수(상태 전환, 풀에서 다시 나옴)
 	int32 TrackFirst = 0;    // 트랙이 없어 엔진이 이 프레임에 만들 수
 	UMassRepresentationSubsystem* RepresentationSubsystemForStats = Context.GetMutableSubsystem<UMassRepresentationSubsystem>(); // 쿼리 밖에서 얻는다
@@ -311,6 +320,17 @@ void ULabIskmProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutio
 
 			Representation.PrevTransform = Transform;
 			Representation.PrevLODSignificance = LODSignificance;
+#if !UE_BUILD_TEST
+			if (bBoxDiag)
+			{
+				const FVector P = Transform.GetLocation();
+				if (FMath::Abs(P.X - BoxCenter.X) > BoxHalf || FMath::Abs(P.Y - BoxCenter.Y) > BoxHalf)
+				{
+					++OutBox;
+					if (QualityView.bValid && QualityView.Contains(P + FVector(0.f, 0.f, 90.f))) { ++OutBoxView; }
+				}
+			}
+#endif
 
 			// 표현 축(measurement.md): 거리 밴드별로 그린 개체 수. VAT 프로세서와 같은 스탯 이름(Lab/IsmBand*)이라 요약 스크립트가 그대로 읽는다
 			const float Dist = FVector::Dist2D(Transform.GetLocation(), ViewLocation);
@@ -355,6 +375,29 @@ void ULabIskmProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutio
 	static int64 WritesSum = 0, FirstSum = 0;
 	WritesSum += TrackWrites;
 	FirstSum += TrackFirst;
+	if (bBoxDiag)
+	{
+		static double BoxSince = 0.;
+		static int32 BoxFrames = 0, BoxOutMax = 0, BoxOutViewMax = 0, BoxMovesAtStart = 0;
+		static int64 BoxOutSum = 0, BoxOutViewSum = 0;
+		static double BoxCamMax = 0.;
+		if (QualityView.bValid)
+		{
+			MaxCamFromBox = FMath::Max(FMath::Abs(QualityView.Location.X - BoxCenter.X), FMath::Abs(QualityView.Location.Y - BoxCenter.Y));
+		}
+		++BoxFrames; BoxOutSum += OutBox; BoxOutViewSum += OutBoxView;
+		BoxOutMax = FMath::Max(BoxOutMax, OutBox); BoxOutViewMax = FMath::Max(BoxOutViewMax, OutBoxView);
+		BoxCamMax = FMath::Max(BoxCamMax, MaxCamFromBox);
+		if (BoxSince <= 0.) { BoxSince = Now; BoxMovesAtStart = Crowd->IskmBoundsMoves; }
+		else if (Now - BoxSince >= 5.)
+		{
+			// out: 상자 밖 ISKM 인스턴스(프레임 평균, 최대), out_view: 그중 화면 안, cam_off: 카메라가 상자 중심에서 벗어난 최대 축 거리(cm), moves: 이 5초에 상자를 옮긴 횟수
+			UE_LOG(LogLab, Log, TEXT("lab_iskmbox t=%.1f step_m=%g half=%.0f center=%s out_mean=%.1f out_max=%d out_view_mean=%.1f out_view_max=%d cam_off_max=%.0f moves=%d"),
+				Now, FLabConfig::Get().BoundsStepM, BoxHalf, *BoxCenter.ToCompactString(), double(BoxOutSum) / BoxFrames, BoxOutMax, double(BoxOutViewSum) / BoxFrames, BoxOutViewMax,
+				BoxCamMax, Crowd->IskmBoundsMoves - BoxMovesAtStart);
+			BoxSince = Now; BoxFrames = 0; BoxOutSum = BoxOutViewSum = 0; BoxOutMax = BoxOutViewMax = 0; BoxCamMax = 0.; BoxMovesAtStart = Crowd->IskmBoundsMoves;
+		}
+	}
 	if (Now - Since >= 1.)
 	{
 		UE_LOG(LogLab, Log, TEXT("lab_iskm_stats t=%.1f tracks=%d instances=%d track_writes=%lld track_first=%lld pooled=%d reused=%d created=%d b1=%d b2=%d"),

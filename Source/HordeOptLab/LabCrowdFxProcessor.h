@@ -44,5 +44,20 @@ protected:
 	double DiagMaxMs = 0.;
 	float DiagMaxLag = 0.f; // 원소의 지금 − T0 최대(초). Off 밴드 틱 간격(1초 ± 10%)을 넘지 않아야 한다
 	float DiagMinCamM = TNumericLimits<float>::Max(); // 원소(그려지지 않은 걷는 엔티티) 중 카메라에 가장 가까운 3D 거리(m). 메시 렌더러 MinCameraDistance를 정하는 근거
+	/**
+	 * v2 W8 개발 진단(-LabOrbDiag, lab_orbdiag 5초마다, Docs/Worklog/V2.md "W8").
+	 * 입자 오차: 그려지지 않은 걷는 엔티티(카메라 175~260m)의 입자 위치(에셋의 식, 넣은 User.LabOrbPos)와 엔티티가 지금 있어야 할 위치(같은 식, 오브의 지금 위치)의 거리와 방향 차이.
+	 * 전환: 지난 프레임 입자였던 엔티티가 이번 프레임 그려질 때 메시 위치와 지난 입자 위치의 거리, 메시 방향과 입자 방향의 차이.
+	 * 덮임: 화면 안 카메라 150~215m의 걷는 엔티티를 그린 것(액터·ISKM), 입자로 그린 것(175m 이상), 아무것도 그리지 않은 것(입자 MinCameraDistance 175m 안)으로 나눈다.
+	 */
+	struct FLabFxPrev { FVector2D Pos; FVector2D Dir; };
+	TMap<FMassEntityHandle, FLabFxPrev> DiagPrev;
+	double DiagPosErrMax = 0., DiagPosErrSum = 0., DiagDirErrMax = 0., DiagDirErrSum = 0.;
+	int64 DiagErrCount = 0;
+	double DiagJumpMax = 0., DiagJumpSum = 0., DiagTurnMax = 0., DiagTurnSum = 0.;
+	int64 DiagJumpCount = 0;
+	int64 DiagCoverDrawn = 0, DiagCoverFx = 0, DiagCoverHidden = 0;
+	int32 DiagCoverHiddenMax = 0;
+	int64 DiagHitDeadView = 0; // 화면 안의 그려지지 않는 피격·사망 개체(프레임 합)
 #endif
 };

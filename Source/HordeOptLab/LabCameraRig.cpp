@@ -1,6 +1,7 @@
 #include "LabCameraRig.h"
 #include "LabConfig.h"
 #include "HordeOptLab.h"
+#include "Camera/CameraComponent.h"
 #include "Misc/CommandLine.h"
 #include "Misc/Parse.h"
 
@@ -9,6 +10,10 @@ ALabCameraRig::ALabCameraRig()
 	PrimaryActorTick.bCanEverTick = true;
 #if !UE_BUILD_TEST
 	bCamTurn = FParse::Param(FCommandLine::Get(), TEXT("LabCamTurn"));
+	FParse::Value(FCommandLine::Get(), TEXT("-LabDiagFov="), DiagFov);
+	FParse::Value(FCommandLine::Get(), TEXT("-LabDiagAimM="), DiagAimM);
+	FParse::Value(FCommandLine::Get(), TEXT("-LabDiagYawOff="), DiagYawOff);
+	FParse::Value(FCommandLine::Get(), TEXT("-LabDiagYaw="), DiagYaw);
 #endif
 }
 
@@ -43,6 +48,10 @@ void ALabCameraRig::Apply()
 		// 측정 창 60초에 정확히 한 바퀴라 방향 편차가 평균으로 정리된다.
 		float Yaw = 360.f * Elapsed / FLabScenario::OrbViewPeriod;
 #if !UE_BUILD_TEST
+		if (DiagYaw > -999.f)
+		{
+			Yaw = DiagYaw; // v2 W8 개발 전용(-LabDiagYaw=<도>): 회전을 멈춘다. 카메라는 오브를 따라 움직인다(연속 프레임 비교용)
+		}
 		if (bCamTurn)
 		{
 			// 회전 k는 [k·5초, k·5초 + 0.5초]에 90·k → 90·(k+1)도로 돌고, 그 뒤 4.5초는 90·(k+1)도에 멈춘다.
@@ -60,7 +69,18 @@ void ALabCameraRig::Apply()
 #endif
 		const FVector Forward = FRotator(0.f, Yaw, 0.f).Vector();
 		const FVector Location = Center - Forward * FLabScenario::OrbViewBack + FVector(0.f, 0.f, FLabScenario::OrbViewHeight);
-		SetActorLocationAndRotation(Location, FRotator(FLabScenario::OrbViewPitch, Yaw, 0.f));
+		float Pitch = FLabScenario::OrbViewPitch;
+#if !UE_BUILD_TEST
+		if (DiagFov > 0.f)
+		{
+			// v2 W8 개발 전용 확대(-LabDiagFov=<도> -LabDiagAimM=<m> -LabDiagYawOff=<도>): P1과 같은 자리·회전에서 FOV만 좁히고, 카메라에서 AimM 앞의 지면을 화면 가운데에 둔다.
+			// 렌더와 LOD가 보는 카메라 위치는 P1 그대로라 200m 경계의 표현(입자·ISKM)이 측정 장면과 같다. 화면 안 판정(액터 경계, 저격)만 좁은 시야로 바뀐다.
+			Yaw += DiagYawOff;
+			Pitch = -FMath::RadiansToDegrees(FMath::Atan2(FLabScenario::OrbViewHeight, DiagAimM * 100.f));
+			if (GetCameraComponent()->FieldOfView != DiagFov) { GetCameraComponent()->SetFieldOfView(DiagFov); }
+		}
+#endif
+		SetActorLocationAndRotation(Location, FRotator(Pitch, Yaw, 0.f));
 		return;
 	}
 	}

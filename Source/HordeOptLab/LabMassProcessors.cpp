@@ -239,7 +239,14 @@ void ULabOffMoveProcessor::Execute(FMassEntityManager& EntityManager, FMassExecu
 	float MaxSeconds = 0.f;
 	double SumSeconds = 0.;
 	double EngineSumSeconds = 0.;
-	EntityQuery.ForEachEntityChunk(Context, [Orb, Now, FrameDelta, &Moved, &MaxSeconds, &SumSeconds, &EngineSumSeconds](FMassExecutionContext& Context)
+#if !UE_BUILD_TEST
+	// v2 W8 개발 진단(-LabOrbDiag): 한 틱의 직진 이동과, 같은 시간을 8조각으로 나눠 조각마다 그 시각의 오브(FLabOrbit::LocationAt)를 향해 옮긴 기준 자리의 거리
+	static const bool bOrbDiag = FParse::Param(FCommandLine::Get(), TEXT("LabOrbDiag"));
+	const FLabOrbit& Orbit = FLabConfig::Get().Orbit;
+	double StepErrMax = 0., StepErrSum = 0.;
+	int64 StepErrCount = 0;
+#endif
+	EntityQuery.ForEachEntityChunk(Context, [&](FMassExecutionContext& Context)
 	{
 		const TArrayView<FTransformFragment> Transforms = Context.GetMutableFragmentView<FTransformFragment>();
 		const TArrayView<FMassDesiredMovementFragment> Movements = Context.GetMutableFragmentView<FMassDesiredMovementFragment>();
@@ -268,11 +275,48 @@ void ULabOffMoveProcessor::Execute(FMassEntityManager& EntityManager, FMassExecu
 				Movements[It].DesiredVelocity = FVector::ZeroVector;
 				continue;
 			}
+			// 방향은 틱마다 오브의 지금 위치(OrbCenter)로 다시 잡는다(v2 사양 4.2). 틱 사이 오차는 평균 0.3cm, 최대 1.8cm다(Docs/Worklog/V2.md "W8", 아래 -LabOrbDiag)
 			const FVector Direction = ToOrb / Distance;
+#if !UE_BUILD_TEST
+			const FVector Start = Transform.GetLocation();
+#endif
 			Transform.AddToTranslation(Direction * FMath::Min(double(Speed * Seconds), Distance));
 			Movements[It].DesiredVelocity = Direction * Speed; // 200m 안으로 돌아오면 엔진 조향이 이 속도에서 이어 간다
+#if !UE_BUILD_TEST
+			if (bOrbDiag && Seconds > FrameDelta * 2.f && Distance > Speed * Seconds)
+			{
+				constexpr int32 Pieces = 8;
+				const double Piece = double(Seconds) / Pieces;
+				FVector Ref = Start;
+				for (int32 k = 0; k < Pieces; ++k)
+				{
+					FVector To = Orbit.LocationAt(Now - Seconds + (k + 1) * Piece) - Ref;
+					To.Z = 0.;
+					Ref += To.GetSafeNormal() * Speed * Piece;
+				}
+				const double Err = FVector::Dist2D(Transform.GetLocation(), Ref);
+				StepErrMax = FMath::Max(StepErrMax, Err); StepErrSum += Err; ++StepErrCount;
+			}
+#endif
 		}
 	});
+#if !UE_BUILD_TEST
+	if (bOrbDiag)
+	{
+		static double DiagSince = 0., DiagErrMax = 0., DiagErrSum = 0.;
+		static int64 DiagErrCount = 0;
+		DiagErrMax = FMath::Max(DiagErrMax, StepErrMax); DiagErrSum += StepErrSum; DiagErrCount += StepErrCount;
+		if (DiagSince <= 0.) { DiagSince = Now; }
+		else if (Now - DiagSince >= 5.)
+		{
+			const ULabCrowdSubsystem* C = Crowd;
+			UE_LOG(LogLab, Log, TEXT("lab_offstep t=%.1f steps=%lld step_err_mean=%.2f step_err_max=%.2f leave_n=%lld leave_lag_mean=%.3f leave_lag_max=%.3f"),
+				Now, DiagErrCount, DiagErrCount > 0 ? DiagErrSum / DiagErrCount : 0., DiagErrMax,
+				C->OffLeaveCount.load(), C->OffLeaveCount.load() > 0 ? C->OffLeaveLagSum.load() / double(C->OffLeaveCount.load()) : 0., C->OffLeaveLagMax.load());
+			DiagSince = Now; DiagErrMax = DiagErrSum = 0.; DiagErrCount = 0;
+		}
+	}
+#endif
 	CSV_CUSTOM_STAT(Lab, OffMoveCount, Moved, ECsvCustomStatOp::Set);
 
 #if !UE_BUILD_TEST
@@ -309,7 +353,7 @@ ULabOffMoveEnterObserver::ULabOffMoveEnterObserver()
 	bAutoRegisterWithObserverRegistry = FLabConfig::Get().UsesSimLod() && FLabConfig::Get().SimLod().bOffMove;
 #if !UE_BUILD_TEST
 	// 개발 확인(-LabSimLodLog): Off 태그가 떨어질 때도 불려, 그때의 카메라 거리와 마지막 이동 뒤 흐른 시간을 로그에 남긴다(lab_event offleave).
-	if (FParse::Param(FCommandLine::Get(), TEXT("LabSimLodLog")))
+	if (FParse::Param(FCommandLine::Get(), TEXT("LabSimLodLog")) || FParse::Param(FCommandLine::Get(), TEXT("LabOrbDiag")))
 	{
 		ObservedOperations |= EMassObservedOperationFlags::RemoveElement;
 	}
@@ -335,7 +379,9 @@ void ULabOffMoveEnterObserver::Execute(FMassEntityManager& EntityManager, FMassE
 	const bool bRemoved = Observed && Observed->GetOperationType() == EMassObservedOperation::RemoveElement;
 #if !UE_BUILD_TEST
 	static const bool bLog = FParse::Param(FCommandLine::Get(), TEXT("LabSimLodLog"));
+	static const bool bOrbDiag = FParse::Param(FCommandLine::Get(), TEXT("LabOrbDiag"));
 	const ULabCrowdSubsystem* Crowd = bLog ? Context.GetSubsystem<ULabCrowdSubsystem>() : nullptr;
+	ULabCrowdSubsystem* DiagCrowd = bOrbDiag && bRemoved ? const_cast<ULabCrowdSubsystem*>(Context.GetSubsystem<ULabCrowdSubsystem>()) : nullptr; // 원자 변수만 쓴다
 #endif
 	EntityQuery.ForEachEntityChunk(Context, [&](FMassExecutionContext& Context)
 	{
@@ -352,6 +398,13 @@ void ULabOffMoveEnterObserver::Execute(FMassEntityManager& EntityManager, FMassE
 				const double Last = OffMoves[It].LastMoveTime;
 				LabLogScreenEvent(bRemoved ? TEXT("offleave") : TEXT("offenter"), Crowd->SnipeView, Transforms[It].GetTransform().GetLocation(),
 					bRemoved ? (Last > 0. ? float(Now - Last) : -1.f) : (Last > 0. ? 1.f : 0.f));
+			}
+			if (DiagCrowd && OffMoves[It].LastMoveTime > 0.)
+			{
+				const double Lag = Now - OffMoves[It].LastMoveTime;
+				DiagCrowd->OffLeaveCount.store(DiagCrowd->OffLeaveCount.load() + 1);
+				DiagCrowd->OffLeaveLagSum.store(DiagCrowd->OffLeaveLagSum.load() + Lag);
+				DiagCrowd->OffLeaveLagMax.store(FMath::Max(DiagCrowd->OffLeaveLagMax.load(), Lag));
 			}
 #endif
 			if (!bRemoved)
