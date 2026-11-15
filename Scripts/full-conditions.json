@@ -1,9 +1,9 @@
 {
- "version": 1,
- "source": "Docs/Worklog/Q5.md \"사다리와 조건 표\". 기대값은 Test 패키지 실행의 CSV 메타데이터 키(대소문자 그대로)와 문자열 값이다.",
- "batch": "Full1",
- "label_format": "Full1-<label_step>-<label_variant>-N<N>-<P1|P2>-r<i>",
+ "version": 2,
+ "source": "Docs/Worklog/V2.md \"W12 측정 준비\". 단계와 빼 보기의 기대값은 같은 문서 \"W10\"의 표와 \"W11\"이다. 기대값은 Test 패키지 실행의 CSV 메타데이터 키(대소문자 무시)와 문자열 값이다. base가 있으면 그 설정의 expect 위에 이 expect를 덮어쓴다.",
  "exe": "Packaged/Test/Windows/HordeOptLab/Binaries/Win64/HordeOptLab-Win64-Test.exe",
+ "batch": "Full4",
+ "label_format": "<Batch>-<V0|V1>-<구성>-N<N>-P1-r<i>. V0 = 오브 궤도 속도 2m/s(이동), V1 = 속도 0(정지). 트레이스는 <Batch>trace-..., <Batch>traceser-..., 촬영은 <Batch>shot-..., A/A는 회차 11~13, 실패 재측정은 회차 + Runs.",
  "common_args": [
   "-windowed",
   "-ResX=2560",
@@ -11,894 +11,811 @@
   "-nosound",
   "-LabBench",
   "-LabSeed=20261106",
-  "-LabTypes=2"
- ],
- "run_args": [
-  "-LabN=<N>",
-  "-LabPreset=<1|2>",
-  "-LabLabel=<label>"
- ],
- "shot_args": [
-  "-LabHud",
-  "-LabShotAt=<sec>"
+  "-LabTypes=2",
+  "-LabPreset=1"
  ],
  "serial_trace_args": [
   "-LabFullyParallel=0"
  ],
+ "trace_args": "-trace=cpu,gpu,frame,counters,mass",
+ "scenario": {
+  "radius_m": "57.3",
+  "height_m": "6",
+  "target_n": 10000,
+  "measure_sec": 180,
+  "trace_measure_sec": 60,
+  "speeds": {
+   "V0": {
+    "mps": "2",
+    "warmup_sec": 60,
+    "title": "moving"
+   },
+   "V1": {
+    "mps": "0",
+    "warmup_sec": 15,
+    "title": "still"
+   }
+  },
+  "note": "궤도 값과 구간은 FLabScenario와 FLabBench의 상수다(D34). 러너는 같은 값을 인자로 넘기고 CSV 메타데이터 LabOrbit, LabWindow로 대조한다."
+ },
  "common_expect": {
   "LabTypes": "2",
   "LabTypesAssets": "ok",
   "LabFarM": "200",
-  "LabHydrateFixMask": "31",
   "LabSeed": "20261106",
   "LabHud": "0",
   "LabShotAt": "0",
-  "LabOk": "1"
- },
- "run_expect": {
-  "LabN": "<N>",
-  "LabPreset": "P<1|2>",
-  "LabLabel": "<label>",
-  "LabAlive": "<N>",
-  "LabAliveMin": "<N>",
-  "LabAliveMax": "<N>"
+  "LabOk": "1",
+  "LabPreset": "P1"
  },
  "equivalence": {
-  "csv_stats": [
-   "Lab/Alive",
-   "Lab/Deaths",
-   "Lab/Near30"
-  ],
-  "end_metadata": [
-   "LabDeaths",
-   "LabZoneKills",
-   "LabSnipes",
-   "LabDeathRate",
-   "LabNear30Mean",
-   "LabAliveMin",
-   "LabAliveMax"
-  ],
-  "summary_keys": [
-   "deaths",
-   "zone_kills",
-   "snipes",
-   "death_rate",
-   "near30_mean",
-   "alive_min",
-   "alive_max"
-  ]
+  "death_rate_tol": 0.03,
+  "near30_tol": 0.03,
+  "round_trip_max_per_sec": 0.5,
+  "overlap_mean": {
+   "sep_moving": [
+    120,
+    280
+   ],
+   "sep_still": [
+    0,
+    10
+   ],
+   "zero": [
+    0,
+    50
+   ],
+   "engine_moving": [
+    5000,
+    16000
+   ],
+   "engine_still": [
+    0,
+    16000
+   ],
+   "off_moving": [
+    800,
+    3000
+   ],
+   "off_still": [
+    0,
+    3000
+   ]
+  },
+  "overlap_basis": "분리 프로세서(sep) 이동: 단계 3~8과 W11 묶음의 값 159~225(V2W10Ladder, V2W11Cost, V2W11Sweep, V2W9Flash)에 0.75배와 1.25배를 곱했다. 분리 프로세서 정지: V2W7Switch의 0.01~0.02에 여유를 뒀다. 액터 기준선(zero)은 V2W6Base N 500~2000에서 0이다. 엔진 회피(engine)는 V2W3Cost, V2W4Cost, V2W10Ladder에서 10,338~10,835다. 겹침 방지 끔(off)은 V2W4Cost에서 1,599~1,607이다.",
+  "overlap_severity": "sep와 zero(N 2000 이하)는 범위 밖이면 실패로 센다. engine, off, zero(N 2000 초과)는 보고만 한다(D51: 단계 2는 엔진 회피라 실패로 막지 않는다)."
  },
- "conditions": [
+ "steps": {
+  "1": {
+   "name": "Actor baseline",
+   "role": "start"
+  },
+  "2": {
+   "name": "Mass, engine default path",
+   "role": "earn"
+  },
+  "3": {
+   "name": "Own separation logic",
+   "role": "earn"
+  },
+  "4": {
+   "name": "Animated instances + actor budget",
+   "role": "quality"
+  },
+  "5": {
+   "name": "Simulation LOD + entity pool",
+   "role": "earn"
+  },
+  "6": {
+   "name": "ISKM",
+   "role": "quality"
+  },
+  "7": {
+   "name": "Background crowd",
+   "role": "quality"
+  },
+  "8": {
+   "name": "Raise quality",
+   "role": "quality"
+  }
+ },
+ "configs": [
   {
-   "name": "L1-full",
-   "group": "ladder",
-   "label_step": "L1",
-   "label_variant": "full",
-   "ladder": "1",
-   "stage": "M0",
-   "variant": "full",
+   "name": "s1",
+   "kind": "step",
+   "step": 1,
+   "title": "Actor baseline",
+   "role": "start",
+   "overlap": "zero",
+   "equiv": "report",
    "args": [
-    "-LabStage=M0",
-    "-LabVariant=full"
+    "-LabStage=1"
    ],
    "expect": {
-    "LabStage": "M0",
-    "LabVariant": "full",
+    "LabStage": "1",
     "LabLadder": "1",
-    "LabOverrides": "-",
-    "LabBudget": "0",
-    "LabPool": "0",
-    "LabIskmBounds": "0",
-    "LabCrowdFx": "0",
-    "LabCrowdFxActive": "0",
-    "LabSimLod": "-",
-    "LabActorCap": "500",
-    "LabHydrateM": "30",
-    "LabFarShadow": "-",
-    "LabActorCollision": "-",
     "LabTechHydrate": "0",
-    "LabTechAnimBudget": "0",
-    "LabTechHydrateFix": "0",
-    "LabTechPool": "0",
-    "LabTechSimLod": "0",
-    "LabTechIskm": "0",
-    "LabTechFixedBounds": "0",
-    "LabTechFarCull": "0",
-    "LabTechCrowdFx": "0"
-   },
-   "note": "액터 기준선. 모든 개체가 ACharacter 액터"
+    "LabTechAvoid": "0",
+    "LabTechSeparate": "1",
+    "LabActorCollision": "pawn",
+    "LabRepHold": "0"
+   }
   },
   {
-   "name": "L2-mass",
-   "group": "ladder",
-   "label_step": "L2",
-   "label_variant": "mass",
-   "ladder": "2",
-   "stage": "M1",
-   "variant": "mass",
+   "name": "s2",
+   "kind": "step",
+   "step": 2,
+   "title": "Mass, engine default path",
+   "role": "earn",
+   "overlap": "engine",
+   "equiv": "report",
    "args": [
-    "-LabStage=M1",
-    "-LabVariant=mass"
+    "-LabStage=2"
    ],
    "expect": {
-    "LabStage": "M1",
-    "LabVariant": "mass",
-    "LabLadder": "2",
-    "LabOverrides": "-",
-    "LabBudget": "0",
-    "LabPool": "0",
-    "LabIskmBounds": "0",
-    "LabCrowdFx": "0",
-    "LabCrowdFxActive": "0",
-    "LabSimLod": "-",
-    "LabActorCap": "500",
-    "LabHydrateM": "30",
-    "LabFarShadow": "-",
-    "LabActorCollision": "-",
-    "LabTechHydrate": "0",
-    "LabTechAnimBudget": "0",
-    "LabTechHydrateFix": "0",
-    "LabTechPool": "0",
-    "LabTechSimLod": "0",
-    "LabTechIskm": "0",
-    "LabTechFixedBounds": "0",
-    "LabTechFarCull": "0",
-    "LabTechCrowdFx": "0"
-   },
-   "note": "로직을 Mass로, 표현은 애니 없는 ISM"
-  },
-  {
-   "name": "L3-vatcull",
-   "group": "ladder",
-   "label_step": "L3",
-   "label_variant": "vatcull",
-   "ladder": "3",
-   "stage": "M2",
-   "variant": "vatcull",
-   "args": [
-    "-LabStage=M2",
-    "-LabVariant=vatcull"
-   ],
-   "expect": {
-    "LabStage": "M2",
-    "LabVariant": "vatcull",
-    "LabLadder": "3",
-    "LabOverrides": "-",
-    "LabBudget": "0",
-    "LabPool": "0",
-    "LabIskmBounds": "0",
-    "LabCrowdFx": "0",
-    "LabCrowdFxActive": "0",
-    "LabSimLod": "-",
-    "LabActorCap": "500",
-    "LabHydrateM": "30",
-    "LabFarShadow": "-",
-    "LabActorCollision": "-",
-    "LabTechHydrate": "0",
-    "LabTechAnimBudget": "0",
-    "LabTechHydrateFix": "0",
-    "LabTechPool": "0",
-    "LabTechSimLod": "0",
-    "LabTechIskm": "0",
-    "LabTechFixedBounds": "0",
-    "LabTechFarCull": "1",
-    "LabTechCrowdFx": "0"
-   },
-   "note": "ISM + VAT, 200m 밖 Off(m2off와 같은 변형)"
-  },
-  {
-   "name": "L4-mass",
-   "group": "ladder",
-   "label_step": "L4",
-   "label_variant": "mass",
-   "ladder": "4",
-   "stage": "M3",
-   "variant": "mass",
-   "args": [
-    "-LabStage=M3",
-    "-LabVariant=mass"
-   ],
-   "expect": {
-    "LabStage": "M3",
-    "LabVariant": "mass",
-    "LabLadder": "4",
-    "LabOverrides": "-",
-    "LabBudget": "1",
-    "LabPool": "0",
-    "LabIskmBounds": "0",
-    "LabCrowdFx": "0",
-    "LabCrowdFxActive": "0",
-    "LabSimLod": "-",
-    "LabActorCap": "500",
-    "LabHydrateM": "30",
-    "LabFarShadow": "1",
-    "LabActorCollision": "0",
+    "LabStage": "2",
+    "LabTechInstAnim": "0",
     "LabTechHydrate": "1",
+    "LabTechAnimBudget": "0",
+    "LabTechHydrateFix": "0",
+    "LabTechSimLod": "0",
+    "LabTechFarCull": "1",
+    "LabTechAvoid": "1",
+    "LabTechSeparate": "0",
+    "LabActorCollision": "trace",
+    "LabRepHold": "0",
+    "LabActorCap": "500",
+    "LabHydrateM": "30"
+   }
+  },
+  {
+   "name": "s3",
+   "kind": "step",
+   "step": 3,
+   "title": "Own separation logic",
+   "role": "earn",
+   "overlap": "sep",
+   "equiv": "strict",
+   "args": [
+    "-LabStage=3"
+   ],
+   "expect": {
+    "LabStage": "3",
+    "LabTechInstAnim": "0",
+    "LabTechHydrate": "1",
+    "LabTechAnimBudget": "0",
+    "LabTechHydrateFix": "0",
+    "LabTechSimLod": "0",
+    "LabTechAvoid": "0",
+    "LabTechSeparate": "1",
+    "LabActorCollision": "trace",
+    "LabRepHold": "0"
+   }
+  },
+  {
+   "name": "s4",
+   "kind": "step",
+   "step": 4,
+   "title": "Animated instances + actor budget",
+   "role": "quality",
+   "overlap": "sep",
+   "equiv": "strict",
+   "args": [
+    "-LabStage=4"
+   ],
+   "expect": {
+    "LabStage": "4",
+    "LabTechInstAnim": "1",
     "LabTechAnimBudget": "1",
     "LabTechHydrateFix": "1",
     "LabTechPool": "0",
     "LabTechSimLod": "0",
     "LabTechIskm": "0",
-    "LabTechFixedBounds": "0",
-    "LabTechFarCull": "1",
-    "LabTechCrowdFx": "0"
-   },
-   "note": "근거리 액터 + 화면 크기 Budget. 변형 이름은 mass여야 한다(m3mass는 Budget을 끈다)"
+    "LabTechAvoid": "0",
+    "LabTechSeparate": "1",
+    "LabActorCollision": "trace",
+    "LabRepHold": "2000"
+   }
   },
   {
-   "name": "L5-m4offpool",
-   "group": "ladder",
-   "label_step": "L5",
-   "label_variant": "m4offpool",
-   "ladder": "5",
-   "stage": "M5",
-   "variant": "m4offpool",
+   "name": "s5",
+   "kind": "step",
+   "step": 5,
+   "title": "Simulation LOD + entity pool",
+   "role": "earn",
+   "overlap": "sep",
+   "equiv": "strict",
    "args": [
-    "-LabStage=M5",
-    "-LabVariant=m4offpool"
+    "-LabStage=5"
    ],
    "expect": {
-    "LabStage": "M5",
-    "LabVariant": "m4offpool",
-    "LabLadder": "5",
-    "LabOverrides": "-",
-    "LabBudget": "1",
-    "LabPool": "1",
-    "LabIskmBounds": "0",
-    "LabCrowdFx": "0",
-    "LabCrowdFxActive": "0",
-    "LabSimLod": "80/200m tick=0/0.50/1.00 avoid=0 offmove=1",
-    "LabActorCap": "500",
-    "LabHydrateM": "30",
-    "LabFarShadow": "1",
-    "LabActorCollision": "0",
-    "LabTechHydrate": "1",
-    "LabTechAnimBudget": "1",
-    "LabTechHydrateFix": "1",
+    "LabStage": "5",
+    "LabTechInstAnim": "1",
     "LabTechPool": "1",
     "LabTechSimLod": "1",
     "LabTechIskm": "0",
-    "LabTechFixedBounds": "0",
-    "LabTechFarCull": "1",
-    "LabTechCrowdFx": "0"
-   },
-   "note": "Simulation LOD(200m 밖 자체 이동) + 엔티티 풀, 원거리 VAT. M5 묶음과 같이 단계 M5"
+    "LabTechSeparate": "1",
+    "LabActorCollision": "trace",
+    "LabRepHold": "2000"
+   }
   },
   {
-   "name": "L6-m5bounds",
-   "group": "ladder",
-   "label_step": "L6",
-   "label_variant": "m5bounds",
-   "ladder": "6",
-   "stage": "M5",
-   "variant": "m5bounds",
+   "name": "s6",
+   "kind": "step",
+   "step": 6,
+   "title": "ISKM",
+   "role": "quality",
+   "overlap": "sep",
+   "equiv": "strict",
    "args": [
-    "-LabStage=M5",
-    "-LabVariant=m5bounds"
+    "-LabStage=6"
    ],
    "expect": {
-    "LabStage": "M5",
-    "LabVariant": "m5bounds",
-    "LabLadder": "6",
-    "LabOverrides": "-",
-    "LabBudget": "1",
-    "LabPool": "1",
-    "LabIskmBounds": "2",
-    "LabCrowdFx": "0",
-    "LabCrowdFxActive": "0",
-    "LabSimLod": "80/200m tick=0/0.50/1.00 avoid=0 offmove=1",
-    "LabActorCap": "500",
-    "LabHydrateM": "30",
-    "LabFarShadow": "1",
-    "LabActorCollision": "0",
-    "LabTechHydrate": "1",
-    "LabTechAnimBudget": "1",
-    "LabTechHydrateFix": "1",
-    "LabTechPool": "1",
-    "LabTechSimLod": "1",
+    "LabStage": "6",
     "LabTechIskm": "1",
     "LabTechFixedBounds": "1",
-    "LabTechFarCull": "1",
-    "LabTechCrowdFx": "0"
-   },
-   "note": "ISKM + 고정 바운드"
+    "LabTechCrowdFx": "0",
+    "LabBoundsStepM": "10",
+    "LabIskmTrackReserve": "1",
+    "LabTechSeparate": "1",
+    "LabRepHold": "2000"
+   }
   },
   {
-   "name": "L7-q2crowd",
-   "group": "ladder",
-   "label_step": "L7",
-   "label_variant": "q2crowd",
-   "ladder": "7",
-   "stage": "M5",
-   "variant": "q2crowd",
+   "name": "s7",
+   "kind": "step",
+   "step": 7,
+   "title": "Background crowd",
+   "role": "quality",
+   "overlap": "sep",
+   "equiv": "strict",
    "args": [
-    "-LabStage=M5",
-    "-LabVariant=q2crowd"
+    "-LabStage=7"
    ],
    "expect": {
-    "LabStage": "M5",
-    "LabVariant": "q2crowd",
-    "LabLadder": "7",
-    "LabOverrides": "-",
-    "LabBudget": "1",
-    "LabPool": "1",
-    "LabIskmBounds": "2",
-    "LabCrowdFx": "1",
-    "LabCrowdFxActive": "1",
-    "LabSimLod": "80/200m tick=0/0.50/1.00 avoid=0 offmove=1",
+    "LabStage": "7",
+    "LabTechIskm": "1",
+    "LabTechCrowdFx": "1",
+    "LabFxOrbFollow": "1",
     "LabActorCap": "500",
     "LabHydrateM": "30",
     "LabFarShadow": "1",
-    "LabActorCollision": "0",
-    "LabTechHydrate": "1",
-    "LabTechAnimBudget": "1",
-    "LabTechHydrateFix": "1",
-    "LabTechPool": "1",
-    "LabTechSimLod": "1",
-    "LabTechIskm": "1",
-    "LabTechFixedBounds": "1",
-    "LabTechFarCull": "1",
-    "LabTechCrowdFx": "1"
-   },
-   "note": "Niagara 배경 무리"
+    "LabRepHold": "2000"
+   }
   },
   {
-   "name": "L8-q4final",
-   "group": "ladder",
-   "label_step": "L8",
-   "label_variant": "q4final",
-   "ladder": "8",
-   "stage": "M5",
-   "variant": "q4final",
+   "name": "s8",
+   "kind": "step",
+   "step": 8,
+   "title": "Raise quality",
+   "role": "quality",
+   "overlap": "sep",
+   "equiv": "strict",
    "args": [
-    "-LabStage=M5",
-    "-LabVariant=q4final"
+    "-LabStage=8"
    ],
    "expect": {
-    "LabStage": "M5",
-    "LabVariant": "q4final",
+    "LabStage": "8",
     "LabLadder": "8",
-    "LabOverrides": "-",
-    "LabBudget": "1",
-    "LabPool": "1",
-    "LabIskmBounds": "2",
-    "LabCrowdFx": "1",
-    "LabCrowdFxActive": "1",
-    "LabSimLod": "80/200m tick=0/0.50/1.00 avoid=0 offmove=1",
+    "LabTechSimLod": "1",
+    "LabTechIskm": "1",
+    "LabTechFixedBounds": "1",
+    "LabTechCrowdFx": "1",
+    "LabTechAvoid": "0",
+    "LabTechSeparate": "1",
+    "LabActorCollision": "trace",
+    "LabRepHold": "2000",
+    "LabFxOrbFollow": "1",
+    "LabBoundsStepM": "10",
+    "LabIskmTrackReserve": "1",
     "LabActorCap": "1000",
     "LabHydrateM": "40",
     "LabFarShadow": "0",
-    "LabActorCollision": "0",
-    "LabTechHydrate": "1",
-    "LabTechAnimBudget": "1",
-    "LabTechHydrateFix": "1",
-    "LabTechPool": "1",
-    "LabTechSimLod": "1",
-    "LabTechIskm": "1",
-    "LabTechFixedBounds": "1",
-    "LabTechFarCull": "1",
-    "LabTechCrowdFx": "1"
-   },
-   "note": "최종 구성: 액터 상한 1,000, 화면 안 전환 거리 40m, 80m 밖 인스턴스 그림자 끔(Q4b)"
+    "LabFixedSkelBounds": "1",
+    "LabQueryIsolate": "0"
+   }
   },
   {
-   "name": "A8-hydrate",
-   "group": "ablation",
-   "label_step": "A8",
-   "label_variant": "hydrate",
-   "ladder": "8",
-   "stage": "M5",
-   "variant": "q4final",
+   "name": "a8hyd",
+   "kind": "ablation",
+   "base": "s8",
+   "title": "Hydration actors",
+   "overlap": "sep",
+   "equiv": "strict",
    "args": [
-    "-LabStage=M5",
-    "-LabVariant=q4final",
+    "-LabStage=8",
     "-LabHydrate=0"
    ],
    "expect": {
-    "LabStage": "M5",
-    "LabVariant": "q4final",
-    "LabLadder": "8",
-    "LabOverrides": "hydrate=0",
-    "LabBudget": "1",
-    "LabPool": "1",
-    "LabIskmBounds": "2",
-    "LabCrowdFx": "1",
-    "LabCrowdFxActive": "1",
-    "LabSimLod": "80/200m tick=0/0.50/1.00 avoid=0 offmove=1",
-    "LabActorCap": "1000",
-    "LabHydrateM": "40",
-    "LabFarShadow": "0",
-    "LabActorCollision": "-",
     "LabTechHydrate": "0",
-    "LabTechAnimBudget": "1",
-    "LabTechHydrateFix": "1",
-    "LabTechPool": "1",
-    "LabTechSimLod": "1",
-    "LabTechIskm": "1",
-    "LabTechFixedBounds": "1",
-    "LabTechFarCull": "1",
-    "LabTechCrowdFx": "1"
-   },
-   "note": "빼 보기: 최종 구성에서 hydrate만 뺀다(Q3 스위치)"
+    "LabActorCollision": "-"
+   }
   },
   {
-   "name": "A8-budget",
-   "group": "ablation",
-   "label_step": "A8",
-   "label_variant": "budget",
-   "ladder": "8",
-   "stage": "M5",
-   "variant": "q4final",
+   "name": "a8bud",
+   "kind": "ablation",
+   "base": "s8",
+   "title": "Actor anim budget",
+   "overlap": "sep",
+   "equiv": "strict",
    "args": [
-    "-LabStage=M5",
-    "-LabVariant=q4final",
+    "-LabStage=8",
     "-LabScreenSigBudget=0"
    ],
    "expect": {
-    "LabStage": "M5",
-    "LabVariant": "q4final",
-    "LabLadder": "8",
-    "LabOverrides": "screensig_budget=0",
-    "LabBudget": "0",
-    "LabPool": "1",
-    "LabIskmBounds": "2",
-    "LabCrowdFx": "1",
-    "LabCrowdFxActive": "1",
-    "LabSimLod": "80/200m tick=0/0.50/1.00 avoid=0 offmove=1",
-    "LabActorCap": "1000",
-    "LabHydrateM": "40",
-    "LabFarShadow": "0",
-    "LabActorCollision": "0",
-    "LabTechHydrate": "1",
     "LabTechAnimBudget": "0",
-    "LabTechHydrateFix": "1",
-    "LabTechPool": "1",
-    "LabTechSimLod": "1",
-    "LabTechIskm": "1",
-    "LabTechFixedBounds": "1",
-    "LabTechFarCull": "1",
-    "LabTechCrowdFx": "1"
-   },
-   "note": "빼 보기: 최종 구성에서 budget만 뺀다(Q3 스위치)"
+    "LabBudget": "0"
+   }
   },
   {
-   "name": "A8-fix",
-   "group": "ablation",
-   "label_step": "A8",
-   "label_variant": "fix",
-   "ladder": "8",
-   "stage": "M5",
-   "variant": "q4final",
+   "name": "a8fix",
+   "kind": "ablation",
+   "base": "s8",
+   "title": "Transition fixes",
+   "overlap": "sep",
+   "equiv": "strict",
    "args": [
-    "-LabStage=M5",
-    "-LabVariant=q4final",
+    "-LabStage=8",
     "-LabHydrateFixMask=0"
    ],
    "expect": {
-    "LabStage": "M5",
-    "LabVariant": "q4final",
-    "LabLadder": "8",
-    "LabOverrides": "fixmask=0",
-    "LabBudget": "1",
-    "LabPool": "1",
-    "LabIskmBounds": "2",
-    "LabCrowdFx": "1",
-    "LabCrowdFxActive": "1",
-    "LabSimLod": "80/200m tick=0/0.50/1.00 avoid=0 offmove=1",
-    "LabActorCap": "1000",
-    "LabHydrateM": "40",
-    "LabFarShadow": "0",
-    "LabActorCollision": "0",
-    "LabTechHydrate": "1",
-    "LabTechAnimBudget": "1",
     "LabTechHydrateFix": "0",
-    "LabTechPool": "1",
-    "LabTechSimLod": "1",
-    "LabTechIskm": "1",
-    "LabTechFixedBounds": "1",
-    "LabTechFarCull": "1",
-    "LabTechCrowdFx": "1",
     "LabHydrateFixMask": "0"
-   },
-   "note": "빼 보기: 최종 구성에서 fix만 뺀다(Q3 스위치)"
+   }
   },
   {
-   "name": "A8-pool",
-   "group": "ablation",
-   "label_step": "A8",
-   "label_variant": "pool",
-   "ladder": "8",
-   "stage": "M5",
-   "variant": "q4final",
+   "name": "a8hold",
+   "kind": "ablation",
+   "base": "s8",
+   "title": "Min hold time",
+   "overlap": "sep",
+   "equiv": "strict",
    "args": [
-    "-LabStage=M5",
-    "-LabVariant=q4final",
+    "-LabStage=8",
+    "-LabRepHold=0"
+   ],
+   "expect": {
+    "LabRepHold": "0"
+   }
+  },
+  {
+   "name": "a8pool",
+   "kind": "ablation",
+   "base": "s8",
+   "title": "Entity pool",
+   "overlap": "sep",
+   "equiv": "strict",
+   "args": [
+    "-LabStage=8",
     "-LabEntityPool=0"
    ],
    "expect": {
-    "LabStage": "M5",
-    "LabVariant": "q4final",
-    "LabLadder": "8",
-    "LabOverrides": "pool=0",
-    "LabBudget": "1",
-    "LabPool": "0",
-    "LabIskmBounds": "2",
-    "LabCrowdFx": "1",
-    "LabCrowdFxActive": "1",
-    "LabSimLod": "80/200m tick=0/0.50/1.00 avoid=0 offmove=1",
-    "LabActorCap": "1000",
-    "LabHydrateM": "40",
-    "LabFarShadow": "0",
-    "LabActorCollision": "0",
-    "LabTechHydrate": "1",
-    "LabTechAnimBudget": "1",
-    "LabTechHydrateFix": "1",
     "LabTechPool": "0",
-    "LabTechSimLod": "1",
-    "LabTechIskm": "1",
-    "LabTechFixedBounds": "1",
-    "LabTechFarCull": "1",
-    "LabTechCrowdFx": "1"
-   },
-   "note": "빼 보기: 최종 구성에서 pool만 뺀다(Q3 스위치)"
+    "LabPool": "0"
+   }
   },
   {
-   "name": "A8-simlod",
-   "group": "ablation",
-   "label_step": "A8",
-   "label_variant": "simlod",
-   "ladder": "8",
-   "stage": "M5",
-   "variant": "q4final",
+   "name": "a8sim",
+   "kind": "ablation",
+   "base": "s8",
+   "title": "Simulation LOD",
+   "overlap": "sep",
+   "equiv": "strict",
    "args": [
-    "-LabStage=M5",
-    "-LabVariant=q4final",
+    "-LabStage=8",
     "-LabSimLod=0"
    ],
    "expect": {
-    "LabStage": "M5",
-    "LabVariant": "q4final",
-    "LabLadder": "8",
-    "LabOverrides": "simlod=0",
-    "LabBudget": "1",
-    "LabPool": "1",
-    "LabIskmBounds": "2",
-    "LabCrowdFx": "1",
-    "LabCrowdFxActive": "1",
-    "LabSimLod": "-",
-    "LabActorCap": "1000",
-    "LabHydrateM": "40",
-    "LabFarShadow": "0",
-    "LabActorCollision": "0",
-    "LabTechHydrate": "1",
-    "LabTechAnimBudget": "1",
-    "LabTechHydrateFix": "1",
-    "LabTechPool": "1",
     "LabTechSimLod": "0",
-    "LabTechIskm": "1",
-    "LabTechFixedBounds": "1",
-    "LabTechFarCull": "1",
-    "LabTechCrowdFx": "1"
-   },
-   "note": "빼 보기: 최종 구성에서 simlod만 뺀다(Q3 스위치)"
+    "LabSimLod": "-"
+   }
   },
   {
-   "name": "A8-iskm",
-   "group": "ablation",
-   "label_step": "A8",
-   "label_variant": "iskm",
-   "ladder": "8",
-   "stage": "M5",
-   "variant": "q4final",
+   "name": "a8iskm",
+   "kind": "ablation",
+   "base": "s8",
+   "title": "ISKM",
+   "overlap": "sep",
+   "equiv": "strict",
    "args": [
-    "-LabStage=M5",
-    "-LabVariant=q4final",
+    "-LabStage=8",
     "-LabIskm=0"
    ],
    "expect": {
-    "LabStage": "M5",
-    "LabVariant": "q4final",
-    "LabLadder": "8",
-    "LabOverrides": "iskm=0",
-    "LabBudget": "1",
-    "LabPool": "1",
-    "LabIskmBounds": "0",
-    "LabCrowdFx": "1",
-    "LabCrowdFxActive": "1",
-    "LabSimLod": "80/200m tick=0/0.50/1.00 avoid=0 offmove=1",
-    "LabActorCap": "1000",
-    "LabHydrateM": "40",
-    "LabFarShadow": "0",
-    "LabActorCollision": "0",
-    "LabTechHydrate": "1",
-    "LabTechAnimBudget": "1",
-    "LabTechHydrateFix": "1",
-    "LabTechPool": "1",
-    "LabTechSimLod": "1",
     "LabTechIskm": "0",
-    "LabTechFixedBounds": "1",
-    "LabTechFarCull": "1",
-    "LabTechCrowdFx": "1"
-   },
-   "note": "빼 보기: 최종 구성에서 iskm만 뺀다(Q3 스위치)"
+    "LabIskmTrackReserve": "-",
+    "LabBoundsStepM": "-"
+   }
   },
   {
-   "name": "A8-bounds",
-   "group": "ablation",
-   "label_step": "A8",
-   "label_variant": "bounds",
-   "ladder": "8",
-   "stage": "M5",
-   "variant": "q4final",
+   "name": "a8bnd",
+   "kind": "ablation",
+   "base": "s8",
+   "title": "Fixed bounds",
+   "overlap": "sep",
+   "equiv": "strict",
    "args": [
-    "-LabStage=M5",
-    "-LabVariant=q4final",
+    "-LabStage=8",
     "-LabFixedBounds=0"
    ],
    "expect": {
-    "LabStage": "M5",
-    "LabVariant": "q4final",
-    "LabLadder": "8",
-    "LabOverrides": "fixed_bounds=0",
-    "LabBudget": "1",
-    "LabPool": "1",
-    "LabIskmBounds": "0",
-    "LabCrowdFx": "1",
-    "LabCrowdFxActive": "1",
-    "LabSimLod": "80/200m tick=0/0.50/1.00 avoid=0 offmove=1",
-    "LabActorCap": "1000",
-    "LabHydrateM": "40",
-    "LabFarShadow": "0",
-    "LabActorCollision": "0",
-    "LabTechHydrate": "1",
-    "LabTechAnimBudget": "1",
-    "LabTechHydrateFix": "1",
-    "LabTechPool": "1",
-    "LabTechSimLod": "1",
-    "LabTechIskm": "1",
     "LabTechFixedBounds": "0",
-    "LabTechFarCull": "1",
-    "LabTechCrowdFx": "1"
-   },
-   "note": "빼 보기: 최종 구성에서 bounds만 뺀다(Q3 스위치)"
+    "LabIskmBounds": "0",
+    "LabBoundsStepM": "-"
+   }
   },
   {
-   "name": "A8-farcull",
-   "group": "ablation",
-   "label_step": "A8",
-   "label_variant": "farcull",
-   "ladder": "8",
-   "stage": "M5",
-   "variant": "q4final",
+   "name": "a8far",
+   "kind": "ablation",
+   "base": "s8",
+   "title": "Far cull",
+   "overlap": "sep",
+   "equiv": "strict",
    "args": [
-    "-LabStage=M5",
-    "-LabVariant=q4final",
+    "-LabStage=8",
     "-LabFarCull=0"
    ],
    "expect": {
-    "LabStage": "M5",
-    "LabVariant": "q4final",
-    "LabLadder": "8",
-    "LabOverrides": "far_cull=0",
-    "LabBudget": "1",
-    "LabPool": "1",
-    "LabIskmBounds": "2",
-    "LabCrowdFx": "1",
-    "LabCrowdFxActive": "1",
-    "LabSimLod": "80/200m tick=0/0.50/1.00 avoid=0 offmove=1",
-    "LabActorCap": "1000",
-    "LabHydrateM": "40",
-    "LabFarShadow": "0",
-    "LabActorCollision": "0",
-    "LabTechHydrate": "1",
-    "LabTechAnimBudget": "1",
-    "LabTechHydrateFix": "1",
-    "LabTechPool": "1",
-    "LabTechSimLod": "1",
-    "LabTechIskm": "1",
-    "LabTechFixedBounds": "1",
-    "LabTechFarCull": "0",
-    "LabTechCrowdFx": "1"
-   },
-   "note": "빼 보기: 최종 구성에서 farcull만 뺀다(Q3 스위치)"
+    "LabTechFarCull": "0"
+   }
   },
   {
-   "name": "A8-crowdfx",
-   "group": "ablation",
-   "label_step": "A8",
-   "label_variant": "crowdfx",
-   "ladder": "8",
-   "stage": "M5",
-   "variant": "q4final",
+   "name": "a8fx",
+   "kind": "ablation",
+   "base": "s8",
+   "title": "Background crowd",
+   "overlap": "sep",
+   "equiv": "strict",
    "args": [
-    "-LabStage=M5",
-    "-LabVariant=q4final",
+    "-LabStage=8",
     "-LabCrowdFx=0"
    ],
    "expect": {
-    "LabStage": "M5",
-    "LabVariant": "q4final",
-    "LabLadder": "8",
-    "LabOverrides": "crowdfx=0",
-    "LabBudget": "1",
-    "LabPool": "1",
-    "LabIskmBounds": "2",
-    "LabCrowdFx": "0",
+    "LabTechCrowdFx": "0",
     "LabCrowdFxActive": "0",
-    "LabSimLod": "80/200m tick=0/0.50/1.00 avoid=0 offmove=1",
-    "LabActorCap": "1000",
-    "LabHydrateM": "40",
-    "LabFarShadow": "0",
-    "LabActorCollision": "0",
-    "LabTechHydrate": "1",
-    "LabTechAnimBudget": "1",
-    "LabTechHydrateFix": "1",
-    "LabTechPool": "1",
-    "LabTechSimLod": "1",
-    "LabTechIskm": "1",
-    "LabTechFixedBounds": "1",
-    "LabTechFarCull": "1",
-    "LabTechCrowdFx": "0"
-   },
-   "note": "빼 보기: 최종 구성에서 crowdfx만 뺀다(Q3 스위치)"
+    "LabFxOrbFollow": "-"
+   }
   },
   {
-   "name": "A8-farshadow",
-   "group": "ablation",
-   "label_step": "A8",
-   "label_variant": "farshadow",
-   "ladder": "8",
-   "stage": "M5",
-   "variant": "q4final",
+   "name": "a8sep",
+   "kind": "ablation",
+   "base": "s8",
+   "title": "Separation",
+   "overlap": "off",
+   "equiv": "report",
    "args": [
-    "-LabStage=M5",
-    "-LabVariant=q4final",
+    "-LabStage=8",
+    "-LabSeparate=0"
+   ],
+   "expect": {
+    "LabTechSeparate": "0"
+   }
+  },
+  {
+   "name": "a8cap",
+   "kind": "ablation",
+   "base": "s8",
+   "title": "Actor capsule",
+   "overlap": "sep",
+   "equiv": "strict",
+   "args": [
+    "-LabStage=8",
+    "-LabActorCollision=0"
+   ],
+   "expect": {
+    "LabActorCollision": "0"
+   }
+  },
+  {
+   "name": "a8shd",
+   "kind": "ablation",
+   "base": "s8",
+   "title": "Far shadow off",
+   "overlap": "sep",
+   "equiv": "strict",
+   "args": [
+    "-LabStage=8",
     "-LabFarShadow=1"
    ],
    "expect": {
-    "LabStage": "M5",
-    "LabVariant": "q4final",
-    "LabLadder": "8",
-    "LabOverrides": "far_shadow=1",
-    "LabBudget": "1",
-    "LabPool": "1",
-    "LabIskmBounds": "2",
-    "LabCrowdFx": "1",
-    "LabCrowdFxActive": "1",
-    "LabSimLod": "80/200m tick=0/0.50/1.00 avoid=0 offmove=1",
-    "LabActorCap": "1000",
-    "LabHydrateM": "40",
-    "LabFarShadow": "1",
-    "LabActorCollision": "0",
-    "LabTechHydrate": "1",
-    "LabTechAnimBudget": "1",
-    "LabTechHydrateFix": "1",
-    "LabTechPool": "1",
-    "LabTechSimLod": "1",
-    "LabTechIskm": "1",
-    "LabTechFixedBounds": "1",
-    "LabTechFarCull": "1",
-    "LabTechCrowdFx": "1"
-   },
-   "note": "빼 보기: 최종 구성에서 원거리 그림자 끄기만 뺀다(80m 밖 ISKM도 그림자 켬, Q4b -LabFarShadow=1)"
+    "LabFarShadow": "1"
+   }
   },
   {
-   "name": "S1-budget",
-   "group": "sub",
-   "label_step": "S1",
-   "label_variant": "budget",
-   "ladder": "1b",
-   "stage": "M0",
-   "variant": "budget",
+   "name": "a8fsb",
+   "kind": "ablation",
+   "base": "s8",
+   "title": "Fixed skeletal bounds",
+   "overlap": "sep",
+   "equiv": "strict",
    "args": [
-    "-LabStage=M0",
-    "-LabVariant=budget"
+    "-LabStage=8",
+    "-LabFixedSkelBounds=0"
    ],
    "expect": {
-    "LabStage": "M0",
-    "LabVariant": "budget",
-    "LabLadder": "1b",
-    "LabOverrides": "-",
-    "LabBudget": "1",
-    "LabPool": "0",
-    "LabIskmBounds": "0",
-    "LabCrowdFx": "0",
-    "LabCrowdFxActive": "0",
-    "LabSimLod": "-",
-    "LabActorCap": "500",
-    "LabHydrateM": "30",
-    "LabFarShadow": "-",
-    "LabActorCollision": "-",
-    "LabTechHydrate": "0",
-    "LabTechAnimBudget": "1",
-    "LabTechHydrateFix": "0",
-    "LabTechPool": "0",
-    "LabTechSimLod": "0",
-    "LabTechIskm": "0",
-    "LabTechFixedBounds": "0",
-    "LabTechFarCull": "0",
-    "LabTechCrowdFx": "0"
-   },
-   "note": "액터 + USkeletalMeshComponentBudgeted + 거리 단계 중요도, a.Budget.BudgetMs 4"
+    "LabFixedSkelBounds": "0"
+   }
   },
   {
-   "name": "S1-uro",
-   "group": "sub",
-   "label_step": "S1",
-   "label_variant": "uro",
-   "ladder": "1c",
-   "stage": "M0",
-   "variant": "uro",
+   "name": "s8av",
+   "kind": "sub",
+   "base": "s8",
+   "title": "Engine avoidance (added)",
+   "overlap": "engine",
+   "equiv": "report",
    "args": [
-    "-LabStage=M0",
-    "-LabVariant=uro"
+    "-LabStage=8",
+    "-LabAvoid=1"
    ],
    "expect": {
-    "LabStage": "M0",
-    "LabVariant": "uro",
-    "LabLadder": "1c",
-    "LabOverrides": "-",
-    "LabBudget": "0",
-    "LabPool": "0",
-    "LabIskmBounds": "0",
-    "LabCrowdFx": "0",
-    "LabCrowdFxActive": "0",
-    "LabSimLod": "-",
-    "LabActorCap": "500",
-    "LabHydrateM": "30",
-    "LabFarShadow": "-",
-    "LabActorCollision": "-",
-    "LabTechHydrate": "0",
-    "LabTechAnimBudget": "0",
-    "LabTechHydrateFix": "0",
-    "LabTechPool": "0",
-    "LabTechSimLod": "0",
-    "LabTechIskm": "0",
-    "LabTechFixedBounds": "0",
-    "LabTechFarCull": "0",
-    "LabTechCrowdFx": "0"
-   },
-   "note": "액터 + URO"
+    "LabTechAvoid": "1"
+   }
   },
   {
-   "name": "S8-col",
-   "group": "sub",
-   "label_step": "S8",
-   "label_variant": "col",
-   "ladder": "8",
-   "stage": "M5",
-   "variant": "q4final",
+   "name": "a8res",
+   "kind": "extra",
+   "base": "s8",
+   "title": "ISKM track reserve",
+   "overlap": "sep",
+   "equiv": "strict",
    "args": [
-    "-LabStage=M5",
-    "-LabVariant=q4final",
-    "-LabActorCollision=1"
+    "-LabStage=8",
+    "-LabIskmTrackReserve=0"
    ],
    "expect": {
-    "LabStage": "M5",
-    "LabVariant": "q4final",
-    "LabLadder": "8",
-    "LabOverrides": "actor_collision=1",
-    "LabBudget": "1",
-    "LabPool": "1",
-    "LabIskmBounds": "2",
-    "LabCrowdFx": "1",
-    "LabCrowdFxActive": "1",
-    "LabSimLod": "80/200m tick=0/0.50/1.00 avoid=0 offmove=1",
-    "LabActorCap": "1000",
-    "LabHydrateM": "40",
-    "LabFarShadow": "0",
-    "LabActorCollision": "1",
-    "LabTechHydrate": "1",
-    "LabTechAnimBudget": "1",
-    "LabTechHydrateFix": "1",
-    "LabTechPool": "1",
-    "LabTechSimLod": "1",
-    "LabTechIskm": "1",
-    "LabTechFixedBounds": "1",
-    "LabTechFarCull": "1",
-    "LabTechCrowdFx": "1"
-   },
-   "note": "하이드레이션 액터 캡슐 콜리전 켬(Pawn 프로필 그대로). 기본(L8)은 끔이라 짝은 L8이다(Docs/Worklog/Q5.md \"1b단위\")"
+    "LabIskmTrackReserve": "0"
+   }
+  },
+  {
+   "name": "a8fxf",
+   "kind": "extra",
+   "base": "s8",
+   "title": "Particle orb follow",
+   "overlap": "sep",
+   "equiv": "strict",
+   "args": [
+    "-LabStage=8",
+    "-LabFxOrbFollow=0"
+   ],
+   "expect": {
+    "LabFxOrbFollow": "0"
+   }
+  },
+  {
+   "name": "a8stp",
+   "kind": "extra",
+   "base": "s8",
+   "title": "Bounds step follow",
+   "overlap": "sep",
+   "equiv": "strict",
+   "args": [
+    "-LabStage=8",
+    "-LabBoundsStepM=0"
+   ],
+   "expect": {
+    "LabBoundsStepM": "0"
+   }
+  },
+  {
+   "name": "s8iso",
+   "kind": "extra",
+   "base": "s8",
+   "title": "Query isolate (added)",
+   "overlap": "sep",
+   "equiv": "strict",
+   "args": [
+    "-LabStage=8",
+    "-LabQueryIsolate=1"
+   ],
+   "expect": {
+    "LabQueryIsolate": "1"
+   }
   }
- ]
+ ],
+ "groups": {
+  "ladder": {
+   "configs": [
+    "s1",
+    "s2",
+    "s3",
+    "s4",
+    "s5",
+    "s6",
+    "s7",
+    "s8"
+   ],
+   "speed": "V0",
+   "n": [
+    10000
+   ],
+   "runs": 3,
+   "note": "사다리 8단계 x 1만 x 이동"
+  },
+  "ablation": {
+   "configs": [
+    "a8hyd",
+    "a8bud",
+    "a8fix",
+    "a8hold",
+    "a8pool",
+    "a8sim",
+    "a8iskm",
+    "a8bnd",
+    "a8far",
+    "a8fx",
+    "a8sep",
+    "a8cap",
+    "a8shd",
+    "a8fsb"
+   ],
+   "speed": "V0",
+   "n": [
+    10000
+   ],
+   "runs": 3,
+   "note": "빼 보기 열네 행(단계 8에 스위치 하나) x 이동. 기준은 사다리의 s8"
+  },
+  "still": {
+   "configs": [
+    "s8",
+    "a8hyd",
+    "a8bud",
+    "a8fix",
+    "a8hold",
+    "a8pool",
+    "a8sim",
+    "a8iskm",
+    "a8bnd",
+    "a8far",
+    "a8fx",
+    "a8sep",
+    "a8cap",
+    "a8shd",
+    "a8fsb"
+   ],
+   "speed": "V1",
+   "n": [
+    10000
+   ],
+   "runs": 3,
+   "note": "정지 조건: 단계 8과 빼 보기 열네 행"
+  },
+  "sub": {
+   "configs": [
+    "s8av"
+   ],
+   "speed": "V0",
+   "n": [
+    10000
+   ],
+   "runs": 3,
+   "note": "하위 실험: 단계 8에 엔진 회피를 더한다(D43)"
+  },
+  "maxn": {
+   "configs": [
+    "s2",
+    "s3",
+    "s4",
+    "s5",
+    "s6",
+    "s7",
+    "s8"
+   ],
+   "speed": "V0",
+   "n": [
+    5000,
+    20000
+   ],
+   "runs": 3,
+   "note": "보조(최대 N): Mass 단계 2~8 x {5천, 2만}. 1만은 사다리가 맡는다"
+  },
+  "actor": {
+   "configs": [
+    "s1"
+   ],
+   "speed": "V0",
+   "n": [
+    500,
+    1000,
+    2000
+   ],
+   "runs": 3,
+   "note": "보조(액터): 단계 1 x {500, 1천, 2천}"
+  },
+  "aa": {
+   "configs": [
+    "s8"
+   ],
+   "speed": "V0",
+   "n": [
+    10000
+   ],
+   "runs": 3,
+   "run_base": 10,
+   "note": "묶음 끝의 기준점 반복(회차 11~13). 묶음 안 잡음의 기준"
+  },
+  "trace": {
+   "configs": [
+    "s1",
+    "s2",
+    "s3",
+    "s4",
+    "s5",
+    "s6",
+    "s7",
+    "s8"
+   ],
+   "speed": "V0",
+   "n": [
+    10000
+   ],
+   "runs": 1,
+   "prefix": "trace",
+   "measure_sec": 60,
+   "trace": true,
+   "note": "Insights 트레이스, 단계 1~8. 수치는 비교에 쓰지 않는다"
+  },
+  "traceser": {
+   "configs": [
+    "s2",
+    "s3",
+    "s4",
+    "s5",
+    "s6",
+    "s7",
+    "s8"
+   ],
+   "speed": "V0",
+   "n": [
+    10000
+   ],
+   "runs": 1,
+   "prefix": "traceser",
+   "measure_sec": 60,
+   "trace": true,
+   "serial": true,
+   "note": "직렬 트레이스(-LabFullyParallel=0), 단계 2~8"
+  },
+  "extra": {
+   "configs": [
+    "a8res",
+    "a8fxf",
+    "a8stp",
+    "s8iso"
+   ],
+   "speed": "V0",
+   "n": [
+    10000
+   ],
+   "runs": 3,
+   "optin": true,
+   "note": "기본 묶음에 넣지 않는 후보. -Only extra로만 돈다"
+  }
+ },
+ "main_groups": [
+  "ladder",
+  "ablation",
+  "still",
+  "sub",
+  "maxn",
+  "actor"
+ ],
+ "capture": {
+  "configs": [
+   "s1",
+   "s2",
+   "s3",
+   "s4",
+   "s5",
+   "s6",
+   "s7",
+   "s8"
+  ],
+  "speed": "V0",
+  "n": 10000,
+  "warmup_sec": 15,
+  "duration_sec": 40,
+  "shot_at": 45,
+  "note": "HUD를 켜고 단계 1~8을 촬영한다(capture-full.ps1). 측정 CSV는 만들지만 요약에 넣지 않는다"
+ }
 }

@@ -1,89 +1,95 @@
-"""측정 실행의 CSV 메타데이터를 기대값과 대조하고 프레임 지표와 동등성 통계를 한 줄로 보인다.
+"""측정 실행의 CSV 메타데이터를 조건 표의 기대값과 대조하고 프레임 지표를 한 줄로 보인다(v2 W12).
 
-두 가지 기대값 출처가 있다.
-1. 총괄 묶음 조건(Q5): Scripts/full-conditions.json. 사다리 8단계(L1~L8), 빼 보기 행(A8-*, Q4b부터 farshadow를 더해 열 행), 하위 실험(S1-*, S8-*)의
-   인자와 기대 메타데이터. 라벨이 Full<n>-<label_step>-<label_variant>-N<N>-<P1|P2>-r<i>이면 그 조건을 고른다. --cond로 직접 고를 수도 있다.
-   기대값 = common_expect + 조건의 expect + 실행값(LabN, LabPreset, LabLabel, LabAlive·LabAliveMin·LabAliveMax = N).
-   --shot이면 촬영 실행이라 LabHud 1, LabShotAt > 0을 기대한다. --serial이면 LabOverrides 끝에 fully_parallel=0이 붙는다.
-2. Q3·Q4 빼 보기 라벨(옛 방식): plan.md "품질 계획" 빼 보기 표의 아홉 행과 final. 그 행의 기법만 0이고 나머지 여덟은 1이다(LabTech*, FLabConfig::TechList).
-   실제 적용값도 본다: LabBudget, LabPool, LabIskmBounds(2종이면 2), LabCrowdFxActive.
+기대값은 Scripts/full-conditions.json(v2)이 정한다: 공통 기대값 + 구성(단계 s1~s8, 빼 보기 a8* 등)의 기대값(base가 있으면 그 위에 덮어쓴다)
++ 실행값(오브 궤도 LabOrbit, 워밍업+측정 LabWindow, LabN, LabAlive*, LabLabel, 빌드 LabBuild).
+라벨이 <묶음>-<V0|V1>-<구성>-N<N>-P1-r<회차>면 조건을 라벨에서 고른다. 트레이스(<묶음>trace-, <묶음>traceser-)와 촬영(<묶음>shot-) 라벨도 같다.
+--cond V0-s8로 직접 고를 수도 있다.
 
-실행: py -3 -I Scripts/ablation-check.py <CSV>... [--cond L8-q4final] [--shot] [--serial] [--row final|hydrate|...]
-대조가 하나라도 틀리면 종료 코드 1. 표준 라이브러리만 쓴다(summarize.py의 CSV 읽기를 그대로 쓴다).
+실행: py -3 -I Scripts/ablation-check.py <CSV>... [--cond V0-s8] [--shot] [--serial] [--build 903c3385a45c] [--measure-sec 60]
+  --shot    촬영 실행(-LabHud -LabShotAt): LabHud 1, LabShotAt > 0을 기대한다(대조 때 워밍업·측정 구간은 보지 않는다)
+  --serial  직렬 트레이스(-LabFullyParallel=0): LabOverrides에 fully_parallel=0이 든다
+  --build   패키지의 커밋 해시 앞 12자. 주면 LabBuild와 같아야 한다(러너가 Packaged/Test/commit.txt에서 읽어 넘긴다)
+  --measure-sec  측정 구간이 기본(180초)이 아닌 실행(트레이스 60초)의 LabWindow를 맞춘다
+대조가 하나라도 틀리면 종료 코드 1. 마지막 줄이 아닌 둘째 줄에 `frames=<n> frame_p50=<ms> frame_p95=<ms>`가 있다(러너가 읽는다).
+표준 라이브러리만 쓴다.
 """
 import argparse
-import json
-import re
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+import lab_conditions as lc  # noqa: E402
 from summarize import column, percentile, read_profile  # noqa: E402
 
-CONDITIONS = Path(__file__).resolve().parent / "full-conditions.json"
-FULL_LABEL = re.compile(r"^Full\d+-(?P<step>[A-Za-z0-9]+)-(?P<variant>[A-Za-z0-9]+)-N(?P<n>\d+)-(?P<preset>P[12])-r\d+$")
 
-# Q3·Q4 행 이름 -> 끄는 기법의 메타데이터 키(소문자). 명령은 Docs/Guides/commands.md "빼 보기 스위치"
-ROWS = {
-    "final": None,
-    "hydrate": "labtechhydrate",
-    "budget": "labtechanimbudget",
-    "fix": "labtechhydratefix",
-    "pool": "labtechpool",
-    "simlod": "labtechsimlod",
-    "iskm": "labtechiskm",
-    "bounds": "labtechfixedbounds",
-    "farcull": "labtechfarcull",
-    "crowdfx": "labtechcrowdfx",
-}
-TECH_KEYS = [k for k in ROWS.values() if k]
+def mean(vals):
+    return round(sum(vals) / len(vals), 3) if vals else "?"
 
 
-def expected_row(row, types):
-    """Q3·Q4 행의 기대값(메타데이터 키 소문자 -> 문자열)."""
-    exp = {k: "1" for k in TECH_KEYS}
-    if ROWS[row]:
-        exp[ROWS[row]] = "0"
-    exp["labbudget"] = "0" if row == "budget" else "1"
-    exp["labpool"] = "0" if row == "pool" else "1"
-    exp["labiskmbounds"] = "0" if row in ("iskm", "bounds") else str(types)
-    exp["labcrowdfxactive"] = "0" if row == "crowdfx" else "1"
-    return exp
+def check_labels(doc, cfgs, path):
+    labels = [ln.strip() for ln in Path(path).read_text(encoding="utf-8-sig").splitlines() if ln.strip()]
+    bad = 0
+    for label in labels:
+        p = lc.parse_label(label)
+        if not p or p["cfg"] not in cfgs or p["speed"] not in doc["scenario"]["speeds"]:
+            bad += 1
+            print(f"  LABEL FAIL {label}")
+            continue
+        lc.expected(doc, cfgs, p["cfg"], p["speed"], p["n"], label, "000000000000", p["kind"] == "shot", p["kind"] == "traceser")
+    dup = len(labels) - len(set(labels))
+    if dup:
+        bad += 1
+        print(f"  LABEL FAIL {dup} duplicate labels")
+    print(f"  labels: {len(labels)} checked, {bad} problems (pattern, config, speed, expectation, duplicates)")
+    return 1 if bad else 0
 
 
-def load_conditions():
-    doc = json.loads(CONDITIONS.read_text(encoding="utf-8"))
-    return doc, {c["name"]: c for c in doc["conditions"]}
+REFERENCE_CSV = Path(__file__).resolve().parent.parent / "Saved" / "Profiling" / "CSV" / "V2W11Sweep-V0-s8-N10000-P1-r1.csv"
 
 
-def expected_cond(doc, cond, label, n, preset, shot, serial):
-    """총괄 묶음 조건의 기대값(키 소문자 -> 문자열). n·preset이 없으면 실행값은 대조하지 않는다."""
-    exp = {k.lower(): v for k, v in doc["common_expect"].items()}
-    exp.update({k.lower(): v for k, v in cond["expect"].items()})
-    if n:
-        exp.update({"labn": n, "labalive": n, "labalivemin": n, "labalivemax": n})
-    if preset:
-        exp["labpreset"] = preset
-    if label:
-        exp["lablabel"] = label
-    if serial:
-        ov = exp.get("laboverrides", "-")
-        exp["laboverrides"] = "fully_parallel=0" if ov == "-" else ov + "|fully_parallel=0"
-    if shot:
-        exp["labhud"] = "1"
-        exp.pop("labshotat", None)
-    return exp
+def selftest(doc, cfgs):
+    bad = 0
+    for g, d in doc["groups"].items():
+        for c in d["configs"]:
+            if c not in cfgs:
+                bad += 1
+                print(f"  SELFTEST FAIL group {g}: unknown config {c}")
+        if d["speed"] not in doc["scenario"]["speeds"]:
+            bad += 1
+            print(f"  SELFTEST FAIL group {g}: unknown speed {d['speed']}")
+    if REFERENCE_CSV.exists():
+        _, _, meta = read_profile(REFERENCE_CSV)
+        for name in cfgs:
+            exp = lc.expected(doc, cfgs, name, "V0", 10000, "x", "000000000000")
+            miss = [k.lstrip("~") for k in exp if k.lstrip("~") not in meta]
+            if miss:
+                bad += 1
+                print(f"  SELFTEST FAIL {name}: expected keys not in the reference CSV metadata: {', '.join(miss)}")
+        print(f"  selftest: {len(cfgs)} configs, expected keys checked against {REFERENCE_CSV.name}")
+    else:
+        print(f"  selftest: {len(cfgs)} configs (reference CSV {REFERENCE_CSV.name} not found, metadata keys not checked)")
+    return 1 if bad else 0
 
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("csv", nargs="+")
-    ap.add_argument("--row", choices=list(ROWS))
-    ap.add_argument("--cond", help="full-conditions.json의 조건 이름(예: L8-q4final). 없으면 라벨에서 고른다")
-    ap.add_argument("--shot", action="store_true", help="촬영 실행(-LabHud -LabShotAt)")
-    ap.add_argument("--serial", action="store_true", help="직렬 트레이스 실행(-LabFullyParallel=0)")
+    ap.add_argument("csv", nargs="*")
+    ap.add_argument("--labels", help="라벨 목록 파일(한 줄에 하나). 파일의 모든 라벨이 조건 표의 조건이고 기대값을 만들 수 있는지만 본다(러너 -DryRun이 쓴다)")
+    ap.add_argument("--selftest", action="store_true", help="조건 표의 모든 구성의 기대 키가 기준 CSV의 메타데이터에 있는지, 묶음 종류의 구성이 모두 있는지 본다")
+    ap.add_argument("--cond", help="조건 이름(예: V0-s8). 없으면 라벨에서 고른다")
+    ap.add_argument("--shot", action="store_true")
+    ap.add_argument("--serial", action="store_true")
+    ap.add_argument("--build", default="")
+    ap.add_argument("--measure-sec", type=int, default=0)
     a = ap.parse_args()
-    doc, conds = load_conditions()
+    doc = lc.load()
+    cfgs = lc.configs(doc)
+    if a.labels:
+        sys.exit(check_labels(doc, cfgs, a.labels))
+    if a.selftest:
+        sys.exit(selftest(doc, cfgs))
+    if not a.csv:
+        ap.error("CSV, --labels, --selftest 중 하나가 필요하다")
     bad = 0
     for path in a.csv:
         header, data, meta = read_profile(path)
@@ -91,43 +97,50 @@ def main():
         frame = column(header, data, ["FrameTime"])
         game = column(header, data, ["GameThreadTime"])
         gpu = column(header, data, ["GPUTime"])
-        tech = ",".join(f"{k[len('labtech'):]}:{meta.get(k, '?')}" for k in TECH_KEYS)
-        print(f"{label}: stage={meta.get('labstage', '?')} variant={meta.get('labvariant', '?')} ladder={meta.get('labladder', '?')} "
-              f"overrides={meta.get('laboverrides', '?')} n={meta.get('labn', '?')} types={meta.get('labtypes', '?')} "
-              f"budget={meta.get('labbudget', '?')} pool={meta.get('labpool', '?')} iskm_bounds={meta.get('labiskmbounds', '?')} "
-              f"fixmask={meta.get('labhydratefixmask', '?')} crowdfx_active={meta.get('labcrowdfxactive', '?')} "
-              f"cap={meta.get('labactorcap', '?')} hyd={meta.get('labhydratem', '?')} col={meta.get('labactorcollision', '?')} "
-              f"hud={meta.get('labhud', '?')} tech={tech}")
+        overlap = mean(column(header, data, ["Lab/OverlapPairs"]))
+        print(f"{label}: stage={meta.get('labstage', '?')} ladder={meta.get('labladder', '?')} orbit={meta.get('laborbit', '?')} window={meta.get('labwindow', '?')} "
+              f"overrides={meta.get('laboverrides', '?')} n={meta.get('labn', '?')} types={meta.get('labtypes', '?')} cap={meta.get('labactorcap', '?')} "
+              f"hyd={meta.get('labhydratem', '?')} col={meta.get('labactorcollision', '?')} sep={meta.get('labtechseparate', '?')} avoid={meta.get('labtechavoid', '?')} "
+              f"hold={meta.get('labrephold', '?')} fsb={meta.get('labfixedskelbounds', '?')} hud={meta.get('labhud', '?')} build={meta.get('labbuild', '?')}")
         print(f"  frames={len(frame)} frame_p50={percentile(frame, 0.5)} frame_p95={percentile(frame, 0.95)} game_p50={percentile(game, 0.5)} "
-              f"gpu_p50={percentile(gpu, 0.5)} ok={meta.get('labok', '?')} alive={meta.get('labalive', '?')} "
-              f"death_rate={meta.get('labdeathrate', '?')} deaths={meta.get('labdeaths', '?')} near30_mean={meta.get('labnear30mean', '?')} "
-              f"alive_min={meta.get('labalivemin', '?')} alive_max={meta.get('labalivemax', '?')}")
-
-        m = FULL_LABEL.match(label)
-        cond_name = a.cond or (f"{m['step']}-{m['variant']}" if m else None)
-        if cond_name:
-            if cond_name not in conds:
-                bad += 1
-                print(f"  CHECK {cond_name}: FAIL unknown condition (Scripts/full-conditions.json)")
-                continue
-            # 라벨이 Full 형식이 아니면(--cond) N은 메타데이터의 LabN을 믿고 살아 있는 총수만 그 값과 대조한다
-            n = m["n"] if m else meta.get("labn")
-            exp = expected_cond(doc, conds[cond_name], label if m else None, n, m["preset"] if m else None, a.shot, a.serial)
-            if a.shot and meta.get("labshotat", "0") in ("0", ""):
-                exp["labshotat"] = "> 0"
-            check = cond_name
+              f"gpu_p50={percentile(gpu, 0.5)} ok={meta.get('labok', '?')} alive={meta.get('labalive', '?')} death_rate={meta.get('labdeathrate', '?')} "
+              f"near30_mean={meta.get('labnear30mean', '?')} overlap_mean={overlap} capsule={meta.get('labcapsuletraces', '?')}/{meta.get('labcapsulehits', '?')}/{meta.get('labcapsuleblocked', '?')}")
+        p = lc.parse_label(label)
+        cond = a.cond
+        if cond:
+            speed, _, cfg = cond.partition("-")
+            n = meta.get("labn")
+        elif p:
+            speed, cfg, n = p["speed"], p["cfg"], str(p["n"])
+            cond = f"{speed}-{cfg}"
         else:
-            row = a.row or next((r for r in ROWS if f"-{r}-" in f"-{label}-"), None)
-            if not row:
-                continue
-            exp = expected_row(row, meta.get("labtypes", "2"))
-            check = row
-        diff = [f"{k}={meta.get(k, '?')} (expected {v})" for k, v in exp.items() if meta.get(k) != v]
+            bad += 1
+            print(f"  CHECK ?: FAIL label '{label}' does not match <묶음>-<V0|V1>-<구성>-N<N>-P1-r<회차>; pass --cond")
+            continue
+        if cfg not in cfgs or speed not in doc["scenario"]["speeds"]:
+            bad += 1
+            print(f"  CHECK {cond}: FAIL unknown condition (Scripts/full-conditions.json)")
+            continue
+        serial = a.serial or (p is not None and p["kind"] == "traceser")
+        measure = a.measure_sec or (doc["groups"]["trace"]["measure_sec"] if p and p["kind"] in ("trace", "traceser") else 0)
+        exp = lc.expected(doc, cfgs, cfg, speed, n, label if p else None, a.build or None, a.shot or (p is not None and p["kind"] == "shot"), serial, measure or None)
+        if exp.get("labhud") == "1" and meta.get("labshotat", "0") in ("0", ""):
+            exp["labshotat"] = "> 0"
+        if exp.get("labhud") == "1":
+            exp.pop("labwindow", None)  # 촬영 실행은 -LabWarmup, -LabDuration을 따로 준다
+        diff = []
+        for k, v in exp.items():
+            if k.startswith("~"):
+                got = meta.get(k[1:], "?")
+                if v not in got:
+                    diff.append(f"{k[1:]}={got} (expected to contain {v})")
+            elif meta.get(k) != v:
+                diff.append(f"{k}={meta.get(k, '?')} (expected {v})")
         if diff:
             bad += 1
-            print(f"  CHECK {check}: FAIL " + "; ".join(diff))
+            print(f"  CHECK {cond}: FAIL " + "; ".join(diff))
         else:
-            print(f"  CHECK {check}: ok")
+            print(f"  CHECK {cond}: ok")
     sys.exit(1 if bad else 0)
 
 

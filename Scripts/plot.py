@@ -7,20 +7,24 @@
 - n-at-60fps.csv   : 위 막대의 값(p95 N, p50 N, 병목). 글의 표 재료.
 
 실행: py -3 -I Scripts/plot.py                # 마일스톤 묶음(Measurements/M*/)
-      py -3 -I Scripts/plot.py --batch Full1  # 총괄 묶음: Measurements/Full1/만 읽는다(아래 FULL_SERIES 표, Docs/figures/full1/)
+      py -3 -I Scripts/plot.py --batch Full4  # 총괄 묶음: Measurements/Full4/만 읽는다(조건 표 Scripts/full-conditions.json, Docs/figures/full4/)
 
-총괄 묶음(Docs/Worklog/Q5.md "2단위")이 그리는 것
-- full-ladder-P1.svg, full-ladder-P2.svg : 사다리 8단계의 프레임 p95(굵은 막대)와 p50(가는 막대), 목표 총수. 막대 색은 단계의 성격(출발점, 버는 단계, 품질 단계)이다.
-                                          묶음 끝 A/A(L8 기준점 반복)의 범위를 제목 아래에 적는다. 13.3ms(여유 20%)와 16.7ms 선을 긋는다.
-- full-ablation-P1.svg                    : 빼 보기 아홉 행의 프레임 p95와 최종 구성(L8)의 p95. 막대가 L8보다 길수록 그 기법이 번 것이다.
-- full-maxn-P1.svg                        : N에 따른 프레임 p95, 단계 1~8, P1, 로그-로그(보조 지표).
-- full-ladder.csv, full-ablation.csv, full-n-at-60fps.csv : 글의 표 재료(프레임 p50·p95·p99, 프로세스 메모리, GPU 메모리, 품질 열, 동등성 값, N@16.7ms).
+총괄 묶음(v2 W12, Docs/Worklog/V2.md "W12 측정 준비")이 그리는 것
+- full-ladder.svg                          : 사다리 8단계의 프레임 p95(굵은 막대)와 p50(가는 막대), 목표 총수, 이동 조건(V0). 16.7ms와 p95 + 0.6ms(D52 제안) 선을 긋는다.
+- full-ablation-moving.svg, -still.svg     : 단계 8에서 기법 하나를 뺀(또는 엔진 회피를 더한) 행의 프레임 p95와 단계 8의 p95. 이동(V0)과 정지(V1).
+- full-maxn.svg                            : N에 따른 프레임 p95, 단계 1~8, 로그-로그(보조 지표). 단계 1의 점은 사다리(1만)와 액터 보조(500, 1천, 2천)를 합친다.
+- full-ladder.csv, full-ablation-moving.csv, full-ablation-still.csv, full-n-at-60fps.csv : 표 재료(프레임 p50·p95, 범위, 차이 판정, 겹친 쌍, 캡슐, 왕복 전환, CPU 클럭, N@16.7ms).
+--out <폴더>로 출력 위치를 바꾼다(확인용 그림은 커밋하지 않는다).
 """
 import argparse
 import csv
 import json
 import math
+import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import lab_conditions as lc  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "Docs" / "figures"
@@ -124,26 +128,15 @@ def line_chart(sers, title, path, sers50=None):
     path.write_text(svg(W, H, "\n".join(body)), encoding="utf-8")
 
 
-# ---- 총괄 묶음(--batch Full1) ----
-# 그릴 계열: 사다리 단계(plan.md "사다리" 표의 번호, 성격) -> 조건 이름(Scripts/full-conditions.json). 단계마다 대표 조건 하나다.
-# 성격: start 출발점, earn 버는 단계(프레임 시간을 번다), quality 품질 단계(프레임을 쓰고 화면·자세·거리 품질을 얻는다)
-FULL_SERIES = [
-    ("1", "Actor baseline", "L1-full", "start"),
-    ("2", "Logic on Mass", "L2-mass", "earn"),
-    ("3", "ISM + VAT, cull past 200 m", "L3-vatcull", "quality"),
-    ("4", "Near actors + anim budget", "L4-mass", "quality"),
-    ("5", "Simulation LOD + entity pool", "L5-m4offpool", "earn"),
-    ("6", "ISKM + fixed bounds", "L6-m5bounds", "quality"),
-    ("7", "Niagara background crowd", "L7-q2crowd", "quality"),
-    ("8", "Raise quality (actor cap, hydrate dist)", "L8-q4final", "quality"),
-]
+# ---- 총괄 묶음(--batch Full4, v2 W12) ----
+# 계열과 이름은 Scripts/full-conditions.json(v2)이 정한다: steps(단계 이름·성격), configs(빼 보기 이름), groups. 조건 이름은 "<V0|V1>-<구성>"(V0 이동, V1 정지)이다.
+# 성격: start 출발점, earn 버는 단계(프레임 시간을 번다), quality 품질 단계(번 시간을 화면·거리 품질에 쓴다)
 FULL_KIND_COLOR = {"start": "#6b7280", "earn": "#2563eb", "quality": "#ea580c"}
-FULL_KIND_NAME = {"start": "start", "earn": "earns frame time", "quality": "spends it on quality"}
-FULL_BASELINE = "L8-q4final"      # 빼 보기와 A/A의 기준 조건
-FULL_LADDER_CLIP_MS = 20.0        # 사다리 그림의 가로축 끝. 넘는 막대(L1)는 끊어 그린다
-FULL_MARGIN_MS = 13.3             # 목표: 16.7ms에서 여유 20%를 뺀 값(plan.md "목표 사양", 잠정)
+FULL_LADDER_CLIP_MS = 20.0        # 사다리 그림의 가로축 끝. 넘는 막대(단계 1, 2)는 끊어 그린다
+FULL_JUDGE_MARGIN_MS = 0.6        # D52의 제안: p95 중앙값 + 0.6ms <= 16.7ms. 선은 16.7 - 0.6 = 16.1ms에 긋는다(제안이라 사용자 승인 전이다)
 FULL_ROW_FIELDS = ["frame_p50_ms", "frame_p95_ms", "frame_p99_ms", "game_p50_ms", "render_p50_ms", "gpu_p50_ms", "mem_total_mb", "gpu_mem_p50",
-                   "actors_mean", "view_actors_mean", "cover30_mean", "large_skip_ratio", "death_rate", "near30_mean"]
+                   "actors_mean", "view_actors_mean", "cover30_mean", "overlap_mean", "capsule_traces", "capsule_blocked", "sw_round_all", "death_rate", "near30_mean",
+                   "cpu_perf_mean", "cpu_perf_min"]
 
 
 def full_load(batch):
@@ -172,8 +165,7 @@ def write_rows(path, rows, fields):
 def hbar_chart(items, title, subtitle, path, lines, clip=None, footer=None):
     """items: (이름, p95, p50 또는 None, 색, 주석). lines: (ms, 색, 이름) 세로선.
 
-    clip(ms)을 주면 가로축을 거기서 끊는다. 넘는 막대는 축 끝까지만 그리고 끝에 끊김 표시를 한 뒤 값을 적는다
-    (L1이 400ms대라 선형 축에서는 나머지 단계가 몇 픽셀로 눌린다).
+    clip(ms)을 주면 가로축을 거기서 끊는다. 넘는 막대는 축 끝까지만 그리고 끝에 끊김 표시를 한 뒤 값을 적는다.
     """
     W, L, R, T = 900, 290, 150, 70
     rowh = 38
@@ -200,8 +192,8 @@ def hbar_chart(items, title, subtitle, path, lines, clip=None, footer=None):
     path.write_text(svg(W, H, "\n".join(body)), encoding="utf-8")
 
 
-def full_target(batch, rows, override):
-    # 목표 총수: --target-n > batch.json의 target_n(run-full.ps1이 적는다) > A/A 행이 있는 N > L8 P1 행의 최대 N
+def full_target(batch, override):
+    # 목표 총수: --target-n > batch.json의 target_n(run-full.ps1이 적는다) > 조건 표의 scenario.target_n
     if override:
         return override, "--target-n"
     bj = ROOT / "Measurements" / batch / "batch.json"
@@ -212,81 +204,94 @@ def full_target(batch, rows, override):
                 return int(t), "batch.json"
         except (ValueError, OSError):
             pass
-    aa = sorted({n for (v, n, p) in rows if v == FULL_BASELINE + "-aa" and p == "P1"})
-    if aa:
-        return aa[-1], "A/A row"
-    have = {n for (v, n, p) in rows if v == FULL_BASELINE and p == "P1"}
-    return (max(have) if have else None), "max N"
+    return int(lc.load()["scenario"]["target_n"]), "full-conditions.json"
 
 
-def full_main(batch, target_n=None):
+def full_row(r, extra):
+    row = dict(extra, runs=r["runs"], frame_p95_ms_min=r.get("frame_p95_ms_min", ""), frame_p95_ms_max=r.get("frame_p95_ms_max", ""),
+               frame_p50_ms_min=r.get("frame_p50_ms_min", ""), frame_p50_ms_max=r.get("frame_p50_ms_max", ""))
+    for k in FULL_ROW_FIELDS:
+        row[k] = r.get(k, "")
+    return row
+
+
+def full_ablation(rows, doc, cfgs, speed, target, out, title_extra):
+    """빼 보기 한 장. 기준은 같은 속도의 단계 8. 막대가 기준보다 길면 그 기법이 번 것이다. 묶음 종류(group)는 조건 표에서 읽는다."""
+    base = rows.get((f"{speed}-s8", target, "P1"))
+    if not base or fnum(base, "frame_p95_ms") is None:
+        return [], None
+    names = [c for g in ("ablation", "sub") for c in doc["groups"][g]["configs"]]
+    b95, b50 = fnum(base, "frame_p95_ms"), fnum(base, "frame_p50_ms")
+    items = [("final configuration (step 8)", b95, b50, FULL_KIND_COLOR["quality"], "")]
+    csv_rows = []
+    for cfg in names:
+        r = rows.get((f"{speed}-{cfg}", target, "P1"))
+        if not r or fnum(r, "frame_p95_ms") is None:
+            continue
+        v95, v50 = fnum(r, "frame_p95_ms"), fnum(r, "frame_p50_ms")
+        added = cfgs[cfg]["kind"] == "sub"
+        d95, d50 = v95 - b95, v50 - b50
+        label = f'with {cfgs[cfg]["title"].replace(" (added)", "")}' if added else f'without {cfgs[cfg]["title"]}'
+        items.append((label, v95, v50, FULL_KIND_COLOR["earn"] if d95 > 0 else FULL_KIND_COLOR["start"], f"{d95:+.2f}"))
+        # 차이 판정(measurement.md): p50 변화가 두 조건의 범위(최댓값 - 최솟값) 중 큰 쪽보다 클 때만 차이가 있다
+        rng = lambda x, k: (fnum(x, k + "_max") or 0) - (fnum(x, k + "_min") or 0)
+        distinct = "yes" if abs(d50) > max(rng(r, "frame_p50_ms"), rng(base, "frame_p50_ms")) else "no"
+        csv_rows.append(full_row(r, {"cond": f"{speed}-{cfg}", "title": cfgs[cfg]["title"], "kind": cfgs[cfg]["kind"], "n": target,
+                                     "delta_p50_ms": round(d50, 3), "delta_p95_ms": round(d95, 3), "p50_distinct": distinct,
+                                     "delta_gpu_p50_ms": round((fnum(r, "gpu_p50_ms") or 0) - (fnum(base, "gpu_p50_ms") or 0), 3)}))
+    if len(items) > 1:
+        hbar_chart(items, f"Remove one technique from the final configuration (N={target:,}, {title_extra})",
+                   "blue: removing it costs frame time (it earned it), gray: no cost", out, [(BUDGET_MS, "#b45309", "16.7 ms")])
+    return csv_rows, base
+
+
+def full_main(batch, target_n=None, out_dir=None):
+    doc = lc.load()
+    cfgs = lc.configs(doc)
     rows = full_load(batch)
-    out = OUT / batch.lower()
+    out = Path(out_dir) if out_dir else OUT / batch.lower()
     out.mkdir(parents=True, exist_ok=True)
-    ns = sorted({n for (_, n, _) in rows})
-    target, target_src = full_target(batch, rows, target_n)
-    if target is None:
-        raise SystemExit(f"no {FULL_BASELINE} P1 rows in Measurements/{batch}/summary.csv")
-    aa = rows.get((FULL_BASELINE + "-aa", target, "P1"))
-    base = rows.get((FULL_BASELINE, target, "P1"))
+    target, target_src = full_target(batch, target_n)
+    judge = BUDGET_MS - FULL_JUDGE_MARGIN_MS
+    lines = [(BUDGET_MS, "#b45309", "16.7 ms (60 fps)"), (judge, "#16a34a", f"{judge:.1f} ms (p95 + {FULL_JUDGE_MARGIN_MS} ms, D52 proposal)")]
+
+    # 사다리: 단계 1~8, 이동(V0), 목표 총수
+    aa = rows.get(("V0-s8-aa", target, "P1"))
+    base = rows.get(("V0-s8", target, "P1"))
     aa_note = ""
     if aa and base and fnum(aa, "frame_p95_ms") is not None:
-        aa_note = (f'A/A ({FULL_BASELINE} again, {aa["runs"]} runs): p95 {fnum(aa, "frame_p95_ms"):.2f} ms '
+        aa_note = (f'A/A (step 8 again, {aa["runs"]} runs): p95 {fnum(aa, "frame_p95_ms"):.2f} ms '
                    f'(range {fnum(aa, "frame_p95_ms_min"):.2f}-{fnum(aa, "frame_p95_ms_max"):.2f}) vs {fnum(base, "frame_p95_ms"):.2f}')
-    budget = [(BUDGET_MS, "#b45309", "16.7 ms"), (FULL_MARGIN_MS, "#16a34a", "13.3 ms")]
+    items, ladder_csv = [], []
+    for num, st in doc["steps"].items():
+        r = rows.get((f"V0-s{num}", target, "P1"))
+        if not r or fnum(r, "frame_p95_ms") is None:
+            continue
+        items.append((f"{num}. {st['name']}", fnum(r, "frame_p95_ms"), fnum(r, "frame_p50_ms"), FULL_KIND_COLOR[st["role"]], ""))
+        ladder_csv.append(full_row(r, {"step": num, "name": st["name"], "cond": f"V0-s{num}", "kind": st["role"], "n": target}))
+    if items:
+        hbar_chart(items, f"Frame time of the ladder at N={target:,} (moving orb)", "gray: start · blue: earned frame time · orange: spent it on quality",
+                   out / "full-ladder.svg", lines, clip=FULL_LADDER_CLIP_MS,
+                   footer="ms. thick bar = frame p95, thin bar = frame p50 (median of runs). Steps that exceed the axis are cut")
+    write_rows(out / "full-ladder.csv", ladder_csv, ["step", "name", "cond", "kind", "n", "runs", "frame_p95_ms_min", "frame_p95_ms_max", "frame_p50_ms_min", "frame_p50_ms_max"] + FULL_ROW_FIELDS)
 
-    ladder_csv = []
-    for preset in ("P1", "P2"):
-        items = []
-        for num, name, cond, kind in FULL_SERIES:
-            r = rows.get((cond, target, preset))
-            if not r or fnum(r, "frame_p95_ms") is None:
-                continue
-            items.append((f"{num}. {name}", fnum(r, "frame_p95_ms"), fnum(r, "frame_p50_ms"), FULL_KIND_COLOR[kind], ""))
-            row = {"step": num, "name": name, "cond": cond, "kind": kind, "n": target, "preset": preset, "runs": r["runs"]}
-            for k in FULL_ROW_FIELDS:
-                row[k] = r.get(k, "")
-            row["frame_p95_ms_min"], row["frame_p95_ms_max"] = r.get("frame_p95_ms_min", ""), r.get("frame_p95_ms_max", "")
-            ladder_csv.append(row)
-        if items:
-            # README에 싣는 그림이다. 부제에 A/A(재현성) 문구를 넣지 않는다(측정 기록에 있다). L1은 축 밖이라 끊어 그린다(2026-11-12 사용자 결정)
-            view = {"P1": "오브 시점", "P2": "탑뷰"}[preset]
-            hbar_chart(items, f"호드 총수 {target:,}의 프레임 시간 ({view})", "회색: 시작점 · 파랑: 프레임 시간을 번 단계 · 주황: 번 시간을 품질에 쓴 단계",
-                       out / f"full-ladder-{preset}.svg", [(BUDGET_MS, "#b45309", "16.7 ms (60 fps)"), (FULL_MARGIN_MS, "#16a34a", "13.3 ms")], clip=FULL_LADDER_CLIP_MS,
-                       footer="단위 ms. 굵은 막대 = 프레임 p95, 가는 막대 = 프레임 p50 (세 회차 중앙값). 1단계는 축 밖이라 끊어 그렸다")
-    write_rows(out / "full-ladder.csv", ladder_csv, ["step", "name", "cond", "kind", "n", "preset", "runs", "frame_p95_ms_min", "frame_p95_ms_max"] + FULL_ROW_FIELDS)
+    # 빼 보기: 이동(V0)과 정지(V1)
+    abl_fields = ["cond", "title", "kind", "n", "delta_p50_ms", "delta_p95_ms", "p50_distinct", "delta_gpu_p50_ms", "runs", "frame_p95_ms_min", "frame_p95_ms_max", "frame_p50_ms_min", "frame_p50_ms_max"] + FULL_ROW_FIELDS
+    for speed, name in (("V0", "moving"), ("V1", "still")):
+        csv_rows, _ = full_ablation(rows, doc, cfgs, speed, target, out / f"full-ablation-{name}.svg", f"{name} orb")
+        write_rows(out / f"full-ablation-{name}.csv", csv_rows, abl_fields)
 
-    # 빼 보기: 조건 JSON의 group ablation 전부(summary.csv의 group 열). 막대가 기준(L8)보다 길면 그 기법이 번 것
-    abl_items, abl_csv = [], []
-    if base:
-        b95 = fnum(base, "frame_p95_ms")
-        abl_items.append((f"{FULL_BASELINE} (final)", b95, fnum(base, "frame_p50_ms"), FULL_KIND_COLOR["quality"], ""))
-        for (v, n, p), r in sorted(rows.items()):
-            if p != "P1" or n != target or r.get("group") != "ablation":
-                continue
-            v95 = fnum(r, "frame_p95_ms")
-            if v95 is None:
-                continue
-            delta = v95 - b95
-            abl_items.append((f"without {v.split('-', 1)[1]}", v95, fnum(r, "frame_p50_ms"), FULL_KIND_COLOR["earn"] if delta > 0 else FULL_KIND_COLOR["start"], f"{delta:+.2f}"))
-            row = {"cond": v, "n": n, "delta_p95_ms": round(delta, 3), "runs": r["runs"], "frame_p95_ms_min": r.get("frame_p95_ms_min", ""), "frame_p95_ms_max": r.get("frame_p95_ms_max", "")}
-            for k in FULL_ROW_FIELDS:
-                row[k] = r.get(k, "")
-            abl_csv.append(row)
-        if len(abl_items) > 1:
-            hbar_chart(abl_items, f"Remove one technique from the final configuration (N={target:,}, P1)",
-                       (aa_note or "blue: removing it costs frame time (it earned it), gray: no cost"), out / "full-ablation-P1.svg", budget)
-    write_rows(out / "full-ablation.csv", abl_csv, ["cond", "n", "delta_p95_ms", "runs", "frame_p95_ms_min", "frame_p95_ms_max"] + FULL_ROW_FIELDS)
-
-    # 보조: N 스케일링(P1). 계열 = 사다리 대표 조건(사다리 번호를 앞에 붙인다)
+    # 보조: N 스케일링. 계열 = 단계. 단계 1의 점은 사다리(1만)와 액터 보조(500, 1천, 2천)를 합친다
     p95, p50 = {}, {}
-    for num, name, cond, kind in FULL_SERIES:
+    ns = sorted({n for (v, n, p) in rows if v.startswith("V0-s") and v[4:].isdigit()})
+    for num in doc["steps"]:
         for n in ns:
-            r = rows.get((cond, n, "P1"))
+            r = rows.get((f"V0-s{num}", n, "P1"))
             if r and fnum(r, "frame_p95_ms") is not None:
-                p95.setdefault(f"{num} {cond}", []).append((n, fnum(r, "frame_p95_ms")))
+                key = f"{num} {doc['steps'][num]['name']}"
+                p95.setdefault(key, []).append((n, fnum(r, "frame_p95_ms")))
                 named = [fnum(r, k) for k in ("frame_p50_ms", "game_p50_ms", "render_p50_ms", "gpu_p50_ms")]
-                p50.setdefault(f"{num} {cond}", []).append((n, max(v for v in named if v is not None)))
+                p50.setdefault(key, []).append((n, max(v for v in named if v is not None)))
     table = []
     for name, pts in sorted(p95.items()):
         if len(pts) < 2:
@@ -298,7 +303,7 @@ def full_main(batch, target_n=None):
     write_rows(out / "full-n-at-60fps.csv", table, ["series", "n_p95", "note_p95", "n_p50", "note_p50", "points"])
     multi = {k: sorted(v) for k, v in p95.items() if len(v) >= 2}
     if multi:
-        line_chart(multi, f"Frame p95 vs N ({batch}, P1)", out / "full-maxn-P1.svg", {k: sorted(v) for k, v in p50.items() if k in multi})
+        line_chart(multi, f"Frame p95 vs N ({batch}, moving orb)", out / "full-maxn.svg", {k: sorted(v) for k, v in p50.items() if k in multi})
     print(f"{batch}: target N={target:,} (from {target_src}) {aa_note}")
     for t in table:
         print(f'{t["series"]}: N@16.7ms p95 = {t["n_p95"]} {t["note_p95"]} | p50 = {t["n_p50"]} {t["note_p50"]}')
@@ -309,9 +314,10 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--batch", help="총괄 묶음 이름(예: Full1). 주면 Measurements/<묶음>/만 읽어 Docs/figures/<묶음>/에 그린다")
     ap.add_argument("--target-n", type=int, help="--batch의 목표 총수를 직접 정한다(기본: batch.json의 target_n)")
+    ap.add_argument("--out", help="--batch의 출력 폴더(기본 Docs/figures/<묶음>/). 커밋하지 않을 확인용 그림은 스크래치 폴더를 준다")
     args = ap.parse_args()
     if args.batch:
-        full_main(args.batch, args.target_n)
+        full_main(args.batch, args.target_n, args.out)
         return
     OUT.mkdir(parents=True, exist_ok=True)
     rows = load()

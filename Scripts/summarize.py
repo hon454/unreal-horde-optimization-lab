@@ -23,6 +23,7 @@ import csv
 import json
 import re
 import statistics
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -63,18 +64,35 @@ SWITCH_MEAN = [("rep_held_mean", "Lab/RepHeld"), ("rep_cap_blocked_mean", "Lab/R
 SWITCH_NUM = [k for k, _ in SWITCH_STATS] + ["sw_round_all"] + [k for k, _ in SWITCH_MEAN] + ["rep_cap_on_ratio", "actors_max"]
 SWITCH_RANGE = ["sw_round_all", "sw_round_actor"]
 SWITCH_FIELDS = SWITCH_TEXT + SWITCH_NUM
+# v2 W12 CPU 클럭(run-full.ps1이 Measurements/<묶음>/clock.csv에 남긴다). cpu_perf_mean·cpu_perf_min = 측정 구간 2초 표본의 % Processor Performance 평균·최소(기본 클럭 대비 %),
+# cpu_mhz_mean = 평균 × 기본 클럭, cpu_busy_before = 실행 시작 전 3초의 전체 CPU 사용률(%). 파일이 없으면 빈칸. summary에는 중앙값(cpu_perf_min은 최솟값)을 쓴다
+CLOCK_FIELDS = ["cpu_perf_mean", "cpu_perf_min", "cpu_mhz_mean", "cpu_busy_before"]
+CLOCK_SRC = {"cpu_perf_mean": "perf_mean_pct", "cpu_perf_min": "perf_min_pct", "cpu_mhz_mean": "mhz_mean", "cpu_busy_before": "cpu_busy_before_pct"}
+
+
+def read_clock(batch):
+    p = ROOT / "Measurements" / batch / "clock.csv"
+    out = {}
+    if p.exists():
+        with open(p, newline="", encoding="utf-8-sig") as f:
+            for r in csv.DictReader(f):
+                out[r["label"]] = r
+    return out
 
 _full_by_label = None
 
 
 def full_condition(step, variant):
-    """label_step-label_variant로 조건 JSON의 조건을 찾는다. JSON이 없거나 이름이 없으면 None."""
+    """라벨의 속도 칸(V0 이동, V1 정지)과 구성 칸으로 조건 표(v2)의 조건을 찾는다. 조건 이름은 "<속도>-<구성>", group은 구성의 종류(step, ablation, sub, extra).
+    표가 없거나 이름이 없으면 None."""
     global _full_by_label
     if _full_by_label is None:
         try:
-            doc = json.loads(FULL_CONDITIONS.read_text(encoding="utf-8"))
-            _full_by_label = {f'{c["label_step"]}-{c["label_variant"]}': c for c in doc["conditions"]}
-        except (OSError, ValueError, KeyError):
+            sys.path.insert(0, str(Path(__file__).resolve().parent))
+            import lab_conditions as lc
+            doc = lc.load()
+            _full_by_label = {f"{sp}-{name}": {"name": f"{sp}-{name}", "group": c["kind"]} for name, c in lc.configs(doc).items() for sp in doc["scenario"]["speeds"]}
+        except (OSError, ValueError, KeyError, ImportError):
             _full_by_label = {}
     return _full_by_label.get(f"{step}-{variant}")
 
@@ -470,7 +488,7 @@ def main():
     runs_path = out_dir / "runs.csv"
     full = bool(BATCH_NAME_RE.match(args.milestone))
     failed = failed_labels(args.milestone) if full else set()
-    run_fields = RUN_FIELDS + (FULL_FIELDS + BUDGET_FIELDS if full else []) + SWITCH_FIELDS
+    run_fields = RUN_FIELDS + (FULL_FIELDS + BUDGET_FIELDS if full else []) + SWITCH_FIELDS + CLOCK_FIELDS
 
     existing = {}
     if runs_path.exists():
@@ -479,6 +497,7 @@ def main():
                 if r["label"] not in failed:
                     existing[r["label"]] = r
 
+    clock = read_clock(args.milestone) if full else {}
     added = 0
     for path in sorted(CSV_DIR.glob(f"{args.milestone}-*.csv")):
         if path.stem in failed:
@@ -486,6 +505,8 @@ def main():
         if path.stem in existing and not args.rebuild:
             continue
         row = summarize_run(path, existing[path.stem]["pc"] if path.stem in existing else args.pc)
+        if row and path.stem in clock:
+            row.update({k: clock[path.stem].get(src, "") for k, src in CLOCK_SRC.items()})
         if row:
             added += path.stem not in existing
             existing[row["label"]] = row
@@ -537,6 +558,7 @@ def main():
     fields += SWITCH_TEXT
     for c in SWITCH_NUM:
         fields += [c] + ([f"{c}_min", f"{c}_max"] if c in SWITCH_RANGE else [])
+    fields += CLOCK_FIELDS
     with open(out_dir / "summary.csv", "w", newline="", encoding="utf-8") as f:
         w = csv.DictWriter(f, fieldnames=fields)
         w.writeheader()
@@ -591,6 +613,9 @@ def main():
                 if c in SWITCH_RANGE:
                     out[f"{c}_min"] = min(vals) if vals else ""
                     out[f"{c}_max"] = max(vals) if vals else ""
+            for c in CLOCK_FIELDS:
+                vals = [float(r[c]) for r in rs if str(r.get(c, "")) != ""]
+                out[c] = (round(min(vals), 1) if c == "cpu_perf_min" else round(statistics.median(vals), 1)) if vals else ""
             w.writerow(out)
 
     print(f"runs.csv: {len(rows)} rows (+{added}), summary.csv: {len(groups)} conditions -> {out_dir}")

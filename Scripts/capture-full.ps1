@@ -1,15 +1,17 @@
-﻿# 총괄 묶음 촬영(Docs/Worklog/Q5.md "2단위", plan.md "HUD와 촬영"). 측정이 끝난 뒤 따로 돈다. 사다리 8단계 x 목표 총수 x P1을 HUD 켜고 띄워 ffmpeg(gdigrab)로 게임 창의 한 구간을 녹화해 움직이는 WebP로 만든다(-Format gif면 GIF).
-# 라벨: <Batch>shot-<단계>-<변형>-N<N>-P1-r<Run>. 접두사가 <Batch>-가 아니라 summarize.py·spikes.py·equivalence-check.py의 글롭에 잡히지 않는다. 측정 CSV는 건드리지 않는다.
+﻿# 총괄 묶음 촬영(v2 W12. v1은 Docs/Worklog/Q5.md "2단위"). 측정이 끝난 뒤 따로 돈다. 사다리 8단계 x 목표 총수 x 이동 조건(V0, 따라가는 카메라)을 HUD 켜고 띄워 ffmpeg(gdigrab)로 게임 창의 한 구간을 녹화해 움직이는 WebP로 만든다(-Format gif면 GIF).
+# 라벨: <Batch>shot-V0-s<단계>-N<N>-P1-r<Run>. 접두사가 <Batch>-가 아니라 summarize.py·spikes.py·equivalence-check.py의 글롭에 잡히지 않는다. 측정 CSV는 건드리지 않는다.
 # 결과는 git 밖 Saved/Capture/<Batch>/<라벨>.webp(또는 .gif)이고 경로·크기·시각은 Measurements/<Batch>/captures.csv에 적는다(경로만 커밋). 한 단계가 실패해도 다음으로 넘어가고, 종료 코드는 늘 0이며 끝에 실패 수를 출력한다.
 # 영역: 창 제목으로 찍는 gdigrab(title=)은 DPI 가상화를 받는 ffmpeg가 창 크기를 논리 픽셀(배율 150%면 2/3)로 읽고 화면 DC에서는 물리 픽셀을 복사해 왼쪽 위 일부만 담는다(Pre1).
 # 그래서 ffmpeg를 DPI 인식 상태로 띄우고(__COMPAT_LAYER=HighDpiAware) 게임 창 클라이언트 영역의 물리 화면 좌표를 구해 -f gdigrab -i desktop -offset_x/-offset_y/-video_size로 그 영역만 찍는다. 영역이 가상 화면 밖으로 넘치면 실패다.
-# 녹화 구간: 게임 창이 뜬 뒤 -RecordDelaySec초 기다렸다가 -Seconds초 녹화한다(기본 24초 뒤 8초: 워밍업 15초 + 시작 지연 여유). 게임은 -LabDuration으로 측정 구간을 줄이고
+# 녹화 구간: 게임 창이 뜬 뒤 -RecordDelaySec초 기다렸다가 -Seconds초 녹화한다(기본 24초 뒤 8초: 워밍업 15초 + 시작 지연 여유). 게임은 -LabWarmup=15, -LabDuration으로 구간을 줄이고(오브는 처음부터 궤도를 돈다)
 # -LabShotAt(기본 45초)로 끝에 스크린샷 한 장을 찍어 ablation-check.py --shot 대조를 통과시킨다(LabHud 1, LabShotAt > 0). 녹화 부하로 HUD 숫자가 측정 실행보다 높을 수 있다(글 캡션).
 # 화면 왼쪽 위 HUD에 엔진의 "CsvProfiler frame: N" 화면 메시지가 겹치므로 -ExecCmds=DisableAllScreenMessages로 끈다(UnrealEngine.cpp:13786 bShowScreenMessages, 5951 명령. csv 캡처는 --shot 대조에 필요해 그대로 켠다. Docs/Reference/engine-notes.md).
-# 사다리 단계는 Scripts/full-conditions.json의 group ladder 조건이다(이름을 박지 않는다).
+# 촬영할 구성(단계 1~8)과 속도, N은 Scripts/full-conditions.json의 capture 절이다(이름을 박지 않는다).
 param(
     [string]$Batch = "Full1",
     [int]$TargetN = 10000,
+    # 게임 워밍업(초). 호드는 정상 상태 분포로 시작하므로 15초면 화면이 자리 잡는다(v1과 같다)
+    [int]$WarmupSec = 15,
     [int]$Run = 1,
     [int]$Seconds = 8,
     [int]$RecordDelaySec = 24,
@@ -31,8 +33,13 @@ $ErrorActionPreference = "Continue"
 $PSNativeCommandUseErrorActionPreference = $false
 
 $Doc = Get-Content "$PSScriptRoot\full-conditions.json" -Raw -Encoding UTF8 | ConvertFrom-Json
-$Ladder = @($Doc.conditions | Where-Object { $_.group -eq "ladder" } | Sort-Object { [int]$_.ladder })
-if ($Steps.Count -gt 0) { $Ladder = @($Ladder | Where-Object { $Steps -contains [int]$_.ladder }) }
+$Sc = $Doc.scenario
+$CapCfg = $Doc.capture
+$CfgAll = @{}
+foreach ($c in $Doc.configs) { $CfgAll[$c.name] = $c }
+$Ladder = @($CapCfg.configs | ForEach-Object { $CfgAll[$_] } | Sort-Object { [int]$_.step })
+if ($Steps.Count -gt 0) { $Ladder = @($Ladder | Where-Object { $Steps -contains [int]$_.step }) }
+$Mps = [string]$Sc.speeds.($CapCfg.speed).mps
 $Exe = "$ProjectDir\$(($Doc.exe) -replace '/', '\')"
 $PkgRoot = "$ProjectDir\Packaged\Test\Windows\HordeOptLab"
 $PkgCsv = "$PkgRoot\Saved\Profiling\CSV"
@@ -42,9 +49,9 @@ $Index = "$ProjectDir\Measurements\$Batch\captures.csv"
 $FfCmd = Get-Command ffmpeg -ErrorAction SilentlyContinue
 $Ffmpeg = if ($FfCmd) { $FfCmd.Source } else { "ffmpeg" }
 
-function Get-Label($c) { return "${Batch}shot-$($c.label_step)-$($c.label_variant)-N$TargetN-P1-r$Run" }
+function Get-Label($c) { return "${Batch}shot-$($CapCfg.speed)-$($c.name)-N$TargetN-P1-r$Run" }
 function Get-GameArgs($c, $label) {
-    $a = @($Doc.common_args) + @($c.args) + @("-LabN=$TargetN", "-LabPreset=1", "-LabLabel=$label", "-LabHud", "-LabShotAt=$ShotAt", "-LabDuration=$GameDurationSec", "-ExecCmds=DisableAllScreenMessages")
+    $a = @($Doc.common_args) + @($c.args) + @("-LabN=$TargetN", "-LabLabel=$label", "-LabOrbOrbitRadius=$($Sc.radius_m)", "-LabOrbOrbitSpeed=$Mps", "-LabOrbHeight=$($Sc.height_m)", "-LabWarmup=$WarmupSec", "-LabHud", "-LabShotAt=$ShotAt", "-LabDuration=$GameDurationSec", "-ExecCmds=DisableAllScreenMessages")
     return $a
 }
 # Start-Process -ArgumentList는 배열 원소를 따옴표로 감싸 주지 않으므로 공백이 든 경로·창 제목은 직접 감싼다
@@ -63,7 +70,7 @@ function Get-GifArgs($mkv, $pal, $gif) {
     return @("-y", "-hide_banner", "-loglevel", "warning", "-i", (Q $mkv), "-i", (Q $pal), "-lavfi", "fps=$Fps,scale=${Width}:-1:flags=lanczos[x];[x][1:v]paletteuse=dither=bayer:bayer_scale=5", (Q $gif))
 }
 
-$PerRun = 30 + $GameDurationSec + 15 + 2 + 25   # 시작 + 워밍업 + 측정 + 플러시 + 인코딩 여유
+$PerRun = 30 + $GameDurationSec + $WarmupSec + 2 + 25   # 시작 + 워밍업 + 측정 + 플러시 + 인코딩 여유
 if ($DryRun) {
     Write-Host "DRYRUN capture batch=$Batch N=$TargetN runs=$($Ladder.Count) record=${Seconds}s after window+${RecordDelaySec}s, game -LabDuration=$GameDurationSec -LabShotAt=$ShotAt, ${Format} ${Width}px ${Fps}fps q=$Quality"
     Write-Host "ffmpeg: $Ffmpeg (found=$([bool]$FfCmd)); output dir: $CapDir"
@@ -81,7 +88,7 @@ if ($DryRun) {
         Write-Host "  ffmpeg palette: `"$Ffmpeg`" $((Get-PaletteArgs "$CapDir\$l0.mkv" "$CapDir\$l0.png") -join ' ')"
         Write-Host "  ffmpeg gif:     `"$Ffmpeg`" $((Get-GifArgs "$CapDir\$l0.mkv" "$CapDir\$l0.png" "$CapDir\$l0.gif") -join ' ')"
     }
-    Write-Host "  check:          py -3 -I Scripts/ablation-check.py <csv> --cond <name> --shot"
+    Write-Host "  check:          py -3 -I Scripts/ablation-check.py <csv> --shot"
     exit 0
 }
 
@@ -190,7 +197,7 @@ function Capture-One($c) {
         # 게임이 스스로 끝나길 기다린다(제한 시간 뒤 종료). 그다음 CSV를 가져와 --shot 대조
         if (-not $Proc.WaitForExit(($GameDurationSec + 120) * 1000)) { Stop-Process -Id $Proc.Id -Force -ErrorAction SilentlyContinue; $res.Note = "game did not exit, killed; "; }
         if (Test-Path "$PkgCsv\$label.csv") {
-            $out = (& py -3 -I "$ProjectDir\Scripts\ablation-check.py" "$PkgCsv\$label.csv" --cond $c.name --shot 2>&1 | Out-String)
+            $out = (& py -3 -I "$ProjectDir\Scripts\ablation-check.py" "$PkgCsv\$label.csv" --shot 2>&1 | Out-String)
             if ($LASTEXITCODE -ne 0) { $res.Note += "metadata check failed: " + ([regex]::Match($out, "CHECK [^\r\n]*FAIL[^\r\n]*")).Value }
             Move-Item "$PkgCsv\$label.csv" "$OutCsv\$label.csv" -Force
         } else { $res.Note += "no csv from the shot run" }
