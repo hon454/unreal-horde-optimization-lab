@@ -17,7 +17,7 @@
 
 사용자가 리뷰의 M1\~M8을 정했다([V2-review.md](Worklog/V2-review.md) "사용자 판단").
 
-1. 사용자가 단계 8의 전환 거리를 정한다. 그 뒤에 ADR 초안을 쓴다. `Full4`는 그 뒤다.
+1. 코드 세션이 ADR-0021 승인 뒤에 단계 8의 전환 거리를 35m으로 바꾼다. `Full4`는 그 뒤다.
 2. 코드 세션이 M3(엔진 회피 파라미터)을 잰다.
 3. 코디네이터가 패키지와 태그 `v2-full4` 뒤에 W13(총괄 묶음 `Full4`, 216회, 약 13.7시간)을 맡긴다.
 
@@ -168,4 +168,4 @@ Development 전환 점수는 `Full1` 때의 참고값이다(`Measurements/Full1/
 
 ## 사용자에게 요청한 일
 
-- 단계 8의 전환 거리를 고른다([Worklog/V2.md](Worklog/V2.md) "묶음 `V2Hyd35`").
+- [ADR-0021](Decisions/0021-step8-hydrate-distance-35m.md)(전환 거리 35m)을 승인한다.
