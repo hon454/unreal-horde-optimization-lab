@@ -25,11 +25,13 @@ EXTRA = [("overlap", "Lab/OverlapPairs"), ("overlap_deep", "Lab/OverlapDeep")]
 CAPSULE = [("traces", "Lab/CapsuleTraces"), ("hits", "Lab/CapsuleHits"), ("blocked", "Lab/CapsuleBlocked")]
 # v2 W7 경계별 전환(ULabRepSwitchCountProcessor)과 최소 유지 시간(ULabRepHoldProcessor). 초당 수, rep_cap_on_ratio는 상한이 걸린 프레임의 비율. 맨 뒤에 붙인다
 SWITCH2 = [("shadow_off", "Lab/SwShadowOff"), ("shadow_on", "Lab/SwShadowOn"), ("round_actor", "Lab/SwRoundActor"), ("round_far", "Lab/SwRoundFar"),
-           ("round_shadow", "Lab/SwRoundShadow"), ("rep_held", "Lab/RepHeld"), ("rep_cap_blocked", "Lab/RepCapBlocked")]
+           ("round_shadow", "Lab/SwRoundShadow")]
+# 붙잡힌 엔티티 수(프레임 평균, 붙잡힌 동안 프레임마다 다시 센다)
+HOLD = [("rep_held", "Lab/RepHeld"), ("rep_cap_blocked", "Lab/RepCapBlocked")]
 FIELDS = (["label", "orbit", "bin", "t_end", "frames", "frame_p50", "frame_p95"] + [f"{k}_{s}" for k, _ in STATS for s in ("mean", "max")]
           + [f"sw_{k}_per_s" for k, _ in SWITCH] + ["deaths_per_s"] + [f"{k}_{s}" for k, _ in EXTRA for s in ("mean", "max")]
           + ["capsule_traces_per_s", "capsule_hit_ratio", "capsule_any_ratio"]
-          + [f"sw_{k}_per_s" for k, _ in SWITCH2] + ["rep_cap_on_ratio"])
+          + [f"sw_{k}_per_s" for k, _ in SWITCH2] + [f"{k}_mean" for k, _ in HOLD] + ["rep_cap_on_ratio"])
 
 
 def main():
@@ -47,7 +49,7 @@ def main():
         ft = column(header, data, ["FrameTime"])
         if not ft:
             continue
-        cols = {k: column(header, data, [name]) for k, name in STATS + SWITCH + EXTRA + SWITCH2}
+        cols = {k: column(header, data, [name]) for k, name in STATS + SWITCH + EXTRA + SWITCH2 + HOLD}
         capon = column(header, data, ["Lab/RepCapOn"])
         deaths = column(header, data, ["Lab/Deaths"])
         caps = {k: column(header, data, [name]) for k, name in CAPSULE}
@@ -71,6 +73,9 @@ def main():
             for k, _ in SWITCH + SWITCH2:
                 v = cols[k][s:e] if len(cols[k]) == len(ft) else []
                 row[f"sw_{k}_per_s"] = round(sum(v) / span, 2) if v and span > 0 else ""
+            for k, _ in HOLD:
+                v = cols[k][s:e] if len(cols[k]) == len(ft) else []
+                row[f"{k}_mean"] = round(sum(v) / len(v), 2) if v else ""
             cv = capon[s:e] if len(capon) == len(ft) else []
             row["rep_cap_on_ratio"] = round(sum(cv) / len(cv), 3) if cv else ""
             # 초당 사망: 누적 사망 수(Lab/Deaths)의 구간 증가분 ÷ 구간 길이. 구간 앞 프레임의 값에서 잰다

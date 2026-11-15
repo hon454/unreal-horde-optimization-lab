@@ -52,14 +52,15 @@ BUDGET_FIELDS = BUDGET_TEXT + BUDGET_NUM
 # rep_hold_ms = 메타데이터 LabRepHold(최소 유지 시간, 0 끔). sw_* = 초당 전환 수(스탯 합 ÷ 측정 구간 길이): 없음→인스턴스, 인스턴스→액터, 액터→인스턴스, 인스턴스→없음,
 # 그 밖(없음↔액터), 그림자 끔(80m 밖으로, LOD Medium→Low), 그림자 켬. 왕복(2초 안에 같은 경계를 반대로 다시 넘은 수, 초당): sw_round(표현 무리, Spike1부터의 뜻),
 # 그 가운데 sw_round_actor(40m 액터 경계)·sw_round_far(200m 경계), sw_round_shadow(80m 그림자 경계), sw_round_all = sw_round + sw_round_shadow.
-# rep_held·rep_cap_blocked = 초당 되돌린 전환 수·상한 때문에 막은 새 액터 수(규칙 끔이면 빈칸), rep_cap_on_ratio = 액터 상한이 걸린 프레임의 비율, actors_max = Lab/Actors 최댓값.
+# rep_held_mean·rep_cap_blocked_mean = 프레임 평균의 붙잡힌 엔티티 수·상한 때문에 막은 새 액터 수(규칙 끔이면 빈칸), rep_cap_on_ratio = 액터 상한이 걸린 프레임의 비율, actors_max = Lab/Actors 최댓값.
 # summary에는 중앙값을 쓰고 sw_round_all·sw_round_actor는 _min·_max도 쓴다
 SWITCH_TEXT = ["rep_hold_ms"]
 SWITCH_STATS = [("sw_none_to_inst", "Lab/SwNoneToInst"), ("sw_inst_to_actor", "Lab/SwInstToActor"), ("sw_actor_to_inst", "Lab/SwActorToInst"),
                 ("sw_inst_to_none", "Lab/SwInstToNone"), ("sw_other", "Lab/SwOther"), ("sw_shadow_off", "Lab/SwShadowOff"), ("sw_shadow_on", "Lab/SwShadowOn"),
-                ("sw_round", "Lab/SwRound"), ("sw_round_actor", "Lab/SwRoundActor"), ("sw_round_far", "Lab/SwRoundFar"), ("sw_round_shadow", "Lab/SwRoundShadow"),
-                ("rep_held", "Lab/RepHeld"), ("rep_cap_blocked", "Lab/RepCapBlocked")]
-SWITCH_NUM = [k for k, _ in SWITCH_STATS] + ["sw_round_all", "rep_cap_on_ratio", "actors_max"]
+                ("sw_round", "Lab/SwRound"), ("sw_round_actor", "Lab/SwRoundActor"), ("sw_round_far", "Lab/SwRoundFar"), ("sw_round_shadow", "Lab/SwRoundShadow")]
+# 되돌림은 붙잡힌 동안 프레임마다 다시 세므로 초당 합이 아니라 프레임 평균(어느 순간 붙잡혀 있는 엔티티 수)으로 쓴다
+SWITCH_MEAN = [("rep_held_mean", "Lab/RepHeld"), ("rep_cap_blocked_mean", "Lab/RepCapBlocked")]
+SWITCH_NUM = [k for k, _ in SWITCH_STATS] + ["sw_round_all"] + [k for k, _ in SWITCH_MEAN] + ["rep_cap_on_ratio", "actors_max"]
 SWITCH_RANGE = ["sw_round_all", "sw_round_actor"]
 SWITCH_FIELDS = SWITCH_TEXT + SWITCH_NUM
 
@@ -341,6 +342,10 @@ def switch_fields(header, data, meta, frame):
             out[key] = round(sum(vals) / span, 3)
     if out["sw_round"] != "" and out["sw_round_shadow"] != "":
         out["sw_round_all"] = round(out["sw_round"] + out["sw_round_shadow"], 3)
+    for key, stat in SWITCH_MEAN:
+        vals = column(header, data, [stat])
+        if vals:
+            out[key] = round(statistics.fmean(vals), 3)
     cap = column(header, data, ["Lab/RepCapOn"])
     if cap:
         out["rep_cap_on_ratio"] = round(statistics.fmean(cap), 4)
