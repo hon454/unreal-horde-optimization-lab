@@ -37,7 +37,7 @@ STATUS.md "명령"에는 매번 쓰는 것만 둔다. 여기에는 스크립트 
 | 5 | Simulation LOD(80/200m, 200m 밖 자체 이동) + 엔티티 풀 | `M5 m4offpool` |
 | 6 | ISKM(카메라를 따라가는 고정 바운드, 트랙 예약) | `M5 m5bounds` |
 | 7 | 배경 무리(엔티티 구동 입자, 맵 밖 독립 입자) | `M5 q2crowd` |
-| 8 | 품질 올리기: 액터 상한 1,000, 전환 거리 40m, 80m 밖 인스턴스 그림자 끔 | `M5 q4final` |
+| 8 | 품질 올리기: 액터 상한 1,000, 전환 거리 40m, 80m 밖 인스턴스 그림자 끔, 액터 메시 고정 바운드(v2 W11) | `M5 q4final` + 고정 바운드 |
 
 단계별 스위치와 CSV 메타데이터 값이다. 빈칸은 그 단계에 없는 기법이다(메타데이터 `0`이나 `-`).
 
@@ -63,9 +63,13 @@ STATUS.md "명령"에는 매번 쓰는 것만 둔다. 여기에는 스크립트 
 | `LabTechFarCull`(`-LabFarCull=0`이 끈다) | 0 | 1 | 1 | 1 | 1 | 1 | 1 | 1 |
 | `LabActorCap`·`LabHydrateM`(`-LabActorCap`, `-LabHydrateM`) | | 500·30 | 500·30 | 500·30 | 500·30 | 500·30 | 500·30 | 1000·40 |
 | `LabFarShadow`(`-LabFarShadow`) | - | 1 | 1 | 1 | 1 | 1 | 1 | 0 |
+| `LabFixedSkelBounds`(`-LabFixedSkelBounds`, v2 W11) | - | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
+| `LabQueryIsolate`(`-LabQueryIsolate`, v2 W11) | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+
+- `-LabFixedSkelBounds=1`은 하이드레이션 액터 메시에 `bComponentUseFixedSkelBounds`를 켜고 `BoundsScale` 1.1을 곱한다(`FLabQuality::FixedSkelBoundsScale`). `-LabQueryIsolate=1`은 게임 모듈 시작 때 `p.Chaos.AccelerationStructureIsolateQueryOnlyObjects`를 1로 둔다. 메타데이터 `LabQueryIsolate`는 그 CVar의 실제 값이다. 근거는 [Worklog/V2.md](../Worklog/V2.md) "W11"과 [engine-notes.md](../Reference/engine-notes.md) 44절이다.
 
 - 메타데이터 `LabStage`와 `LabLadder`는 단계 번호다. 인자로 단계 기본값과 다르게 준 것은 `LabOverrides`에 `|`로 이어 남는다.
-- 0/1 스위치(`-LabAvoid`, `-LabSeparate`, `-LabScreenSigBudget`, `-LabEntityPool`, `-LabCrowdFx`, `-LabFxOrbFollow`, `-LabIskmTrackReserve`, `-LabFarShadow`)는 두 방향 모두 받는다. `-LabHydrate`, `-LabSimLod`, `-LabIskm`, `-LabFixedBounds`, `-LabFarCull`은 0일 때만 뜻이 있다(끄기 전용).
+- 0/1 스위치(`-LabAvoid`, `-LabSeparate`, `-LabScreenSigBudget`, `-LabEntityPool`, `-LabCrowdFx`, `-LabFxOrbFollow`, `-LabIskmTrackReserve`, `-LabFarShadow`, `-LabFixedSkelBounds`, `-LabQueryIsolate`)는 두 방향 모두 받는다. `-LabHydrate`, `-LabSimLod`, `-LabIskm`, `-LabFixedBounds`, `-LabFarCull`은 0일 때만 뜻이 있다(끄기 전용).
 - 정지 조건은 `-LabOrbOrbitSpeed=0`이다. 단계 8과 빼 보기에만 붙인다([v2-plan.md](../v2-plan.md) "사다리").
 
 ### 빼 보기(v2 W10)
@@ -90,6 +94,10 @@ STATUS.md "명령"에는 매번 쓰는 것만 둔다. 여기에는 스크립트 
 | `a8fxf` | 입자 외삽 목표 매 프레임 | `-LabFxOrbFollow=0` | `LabFxOrbFollow` 0 |
 | `a8stp` | 바운드 상자 따라가기 | `-LabBoundsStepM=0` | `LabBoundsStepM` 0 |
 | `a8shd` | 80m 밖 그림자 끔 → 켬 | `-LabFarShadow=1` | `LabFarShadow` 1 |
+| `a8fsb` | 액터 메시 고정 바운드 → 피직스 에셋 바운드(v2 W11) | `-LabFixedSkelBounds=0` | `LabFixedSkelBounds` 0 |
+
+- 하위 실험 `s8iso`(단계 8 + `-LabQueryIsolate=1`, v2 W11)가 러너에 있다. `s8av`(엔진 회피 더하기)도 있다.
+- v2 W11부터 `run-spike.ps1`은 `s8` 뒤에 조각을 이어 붙인 구성 이름을 받는다: `fsb`·`fsb0`(고정 바운드 켬·끔), `iso`·`iso0`(칸 나누기), `c<개수>`(`-LabActorCap`), `h<미터>`(`-LabHydrateM`), `shd0`·`shd1`(`-LabFarShadow`). 예: `s8h45`, `s8c750`. 조각마다 기대 메타데이터 하나를 대조한다.
 
 ```bash
 powershell -ExecutionPolicy Bypass -File Scripts/run-dev.ps1 -Small -Stage 8 -Tag a8sep -Extra "-LabSeparate=0"
