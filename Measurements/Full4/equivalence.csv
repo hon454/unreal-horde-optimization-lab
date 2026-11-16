@@ -16,7 +16,7 @@ n,speed,cond,runs,equiv,alive_min,alive_max,death_rate,death_rate_min,death_rate
 10000,V0,V0-a8fx,3,strict,10000,10000,59.258,59.246,59.261,59.261,-0.0,ok,979.88,979.5,980.06,978.245,0.17,ok,220.8,sep,118.2..472.9,ok,,,n/a,272,0,ok,0.0,ok,ok,
 10000,V0,V0-a8fxf,3,strict,10000,10000,59.246,59.192,59.272,59.261,-0.02,ok,979.37,977.82,979.52,978.245,0.12,ok,237.4,sep,118.2..472.9,ok,,,n/a,271,0,ok,0.006,ok,ok,
 10000,V0,V0-a8hold,3,strict,10000,10000,59.265,59.25,59.296,59.261,0.01,ok,979.44,978.95,980.21,978.245,0.12,ok,225.1,sep,118.2..472.9,ok,,,n/a,271,0,ok,4.344,report,report,round trips 4.34/s (no min hold)
-10000,V0,V0-a8hyd,2,strict,10000,10000,59.121,59.116,59.127,59.261,-0.23,ok,984.645,984.16,985.13,978.245,0.65,ok,52.4,sep,118.2..472.9,report,,,n/a,0,0,n/a,0.022,ok,report,"overlap 52 outside 118.2..472.9 (sep, report only: overlap_grade of a8hyd)"
+10000,V0,V0-a8hyd,3,strict,10000,10000,59.127,59.116,59.137,59.261,-0.23,ok,984.17,984.16,985.13,978.245,0.61,ok,51.8,sep,118.2..472.9,report,,,n/a,0,0,n/a,0.022,ok,report,"overlap 52 outside 118.2..472.9 (sep, report only: overlap_grade of a8hyd)"
 10000,V0,V0-a8iskm,3,strict,10000,10000,59.22,59.219,59.235,59.261,-0.07,ok,980.47,979.99,980.61,978.245,0.23,ok,214.2,sep,118.2..472.9,ok,,,n/a,272,0,ok,0.0,ok,ok,
 10000,V0,V0-a8pool,3,strict,10000,10000,59.268,59.246,59.27,59.261,0.01,ok,979.2,978.75,979.37,978.245,0.1,ok,229.6,sep,118.2..472.9,ok,,,n/a,273,0,ok,0.0,ok,ok,
 10000,V0,V0-a8res,3,strict,10000,10000,59.273,59.247,59.287,59.261,0.02,ok,979.1,979.05,979.72,978.245,0.09,ok,232.2,sep,118.2..472.9,ok,,,n/a,271,0,ok,0.0,ok,ok,
@@ -43,7 +43,7 @@ n,speed,cond,runs,equiv,alive_min,alive_max,death_rate,death_rate_min,death_rate
 10000,V1,V1-a8fsb,3,strict,10000,10000,61.293,61.289,61.299,61.294,-0.0,ok,617.95,617.94,618.03,618.01,-0.01,ok,0.0,sep,-1.0..1.0,ok,,,n/a,270,5,report,0.0,ok,report,"capsule misses 5 (still scene, report only)"
 10000,V1,V1-a8fx,3,strict,10000,10000,61.283,61.276,61.298,61.294,-0.02,ok,617.93,617.92,617.96,618.01,-0.01,ok,0.0,sep,-1.0..1.0,ok,,,n/a,270,4,report,0.0,ok,report,"capsule misses 4 (still scene, report only)"
 10000,V1,V1-a8hold,3,strict,10000,10000,61.293,61.282,61.3,61.294,-0.0,ok,617.98,617.97,618.0,618.01,-0.0,ok,0.0,sep,-1.0..1.0,ok,,,n/a,270,6,report,2.278,report,report,"capsule misses 6 (still scene, report only); round trips 2.28/s (no min hold)"
-10000,V1,V1-a8hyd,1,strict,10000,10000,61.294,61.294,61.294,61.294,0.0,ok,618.7,618.7,618.7,618.01,0.11,ok,0.0,sep,-1.0..1.0,ok,,,n/a,0,0,n/a,0.006,ok,ok,
+10000,V1,V1-a8hyd,3,strict,10000,10000,61.293,61.287,61.294,61.294,-0.0,ok,618.67,618.67,618.7,618.01,0.11,ok,0.0,sep,-1.0..1.0,ok,,,n/a,0,0,n/a,0.006,ok,ok,
 10000,V1,V1-a8iskm,3,strict,10000,10000,61.288,61.288,61.294,61.294,-0.01,ok,617.82,617.81,617.87,618.01,-0.03,ok,0.0,sep,-1.0..1.0,ok,,,n/a,270,7,report,0.0,ok,report,"capsule misses 7 (still scene, report only)"
 10000,V1,V1-a8pool,3,strict,10000,10000,61.293,61.289,61.299,61.294,-0.0,ok,618.1,618.07,618.12,618.01,0.01,ok,0.0,sep,-1.0..1.0,ok,,,n/a,270,5,report,0.0,ok,report,"capsule misses 5 (still scene, report only)"
 10000,V1,V1-a8res,3,strict,10000,10000,61.291,61.287,61.297,61.294,-0.0,ok,618.03,618.03,618.09,618.01,0.0,ok,0.0,sep,-1.0..1.0,ok,,,n/a,270,3,report,0.0,ok,report,"capsule misses 3 (still scene, report only)"

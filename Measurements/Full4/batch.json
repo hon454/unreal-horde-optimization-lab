@@ -3,8 +3,8 @@
     "state":  "done",
     "commit":  "de0e21bd64ac6f9a8b8fa08c912920532440cea7",
     "started":  "2026-11-16 14:50:12",
-    "ended":  "2026-11-17 04:54:32",
-    "resumes":  1,
+    "ended":  "2026-11-17 08:52:12",
+    "resumes":  2,
     "order":  "round",
     "runs_override":  -1,
     "target_n":  10000,
@@ -17,12 +17,10 @@
     "base_mhz":  3401,
     "conditions":  79,
     "planned_runs":  207,
-    "planned_runs_ok":  204,
-    "planned_runs_missing":  3,
+    "planned_runs_ok":  207,
+    "planned_runs_missing":  0,
     "failed_runs":  9,
     "giveups":  [
-                    "Full4-V0-a8hyd-N10000-P1-r1",
-                    "Full4-V1-a8hyd-N10000-P1-r1",
-                    "Full4-V1-a8hyd-N10000-P1-r2"
+
                 ]
 }
