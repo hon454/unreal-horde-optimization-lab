@@ -52,7 +52,7 @@ $FailuresCsv = "$BatchDir\failures.csv"
 # 액터 상한과 전환 거리는 단계 2~8 모두 1000·35다(ADR-0021). 그전에는 단계 2~7 500·30, 단계 8 1000·40이었다
 $StepExpect = @{
     "1" = @("LabStage=1", "LabLadder=1", "LabTechHydrate=0", "LabTechAvoid=0", "LabTechSeparate=1", "LabActorCollision=pawn", "LabRepHold=0", "LabFarHandoff=1", "LabFarHitIskm=-", "LabSmoothOrient=-")
-    "2" = @("LabStage=2", "LabActorCap=1000", "LabHydrateM=35", "LabTechInstAnim=0", "LabTechHydrate=1", "LabTechAnimBudget=0", "LabTechHydrateFix=0", "LabTechSimLod=0", "LabTechFarCull=1", "LabTechAvoid=1", "LabTechSeparate=0", "LabActorCollision=trace", "LabRepHold=0", "LabFarHandoff=1", "LabFarHitIskm=-", "LabSmoothOrient=0")
+    "2" = @("LabStage=2", "LabActorCap=1000", "LabHydrateM=35", "LabTechInstAnim=0", "LabTechHydrate=1", "LabTechAnimBudget=0", "LabTechHydrateFix=0", "LabTechSimLod=0", "LabTechFarCull=1", "LabTechAvoid=1", "LabTechSeparate=0", "LabActorCollision=trace", "LabRepHold=0", "LabFarHandoff=1", "LabFarHitIskm=-", "LabSmoothOrient=0", "LabAvoidTuned=0")
     "3" = @("LabStage=3", "LabActorCap=1000", "LabHydrateM=35", "LabTechInstAnim=0", "LabTechHydrate=1", "LabTechAnimBudget=0", "LabTechHydrateFix=0", "LabTechSimLod=0", "LabTechAvoid=0", "LabTechSeparate=1", "LabActorCollision=trace", "LabRepHold=0", "LabFarHandoff=1", "LabFarHitIskm=-", "LabSmoothOrient=1")
     "4" = @("LabStage=4", "LabActorCap=1000", "LabHydrateM=35", "LabTechInstAnim=1", "LabTechAnimBudget=1", "LabTechHydrateFix=1", "LabTechPool=0", "LabTechSimLod=0", "LabTechIskm=0", "LabTechAvoid=0", "LabTechSeparate=1", "LabActorCollision=trace", "LabRepHold=2000", "LabFarHandoff=1", "LabFarHitIskm=-", "LabSmoothOrient=1")
     "5" = @("LabStage=5", "LabActorCap=1000", "LabHydrateM=35", "LabTechInstAnim=1", "LabTechPool=1", "LabTechSimLod=1", "LabTechIskm=0", "LabTechSeparate=1", "LabActorCollision=trace", "LabRepHold=2000", "LabFarHandoff=1", "LabFarHitIskm=-", "LabSmoothOrient=1")
@@ -74,6 +74,8 @@ foreach ($s in @(1, 8)) {
 $base8 = @($StepExpect["8"] | Where-Object { $_ -notmatch '^LabFarHandoff=|^LabFarHitIskm=' })
 $ConfigTable += @{ Name = "s8m6a"; Args = @("-LabStage=8", "-LabFarHitIskm=0"); Expect = $base8 + @("LabFarHandoff=1", "LabFarHitIskm=0") }
 $ConfigTable += @{ Name = "s8m6b"; Args = @("-LabStage=8", "-LabFarHandoff=0"); Expect = $base8 + @("LabFarHandoff=0", "LabFarHitIskm=1") }
+# 리뷰 M3(묶음 V2M3Avoid): 단계 2에 엔진 회피 파라미터 한 벌(-LabAvoidTuned=1, LabConfig.h FLabAvoidParams)
+$ConfigTable += @{ Name = "s2avt"; Args = @("-LabStage=2", "-LabAvoidTuned=1"); Expect = @($StepExpect["2"] | Where-Object { $_ -notmatch '^LabAvoidTuned=' }) + @("LabAvoidTuned=1") }
 # 방향 보간 병렬 사본을 끈 단계 8(Docs/Worklog/V2.md "방향 보간 병렬 사본: 사다리 배선"). 사본은 단계 3부터 기본 켬이라 옛 s8so(묶음 V2SmoothOri)는 이제 s8과 같아 지웠다
 $ConfigTable += @{ Name = "s8sooff"; Args = @("-LabStage=8", "-LabSmoothOrient=0"); Expect = @($StepExpect["8"] | Where-Object { $_ -notmatch '^LabSmoothOrient=' }) + @("LabSmoothOrient=0") }
 # 빼 보기: 단계 8에서 스위치 하나. Expect는 바뀌는 메타데이터 값이다. LabOverrides는 정지 조건(orbit=…)과 섞이므로 대조하지 않는다
@@ -98,7 +100,9 @@ $Ablations = @(
     # 하위 실험: 단계 8에 QueryOnly 칸 나누기를 더한다(v2 W11, 묶음 V2W11Cost에서 실행 간 범위 안이라 기본값에 넣지 않았다)
     @{ Name = "s8iso"; Arg = "-LabQueryIsolate=1"; Expect = @("LabQueryIsolate=1") },
     # 하위 실험(빼 보기가 아니라 더하기): 단계 8에 엔진 회피를 더한다(D43의 비교)
-    @{ Name = "s8av"; Arg = "-LabAvoid=1 -LabSeparate=0"; Expect = @("LabTechAvoid=1", "LabTechSeparate=0") }
+    @{ Name = "s8av"; Arg = "-LabAvoid=1 -LabSeparate=0"; Expect = @("LabTechAvoid=1", "LabTechSeparate=0", "LabAvoidTuned=0") },
+    # 리뷰 M3(묶음 V2M3Avoid): s8av에 엔진 회피 파라미터 한 벌(LabConfig.h FLabAvoidParams)
+    @{ Name = "s8avt"; Arg = "-LabAvoid=1 -LabSeparate=0 -LabAvoidTuned=1"; Expect = @("LabTechAvoid=1", "LabTechSeparate=0", "LabAvoidTuned=1") }
 )
 foreach ($a in $Ablations) {
     $keys = @($a.Expect | ForEach-Object { ($_ -split "=")[0] })

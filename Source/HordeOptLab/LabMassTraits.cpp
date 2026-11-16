@@ -67,6 +67,15 @@ ULabSimulationLODTrait::ULabSimulationLODTrait()
 	}
 }
 
+ULabObstacleAvoidanceTrait::ULabObstacleAvoidanceTrait()
+{
+	// 리뷰 M3: 세 값만 바꾼다(LabConfig.h FLabAvoidParams). 엔진 Trait이 BuildTemplate에서 GetValidated()로 하한만 걸고 공유 프래그먼트로 넣는다(MassAvoidanceTrait.cpp:26-28)
+	const FLabAvoidParams& P = FLabConfig::Get().AvoidParams;
+	MovingParameters.SeparationRadiusScale = P.SeparationRadiusScale;
+	MovingParameters.ObstacleSeparationStiffness = P.SeparationStiffness;
+	MovingParameters.PredictiveAvoidanceTime = P.PredictiveTime;
+}
+
 ULabMovementTrait::ULabMovementTrait()
 {
 	// 시나리오 이동 속도(3m/s)로 곧게 간다. 가속은 M0 CharacterMovement 기본값(MaxAcceleration 2048)에 맞춘다.

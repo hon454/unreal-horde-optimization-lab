@@ -80,7 +80,15 @@ UMassEntityConfigAsset* ULabCrowdSubsystem::BuildEntityConfig(int32 UnitType, US
 	{
 		// v2 W3 엔진 회피(사다리 단계 2, 또는 -LabAvoid=1). 이웃을 찾으려면 장애물 격자에 등록돼야 하므로 두 Trait을 함께 붙인다. 파라미터는 엔진 기본값.
 		// Simulation LOD가 있으면 LOD 태그 때문에 회피 프로세서가 High(80m 안)만 처리한다(MassAvoidanceProcessors.cpp:301-303)
-		AddLabTrait<UMassObstacleAvoidanceTrait>(*EntityConfig);
+		// 리뷰 M3: -LabAvoidTuned=1이면 파라미터 세 값을 바꾼 하위 Trait(LabMassTraits.h). 0이면 엔진 Trait 그대로다
+		if (FLabConfig::Get().UsesAvoidTuned())
+		{
+			AddLabTrait<ULabObstacleAvoidanceTrait>(*EntityConfig);
+		}
+		else
+		{
+			AddLabTrait<UMassObstacleAvoidanceTrait>(*EntityConfig);
+		}
 		AddLabTrait<UMassNavigationObstacleTrait>(*EntityConfig);
 	}
 

@@ -80,6 +80,13 @@ const FLabConfig& FLabConfig::Get()
 		}
 		Switch(TEXT("-LabEntityPool="), TEXT("pool"), C.bEntityPool);
 		Switch(TEXT("-LabAvoid="), TEXT("avoid"), C.bAvoid);
+		Switch(TEXT("-LabAvoidTuned="), TEXT("avoid_tuned"), C.bAvoidTuned); // 리뷰 M3(LabConfig.h FLabAvoidParams). 기본 0
+#if !UE_BUILD_TEST
+		// 개발 빌드에서만 회피 파라미터 한 벌을 바꿔 본다(-LabAvoidTuned=1일 때만 쓰인다). Test 빌드는 FLabAvoidParams 기본값이다
+		FParse::Value(Cmd, TEXT("-LabAvoidSepScale="), C.AvoidParams.SeparationRadiusScale);
+		FParse::Value(Cmd, TEXT("-LabAvoidSepStiff="), C.AvoidParams.SeparationStiffness);
+		FParse::Value(Cmd, TEXT("-LabAvoidPredTime="), C.AvoidParams.PredictiveTime);
+#endif
 		Switch(TEXT("-LabSeparate="), TEXT("separate"), C.bSeparate);
 		// v2 W7 표현 전환의 최소 유지 시간(LabConfig.h RepHoldMs). 0이면 끈다
 		{
@@ -319,10 +326,11 @@ FString FLabConfig::ToLogString() const
 	const FString Health = HealthFixed > 0.f ? FString::Printf(TEXT(" health_fixed=%.0f"), HealthFixed) : FString();
 	const FString Crowd = bCrowdFx ? FString::Printf(TEXT(" crowdfx=1 crowdfx_particles=%d crowdfx_outer=%d"), CrowdFxParticles(), bCrowdFxOuter ? 1 : 0) : FString();
 	// tech는 빼 보기 기법의 켬·끔이다(Q3). 모든 실행에 붙여 러너와 사람이 기대값과 대조한다.
-	return FString::Printf(TEXT("lab_config stage=%d n=%d preset=P%d seed=%d bench=%d label=%s duration=%.1f types=%d simlod=%s%s pool=%d screensig_budget=%d actor_cap=%d hydrate_m=%.0f far_shadow=%s%s%s %s overrides=%s hud=%d actor_col=%s rep_hold=%d fixmask=%d fx_orb_follow=%s bounds_step=%s iskm_track_reserve=%s fixed_skel_bounds=%s query_isolate=%d far_handoff=%d far_hit_iskm=%s smooth_orient=%s"),
+	return FString::Printf(TEXT("lab_config stage=%d n=%d preset=P%d seed=%d bench=%d label=%s duration=%.1f types=%d simlod=%s%s pool=%d screensig_budget=%d actor_cap=%d hydrate_m=%.0f far_shadow=%s%s%s %s overrides=%s hud=%d actor_col=%s rep_hold=%d fixmask=%d fx_orb_follow=%s bounds_step=%s iskm_track_reserve=%s fixed_skel_bounds=%s query_isolate=%d far_handoff=%d far_hit_iskm=%s smooth_orient=%s avoid_tuned=%s%s"),
 		Step, N, Preset, Seed, bBench ? 1 : 0, *Label, DurationSec, Types, *SimLodString(), *Far, bEntityPool ? 1 : 0, bScreenSigBudget ? 1 : 0, ActorCap, HydrateM, FarShadowString(),
 		*Health, *Crowd, *TechString(), Overrides.IsEmpty() ? TEXT("-") : *Overrides, bHud ? 1 : 0, ActorCollisionString(), UsesRepHold() ? RepHoldMs : 0, HydrateFixMask,
-		*FxOrbFollowString(), *BoundsStepString(), *IskmTrackReserveString(), FixedSkelBoundsString(), bQueryIsolate ? 1 : 0, bFarHandoff ? 1 : 0, *FarHitIskmString(), SmoothOrientString());
+		*FxOrbFollowString(), *BoundsStepString(), *IskmTrackReserveString(), FixedSkelBoundsString(), bQueryIsolate ? 1 : 0, bFarHandoff ? 1 : 0, *FarHitIskmString(), SmoothOrientString(),
+		AvoidTunedString(), UsesAvoidTuned() ? *(TEXT(" avoid_params=") + AvoidParams.ToString()) : TEXT(""));
 }
 
 FString FLabConfig::FarHitIskmString() const

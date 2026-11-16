@@ -734,3 +734,17 @@ for (const int32 TrackIndex : Temp)
 | 토큰은 비밀 값이다 | Android 패키지에서 파일 서버를 여는 열쇠다. UPL이 값을 Java 코드에 넣고, UAT와 Gauntlet이 ini에서 읽는다. 빈 문자열이면 토큰 없이 연다 | `AFS/Source/AndroidFileServer/AndroidFileServer_UPL.xml:10,16,429,470`, `Engine/Source/Programs/AutomationTool/Android/AndroidPlatform.Automation.cs:1019-1050` |
 | Win64의 런타임 모듈은 하는 일이 없다 | `StartupModule`이 비어 있다. 블루프린트 함수는 `PLATFORM_ANDROID`일 때만 일한다 | `AFS/Source/AndroidFileServer/Private/AndroidFileServer.cpp`, `AFS/Source/AndroidFileServer/Private/AndroidFileServerBPLibrary.cpp` |
 | 다른 플러그인이 의존하지 않는다 | `Engine/Plugins`의 `.uplugin`에서 `"AndroidFileServer"`는 자기 파일에만 있다 | `Engine/Plugins/**/*.uplugin` 검색 |
+
+## 51. 엔진 이동 회피의 파라미터와 이웃 수(2026-11-16, 리뷰 M3)
+
+줄임말: **MN** = `Engine/Plugins/AI/MassAI/Source/MassNavigation`, **AP** = `MN/Private/MassAvoidanceProcessors.cpp`. 36절의 보충이다. 실행 결과는 [Worklog/V2.md](../Worklog/V2.md) "M3: 엔진 회피 파라미터"와 "묶음 `V2M3Avoid`"에 있다.
+
+| 항목 | 확인한 것 | 위치 |
+| --- | --- | --- |
+| 파라미터는 Trait의 protected 값이다 | `UMassObstacleAvoidanceTrait`의 `MovingParameters`·`StandingParameters`는 protected다. 클래스는 `MinimalAPI`이지만 생성자·소멸자·`BuildTemplate`이 내보내져 게임 모듈에서 상속할 수 있다. `BuildTemplate`은 `GetValidated()`(하한만 건다)를 거쳐 공유 프래그먼트로 넣는다 | `MN/Public/Avoidance/MassAvoidanceTrait.h:11-25`, `MN/Private/MassAvoidanceTrait.cpp:26-28`, UHT `MassAvoidanceTrait.generated.h:35,42` |
+| 분리 힘의 식 | 이웃마다 `PenSep = (SeparationRadiusScale × 내 반지름 + 상대 반지름 + ObstacleSeparationDistance) − 중심 거리`, 크기 = `clamp(PenSep ÷ ObstacleSeparationDistance, 0, 1)²` × `ObstacleSeparationStiffness`다. 중심 거리가 `SeparationRadiusScale × 내 반지름 + 상대 반지름` 안이면 크기가 강성 그대로다. 기본값(배율 0.9, 소형끼리)은 76cm에서 최대가 되어 몸통이 닿는 80cm보다 안쪽이다 | `AP:768`, `AP:962-969`, `MN/Public/Avoidance/MassAvoidanceFragments.h:62-73` |
+| 예측 회피의 식 | 상대 속도로 가장 가까워지는 시각(CPA, 0\~`PredictiveAvoidanceTime`)의 거리로 힘을 낸다. 크기 = `clamp(관통 ÷ PredictiveAvoidanceDistance, 0, 1)² × (1 − CPA ÷ 예측 시간) × ObstaclePredictiveAvoidanceStiffness`(700). 예측 반경 배율은 0.65다 | `AP:971-993`, `MassAvoidanceFragments.h:88-110` |
+| 힘을 쓰는 이웃은 여섯이다 | 장애물 격자에서 후보를 최대 24개(`MaxExpectedAgentsPerCell` 6 × `MinTouchingCellCount` 4) 모은다. 칸은 칸 중심과의 거리로 정렬하고, 24개가 차면 남은 칸을 보지 않는다. 후보를 거리로 정렬한 뒤 가까운 여섯(`MaxColliders`, 함수 안 상수)만 힘을 낸다. 셋 다 상수라 파라미터로 바꿀 수 없다. 탐지 거리(400cm)는 상자 크기와 거리 컷만 정한다 | `AP:49-51`, `AP:53-112`, `AP:778-822`, `AP:830-836` |
+| 칸이 붐비면 칸 경계 너머의 이웃을 놓친다 | 칸 한 변은 2.5m다. 몸통 80cm 간격으로 빽빽하면 한 칸에 약 10개, 겹쳐 쌓이면 그 이상이다. 내 칸(중심이 가장 가까운 칸)만으로 24개가 차면 옆 칸에 있는 가장 가까운 이웃이 후보에 들지 않는다(식에서 읽은 것, 실행으로 재지 않았다) | `MN/Private/MassNavigationSubsystem.cpp:13`, `AP:95-110` |
+| 합친 힘은 가속 상한으로 잘린다 | 조향이 먼저 쓴 힘에 분리·예측 힘을 더하고 끝에 `MaxAcceleration`(이 프로젝트 2,048cm/s²)으로 자른다. 조향 힘은 `(조향 속도 − 바라는 속도) ÷ ReactionTime`(0.3초)이라 막힌 개체(바라는 속도 0)에서 약 1,000, 반대로 움직이면 약 2,000이다. 기본 강성 250은 이보다 작다 | `AP:421`, `AP:1046-1078`, `MN/Private/MassSteeringProcessors.cpp:110,237`, `MN/Public/Steering/MassSteeringFragments.h:66`, `Source/HordeOptLab/LabMassTraits.cpp`(`ULabMovementTrait`) |
+| 엔진 주석의 권장 범위 | 분리 반경 배율 0.8\~1, 분리 강성 100\~500, 예측 시간 1\~3초(실내 사람 1.4, 실외 2.4), 예측 강성 400\~1,000이다. 묶음 `V2M3Avoid`의 한 벌(1.5, 3,000, 0.5초)은 셋 모두 이 범위 밖이다 | `MassAvoidanceFragments.h:62,67,88,108` |

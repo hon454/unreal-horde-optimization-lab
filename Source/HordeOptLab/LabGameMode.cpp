@@ -476,6 +476,8 @@ void ALabGameMode::TickBench()
 			CSV_METADATA(TEXT("LabFarHitIskm"), *Config.FarHitIskmString());
 			// 방향 보간: 1 Lab 병렬 사본(단계 3부터 기본), 0 엔진 프로세서(단계 2), 액터 단계 "-", 개발 검사 "check"
 			CSV_METADATA(TEXT("LabSmoothOrient"), Config.SmoothOrientString());
+			// 리뷰 M3: 엔진 회피 파라미터 한 벌(1), 엔진 기본값(0), 엔진 회피를 쓰지 않는 실행 "-"
+			CSV_METADATA(TEXT("LabAvoidTuned"), Config.AvoidTunedString());
 			// v2 W11 액터 비용 후보: 하이드레이션 액터 메시의 고정 바운드(1/0, 액터가 없으면 "-"), QueryOnly 바디 칸 나누기(실제 CVar 값)
 			CSV_METADATA(TEXT("LabFixedSkelBounds"), Config.FixedSkelBoundsString());
 			{

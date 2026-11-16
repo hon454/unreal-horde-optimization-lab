@@ -4,6 +4,7 @@
 #include "MassEntityTraitBase.h"
 #include "Movement/MassMovementTrait.h"
 #include "MassLODTrait.h"
+#include "Avoidance/MassAvoidanceTrait.h"
 #include "LabMassTraits.generated.h"
 
 /**
@@ -42,4 +43,16 @@ class ULabSimulationLODTrait : public UMassSimulationLODTrait
 	GENERATED_BODY()
 public:
 	ULabSimulationLODTrait();
+};
+
+/**
+ * 리뷰 M3 엔진 회피 Trait(-LabAvoidTuned=1). 이동 회피 파라미터가 protected라(MassAvoidanceTrait.h:20-21) 하위 클래스에서 FLabAvoidParams의 세 값으로 채운다.
+ * 나머지 값과 BuildTemplate은 엔진 그대로다. -LabAvoidTuned=0이면 이 클래스를 쓰지 않고 엔진 UMassObstacleAvoidanceTrait를 붙인다(LabCrowdSubsystem.cpp).
+ */
+UCLASS(meta = (DisplayName = "Lab Obstacle Avoidance"))
+class ULabObstacleAvoidanceTrait : public UMassObstacleAvoidanceTrait
+{
+	GENERATED_BODY()
+public:
+	ULabObstacleAvoidanceTrait();
 };

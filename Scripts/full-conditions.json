@@ -165,7 +165,8 @@
     "LabActorCollision": "trace",
     "LabRepHold": "0",
     "LabFarHitIskm": "-",
-    "LabSmoothOrient": "0"
+    "LabSmoothOrient": "0",
+    "LabAvoidTuned": "0"
    }
   },
   {
@@ -572,7 +573,8 @@
    ],
    "expect": {
     "LabTechAvoid": "1",
-    "LabTechSeparate": "0"
+    "LabTechSeparate": "0",
+    "LabAvoidTuned": "0"
    }
   },
   {

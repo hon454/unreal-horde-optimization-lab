@@ -74,6 +74,20 @@ struct FLabSimLod
 };
 
 /**
+ * 리뷰 M3 엔진 회피 파라미터 한 벌(-LabAvoidTuned=1, Docs/Worklog/V2.md "M3: 엔진 회피 파라미터"). 엔진 FMassMovingAvoidanceParameters의 세 값만 바꾼다
+ * (MassNavigation/Public/Avoidance/MassAvoidanceFragments.h:62-90, engine-notes.md 51절). 엔진 문서의 권장 범위(강성 100~500)를 넘는다. 나머지 값은 엔진 기본값 그대로다.
+ * Test 빌드는 이 기본값만 쓴다. 개발 빌드는 -LabAvoidSepScale=, -LabAvoidSepStiff=, -LabAvoidPredTime=로 바꿔 본다.
+ */
+struct FLabAvoidParams
+{
+	// 값은 개발 빌드 1만 실행 다섯 번으로 골랐다(Docs/Worklog/V2.md "M3: 엔진 회피 파라미터"의 실행 D)
+	float SeparationRadiusScale = 1.5f;   // 엔진 0.9. 분리 힘이 최대가 되는 거리 = 이 값 × 내 반지름 + 상대 반지름(MassAvoidanceProcessors.cpp:768,963-964)
+	float SeparationStiffness = 3000.f;   // 엔진 ObstacleSeparationStiffness 250(이웃 하나의 최대 분리 가속, cm/s²). 조향 힘(최대 약 2,000)과 가속 상한 2,048보다 크게 둔다
+	float PredictiveTime = 0.5f;          // 엔진 PredictiveAvoidanceTime 2.5초(예측 회피가 내다보는 시간, :972,990)
+	FString ToString() const { return FString::Printf(TEXT("%g/%g/%g"), SeparationRadiusScale, SeparationStiffness, PredictiveTime); }
+};
+
+/**
  * 시나리오 고정값. 2026-11-07 사용자 확정(measurement.md "확정값"). 바꾸면 모든 태그를 다시 잰다.
  * 단위는 cm, 초.
  */
@@ -215,6 +229,14 @@ struct FLabConfig
 	 * Simulation LOD를 쓰는 단계에서는 엔진 회피 프로세서가 High(80m 안)만 처리한다(MassAvoidanceProcessors.cpp:301-303).
 	 */
 	bool bAvoid = false;
+	/**
+	 * 리뷰 M3 엔진 회피 파라미터 한 벌(-LabAvoidTuned=0/1, 기본 0). 1이면 회피 Trait을 ULabObstacleAvoidanceTrait로 붙여 AvoidParams의 세 값을 쓴다.
+	 * 0이면 엔진 Trait 그대로다(엔진 기본 파라미터). 엔진 회피를 쓰는 실행에서만 뜻이 있다(UsesAvoidance). CSV 메타데이터 LabAvoidTuned, 그 밖의 실행은 "-".
+	 */
+	bool bAvoidTuned = false;
+	FLabAvoidParams AvoidParams;
+	bool UsesAvoidTuned() const { return UsesAvoidance() && bAvoidTuned; }
+	const TCHAR* AvoidTunedString() const { return !UsesAvoidance() ? TEXT("-") : bAvoidTuned ? TEXT("1") : TEXT("0"); }
 	/**
 	 * 겹침 방지(-LabSeparate=0/1, Docs/v2-spec.md 3절). Mass 단계는 ULabSeparationProcessor가 겹친 개체의 위치를 직접 떼어 놓는다(v2 W4, D45).
 	 * 단계 1은 액터 캡슐끼리 막기다(UsesActorBlocking, v2 W6, D47). 기본: 단계 2만 0(엔진 회피를 쓴다), 그 밖 1. CSV 메타데이터 LabTechSeparate.
