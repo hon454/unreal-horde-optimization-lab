@@ -52,7 +52,8 @@
 
 - 출발값은 [ADR-0010](Decisions/0010-final-representation-bands.md)과 [ADR-0011](Decisions/0011-entity-driven-crowd-particles.md) 그대로다: 액터 0\~40m(상한 1,000), ISKM 40\~80m 그림자 켬, ISKM 80\~200m 그림자 끔, 200\~500m 엔티티 구동 입자, 500\~1,000m 맵 밖 무리. 맵 밖 무리는 처음에 독립 입자였고, M6 수정 A부터 코드가 굴리는 기록을 엔티티 구동 입자로 그린다([ADR-0020](Decisions/0020-far-stream-respawn-handoff.md)). 그리는 끝 밖에서 맞은 개체는 제거될 때까지 그림자 없는 ISKM으로 그린다(M6 수정 B, `-LabFarHitIskm`).
 - 기능(겹침 방지, 캡슐)이 들어간 뒤 목표 사양을 넘으면 액터 상한과 전환 거리를 조정한다. 조정은 "품질 올리기" 작업 단위에서 재서 정하고 ADR 초안으로 남긴다.
-- W11이 값을 쟀다. 액터 상한 1,000과 액터 거리 40m는 그대로 둔다. 단계 8의 액터 메시에 고정 바운드를 더한다([ADR-0019](Decisions/0019-step8-actor-cap-distance-and-fixed-skel-bounds.md) 제안됨, D52).
+- W11이 값을 쟀다. 액터 상한 1,000과 액터 거리 40m는 그대로 둔다. 단계 8의 액터 메시에 고정 바운드를 더한다([ADR-0019](Decisions/0019-step8-actor-cap-distance-and-fixed-skel-bounds.md), D52).
+- 맵 밖 무리의 수정 뒤 단계 8이 판정을 넘어 액터 거리를 35m으로 낮췄다. 단계 2\~8이 모두 액터 상한 1,000과 액터 거리 35m을 쓴다. 표현 구간은 액터 0\~35m, ISKM 35\~80m 그림자 켬, 그 밖은 위와 같다([ADR-0021](Decisions/0021-unified-actor-cap-and-hydrate-distance.md)).
 
 ### 4.1 전환(사용자 요구)
 
