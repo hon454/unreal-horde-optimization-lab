@@ -1,0 +1,19 @@
+﻿{
+    "batch":  "V2M3Avoid",
+    "build":  "3072e96117cfe931762a2df4eb4dbbcbde826c80",
+    "start":  "2026-11-16 10:03:47",
+    "end":  "2026-11-16 11:09:16",
+    "n":  "10000",
+    "preset":  "P3",
+    "radius_m":  "57.3",
+    "height_m":  "6",
+    "speeds":  [
+                   "2"
+               ],
+    "duration_sec":  180,
+    "runs":  3,
+    "planned":  16,
+    "ok":  16,
+    "failed":  0,
+    "gave_up":  0
+}
