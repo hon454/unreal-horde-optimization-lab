@@ -1,0 +1,4 @@
+﻿label,samples,perf_mean_pct,perf_min_pct,perf_max_pct,mhz_mean,cpu_busy_before_pct
+V2W13Pre-V0-s1-N10000-P1-r0,90,136.4,135.7,137.2,4641,6.6
+V2W13Pre-V0-s1-N10000-P1-r1,90,136.1,135.2,137.0,4628,6.2
+V2W13Pre-V0-s2-N10000-P1-r1,89,134.1,133.4,134.8,4560,2.3

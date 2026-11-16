@@ -1,0 +1,26 @@
+﻿{
+    "batch":  "V2W13Pre",
+    "state":  "running",
+    "commit":  "de0e21bd64ac6f9a8b8fa08c912920532440cea7",
+    "started":  "2026-11-16 11:55:45",
+    "ended":  "",
+    "resumes":  0,
+    "order":  "round",
+    "runs_override":  1,
+    "target_n":  10000,
+    "only":  "ladder,ablation,still,sub,topview,maxn,maxn_mid,maxn_low,actor,aa,trace,traceser",
+    "pick":  "ladder:*,ablation:a8sim,still:s8,sub:s8av,topview:s8,actor:s1opt,maxn_mid:s3,maxn:s8,trace:s8",
+    "n_filter":  "",
+    "orbit":  "r57.3/h6",
+    "measure_sec":  180,
+    "power_plan":  "381b4222-f694-41f0-9685-ff5bb260df2e  (균형 조정)",
+    "base_mhz":  3401,
+    "conditions":  18,
+    "planned_runs":  18,
+    "planned_runs_ok":  0,
+    "planned_runs_missing":  18,
+    "failed_runs":  0,
+    "giveups":  [
+
+                ]
+}
