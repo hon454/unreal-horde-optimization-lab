@@ -55,7 +55,7 @@ const FLabConfig& FLabConfig::Get()
 		C.bCrowdFx = C.Step >= 7;                        // 7: 배경 무리
 		C.ActorCap = FLabQuality::DefaultActorCap;       // 2~8 같은 값(ADR-0021). 단계 1은 쓰지 않는다
 		C.HydrateM = FLabQuality::DefaultHydrateM;
-		C.bFarShadow = C.Step != 8;                      // 8: 80m 밖 그림자 끔(품질 올리기)
+		C.bFarShadow = C.Step != 8;                      // 8: 80m 밖 그림자 끔(남은 비용 줄이기)
 		C.bFixedSkelBounds = C.Step == 8;                // 8: 액터 메시 고정 바운드(v2 W11, 번 시간을 품질에 쓰는 단계의 비용 줄이기)
 
 		// Q5: 단계 기본값과 다르게 준 인자를 모은다(LabOverrides, HUD). 기본값과 같은 값을 준 인자는 넣지 않는다.
@@ -77,6 +77,15 @@ const FLabConfig& FLabConfig::Get()
 		{
 			if (C.BudgetMs != FLabScenario::BudgetMs) { NoteOverride(TEXT("budget_ms=") + FString::SanitizeFloat(C.BudgetMs, 0)); } // 4 → "4", 2.5 → "2.5"
 			if (C.BudgetMs <= 0.f) { C.bScreenSigBudget = false; }
+		}
+		// 단계 1의 엔진 액터 애니 최적화(LabConfig.h bActorOpt). 기본 0. 뜻이 있는 단계 1에서 켰을 때만 LabOverrides에 적는다
+		{
+			int32 ActorOpt = -1;
+			if (FParse::Value(Cmd, TEXT("-LabActorOpt="), ActorOpt) && ActorOpt >= 0)
+			{
+				C.bActorOpt = ActorOpt != 0;
+				if (C.bActorOpt && C.IsActorCrowd()) { NoteOverride(TEXT("actor_opt=1")); }
+			}
 		}
 		Switch(TEXT("-LabEntityPool="), TEXT("pool"), C.bEntityPool);
 		Switch(TEXT("-LabAvoid="), TEXT("avoid"), C.bAvoid);
@@ -326,11 +335,11 @@ FString FLabConfig::ToLogString() const
 	const FString Health = HealthFixed > 0.f ? FString::Printf(TEXT(" health_fixed=%.0f"), HealthFixed) : FString();
 	const FString Crowd = bCrowdFx ? FString::Printf(TEXT(" crowdfx=1 crowdfx_particles=%d crowdfx_outer=%d"), CrowdFxParticles(), bCrowdFxOuter ? 1 : 0) : FString();
 	// tech는 빼 보기 기법의 켬·끔이다(Q3). 모든 실행에 붙여 러너와 사람이 기대값과 대조한다.
-	return FString::Printf(TEXT("lab_config stage=%d n=%d preset=P%d seed=%d bench=%d label=%s duration=%.1f types=%d simlod=%s%s pool=%d screensig_budget=%d actor_cap=%d hydrate_m=%.0f far_shadow=%s%s%s %s overrides=%s hud=%d actor_col=%s rep_hold=%d fixmask=%d fx_orb_follow=%s bounds_step=%s iskm_track_reserve=%s fixed_skel_bounds=%s query_isolate=%d far_handoff=%d far_hit_iskm=%s smooth_orient=%s avoid_tuned=%s%s"),
+	return FString::Printf(TEXT("lab_config stage=%d n=%d preset=P%d seed=%d bench=%d label=%s duration=%.1f types=%d simlod=%s%s pool=%d screensig_budget=%d actor_cap=%d hydrate_m=%.0f far_shadow=%s%s%s %s overrides=%s hud=%d actor_col=%s rep_hold=%d fixmask=%d fx_orb_follow=%s bounds_step=%s iskm_track_reserve=%s fixed_skel_bounds=%s query_isolate=%d far_handoff=%d far_hit_iskm=%s smooth_orient=%s avoid_tuned=%s%s actor_opt=%s"),
 		Step, N, Preset, Seed, bBench ? 1 : 0, *Label, DurationSec, Types, *SimLodString(), *Far, bEntityPool ? 1 : 0, bScreenSigBudget ? 1 : 0, ActorCap, HydrateM, FarShadowString(),
 		*Health, *Crowd, *TechString(), Overrides.IsEmpty() ? TEXT("-") : *Overrides, bHud ? 1 : 0, ActorCollisionString(), UsesRepHold() ? RepHoldMs : 0, HydrateFixMask,
 		*FxOrbFollowString(), *BoundsStepString(), *IskmTrackReserveString(), FixedSkelBoundsString(), bQueryIsolate ? 1 : 0, bFarHandoff ? 1 : 0, *FarHitIskmString(), SmoothOrientString(),
-		AvoidTunedString(), UsesAvoidTuned() ? *(TEXT(" avoid_params=") + AvoidParams.ToString()) : TEXT(""));
+		AvoidTunedString(), UsesAvoidTuned() ? *(TEXT(" avoid_params=") + AvoidParams.ToString()) : TEXT(""), ActorOptString());
 }
 
 FString FLabConfig::FarHitIskmString() const

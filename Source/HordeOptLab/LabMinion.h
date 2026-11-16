@@ -86,6 +86,21 @@ protected:
 };
 
 /**
+ * 단계 1의 엔진 액터 애니 최적화(-LabActorOpt=1, FLabConfig::UsesActorOpt, Docs/Worklog/V2.md "단계 1의 URO·애니 예산 스위치").
+ * 캡슐·이동·상태는 ALabMinion 그대로다. 메시만 USkeletalMeshComponentBudgeted로 바꾸고(ALabMinionMassActorBudget과 같은 서브오브젝트 클래스 교체), URO를 켠 채 만든다.
+ * 메시는 BeginPlay에서 Budget Allocator에 스스로 등록하고, Budget Allocator가 켜져 있으면 엔진이 URO를 끈다(AnimationBudgetAllocator.cpp:1191-1197, engine-notes.md 52절).
+ * 중요도는 하이드레이션 액터와 같은 화면 크기(몸통 반지름 ÷ 카메라 거리, ULabActorSyncProcessor)이고 액터 틱이 매 프레임 넣는다.
+ */
+UCLASS()
+class ALabMinionBudget : public ALabMinion
+{
+	GENERATED_BODY()
+public:
+	ALabMinionBudget(const FObjectInitializer& ObjectInitializer);
+	virtual void Tick(float DeltaSeconds) override;
+};
+
+/**
  * CharacterMovement의 틱을 끄고 위치를 직접 옮기는 액터(ACharacter는 이 컴포넌트를 필수로 만든다). 캡슐·스켈레탈 메시·AnimBP는 ALabMinion과 같다.
  * v1의 pawn 변형(액터 쪽 천장)이었고, v2 W10부터는 하이드레이션 액터의 부모로만 남는다.
  */

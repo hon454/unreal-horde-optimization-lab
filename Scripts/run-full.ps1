@@ -2,7 +2,7 @@
 # 조건은 Scripts/full-conditions.json(v2)이 정한다: 구성(단계 s1~s8, 빼 보기 a8*), 묶음 종류(group)별 구성·속도·N·회차, 시나리오 값(궤도, 워밍업, 측정 구간).
 # 절차(앞 창 검사, 실패 CSV 이동, progress.log, failures.csv, 메타데이터 대조)는 run-spike.ps1과 v1 run-full.ps1에서 옮겼다.
 # 묶음 종류(group): ladder(8단계 x 1만 x 이동), ablation(빼 보기 x 이동), still(단계 8과 빼 보기 x 정지), sub(하위 실험), maxn(Mass 단계 x {5천, 2만}),
-#   maxn_mid(단계 4~8 x 1.25만), maxn_low(단계 2 x 2,500), topview(단계 8 탑뷰 P2, 참고 한 점), actor(단계 1 x {500, 1천, 2천}), aa(단계 8 반복, 회차 11~13),
+#   maxn_mid(단계 4~8 x 1.25만), maxn_low(단계 2 x 2,500), topview(단계 8 탑뷰 P2, 참고 한 점), actor(단계 1과 s1opt x {500, 1천, 2천}), aa(단계 8 반복, 회차 11~13),
 #   trace(단계 1~8 트레이스), traceser(단계 2~8 직렬 트레이스), extra(기본 묶음에 없는 후보 s8iso, -Only extra로만).
 # 라벨: <묶음>-<V0|V1>-<구성>-N<N>-P<1|2>-r<회차>. V0는 이동(궤도 속도 2m/s), V1은 정지(0). P는 그룹의 preset(기본 1, topview는 2)이다. 트레이스는 <묶음>trace-..., <묶음>traceser-...
 # 실행 순서: 회차가 바깥 루프(r1 전 조건 -> r2 -> r3), 짝수 회차는 슬롯 순서를 뒤집는다(표류가 조건에 고르게 퍼지게). -Order cond면 조건 단위. 묶음 맨 첫 실행 r0 하나는 버린다.

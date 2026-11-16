@@ -12,6 +12,8 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/PlayerController.h"
+#include "Camera/PlayerCameraManager.h"
 #include "SkeletalMeshComponentBudgeted.h"
 
 ALabMinion::ALabMinion(const FObjectInitializer& ObjectInitializer)
@@ -183,6 +185,35 @@ void ALabMinion::Tick(float DeltaSeconds)
 	{
 		Spawner->OnMinionFinished(this);
 	}
+}
+
+// 단계 1 엔진 액터 애니 최적화(-LabActorOpt=1) -------------------------------
+
+ALabMinionBudget::ALabMinionBudget(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer.SetDefaultSubobjectClass<USkeletalMeshComponentBudgeted>(ACharacter::MeshComponentName))
+{
+	// v1 uro 변형과 같은 켬(거리 단계는 FAnimUpdateRateParameters 기본값). 메시 기본값은 끔이다(SkeletalMeshComponent.cpp:493).
+	// 메시가 BeginPlay에서 Budget Allocator에 등록되면 Budget Allocator가 켜져 있는 한 엔진이 이 값을 끄고, Budget Allocator가 꺼지면 다시 켠다(AnimationBudgetAllocator.cpp:1191-1197, 1363-1397).
+	// 그래서 생성자에서만 넣는다. 등록 뒤(InitMinion → SetupVisual)에 넣으면 엔진이 막아 둔 URO와 Budget Allocator의 겹침이 생긴다
+	GetMesh()->bEnableUpdateRateOptimizations = true;
+}
+
+void ALabMinionBudget::Tick(float DeltaSeconds)
+{
+	// 중요도 = 화면 크기 = 몸통 반지름 ÷ 카메라 거리. 하이드레이션 액터와 같은 식이다(ULabActorSyncProcessor, 반지름은 FLabUnitTypeParams::BoundRadius와 같은 값).
+	// Budget Allocator는 다음 프레임의 액터 틱 전(OnWorldPreActorTick)에 이 값으로 순서를 정한다. Mass 동기화도 PrePhysics에서 넣어 같은 한 프레임 늦음이다(engine-notes.md 29절).
+	// 카메라는 저격 시야(ALabOrb::GetSnipeView)와 같은 PlayerCameraManager다. 거리는 메시 위치(발밑)로 잰다. 엔티티 위치가 발밑인 것과 맞춘다.
+	// Super::Tick보다 먼저 넣는다. 사망이 끝난 프레임에는 Super::Tick이 스포너를 불러 이 액터를 지운다(OnMinionFinished → Destroy).
+	if (const APlayerController* PC = GetWorld()->GetFirstPlayerController())
+	{
+		if (const APlayerCameraManager* Cam = PC->PlayerCameraManager.Get())
+		{
+			USkeletalMeshComponentBudgeted* Budgeted = CastChecked<USkeletalMeshComponentBudgeted>(GetMesh());
+			const float Radius = FLabUnitAssetPaths::Get(UnitType).BoundRadius;
+			Budgeted->SetComponentSignificance(Radius / FMath::Max(float(FVector::Dist(Budgeted->GetComponentLocation(), Cam->GetCameraLocation())), 1.f));
+		}
+	}
+	Super::Tick(DeltaSeconds);
 }
 
 // 이동 틱 없는 액터(하이드레이션 액터의 부모) ------------------------------

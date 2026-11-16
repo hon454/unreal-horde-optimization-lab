@@ -55,7 +55,7 @@ public:
 	int32 GetHudActors() const;
 
 protected:
-	/** 화면 크기 애니 예산(단계 4부터): a.Budget.Enabled·BudgetMs를 넣고 월드 할당기를 켠다 */
+	/** 화면 크기 애니 예산(단계 4부터, 단계 1은 -LabActorOpt=1일 때): a.Budget.Enabled·BudgetMs를 넣고 월드 할당기를 켠다 */
 	void ApplyBudgetCVars();
 	void ApplyBenchCVars();
 	void TickBench();

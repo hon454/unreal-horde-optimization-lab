@@ -748,3 +748,17 @@ for (const int32 TrackIndex : Temp)
 | 칸이 붐비면 칸 경계 너머의 이웃을 놓친다 | 칸 한 변은 2.5m다. 몸통 80cm 간격으로 빽빽하면 한 칸에 약 10개, 겹쳐 쌓이면 그 이상이다. 내 칸(중심이 가장 가까운 칸)만으로 24개가 차면 옆 칸에 있는 가장 가까운 이웃이 후보에 들지 않는다(식에서 읽은 것, 실행으로 재지 않았다) | `MN/Private/MassNavigationSubsystem.cpp:13`, `AP:95-110` |
 | 합친 힘은 가속 상한으로 잘린다 | 조향이 먼저 쓴 힘에 분리·예측 힘을 더하고 끝에 `MaxAcceleration`(이 프로젝트 2,048cm/s²)으로 자른다. 조향 힘은 `(조향 속도 − 바라는 속도) ÷ ReactionTime`(0.3초)이라 막힌 개체(바라는 속도 0)에서 약 1,000, 반대로 움직이면 약 2,000이다. 기본 강성 250은 이보다 작다 | `AP:421`, `AP:1046-1078`, `MN/Private/MassSteeringProcessors.cpp:110,237`, `MN/Public/Steering/MassSteeringFragments.h:66`, `Source/HordeOptLab/LabMassTraits.cpp`(`ULabMovementTrait`) |
 | 엔진 주석의 권장 범위 | 분리 반경 배율 0.8\~1, 분리 강성 100\~500, 예측 시간 1\~3초(실내 사람 1.4, 실외 2.4), 예측 강성 400\~1,000이다. 묶음 `V2M3Avoid`의 한 벌(1.5, 3,000, 0.5초)은 셋 모두 이 범위 밖이다 | `MassAvoidanceFragments.h:62,67,88,108` |
+
+## 52. 액터 메시의 URO와 Animation Budget Allocator는 한 메시에서 함께 돌지 않는다(2026-11-16, 단계 1 스위치)
+
+줄임말: **ABA** = `Engine/Plugins/Runtime/AnimationBudgetAllocator/Source/AnimationBudgetAllocator`, **ENG** = `Engine/Source/Runtime/Engine`. 28절과 29절을 넓힌다. 쓰는 곳은 단계 1의 `-LabActorOpt=1`이다([Worklog/V2.md](../Worklog/V2.md) "단계 1의 URO·애니 예산 스위치").
+
+| 항목 | 확인한 것 | 위치 |
+| --- | --- | --- |
+| Budget Allocator가 켜져 있으면 URO를 끈다 | `RegisterComponent`는 Budget Allocator가 켜져 있을 때(`bCachedEnabled && bEnabled`) 메시의 `bEnableUpdateRateOptimizations`를 거짓으로 두고 외부 틱 제어를 켠다. 인터페이스 주석도 "URO will be disabled"다 | `ABA/Private/AnimationBudgetAllocator.cpp:1187-1197`, `ABA/Public/IAnimationBudgetAllocator.h:20-27` |
+| Budget Allocator를 끄면 URO를 다시 켠다 | Budget Allocator의 켬이 바뀌면 등록된 메시 모두에 반영한다. 꺼지면 `bEnableUpdateRateOptimizations = true`, 외부 틱 제어 끔, 틱 다시 켬이다. 등록을 풀 때도 URO를 켠다. 그래서 엔진이 뜻하는 짝은 "Budget Allocator가 도는 동안 Budget Allocator, 꺼지면 URO"다 | `AnimationBudgetAllocator.cpp:1363-1400`, `:1218-1233` |
+| 등록은 메시가 스스로 한다 | `USkeletalMeshComponentBudgeted`는 `bAutoRegisterWithBudgetAllocator`(기본 참)면 `BeginPlay`에서 등록한다. 월드가 아직 시작 전이면 미뤄 등록한다. `bAutoCalculateSignificance`의 기본은 거짓이다 | `ABA/Private/SkeletalMeshComponentBudgeted.cpp:21-52` |
+| 엔진이 주는 자동 중요도 | `bAutoCalculateSignificance`를 켜면 메시 틱 끝에서 중요도 = `max(최대 거리² − 거리², 1) ÷ 최대 거리²`를 플레이어 시점마다 셈해 가장 큰 값을 쓴다. 크기(종류)는 들어가지 않는다. 이 프로젝트는 쓰지 않는다 | `SkeletalMeshComponentBudgeted.cpp:103-122` |
+| Budget Allocator 켬 CVar | `a.Budget.Enabled`는 `GAnimationBudgetEnabled`(기본 0)에 바로 묶인다. 도움말은 "스켈레탈 메시가 돌지 않을 때 바꾸라"다. 이 프로젝트는 개체를 만들기 전(`ALabGameMode::StartPlay`)에 켠다 | `ABA/Private/AnimationBudgetAllocatorCVars.cpp:7-14` |
+| URO의 기본값 | 스켈레탈 메시 컴포넌트의 `bEnableUpdateRateOptimizations` 기본은 거짓이다. URO는 이 값과 `a.URO.Enable`(기본 1)이 둘 다 참일 때 쓰인다 | `ENG/Private/Components/SkeletalMeshComponent.cpp:493`, `ENG/Private/Components/SkinnedMeshComponent.cpp:95-98,1810-1813` |
+| `ACharacter` 메시의 틱 옵션 | `ACharacter` 생성자가 메시의 `VisibilityBasedAnimTickOption`을 `AlwaysTickPose`로 둔다. Budget Allocator는 이와 따로 최근 1초 안에 그려지지 않은 메시의 틱을 끈다(29절 "수요") | `ENG/Private/Character.cpp:125` |

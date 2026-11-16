@@ -66,12 +66,14 @@ STATUS.md "명령"에는 매번 쓰는 것만 둔다. 여기에는 스크립트 
 | `LabFarShadow`(`-LabFarShadow`) | - | 1 | 1 | 1 | 1 | 1 | 1 | 0 |
 | `LabFixedSkelBounds`(`-LabFixedSkelBounds`, v2 W11) | - | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
 | `LabQueryIsolate`(`-LabQueryIsolate`, v2 W11) | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
+| `LabActorOpt`(`-LabActorOpt`, 단계 1의 URO·애니 예산) | 0 | - | - | - | - | - | - | - |
 
 - `-LabFixedSkelBounds=1`은 하이드레이션 액터 메시에 `bComponentUseFixedSkelBounds`를 켜고 `BoundsScale` 1.1을 곱한다(`FLabQuality::FixedSkelBoundsScale`). `-LabQueryIsolate=1`은 게임 모듈 시작 때 `p.Chaos.AccelerationStructureIsolateQueryOnlyObjects`를 1로 둔다. 메타데이터 `LabQueryIsolate`는 그 CVar의 실제 값이다. 근거는 [Worklog/V2.md](../Worklog/V2.md) "W11"과 [engine-notes.md](../Reference/engine-notes.md) 44절이다.
 - `-LabSmoothOrient=1`은 엔진 `UMassSmoothOrientationProcessor`를 끄고 같은 식을 청크 병렬로 도는 `ULabSmoothOrientationProcessor`를 켠다. 결과는 엔진과 비트 단위로 같다. 개발 빌드의 `-LabSmoothOrientCheck`는 엔진 프로세서를 두고 사본과 견준다(메타데이터 `check`, 로그 `lab_smoothori_check`). 근거는 [Worklog/V2.md](../Worklog/V2.md) "방향 보간 병렬 사본"과 "방향 보간 병렬 사본: 사다리 배선"이다.
+- `-LabActorOpt=1`은 단계 1에서만 뜻이 있다. 단계 1 액터를 `ALabMinionBudget`(메시 `USkeletalMeshComponentBudgeted`, URO 켬)으로 만들고 Animation Budget Allocator를 `-LabBudgetMs`(기본 4ms)로 켠다. 중요도는 하이드레이션 액터와 같은 화면 크기다. Budget Allocator가 도는 동안 엔진이 URO를 끈다. 메타데이터는 `LabActorOpt` 1, `LabBudget` 1, `LabBudgetMs` 4이고 `LabOverrides`에 `actor_opt=1`이 붙는다. 조건 표의 구성은 `s1opt`다. 근거는 [Worklog/V2.md](../Worklog/V2.md) "단계 1의 URO·애니 예산 스위치"와 [engine-notes.md](../Reference/engine-notes.md) 52절이다.
 
 - 메타데이터 `LabStage`와 `LabLadder`는 단계 번호다. 인자로 단계 기본값과 다르게 준 것은 `LabOverrides`에 `|`로 이어 남는다.
-- 0/1 스위치(`-LabAvoid`, `-LabSeparate`, `-LabScreenSigBudget`, `-LabEntityPool`, `-LabCrowdFx`, `-LabFxOrbFollow`, `-LabIskmTrackReserve`, `-LabFarShadow`, `-LabFixedSkelBounds`, `-LabQueryIsolate`, `-LabSmoothOrient`)는 두 방향 모두 받는다. `-LabHydrate`, `-LabSimLod`, `-LabIskm`, `-LabFixedBounds`, `-LabFarCull`은 0일 때만 뜻이 있다(끄기 전용).
+- 0/1 스위치(`-LabAvoid`, `-LabSeparate`, `-LabScreenSigBudget`, `-LabEntityPool`, `-LabCrowdFx`, `-LabFxOrbFollow`, `-LabIskmTrackReserve`, `-LabFarShadow`, `-LabFixedSkelBounds`, `-LabQueryIsolate`, `-LabSmoothOrient`, `-LabActorOpt`)는 두 방향 모두 받는다. `-LabHydrate`, `-LabSimLod`, `-LabIskm`, `-LabFixedBounds`, `-LabFarCull`은 0일 때만 뜻이 있다(끄기 전용).
 - 정지 조건은 `-LabOrbOrbitSpeed=0`이다. 단계 8과 빼 보기에만 붙인다([v2-plan.md](../v2-plan.md) "사다리").
 
 ### 빼 보기(v2 W10)
@@ -319,7 +321,7 @@ powershell -ExecutionPolicy Bypass -File Scripts/capture-full.ps1 -Batch Full4
 | 인자(`run-full.ps1`) | 뜻 |
 | --- | --- |
 | `-Batch` | 묶음 이름(필수). 폴더 `Measurements/<Batch>/`, 라벨 접두사. 같은 이름과 라벨은 다시 쓰지 않는다(`progress.log`가 있으면 `-Resume` 아니면 거부) |
-| `-Only` | 묶음 종류만: `ladder`(8단계 × 1만 × 이동), `ablation`(빼 보기 17행 × 이동), `still`(단계 8과 빼 보기 15행 × 정지), `sub`(`s8av`), `topview`(단계 8 × 이동 × 탑뷰 P2, 참고 한 점), `maxn`(단계 2\~8 × {5천, 2만}), `maxn_mid`(단계 4\~8 × 1.25만), `maxn_low`(단계 2 × 2,500), `actor`(단계 1 × {500, 1천, 2천}), `aa`(단계 8 반복, 회차 11\~13), `trace`(단계 1\~8), `traceser`(단계 2\~8 직렬), `extra`(후보 `s8iso`. 적어야 돈다). 비우면 `extra`를 뺀 전부 |
+| `-Only` | 묶음 종류만: `ladder`(8단계 × 1만 × 이동), `ablation`(빼 보기 17행 × 이동), `still`(단계 8과 빼 보기 15행 × 정지), `sub`(`s8av`), `topview`(단계 8 × 이동 × 탑뷰 P2, 참고 한 점), `maxn`(단계 2\~8 × {5천, 2만}), `maxn_mid`(단계 4\~8 × 1.25만), `maxn_low`(단계 2 × 2,500), `actor`(단계 1과 `s1opt` × {500, 1천, 2천}), `aa`(단계 8 반복, 회차 11\~13), `trace`(단계 1\~8), `traceser`(단계 2\~8 직렬), `extra`(후보 `s8iso`. 적어야 돈다). 비우면 `extra`를 뺀 전부 |
 | `-Pick`, `-NFilter` | 예행용. `-Pick "ladder:s1,still:*"`은 묶음 종류:구성이 맞는 슬롯만, `-NFilter 500,10000`은 그 N인 슬롯만 남긴다 |
 | `-Runs` | 반복 묶음의 회차 수를 덮어쓴다(기본은 조건 표의 3). 트레이스와 A/A는 조건 표 값이다 |
 | `-Order round\|cond` | 기본 `round`: 회차가 바깥 루프(r1 전 슬롯, r2 전 슬롯 역순, r3). `cond`: 같은 조건 연달아 |

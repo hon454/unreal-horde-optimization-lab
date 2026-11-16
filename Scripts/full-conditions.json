@@ -136,7 +136,8 @@
     "LabActorCollision": "pawn",
     "LabRepHold": "0",
     "LabFarHitIskm": "-",
-    "LabSmoothOrient": "-"
+    "LabSmoothOrient": "-",
+    "LabActorOpt": "0"
    }
   },
   {
@@ -636,6 +637,23 @@
    "expect": {
     "LabQueryIsolate": "1"
    }
+  },
+  {
+   "name": "s1opt",
+   "kind": "sub",
+   "base": "s1",
+   "title": "Actor baseline + Animation Budget Allocator",
+   "overlap": "zero",
+   "equiv": "report",
+   "args": [
+    "-LabStage=1",
+    "-LabActorOpt=1"
+   ],
+   "expect": {
+    "LabActorOpt": "1",
+    "LabBudget": "1",
+    "LabBudgetMs": "4"
+   }
   }
  ],
  "groups": {
@@ -779,7 +797,8 @@
   },
   "actor": {
    "configs": [
-    "s1"
+    "s1",
+    "s1opt"
    ],
    "speed": "V0",
    "n": [
@@ -788,7 +807,7 @@
     2000
    ],
    "runs": 3,
-   "note": "보조(액터): 단계 1 x {500, 1천, 2천}"
+   "note": "보조(액터): 단계 1과 s1opt(단계 1 + -LabActorOpt=1, Animation Budget Allocator 4ms. 그동안 엔진이 URO를 끈다) x {500, 1천, 2천}. s1opt는 Full4 계획 점검 R5의 사용자 판단이다(최선의 액터 기준선)"
   },
   "aa": {
    "configs": [

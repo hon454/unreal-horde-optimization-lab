@@ -347,7 +347,9 @@ ALabMinion* ALabCrowdSpawner::SpawnActorAt(const FVector& Ground, uint32 Serial)
 
 	FActorSpawnParameters Params;
 	Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-	ALabMinion* Minion = GetWorld()->SpawnActor<ALabMinion>(ALabMinion::StaticClass(), Location, Facing, Params);
+	// -LabActorOpt=1: 메시가 USkeletalMeshComponentBudgeted인 ALabMinionBudget(URO + 애니 예산). 끔이면 전과 같은 ALabMinion이다
+	UClass* MinionClass = FLabConfig::Get().UsesActorOpt() ? ALabMinionBudget::StaticClass() : ALabMinion::StaticClass();
+	ALabMinion* Minion = GetWorld()->SpawnActor<ALabMinion>(MinionClass, Location, Facing, Params);
 	Minion->InitMinion(this, FLabUnitTypes::IsLarge(Serial) ? LargeAssets : Assets, Serial); // M0 2종: 대형 에셋(없으면 소형과 같다)
 	Minions.Add(Minion);
 	return Minion;

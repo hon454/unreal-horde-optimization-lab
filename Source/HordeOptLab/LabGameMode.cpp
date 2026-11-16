@@ -374,7 +374,8 @@ void ALabGameMode::SetupCrowdFx()
 
 void ALabGameMode::ApplyBudgetCVars()
 {
-	if (!FLabConfig::Get().UsesBudgetActors())
+	// 단계 4부터의 하이드레이션 액터(화면 크기 Budget), 또는 단계 1의 엔진 액터 애니 최적화(-LabActorOpt=1, 같은 예산 값)
+	if (!FLabConfig::Get().UsesBudgetActors() && !FLabConfig::Get().UsesActorBudget())
 	{
 		return;
 	}
@@ -478,6 +479,8 @@ void ALabGameMode::TickBench()
 			CSV_METADATA(TEXT("LabSmoothOrient"), Config.SmoothOrientString());
 			// 리뷰 M3: 엔진 회피 파라미터 한 벌(1), 엔진 기본값(0), 엔진 회피를 쓰지 않는 실행 "-"
 			CSV_METADATA(TEXT("LabAvoidTuned"), Config.AvoidTunedString());
+			// 단계 1의 엔진 액터 애니 최적화(-LabActorOpt): 1 켬, 0 끔, Mass 단계 "-". Budget Allocator가 실제로 도는지는 LabBudget·LabBudgetMs다
+			CSV_METADATA(TEXT("LabActorOpt"), Config.ActorOptString());
 			// v2 W11 액터 비용 후보: 하이드레이션 액터 메시의 고정 바운드(1/0, 액터가 없으면 "-"), QueryOnly 바디 칸 나누기(실제 CVar 값)
 			CSV_METADATA(TEXT("LabFixedSkelBounds"), Config.FixedSkelBoundsString());
 			{

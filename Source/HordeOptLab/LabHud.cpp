@@ -106,7 +106,15 @@ namespace
 		const FString Far = FString::Printf(TEXT("%d m"), Config.FarM);
 		FHudStepText T;
 		T.Tag = FString::Printf(TEXT("STEP %s / 8"), *Id);
-		if (Id == TEXT("1")) { T.Title = TEXT("All actors (baseline)"); T.Change = TEXT("every minion is a skeletal-mesh actor with a capsule"); }
+		if (Id == TEXT("1") && Config.UsesActorOpt())
+		{
+			// -LabActorOpt=1(Docs/Worklog/V2.md "단계 1의 URO·애니 예산 스위치"). Budget Allocator가 도는 동안 엔진이 URO를 끈다(Budget Allocator가 대신한다)
+			T.Title = TEXT("All actors, engine anim optimizations");
+			T.Change = Config.UsesActorBudget()
+				? FString::Printf(TEXT("every minion is an actor; Animation Budget Allocator %s ms (replaces URO while it runs)"), *FString::SanitizeFloat(Config.BudgetMs, 0))
+				: FString(TEXT("every minion is an actor; URO (budget off)"));
+		}
+		else if (Id == TEXT("1")) { T.Title = TEXT("All actors (baseline)"); T.Change = TEXT("every minion is a skeletal-mesh actor with a capsule"); }
 		// v2 사다리(Docs/v2-plan.md "사다리", Docs/Worklog/V2.md "W10" 단계별 스위치 표)
 		else if (Id == TEXT("2")) { T.Title = TEXT("Mass, engine path"); T.Change = FString::Printf(TEXT("+ Mass entities, engine avoidance, actors within %s (cap %s), static instances to %s"), *Hyd, *GroupThousands(Config.ActorCap), *Far); }
 		else if (Id == TEXT("3")) { T.Title = TEXT("Hand-written separation"); T.Change = TEXT("+ Lab separation processor instead of engine avoidance"); }

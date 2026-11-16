@@ -173,7 +173,7 @@ struct FLabConfig
 {
 	/**
 	 * 사다리 단계(-LabStage=1~8, 기본 8 = 최종 구성, Docs/v2-plan.md "사다리"). 1 액터 기준선, 2 Mass 엔진 기본 경로, 3 직접 짠 분리,
-	 * 4 애니메이션 표현(VAT·애니 예산·전환 대책), 5 Simulation LOD + 엔티티 풀, 6 ISKM, 7 배경 무리, 8 품질 올리기(80m 밖 그림자 끔, 액터 메시 고정 바운드, ADR-0021).
+	 * 4 애니메이션 표현(VAT·애니 예산·전환 대책), 5 Simulation LOD + 엔티티 풀, 6 ISKM, 7 배경 무리, 8 남은 비용 줄이기(80m 밖 그림자 끔, 액터 메시 고정 바운드, ADR-0021).
 	 */
 	int32 Step = 8;
 	bool bStageValid = true;   // -LabStage가 1~8이 아니면 false(옛 이름 M0~M5 포함). 게임 모드가 종료 코드 2로 끝낸다
@@ -309,6 +309,17 @@ struct FLabConfig
 	 * 0 이하면 예산을 끈다(-LabScreenSigBudget=0과 같다). 기본값과 다르면 LabOverrides에 budget_ms=<값>으로 남는다.
 	 */
 	float BudgetMs = FLabScenario::BudgetMs;
+	/**
+	 * 단계 1의 엔진 액터 애니 최적화(-LabActorOpt=0/1, 기본 0, Docs/Worklog/V2.md "단계 1의 URO·애니 예산 스위치"). 1이면 단계 1 액터를 ALabMinionBudget으로 만든다:
+	 * 메시가 USkeletalMeshComponentBudgeted이고 URO(bEnableUpdateRateOptimizations)를 켠 채 시작하며, Budget Allocator를 BudgetMs로 켜고 중요도는 하이드레이션 액터와 같은 화면 크기다.
+	 * 엔진은 Budget Allocator에 등록한 메시의 URO를 끄고 Budget Allocator를 끄면 다시 켠다(AnimationBudgetAllocator.cpp:1191-1197, 1363-1397, engine-notes.md 52절). 그래서 Budget Allocator가 도는 동안은 Budget Allocator가 URO를 대신한다.
+	 * 단계 1에서만 뜻이 있다(UsesActorOpt). CSV 메타데이터 LabActorOpt("1"/"0", Mass 단계 "-"), lab_config actor_opt=. 단계 1에서 켜면 LabOverrides에 actor_opt=1이 붙는다.
+	 */
+	bool bActorOpt = false;
+	bool UsesActorOpt() const { return IsActorCrowd() && bActorOpt; }
+	/** 단계 1 액터를 위해 Budget Allocator를 켜는가(스위치 켬이고 예산이 0보다 크다). 0 이하면 Budget Allocator가 꺼져 메시는 URO로 돈다 */
+	bool UsesActorBudget() const { return UsesActorOpt() && BudgetMs > 0.f; }
+	const TCHAR* ActorOptString() const { return !IsActorCrowd() ? TEXT("-") : bActorOpt ? TEXT("1") : TEXT("0"); }
 	/** Q2 Niagara 배경 무리(-LabCrowdFx=0/1). 기본: 사다리 단계 7부터 1. 인자를 주면 그 값이 이긴다(빼 보기 -LabCrowdFx=0) */
 	bool bCrowdFx = false;
 	/**
