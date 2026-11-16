@@ -353,7 +353,8 @@
    ],
    "expect": {
     "LabTechHydrate": "0",
-    "LabActorCollision": "-"
+    "LabActorCollision": "-",
+    "LabFixedSkelBounds": "-"
    }
   },
   {
