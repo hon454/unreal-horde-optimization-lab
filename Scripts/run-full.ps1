@@ -1,9 +1,10 @@
 ﻿# 총괄 묶음 러너(v2 W12). Test 패키지 exe를 직접 부른다. v1의 run-full.ps1(태그 v1)을 v2의 사다리 단계(-LabStage=1~8)와 빼 보기 스위치에 맞게 다시 썼다.
 # 조건은 Scripts/full-conditions.json(v2)이 정한다: 구성(단계 s1~s8, 빼 보기 a8*), 묶음 종류(group)별 구성·속도·N·회차, 시나리오 값(궤도, 워밍업, 측정 구간).
 # 절차(앞 창 검사, 실패 CSV 이동, progress.log, failures.csv, 메타데이터 대조)는 run-spike.ps1과 v1 run-full.ps1에서 옮겼다.
-# 묶음 종류(group): ladder(8단계 x 1만 x 이동), ablation(빼 보기 x 이동), still(단계 8과 빼 보기 x 정지), sub(하위 실험), maxn(Mass 단계 x {5천, 2만}),
-#   maxn_mid(단계 4~8 x 1.25만), maxn_low(단계 2 x 2,500), topview(단계 8 탑뷰 P2, 참고 한 점), actor(단계 1과 s1opt x {500, 1천, 2천}), aa(단계 8 반복, 회차 11~13),
+# 묶음 종류(group): ladder(8단계 x 1만 x 이동), ablation(빼 보기 x 이동), still(단계 8과 빼 보기 x 정지), sub(하위 실험), maxn(단계 2 x 5천, 단계 3~8 x 2만),
+#   maxn_mid(단계 3~8 x 1.25만), maxn_low(단계 2 x 2,500), topview(단계 8 탑뷰 P2, 참고 한 점), actor(단계 1과 s1opt x {500, 1천, 2천}), aa(단계 8 반복, 회차 11~13),
 #   trace(단계 1~8 트레이스), traceser(단계 2~8 직렬 트레이스), extra(기본 묶음에 없는 후보 s8iso, -Only extra로만).
+#   그룹의 n_by_config가 있으면 그 구성은 n 대신 거기 적힌 N 목록으로 돈다(maxn의 s2).
 # 라벨: <묶음>-<V0|V1>-<구성>-N<N>-P<1|2>-r<회차>. V0는 이동(궤도 속도 2m/s), V1은 정지(0). P는 그룹의 preset(기본 1, topview는 2)이다. 트레이스는 <묶음>trace-..., <묶음>traceser-...
 # 실행 순서: 회차가 바깥 루프(r1 전 조건 -> r2 -> r3), 짝수 회차는 슬롯 순서를 뒤집는다(표류가 조건에 고르게 퍼지게). -Order cond면 조건 단위. 묶음 맨 첫 실행 r0 하나는 버린다.
 # 실행마다 끝난 직후 ablation-check.py로 메타데이터를 대조한다. 실패(종료 코드, CSV 없음, 앞 창이 게임이 아님, 대조 틀림, 시간 초과)는 Measurements/<묶음>/failures.csv에 적고 넘어간다.
@@ -11,6 +12,9 @@
 # 리뷰 M4: 실패 재측정 뒤에 느린 실행(Game p50과 Render p50이 그 조건 중앙값보다 함께 2% 넘게 긴 실행, Scripts/batch_rules.py)을 새 회차(7~9)로 한 번 다시 잰다.
 #   다시 잰 실행도 느리면 더 재지 않는다. 표시는 runs.csv slow_mark와 slow.csv에 남고 summary.csv runs_used가 요약에 쓴 회차를 적는다.
 #   끝에서 summarize.py, spikes.py, equivalence-check.py, batch-check.py(A/A 3회 차이 0.5ms, 단계 8 모든 실행 p95 16.7ms 이하, 느린 실행)를 부르고, 검사가 실패하면 종료 코드 1이다.
+#   동등성의 기능 미달(UNMET, 목표 총수가 아닌 점)은 종료 코드를 바꾸지 않는다. 그 점은 plot.py가 최대 N 보간에서 뺀다.
+# Full4 계획 점검 R2: 실행이 연달아 -MaxConsecFail회(기본 3) 실패하면 묶음을 멈춘다(progress.log에 ABORT 줄, batch.json state=aborted, 종료 코드 2).
+#   본 실행, 실패 재측정, 느린 실행 재측정에서 같은 횟수를 이어서 센다. 성공하면 0으로 돌아간다. 원인을 고친 뒤 -Resume으로 이어 한다. -MaxConsecFail 0이면 끈다.
 # 리뷰 M7: 패키지의 commit.txt에 dirty가 있으면 시작하지 않는다(-AllowDirty는 시험용). 패키지 커밋에는 태그 v2-full4를 단다(measurement.md "측정 인프라 동결").
 # 진행은 Measurements/<묶음>/progress.log(탭 구분: 시각, 라벨, OK|FAIL|DISCARD, 프레임 p50, p95, 이유). -Resume이면 거기 있는 라벨은 건너뛴다(중단 뒤 이어 하기).
 # v2 W12: 실행마다 CPU 클럭(% Processor Performance, 측정 구간 평균·최소·최대)과 시작 전 CPU 사용률을 Measurements/<묶음>/clock.csv에 남긴다(summarize.py가 runs.csv에 붙인다).
@@ -18,7 +22,7 @@
 # -File로 부르면 배열 인자가 한 문자열로 넘어오므로 -Only, -Pick은 쉼표로 이은 문자열이다.
 param(
     [Parameter(Mandatory = $true)][string]$Batch,
-    # 쉼표로 이은 묶음 종류. 비우면 기본(ladder, ablation, still, sub, maxn, actor, aa, trace, traceser). extra는 적어야 돈다
+    # 쉼표로 이은 묶음 종류. 비우면 기본(조건 표 main_groups = ladder, ablation, still, sub, topview, maxn, maxn_mid, maxn_low, actor, 그리고 aa, trace, traceser). extra는 적어야 돈다
     [string]$Only = "",
     # 쉼표로 이은 group:구성(별표 가능). 예: "ladder:s1,still:s8,trace:*". 맞는 슬롯만 남긴다(예행용)
     [string]$Pick = "",
@@ -42,7 +46,9 @@ param(
     [string]$PkgRootOverride = "",
     [switch]$NoProcCheck,
     # 시험용: 패키지 커밋에 dirty가 있어도 시작한다. 측정 묶음에는 쓰지 않는다
-    [switch]$AllowDirty
+    [switch]$AllowDirty,
+    # 실행이 연달아 이 횟수만큼 실패하면 묶음을 멈춘다(종료 코드 2). 0이면 끈다
+    [int]$MaxConsecFail = 3
 )
 $env:LAB_NO_ENGINE = "1"
 . "$PSScriptRoot\common.ps1"
@@ -50,7 +56,10 @@ $ErrorActionPreference = "Continue"
 $PSNativeCommandUseErrorActionPreference = $false
 
 $FlushSec = 2
-$ObservedSavingSec = 26   # 묶음 V2W11Sweep의 이동 실행은 진행 로그의 시각 차가 246초로, 위 상한(30 + 60 + 180 + 2 = 272초)보다 26초 짧다. 예상 시간의 두 번째 값
+# 예상 시간의 두 번째 값: 지금 러너의 잰 실행 길이(초). 묶음 V2W12Dry의 progress.log 시각 차다(CPU 한가함 확인 3초 포함).
+# 이동 249, 정지 205, 트레이스 128, 단계 1의 1만 이동 365(프레임이 길어 같은 게임 시간에 벽시계 시간이 더 든다).
+# 단계 1의 1만 트레이스는 잰 적이 없어 같은 비율(워밍업 + 측정 초에 비례)로 가늠한다
+$ObservedSec = @{ V0 = 249; V1 = 205; Trace = 128; S1Big = 365 }
 
 # ---- 조건 JSON에서 슬롯과 작업 목록을 만든다 ----
 $Doc = Get-Content "$PSScriptRoot\full-conditions.json" -Raw -Encoding UTF8 | ConvertFrom-Json
@@ -73,7 +82,9 @@ foreach ($gn in $GroupNames) {
     $runCount = if (-not $isAux -and $Runs -ge 0) { $Runs } else { [int]$g.runs }
     foreach ($cn in $g.configs) {
         if (-not $Cfg.ContainsKey($cn)) { Write-Host "FAIL: group $gn lists unknown config '$cn'."; exit 1 }
-        foreach ($n in $g.n) {
+        $nList = @($g.n)
+        if ($g.n_by_config -and $g.n_by_config.PSObject.Properties[$cn]) { $nList = @($g.n_by_config.$cn) }
+        foreach ($n in $nList) {
             if ($PickList.Count -gt 0 -and -not @($PickList | Where-Object { ($_.Group -eq "*" -or $_.Group -eq $gn) -and ($_.Cfg -eq "*" -or $_.Cfg -eq $cn) }).Count) { continue }
             if ($NList.Count -gt 0 -and $NList -notcontains [int]$n) { continue }
             $sp = $Sc.speeds.($g.speed)
@@ -88,6 +99,11 @@ foreach ($gn in $GroupNames) {
 }
 function Slot-Key($j) { return "$($j.Slot.Group)|$($j.Slot.Prefix)|$($j.Slot.Speed)|$($j.Slot.Cfg.name)|$($j.Slot.N)" }
 function Run-Sec($s) { return $StartupSec + $s.Warmup + $s.Measure + $FlushSec }
+function Obs-Sec($s) {
+    $base = if ($s.Trace) { $ObservedSec.Trace } elseif ($s.Speed -eq "V1") { $ObservedSec.V1 } else { $ObservedSec.V0 }
+    if ($s.Cfg.name -eq "s1" -and $s.N -ge 10000) { $base += ($ObservedSec.S1Big - $ObservedSec.V0) * ($s.Warmup + $s.Measure) / 240.0 }
+    return $base
+}
 function New-Job($Slot, $Run) {
     $label = "$($Slot.Prefix)-$($Slot.Speed)-$($Slot.Cfg.name)-N$($Slot.N)-P$($Slot.Preset)-r$Run"
     return @{ Slot = $Slot; Run = $Run; Label = $label; RetryRun = $Run + $Slot.RunCount; Group = $Slot.Group }
@@ -151,8 +167,10 @@ if ($DryRun) {
     $R0 = if ($SkipR0 -or $Main.Count -eq 0) { 0 } else { 1 }
     $r0sec = if ($R0 -eq 1) { Run-Sec $Main[0].Slot } else { 0 }
     $totalSec = $upper + $r0sec
-    $obsSec = $totalSec - $ObservedSavingSec * ($All.Count + $R0)
-    Write-Host ("TOTAL slots={0} runs={1} (+{2} discarded r0) est={3:N2} h upper bound (startup {4} + warmup + measure + flush {5} s per run), {6:N2} h at the observed run length (-{7} s per run). Retry allowance not included (+5% = {8:N2} h)" -f $SlotCount, $All.Count, $R0, ($totalSec / 3600.0), $StartupSec, $FlushSec, ($obsSec / 3600.0), $ObservedSavingSec, ($obsSec * 1.05 / 3600.0))
+    $obsSec = if ($R0 -eq 1) { Obs-Sec $Main[0].Slot } else { 0 }
+    foreach ($j in $All) { $obsSec += (Obs-Sec $j.Slot) }
+    Write-Host ("TOTAL slots={0} runs={1} (+{2} discarded r0) est={3:N2} h upper bound (startup {4} + warmup + measure + flush {5} s per run), {6:N2} h at the observed run length (V2W12Dry: moving {7} s, still {8} s, trace {9} s, step 1 at N=10000 {10} s). Retry allowance not included (+5% = {11:N2} h)" -f $SlotCount, $All.Count, $R0, ($totalSec / 3600.0), $StartupSec, $FlushSec, ($obsSec / 3600.0), $ObservedSec.V0, $ObservedSec.V1, $ObservedSec.Trace, $ObservedSec.S1Big, ($obsSec * 1.05 / 3600.0))
+    Write-Host "STOP RULE: the batch stops after $MaxConsecFail consecutive failed runs (exit code 2; 0 = off)."
     $lab = New-Object System.Collections.ArrayList
     if ($R0 -eq 1) { [void]$lab.Add((New-Job $Main[0].Slot 0).Label) }
     foreach ($j in $All) { [void]$lab.Add($j.Label) }
@@ -392,6 +410,19 @@ function Save-BatchJson($Ended, $State) {
     $obj | ConvertTo-Json -Depth 4 | Set-Content -Path $BatchJson -Encoding UTF8
 }
 
+# Full4 계획 점검 R2: 연속 실패 수. 패키지·빌드 불일치, 메타데이터 키 불일치, 앞 창 빼앗김 같은 계통 오류로 묶음 전체를 쓰지 않게 멈춘다
+$ConsecFail = 0
+function Note-Result($Ok, $Label) {
+    if ($Ok) { $script:ConsecFail = 0; return }
+    $script:ConsecFail++
+    if ($MaxConsecFail -le 0 -or $script:ConsecFail -lt $MaxConsecFail) { return }
+    $why = "$($script:ConsecFail) consecutive failed runs (last $Label)"
+    Add-Content -Path $ProgressLog -Encoding UTF8 -Value ("{0}`t-`tABORT`t`t`t{1}" -f (Now), (Clean $why))
+    Save-BatchJson (Now) "aborted"
+    Write-Host "ABORT $Batch : $why. See failures.csv, fix the cause, then continue with -Resume (failed runs are measured again in the retry pass)."
+    exit 2
+}
+
 Save-BatchJson "" "running"
 $estH = [math]::Round((($All | ForEach-Object { Run-Sec $_.Slot } | Measure-Object -Sum).Sum) / 3600.0, 2)
 Write-Host "BATCH $Batch commit=$Commit runs=$($All.Count) slots=$SlotCount order=$Order est<=${estH} h start=$(Now)"
@@ -416,9 +447,9 @@ foreach ($j in $All) {
         if ($LASTEXITCODE -eq 0) { Write-Progress-Line $j.Label "OK" $m.Groups[1].Value $m.Groups[2].Value "recovered csv"; Write-Host "RECOVERED $($j.Label)"; continue }
         New-Item -ItemType Directory -Force -Path "$OutCsv\failed" | Out-Null
         Move-Item "$OutCsv\$($j.Label).csv" "$OutCsv\failed\$($j.Label)-$(Get-Date -Format 'yyyyMMddHHmmss').csv" -Force
-        Write-Progress-Line $j.Label "FAIL" "" "" "orphan csv failed check"; Write-Failure $j $j.Label "orphan csv failed check"; continue
+        Write-Progress-Line $j.Label "FAIL" "" "" "orphan csv failed check"; Write-Failure $j $j.Label "orphan csv failed check"; Note-Result $false $j.Label; continue
     }
-    [void](Run-Job $j $j.Label)
+    Note-Result (Run-Job $j $j.Label) $j.Label
 }
 
 # 실패분만 새 회차 번호로 한 번 다시 잰다. 다시 실패하면 포기
@@ -428,7 +459,9 @@ foreach ($j in $Retry) {
     $rl = Retry-Label $j
     if ($Status.ContainsKey($rl)) { continue }
     $jr = New-Job $j.Slot $j.RetryRun
-    if (-not (Run-Job $jr $jr.Label)) { Write-Host "GIVEUP $($jr.Label) (failed twice: $($j.Label))" }
+    $ok = Run-Job $jr $jr.Label
+    if (-not $ok) { Write-Host "GIVEUP $($jr.Label) (failed twice: $($j.Label))" }
+    Note-Result $ok $jr.Label
 }
 
 # 느린 실행을 새 회차(7~9)로 한 번 다시 잰다(리뷰 M4). 요약으로 runs.csv를 만들고 batch-check.py가 다시 잴 실행을 알려 준다. 다시 잰 실행이 또 느려도 더 재지 않는다
@@ -442,7 +475,7 @@ foreach ($ln in $SlowList) {
     $jr = New-Job $orig.Slot ([int]$parts[2])
     if ($Status.ContainsKey($jr.Label)) { continue }
     Write-Host "SLOW RERUN $($parts[1]) -> $($jr.Label)"
-    [void](Run-Job $jr $jr.Label)
+    Note-Result (Run-Job $jr $jr.Label) $jr.Label
 }
 
 $Ended = Now

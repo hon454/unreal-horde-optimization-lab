@@ -10,11 +10,13 @@
       py -3 -I Scripts/plot.py --batch Full4  # 총괄 묶음: Measurements/Full4/만 읽는다(조건 표 Scripts/full-conditions.json, Docs/figures/full4/)
 
 총괄 묶음(v2 W12, Docs/Worklog/V2.md "W12 측정 준비")이 그리는 것
-- full-ladder.svg                          : 사다리 8단계의 프레임 p95(굵은 막대)와 p50(가는 막대), 목표 총수, 이동 조건(V0). 16.7ms와 p95 + 0.6ms(D52 제안) 선을 긋는다.
+- full-ladder.svg                          : 사다리 8단계의 프레임 p95(굵은 막대)와 p50(가는 막대), 목표 총수, 이동 조건(V0). 16.7ms와 p95 + 0.6ms(ADR-0019 판정식) 선을 긋는다.
 - full-ablation-moving.svg, -still.svg     : 단계 8에서 기법 하나를 뺀(또는 엔진 회피를 더한) 행의 프레임 p95와 단계 8의 p95. 이동(V0)과 정지(V1).
-- full-maxn.svg                            : N에 따른 프레임 p95, 단계 1~8, 로그-로그(보조 지표). 단계 1의 점은 사다리(1만)와 액터 보조(500, 1천, 2천)를 합친다.
+- full-maxn.svg                            : N에 따른 프레임 p95, 단계 1~8과 s1opt, 로그-로그(보조 지표). 단계 1의 점은 사다리(1만)와 액터 보조(500, 1천, 2천)를 합친다.
+                                             기능 미달(equivalence.csv의 UNMET) 점은 속이 빈 원으로 그리고 아래 주석에 적는다.
 - full-ladder.csv, full-ablation-moving.csv, full-ablation-still.csv, full-n-at-60fps.csv : 표 재료(프레임 p50·p95, 범위, 차이 판정, 겹친 쌍, 캡슐, 왕복 전환, CPU 클럭, N@16.7ms).
---out <폴더>로 출력 위치를 바꾼다(확인용 그림은 커밋하지 않는다).
+  full-n-at-60fps.csv의 excluded는 "N=… 기능 미달로 뺌", n_p95_bound는 뺀 뒤 16.7ms를 사이에 두는 두 점이 없을 때의 범위("≥12500")다.
+--out <폴더>로 출력 위치를 바꾼다(확인용 그림은 커밋하지 않는다). --equivalence <csv>로 동등성 결과를 바꾼다(기본 Measurements/<묶음>/equivalence.csv).
 """
 import argparse
 import csv
@@ -94,8 +96,10 @@ def bar_chart(data, title, path):
     path.write_text(svg(W, H, "\n".join(body)), encoding="utf-8")
 
 
-def line_chart(sers, title, path, sers50=None):
-    W, H, L, R, T, B = 760, 440, 70, 170, 50, 50
+def line_chart(sers, title, path, sers50=None, hollow=None, footnote="", legend_w=170):
+    """hollow: 계열 이름 -> 속이 빈 원으로 그릴 N들(기능 미달로 최대 N 보간에서 뺀 점). footnote: 그림 아래 한 줄. legend_w: 오른쪽 범례 폭."""
+    W, H, L, R, T, B = 760 + legend_w - 170, 440 + (18 if footnote else 0), 70, legend_w, 50, 50 + (18 if footnote else 0)
+    hollow = hollow or {}
     ns = [n for pts in sers.values() for n, _ in pts]
     ms = [m for pts in sers.values() for _, m in pts] + [BUDGET_MS]
     sers50 = sers50 or {}
@@ -114,7 +118,9 @@ def line_chart(sers, title, path, sers50=None):
         if y0 <= math.log10(m) <= y1:
             body.append(f'<text x="{L-8}" y="{Y(m)+4:.1f}" text-anchor="end">{m}</text>')
             body.append(f'<line x1="{L}" y1="{Y(m):.1f}" x2="{W-R}" y2="{Y(m):.1f}" stroke="#eee"/>')
-    body.append(f'<text x="{(W-R+L)/2}" y="{H-12}" text-anchor="middle">N (log)</text>')
+    body.append(f'<text x="{(W-R+L)/2}" y="{H-B+36}" text-anchor="middle">N (log)</text>')
+    if footnote:
+        body.append(f'<text x="{L}" y="{H-10}" font-size="11" fill="#555">{footnote}</text>')
     body.append(f'<text x="18" y="{(H)/2}" transform="rotate(-90 18 {H/2})" text-anchor="middle">frame p95 (solid) / bottleneck p50 (dashed) ms, log</text>')
     for i, (name, pts) in enumerate(sorted(sers.items())):
         c = COLORS[i % len(COLORS)]
@@ -123,7 +129,8 @@ def line_chart(sers, title, path, sers50=None):
         if name in sers50:
             d50 = " ".join(f'{"M" if j == 0 else "L"}{X(n):.1f},{Y(m):.1f}' for j, (n, m) in enumerate(sers50[name]))
             body.append(f'<path d="{d50}" fill="none" stroke="{c}" stroke-width="1" stroke-dasharray="4 3" opacity="0.7"/>')
-        body += [f'<circle cx="{X(n):.1f}" cy="{Y(m):.1f}" r="3" fill="{c}"/>' for n, m in pts]
+        body += [(f'<circle cx="{X(n):.1f}" cy="{Y(m):.1f}" r="4" fill="white" stroke="{c}" stroke-width="2"/>' if n in hollow.get(name, ())
+                  else f'<circle cx="{X(n):.1f}" cy="{Y(m):.1f}" r="3" fill="{c}"/>') for n, m in pts]
         body.append(f'<text x="{W-R+12}" y="{T + 18*i + 10}" fill="{c}">{name}</text>')
     path.write_text(svg(W, H, "\n".join(body)), encoding="utf-8")
 
@@ -133,7 +140,8 @@ def line_chart(sers, title, path, sers50=None):
 # 성격: start 출발점, earn 버는 단계(프레임 시간을 번다), quality 품질 단계(번 시간을 화면·거리 품질에 쓴다)
 FULL_KIND_COLOR = {"start": "#6b7280", "earn": "#2563eb", "quality": "#ea580c"}
 FULL_LADDER_CLIP_MS = 20.0        # 사다리 그림의 가로축 끝. 넘는 막대(단계 1, 2)는 끊어 그린다
-FULL_JUDGE_MARGIN_MS = 0.6        # D52의 제안: p95 중앙값 + 0.6ms <= 16.7ms. 선은 16.7 - 0.6 = 16.1ms에 긋는다(제안이라 사용자 승인 전이다)
+FULL_JUDGE_MARGIN_MS = 0.6        # ADR-0019 판정식(D52에서 온 값): p95 중앙값 + 0.6ms <= 16.7ms. 선은 16.7 - 0.6 = 16.1ms에 긋는다. 그림 글자에는 내부 이름을 쓰지 않는다
+UNMET = "UNMET"                   # equivalence-check.py의 기능 미달 등급(목표 총수가 아닌 점). 그 점은 최대 N 보간에서 뺀다
 FULL_ROW_FIELDS = ["frame_p50_ms", "frame_p95_ms", "frame_p99_ms", "game_p50_ms", "render_p50_ms", "gpu_p50_ms", "mem_total_mb", "gpu_mem_p50",
                    "actors_mean", "view_actors_mean", "cover30_mean", "overlap_mean", "capsule_traces", "capsule_blocked", "sw_round_all", "death_rate", "near30_mean",
                    "cpu_perf_mean", "cpu_perf_min"]
@@ -245,7 +253,7 @@ def full_ablation(rows, doc, cfgs, speed, target, out, title_extra):
     return csv_rows, base
 
 
-def full_main(batch, target_n=None, out_dir=None):
+def full_main(batch, target_n=None, out_dir=None, eq_path=None):
     doc = lc.load()
     cfgs = lc.configs(doc)
     rows = full_load(batch)
@@ -253,7 +261,7 @@ def full_main(batch, target_n=None, out_dir=None):
     out.mkdir(parents=True, exist_ok=True)
     target, target_src = full_target(batch, target_n)
     judge = BUDGET_MS - FULL_JUDGE_MARGIN_MS
-    lines = [(BUDGET_MS, "#b45309", "16.7 ms (60 fps)"), (judge, "#16a34a", f"{judge:.1f} ms (p95 + {FULL_JUDGE_MARGIN_MS} ms, D52 proposal)")]
+    lines = [(BUDGET_MS, "#b45309", "16.7 ms (60 fps)"), (judge, "#16a34a", f"{judge:.1f} ms (median p95 + {FULL_JUDGE_MARGIN_MS} ms margin)")]
 
     # 사다리: 단계 1~8, 이동(V0), 목표 총수
     aa = rows.get(("V0-s8-aa", target, "P1"))
@@ -281,36 +289,72 @@ def full_main(batch, target_n=None, out_dir=None):
         csv_rows, _ = full_ablation(rows, doc, cfgs, speed, target, out / f"full-ablation-{name}.svg", f"{name} orb")
         write_rows(out / f"full-ablation-{name}.csv", csv_rows, abl_fields)
 
-    # 보조: N 스케일링. 계열 = 단계. 단계 1의 점은 사다리(1만)와 액터 보조(500, 1천, 2천)를 합친다
-    p95, p50, ovl = {}, {}, {}
-    ns = sorted({n for (v, n, p) in rows if v.startswith("V0-s") and v[4:].isdigit()})
-    for num in doc["steps"]:
+    # 보조: N 스케일링. 계열 = 단계와 액터 보조의 하위 실험(s1opt). 단계 1의 점은 사다리(1만)와 액터 보조(500, 1천, 2천)를 합친다
+    # Full4 계획 점검 R1: equivalence.csv에서 기능 미달(UNMET)인 (조건, N) 점은 보간에서 뺀다. 그림에는 속이 빈 원으로 남긴다
+    unmet, eq_src = full_unmet(batch, eq_path)
+    series_cfgs = [(f"s{num}", f"{num} {st['name']}") for num, st in doc["steps"].items()]
+    # 하위 실험 계열의 이름: "<바탕 단계 번호>+ <제목의 ' + ' 뒤>"(s1opt -> "1+ Animation Budget Allocator")
+    series_cfgs += [(c, f"{cfgs[c].get('base', c)[1:]}+ {cfgs[c]['title'].split(' + ', 1)[-1]}")
+                    for c in doc["groups"].get("actor", {}).get("configs", []) if cfgs[c]["kind"] != "step"]
+    p95, p50, ovl, excl = {}, {}, {}, {}
+    ns = sorted({n for (v, n, p) in rows if v.startswith("V0-") and p == "P1"})
+    for cfg, key in series_cfgs:
         for n in ns:
-            r = rows.get((f"V0-s{num}", n, "P1"))
+            r = rows.get((f"V0-{cfg}", n, "P1"))
             if r and fnum(r, "frame_p95_ms") is not None:
-                key = f"{num} {doc['steps'][num]['name']}"
                 p95.setdefault(key, []).append((n, fnum(r, "frame_p95_ms")))
                 ovl.setdefault(key, {})[n] = fnum(r, "overlap_mean")
                 named = [fnum(r, k) for k in ("frame_p50_ms", "game_p50_ms", "render_p50_ms", "gpu_p50_ms")]
                 p50.setdefault(key, []).append((n, max(v for v in named if v is not None)))
+                if (f"V0-{cfg}", n) in unmet:
+                    excl.setdefault(key, set()).add(n)
     table = []
     for name, pts in sorted(p95.items()):
         if len(pts) < 2:
             continue
-        n95, note95 = n_at_budget(sorted(pts))
-        n50, note50 = n_at_budget(sorted(p50[name]))
-        table.append({"series": name, "n_p95": round(n95) if n95 else "", "note_p95": note95, "n_p50": round(n50) if n50 else "", "note_p50": note50,
+        drop = excl.get(name, set())
+        kept = [(n, m) for n, m in sorted(pts) if n not in drop]
+        kept50 = [(n, m) for n, m in sorted(p50[name]) if n not in drop]
+        n95, note95 = n_at_budget(kept) if kept else (None, "no points left")
+        n50, note50 = n_at_budget(kept50) if kept50 else (None, "no points left")
+        bound = ""
+        if drop and note95 == "above range":
+            # 16.7ms를 사이에 두는 두 점이 빼서 없어졌다: 값 대신 남은 가장 큰 N 이상이라는 범위를 낸다
+            bound, n95, note95 = f"≥{kept[-1][0]}", None, "above kept range"
+        if drop and note50 == "above range":
+            n50, note50 = None, f"≥{kept50[-1][0]} (above kept range)"
+        table.append({"series": name, "n_p95": round(n95) if n95 else "", "note_p95": note95, "n_p95_bound": bound,
+                      "n_p50": round(n50) if n50 else "", "note_p50": note50,
+                      "excluded": " ".join(f"N={n} 기능 미달로 뺌" for n in sorted(drop)),
                       "points": " ".join(f"{n}:{m:.2f}" for n, m in sorted(pts)),
                       # 리뷰 M5: 각 점의 겹친 쌍(0.5초 표본 평균). 보간한 N이 겹침 방지가 무너진 구간이면 값을 그대로 쓰지 않는다
                       "overlap_points": " ".join(f"{n}:{ovl[name][n]:.0f}" if ovl[name].get(n) is not None else f"{n}:-" for n, _ in sorted(pts))})
-    write_rows(out / "full-n-at-60fps.csv", table, ["series", "n_p95", "note_p95", "n_p50", "note_p50", "points", "overlap_points"])
+    write_rows(out / "full-n-at-60fps.csv", table, ["series", "n_p95", "note_p95", "n_p95_bound", "n_p50", "note_p50", "excluded", "points", "overlap_points"])
     multi = {k: sorted(v) for k, v in p95.items() if len(v) >= 2}
     if multi:
-        line_chart(multi, f"Frame p95 vs N ({batch}, moving orb)", out / "full-maxn.svg", {k: sorted(v) for k, v in p50.items() if k in multi})
+        dropped = [f"{k.split(' ')[0]} N={n:,}" for k in sorted(multi) for n in sorted(excl.get(k, ()))]
+        foot = ("hollow points: function not met at that N (equivalence check), left out of the max-N interpolation: " + ", ".join(dropped)) if dropped else ""
+        line_chart(multi, f"Frame p95 vs N ({batch}, moving orb)", out / "full-maxn.svg", {k: sorted(v) for k, v in p50.items() if k in multi},
+                   hollow=excl, footnote=foot, legend_w=250)
     print(f"{batch}: target N={target:,} (from {target_src}) {aa_note}")
+    print(f"equivalence: {eq_src} ({len(unmet)} UNMET points)")
     for t in table:
-        print(f'{t["series"]}: N@16.7ms p95 = {t["n_p95"]} {t["note_p95"]} | p50 = {t["n_p50"]} {t["note_p50"]} | p95 points {t["points"]} | overlapping pairs {t["overlap_points"]}')
+        print(f'{t["series"]}: N@16.7ms p95 = {t["n_p95"] or t["n_p95_bound"]} {t["note_p95"]} | p50 = {t["n_p50"]} {t["note_p50"]} | p95 points {t["points"]} | overlapping pairs {t["overlap_points"]}'
+              + (f' | {t["excluded"]}' if t["excluded"] else ""))
     print(f"wrote {out}")
+
+
+def full_unmet(batch, eq_path=None):
+    """equivalence.csv(equivalence-check.py)에서 기능 미달(pass = UNMET)인 (조건, N). 조건은 P1의 "<V0|V1>-<구성>"이다(A/A와 탑뷰 행은 이름 끝이 달라 걸리지 않는다)."""
+    p = Path(eq_path) if eq_path else ROOT / "Measurements" / batch / "equivalence.csv"
+    out = set()
+    if not p.exists():
+        return out, f"{p} not found (no points excluded)"
+    with open(p, newline="", encoding="utf-8") as f:
+        for r in csv.DictReader(f):
+            if r.get("pass") == UNMET:
+                out.add((r["cond"], int(r["n"])))
+    return out, str(p)
 
 
 def main():
@@ -318,9 +362,10 @@ def main():
     ap.add_argument("--batch", help="총괄 묶음 이름(예: Full1). 주면 Measurements/<묶음>/만 읽어 Docs/figures/<묶음>/에 그린다")
     ap.add_argument("--target-n", type=int, help="--batch의 목표 총수를 직접 정한다(기본: batch.json의 target_n)")
     ap.add_argument("--out", help="--batch의 출력 폴더(기본 Docs/figures/<묶음>/). 커밋하지 않을 확인용 그림은 스크래치 폴더를 준다")
+    ap.add_argument("--equivalence", help="--batch의 동등성 결과 CSV(기본 Measurements/<묶음>/equivalence.csv). 기능 미달(UNMET) 점을 최대 N 보간에서 뺀다")
     args = ap.parse_args()
     if args.batch:
-        full_main(args.batch, args.target_n, args.out)
+        full_main(args.batch, args.target_n, args.out, args.equivalence)
         return
     OUT.mkdir(parents=True, exist_ok=True)
     rows = load()

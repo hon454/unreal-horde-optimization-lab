@@ -44,10 +44,25 @@ def check_labels(doc, cfgs, path):
     return 1 if bad else 0
 
 
-REFERENCE_CSV = Path(__file__).resolve().parent.parent / "Saved" / "Profiling" / "CSV" / "V2W11Sweep-V0-s8-N10000-P1-r1.csv"
+CSV_DIR = Path(__file__).resolve().parent.parent / "Saved" / "Profiling" / "CSV"
 
 
-def selftest(doc, cfgs):
+def newest_reference():
+    """selftest의 기준 CSV: Saved/Profiling/CSV에서 가장 최근에 쓴, 라벨 규칙에 맞는 측정 CSV(트레이스·촬영 제외).
+    가장 최근 빌드가 쓰는 메타데이터 키와 조건 표를 견주려는 것이다. 예전에는 V2W11Sweep의 CSV로 고정해 그 뒤에 더한 키(LabSmoothOrient, LabAvoidTuned,
+    LabActorOpt 등)가 늘 빠져 실패했다(Full4 계획 점검)."""
+    best = None
+    for p in CSV_DIR.glob("*.csv"):
+        lp = lc.parse_label(p.stem)
+        if not lp or lp["kind"]:
+            continue
+        t = p.stat().st_mtime
+        if best is None or t > best[0]:
+            best = (t, p)
+    return best[1] if best else None
+
+
+def selftest(doc, cfgs, reference=None):
     bad = 0
     for g, d in doc["groups"].items():
         for c in d["configs"]:
@@ -57,17 +72,18 @@ def selftest(doc, cfgs):
         if d["speed"] not in doc["scenario"]["speeds"]:
             bad += 1
             print(f"  SELFTEST FAIL group {g}: unknown speed {d['speed']}")
-    if REFERENCE_CSV.exists():
-        _, _, meta = read_profile(REFERENCE_CSV)
+    ref = Path(reference) if reference else newest_reference()
+    if ref and ref.exists():
+        _, _, meta = read_profile(ref)
         for name in cfgs:
             exp = lc.expected(doc, cfgs, name, "V0", 10000, "x", "000000000000")
             miss = [k.lstrip("~") for k in exp if k.lstrip("~") not in meta]
             if miss:
                 bad += 1
                 print(f"  SELFTEST FAIL {name}: expected keys not in the reference CSV metadata: {', '.join(miss)}")
-        print(f"  selftest: {len(cfgs)} configs, expected keys checked against {REFERENCE_CSV.name}")
+        print(f"  selftest: {len(cfgs)} configs, expected keys checked against {ref.name} (build {meta.get('labbuild', '?')})")
     else:
-        print(f"  selftest: {len(cfgs)} configs (reference CSV {REFERENCE_CSV.name} not found, metadata keys not checked)")
+        print(f"  selftest: {len(cfgs)} configs (no reference CSV in {ref or CSV_DIR}, metadata keys not checked; pass --reference <CSV>)")
     return 1 if bad else 0
 
 
@@ -76,6 +92,7 @@ def main():
     ap.add_argument("csv", nargs="*")
     ap.add_argument("--labels", help="라벨 목록 파일(한 줄에 하나). 파일의 모든 라벨이 조건 표의 조건이고 기대값을 만들 수 있는지만 본다(러너 -DryRun이 쓴다)")
     ap.add_argument("--selftest", action="store_true", help="조건 표의 모든 구성의 기대 키가 기준 CSV의 메타데이터에 있는지, 묶음 종류의 구성이 모두 있는지 본다")
+    ap.add_argument("--reference", help="--selftest의 기준 CSV(기본: Saved/Profiling/CSV에서 가장 최근의 측정 CSV)")
     ap.add_argument("--cond", help="조건 이름(예: V0-s8). 없으면 라벨에서 고른다")
     ap.add_argument("--shot", action="store_true")
     ap.add_argument("--serial", action="store_true")
@@ -87,7 +104,7 @@ def main():
     if a.labels:
         sys.exit(check_labels(doc, cfgs, a.labels))
     if a.selftest:
-        sys.exit(selftest(doc, cfgs))
+        sys.exit(selftest(doc, cfgs, a.reference))
     if not a.csv:
         ap.error("CSV, --labels, --selftest 중 하나가 필요하다")
     bad = 0

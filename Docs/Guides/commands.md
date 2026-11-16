@@ -149,7 +149,7 @@ py -3 -I Scripts/ablation-check.py Saved/Profiling/CSV/Q3dev-hydrate-N100-P1-r1.
 ```
 
 - `lab_config` 끝의 `tech=hyd:1,bud:1,fix:1,pool:1,sim:1,iskm:1,bnd:1,far:1,fx:1`이 아홉 기법의 설정이다. 단계가 그 기법을 아직 갖지 않으면 0이다(M4 `m4mass`의 Simulation LOD는 틱 간격만이라 `tick`, 전환 대책 일부만 켜면 `m<마스크>`).
-- 실제 적용값은 `lab_applied`(개발 빌드 로그, 벤치마크는 측정 시작 때, 개발 실행은 끝날 때)와 CSV 메타데이터 `LabStage`·`LabBudget`(할당기가 도는가)·`LabPool`·`LabIskmBounds`(고정 바운드가 들어간 ISKM 메시 종류 수, 2종이면 2. Q4b부터 컴포넌트가 아니라 메시 종류를 센다)·`LabHydrateFixMask`다.
+- 실제 적용값은 `lab_applied`(개발 빌드 로그, 벤치마크는 측정 시작 때, 개발 실행은 끝날 때)와 CSV 메타데이터 `LabStage`·`LabBudget`(Budget Allocator가 도는가)·`LabPool`·`LabIskmBounds`(고정 바운드가 들어간 ISKM 메시 종류 수, 2종이면 2. Q4b부터 컴포넌트가 아니라 메시 종류를 센다)·`LabHydrateFixMask`다.
 - `-LabFarM`(그리는 거리)은 표현 Off와 Simulation LOD Off, 배경 무리 안쪽 반경을 함께 옮기므로 farcull 행에 쓰지 않는다. `-LabFarCull=0`은 표현 Off만 맵 반경의 두 배(1,000m)로 옮긴다.
 
 ## 전환 점수(Q3)
@@ -297,20 +297,20 @@ v2 W12에서 다시 만들었다. 조건과 기대 메타데이터는 `Scripts/f
 powershell -ExecutionPolicy Bypass -File Scripts/run-full.ps1 -Batch Full4 -DryRun
 # 마른 실행 묶음(종류마다 하나씩, 1회씩): 라벨 V2W12Dry-...
 powershell -ExecutionPolicy Bypass -File Scripts/run-full.ps1 -Batch V2W12Dry -Runs 1 -NFilter "500,10000,20000" -Pick "ladder:s1,ladder:s8,ablation:a8fsb,still:s8,maxn:s8,actor:s1,trace:s2"
-# 총괄 묶음 Full4(본 실행 216회, 잰 길이로 약 13.7시간. 사용자 검토 뒤에 한다. 패키지 커밋에 dirty가 있으면 시작하지 않는다)
+# 총괄 묶음 Full4(본 실행 207회, 잰 길이로 13.44시간. 사용자가 시작을 요청한 뒤에 한다. 패키지 커밋에 dirty가 있으면 시작하지 않는다. 연달아 3회 실패하면 종료 코드 2로 멈춘다)
 powershell -ExecutionPolicy Bypass -File Scripts/run-full.ps1 -Batch Full4
 # 끊겼으면 이어 한다(progress.log에 있는 라벨은 건너뛴다)
 powershell -ExecutionPolicy Bypass -File Scripts/run-full.ps1 -Batch Full4 -Resume
 # 일부만: -Only ladder,ablation,still,sub,topview,maxn,maxn_mid,maxn_low,actor,aa,trace,traceser,extra (쉼표로 이은 한 문자열)
 powershell -ExecutionPolicy Bypass -File Scripts/run-full.ps1 -Batch Full4 -Only ladder,ablation -Runs 1
 
-# 묶음 검사와 요약(러너가 끝에 summarize, spikes, equivalence, batch-check를 돌리고 동등성이나 묶음 판정이 실패하면 종료 코드 1이다)
+# 묶음 검사와 요약(러너가 끝에 summarize, spikes, equivalence, batch-check를 돌리고 동등성 FAIL이나 묶음 판정 실패면 종료 코드 1이다. 동등성 UNMET은 0)
 py -3 -I Scripts/summarize.py --batch Full4
-py -3 -I Scripts/equivalence-check.py --batch Full4
+py -3 -I Scripts/equivalence-check.py --batch Full4   # 시험은 --out <csv>, 합성 입력은 --csv-dir <프레임 CSV 폴더> --dir <runs.csv 폴더>
 py -3 -I Scripts/batch-check.py --batch Full4   # A/A, 단계 8의 모든 실행, 느린 실행. --dir <폴더> --out <slow.csv>로 스크래치에 돌릴 수 있다
 py -3 -I Scripts/spikes.py --batch Full4
-py -3 -I Scripts/plot.py --batch Full4          # 확인용은 --out <폴더>
-py -3 -I Scripts/ablation-check.py --selftest    # 조건 표의 기대 키와 묶음 종류의 구성을 검사
+py -3 -I Scripts/plot.py --batch Full4          # 확인용은 --out <폴더>. --equivalence <csv>: 기능 미달(UNMET) 점을 최대 N 보간에서 뺀다(기본 Measurements/<묶음>/equivalence.csv)
+py -3 -I Scripts/ablation-check.py --selftest    # 조건 표의 기대 키와 묶음 종류의 구성을 검사. 기준 CSV는 Saved/Profiling/CSV의 가장 최근 측정 CSV(--reference <CSV>로 바꾼다)
 py -3 -I Scripts/ablation-check.py <CSV> --build <커밋 해시 앞 12자>
 
 # 촬영(측정이 끝난 뒤 따로)
@@ -321,16 +321,19 @@ powershell -ExecutionPolicy Bypass -File Scripts/capture-full.ps1 -Batch Full4
 | 인자(`run-full.ps1`) | 뜻 |
 | --- | --- |
 | `-Batch` | 묶음 이름(필수). 폴더 `Measurements/<Batch>/`, 라벨 접두사. 같은 이름과 라벨은 다시 쓰지 않는다(`progress.log`가 있으면 `-Resume` 아니면 거부) |
-| `-Only` | 묶음 종류만: `ladder`(8단계 × 1만 × 이동), `ablation`(빼 보기 17행 × 이동), `still`(단계 8과 빼 보기 15행 × 정지), `sub`(`s8av`), `topview`(단계 8 × 이동 × 탑뷰 P2, 참고 한 점), `maxn`(단계 2\~8 × {5천, 2만}), `maxn_mid`(단계 4\~8 × 1.25만), `maxn_low`(단계 2 × 2,500), `actor`(단계 1과 `s1opt` × {500, 1천, 2천}), `aa`(단계 8 반복, 회차 11\~13), `trace`(단계 1\~8), `traceser`(단계 2\~8 직렬), `extra`(후보 `s8iso`. 적어야 돈다). 비우면 `extra`를 뺀 전부 |
+| `-Only` | 묶음 종류만: `ladder`(8단계 × 1만 × 이동), `ablation`(빼 보기 17행 × 이동), `still`(단계 8과 빼 보기 15행 × 정지), `sub`(`s8av`), `topview`(단계 8 × 이동 × 탑뷰 P2, 참고 한 점), `maxn`(단계 2 × 5천, 단계 3\~8 × 2만), `maxn_mid`(단계 3\~8 × 1.25만), `maxn_low`(단계 2 × 2,500), `actor`(단계 1과 `s1opt` × {500, 1천, 2천}), `aa`(단계 8 반복, 회차 11\~13), `trace`(단계 1\~8), `traceser`(단계 2\~8 직렬), `extra`(후보 `s8iso`. 적어야 돈다). 비우면 `extra`를 뺀 전부 |
 | `-Pick`, `-NFilter` | 예행용. `-Pick "ladder:s1,still:*"`은 묶음 종류:구성이 맞는 슬롯만, `-NFilter 500,10000`은 그 N인 슬롯만 남긴다 |
 | `-Runs` | 반복 묶음의 회차 수를 덮어쓴다(기본은 조건 표의 3). 트레이스와 A/A는 조건 표 값이다 |
 | `-Order round\|cond` | 기본 `round`: 회차가 바깥 루프(r1 전 슬롯, r2 전 슬롯 역순, r3). `cond`: 같은 조건 연달아 |
 | `-Resume`, `-DryRun`, `-SkipR0`, `-NoFgCheck`, `-NoClock` | 이어 하기, 계획만, `r0` 건너뛰기, 앞 창 검사 끄기, CPU 클럭 기록 끄기(측정에는 앞 창 검사를 끄지 않는다) |
 | `-AllowDirty` | 패키지의 `commit.txt`에 `dirty`가 있어도 시작한다. 러너 시험 전용이다. 측정 묶음에는 쓰지 않는다 |
+| `-MaxConsecFail` | 실행이 연달아 이 횟수만큼 실패하면 묶음을 멈춘다(기본 3, 0이면 끈다). 본 실행, 실패 재측정, 느린 실행 재측정을 이어서 센다. 멈추면 `progress.log`에 `ABORT` 줄, `batch.json`의 `state`가 `aborted`, 종료 코드 2다. 원인을 고친 뒤 `-Resume`으로 이어 한다 |
+| `-StartupSec`, `-TimeoutFactor` | 예상 시간 계산용 프로세스 시작 시간(기본 30초), 시간 제한 = 배수(기본 3) × 한 실행 예상 시간 |
+| `-ExePath`, `-ExeArgsPrefix`, `-PkgRootOverride`, `-NoProcCheck` | 러너 시험용(게임 없이 파싱·재시도·이어 하기 점검). 측정에는 쓰지 않는다. `-ExeArgsPrefix`는 공백으로 나누므로 경로에 공백이 없어야 한다 |
+
+`-DryRun`의 예상 시간은 둘이다. 상한은 실행마다 시작 30초 + 워밍업 + 측정 + 마무리 2초다. 둘째 값은 지금 러너의 잰 실행 길이(`V2W12Dry`: 이동 249초, 정지 205초, 트레이스 128초, 단계 1의 1만 이동 365초)다.
 
 탑뷰 한 점의 장치 확인(Development 빌드, 측정이 없을 때 한다. 러너를 거치지 않고 한 줄로 확인한다): `powershell -ExecutionPolicy Bypass -File Scripts/run-dev.ps1 -N 10000 -Preset P2 -Stage 8 -Extra "-LabOrbOrbitRadius=57.3","-LabOrbOrbitSpeed=2","-LabOrbHeight=6" -Duration 30 -ShotAt 20`. 스크린샷(`Saved/Screenshots/Lab/`)이 오브 위 100m에서 수직으로 내려다본 장면이어야 한다. `-Duration 60 -ShotAt 50`으로 한 번 더 찍어 오브가 화면 한가운데에 있고 지면의 배치가 궤도를 도는 만큼(2m/s × 30초 = 60m) 옮겨 갔는지 견준다. 로그의 `lab_config` 줄에 Preset 2가 찍혀야 한다.
-| `-StartupSec`, `-TimeoutFactor` | 예상 시간 계산용 프로세스 시작 시간(기본 30초), 시간 제한 = 배수(기본 3) × 한 실행 예상 시간 |
-| `-ExePath`, `-ExeArgsPrefix`, `-PkgRootOverride`, `-NoProcCheck` | 러너 시험용(게임 없이 파싱·재시도·이어 하기 점검). 측정에는 쓰지 않는다 |
 
 `capture-full.ps1`은 조건 표의 `capture` 절(단계 1\~8, 이동, 1만)을 `-LabHud -LabShotAt=45 -LabDuration=40 -LabWarmup=15`로 띄워 창이 뜬 24초 뒤부터 8초를 ffmpeg(`gdigrab`, 게임 창 클라이언트 영역의 물리 화면 좌표로 `-i desktop` 영역 녹화, `__COMPAT_LAYER=HighDpiAware`)로 녹화하고 960px 15fps 움직이는 WebP(`libwebp_anim -q:v 60 -loop 0`)로 만든다(`-Format gif`면 팔레트 2패스 GIF). 화면 메시지는 `-ExecCmds=DisableAllScreenMessages`로 끈다. 결과는 git 밖 `Saved/Capture/<Batch>/<라벨>.webp`, 경로는 `Measurements/<Batch>/captures.csv`에 적는다. 인자 `-Steps 8`, `-Seconds`, `-RecordDelaySec`, `-Width`, `-Fps`, `-Quality`, `-Format`, `-Run`, `-WarmupSec`(기본 15).
 
