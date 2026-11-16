@@ -111,8 +111,8 @@
    "role": "quality"
   },
   "8": {
-   "name": "Raise quality",
-   "role": "quality"
+   "name": "Trim remaining cost",
+   "role": "earn"
   }
  },
  "configs": [
@@ -305,8 +305,8 @@
    "name": "s8",
    "kind": "step",
    "step": 8,
-   "title": "Raise quality",
-   "role": "quality",
+   "title": "Trim remaining cost",
+   "role": "earn",
    "overlap": "sep",
    "equiv": "strict",
    "args": [
