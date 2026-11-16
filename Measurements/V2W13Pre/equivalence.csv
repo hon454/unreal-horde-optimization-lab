@@ -1,0 +1,18 @@
+n,speed,cond,runs,equiv,alive_min,alive_max,death_rate,death_rate_min,death_rate_max,death_rate_ref,death_rate_dev_pct,death_rate_ok,near30_mean,near30_mean_min,near30_mean_max,near30_mean_ref,near30_mean_dev_pct,near30_mean_ok,overlap_mean,overlap_class,overlap_range,overlap_ok,overlap_xn_ref,overlap_xn_limit,overlap_xn_ok,capsule_traces,capsule_miss,capsule_ok,round_per_sec,round_ok,pass,note
+500,V0,V0-s1opt,1,report,500,500,3.389,3.389,3.389,,,no peers,11.96,11.96,11.96,,,no peers,0.0,zero,0..50,ok,,,n/a,483,0,ok,,no value,ok,
+1000,V0,V0-s1opt,1,report,1000,1000,6.372,6.372,6.372,,,no peers,51.96,51.96,51.96,,,no peers,0.0,zero,0..50,ok,,,n/a,479,0,ok,,no value,ok,
+2000,V0,V0-s1opt,1,report,2000,2000,11.894,11.894,11.894,,,no peers,147.72,147.72,147.72,,,no peers,0.0,zero,0..50,ok,,,n/a,470,0,ok,,no value,ok,
+10000,V0,V0-a8sim,1,strict,10000,10000,59.217,59.217,59.217,59.228,-0.02,ok,978.66,978.66,978.66,978.235,0.04,ok,218.8,sep,117.5..469.9,ok,,,n/a,90,0,ok,0.0,ok,ok,
+10000,V0,V0-s1,1,report,10000,10000,32.855,32.855,32.855,59.228,-44.53,report,793.37,793.37,793.37,978.235,-18.9,report,7.0,zero,0..50,ok,,,n/a,468,0,ok,,no value,report,death_rate dev -44.53%; near30_mean dev -18.90%
+10000,V0,V0-s2,1,report,10000,10000,54.167,54.167,54.167,59.228,-8.55,report,2163.85,2163.85,2163.85,978.235,121.2,report,12610.4,engine,5000..16000,ok,,,n/a,88,0,ok,68.293,report,report,death_rate dev -8.55%; near30_mean dev +121.20%; round trips 68.29/s (no min hold)
+10000,V0,V0-s3,1,strict,10000,10000,59.154,59.154,59.154,59.228,-0.13,ok,977.39,977.39,977.39,978.235,-0.09,ok,231.4,sep,117.5..469.9,ok,,,n/a,90,0,ok,4.333,report,report,round trips 4.33/s (no min hold)
+10000,V0,V0-s4,1,strict,10000,10000,59.23,59.23,59.23,59.228,0.0,ok,978.19,978.19,978.19,978.235,-0.0,ok,234.6,sep,117.5..469.9,ok,,,n/a,91,0,ok,0.0,ok,ok,
+10000,V0,V0-s5,1,strict,10000,10000,59.223,59.223,59.223,59.228,-0.01,ok,978.28,978.28,978.28,978.235,0.0,ok,241.5,sep,117.5..469.9,ok,,,n/a,91,0,ok,0.0,ok,ok,
+10000,V0,V0-s6,1,strict,10000,10000,59.227,59.227,59.227,59.228,-0.0,ok,979.03,979.03,979.03,978.235,0.08,ok,235.3,sep,117.5..469.9,ok,,,n/a,90,0,ok,0.0,ok,ok,
+10000,V0,V0-s7,1,strict,10000,10000,59.301,59.301,59.301,59.228,0.12,ok,978.14,978.14,978.14,978.235,-0.01,ok,253.7,sep,117.5..469.9,ok,,,n/a,91,0,ok,0.0,ok,ok,
+10000,V0,V0-s8,1,strict,10000,10000,59.294,59.294,59.294,59.228,0.11,ok,978.52,978.52,978.52,978.235,0.03,ok,234.4,sep,117.5..469.9,ok,,,n/a,90,0,ok,0.0,ok,ok,
+10000,V0,V0-s8av,1,report,10000,10000,54.213,54.213,54.213,59.228,-8.47,report,2081.45,2081.45,2081.45,978.235,112.78,report,12773.7,engine,5000..16000,ok,,,n/a,90,0,ok,0.0,ok,report,death_rate dev -8.47%; near30_mean dev +112.78%
+10000,V0,V0-s8-P2,1,report,10000,10000,58.537,58.537,58.537,59.228,-1.17,report,985.78,985.78,985.78,978.235,0.77,ok,23.8,sep,117.5..469.9,report,,,n/a,0,0,report,0.0,ok,report,"death_rate dev -1.17%; overlap 24 outside 117.5..469.9 (sep); capsule traces 0 misses 0 (P2, report only)"
+10000,V1,V1-s8,1,strict,10000,10000,61.298,61.298,61.298,61.298,0.0,ok,618.06,618.06,618.06,618.06,0.0,ok,0.0,sep,-1.0..1.0,ok,,,n/a,90,0,ok,0.0,ok,ok,
+12500,V0,V0-s3,1,strict,12500,12500,73.942,73.942,73.942,73.942,0.0,ok,1228.39,1228.39,1228.39,1228.39,0.0,ok,629.2,sep,314.6..1258.5,ok,235.0,734.2,ok,90,0,ok,5.516,report,report,round trips 5.52/s (no min hold)
+20000,V0,V0-s8,1,strict,20000,20000,117.808,117.808,117.808,117.808,0.0,ok,1920.0,1920.0,1920.0,1920.0,0.0,ok,2585.6,sep,1292.8..5171.2,ok,235.0,1879.7,UNMET,91,0,ok,0.006,ok,UNMET,overlap 2586 > cross-N limit 1880 = 2 x 235 x (20000/10000)^2 (2.8x the scaled N=10000 value)

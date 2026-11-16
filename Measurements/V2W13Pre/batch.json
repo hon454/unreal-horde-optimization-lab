@@ -1,10 +1,10 @@
 ﻿{
     "batch":  "V2W13Pre",
-    "state":  "running",
+    "state":  "done",
     "commit":  "de0e21bd64ac6f9a8b8fa08c912920532440cea7",
     "started":  "2026-11-16 11:55:45",
-    "ended":  "",
-    "resumes":  0,
+    "ended":  "2026-11-16 14:07:23",
+    "resumes":  1,
     "order":  "round",
     "runs_override":  1,
     "target_n":  10000,
@@ -17,8 +17,8 @@
     "base_mhz":  3401,
     "conditions":  18,
     "planned_runs":  18,
-    "planned_runs_ok":  0,
-    "planned_runs_missing":  18,
+    "planned_runs_ok":  18,
+    "planned_runs_missing":  0,
     "failed_runs":  0,
     "giveups":  [
 
