@@ -9,12 +9,15 @@
 # 실행 순서: 회차가 바깥 루프(r1 전 조건 -> r2 -> r3), 짝수 회차는 슬롯 순서를 뒤집는다(표류가 조건에 고르게 퍼지게). -Order cond면 조건 단위. 묶음 맨 첫 실행 r0 하나는 버린다.
 # 실행마다 끝난 직후 ablation-check.py로 메타데이터를 대조한다. 실패(종료 코드, CSV 없음, 앞 창이 게임이 아님, 대조 틀림, 시간 초과)는 Measurements/<묶음>/failures.csv에 적고 넘어간다.
 # 묶음 끝에서 실패분만 새 회차 번호(회차 + 그 묶음 종류의 회차 수)로 한 번 다시 잰다. 실패 CSV는 Saved/Profiling/CSV/failed/ 또는 fg-failed/로 옮겨 요약에서 빠진다.
+# -RetryGiveups(기본 끔): 실패 재측정도 실패한 계획 실행(batch.json giveups)을 새 회차(회차 + 20: 21~23, A/A 31~33)로 한 번 더 잰다. 또 실패하면 더 재지 않는다.
+#   Full4의 a8hyd 9회가 조건 표 기대값의 잘못(4b303c6에서 고침)으로 실패해 재시도 회차까지 써 버린 일 때문에 더했다. batch.json은 이 회차가 OK면 그 계획 실행을 OK로 센다.
+#   요약·검사(batch_rules.base_run)는 회차 21 이상을 20을 뺀 회차로 읽어 같은 조건(A/A면 A/A)의 원 실행으로 센다. -DryRun과 함께 주면 progress.log를 읽어 더 잴 라벨을 찍는다.
 # 리뷰 M4: 실패 재측정 뒤에 느린 실행(Game p50과 Render p50이 그 조건 중앙값보다 함께 2% 넘게 긴 실행, Scripts/batch_rules.py)을 새 회차(7~9)로 한 번 다시 잰다.
 #   다시 잰 실행도 느리면 더 재지 않는다. 표시는 runs.csv slow_mark와 slow.csv에 남고 summary.csv runs_used가 요약에 쓴 회차를 적는다.
 #   끝에서 summarize.py, spikes.py, equivalence-check.py, batch-check.py(A/A 3회 차이 0.5ms, 단계 8 모든 실행 p95 16.7ms 이하, 느린 실행)를 부르고, 검사가 실패하면 종료 코드 1이다.
 #   동등성의 기능 미달(UNMET, 목표 총수가 아닌 점)은 종료 코드를 바꾸지 않는다. 그 점은 plot.py가 최대 N 보간에서 뺀다.
 # Full4 계획 점검 R2: 실행이 연달아 -MaxConsecFail회(기본 3) 실패하면 묶음을 멈춘다(progress.log에 ABORT 줄, batch.json state=aborted, 종료 코드 2).
-#   본 실행, 실패 재측정, 느린 실행 재측정에서 같은 횟수를 이어서 센다. 성공하면 0으로 돌아간다. 원인을 고친 뒤 -Resume으로 이어 한다. -MaxConsecFail 0이면 끈다.
+#   본 실행, 실패 재측정, 두 번째 재측정(-RetryGiveups), 느린 실행 재측정에서 같은 횟수를 이어서 센다. 성공하면 0으로 돌아간다. 원인을 고친 뒤 -Resume으로 이어 한다. -MaxConsecFail 0이면 끈다.
 # 리뷰 M7: 패키지의 commit.txt에 dirty가 있으면 시작하지 않는다(-AllowDirty는 시험용). 패키지 커밋에는 태그 v2-full4를 단다(measurement.md "측정 인프라 동결").
 # 진행은 Measurements/<묶음>/progress.log(탭 구분: 시각, 라벨, OK|FAIL|DISCARD, 프레임 p50, p95, 이유). -Resume이면 거기 있는 라벨은 건너뛴다(중단 뒤 이어 하기).
 # v2 W12: 실행마다 CPU 클럭(% Processor Performance, 측정 구간 평균·최소·최대)과 시작 전 CPU 사용률을 Measurements/<묶음>/clock.csv에 남긴다(summarize.py가 runs.csv에 붙인다).
@@ -48,7 +51,9 @@ param(
     # 시험용: 패키지 커밋에 dirty가 있어도 시작한다. 측정 묶음에는 쓰지 않는다
     [switch]$AllowDirty,
     # 실행이 연달아 이 횟수만큼 실패하면 묶음을 멈춘다(종료 코드 2). 0이면 끈다
-    [int]$MaxConsecFail = 3
+    [int]$MaxConsecFail = 3,
+    # 실패 재측정도 실패한 계획 실행을 회차 + 20으로 한 번 더 잰다(기본 끔). 보통 -Resume과 함께 쓴다
+    [switch]$RetryGiveups
 )
 $env:LAB_NO_ENGINE = "1"
 . "$PSScriptRoot\common.ps1"
@@ -108,6 +113,10 @@ function New-Job($Slot, $Run) {
     $label = "$($Slot.Prefix)-$($Slot.Speed)-$($Slot.Cfg.name)-N$($Slot.N)-P$($Slot.Preset)-r$Run"
     return @{ Slot = $Slot; Run = $Run; Label = $label; RetryRun = $Run + $Slot.RunCount; Group = $Slot.Group }
 }
+function Retry-Label($j) { return "$($j.Slot.Prefix)-$($j.Slot.Speed)-$($j.Slot.Cfg.name)-N$($j.Slot.N)-P$($j.Slot.Preset)-r$($j.RetryRun)" }
+# -RetryGiveups의 두 번째 재측정 회차 = 계획 회차 + 20(Scripts/batch_rules.py GIVEUP_RETRY_OFFSET과 같은 값). 다른 규칙이 쓰지 않는 번호다(1~3, 4~6, 7~9, 11~13, 14~16)
+$GiveupOffset = 20
+function Giveup-Label($j) { return "$($j.Slot.Prefix)-$($j.Slot.Speed)-$($j.Slot.Cfg.name)-N$($j.Slot.N)-P$($j.Slot.Preset)-r$($j.Run + $GiveupOffset)" }
 $MainSlots = @($Slots | Where-Object { -not $_.Aux })
 $AuxSlots = @($Slots | Where-Object { $_.Aux })
 $Main = New-Object System.Collections.ArrayList
@@ -185,6 +194,14 @@ if ($DryRun) {
     }
     Write-Host "RUN ORDER ($($lab.Count) runs including r0):"
     Write-Host ("  " + ($lab -join "`n  "))
+    if ($RetryGiveups) {
+        # progress.log로 두 번째 재측정 대상(계획 실행과 실패 재측정이 둘 다 FAIL, 두 번째 재측정 라벨이 아직 없음)을 고른다. 라벨 검사에도 넣는다
+        $st = @{}
+        if (Test-Path $ProgressLog) { foreach ($line in (Get-Content $ProgressLog -Encoding UTF8)) { $f = $line.Split("`t"); if ($f.Count -ge 3) { $st[$f[1]] = $f[2] } } }
+        $gv = @($All | Where-Object { $st[$_.Label] -eq "FAIL" -and $st[(Retry-Label $_)] -eq "FAIL" -and -not $st.ContainsKey((Giveup-Label $_)) })
+        Write-Host "GIVEUP RETRY PASS (-RetryGiveups, from $ProgressLog, exists=$(Test-Path $ProgressLog)): $($gv.Count) runs, after the retry pass and before the slow-run reruns"
+        foreach ($j in $gv) { Write-Host "  $(Giveup-Label $j)  (given up: $($j.Label) and $(Retry-Label $j))"; [void]$lab.Add((Giveup-Label $j)) }
+    }
     $tmp = Join-Path ([System.IO.Path]::GetTempPath()) "lab-dryrun-labels.txt"
     Set-Content -Path $tmp -Value $lab -Encoding UTF8
     $chk = (& py -3 -I "$PSScriptRoot\ablation-check.py" --labels $tmp 2>&1 | Out-String)
@@ -396,16 +413,16 @@ function Run-Job($j, $Label) {
     return $r.Ok
 }
 
-function Retry-Label($j) { return "$($j.Slot.Prefix)-$($j.Slot.Speed)-$($j.Slot.Cfg.name)-N$($j.Slot.N)-P$($j.Slot.Preset)-r$($j.RetryRun)" }
+# 계획 실행은 그 라벨, 실패 재측정, 두 번째 재측정(-RetryGiveups) 가운데 하나가 OK면 OK로 센다. 포기는 셋 다 OK가 아닌 것이다(두 번째 재측정이 없으면 앞 둘이 FAIL)
 function Save-BatchJson($Ended, $State) {
-    $ok = @($All | Where-Object { $Status[$_.Label] -eq "OK" -or $Status[(Retry-Label $_)] -eq "OK" }).Count
+    $ok = @($All | Where-Object { $Status[$_.Label] -eq "OK" -or $Status[(Retry-Label $_)] -eq "OK" -or $Status[(Giveup-Label $_)] -eq "OK" }).Count
     $failRuns = @($Status.Values | Where-Object { $_ -eq "FAIL" }).Count
     $obj = [ordered]@{
         batch = $Batch; state = $State; commit = $Commit; started = $Started; ended = $Ended; resumes = $Resumes
         order = $Order; runs_override = $Runs; target_n = [int]$Sc.target_n; only = ($GroupNames -join ","); pick = $Pick; n_filter = $NFilter
         orbit = "r$($Sc.radius_m)/h$($Sc.height_m)"; measure_sec = [int]$Sc.measure_sec; power_plan = $PowerPlan; base_mhz = $BaseMhz
         conditions = $SlotCount; planned_runs = $All.Count; planned_runs_ok = $ok; planned_runs_missing = ($All.Count - $ok); failed_runs = $failRuns
-        giveups = @($All | Where-Object { $Status[$_.Label] -eq "FAIL" -and $Status[(Retry-Label $_)] -eq "FAIL" } | ForEach-Object { $_.Label })
+        giveups = @($All | Where-Object { $Status[$_.Label] -eq "FAIL" -and $Status[(Retry-Label $_)] -eq "FAIL" -and $Status[(Giveup-Label $_)] -ne "OK" } | ForEach-Object { $_.Label })
     }
     $obj | ConvertTo-Json -Depth 4 | Set-Content -Path $BatchJson -Encoding UTF8
 }
@@ -464,13 +481,27 @@ foreach ($j in $Retry) {
     Note-Result $ok $jr.Label
 }
 
+# -RetryGiveups: 포기한 계획 실행(계획 실행과 실패 재측정이 둘 다 FAIL)을 회차 + 20으로 한 번 더 잰다. 또 실패하면 더 재지 않는다. 연속 실패는 이어서 센다
+if ($RetryGiveups) {
+    $Giveup = @($All | Where-Object { $Status[$_.Label] -eq "FAIL" -and $Status[(Retry-Label $_)] -eq "FAIL" })
+    if ($Giveup.Count -gt 0) { Write-Host "GIVEUP RETRY PASS: $($Giveup.Count) given-up runs" }
+    foreach ($j in $Giveup) {
+        $gl = Giveup-Label $j
+        if ($Status.ContainsKey($gl)) { continue }
+        $jg = New-Job $j.Slot ($j.Run + $GiveupOffset)
+        $ok = Run-Job $jg $jg.Label
+        if (-not $ok) { Write-Host "GIVEUP AGAIN $($jg.Label) (failed three times: $($j.Label), $(Retry-Label $j))" }
+        Note-Result $ok $jg.Label
+    }
+}
+
 # 느린 실행을 새 회차(7~9)로 한 번 다시 잰다(리뷰 M4). 요약으로 runs.csv를 만들고 batch-check.py가 다시 잴 실행을 알려 준다. 다시 잰 실행이 또 느려도 더 재지 않는다
 & py -3 -I "$PSScriptRoot\summarize.py" --batch $Batch 2>&1 | Out-Host
 $SlowList = @(& py -3 -I "$PSScriptRoot\batch-check.py" --batch $Batch --list-slow 2>&1 | ForEach-Object { "$_" } | Where-Object { $_ -match "^RERUN " })
 if ($SlowList.Count -gt 0) { Write-Host "SLOW RERUN PASS: $($SlowList.Count) slow runs" }
 foreach ($ln in $SlowList) {
     $parts = $ln -split " "
-    $orig = @($All | Where-Object { $_.Label -eq $parts[1] -or (Retry-Label $_) -eq $parts[1] }) | Select-Object -First 1
+    $orig = @($All | Where-Object { $_.Label -eq $parts[1] -or (Retry-Label $_) -eq $parts[1] -or (Giveup-Label $_) -eq $parts[1] }) | Select-Object -First 1
     if (-not $orig) { Write-Host "SLOW RERUN skipped: $($parts[1]) is not a planned run"; continue }
     $jr = New-Job $orig.Slot ([int]$parts[2])
     if ($Status.ContainsKey($jr.Label)) { continue }

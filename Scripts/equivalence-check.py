@@ -43,10 +43,11 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import lab_conditions as lc  # noqa: E402
+import batch_rules as br  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 CSV_DIR = ROOT / "Saved" / "Profiling" / "CSV"
-AA_RUN_MIN = 10  # 묶음 끝 A/A는 회차 11~13
+AA_RUN_MIN = 10  # 묶음 끝 A/A는 회차 11~13. 두 번째 재측정(회차 + 20, run-full.ps1 -RetryGiveups)은 br.base_run으로 20을 빼고 가른다
 
 
 def read_meta(path, tail=1 << 19):
@@ -140,7 +141,7 @@ def main():
             continue
         meta = read_meta(path)
         t = table.get(path.stem, {})
-        runs.setdefault((p["n"], p["speed"], p["cfg"], p["run"] > AA_RUN_MIN, p["preset"]), []).append({
+        runs.setdefault((p["n"], p["speed"], p["cfg"], br.base_run(p["run"]) > AA_RUN_MIN, p["preset"]), []).append({
             "label": path.stem, "death_rate": num(meta, "labdeathrate"), "near30_mean": num(meta, "labnear30mean"),
             "alive_min": num(meta, "labalivemin"), "alive_max": num(meta, "labalivemax"),
             "traces": num(meta, "labcapsuletraces"), "hits": num(meta, "labcapsulehits"), "blocked": num(meta, "labcapsuleblocked"),

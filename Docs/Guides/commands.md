@@ -301,6 +301,9 @@ powershell -ExecutionPolicy Bypass -File Scripts/run-full.ps1 -Batch V2W12Dry -R
 powershell -ExecutionPolicy Bypass -File Scripts/run-full.ps1 -Batch Full4
 # 끊겼으면 이어 한다(progress.log에 있는 라벨은 건너뛴다)
 powershell -ExecutionPolicy Bypass -File Scripts/run-full.ps1 -Batch Full4 -Resume
+# 포기한 실행(batch.json giveups)을 회차 + 20으로 한 번 더 잰다. 먼저 -DryRun을 붙여 더 잴 라벨을 본다
+powershell -ExecutionPolicy Bypass -File Scripts/run-full.ps1 -Batch Full4 -Resume -RetryGiveups -DryRun
+powershell -ExecutionPolicy Bypass -File Scripts/run-full.ps1 -Batch Full4 -Resume -RetryGiveups
 # 일부만: -Only ladder,ablation,still,sub,topview,maxn,maxn_mid,maxn_low,actor,aa,trace,traceser,extra (쉼표로 이은 한 문자열)
 powershell -ExecutionPolicy Bypass -File Scripts/run-full.ps1 -Batch Full4 -Only ladder,ablation -Runs 1
 
@@ -327,7 +330,8 @@ powershell -ExecutionPolicy Bypass -File Scripts/capture-full.ps1 -Batch Full4
 | `-Order round\|cond` | 기본 `round`: 회차가 바깥 루프(r1 전 슬롯, r2 전 슬롯 역순, r3). `cond`: 같은 조건 연달아 |
 | `-Resume`, `-DryRun`, `-SkipR0`, `-NoFgCheck`, `-NoClock` | 이어 하기, 계획만, `r0` 건너뛰기, 앞 창 검사 끄기, CPU 클럭 기록 끄기(측정에는 앞 창 검사를 끄지 않는다) |
 | `-AllowDirty` | 패키지의 `commit.txt`에 `dirty`가 있어도 시작한다. 러너 시험 전용이다. 측정 묶음에는 쓰지 않는다 |
-| `-MaxConsecFail` | 실행이 연달아 이 횟수만큼 실패하면 묶음을 멈춘다(기본 3, 0이면 끈다). 본 실행, 실패 재측정, 느린 실행 재측정을 이어서 센다. 멈추면 `progress.log`에 `ABORT` 줄, `batch.json`의 `state`가 `aborted`, 종료 코드 2다. 원인을 고친 뒤 `-Resume`으로 이어 한다 |
+| `-RetryGiveups` | 계획 실행과 그 실패 재측정이 둘 다 실패한 실행을 회차 + 20(21\~23, A/A는 31\~33)으로 한 번 더 잰다(기본 끔). 실패 재측정 뒤, 느린 실행 재측정 앞에 돈다. 이 실행이 OK면 `batch.json`이 그 계획 실행을 OK로 센다. 또 실패하면 더 재지 않는다. `-DryRun`과 함께 주면 `progress.log`를 읽어 더 잴 라벨을 찍는다 |
+| `-MaxConsecFail` | 실행이 연달아 이 횟수만큼 실패하면 묶음을 멈춘다(기본 3, 0이면 끈다). 본 실행, 실패 재측정, 두 번째 재측정(`-RetryGiveups`), 느린 실행 재측정을 이어서 센다. 멈추면 `progress.log`에 `ABORT` 줄, `batch.json`의 `state`가 `aborted`, 종료 코드 2다. 원인을 고친 뒤 `-Resume`으로 이어 한다 |
 | `-StartupSec`, `-TimeoutFactor` | 예상 시간 계산용 프로세스 시작 시간(기본 30초), 시간 제한 = 배수(기본 3) × 한 실행 예상 시간 |
 | `-ExePath`, `-ExeArgsPrefix`, `-PkgRootOverride`, `-NoProcCheck` | 러너 시험용(게임 없이 파싱·재시도·이어 하기 점검). 측정에는 쓰지 않는다. `-ExeArgsPrefix`는 공백으로 나누므로 경로에 공백이 없어야 한다 |
 

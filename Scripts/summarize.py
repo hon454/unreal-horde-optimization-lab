@@ -32,10 +32,13 @@ CSV_DIR = ROOT / "Saved" / "Profiling" / "CSV"
 LABEL_RE = re.compile(r"^(?P<m>M\d+b?|Q\d+)-(?P<variant>[a-z][a-z0-9]*)-N(?P<n>\d+)-(?P<preset>P\d)(?P<tag>[a-z0-9]*)-r(?P<run>\d+)$")
 # 총괄 묶음(Full<n>, 예행 Reh<n>, Docs/Worklog/Q5.md "2단위"): Full1-<단계>-<변형>-N<N>-<P1|P2>-r<i>. 단계·변형 칸은 Scripts/full-conditions.json의 조건 이름이 된다(L8-q4final, A8-hydrate, S1-budget).
 # 촬영(Full1shot-)·트레이스(Full1trace-, Full1traceser-) 라벨은 접두사가 달라 읽지 않는다. 회차 11 이상은 묶음 끝 A/A(요약에서 <조건>-aa), 실패 재측정은 회차 + Runs(4~6, 14~16)라 같은 조건으로 센다.
+# 두 번째 재측정(run-full.ps1 -RetryGiveups)은 회차 + 20(21~23, A/A 31~33)이다. A/A와 원 실행은 batch_rules.base_run(20을 뺀 회차)으로 가른다.
 FULL_RE = re.compile(r"^(?P<m>[A-Z][A-Za-z]+\d+|V2W\d+[A-Za-z]*)-(?P<step>[A-Z]\d+)-(?P<variant>[A-Za-z0-9]+)-N(?P<n>\d+)-(?P<preset>P\d)-r(?P<run>\d+)$")
 BATCH_NAME_RE = re.compile(r"^(?:[A-Z][A-Za-z]+\d+|V2W\d+[A-Za-z]*)$")  # Full1(총괄 묶음), Reh1(예행), AB1(참고). M3b·Q4는 숫자 앞 글자가 하나라 걸리지 않는다. V2W1·V2W1Still은 v2 작업 단위의 확인 묶음이다
 FULL_CONDITIONS = Path(__file__).resolve().parent / "full-conditions.json"
 FULL_AA_MIN_RUN = 10
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import batch_rules  # noqa: E402  느린 실행 규칙과 두 번째 재측정 회차(base_run)
 # 총괄 묶음에만 붙는 열: 조건 이름, 묶음 종류(ladder·ablation·sub), 사다리 단계(LabLadder), 동등성 값(Docs/Worklog/Q5.md "동등성 통계")
 FULL_TEXT = ["cond", "group", "ladder"]
 FULL_NUM = ["deaths", "snipes", "death_rate", "near30_mean", "alive_min", "alive_max"]
@@ -515,11 +518,9 @@ def main():
 
     rows = sorted(existing.values(), key=lambda r: (r["variant"], int(r["n"]), r["preset"], int(r["run"])))
     if full:
-        sys.path.insert(0, str(Path(__file__).resolve().parent))
-        import batch_rules
         by_cond = {}
         for r in rows:
-            if 1 <= int(r["run"]) <= batch_rules.RERUN_RUN_MAX:
+            if 1 <= batch_rules.base_run(r["run"]) <= batch_rules.RERUN_RUN_MAX:
                 by_cond.setdefault((r["variant"], int(r["n"]), r["preset"]), []).append(r)
         marks = {}
         for rs in by_cond.values():
@@ -549,7 +550,7 @@ def main():
             if r.get("slow_mark") == "slow-replaced":
                 slow_dropped.setdefault((r["variant"], int(r["n"]), r["preset"]), []).append(r["label"])
                 continue  # 느린 실행은 다시 잰 실행이 대신한다(batch_rules.py). runs.csv에는 남는다
-            groups.setdefault((r["variant"] + ("-aa" if int(r["run"]) > FULL_AA_MIN_RUN else ""), int(r["n"]), r["preset"]), []).append(r)
+            groups.setdefault((r["variant"] + ("-aa" if batch_rules.base_run(r["run"]) > FULL_AA_MIN_RUN else ""), int(r["n"]), r["preset"]), []).append(r)
             continue
         if r["milestone"].startswith("Q"):
             # 품질 계획 묶음: 태그가 곧 조건이다(구성·격자·A/A를 태그로 가른다, Docs/Worklog/Q4.md)

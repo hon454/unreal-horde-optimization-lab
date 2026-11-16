@@ -60,7 +60,7 @@ def main():
     # 1. 느린 실행
     by_cond = {}
     for r in rows:
-        if int(r["run"]) <= br.RERUN_RUN_MAX:
+        if br.base_run(r["run"]) <= br.RERUN_RUN_MAX:  # 두 번째 재측정(21~23)은 원 실행으로 센다
             by_cond.setdefault((r["variant"], int(r["n"]), r["preset"]), []).append(r)
     marks, med_of = {}, {}
     for key, rs in by_cond.items():
@@ -108,8 +108,8 @@ def main():
 
     # 2. A/A
     s8 = [r for r in rows if r["variant"] == COND and int(r["n"]) == target and r["preset"] == "P1"]
-    ladder = [r for r in s8 if int(r["run"]) <= br.AA_RUN_MIN and marks.get(r["label"]) != "slow-replaced"]
-    aa = [r for r in s8 if int(r["run"]) > br.AA_RUN_MIN]
+    ladder = [r for r in s8 if br.base_run(r["run"]) <= br.AA_RUN_MIN and marks.get(r["label"]) != "slow-replaced"]
+    aa = [r for r in s8 if br.base_run(r["run"]) > br.AA_RUN_MIN]
     ladder_p95 = [fnum(r, "frame_p95_ms") for r in ladder if fnum(r, "frame_p95_ms") is not None]
     aa_p95 = [fnum(r, "frame_p95_ms") for r in aa if fnum(r, "frame_p95_ms") is not None]
     if not aa_p95 or not ladder_p95:
