@@ -719,3 +719,18 @@ for (const int32 TrackIndex : Temp)
 | 수학 함수는 헤더 인라인이다 | `GetYawFromDirection`, `LerpAngle`, `ExponentialSmoothingAngle`. 프로젝트 모듈로 옮긴 사본의 결과가 엔진 DLL과 비트 단위로 같았다(개발 검사 2,363만 번) | `MN/Public/MassNavigationUtils.h:19,34,41` |
 | 처리 큐의 병렬 청크 | `mass.ForceInlineProcessorExecution`(기본 참)에서 `ParallelForEachEntityChunk`의 청크는 하나씩 `UE::Tasks`로 띄워지고, 쿼리 뒤 콜백(`ProcessChunks`)이 모두 끝나기를 기다린다. 게임 스레드 프로세서여도 청크는 작업자로 간다. 쿼리 전 전역 충돌 기다림은 병렬이어도 그대로다 | `ME/MassEntityQuery.cpp:530-647`, `ME/MassProcessingQueueTypes.cpp:585-636,706-758` |
 | 엔진 프로세서는 상속으로 바꿀 수 없다 | 쿼리 두 개가 `private`이고 클래스가 `MinimalAPI`다. 같은 일을 하려면 쿼리를 새로 선언한 사본이 필요하다. `StaticClass`는 쓸 수 있어 CDO의 자동 등록은 끌 수 있다 | `MN/Public/SmoothOrientation/MassSmoothOrientationProcessors.h:14-29` |
+
+## 50. 쿡이 `DefaultEngine.ini`를 고쳐 쓰는 경로(2026-11-16, 쿡의 ini 자동 변경)
+
+줄임말: **AFS** = `Engine/Plugins/Runtime/AndroidFileServer`, **CC** = `Engine/Source/Runtime/Core/Private/Misc/ConfigCacheIni.cpp`. 대처는 [troubleshooting.md](../Guides/troubleshooting.md), 실행 결과는 [Worklog/V2.md](../Worklog/V2.md) "쿡의 ini 자동 변경"에 있다.
+
+| 항목 | 확인한 것 | 위치 |
+| --- | --- | --- |
+| 플러그인은 기본으로 켜진다 | `EnabledByDefault: true`다. 에디터 모듈 `AndroidFileServerEditor`(Editor, PostEngineInit)는 Win64에서도 올라온다. 런타임 모듈 `AndroidFileServer`도 Win64 허용 목록에 있다 | `AFS/AndroidFileServer.uplugin:15-29` |
+| 토큰이 비면 새로 만들어 저장한다 | 설정 클래스(`Config = Engine, DefaultConfig`)의 생성자 기본값이 `SecurityToken = "[AUTO]"`다. `PostInitProperties`가 값이 `[AUTO]`이면 새 GUID를 넣고 `TryUpdateDefaultConfigFile(TEXT(""), false)`를 부른다 | `AFS/Source/AndroidFileServerEditor/Private/AndroidFileServerRuntimeSettings.cpp:14,27-37`, `AFS/Source/AndroidFileServerEditor/Public/AndroidFileServerRuntimeSettings.h:23` |
+| 이 쓰기는 CDO가 만들어질 때 한 번 일어난다 | CDO는 `LoadConfig`를 `PostInitProperties`보다 먼저 부른다. 그래서 ini에 토큰이 있으면 쓰지 않고, 없으면 쓴다. 에디터 모듈의 `StartupModule`이 `GetMutableDefault`로 CDO를 만든다. 에디터, 커맨드렛, 쿡(`UnrealEditor-Cmd -run=Cook`) 모두 이 모듈을 올린다 | `Engine/Source/Runtime/CoreUObject/Private/UObject/UObjectGlobals.cpp:4272-4275,4318-4321`, `AFS/Source/AndroidFileServerEditor/Private/AndroidFileServerEditor.cpp:14-26` |
+| 쓰는 곳은 프로젝트의 `Config/DefaultEngine.ini`다 | `TryUpdateDefaultConfigFile`은 파일이 읽기 전용이 아니면 `UpdateSingleSectionOfConfigFile`로 간다. 경로는 `GetDefaultConfigFilename`의 `<SourceConfigDir>/Default<ConfigName>.ini`다 | `Engine/Source/Runtime/CoreUObject/Private/UObject/Obj.cpp:3986,4000-4054` |
+| 빈 줄 셋도 같은 쓰기에서 생긴다 | `FConfigFile::UpdateSections`가 파일을 절 머리에서 잘라 절마다 글을 모은다. 절 머리 바로 위의 주석 줄은 앞 절의 글 끝에 붙는다. `WriteToStringInternal`은 절 글이 빈 줄로 끝나지 않으면 줄바꿈 하나를 더한다. 그래서 주석이 절 머리에 바로 붙은 곳(이 프로젝트는 세 곳)에 빈 줄이 생긴다 | `CC:7016-7130,2871-2889` |
+| 토큰은 비밀 값이다 | Android 패키지에서 파일 서버를 여는 열쇠다. UPL이 값을 Java 코드에 넣고, UAT와 Gauntlet이 ini에서 읽는다. 빈 문자열이면 토큰 없이 연다 | `AFS/Source/AndroidFileServer/AndroidFileServer_UPL.xml:10,16,429,470`, `Engine/Source/Programs/AutomationTool/Android/AndroidPlatform.Automation.cs:1019-1050` |
+| Win64의 런타임 모듈은 하는 일이 없다 | `StartupModule`이 비어 있다. 블루프린트 함수는 `PLATFORM_ANDROID`일 때만 일한다 | `AFS/Source/AndroidFileServer/Private/AndroidFileServer.cpp`, `AFS/Source/AndroidFileServer/Private/AndroidFileServerBPLibrary.cpp` |
+| 다른 플러그인이 의존하지 않는다 | `Engine/Plugins`의 `.uplugin`에서 `"AndroidFileServer"`는 자기 파일에만 있다 | `Engine/Plugins/**/*.uplugin` 검색 |
