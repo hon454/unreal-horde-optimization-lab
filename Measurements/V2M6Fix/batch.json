@@ -1,0 +1,19 @@
+﻿{
+    "batch":  "V2M6Fix",
+    "build":  "c08aeaf6f5f31df7fe58fb6c2d60b3a8f804c5f6 (dirty)",
+    "start":  "2026-11-15 23:57:12",
+    "end":  "2026-11-16 00:25:54",
+    "n":  "10000",
+    "preset":  "P3",
+    "radius_m":  "57.3",
+    "height_m":  "6",
+    "speeds":  [
+                   "2"
+               ],
+    "duration_sec":  180,
+    "runs":  3,
+    "planned":  7,
+    "ok":  7,
+    "failed":  0,
+    "gave_up":  0
+}

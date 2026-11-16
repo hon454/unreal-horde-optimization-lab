@@ -1,0 +1,19 @@
+﻿{
+    "batch":  "V2M6Trace",
+    "build":  "c08aeaf6f5f31df7fe58fb6c2d60b3a8f804c5f6 (dirty)",
+    "start":  "2026-11-16 01:27:25",
+    "end":  "2026-11-16 01:35:47",
+    "n":  "10000",
+    "preset":  "P3",
+    "radius_m":  "57.3",
+    "height_m":  "6",
+    "speeds":  [
+                   "2"
+               ],
+    "duration_sec":  60,
+    "runs":  1,
+    "planned":  4,
+    "ok":  4,
+    "failed":  0,
+    "gave_up":  0
+}

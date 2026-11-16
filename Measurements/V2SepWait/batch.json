@@ -1,0 +1,19 @@
+﻿{
+    "batch":  "V2SepWait",
+    "build":  "0faf712ceb9bda7672b91adaae9325ecfdd0e814 (dirty)",
+    "start":  "2026-11-16 03:30:02",
+    "end":  "2026-11-16 03:32:08",
+    "n":  "10000",
+    "preset":  "P3",
+    "radius_m":  "57.3",
+    "height_m":  "6",
+    "speeds":  [
+                   "2"
+               ],
+    "duration_sec":  60,
+    "runs":  1,
+    "planned":  1,
+    "ok":  1,
+    "failed":  0,
+    "gave_up":  0
+}

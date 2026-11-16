@@ -1,0 +1,19 @@
+﻿{
+    "batch":  "V2M6Cost",
+    "build":  "0faf712ceb9bda7672b91adaae9325ecfdd0e814 (dirty)",
+    "start":  "2026-11-16 02:31:21",
+    "end":  "2026-11-16 03:24:39",
+    "n":  "10000",
+    "preset":  "P3",
+    "radius_m":  "57.3",
+    "height_m":  "6",
+    "speeds":  [
+                   "2"
+               ],
+    "duration_sec":  180,
+    "runs":  3,
+    "planned":  13,
+    "ok":  13,
+    "failed":  0,
+    "gave_up":  0
+}
