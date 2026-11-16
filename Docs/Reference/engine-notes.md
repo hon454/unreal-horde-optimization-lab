@@ -762,3 +762,15 @@ for (const int32 TrackIndex : Temp)
 | Budget Allocator 켬 CVar | `a.Budget.Enabled`는 `GAnimationBudgetEnabled`(기본 0)에 바로 묶인다. 도움말은 "스켈레탈 메시가 돌지 않을 때 바꾸라"다. 이 프로젝트는 개체를 만들기 전(`ALabGameMode::StartPlay`)에 켠다 | `ABA/Private/AnimationBudgetAllocatorCVars.cpp:7-14` |
 | URO의 기본값 | 스켈레탈 메시 컴포넌트의 `bEnableUpdateRateOptimizations` 기본은 거짓이다. URO는 이 값과 `a.URO.Enable`(기본 1)이 둘 다 참일 때 쓰인다 | `ENG/Private/Components/SkeletalMeshComponent.cpp:493`, `ENG/Private/Components/SkinnedMeshComponent.cpp:95-98,1810-1813` |
 | `ACharacter` 메시의 틱 옵션 | `ACharacter` 생성자가 메시의 `VisibilityBasedAnimTickOption`을 `AlwaysTickPose`로 둔다. Budget Allocator는 이와 따로 최근 1초 안에 그려지지 않은 메시의 틱을 끈다(29절 "수요") | `ENG/Private/Character.cpp:125` |
+
+## 53. Chaos 라인 트레이스가 캡슐의 정면 평면 위에서 출발한 선을 놓친다(2026-11-17, Full4 캡슐 빗나감 진단)
+
+줄임말: **E** = `Engine/Source/Runtime/Engine`, **CC** = `Engine/Source/Runtime/Experimental/ChaosCore`. 38절을 잇는다. 정면 평면은 캡슐(액터)의 정면 축과 연직축이 이루는 평면, 곧 캡슐 로컬 Y = 0 평면이다. 관측은 Development 실행이고 경위와 표는 [Worklog/V2.md](../Worklog/V2.md) "2026-11-17 Full4 캡슐 빗나감 진단"에 있다. 엔진 소스로 원인을 확인하지는 않았다(아래 "확인하지 못한 것").
+
+| 항목 | 확인한 것 | 위치 |
+| --- | --- | --- |
+| 정면 평면 위 시작점의 빗나감(관측) | 정면 평면 위에서 출발해 캡슐 중심(액터 위치)으로 가는 라인 트레이스가 캡슐을 일정 비율로 놓친다. 정지 장면(미니언이 모두 시작점 아래를 향한다) 481,412회 중 1.39%, 이동 장면에서 시작점을 대상의 정면 평면에 올린 479,334회 중 2.42%가 빗나갔다. 시작점을 옆으로 1.7cm 비키면 두 실행 모두 0회다. 정지 장면 빗나감 6,690회 모두에서 같은 프레임, 같은 자리의 반지름 5cm 구 겹침 질의(같은 채널)는 캡슐을 찾았다 | 실행 `CapDiag-V1-s8-N10000-P1-burst`, `CapDiag-V0-s8-N10000-P1-burst` |
+| 브로드페이즈를 거치지 않아도 놓친다(관측) | 바디 지오메트리에 바로 쏘는 `UPrimitiveComponent::LineTraceComponent` → `FPhysInterface_Chaos::LineTrace_Geom`도 정지 장면 빗나감 6,690회 중 68%(6,690 − 2,168 = 4,522회)에서 놓쳤다. 2,168회(32%)는 맞았다 | `E/Private/PhysicsEngine/Experimental/PhysInterface_Chaos.cpp:905-984` |
+| 그 경로의 캡슐 레이캐스트 | `Chaos::Raycasts::RayCapsule`다 | `CC/Private/Chaos/Raycasts.cpp:181-396` |
+| 확인하지 못한 것 | `RayCapsule` 안에서 놓치는 분기를 가르지 못했다. 장면 질의만 놓친 32%가 어느 경로(브로드페이즈 레이캐스트, 장면 질의 쪽 내로페이즈)인지도 모른다. 정지 장면 빗나감의 시작점이 실제로 로컬 Y ≈ 0인지는 직접 찍지 않았다. 이동 장면의 정면 평면 실험과 1.7cm 비킨 시작점의 0회로 추론했다. Test 패키지에서는 비율만 견주었다(`Full4` 정지 1.67%, Development 1.39\~2.0%) | — |
+| 이 프로젝트의 대처 | 정지 장면의 캡슐 빗나감은 동등성 검사에서 보고만 한다. 다음 총괄 묶음 전에 저격 캡슐 트레이스(`ALabOrb::TraceSnipeCapsules`)의 시작점이나 끝점을 정면 평면에서 비킨다 | [measurement.md](../Guides/measurement.md) "실패 등급", `Scripts/full-conditions.json` `equivalence.capsule_miss_basis` |

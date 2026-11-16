@@ -14,13 +14,17 @@
    탑뷰(P2) 실행은 같은 기준에 견주되 모두 보고만 한다.
    총수 사이(Full4 계획 점검, 사용자 판단): N이 목표 총수가 아닌 sep 조건(P1)의 값이 overlap_cross_n_factor(2) x (같은 속도의 N=목표 총수 엄격 단계 조건 중앙값)
    x (N / 목표 총수)^2을 넘으면 기능 미달이다. 밀도가 총수에 비례하고(30m 안 평균 1만 927, 2만 1,824, V2W12Dry) 쌍의 수는 그 제곱에 비례한다. 목표 총수의 기준이 없으면 no ref.
+   구성의 overlap_grade가 report면(a8hyd) 같은 총수 안의 범위 밖도 보고만 한다(사용자 결정 2026-11-17, 이유는 조건 표의 overlap_grade_note).
+   분리는 프레임마다 한 번 고치므로 겹친 쌍이 프레임 시간을 따라 는다. a8hyd는 프레임이 엄격 단계의 절반이다(Docs/Worklog/V2.md "2026-11-17 Full4 캡슐 빗나감 진단").
 4. 캡슐 트레이스: LabActorCollision이 trace나 pawn이면 트레이스 수가 0보다 크고 적중 + 막힘 = 트레이스 수(빗나감 0)여야 한다. 탑뷰(P2)는 액터가 0이라
-   트레이스가 0이므로 보고만 한다(Full4 계획 점검 B1).
+   트레이스가 0이므로 보고만 한다(Full4 계획 점검 B1). 조건 표 equivalence.capsule_miss_report_speeds의 속도(V1, 정지)는 빗나감을 보고만 한다(사용자 결정 2026-11-17).
+   정지 장면에서는 트레이스 시작점이 미니언의 정면 평면에 놓여 Chaos 라인 트레이스가 캡슐을 놓친다. 장치의 결함이다(같은 진단 절). 트레이스 0은 정지에서도 FAIL이다.
 5. 왕복 전환(runs.csv sw_round_all, 초당): LabRepHold가 0보다 크면 조건 표의 round_trip_max_per_sec 이하여야 한다(D48). 어기면 실패. 최소 유지가 없는 조건은 값만 보고한다.
 
 등급(Full4 계획 점검 R1, 조건 표 equivalence.failure_grades). 조건 행의 pass 열은 ok, report, UNMET, FAIL 가운데 하나다.
 - FAIL: 묶음 무효. 종료 코드 1. 살아 있는 총수 불일치와 캡슐 트레이스 0(P1)은 측정 자체가 틀린 것이라 어느 N에서나 FAIL이다.
   나머지 실패(초당 사망, 30m 안, 같은 총수 안의 겹친 쌍, 캡슐 빗나감, 왕복 전환)는 N이 목표 총수(1만)일 때만 FAIL이다.
+  위 3과 4의 보고만 하는 예외(overlap_grade가 report인 구성의 겹친 쌍, 정지 장면의 캡슐 빗나감)는 report다.
 - UNMET(기능 미달): N이 목표 총수가 아닌 점의 그 밖의 실패와 총수 사이 기준의 초과. 그 점만 표시하고 묶음은 유효하다(종료 코드 0).
   plot.py --batch가 equivalence.csv의 UNMET 점을 최대 N 보간에서 뺀다.
 
@@ -114,6 +118,12 @@ def main():
     eq = doc["equivalence"]
     target = int(doc["scenario"]["target_n"])
     xn_factor = float(eq["overlap_cross_n_factor"])
+    # 보고만 하는 예외(사용자 결정 2026-11-17): 정지 장면의 캡슐 빗나감(속도 목록)과 overlap_grade가 report인 구성의 같은 총수 안 겹친 쌍
+    cap_report_speeds = set(eq.get("capsule_miss_report_speeds", []))
+    bad_grade = sorted(k for k, c in cfgs.items() if c.get("overlap_grade") not in (None, "report"))
+    if bad_grade:
+        raise SystemExit(f"unknown overlap_grade in configs {bad_grade} (only \"report\" is defined)")
+    ov_report_cfgs = sorted(k for k, c in cfgs.items() if c.get("overlap_grade") == "report")
     bdir = Path(a.dir) if a.dir else ROOT / "Measurements" / a.batch
     csv_dir = Path(a.csv_dir) if a.csv_dir else CSV_DIR
     failed = failed_labels(bdir)
@@ -215,9 +225,12 @@ def main():
             elif klass == "sep" and not lo_hi:
                 row["overlap_ok"] = "no peers"
             else:
-                blocking = (klass == "sep" and strict) or (klass == "zero" and n <= 2000 and preset == "1")
+                # 조건 표의 overlap_grade가 report인 구성(a8hyd: 프레임이 엄격 단계의 절반이라 겹친 쌍이 적다)은 범위 밖도 보고만 한다. 이유는 overlap_grade_note
+                table_report = c.get("overlap_grade") == "report"
+                blocking = not table_report and ((klass == "sep" and strict) or (klass == "zero" and n <= 2000 and preset == "1"))
                 row["overlap_ok"] = grade if blocking else "report"
-                (point if blocking else notes).append(f"overlap {ov:.0f} outside {row['overlap_range']} ({klass})")
+                why = f"{klass}, report only: overlap_grade of {cfg}" if table_report else klass
+                (point if blocking else notes).append(f"overlap {ov:.0f} outside {row['overlap_range']} ({why})")
             # 3b. 겹친 쌍, 총수 사이(N이 목표 총수가 아닌 sep 조건, P1). 상한 = 배수 x 목표 총수 기준 x (N / 목표 총수)^2. 넘으면 기능 미달
             row["overlap_xn_ref"], row["overlap_xn_limit"] = "", ""
             if n == target or klass != "sep" or preset != "1":
@@ -235,7 +248,9 @@ def main():
                 else:
                     row["overlap_xn_ok"] = "UNMET"
                     unmet.append(f"overlap {ov:.0f} > cross-N limit {limit:.0f} = {xn_factor:g} x {ref_target_ov:.0f} x ({n}/{target})^2 ({ov / (ref_target_ov * (n / target) ** 2):.1f}x the scaled N={target} value)")
-            # 4. 캡슐 트레이스. 탑뷰(P2)는 액터가 0이라 트레이스가 0이므로 보고만 한다(B1). P1의 트레이스 0은 측정 자체가 틀린 것이라 어느 N에서나 FAIL
+            # 4. 캡슐 트레이스. 탑뷰(P2)는 액터가 0이라 트레이스가 0이므로 보고만 한다(B1). P1의 트레이스 0은 측정 자체가 틀린 것이라 어느 N에서나 FAIL(정지 장면도)
+            # 정지 장면(capsule_miss_report_speeds)의 빗나감은 보고만 한다: 시작점이 미니언의 정면 평면에 놓여 Chaos 라인 트레이스가 캡슐을 놓치는 장치 결함
+            # (Docs/Worklog/V2.md "2026-11-17 Full4 캡슐 빗나감 진단"). 다음 총괄 묶음 전에 게임 코드의 트레이스를 고치고 목록을 비운다
             col = rs[0]["collision"]
             tr = sum(r["traces"] or 0 for r in rs)
             hit = sum(r["hits"] or 0 for r in rs)
@@ -250,6 +265,9 @@ def main():
             elif tr <= 0:
                 row["capsule_ok"] = "FAIL"
                 fails.append("capsule traces 0")
+            elif tr - hit - blk != 0 and speed in cap_report_speeds:
+                row["capsule_ok"] = "report"
+                notes.append(f"capsule misses {int(tr - hit - blk)} ({moving} scene, report only)")
             elif tr - hit - blk != 0:
                 row["capsule_ok"] = grade
                 point.append(f"capsule misses {int(tr - hit - blk)}")
@@ -295,7 +313,9 @@ def main():
               f'overlap={r["overlap_mean"]} capsule_miss={r["capsule_miss"]} round={r["round_per_sec"]}/s {r["pass"]} {r["note"]}')
     print(f"equivalence: {len(rows)} conditions, {len(rows) - bad - unmet_count - reports} pass, {reports} report, {unmet_count} UNMET (point only, N != {target}), {bad} FAIL "
           f"(tol death {eq['death_rate_tol']:.0%}, near30 {eq['near30_tol']:.0%}, alive exact, overlap sep {eq['overlap_rel_lo']}x..{eq['overlap_rel_hi']}x of the strict steps, "
-          f"cross-N {xn_factor:g} x N={target} ref x (N/{target})^2, other classes by range) -> {out}")
+          f"cross-N {xn_factor:g} x N={target} ref x (N/{target})^2, other classes by range"
+          + (f"; report only: capsule misses at {','.join(sorted(cap_report_speeds)) or '-'}, same-N overlap of {','.join(ov_report_cfgs) or '-'}" if cap_report_speeds or ov_report_cfgs else "")
+          + f") -> {out}")
     for r in rows:
         if r["pass"] == "UNMET":
             print(f'UNMET N={r["n"]} {r["cond"]}: excluded from the max-N interpolation (plot.py --batch)')
