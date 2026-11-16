@@ -1,0 +1,10 @@
+﻿time,label,cond,n,preset,kind,reason
+2026-11-16 15:35:28,Full4-V0-a8hyd-N10000-P1-r1,V0-a8hyd,10000,P1,ablation,metadata check failed: CHECK V0-a8hyd: FAIL labfixedskelbounds=- (expected 1)
+2026-11-16 16:48:37,Full4-V1-a8hyd-N10000-P1-r1,V1-a8hyd,10000,P1,still,metadata check failed: CHECK V1-a8hyd: FAIL labfixedskelbounds=- (expected 1)
+2026-11-16 21:29:30,Full4-V1-a8hyd-N10000-P1-r2,V1-a8hyd,10000,P1,still,metadata check failed: CHECK V1-a8hyd: FAIL labfixedskelbounds=- (expected 1)
+2026-11-16 22:43:23,Full4-V0-a8hyd-N10000-P1-r2,V0-a8hyd,10000,P1,ablation,metadata check failed: CHECK V0-a8hyd: FAIL labfixedskelbounds=- (expected 1)
+2026-11-16 23:57:33,Full4-V0-a8hyd-N10000-P1-r3,V0-a8hyd,10000,P1,ablation,metadata check failed: CHECK V0-a8hyd: FAIL labfixedskelbounds=- (expected 1)
+2026-11-17 01:10:41,Full4-V1-a8hyd-N10000-P1-r3,V1-a8hyd,10000,P1,still,metadata check failed: CHECK V1-a8hyd: FAIL labfixedskelbounds=- (expected 1)
+2026-11-17 04:18:58,Full4-V0-a8hyd-N10000-P1-r4,V0-a8hyd,10000,P1,ablation,metadata check failed: CHECK V0-a8hyd: FAIL labfixedskelbounds=- (expected 1)
+2026-11-17 04:22:22,Full4-V1-a8hyd-N10000-P1-r4,V1-a8hyd,10000,P1,still,metadata check failed: CHECK V1-a8hyd: FAIL labfixedskelbounds=- (expected 1)
+2026-11-17 04:25:46,Full4-V1-a8hyd-N10000-P1-r5,V1-a8hyd,10000,P1,still,metadata check failed: CHECK V1-a8hyd: FAIL labfixedskelbounds=- (expected 1)

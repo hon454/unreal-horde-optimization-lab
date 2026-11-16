@@ -1,0 +1,7 @@
+label,cond,n,preset,run,mark,game_p50_ms,render_p50_ms,cond_game_median,cond_render_median,game_pct,render_pct,frame_p95_ms
+Full4-V0-a8far-N10000-P1-r1,V0-a8far,10000,P1,1,slow-replaced,15.505,4.427,15.114,4.312,2.6,2.7,18.193
+Full4-V0-a8far-N10000-P1-r7,V0-a8far,10000,P1,7,rerun,15.26,4.367,15.114,4.312,1.0,1.3,17.767
+Full4-V0-a8shd-N10000-P1-r1,V0-a8shd,10000,P1,1,slow-kept,12.042,4.264,11.764,4.031,2.4,5.8,14.511
+Full4-V0-a8shd-N10000-P1-r7,V0-a8shd,10000,P1,7,rerun-slow,12.012,4.161,11.764,4.031,2.1,3.2,14.384
+Full4-V0-s3-N20000-P1-r3,V0-s3,20000,P1,3,slow-replaced,20.677,10.15,20.262,9.51,2.0,6.7,24.472
+Full4-V0-s3-N20000-P1-r7,V0-s3,20000,P1,7,rerun,20.555,9.598,20.262,9.51,1.4,0.9,24.47
