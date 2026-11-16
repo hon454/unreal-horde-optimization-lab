@@ -166,7 +166,7 @@ void ALabCrowdSpawner::SpawnInitial()
 		}
 		if (Config.UsesIskm())
 		{
-			// M5: 30~200m는 ISKM(Scripts/create-iskm.py). 없으면 시작하지 않는다(VAT로 재면 M4와 같아진다). 걷기 루프 길이는 ASTPD의 시퀀스 길이로 바꾼다(plan.md "M5" 결정 4).
+			// M5: 전환 거리~200m는 ISKM(Scripts/create-iskm.py). 없으면 시작하지 않는다(VAT로 재면 M4와 같아진다). 걷기 루프 길이는 ASTPD의 시퀀스 길이로 바꾼다(plan.md "M5" 결정 4).
 			Crowd->IskmMeshes.SetNum(Types);
 			Crowd->IskmProviders.SetNum(Types);
 			for (int32 Type = 0; Type < Types; ++Type)

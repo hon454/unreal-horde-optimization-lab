@@ -121,7 +121,7 @@ UMassEntityConfigAsset* ULabCrowdSubsystem::BuildEntityConfig(int32 UnitType, US
 		Visual->Params.bKeepActorExtraFrame = FLabConfig::Get().HasFix(FLabConfig::FixWait);
 	}
 	{
-		// 전환 거리와 액터 상한은 FLabConfig가 정한다(단계 2~7은 30m·500, 단계 8은 40m·1,000, -LabHydrateM·-LabActorCap). 80m·200m 밴드와 Medium 상한은 그대로
+		// 전환 거리와 액터 상한은 FLabConfig가 정한다(단계 2~8 모두 35m·1,000, ADR-0021, -LabHydrateM·-LabActorCap). 80m·200m 밴드와 Medium 상한은 그대로
 		const float HydrateCm = FLabConfig::Get().HydrateCm();
 		// Off 거리: 기본 200m, -LabFarM=으로 옮긴다. Q3 빼 보기 -LabFarCull=0이면 1,000m라 맵 끝까지 그린다(RepOffCm)
 		const float Bands[EMassLOD::Max] = { 0.f, HydrateCm, 8000.f, FLabConfig::Get().RepOffCm() };
@@ -141,7 +141,7 @@ UMassEntityConfigAsset* ULabCrowdSubsystem::BuildEntityConfig(int32 UnitType, US
 	// Q4b 원거리 그림자(-LabFarShadow=0, 단계 8 기본): 인스턴스 단위 그림자 플래그가 없어 메시 설명자를 LOD 중요도 범위로 둘로 나눈다.
 	// 설명자의 Min/MaxLODSignificance(MassRepresentationTypes.h:97-101, MassSkinnedMeshRepresentationTypes.h:69-75)로 [High, Low)는 그림자 켬, [Low, Max)는 끔이다.
 	// 엔진은 설명자 해시(bCastShadows 포함)마다 컴포넌트를 하나 만들고 SetCastShadow를 부르며(MassVisualizationComponent.cpp:1299-1337, ISM은 :259),
-	// 경계 값마다 범위를 만든다(:1371-1419). 중요도는 LOD 정수 + 밴드 안 비율이라 [1, 2)가 Medium(40~80m), [2, 3)이 Low다(MassLODCalculator.h:412-416, 748-753).
+	// 경계 값마다 범위를 만든다(:1371-1419). 중요도는 LOD 정수 + 밴드 안 비율이라 [1, 2)가 Medium(전환 거리 35m~80m), [2, 3)이 Low다(MassLODCalculator.h:412-416, 748-753).
 	// 범위가 바뀐 프레임에는 엔진이 새 범위와 옛 범위 컴포넌트 모두에 위치를 넣고(MassSkinnedMeshRepresentationTypes.h:665-680) 다음 프레임 갱신되지 않은 옛 인스턴스를 지운다(MassVisualizationComponent.cpp:812-827).
 	const bool bSplitFarShadow = !FLabConfig::Get().bFarShadow;
 	const FTransform MeshLocalTransform = MeshDesc.LocalTransform; // 아래 Add가 배열을 다시 잡을 수 있어 MeshDesc 참조를 더 쓰지 않는다

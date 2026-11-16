@@ -4,7 +4,7 @@
 
 ## 요약과 읽는 순서
 
-미니언 1만은 모두 Mass 엔티티다. 오브는 맵 중심 둘레의 원 궤도를 2m/s로 돈다. 오브를 향해 걷는 이동은 엔진 조향·이동 프로세서가 맡고, 카메라에서 200m 밖은 Lab 프로세서가 틱 간격마다 한 번에 옮긴다. 겹친 개체는 Lab 분리 프로세서가 떼어 놓는다. 피해·저격·상태 전환은 Lab 로직 프로세서 셋이 한다. 표현은 엔진의 표현 LOD가 카메라 거리로 고른다. 0\~40m는 액터(최대 1,000, 캡슐은 저격 트레이스 전용, 메시 바운드는 에셋의 고정 바운드), 40\~200m는 ISKM 인스턴스(80m 밖은 그림자 끔), 200m 밖은 그리지 않고 Niagara 입자가 엔티티 자리에 걷는 모습을 그린다. 200m 밖에서 맞은 개체만 제거될 때까지 그림자 없는 ISKM이다. Lab 표현 프로세서 셋이 각자 액터, ISKM, 입자에 그 프레임의 상태를 넣는다. 한 번 표현이 바뀐 개체는 2초 안에 바로 전의 표현으로 되돌아가지 않는다. 죽은 엔티티는 파괴하지 않고 풀에 넣었다가, 맵 밖 무리(코드가 굴리는 기록 1만 개)에서 오브에 가장 가까운 기록의 자리에서 다시 쓴다.
+미니언 1만은 모두 Mass 엔티티다. 오브는 맵 중심 둘레의 원 궤도를 2m/s로 돈다. 오브를 향해 걷는 이동은 엔진 조향·이동 프로세서가 맡고, 카메라에서 200m 밖은 Lab 프로세서가 틱 간격마다 한 번에 옮긴다. 겹친 개체는 Lab 분리 프로세서가 떼어 놓는다. 피해·저격·상태 전환은 Lab 로직 프로세서 셋이 한다. 표현은 엔진의 표현 LOD가 카메라 거리로 고른다. 0\~35m는 액터(최대 1,000, 캡슐은 저격 트레이스 전용, 메시 바운드는 에셋의 고정 바운드), 35\~200m는 ISKM 인스턴스(80m 밖은 그림자 끔), 200m 밖은 그리지 않고 Niagara 입자가 엔티티 자리에 걷는 모습을 그린다. 200m 밖에서 맞은 개체만 제거될 때까지 그림자 없는 ISKM이다. Lab 표현 프로세서 셋이 각자 액터, ISKM, 입자에 그 프레임의 상태를 넣는다. 한 번 표현이 바뀐 개체는 2초 안에 바로 전의 표현으로 되돌아가지 않는다. 죽은 엔티티는 파괴하지 않고 풀에 넣었다가, 맵 밖 무리(코드가 굴리는 기록 1만 개)에서 오브에 가장 가까운 기록의 자리에서 다시 쓴다.
 
 처음 읽을 때는 이 넷이면 된다.
 
@@ -64,9 +64,9 @@ Avoidance 그룹과 `SyncWorldToMass` 그룹에는 최종 구성의 엔티티를
 
 ### 거리 판정과 표현 전환
 
-- **거리 판정.** `UMassLODCollectorProcessor`가 카메라까지의 거리와 시야를 모으고, `UMassSimulationLODProcessor`(로직 간격: 80m, 200m)와 `UMassVisualizationLODProcessor`(표현: 40m, 80m, 200m)가 각자 LOD를 정한다. 표현 LOD 밴드와 상한은 `ULabCrowdSubsystem::BuildEntityConfig`가 Trait에 넣고, Simulation LOD 값은 `ULabSimulationLODTrait` 생성자가 넣는다([LabMassTraits.cpp](../../Source/HordeOptLab/LabMassTraits.cpp)). 엔진의 LOD 수집·표현 LOD·표현 프로세서는 기본으로 꺼져 있어 [Config/DefaultMass.ini](../../Config/DefaultMass.ini)에서 켠다.
+- **거리 판정.** `UMassLODCollectorProcessor`가 카메라까지의 거리와 시야를 모으고, `UMassSimulationLODProcessor`(로직 간격: 80m, 200m)와 `UMassVisualizationLODProcessor`(표현: 35m, 80m, 200m)가 각자 LOD를 정한다. 표현 LOD 밴드와 상한은 `ULabCrowdSubsystem::BuildEntityConfig`가 Trait에 넣고, Simulation LOD 값은 `ULabSimulationLODTrait` 생성자가 넣는다([LabMassTraits.cpp](../../Source/HordeOptLab/LabMassTraits.cpp)). 엔진의 LOD 수집·표현 LOD·표현 프로세서는 기본으로 꺼져 있어 [Config/DefaultMass.ini](../../Config/DefaultMass.ini)에서 켠다.
 - **최소 유지 시간.** `ULabRepHoldProcessor`(게임 스레드)가 표현 LOD 뒤, 표현 전환 앞에 돈다. 2초 안에 바로 전의 표현(액터·인스턴스·없음)으로 되돌아가려는 개체의 LOD를 붙잡는다. 액터 상한은 넘지 않는다. 단계 4에서 들어왔다(`-LabRepHold=0`이 끈다).
-- **표현 전환.** `UMassVisualizationProcessor`가 LOD에 따라 표현을 바꾼다. High는 액터, Medium·Low는 ISKM 인스턴스, Off는 없음이다. 액터를 붙이고 떼는 일, 액터 풀, 인스턴스 추가·제거는 엔진이 한다. 밴드와 200m 밖 지우기는 단계 2(엔진 표현 경로)에서 들어왔고, 단계 8(품질 올리기)에서 액터 거리가 40m, 상한이 1,000이 됐다(`FLabQuality`).
+- **표현 전환.** `UMassVisualizationProcessor`가 LOD에 따라 표현을 바꾼다. High는 액터, Medium·Low는 ISKM 인스턴스, Off는 없음이다. 액터를 붙이고 떼는 일, 액터 풀, 인스턴스 추가·제거는 엔진이 한다. 밴드와 200m 밖 지우기는 단계 2(엔진 표현 경로)에서 들어왔다. 액터 거리 35m과 상한 1,000은 단계 2\~8이 같다(`FLabQuality`, ADR-0021).
 - **전환 집계.** `ULabRepSwitchCountProcessor`(게임 스레드)가 표현 전환 뒤에 방향별 전환 수와 2초 안의 왕복 수를 CSV 스탯 `Lab/Sw*`로 남긴다. 모든 Mass 단계에서 돈다.
 
 ### 액터 하이드레이션
@@ -130,7 +130,7 @@ Avoidance 그룹과 `SyncWorldToMass` 그룹에는 최종 구성의 엔티티를
 ## 실행 인자에서 설정까지
 
 1. `FLabConfig::Get()`([LabConfig.cpp](../../Source/HordeOptLab/LabConfig.cpp))이 처음 불릴 때 명령줄을 한 번 읽어 정적 값으로 둔다. `-LabStage=8`(없으면 8)이 `Step`이 된다. 1\~8이 아니거나 `-LabVariant=`가 있으면 게임 모드가 종료 코드 2로 끝낸다.
-2. 같은 함수 안에서 단계가 기본값을 정한다. 단계 8은 엔진 회피 끔(`bAvoid`), 분리 켬(`bSeparate`), 화면 크기 Budget 켬(`bScreenSigBudget`), 전환 대책 전부(`HydrateFixMask` 31), 최소 유지 시간 2,000ms(`RepHoldMs`), 엔티티 풀 켬(`bEntityPool`), 배경 무리 켬(`bCrowdFx`), 액터 상한 1,000과 전환 거리 40m(`FLabQuality::FinalActorCap`, `FinalHydrateM`), 원거리 그림자 끔(`bFarShadow` 거짓), 액터 메시 고정 바운드 켬(`bFixedSkelBounds`, `BoundsScale` `FLabQuality::FixedSkelBoundsScale` 1.1, v2 W11), 방향 보간 병렬 사본 켬(`bSmoothOrient`, 단계 3부터)이다. 인자(`-LabSeparate=0` 등)를 주면 인자가 이기고 `Overrides`에 남는다.
+2. 같은 함수 안에서 단계가 기본값을 정한다. 단계 8은 엔진 회피 끔(`bAvoid`), 분리 켬(`bSeparate`), 화면 크기 Budget 켬(`bScreenSigBudget`), 전환 대책 전부(`HydrateFixMask` 31), 최소 유지 시간 2,000ms(`RepHoldMs`), 엔티티 풀 켬(`bEntityPool`), 배경 무리 켬(`bCrowdFx`), 액터 상한 1,000과 전환 거리 35m(`FLabQuality::DefaultActorCap`, `DefaultHydrateM`, 단계 2부터 같다, ADR-0021), 원거리 그림자 끔(`bFarShadow` 거짓), 액터 메시 고정 바운드 켬(`bFixedSkelBounds`, `BoundsScale` `FLabQuality::FixedSkelBoundsScale` 1.1, v2 W11), 방향 보간 병렬 사본 켬(`bSmoothOrient`, 단계 3부터)이다. 인자(`-LabSeparate=0` 등)를 주면 인자가 이기고 `Overrides`에 남는다.
 3. 판정 함수가 나머지를 정한다. `IsMass()`(단계 2부터), `UsesHydration()`, `CullsFar()`, `UsesVat()`(인스턴스가 움직인다, 단계 4부터), `UsesSimLod()`(단계 5부터), `UsesIskm()`(단계 6부터), `UsesFixedBounds()`, `UsesCrowdFxEntity()`, `UsesSeparation()`, `UsesRepHold()`, `UsesSmoothOrient()`.
 4. 게임 모듈 시작(`FLabGameModule::StartupModule`, [HordeOptLab.cpp](../../Source/HordeOptLab/HordeOptLab.cpp))이 이 함수들로 프로세서 CDO의 `bAutoRegisterWithProcessingPhases`를 바꾼다. 최종 구성에서는 `ULabIskmProcessor`, `ULabActorSyncProcessor`, `ULabOffMoveProcessor`, `ULabCrowdFxGatherProcessor`, `ULabSeparationProcessor`, `ULabRepHoldProcessor`, `ULabSmoothOrientationProcessor`가 켜지고 `UMassUpdateISMProcessor`, `ULabVatISMProcessor`, `UMassOffLODNavigationProcessor`, `UMassSmoothOrientationProcessor`가 꺼진다. 관찰자 `ULabOffMoveEnterObserver`는 자기 생성자에서 `bAutoRegisterWithObserverRegistry`를 같은 조건으로 정한다.
 5. 엔티티 구성(`BuildEntityConfig`), 쿼리 구성(`ConfigureQueries`의 `UsesSimLod()` 분기), 게임 모드(`ALabGameMode::StartPlay`의 `SetupCrowdFx`, `ApplyBudgetCVars`의 `a.Budget.Enabled`)가 같은 설정을 읽는다.

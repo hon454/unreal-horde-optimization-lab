@@ -53,9 +53,9 @@ const FLabConfig& FLabConfig::Get()
 		C.RepHoldMs = C.Step >= 4 ? FLabQuality::DefaultRepHoldMs : 0;
 		C.bEntityPool = C.Step >= 5;                     // 5: Simulation LOD와 엔티티 풀
 		C.bCrowdFx = C.Step >= 7;                        // 7: 배경 무리
-		C.ActorCap = C.Step == 8 ? FLabQuality::FinalActorCap : FLabQuality::DefaultActorCap; // 8: 품질 올리기
-		C.HydrateM = C.Step == 8 ? FLabQuality::FinalHydrateM : FLabQuality::DefaultHydrateM;
-		C.bFarShadow = C.Step != 8;
+		C.ActorCap = FLabQuality::DefaultActorCap;       // 2~8 같은 값(ADR-0021). 단계 1은 쓰지 않는다
+		C.HydrateM = FLabQuality::DefaultHydrateM;
+		C.bFarShadow = C.Step != 8;                      // 8: 80m 밖 그림자 끔(품질 올리기)
 		C.bFixedSkelBounds = C.Step == 8;                // 8: 액터 메시 고정 바운드(v2 W11, 번 시간을 품질에 쓰는 단계의 비용 줄이기)
 
 		// Q5: 단계 기본값과 다르게 준 인자를 모은다(LabOverrides, HUD). 기본값과 같은 값을 준 인자는 넣지 않는다.
@@ -165,7 +165,7 @@ const FLabConfig& FLabConfig::Get()
 		// v2 W11 액터 비용 후보(LabConfig.h bFixedSkelBounds, bQueryIsolate)
 		Switch(TEXT("-LabFixedSkelBounds="), TEXT("fixed_skel_bounds"), C.bFixedSkelBounds);
 		Switch(TEXT("-LabQueryIsolate="), TEXT("query_isolate"), C.bQueryIsolate);
-		// Q4 근거리 품질: 단계 기본값(8은 1,000·40m), 그다음 인자
+		// Q4 근거리 품질: 단계 기본값(2~8 모두 1,000·35m, ADR-0021), 그다음 인자
 		const int32 DefaultCap = C.ActorCap;
 		const float DefaultHydrateM = C.HydrateM;
 		FParse::Value(Cmd, TEXT("-LabActorCap="), C.ActorCap);
@@ -257,8 +257,8 @@ FLabConfig::FLadder FLabConfig::Ladder() const
 {
 	// Docs/v2-plan.md "사다리". 이름은 HUD(영어, 엔진 글꼴)에 쓴다
 	static const TCHAR* Names[9] = { TEXT(""), TEXT("Actor baseline"), TEXT("Mass, engine path"), TEXT("Lab separation"), TEXT("Animated instances, anim budget"),
-		TEXT("Simulation LOD + entity pool"), TEXT("ISKM + following bounds"), TEXT("Niagara background crowd"), TEXT("") };
-	return { FString::FromInt(Step), Step == 8 ? FString::Printf(TEXT("Actor cap %d, hydrate %.0f m"), ActorCap, HydrateM) : FString(Names[FMath::Clamp(Step, 0, 8)]) };
+		TEXT("Simulation LOD + entity pool"), TEXT("ISKM + following bounds"), TEXT("Niagara background crowd"), TEXT("Far shadows off, fixed actor bounds") }; // 8: ADR-0021
+	return { FString::FromInt(Step), FString(Names[FMath::Clamp(Step, 0, 8)]) };
 }
 
 float FLabConfig::CrowdFxTotalRate() const

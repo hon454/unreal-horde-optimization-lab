@@ -108,13 +108,13 @@ namespace
 		T.Tag = FString::Printf(TEXT("STEP %s / 8"), *Id);
 		if (Id == TEXT("1")) { T.Title = TEXT("All actors (baseline)"); T.Change = TEXT("every minion is a skeletal-mesh actor with a capsule"); }
 		// v2 사다리(Docs/v2-plan.md "사다리", Docs/Worklog/V2.md "W10" 단계별 스위치 표)
-		else if (Id == TEXT("2")) { T.Title = TEXT("Mass, engine path"); T.Change = FString::Printf(TEXT("+ Mass entities, engine avoidance, actors within %s, static instances to %s"), *Hyd, *Far); }
+		else if (Id == TEXT("2")) { T.Title = TEXT("Mass, engine path"); T.Change = FString::Printf(TEXT("+ Mass entities, engine avoidance, actors within %s (cap %s), static instances to %s"), *Hyd, *GroupThousands(Config.ActorCap), *Far); }
 		else if (Id == TEXT("3")) { T.Title = TEXT("Hand-written separation"); T.Change = TEXT("+ Lab separation processor instead of engine avoidance"); }
 		else if (Id == TEXT("4")) { T.Title = TEXT("Animated instances, animation budget"); T.Change = TEXT("+ vertex animation (VAT), Animation Budget Allocator, hand-off fixes"); }
 		else if (Id == TEXT("5")) { T.Title = TEXT("Simulation LOD, entity pool"); T.Change = TEXT("+ far minions update less often, entities reused"); }
 		else if (Id == TEXT("6")) { T.Title = TEXT("Skinned instances (ISKM)"); T.Change = TEXT("+ ISKM replaces VAT, bounds follow the camera"); }
 		else if (Id == TEXT("7")) { T.Title = FString::Printf(TEXT("Niagara crowd past %s"), *Far); T.Change = TEXT("+ particles where minions are not drawn"); }
-		else if (Id == TEXT("8")) { T.Title = TEXT("Final: quality by distance"); T.Change = FString::Printf(TEXT("+ actors within %s (cap %s), far shadows off"), *Hyd, *GroupThousands(Config.ActorCap)); }
+		else if (Id == TEXT("8")) { T.Title = TEXT("Final: quality by distance"); T.Change = TEXT("+ no instance shadows past 80 m, fixed actor mesh bounds"); } // ADR-0021: 상한과 전환 거리는 단계 2부터 같다
 
 		// 빼 보기·하위 실험(최종 구성 + 인자): 첫 줄을 "Final minus: <뺀 것>"으로 바꾼다
 		if (Id == TEXT("8") && !Config.Overrides.IsEmpty())

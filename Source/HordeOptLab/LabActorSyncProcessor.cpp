@@ -114,7 +114,7 @@ void ULabActorSyncProcessor::Execute(FMassEntityManager& EntityManager, FMassExe
 	const bool bFixStartTime = FLabConfig::Get().HasFix(FLabConfig::FixStartTime);
 	const bool bFixWait = FLabConfig::Get().HasFix(FLabConfig::FixWait);
 	int32 Actors = 0;
-	// Q4 품질 지표(모든 빌드): 화면 안에 보이는 액터 수와 그중 카메라 30m(3D, 표현 LOD와 같은 거리) 안의 수. 화면 판정은 저격과 같은 시야(몸통 높이 +90cm)
+	// Q4 품질 지표(모든 빌드): 화면 안에 보이는 액터 수와 그중 카메라 30m(3D 거리, 고정값. 전환 거리와 무관하다) 안의 수. 화면 판정은 저격과 같은 시야(몸통 높이 +90cm)
 	const FLabSnipeView QualityView = Crowd->SnipeView;
 	int32 ViewActors = 0, ViewActors30 = 0;
 	int32 Rebinds = 0;

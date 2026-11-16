@@ -97,7 +97,7 @@ public:
 	TArray<FMassEntityHandle> SnipeTargetEntities; // v2 W5: SnipeTargets와 같은 순서의 대상 엔티티. 오브가 게임 스레드에서 액터를 찾아 캡슐 트레이스를 쏜다(ALabOrb::TraceSnipeCapsules)
 	/**
 	 * v2 W5 확인 대상: 저격 틱마다 액터가 붙은(FLabActorTag) 화면 안의 산 개체 중 저격 해시가 가장 작은 하나. 피해를 주지 않고 캡슐 트레이스만 쏜다.
-	 * 저격 구간(오브 30m 밖)과 액터 구간(카메라 40m 안)이 P1 카메라에서 거의 겹치지 않아 실제 저격 대상에는 액터가 드물다(Docs/Worklog/V2.md "W5").
+	 * 저격 구간(오브 30m 밖)과 액터 구간(카메라 전환 거리 안, W5 때 40m, ADR-0021부터 35m)이 P1 카메라에서 거의 겹치지 않아 실제 저격 대상에는 액터가 드물다(Docs/Worklog/V2.md "W5").
 	 */
 	TArray<FMassEntityHandle> CapsuleCheckEntities;
 	bool bHasNearest = false;        // 피해 범위 안에서 가장 가까운 개체(테슬라 코일 번개 대상)

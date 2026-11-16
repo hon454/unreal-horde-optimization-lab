@@ -49,16 +49,17 @@ $FailuresCsv = "$BatchDir\failures.csv"
 
 # v2 W10: 구성은 사다리 단계(s1~s8, -LabStage=1~8)와 단계 8의 빼 보기(a8*)다. 옛 단계·변형 이름(M0~M5, -LabVariant)은 지웠고 옛 구성(final, m1 등)도 함께 지웠다.
 # 단계별 스위치 표와 빼 보기 표는 Docs/Worklog/V2.md "W10"과 Docs/Guides/commands.md에 있다. 기대값은 그 표의 CSV 메타데이터 값이다.
+# 액터 상한과 전환 거리는 단계 2~8 모두 1000·35다(ADR-0021). 그전에는 단계 2~7 500·30, 단계 8 1000·40이었다
 $StepExpect = @{
     "1" = @("LabStage=1", "LabLadder=1", "LabTechHydrate=0", "LabTechAvoid=0", "LabTechSeparate=1", "LabActorCollision=pawn", "LabRepHold=0", "LabFarHandoff=1", "LabFarHitIskm=-", "LabSmoothOrient=-")
-    "2" = @("LabStage=2", "LabTechInstAnim=0", "LabTechHydrate=1", "LabTechAnimBudget=0", "LabTechHydrateFix=0", "LabTechSimLod=0", "LabTechFarCull=1", "LabTechAvoid=1", "LabTechSeparate=0", "LabActorCollision=trace", "LabRepHold=0", "LabActorCap=500", "LabHydrateM=30", "LabFarHandoff=1", "LabFarHitIskm=-", "LabSmoothOrient=0")
-    "3" = @("LabStage=3", "LabTechInstAnim=0", "LabTechHydrate=1", "LabTechAnimBudget=0", "LabTechHydrateFix=0", "LabTechSimLod=0", "LabTechAvoid=0", "LabTechSeparate=1", "LabActorCollision=trace", "LabRepHold=0", "LabFarHandoff=1", "LabFarHitIskm=-", "LabSmoothOrient=1")
-    "4" = @("LabStage=4", "LabTechInstAnim=1", "LabTechAnimBudget=1", "LabTechHydrateFix=1", "LabTechPool=0", "LabTechSimLod=0", "LabTechIskm=0", "LabTechAvoid=0", "LabTechSeparate=1", "LabActorCollision=trace", "LabRepHold=2000", "LabFarHandoff=1", "LabFarHitIskm=-", "LabSmoothOrient=1")
-    "5" = @("LabStage=5", "LabTechInstAnim=1", "LabTechPool=1", "LabTechSimLod=1", "LabTechIskm=0", "LabTechSeparate=1", "LabActorCollision=trace", "LabRepHold=2000", "LabFarHandoff=1", "LabFarHitIskm=-", "LabSmoothOrient=1")
-    "6" = @("LabStage=6", "LabTechIskm=1", "LabTechFixedBounds=1", "LabTechCrowdFx=0", "LabBoundsStepM=10", "LabIskmTrackReserve=1", "LabTechSeparate=1", "LabRepHold=2000", "LabFarHandoff=1", "LabFarHitIskm=-", "LabSmoothOrient=1")
-    "7" = @("LabStage=7", "LabTechIskm=1", "LabTechCrowdFx=1", "LabFxOrbFollow=1", "LabActorCap=500", "LabHydrateM=30", "LabFarShadow=1", "LabRepHold=2000", "LabFarHandoff=1", "LabFarHitIskm=1", "LabSmoothOrient=1")
+    "2" = @("LabStage=2", "LabActorCap=1000", "LabHydrateM=35", "LabTechInstAnim=0", "LabTechHydrate=1", "LabTechAnimBudget=0", "LabTechHydrateFix=0", "LabTechSimLod=0", "LabTechFarCull=1", "LabTechAvoid=1", "LabTechSeparate=0", "LabActorCollision=trace", "LabRepHold=0", "LabFarHandoff=1", "LabFarHitIskm=-", "LabSmoothOrient=0")
+    "3" = @("LabStage=3", "LabActorCap=1000", "LabHydrateM=35", "LabTechInstAnim=0", "LabTechHydrate=1", "LabTechAnimBudget=0", "LabTechHydrateFix=0", "LabTechSimLod=0", "LabTechAvoid=0", "LabTechSeparate=1", "LabActorCollision=trace", "LabRepHold=0", "LabFarHandoff=1", "LabFarHitIskm=-", "LabSmoothOrient=1")
+    "4" = @("LabStage=4", "LabActorCap=1000", "LabHydrateM=35", "LabTechInstAnim=1", "LabTechAnimBudget=1", "LabTechHydrateFix=1", "LabTechPool=0", "LabTechSimLod=0", "LabTechIskm=0", "LabTechAvoid=0", "LabTechSeparate=1", "LabActorCollision=trace", "LabRepHold=2000", "LabFarHandoff=1", "LabFarHitIskm=-", "LabSmoothOrient=1")
+    "5" = @("LabStage=5", "LabActorCap=1000", "LabHydrateM=35", "LabTechInstAnim=1", "LabTechPool=1", "LabTechSimLod=1", "LabTechIskm=0", "LabTechSeparate=1", "LabActorCollision=trace", "LabRepHold=2000", "LabFarHandoff=1", "LabFarHitIskm=-", "LabSmoothOrient=1")
+    "6" = @("LabStage=6", "LabActorCap=1000", "LabHydrateM=35", "LabTechIskm=1", "LabTechFixedBounds=1", "LabTechCrowdFx=0", "LabBoundsStepM=10", "LabIskmTrackReserve=1", "LabTechSeparate=1", "LabRepHold=2000", "LabFarHandoff=1", "LabFarHitIskm=-", "LabSmoothOrient=1")
+    "7" = @("LabStage=7", "LabActorCap=1000", "LabHydrateM=35", "LabTechIskm=1", "LabTechCrowdFx=1", "LabFxOrbFollow=1", "LabFarShadow=1", "LabRepHold=2000", "LabFarHandoff=1", "LabFarHitIskm=1", "LabSmoothOrient=1")
     "8" = @("LabStage=8", "LabLadder=8", "LabTechSimLod=1", "LabTechIskm=1", "LabTechFixedBounds=1", "LabTechCrowdFx=1", "LabTechAvoid=0", "LabTechSeparate=1", "LabActorCollision=trace", "LabRepHold=2000",
-            "LabFxOrbFollow=1", "LabBoundsStepM=10", "LabIskmTrackReserve=1", "LabActorCap=1000", "LabHydrateM=40", "LabFarShadow=0",
+            "LabFxOrbFollow=1", "LabBoundsStepM=10", "LabIskmTrackReserve=1", "LabActorCap=1000", "LabHydrateM=35", "LabFarShadow=0",
             "LabFixedSkelBounds=1", "LabQueryIsolate=0", "LabFarHandoff=1", "LabFarHitIskm=1", "LabSmoothOrient=1") # M6 수정 A·B는 장면 규칙(모든 단계 켬). v2 W11: 액터 메시 고정 바운드는 단계 8 기본, 칸 나누기는 끔. 방향 보간 병렬 사본은 단계 3부터
 }
 $ConfigTable = @()

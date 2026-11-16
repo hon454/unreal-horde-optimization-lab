@@ -138,7 +138,7 @@ protected:
  * 표현 전환 수(시험 실행 Spike1에서 시작, v2 W7에서 본 구현으로 정리, Docs/Worklog/V2.md "W7"). 경계별·방향별로 센다. 모든 단계에서 등록한다(대상이 없으면 일하지 않는다).
  * 엔진 표현 프로세서가 이번 프레임에 갱신한 청크(FMassVisualizationChunkFragment::ShouldUpdateVisualization, MassRepresentationProcessor.cpp:529)에서
  * PrevRepresentation != CurrentRepresentation인 엔티티가 이번 프레임에 전환한 것이다(:118-121. 액터 준비 대기 중에는 Prev가 고정되므로 대기가 끝난 프레임에 한 번 센다).
- * 경계: 액터 ↔ 인스턴스(최종 구성 40m), 인스턴스 ↔ 없음(200m, 최종 구성에서 없음은 입자), 인스턴스끼리 그림자 켬 ↔ 끔(표현 LOD Medium ↔ Low, 80m, Q4b).
+ * 경계: 액터 ↔ 인스턴스(전환 거리, 단계 2~8 35m, ADR-0021), 인스턴스 ↔ 없음(200m, 최종 구성에서 없음은 입자), 인스턴스끼리 그림자 켬 ↔ 끔(표현 LOD Medium ↔ Low, 80m, Q4b).
  * CSV 스탯(프레임마다 그 프레임의 수): Lab/SwNoneToInst(없음·입자 → 인스턴스), Lab/SwInstToActor, Lab/SwActorToInst, Lab/SwInstToNone, Lab/SwOther(없음 ↔ 액터),
  * Lab/SwShadowOff(Medium → Low), Lab/SwShadowOn(Low → Medium),
  * Lab/SwRound(표현 무리의 왕복: 같은 엔티티가 RoundTripSec 안에 같은 경계를 반대로 다시 넘은 수. Spike1부터의 뜻 그대로), 그 가운데 Lab/SwRoundActor(액터 경계), Lab/SwRoundFar(200m 경계),

@@ -10,13 +10,14 @@
  */
 struct FLabQuality
 {
-	static constexpr int32 DefaultActorCap = 500;   // 확정값 LODMaxCount High(measurement.md). 사다리 단계 2~7
-	static constexpr float DefaultHydrateM = 30.f;  // 확정값 거리 밴드 0~30m. 사다리 단계 2~7
+	/**
+	 * 액터 상한과 화면 안 전환 거리. Mass 단계 2~8이 모두 같은 값을 쓴다(ADR-0021, Docs/Decisions/0021-unified-actor-cap-and-hydrate-distance.md).
+	 * 상한 1,000은 Q4 묶음에서 골랐다(Docs/Worklog/Q4.md "최종 구성"). 35m에서 액터 최대는 707개라 1만에서는 상한이 걸리지 않는다(묶음 V2Hyd35).
+	 * 35m은 단계 8의 프레임 p95를 판정 안에 두는 값이다(묶음 V2Hyd35: 40m 16.26ms, 35m 14.47ms). 그전 값(단계 2~7 500·30m, 단계 8 1,000·40m)은 ADR-0019·0010
+	 */
+	static constexpr int32 DefaultActorCap = 1000;
+	static constexpr float DefaultHydrateM = 35.f;
 	static constexpr float MaxHydrateM = 79.f;      // 80m(Medium/Low 경계, 확정값)를 넘지 않는다
-	// 사다리 단계 8(품질 올리기)의 값. Q4 묶음에서 골랐다(Docs/Worklog/Q4.md "최종 구성"): 1만에서는 상한이 걸리지 않고 2만에서 1,000개로 막는다
-	static constexpr int32 FinalActorCap = 1000;
-	// Q4b 표현 LOD 재편: 79m → 40m. Q4 묶음에서 대형 액터의 애니 갱신 건너뜀 비율이 40m 0.03~0.07, 50m 0.25~0.31, 79m 0.66이었다
-	static constexpr float FinalHydrateM = 40.f;
 	// v2 W7 표현 전환의 최소 유지 시간(ms, FLabConfig::RepHoldMs). 근거는 Docs/Worklog/V2.md "W7": 액터 경계 왕복의 간격이 대부분 1~2초라
 	// 1,000ms는 이동 조건의 왕복을 거의 줄이지 못했고(개발 빌드 초당 약 4 → 3.5), 2,000ms(왕복 창과 같은 값)는 상한 500 조건의 왕복(초당 13~63)을 0으로 만들었다
 	static constexpr int32 DefaultRepHoldMs = 2000;
@@ -158,7 +159,7 @@ struct FLabConfig
 {
 	/**
 	 * 사다리 단계(-LabStage=1~8, 기본 8 = 최종 구성, Docs/v2-plan.md "사다리"). 1 액터 기준선, 2 Mass 엔진 기본 경로, 3 직접 짠 분리,
-	 * 4 애니메이션 표현(VAT·애니 예산·전환 대책), 5 Simulation LOD + 엔티티 풀, 6 ISKM, 7 배경 무리, 8 품질 올리기.
+	 * 4 애니메이션 표현(VAT·애니 예산·전환 대책), 5 Simulation LOD + 엔티티 풀, 6 ISKM, 7 배경 무리, 8 품질 올리기(80m 밖 그림자 끔, 액터 메시 고정 바운드, ADR-0021).
 	 */
 	int32 Step = 8;
 	bool bStageValid = true;   // -LabStage가 1~8이 아니면 false(옛 이름 M0~M5 포함). 게임 모드가 종료 코드 2로 끝낸다
@@ -198,7 +199,7 @@ struct FLabConfig
 	int32 FullyParallel = -1;
 	/**
 	 * 그리는 거리 실험(-LabFarM=<미터>, 기본 200 = 확정값, Docs/Worklog/M4.md "그리는 거리 인자").
-	 * 표현 LOD의 Off 거리(이 밖은 그리지 않는다)와 Simulation LOD Off 거리를 함께 옮긴다. 30m·80m 경계, Simulation LOD의 Low 경계(200m), 저격 구간, 밴드 집계 경계는 그대로다.
+	 * 표현 LOD의 Off 거리(이 밖은 그리지 않는다)와 Simulation LOD Off 거리를 함께 옮긴다. 전환 거리·80m 경계, Simulation LOD의 Low 경계(200m), 저격 구간, 밴드 집계 경계는 그대로다.
 	 * 200보다 작은 값은 200으로 올린다(Low 경계보다 안쪽의 Off는 다루지 않는다).
 	 */
 	int32 FarM = 200;
@@ -315,11 +316,11 @@ struct FLabConfig
 	 */
 	bool bNoHydrate = false;     // -LabHydrate=0: 액터 구간도 인스턴스(ISKM 단계는 ISKM)로 그린다. 액터 0
 	bool bNoSimLod = false;      // -LabSimLod=0: Simulation LOD Trait을 붙이지 않는다. 로직은 매 프레임, 이동은 전 개체가 엔진 이동·조향(단계 4와 같다)
-	bool bNoIskm = false;        // -LabIskm=0: ISKM 단계에서도 40~200m를 VAT ISM으로 그린다(단계 5의 표현)
+	bool bNoIskm = false;        // -LabIskm=0: ISKM 단계에서도 전환 거리~200m를 VAT ISM으로 그린다(단계 5의 표현)
 	bool bNoFixedBounds = false; // -LabFixedBounds=0: ISKM 컴포넌트 고정 바운드를 넣지 않는다
 	bool bNoFarCull = false;     // -LabFarCull=0: 표현 LOD의 Off(그리지 않음)를 두지 않고 맵 끝까지 그린다. Simulation LOD Off 거리와 배경 무리 안쪽 반경은 그대로
 	/**
-	 * Q4 근거리 품질(FLabQuality). 기본: 사다리 단계 2~7은 500·30m, 단계 8은 1,000·40m. 인자가 이긴다.
+	 * Q4 근거리 품질(FLabQuality). 기본: 사다리 단계 2~8 모두 1,000·35m(ADR-0021). 인자가 이긴다.
 	 * -LabActorCap=<개수>: 액터 상한(두 종류 합계). -LabHydrateM=<미터>: 화면 안에서 액터로 바뀌는 카메라 거리(1~79m). Mass 단계에서만 뜻이 있다.
 	 */
 	int32 ActorCap = FLabQuality::DefaultActorCap;
@@ -386,7 +387,7 @@ struct FLabConfig
 	bool UsesBudgetActors() const { return IsMass() && bScreenSigBudget; }
 	/** Simulation LOD Trait을 붙이고 로직 프로세서 둘(접근·범위 피해)이 청크 필터를 거는가(단계 5부터, -LabSimLod=0이면 거짓). 200m 밖은 Off 밴드와 ULabOffMoveProcessor다 */
 	bool UsesSimLod() const { return Step >= 5 && !bNoSimLod; }
-	/** 40~200m를 ISKM으로 그리는가(단계 6부터, -LabIskm=0이면 거짓) */
+	/** 전환 거리(35m)~200m를 ISKM으로 그리는가(단계 6부터, -LabIskm=0이면 거짓) */
 	bool UsesIskm() const { return Step >= 6 && !bNoIskm; }
 	/** ISKM 컴포넌트에 고정 바운드를 넣는가(ISKM을 쓸 때, -LabFixedBounds=0이면 거짓). 상자는 카메라를 따라간다(BoundsStepM) */
 	bool UsesFixedBounds() const { return UsesIskm() && !bNoFixedBounds; }

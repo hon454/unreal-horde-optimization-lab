@@ -152,6 +152,8 @@
    ],
    "expect": {
     "LabStage": "2",
+    "LabActorCap": "1000",
+    "LabHydrateM": "35",
     "LabTechInstAnim": "0",
     "LabTechHydrate": "1",
     "LabTechAnimBudget": "0",
@@ -162,8 +164,6 @@
     "LabTechSeparate": "0",
     "LabActorCollision": "trace",
     "LabRepHold": "0",
-    "LabActorCap": "500",
-    "LabHydrateM": "30",
     "LabFarHitIskm": "-",
     "LabSmoothOrient": "0"
    }
@@ -181,6 +181,8 @@
    ],
    "expect": {
     "LabStage": "3",
+    "LabActorCap": "1000",
+    "LabHydrateM": "35",
     "LabTechInstAnim": "0",
     "LabTechHydrate": "1",
     "LabTechAnimBudget": "0",
@@ -207,6 +209,8 @@
    ],
    "expect": {
     "LabStage": "4",
+    "LabActorCap": "1000",
+    "LabHydrateM": "35",
     "LabTechInstAnim": "1",
     "LabTechAnimBudget": "1",
     "LabTechHydrateFix": "1",
@@ -234,6 +238,8 @@
    ],
    "expect": {
     "LabStage": "5",
+    "LabActorCap": "1000",
+    "LabHydrateM": "35",
     "LabTechInstAnim": "1",
     "LabTechPool": "1",
     "LabTechSimLod": "1",
@@ -258,6 +264,8 @@
    ],
    "expect": {
     "LabStage": "6",
+    "LabActorCap": "1000",
+    "LabHydrateM": "35",
     "LabTechIskm": "1",
     "LabTechFixedBounds": "1",
     "LabTechCrowdFx": "0",
@@ -282,11 +290,11 @@
    ],
    "expect": {
     "LabStage": "7",
+    "LabActorCap": "1000",
+    "LabHydrateM": "35",
     "LabTechIskm": "1",
     "LabTechCrowdFx": "1",
     "LabFxOrbFollow": "1",
-    "LabActorCap": "500",
-    "LabHydrateM": "30",
     "LabFarShadow": "1",
     "LabRepHold": "2000",
     "LabFarHitIskm": "1",
@@ -306,6 +314,8 @@
    ],
    "expect": {
     "LabStage": "8",
+    "LabActorCap": "1000",
+    "LabHydrateM": "35",
     "LabLadder": "8",
     "LabTechSimLod": "1",
     "LabTechIskm": "1",
@@ -318,8 +328,6 @@
     "LabFxOrbFollow": "1",
     "LabBoundsStepM": "10",
     "LabIskmTrackReserve": "1",
-    "LabActorCap": "1000",
-    "LabHydrateM": "40",
     "LabFarShadow": "0",
     "LabFixedSkelBounds": "1",
     "LabQueryIsolate": "0",

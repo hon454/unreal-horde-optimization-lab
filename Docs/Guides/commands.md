@@ -31,13 +31,13 @@ STATUS.md "명령"에는 매번 쓰는 것만 둔다. 여기에는 스크립트 
 | 단계 | 앞 단계에서 바꾼 묶음 | 옛 이름(v2 W9까지) |
 | --- | --- | --- |
 | 1 | 액터 기준선: 모든 개체가 `ALabMinion`(캡슐, `CharacterMovement`, 캡슐끼리 막기) | `M0 full` |
-| 2 | Mass, 엔진 기본 경로: 엔진 이동·회피·표현, 가까운 개체는 하이드레이션 액터(캡슐 Trace), 나머지는 엔진 `UMassUpdateISMProcessor`의 정지 메시 인스턴스, 200m 밖 그리지 않음 | 없음(새 조합) |
+| 2 | Mass, 엔진 기본 경로: 엔진 이동·회피·표현, 가까운 개체는 하이드레이션 액터(캡슐 Trace, 화면 안 35m, 상한 1,000. 단계 8까지 같다, ADR-0021), 나머지는 엔진 `UMassUpdateISMProcessor`의 정지 메시 인스턴스, 200m 밖 그리지 않음 | 없음(새 조합) |
 | 3 | 직접 짠 로직: 엔진 회피 대신 `ULabSeparationProcessor`, 엔진 방향 보간 대신 같은 결과의 병렬 사본 `ULabSmoothOrientationProcessor` | `M3` + 정지 메시(새 조합) |
 | 4 | 애니메이션 표현: VAT 인스턴스, 액터 애니 예산(화면 크기), 전환 대책 다섯, 최소 유지 시간 2초 | `M3 mass` + 예산 |
 | 5 | Simulation LOD(80/200m, 200m 밖 자체 이동) + 엔티티 풀 | `M5 m4offpool` |
 | 6 | ISKM(카메라를 따라가는 고정 바운드, 트랙 예약) | `M5 m5bounds` |
 | 7 | 배경 무리(엔티티 구동 입자, 맵 밖 독립 입자) | `M5 q2crowd` |
-| 8 | 품질 올리기: 액터 상한 1,000, 전환 거리 40m, 80m 밖 인스턴스 그림자 끔, 액터 메시 고정 바운드(v2 W11) | `M5 q4final` + 고정 바운드 |
+| 8 | 품질 올리기: 80m 밖 인스턴스 그림자 끔, 액터 메시 고정 바운드(v2 W11). 액터 상한과 전환 거리는 단계 2와 같다(ADR-0021) | `M5 q4final`(전환 거리 40m) + 고정 바운드 |
 
 단계별 스위치와 CSV 메타데이터 값이다. 빈칸은 그 단계에 없는 기법이다(메타데이터 `0`이나 `-`).
 
@@ -62,7 +62,7 @@ STATUS.md "명령"에는 매번 쓰는 것만 둔다. 여기에는 스크립트 
 | `LabTechCrowdFx`(`-LabCrowdFx`) | 0 | 0 | 0 | 0 | 0 | 0 | 1 | 1 |
 | `LabFxOrbFollow`(`-LabFxOrbFollow`) | - | - | - | - | - | - | 1 | 1 |
 | `LabTechFarCull`(`-LabFarCull=0`이 끈다) | 0 | 1 | 1 | 1 | 1 | 1 | 1 | 1 |
-| `LabActorCap`·`LabHydrateM`(`-LabActorCap`, `-LabHydrateM`) | | 500·30 | 500·30 | 500·30 | 500·30 | 500·30 | 500·30 | 1000·40 |
+| `LabActorCap`·`LabHydrateM`(`-LabActorCap`, `-LabHydrateM`) | | 1000·35 | 1000·35 | 1000·35 | 1000·35 | 1000·35 | 1000·35 | 1000·35 |
 | `LabFarShadow`(`-LabFarShadow`) | - | 1 | 1 | 1 | 1 | 1 | 1 | 0 |
 | `LabFixedSkelBounds`(`-LabFixedSkelBounds`, v2 W11) | - | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
 | `LabQueryIsolate`(`-LabQueryIsolate`, v2 W11) | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
@@ -170,6 +170,8 @@ py -3 Scripts/transition-score.py <캡처 폴더> Saved/Logs/LabDev-s7-burst-N10
 | `-LabActorCap=<개수>` | 액터 상한(표현 LOD High의 `LODMaxCount`, 두 종류 합계) | 500, `q4final` 1,000 |
 | `-LabHydrateM=<미터>` | 화면 안에서 액터로 바뀌는 카메라 거리(1\~79m). 화면 밖 15m와 80·200m 밴드는 그대로 | 30, `m3hyd15` 15, `m3hyd50` 50, `q4final` 40 |
 | `-LabFarShadow=0\|1` | 표현 LOD Low(80m\~그리는 끝) 인스턴스의 그림자. M3 이상 단계에서만 뜻이 있다. ISKM과 VAT ISM 모두 메시 설명자를 LOD 중요도 범위로 둘로 나눠 끈다 | 1, `q4final` 0 |
+
+위 "기본" 열은 `v1`의 값이다. 지금 `-LabActorCap`과 `-LabHydrateM`의 기본값은 단계 2\~8 모두 1,000과 35m다([ADR-0021](../Decisions/0021-unified-actor-cap-and-hydrate-distance.md), 위 단계별 스위치 표).
 
 CSV 메타데이터 `LabActorCap`·`LabHydrateM`·`LabFarShadow`(M3 미만 `-`), 로그 `lab_config`의 `far_shadow=`, 스탯 `Lab/ViewActors`(화면 안 보이는 액터)·`Lab/ViewActors30`·`Lab/ViewInst30`(화면 안 카메라 30m 안 액터·인스턴스)·`Lab/ViewInstHyd`(전환 거리 안 인스턴스). `summarize.py`가 `view_actors_*`·`cover30_*`·`coverhyd_mean` 열로 낸다.
 
