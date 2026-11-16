@@ -73,7 +73,7 @@ W1\~W12는 끝났다. 사용자가 사양, 계획, ADR-0018\~0020을 승인했�
 
 근거는 [measurement.md](Guides/measurement.md) "확정값"과 "총괄 묶음 규약"이다.
 
-- 조건 표 `Scripts/full-conditions.json`은 `v2` 형식이다(D53). 구성 27개, 183회다. `v1`의 21개 표는 태그 `v1`에 있다.
+- 조건 표 `Scripts/full-conditions.json`은 `v2` 형식이다(D53). 본 실행은 216회다. `v1`의 21개 표는 태그 `v1`에 있다.
 - 총괄 묶음의 조건 표에는 조건을 더하지 않는다. 참고 묶음은 따로 둔다.
 - 최종 구성 `q4final`의 표현은 거리 네 구간이다([ADR-0010](Decisions/0010-final-representation-bands.md), [ADR-0011](Decisions/0011-entity-driven-crowd-particles.md)).
   - 0\~40m: 액터(상한 1,000).
