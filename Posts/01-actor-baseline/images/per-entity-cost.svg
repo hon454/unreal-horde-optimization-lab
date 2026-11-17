@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="564" viewBox="0 0 800 564" font-family="Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Segoe UI, sans-serif" font-size="16" fill="#111827">
+<defs><pattern id="hatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="8" height="8" fill="#fca5a5"/><line x1="0" y1="0" x2="0" y2="8" stroke="#ffffff" stroke-width="3"/></pattern></defs>
+<rect x="0.5" y="0.5" width="799" height="563" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+<text x="32" y="44" font-size="22" font-weight="700">개체 하나당 게임 스레드 시간</text>
+<text x="32" y="72" font-size="16" fill="#4b5563">단계 1, 이동 장면, 오브 시점 카메라. 게임 스레드 시간(중앙값) ÷ 호드 총수(µs)</text>
+<text x="32" y="94" font-size="16" fill="#4b5563">하위 스텝 횟수는 엔진 규칙(50ms 단위, 월드 시간 상한 0.4초)으로 셈했다</text>
+<line x1="90" y1="420.0" x2="740" y2="420.0" stroke="#e5e7eb"/>
+<text x="80.0" y="426.0" font-size="16" text-anchor="end" fill="#4b5563">0</text>
+<line x1="90" y1="343.1" x2="740" y2="343.1" stroke="#e5e7eb"/>
+<text x="80.0" y="349.1" font-size="16" text-anchor="end" fill="#4b5563">20</text>
+<line x1="90" y1="266.2" x2="740" y2="266.2" stroke="#e5e7eb"/>
+<text x="80.0" y="272.2" font-size="16" text-anchor="end" fill="#4b5563">40</text>
+<line x1="90" y1="189.2" x2="740" y2="189.2" stroke="#e5e7eb"/>
+<text x="80.0" y="195.2" font-size="16" text-anchor="end" fill="#4b5563">60</text>
+<line x1="90" y1="353.7" x2="740" y2="353.7" stroke="#4b5563" stroke-width="1.5" stroke-dasharray="6 4"/>
+<line x1="90" y1="148" x2="120" y2="148" stroke="#4b5563" stroke-width="1.5" stroke-dasharray="6 4"/>
+<text x="128.0" y="154.0" font-size="16" text-anchor="start" fill="#4b5563">예상: 1천의 값(17.2µs)으로 일정</text>
+<rect x="148" y="353.2" width="64" height="66.8" rx="3" fill="#2563eb"/>
+<text x="180.0" y="343.2" font-size="17" text-anchor="middle" font-weight="700" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">17.4</text><text x="180.0" y="343.2" font-size="17" text-anchor="middle" font-weight="700" fill="#2563eb">17.4</text>
+<text x="180.0" y="444.0" font-size="16" text-anchor="middle" fill="#111827">500</text>
+<text x="180.0" y="468.0" font-size="16" text-anchor="middle" fill="#4b5563">하위 스텝 1회</text>
+<rect x="298" y="353.7" width="64" height="66.3" rx="3" fill="#2563eb"/>
+<text x="330.0" y="343.7" font-size="17" text-anchor="middle" font-weight="700" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">17.2</text><text x="330.0" y="343.7" font-size="17" text-anchor="middle" font-weight="700" fill="#2563eb">17.2</text>
+<text x="330.0" y="444.0" font-size="16" text-anchor="middle" fill="#111827">1천</text>
+<text x="330.0" y="468.0" font-size="16" text-anchor="middle" fill="#4b5563">1회</text>
+<rect x="448" y="349.0" width="64" height="71.0" rx="3" fill="#2563eb"/>
+<text x="480.0" y="339.0" font-size="17" text-anchor="middle" font-weight="700" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">18.4</text><text x="480.0" y="339.0" font-size="17" text-anchor="middle" font-weight="700" fill="#2563eb">18.4</text>
+<text x="480.0" y="444.0" font-size="16" text-anchor="middle" fill="#111827">2천</text>
+<text x="480.0" y="468.0" font-size="16" text-anchor="middle" fill="#4b5563">1회</text>
+<rect x="598" y="196.6" width="64" height="223.4" rx="3" fill="url(#hatch)" stroke="#dc2626" stroke-width="1.5"/>
+<text x="630.0" y="186.6" font-size="17" text-anchor="middle" font-weight="700" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">58.1</text><text x="630.0" y="186.6" font-size="17" text-anchor="middle" font-weight="700" fill="#dc2626">58.1</text>
+<text x="630.0" y="444.0" font-size="16" text-anchor="middle" fill="#111827">1만</text>
+<text x="630.0" y="468.0" font-size="16" text-anchor="middle" fill="#4b5563">8회</text>
+<line x1="90" y1="420" x2="740" y2="420" stroke="#4b5563"/>
+<line x1="32" y1="494" x2="768" y2="494" stroke="#e5e7eb"/>
+<text x="32.0" y="516.0" font-size="16" text-anchor="start" fill="#4b5563">1천으로 예상한 1만의 게임 스레드는 172ms, 잰 값은 581ms다.</text>
+<text x="32.0" y="540.0" font-size="16" text-anchor="start" fill="#4b5563">빗금 막대(1만)는 월드 시간이 잘려 같은 일을 하지 못한 값이다.</text>
+</svg>
