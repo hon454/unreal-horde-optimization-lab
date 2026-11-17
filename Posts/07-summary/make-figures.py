@@ -432,7 +432,7 @@ def resources():
         names = ", ".join(f"단계 {n} {next(s[1] for s in STEPS if s[0] == n)}" for n in RISES[col])
         o.append(text(32, y, f"{name}: {names}", fill=SUB))
     y += 30
-    o.append(text(32, y, "메모리는 유효 숫자 세 자리로 적었고, 드로우 콜은 개수라 줄이지 않았다.", fill=SUB))
+    o.append(text(32, y, "메모리는 MB 정수로 적었고, 드로우 콜은 개수라 줄이지 않았다.", fill=SUB))
     hatch_key(o, y + 30)
     write("resources.svg", svg(y + 52, o, HATCH))
 

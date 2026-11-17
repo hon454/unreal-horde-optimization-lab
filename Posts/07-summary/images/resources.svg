@@ -88,7 +88,7 @@
 <text x="32.0" y="540.0" font-size="16" text-anchor="start" fill="#4b5563">프로세스 메모리: 단계 7 배경 무리</text>
 <text x="32.0" y="562.0" font-size="16" text-anchor="start" fill="#4b5563">GPU 메모리: 단계 6 ISKM, 단계 7 배경 무리, 단계 8 남은 비용 줄이기</text>
 <text x="32.0" y="584.0" font-size="16" text-anchor="start" fill="#4b5563">드로우 콜: 단계 6 ISKM, 단계 8 남은 비용 줄이기</text>
-<text x="32.0" y="614.0" font-size="16" text-anchor="start" fill="#4b5563">메모리는 유효 숫자 세 자리로 적었고, 드로우 콜은 개수라 줄이지 않았다.</text>
+<text x="32.0" y="614.0" font-size="16" text-anchor="start" fill="#4b5563">메모리는 MB 정수로 적었고, 드로우 콜은 개수라 줄이지 않았다.</text>
 <rect x="32" y="631" width="34" height="16" rx="3" fill="#9ca3af"/>
 <rect x="32" y="631" width="34" height="16" rx="3" fill="url(#rep)"/>
 <text x="74.0" y="644.0" font-size="16" text-anchor="start" fill="#4b5563">빗금 막대: 표현을 더하는 단계(4·6·7). 나머지는 비용을 줄이는 단계와 출발점(단계 1)</text>
