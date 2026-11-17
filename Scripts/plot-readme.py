@@ -44,7 +44,7 @@ STEP_TEXT = {
     1: ("액터 기준선", "ACharacter 액터, 캡슐과 이동 컴포넌트"),
     2: ("Mass, 엔진 기본 경로", "엔진 이동·회피·표현, 가까운 개체는 액터"),
     3: ("직접 짠 분리", "분리 프로세서, 방향 보간 병렬 사본"),
-    4: ("애니메이션 표현", "VAT 인스턴스, 액터 애니메이션 예산, 최소 유지 시간"),
+    4: ("애니메이션 표현", "VAT 인스턴스, Animation Budget Allocator, 최소 유지 시간"),
     5: ("Simulation LOD + 엔티티 풀", "먼 개체의 로직을 드물게, 엔티티를 다시 쓴다"),
     6: ("ISKM", "35~200m를 ISKM으로, 고정 바운드"),
     7: ("배경 무리", "200m 밖을 Niagara 메시 입자로"),
@@ -57,7 +57,7 @@ HATCHED = {n for n, role in STEPS if role == "quality"}  # steps 4, 6 and 7 get 
 
 # Technique contributions: row names "~를 끈 조건" (glossary 5.2). a8shd turns a technique back on; s8av replaces one.
 ABL_TEXT = {
-    "a8hyd": "하이드레이션을 끈 조건", "a8bud": "액터 애니메이션 예산을 끈 조건", "a8fix": "전환 대책을 끈 조건",
+    "a8hyd": "하이드레이션을 끈 조건", "a8bud": "Animation Budget Allocator를 끈 조건", "a8fix": "전환 대책을 끈 조건",
     "a8hold": "최소 유지 시간을 끈 조건", "a8pool": "엔티티 풀을 끈 조건", "a8sim": "Simulation LOD를 끈 조건",
     "a8iskm": "ISKM을 끈 조건", "a8bnd": "ISKM 고정 바운드를 끈 조건", "a8far": "200m 밖을 그리지 않는 일을 끈 조건",
     "a8fx": "배경 무리를 끈 조건", "a8sep": "겹침 방지(분리 프로세서)를 끈 조건", "a8cap": "액터 캡슐을 끈 조건",
@@ -67,7 +67,7 @@ ABL_TEXT = {
 }
 # Rows that remove more than one thing (measurement.md "변수가 둘 이상 섞인 행"). Same keys as plot.py's FULL_ABL_MIXED.
 ABL_MIXED = {
-    "a8hyd": "하이드레이션을 끄면 액터 캡슐, 액터 애니메이션 예산, 액터 메시 고정 바운드도 함께 빠진다.",
+    "a8hyd": "하이드레이션을 끄면 액터 캡슐, Animation Budget Allocator, 액터 메시 고정 바운드도 함께 빠진다.",
     "a8iskm": "ISKM을 끄면 ISKM 고정 바운드, 트랙 예약, 200m 밖에서 맞은 개체를 ISKM으로 그리는 규칙도 함께 빠진다.",
     "a8fx": "배경 무리를 끄면 200m 밖에서 맞은 개체를 ISKM으로 그리는 규칙과 맵 밖 무리의 그리기도 함께 빠진다.",
 }

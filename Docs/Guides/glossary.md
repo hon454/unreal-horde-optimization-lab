@@ -70,7 +70,7 @@
 | 표현 LOD | Representation LOD. 무엇으로 그리나(액터, ISKM, 없음). "LOD"는 늘 수식한다 | 한 문장. Simulation LOD(얼마나 자주 계산하나), 메시 LOD(폴리곤)와 구별한다([posting.md](posting.md) 62행) |
 | VAT 인스턴스 | VAT(Vertex Animation Texture)로 애니메이션을 재생하는 인스턴스드 메시. 단계 4\~5의 액터 밖 표현이고 `a8iskm`이 ISKM을 이것으로 되돌린다. 단계 2\~3의 정지 메시 인스턴스는 VAT 인스턴스가 아니다 | VAT를 한 문장으로 정의한다("애니메이션을 텍스처에 구워 정점 셰이더로 재생", [README.md](../../README.md) 5행). 이 낱말로만 부른다([code-tour.md](code-tour.md) 146행, [commands.md](commands.md) 28, 36, 92행) |
 | ISKM | Instanced Skinned Mesh. GPU에서 스키닝하는 인스턴스 스켈레탈 메시. 단계 6부터 35\~200m의 표현이다 | 한 문장([README.md](../../README.md) 5행, [code-tour.md](code-tour.md) 요약) |
-| 액터 애니메이션 예산 | 하이드레이션 액터의 메시를 `USkeletalMeshComponentBudgeted`로 바꾸고 Animation Budget Allocator의 예산을 4ms로 둔 것. 단계 4부터 | 한 일은 바꾼 것으로 쓴다([AGENTS.md](../../AGENTS.md) "문서와 글", [ADR-0016](../Decisions/0016-animation-budget-value.md), [commands.md](commands.md) 73, 200행) |
+| Animation Budget Allocator | 옛 이름 "액터 애니메이션 예산"을 쓰지 않는다(사용자 2026-11-17). 하이드레이션 액터의 메시를 `USkeletalMeshComponentBudgeted`로 바꾸고 Animation Budget Allocator의 예산을 4ms로 둔 것. 단계 4부터 | 한 일은 바꾼 것으로 쓴다([AGENTS.md](../../AGENTS.md) "문서와 글", [ADR-0016](../Decisions/0016-animation-budget-value.md), [commands.md](commands.md) 73, 200행) |
 | Simulation LOD | 먼 개체의 로직을 드물게 돌리고 200m 밖은 자체 이동으로 대신한다. 단계 5부터 | 한 문장. 틱 간격이 아니라 프로세서를 건너뛴다([code-tour.md](code-tour.md) 62, 67행) |
 | 엔티티 풀 | 죽은 엔티티를 파괴하지 않고 종류별 풀에 넣었다가 재생성 때 다시 쓴다. 움직이는 ISKM 엔티티를 파괴하면 트랙이 남는 엔진 문제의 우회다. 하이드레이션 액터 풀(engine-notes 4절)과 다르다. 단계 5부터 | 한 문장. 설명, 시각 자료, 문제가 있는 엔진 코드를 함께 싣는 것을 고려한다(사용자 요청 2026-11-17, [V2-w14-plan.md](../Worklog/V2-w14-plan.md) 결정 2, [code-tour.md](code-tour.md) 57행, [engine-notes.md](../Reference/engine-notes.md) 3절) |
 | 고정 바운드 | 두 가지다. ISKM 고정 바운드(`-LabFixedBounds`, 단계 6부터)는 ISKM 컴포넌트에 고정 상자를 `SetPrimitiveBoundsOverride`로 넣는다. 상자는 카메라를 따라 옮겨진다(`-LabBoundsStepM`). 액터 메시 고정 바운드(`-LabFixedSkelBounds`, 단계 8)는 하이드레이션 액터 메시의 `bComponentUseFixedSkelBounds`를 켜서 애니가 갱신될 때마다 피직스 에셋 바디로 바운드를 다시 셈하지 않고 메시 에셋의 고정 바운드를 쓰게 하고, `BoundsScale` 1.1을 곱한다. 글에서는 앞에 어느 쪽인지 붙인다 | 한 문장([commands.md](commands.md) 59, 67, 92, 101행, [measurement.md](measurement.md) 188행. 구분의 근거는 `LabCrowdSubsystem.cpp` 458\~473행 `ApplyFixedIskmBounds`, `LabMinion.cpp` 270\~277행, `LabConfig.h` 384\~392행. 2026-11-17 소스 확인) |
@@ -175,7 +175,7 @@
 | `s1` | 단계 1 액터 기준선 | 출발점 | `start` |
 | `s2` | 단계 2 Mass, 엔진 기본 경로 | 비용을 줄이는 단계 | `earn` |
 | `s3` | 단계 3 직접 짠 분리(분리 프로세서, 방향 보간 병렬 사본) | 비용을 줄이는 단계 | `earn` |
-| `s4` | 단계 4 애니메이션 표현(VAT 인스턴스, 액터 애니메이션 예산, 최소 유지 시간) | 표현을 더하는 단계 | `quality` |
+| `s4` | 단계 4 애니메이션 표현(VAT 인스턴스, Animation Budget Allocator, 최소 유지 시간) | 표현을 더하는 단계 | `quality` |
 | `s5` | 단계 5 Simulation LOD + 엔티티 풀 | 비용을 줄이는 단계 | `earn` |
 | `s6` | 단계 6 ISKM | 표현을 더하는 단계 | `quality` |
 | `s7` | 단계 7 배경 무리 | 표현을 더하는 단계 | `quality` |
@@ -189,8 +189,8 @@
 
 | 식별자 | 문서의 말 | 인자 |
 | --- | --- | --- |
-| `a8hyd` | 하이드레이션을 끈 조건. 액터가 없어 캡슐, 액터 애니메이션 예산, 액터 메시 고정 바운드도 함께 빠지고 전 구간이 ISKM이 된다 | `-LabHydrate=0` |
-| `a8bud` | 액터 애니메이션 예산을 끈 조건 | `-LabScreenSigBudget=0` |
+| `a8hyd` | 하이드레이션을 끈 조건. 액터가 없어 캡슐, Animation Budget Allocator, 액터 메시 고정 바운드도 함께 빠지고 전 구간이 ISKM이 된다 | `-LabHydrate=0` |
+| `a8bud` | Animation Budget Allocator를 끈 조건 | `-LabScreenSigBudget=0` |
 | `a8fix` | 전환 대책을 끈 조건 | `-LabHydrateFixMask=0` |
 | `a8hold` | 최소 유지 시간을 끈 조건 | `-LabRepHold=0` |
 | `a8pool` | 엔티티 풀을 끈 조건 | `-LabEntityPool=0` |

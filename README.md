@@ -50,7 +50,7 @@
 </tr>
 <tr>
 <td align="center" valign="top"><img src="Docs/figures/steps/step3-separation.webp" width="400" alt="단계 3 화면. 개체가 분리 프로세서로 서로 밀며 오브를 쫓는다"><br><b>단계 3 직접 짠 분리</b> · 비용을 줄임<br>엔진 회피를 분리 프로세서로<br><b>프레임 p95 14.1ms</b></td>
-<td align="center" valign="top"><img src="Docs/figures/steps/step4-vat-budget.webp" width="400" alt="단계 4 화면. 35m에서 200m 사이의 개체가 VAT 인스턴스로 움직인다"><br><b>단계 4 애니메이션 표현</b> · 표현을 더함<br>VAT 인스턴스, 애니메이션 예산<br><b>프레임 p95 14.2ms</b></td>
+<td align="center" valign="top"><img src="Docs/figures/steps/step4-vat-budget.webp" width="400" alt="단계 4 화면. 35m에서 200m 사이의 개체가 VAT 인스턴스로 움직인다"><br><b>단계 4 애니메이션 표현</b> · 표현을 더함<br>VAT 인스턴스, Animation Budget Allocator<br><b>프레임 p95 14.2ms</b></td>
 </tr>
 <tr>
 <td align="center" valign="top"><img src="Docs/figures/steps/step5-simlod-pool.webp" width="400" alt="단계 5 화면. 겉모습은 단계 4와 같다"><br><b>단계 5 Simulation LOD + 엔티티 풀</b> · 비용을 줄임<br>먼 개체 로직을 드물게, 엔티티 재사용<br><b>프레임 p95 14.5ms</b></td>

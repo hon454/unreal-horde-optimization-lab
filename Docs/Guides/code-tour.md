@@ -147,7 +147,7 @@ Avoidance 그룹과 `SyncWorldToMass` 그룹에는 최종 구성의 엔티티를
 | `UMassOffLODNavigationProcessor`(엔진) | 단계 4까지, 기법별 기여 `-LabSimLod=0`(Simulation LOD를 끈 조건) | 등록하지 않는다 |
 | `UMassSmoothOrientationProcessor`(엔진) | 단계 2, `-LabSmoothOrient=0`, 개발 검사 `-LabSmoothOrientCheck` | 등록하지 않는다. `ULabSmoothOrientationProcessor`가 같은 일을 한다 |
 | `UMassObstacleAvoidanceTrait`, `UMassNavigationObstacleTrait` | 단계 2(엔진 회피), 하위 실험 `-LabAvoid=1` | 붙이지 않는다 |
-| `ALabMinionMassActor`, `ALabMinionMassActorLarge` | 단계 2·3 예산 없는 액터, 기법별 기여 `-LabScreenSigBudget=0`(액터 애니메이션 예산을 끈 조건) | 만들지 않는다 |
+| `ALabMinionMassActor`, `ALabMinionMassActorLarge` | 단계 2·3 예산 없는 액터, 기법별 기여 `-LabScreenSigBudget=0`(Animation Budget Allocator를 끈 조건) | 만들지 않는다 |
 | `-LabBandFloor`, `LabLogScreenEvent`, `-LabSimLodLog`, `-LabOrbDiag`, `-LabFlashDiag`, `-LabDiag*` 등 | 개발 진단 | Test 빌드에는 코드가 없다(`#if !UE_BUILD_TEST`) |
 | `UMassConsumeInstancedSkinnedMeshAnimationProcessor`(엔진) | 엔진 ISKM 경로 | 요구하는 `FMassRepresentationAnimationFragment`가 엔티티에 없다 |
 

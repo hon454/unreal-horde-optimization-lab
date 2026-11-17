@@ -233,7 +233,7 @@ window.SITE_DATA = {
      "real": false
     },
     "group": "dist",
-    "mixed": "하이드레이션을 끄면 액터 캡슐, 액터 애니메이션 예산, 액터 메시 고정 바운드도 함께 빠진다.",
+    "mixed": "하이드레이션을 끄면 액터 캡슐, Animation Budget Allocator, 액터 메시 고정 바운드도 함께 빠진다.",
     "name": "하이드레이션을 끈 조건",
     "notes": [
      "병목이 GPU로 바뀐다"
@@ -455,7 +455,7 @@ window.SITE_DATA = {
     },
     "group": "same",
     "mixed": "",
-    "name": "액터 애니메이션 예산을 끈 조건",
+    "name": "Animation Budget Allocator를 끈 조건",
     "notes": [],
     "state": "same",
     "sub": "끄면 액터 메시가 `USkeletalMeshComponent`이고 매 프레임 애니메이션을 평가한다."

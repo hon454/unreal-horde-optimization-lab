@@ -66,7 +66,7 @@
 <text x="253.2" y="457" font-size="16" text-anchor="end" fill="#374151" stroke="#374151" stroke-width="3" stroke-linejoin="round">p50 12.4 · <tspan font-weight="700">p95 14.1</tspan></text><text x="253.2" y="457" font-size="16" text-anchor="end" fill="white">p50 12.4 · <tspan font-weight="700">p95 14.1</tspan></text>
 <text x="312.5" y="457.0" font-size="16" text-anchor="start" font-weight="700" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">여유 2.55ms</text><text x="312.5" y="457.0" font-size="16" text-anchor="start" font-weight="700" fill="#b45309">여유 2.55ms</text>
 <text x="410.1" y="457.0" font-size="16" text-anchor="start" fill="#4b5563">처음 16.7ms 안</text>
-<text x="32" y="504" font-size="17" font-weight="700">단계 4 애니메이션 표현<tspan font-size="16" font-weight="400" fill="#4b5563">  VAT 인스턴스, 액터 애니메이션 예산, 최소 유지 시간</tspan></text>
+<text x="32" y="504" font-size="17" font-weight="700">단계 4 애니메이션 표현<tspan font-size="16" font-weight="400" fill="#4b5563">  VAT 인스턴스, Animation Budget Allocator, 최소 유지 시간</tspan></text>
 <rect x="32.0" y="512.0" width="230.1" height="22" rx="3" fill="#374151"/>
 <rect x="32.0" y="512.0" width="230.1" height="22" rx="3" fill="url(#rep)"/>
 <rect x="32.0" y="538.0" width="208.3" height="7" rx="2" fill="#374151" fill-opacity="0.45"/>

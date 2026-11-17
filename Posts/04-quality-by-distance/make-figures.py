@@ -302,7 +302,7 @@ def bands():
     o.append(text(32, yb + 92, f"0~{FAR_M}m는 카메라 거리, 맵 끝(맵 중심 {MAP_M}m)부터는 맵 중심 거리다", fill=SUB))
     # rows: what each band is and which step added it
     rows_ = [
-        (cols[0], f"0~{HYDRATE_M}m", f"하이드레이션 액터. 상한 {ACTOR_CAP:,}", f"단계 2부터. 액터 애니메이션 예산과 최소 유지 시간 {HOLD_S}초는 단계 4부터"),
+        (cols[0], f"0~{HYDRATE_M}m", f"하이드레이션 액터. 상한 {ACTOR_CAP:,}", f"단계 2부터. Animation Budget Allocator와 최소 유지 시간 {HOLD_S}초는 단계 4부터"),
         (cols[1], f"{HYDRATE_M}~{SHADOW_M}m", "ISKM, 그림자를 그린다", "단계 6부터. 단계 4·5는 VAT 인스턴스, 단계 2·3은 정지 메시"),
         (cols[2], f"{SHADOW_M}~{FAR_M}m", "ISKM, 그림자를 끈다", "단계 6부터 ISKM. 그림자를 끈 것은 단계 8(글 05)"),
         (cols[3], f"{FAR_M}m 밖, 맵 안", "입자가 그려지지 않는 엔티티의 자리를 걷는다", "단계 7부터. 단계 2~6은 그리지 않는다"),

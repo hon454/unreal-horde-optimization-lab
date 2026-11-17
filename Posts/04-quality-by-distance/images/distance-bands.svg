@@ -36,7 +36,7 @@
 <rect x="32" y="275" width="22" height="18" rx="3" fill="#f35959" stroke="#e5e7eb"/>
 <text x="66.0" y="290.0" font-size="16" text-anchor="start" font-weight="700" fill="#111827">0~35m</text>
 <text x="220.0" y="290.0" font-size="16" text-anchor="start" fill="#111827">하이드레이션 액터. 상한 1,000</text>
-<text x="220.0" y="312.0" font-size="16" text-anchor="start" fill="#4b5563">단계 2부터. 액터 애니메이션 예산과 최소 유지 시간 2초는 단계 4부터</text>
+<text x="220.0" y="312.0" font-size="16" text-anchor="start" fill="#4b5563">단계 2부터. Animation Budget Allocator와 최소 유지 시간 2초는 단계 4부터</text>
 <rect x="32" y="331" width="22" height="18" rx="3" fill="#5995f3" stroke="#e5e7eb"/>
 <text x="66.0" y="346.0" font-size="16" text-anchor="start" font-weight="700" fill="#111827">35~80m</text>
 <text x="220.0" y="346.0" font-size="16" text-anchor="start" fill="#111827">ISKM, 그림자를 그린다</text>

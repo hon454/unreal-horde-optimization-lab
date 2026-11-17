@@ -72,7 +72,7 @@
 | 한 실행은 240초 | 60 + 180 | measurement.md "벤치마크 조건" | |
 | 0.5ms 규칙 | 0.5ms | measurement.md "차이 판정" | |
 | 액터 메시의 애니메이션 시간 | `budgeted_anim_ms` | `Scripts/summarize.py` 47, 230\~232 | 엔진 CSV 스탯 `AnimationBudget/GameThread/BudgetedAnimation`의 실행별 중앙값 |
-| 액터 애니메이션 예산 4ms | 4ms | [ADR-0016](../../Docs/Decisions/0016-animation-budget-value.md), `summary.csv` `budget_ms` 4(메타데이터 `LabBudgetMs`) | 단계 4부터(`LabConfig.cpp` 50) |
+| Animation Budget Allocator의 예산 4ms | 4ms | [ADR-0016](../../Docs/Decisions/0016-animation-budget-value.md), `summary.csv` `budget_ms` 4(메타데이터 `LabBudgetMs`) | 단계 4부터(`LabConfig.cpp` 50) |
 
 ## 그림의 값
 
@@ -113,7 +113,7 @@
 | 엔티티 풀 끔 `a8pool` | 14.24 (14.088\~14.369) | +0.009 | 구별 안 됨 | r1 r2 r3 |
 | ISKM 트랙 예약 끔 `a8res` | 14.239 (14.16\~14.436) | +0.008 | 구별 안 됨 | r1 r2 r3 |
 | 전환 대책 끔 `a8fix` | 14.231 (14.072\~14.295) | 0 | 구별 안 됨 | r1 r2 r3 |
-| 액터 애니메이션 예산 끔 `a8bud` | 14.042 (13.912\~14.078) | −0.189 | 구별 안 됨 | r1 r2 r3 |
+| Animation Budget Allocator 끔 `a8bud` | 14.042 (13.912\~14.078) | −0.189 | 구별 안 됨 | r1 r2 r3 |
 | 최소 유지 시간 끔 `a8hold` | 14.021 (13.901\~14.1) | −0.21 | 구별 안 됨 | r1 r2 r3 |
 | Simulation LOD 끔 `a8sim` | 13.996 (13.897\~14.15) | −0.235 | 구별 안 됨 | r1 r2 r3 |
 | 배경 무리 끔 `a8fx` | 13.922 (13.785\~14.023) | −0.309 | 구별 안 됨 | r1 r2 r3 |
@@ -140,7 +140,7 @@
 
 | 행 | 함께 빠지는 것 | 근거 |
 | --- | --- | --- |
-| `a8hyd`(`-LabHydrate=0`) | 액터 캡슐, 액터 애니메이션 예산, 액터 메시 고정 바운드. 전 구간이 ISKM | measurement.md 187행 |
+| `a8hyd`(`-LabHydrate=0`) | 액터 캡슐, Animation Budget Allocator, 액터 메시 고정 바운드. 전 구간이 ISKM | measurement.md 187행 |
 | `a8iskm`(`-LabIskm=0`) | ISKM 고정 바운드, 트랙 예약, 먼 피격 규칙 `-LabFarHitIskm` | measurement.md 188행 |
 | `a8fx`(`-LabCrowdFx=0`) | 먼 피격 규칙 `-LabFarHitIskm`, 맵 밖 무리 그리기 | measurement.md 189행 |
 
@@ -161,7 +161,7 @@
 | 엔티티 풀 끔 `a8pool` | 죽은 개체의 엔티티를 파괴하고 새로 만든다 | `-LabEntityPool=0` |
 | ISKM 트랙 예약 끔 `a8res` | 트랙 풀을 처음에 용량까지 늘려 두지 않는다 | `-LabIskmTrackReserve=0` |
 | 전환 대책 끔 `a8fix` | 인스턴스와 액터가 바뀌는 프레임의 보정 다섯을 모두 끈다 | `-LabHydrateFixMask=0` |
-| 액터 애니메이션 예산 끔 `a8bud` | 액터 메시가 `USkeletalMeshComponentBudgeted` 대신 `USkeletalMeshComponent`다. 메시가 매 프레임 애니메이션을 평가한다 | `-LabScreenSigBudget=0` |
+| Animation Budget Allocator 끔 `a8bud` | 액터 메시가 `USkeletalMeshComponentBudgeted` 대신 `USkeletalMeshComponent`다. 메시가 매 프레임 애니메이션을 평가한다 | `-LabScreenSigBudget=0` |
 | 최소 유지 시간 끔 `a8hold` | 바뀐 개체가 2초 안에 바로 전의 표현으로 되돌아갈 수 있다 | `-LabRepHold=0` |
 | Simulation LOD 끔 `a8sim` | 80m 밖 개체도 접근·범위 피해 로직을 매 프레임 돌리고, 200m 밖 개체도 엔진의 이동·조향 프로세서로 옮긴다 | `-LabSimLod=0` |
 | 배경 무리 끔 `a8fx` | 200m 밖에 아무것도 그리지 않는다 | `-LabCrowdFx=0` |

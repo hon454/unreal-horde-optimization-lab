@@ -431,7 +431,7 @@ def stage_map():
          [(0, 35, ACT, False), (35, 200, STAT, False), (200, 500, None, False)]),
         ("3", "직접 짠 분리", COST, "엔진 회피 대신 분리 프로세서, 방향 보간 병렬 사본",
          [(0, 35, ACT, False), (35, 200, STAT, False), (200, 500, None, False)]),
-        ("4", "애니메이션 표현", ADD, "VAT 인스턴스, 액터 애니메이션 예산, 최소 유지 시간",
+        ("4", "애니메이션 표현", ADD, "VAT 인스턴스, Animation Budget Allocator, 최소 유지 시간",
          [(0, 35, ACT, False), (35, 200, VAT, False), (200, 500, None, False)]),
         ("5", "Simulation LOD + 엔티티 풀", COST, "먼 개체의 로직을 드물게, 죽은 엔티티를 다시 쓴다",
          [(0, 35, ACT, False), (35, 200, VAT, False), (200, 500, None, False)]),

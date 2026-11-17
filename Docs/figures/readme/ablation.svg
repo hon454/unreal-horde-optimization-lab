@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="800" height="1411" viewBox="0 0 800 1411" font-family="Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Segoe UI, sans-serif" font-size="16" fill="#111827">
-<rect x="0.5" y="0.5" width="799" height="1410" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="1434" viewBox="0 0 800 1434" font-family="Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Segoe UI, sans-serif" font-size="16" fill="#111827">
+<rect x="0.5" y="0.5" width="799" height="1433" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
 <text x="32" y="46" font-size="22" font-weight="700">기법별 기여(최종 구성에서 하나씩 껐을 때)</text>
 <text x="32" y="74" font-size="16" fill="#4b5563">최종 구성(단계 8)에서 기법 하나를 끄고 같은 조건으로 잰 프레임 p95의 차이(ms)</text>
 <text x="32" y="96" font-size="16" fill="#4b5563">호드 총수 1만, 이동 장면, 오브 시점 카메라, 세 번 잰 중앙값. 0은 최종 구성(프레임 p95 14.2ms)</text>
@@ -157,7 +157,7 @@
 <line x1="537.7" y1="859.0" x2="537.7" y2="869.0" stroke="#111827" stroke-width="1.4"/>
 <line x1="542.8" y1="859.0" x2="542.8" y2="869.0" stroke="#111827" stroke-width="1.4"/>
 <text x="549.8" y="869.0" font-size="16" text-anchor="start" fill="white" stroke="white" stroke-width="4" stroke-linejoin="round">0</text><text x="549.8" y="869.0" font-size="16" text-anchor="start" fill="#4b5563">0</text>
-<text x="32" y="907" font-size="16" fill="#4b5563">액터 애니메이션 예산을 끈 조건</text>
+<text x="32" y="907" font-size="16" fill="#4b5563">Animation Budget Allocator를 끈 조건</text>
 <rect x="537.0" y="893" width="4.3" height="18" rx="2" fill="#9ca3af"/>
 <line x1="534.1" y1="902.0" x2="537.9" y2="902.0" stroke="white" stroke-width="3.5"/>
 <line x1="534.1" y1="897.0" x2="534.1" y2="907.0" stroke="white" stroke-width="3.5"/>
@@ -210,9 +210,10 @@
 <line x1="32" y1="1216" x2="768" y2="1216" stroke="#e5e7eb"/>
 <text x="32" y="1238" font-size="16" fill="#4b5563">구별된다: 차이가 0.5ms 이상이고, 두 조건의 세 실행 범위 가운데 큰 쪽보다 크다.</text>
 <text x="32" y="1261" font-size="16" fill="#4b5563">느린 실행을 다시 잰 한 조건은 네 번 잰 중앙값이다.</text>
-<text x="32" y="1284" font-size="16" fill="#4b5563">† 하이드레이션을 끄면 액터 캡슐, 액터 애니메이션 예산, 액터 메시 고정 바운드도 함께 빠진다.</text>
-<text x="32" y="1307" font-size="16" fill="#4b5563">† ISKM을 끄면 ISKM 고정 바운드, 트랙 예약, 200m 밖에서 맞은 개체를 ISKM으로 그리는 규칙도 함께</text>
-<text x="32" y="1330" font-size="16" fill="#4b5563">  빠진다.</text>
-<text x="32" y="1353" font-size="16" fill="#4b5563">† 배경 무리를 끄면 200m 밖에서 맞은 개체를 ISKM으로 그리는 규칙과 맵 밖 무리의 그리기도 함께</text>
-<text x="32" y="1376" font-size="16" fill="#4b5563">  빠진다.</text>
+<text x="32" y="1284" font-size="16" fill="#4b5563">† 하이드레이션을 끄면 액터 캡슐, Animation Budget Allocator, 액터 메시 고정 바운드도 함께</text>
+<text x="32" y="1307" font-size="16" fill="#4b5563">  빠진다.</text>
+<text x="32" y="1330" font-size="16" fill="#4b5563">† ISKM을 끄면 ISKM 고정 바운드, 트랙 예약, 200m 밖에서 맞은 개체를 ISKM으로 그리는 규칙도 함께</text>
+<text x="32" y="1353" font-size="16" fill="#4b5563">  빠진다.</text>
+<text x="32" y="1376" font-size="16" fill="#4b5563">† 배경 무리를 끄면 200m 밖에서 맞은 개체를 ISKM으로 그리는 규칙과 맵 밖 무리의 그리기도 함께</text>
+<text x="32" y="1399" font-size="16" fill="#4b5563">  빠진다.</text>
 </svg>

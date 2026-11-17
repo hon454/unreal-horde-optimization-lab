@@ -39,7 +39,7 @@
 <circle cx="46" cy="373" r="14" fill="#374151"/>
 <text x="46" y="379" text-anchor="middle" font-size="16" font-weight="700" fill="white">4</text>
 <text x="70" y="379" font-size="17" font-weight="700">애니메이션 표현</text>
-<text x="70" y="410" font-size="16" fill="#4b5563"><tspan font-weight="700" fill="#0d9488">표현을 더하는 단계</tspan> · VAT 인스턴스, 액터 애니메이션 예산, 최소 유지 시간</text>
+<text x="70" y="410" font-size="16" fill="#4b5563"><tspan font-weight="700" fill="#0d9488">표현을 더하는 단계</tspan> · VAT 인스턴스, Animation Budget Allocator, 최소 유지 시간</text>
 <rect x="331.0" y="358" width="94.0" height="30" rx="4" fill="#dc2626"/>
 <text x="378.0" y="379" text-anchor="middle" font-size="16" font-weight="700" fill="white">액터</text>
 <rect x="427.0" y="358" width="174.0" height="30" rx="4" fill="#93c5fd"/>

@@ -64,7 +64,7 @@
 | `rep_hold_ms`, `rep_held_mean`, `rep_cap_blocked_mean`, `rep_cap_on_ratio`, `actors_max` | 최소 유지 시간, 붙잡힌 엔티티 수, 액터 상한 때문에 막은 새 액터 수, 상한이 걸린 프레임의 비율, 액터 최댓값 | 메타데이터 `LabRepHold`, 스탯 `Lab/RepHeld` 등 |
 | `actors_mean`, `view_actors_mean`, `cover30_mean` | 붙은 액터 수, 화면 안 보이는 액터 수, 화면 안 카메라 30m 안 개체 중 액터 비율 | 스탯 `Lab/Actors`, `Lab/ViewActors*` |
 | `death_rate`, `near30_mean`, `alive_min`, `alive_max` | 초당 사망, 오브 수평 30m 안 평균, 살아 있는 총수의 최소·최대(동등성 검사의 입력) | 메타데이터 `LabDeathRate` 등 |
-| `large_skipped_ratio`, `small_skipped_ratio`, `budgeted_anim_ms` | 액터 애니메이션 예산이 갱신도 보간도 하지 않은 프레임 비율(대형·소형), 예산 안에서 쓴 시간 | 메타데이터 `LabLargeActor*`, `LabSmallActor*`, 스탯 |
+| `large_skipped_ratio`, `small_skipped_ratio`, `budgeted_anim_ms` | Animation Budget Allocator가 갱신도 보간도 하지 않은 프레임 비율(대형·소형), 예산 안에서 쓴 시간 | 메타데이터 `LabLargeActor*`, `LabSmallActor*`, 스탯 |
 | `cpu_perf_mean`, `cpu_perf_min`, `cpu_mhz_mean`, `cpu_busy_before` | 실행 중 CPU 클럭(기본 대비 %, MHz)과 시작 전 CPU 사용률 | `clock.csv`(러너) |
 
 위 열은 `summarize.py`가 `runs.csv`와 `summary.csv`에 붙인다. 오브 궤도(`LabOrbit` = `r57.3/v2/h6`)와 구간(`LabWindow` = `60+180`)은 메타데이터로 남고 러너가 실행마다 대조한다. 값이 없는 옛 묶음의 열은 빈칸이다.
@@ -184,7 +184,7 @@
 변수가 둘 이상 섞인 행([Worklog/V2-full4-review.md](../Worklog/V2-full4-review.md) N4, N5, R6). 이 행의 차이는 "참고"로 적고 섞인 변수를 함께 적는다.
 
 - 단계 3: 분리 프로세서와 방향 보간 병렬 사본(`-LabSmoothOrient`)을 함께 켠다. 나누는 기법별 기여 행은 없다. 사본의 효과는 p50 −0.17ms, p95 −0.19ms다(`V2SmoothOri`).
-- `a8hyd`: 하이드레이션 액터와 함께 캡슐 콜리전, 액터 애니메이션 예산, 액터 메시 고정 바운드가 빠진다.
+- `a8hyd`: 하이드레이션 액터와 함께 캡슐 콜리전, Animation Budget Allocator, 액터 메시 고정 바운드가 빠진다.
 - `a8iskm`: ISKM과 함께 고정 바운드, 트랙 예약, 장면 규칙 `-LabFarHitIskm`이 빠진다.
 - `a8fx`: 배경 무리와 함께 장면 규칙 `-LabFarHitIskm`과 맵 밖 기록의 그리기가 빠진다.
 - `a8pool`(추정): 풀을 끄면 240초에 새 엔티티가 약 1만 4천 개 생겨 소형 ISKM 트랙 예약(9,964)을 넘을 수 있다. 그러면 트랙 예약의 효과도 함께 빠진다. 측정 기록에 `iskm_tracks_last`를 함께 적는다.
