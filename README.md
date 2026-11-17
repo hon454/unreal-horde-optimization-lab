@@ -19,7 +19,7 @@
 - **대상**: 클라이언트 한 대에서 그리고 움직이는 군중의 비용. 게임 스레드, 렌더 스레드, GPU, 메모리.
 - **최적화**: Mass Entity, 분리 프로세서, Representation LOD, 하이드레이션, Animation Budget Allocator, Simulation LOD, 엔티티 풀, Niagara 배경 무리, 80m 밖 그림자 끄기, 고정 바운드.
 - **측정 도구**: Test 구성 패키지에서 `csvprofile`과 Unreal Insights.
-- **팁**: Mass로 군중을 만들고 프로파일링하며 겪은 증상, 엔진이 그렇게 도는 까닭, 바꾼 코드는 [Mass 군중 최적화와 프로파일링 팁](Docs/Guides/mass-crowd-tips.md)에 모았다.
+- **개발 가이드**: Mass로 군중을 만들고 프로파일링하며 겪은 증상, 엔진이 그렇게 도는 까닭, 바꾼 코드는 [Mass 군중 최적화와 프로파일링 팁](Docs/Guides/mass-crowd-tips.md)에 모았다.
 
 ## 시나리오
 
