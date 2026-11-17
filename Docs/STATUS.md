@@ -15,8 +15,8 @@
 
 ## 다음 할 일
 
-1. 사용자가 스킬 계획안 8절의 아홉 항목을 정한다([Worklog/Skills-plan.md](Worklog/Skills-plan.md), 508e04f). 앞선 결정은 [autonomous-decisions.md](Worklog/autonomous-decisions.md) "사용자 확인(2026-11-18, 스킬)" 절에 있다.
-2. 사용자가 계획안을 승인하면 코디네이터가 스킬 하나당 작업 세션 하나를 띄운다.
+1. 두 스킬은 커밋됐다(`.claude/skills/`, 94d35ce, f5d69e1, 436b884). 경위는 [Worklog/Skills.md](Worklog/Skills.md)에 있다.
+2. 계획안 7.1절의 질문 13개로 스킬이 불리는지 확인한다([Worklog/Skills-plan.md](Worklog/Skills-plan.md)). 방법은 사용자가 정한다.
 3. 공개 자료를 고치면 사용자 승인을 받아 `v2.1`처럼 태그를 달아 릴리스한다.
 4. 사이트에 보이는 것을 고치면 `Scripts/build-site.py`를 다시 돌린다. `Site/assets/`는 `.gitignore`에 있어 `gh-pages`에 따로 넣는다.
 5. `gh-pages`는 강제 푸시 없이 올린다. 방법은 [Worklog/V2.md](Worklog/V2.md) "W14-20 병합과 릴리스" 절에 있다.
@@ -43,7 +43,7 @@
 다음 총괄 묶음 전에 할 일:
 
 - 저격 캡슐 트레이스의 시작점을 고친다(engine-notes.md 53절).
-- 표현 프로세서와 분리 프로세서의 순서 문제(D60)를 고칠지 사용자가 정한다.
+- 표현 프로세서와 밀어내기 프로세서의 순서 문제(D60)를 고칠지 사용자가 정한다.
 - 패키지를 만든 뒤 `Saved/Cooked/`에 `Content/LabDebug/`가 없는지 확인한다.
 
 지켜야 할 것:
@@ -66,7 +66,7 @@
 
 | 세션 | 작업 단위 | 모델 | 상태 |
 | --- | --- | --- | --- |
-| `skills-plan` | 스킬 계획안(`Docs/Worklog/Skills-plan.md`) | Opus high | 계획안 커밋(508e04f). 사용자 결정 대기 |
+| `term-push-apart` | 용어: 분리 → 밀어내기(사용자 결정, 2026-11-18) | Sonnet medium | 푸시, 사이트 배포 끝(dccbe29, gh-pages b9748b3) |
 
 코디네이터는 세션을 띄우면 여기에 적는다. 끝난 세션은 결과를 확인하고 보관한 뒤 지운다.
 
@@ -85,7 +85,7 @@
   - 80\~200m: ISKM, 그림자 끔.
   - 200m 밖: 배경 무리 입자.
 - 단계 2\~8은 액터 상한 1,000과 전환 거리 35m을 쓴다.
-- 기본값: 엔진 회피 끔, 분리 프로세서 켬, 액터 캡슐 켬, 최소 유지 시간 2,000ms.
+- 기본값: 엔진 회피 끔, 밀어내기 프로세서 켬, 액터 캡슐 켬, 최소 유지 시간 2,000ms.
 - Animation Budget Allocator의 예산은 4ms다([ADR-0016](Decisions/0016-animation-budget-value.md)).
 - 비교는 같은 묶음에서 잰 값끼리만 한다. 글과 README의 수치는 `Full4`에서만 만든다. `Pool2`는 "참고"로만 싣는다.
 - README와 글 본문에는 묶음 이름과 조건 라벨을 쓰지 않는다.
@@ -124,7 +124,7 @@ py -3 -I Scripts/check-tilde.py
 | --- | --- | --- |
 | 1 액터 | 597.11 | 665.25 |
 | 2 Mass, 엔진 기본 경로 | 34.06 | 36.79 |
-| 3 직접 짠 분리 | 12.41 | 14.15 |
+| 3 자체 밀어내기 | 12.41 | 14.15 |
 | 4 애니메이션 표현 | 12.86 | 14.21 |
 | 5 Simulation LOD + 엔티티 풀 | 13.09 | 14.52 |
 | 6 ISKM | 13.20 | 14.71 |
