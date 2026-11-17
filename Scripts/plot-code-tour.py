@@ -15,8 +15,9 @@ INK, SUB, LINE, BG, CARD = "#111827", "#4b5563", "#e5e7eb", "#ffffff", "#f8fafc"
 BLUE, TEAL, PINK, AMBER, DARK, GRAY = "#2563eb", "#0d9488", "#db2777", "#b45309", "#374151", "#9ca3af"
 W = 800
 
-# v2 ladder (Docs/v2-plan.md "사다리"): steps 4, 6 and 7 add quality, step 8 spends the earned frame time.
-SPEND = {4, 6, 7, 8}
+# v2 ladder (Docs/v2-plan.md "사다리", Docs/Guides/glossary.md 1.3): steps 4, 6 and 7 add representation,
+# steps 2, 3, 5 and 8 cut cost. Chips of the adding steps are pink, the others blue.
+ADDS = {4, 6, 7}
 
 
 def esc(t):
@@ -39,7 +40,7 @@ def chips(o, right, y, steps):
         label = f"{s}단계"
         w = 18 + 9 * len(str(s)) + 32
         x -= w
-        c = PINK if s in SPEND else BLUE
+        c = PINK if s in ADDS else BLUE
         o.append(f'<rect x="{x}" y="{y - 16}" width="{w}" height="22" rx="11" fill="{c}" fill-opacity="0.12" stroke="{c}"/>')
         o.append(f'<text x="{x + w / 2}" y="{y}" text-anchor="middle" font-size="16" font-weight="700" fill="{c}">{label}</text>')
         x -= 6
@@ -66,9 +67,10 @@ def frame_flow():
     o = []
     o.append(f'<text x="32" y="46" font-size="22" font-weight="700">최종 구성의 한 프레임</text>')
     o.append(f'<text x="32" y="74" font-size="16" fill="{SUB}">화살표는 코드에 선언된 실행 순서다. 칩은 그 코드가 들어온 사다리 단계다.</text>')
+    o.append(f'<text x="32" y="98" font-size="16" fill="{SUB}">분홍 칩은 표현을 더하는 단계(4, 6, 7), 파랑 칩은 비용을 줄이는 단계(2, 3, 5, 8)다.</text>')
 
     # Actor ticks in the same tick group as the Mass PrePhysics phase.
-    y = 98
+    y = 122
     h = card(o, 32, y, W - 64, "액터 틱(틱 그룹 PrePhysics)",
              ["ALabOrb: 이펙트 · ALabCameraRig · ALabGameMode: CSV 기록",
               "Mass 처리와 같은 틱 그룹이고 둘 사이의 순서 선언은 없다"])
@@ -92,7 +94,7 @@ def frame_flow():
     h = card(o, lx, ly, cw, "2 접근과 조향", ["ULabApproachProcessor(Tasks)", "다음 UMassSteerToMoveTargetProcessor"], steps=(2,))
     arrow(o, lx + cw / 2, ly + h, lx + cw / 2, ly + h + 30)
     ly += h + 32
-    h = card(o, lx, ly, cw, "3 이동", ["Movement 그룹: 엔진 이동·회전", "ULabOffMoveProcessor: 200m 밖", "다음 ULabSeparationProcessor: 겹침"], steps=(2, 3, 5))
+    h = card(o, lx, ly, cw, "3 이동", ["Movement 그룹: 엔진 이동", "회전: 단계 3부터 Lab 방향 보간 사본", "ULabOffMoveProcessor: 200m 밖", "다음 ULabSeparationProcessor: 겹침"], steps=(2, 3, 5))
     arrow(o, lx + cw / 2, ly + h, lx + cw / 2, ly + h + 30)
     ly += h + 32
     h = card(o, lx, ly, cw, "4 Lab 로직(LabLogic)", ["ULabOrbContactProcessor: 범위 피해", "다음 ULabOrbSnipeProcessor: 저격",

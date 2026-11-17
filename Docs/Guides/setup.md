@@ -88,7 +88,7 @@ UBT가 `HordeOptLabEditor Win64 Development`를 빌드하고 종료 코드 0으�
 powershell -ExecutionPolicy Bypass -File Scripts/run-dev.ps1 -Small -Stage 8
 ```
 
-미니언 100개로 1280x720 창을 20초 띄운다. 창이 닫힌 뒤 로그의 `lab_config`·`lab_assets`·`lab_summary` 줄과 `EXIT: 0`이 찍히면 에셋과 빌드가 맞다. 이 실행은 Development 빌드라 수치를 비교에 쓰지 않는다. 사다리 단계(`-Stage 1`\~`8`)와 빼 보기 스위치는 [commands.md](commands.md) "사다리 단계와 스위치(v2 W10)"에 있다.
+미니언 100개로 1280x720 창을 20초 띄운다. 창이 닫힌 뒤 로그의 `lab_config`·`lab_assets`·`lab_summary` 줄과 `EXIT: 0`이 찍히면 에셋과 빌드가 맞다. 이 실행은 Development 빌드라 수치를 비교에 쓰지 않는다. 사다리 단계(`-Stage 1`\~`8`)와 기법별 기여 스위치는 [commands.md](commands.md) "사다리 단계와 스위치(v2 W10)"에 있다.
 
 ## 6. 패키징과 측정
 

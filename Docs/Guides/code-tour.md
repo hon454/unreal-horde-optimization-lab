@@ -1,6 +1,6 @@
 # 코드 투어: 최종 구성의 한 프레임
 
-이 문서는 최종 구성(사다리 단계 8, 실행 인자 `-LabStage=8`, 기본값)으로 실행했을 때 한 프레임에 무엇이 어떤 순서로 도는지를 코드에서 읽어 정리한다. 이 저장소의 코드를 처음 여는 UE 개발자를 위한 안내서다. 여덟 단계가 한 빌드에 들어 있고, 단계는 `-LabStage=1`\~`8` 하나로 고른다. 빼 보기와 하위 실험은 스위치 인자로 기법 하나를 바꾼다(단계별 스위치 표는 [commands.md](commands.md) "사다리 단계와 스위치(v2 W10)"). 순서는 프로세서가 선언한 그룹과 `ExecuteAfter`·`ExecuteBefore`에서 읽었다. 선언만으로 순서가 정해지지 않는 곳은 "정해져 있지 않다"고 적었다. 엔진 동작의 근거(파일과 줄)는 [engine-notes.md](../Reference/engine-notes.md)에 있다.
+이 문서는 최종 구성(사다리 단계 8, 실행 인자 `-LabStage=8`, 기본값)으로 실행했을 때 한 프레임에 무엇이 어떤 순서로 도는지를 코드에서 읽어 정리한다. 이 저장소의 코드를 처음 여는 UE 개발자를 위한 안내서다. 여덟 단계가 한 빌드에 들어 있고, 단계는 `-LabStage=1`\~`8` 하나로 고른다. 기법별 기여 조건(최종 구성에서 기법 하나를 끈 조건)과 하위 실험은 스위치 인자로 기법 하나를 끄거나 바꾼다(단계별 스위치 표는 [commands.md](commands.md) "사다리 단계와 스위치(v2 W10)"). 순서는 프로세서가 선언한 그룹과 `ExecuteAfter`·`ExecuteBefore`에서 읽었다. 선언만으로 순서가 정해지지 않는 곳은 "정해져 있지 않다"고 적었다. 엔진 동작의 근거(파일과 줄)는 [engine-notes.md](../Reference/engine-notes.md)에 있다.
 
 ## 요약과 읽는 순서
 
@@ -60,7 +60,7 @@ Avoidance 그룹과 `SyncWorldToMass` 그룹에는 최종 구성의 엔티티를
 
 - **접근.** `ULabApproachProcessor`가 걷는 엔티티마다 `FMassMoveTargetFragment`를 오브의 지금 위치 쪽으로 채운다. 실제 이동은 엔진의 `UMassSteerToMoveTargetProcessor`(조향), `UMassApplyMovementProcessor`(이동)가 한다. 단계 2부터 같다. 회전(방향 보간)은 단계 2에서 엔진 `UMassSmoothOrientationProcessor`가 하고, 단계 3부터 `ULabSmoothOrientationProcessor`([LabSmoothOrientation.h](../../Source/HordeOptLab/LabSmoothOrientation.h))가 한다. 엔진과 같은 쿼리와 식을 청크 병렬(`ParallelForEachEntityChunk`)로 돌려 결과가 비트 단위로 같다(`-LabSmoothOrient=0`이 엔진 프로세서로 되돌린다). 단계 5부터 접근은 청크 필터(`ShouldTickChunkThisFrame`)를 걸어 80\~200m 청크는 0.5초 간격으로만 돈다.
 - **200m 밖.** 카메라에서 200m 밖은 Simulation LOD가 Off라 엔진 이동·조향이 돌지 않는다. `ULabOffMoveProcessor`가 틱 간격(1초)이 온 청크만 마지막으로 옮긴 뒤 흐른 시간 × 걷는 속도만큼 오브의 지금 위치 쪽으로 곧게 옮긴다. Off에 들어오는 순간은 관찰자 `ULabOffMoveEnterObserver`가 지연 명령 플러시 때 받아 마지막 이동 시각을 맞춘다. 단계 5에서 들어왔다. 엔진이 Off 엔티티를 이동 목표로 순간 이동시키는 `UMassOffLODNavigationProcessor`는 이 단계부터 등록하지 않는다([HordeOptLab.cpp](../../Source/HordeOptLab/HordeOptLab.cpp)).
-- **겹침 방지.** `ULabSeparationProcessor`가 그 프레임에 옮겨진 위치에서 균일 격자로 이웃을 찾아, 몸통 반지름(소형 40, 대형 94)의 합보다 가까운 쌍을 직접 떼어 놓는다([LabSeparation.h](../../Source/HordeOptLab/LabSeparation.h)). 모으기와 쓰기는 한 스레드, 풀이는 Jacobi 2회다. 반복마다 격자를 다시 만들고(한 스레드) 이웃 계산을 ParallelFor로 나눈다. 사망 중인 개체는 밀지도 밀리지도 않는다. 단계 3(직접 짠 로직)에서 들어왔다. 단계 2는 엔진 회피(`UMassObstacleAvoidanceTrait`)를 쓰고, 단계 1은 액터 캡슐끼리 막는다.
+- **겹침 방지.** `ULabSeparationProcessor`가 그 프레임에 옮겨진 위치에서 균일 격자로 이웃을 찾아, 몸통 반지름(소형 40, 대형 94)의 합보다 가까운 쌍을 직접 떼어 놓는다([LabSeparation.h](../../Source/HordeOptLab/LabSeparation.h)). 모으기와 쓰기는 한 스레드, 풀이는 Jacobi 2회다. 반복마다 격자를 다시 만들고(한 스레드) 이웃 계산을 ParallelFor로 나눈다. 사망 중인 개체는 밀지도 밀리지도 않는다. 단계 3(직접 짠 분리)에서 들어왔다. 단계 2는 엔진 회피(`UMassObstacleAvoidanceTrait`)를 쓰고, 단계 1은 액터 캡슐끼리 막는다.
 
 ### 거리 판정과 표현 전환
 
@@ -73,7 +73,7 @@ Avoidance 그룹과 `SyncWorldToMass` 그룹에는 최종 구성의 엔티티를
 
 - **액터 클래스.** High 밴드의 엔티티는 `ALabMinionMassActorBudget`(대형은 `ALabMinionMassActorBudgetLarge`)이 된다. 메시가 `USkeletalMeshComponentBudgeted`라 Animation Budget Allocator가 애니 갱신을 예산 안에서 건너뛴다([LabMinion.h](../../Source/HordeOptLab/LabMinion.h)). 하이드레이션은 단계 2부터 있고, 예산 액터는 단계 4에서 들어왔다. 단계 2·3은 예산 없는 `ALabMinionMassActor`다.
 - **캡슐.** 액터 캡슐은 QueryOnly이고 저격 트레이스 채널 `LabSnipe`만 막는다. 오브가 저격 틱마다 액터 구간의 대상에 캡슐 라인 트레이스를 쏴 맞는지 센다(`ALabOrb::TraceSnipeCapsules`). 단계 2부터 켜진다(`-LabActorCollision=0`이 끈다).
-- **전환 대책.** `ULabActorManagement`([LabActorSyncProcessor.h](../../Source/HordeOptLab/LabActorSyncProcessor.h))가 액터의 포즈가 준비될 때까지 엔진에 "준비 안 됨"을 알려 그동안 인스턴스를 계속 그리게 하고, 액터를 옮길 때 캡슐 반높이를 더하며, 액터가 붙을 때 `FLabActorTag`를 지연 명령으로 붙인다. 대책 다섯은 단계 4에서 들어왔다(`-LabHydrateFixMask=0`이 끈다). 태그 붙이기는 단계 2부터 늘 한다.
+- **전환 대책.** `ULabActorManagement`([LabActorSyncProcessor.h](../../Source/HordeOptLab/LabActorSyncProcessor.h))가 액터의 포즈가 준비될 때까지 엔진에 "준비 안 됨"을 알려 그동안 인스턴스를 계속 그리게 하고, 액터를 옮길 때 캡슐 반높이를 더하며, 액터가 붙을 때 `FLabActorTag`를 지연 명령으로 붙인다. 대책은 다섯이다: AnimBP 시작 시각 맞추기, 포즈가 준비될 때까지 인스턴스를 그리고 되돌아갈 때 액터를 한 프레임 더 남기기, 그동안 숨기는 액터를 패스에서만 빼기, 캡슐 반높이 더하기, 풀에 넣을 때 사망 진홍색 지우기(`EHydrateFix`, [LabConfig.h](../../Source/HordeOptLab/LabConfig.h)). 다섯은 단계 4에서 들어왔다(`-LabHydrateFixMask=0`이 끈다). 태그 붙이기는 다섯에 들지 않고 단계 2부터 늘 한다.
 - **동기화.** `ULabActorSyncProcessor`(게임 스레드)가 `FLabActorTag`가 있는 엔티티만 돌며 액터 위치, AnimBP 상태와 시작 시각, 사망 색(커스텀 프리미티브 데이터), 화면 크기 중요도(`SetComponentSignificance`)를 넣는다. 엔진은 액터를 붙이는 순간에만 위치를 맞추기 때문이다. 단계 2부터 돈다.
 
 ### ISKM 갱신
@@ -143,12 +143,12 @@ Avoidance 그룹과 `SyncWorldToMass` 그룹에는 최종 구성의 엔티티를
 | --- | --- | --- |
 | `ALabMinion`, `ALabOrb::Tick`의 액터 분기, `ALabOrb::Snipe`, `ALabCrowdSpawner::SampleActorOverlaps` | 단계 1 액터 군중 | 만들지 않는다. Mass가 켜져 있으면 오브는 `TickMass`로 간다 |
 | `UMassUpdateISMProcessor`(엔진) | 단계 2·3 정지 메시 인스턴스 | 등록하지 않는다 |
-| `ULabVatISMProcessor`([LabVatProcessor.cpp](../../Source/HordeOptLab/LabVatProcessor.cpp)) | 단계 4·5 VAT, 빼 보기 `-LabIskm=0` | 등록하지 않는다 |
-| `UMassOffLODNavigationProcessor`(엔진) | 단계 4까지, 빼 보기 `-LabSimLod=0` | 등록하지 않는다 |
+| `ULabVatISMProcessor`([LabVatProcessor.cpp](../../Source/HordeOptLab/LabVatProcessor.cpp)) | 단계 4·5 VAT, 기법별 기여 `-LabIskm=0`(ISKM을 끈 조건) | 등록하지 않는다 |
+| `UMassOffLODNavigationProcessor`(엔진) | 단계 4까지, 기법별 기여 `-LabSimLod=0`(Simulation LOD를 끈 조건) | 등록하지 않는다 |
 | `UMassSmoothOrientationProcessor`(엔진) | 단계 2, `-LabSmoothOrient=0`, 개발 검사 `-LabSmoothOrientCheck` | 등록하지 않는다. `ULabSmoothOrientationProcessor`가 같은 일을 한다 |
 | `UMassObstacleAvoidanceTrait`, `UMassNavigationObstacleTrait` | 단계 2(엔진 회피), 하위 실험 `-LabAvoid=1` | 붙이지 않는다 |
-| `ALabMinionMassActor`, `ALabMinionMassActorLarge` | 단계 2·3 예산 없는 액터, 빼 보기 `-LabScreenSigBudget=0` | 만들지 않는다 |
+| `ALabMinionMassActor`, `ALabMinionMassActorLarge` | 단계 2·3 예산 없는 액터, 기법별 기여 `-LabScreenSigBudget=0`(액터 애니메이션 예산을 끈 조건) | 만들지 않는다 |
 | `-LabBandFloor`, `LabLogScreenEvent`, `-LabSimLodLog`, `-LabOrbDiag`, `-LabFlashDiag`, `-LabDiag*` 등 | 개발 진단 | Test 빌드에는 코드가 없다(`#if !UE_BUILD_TEST`) |
 | `UMassConsumeInstancedSkinnedMeshAnimationProcessor`(엔진) | 엔진 ISKM 경로 | 요구하는 `FMassRepresentationAnimationFragment`가 엔티티에 없다 |
 
-v2 W10에서 사다리와 빼 보기에 없는 옛 변형(`-LabVariant`)과 그 코드를 지웠다. 목록은 [Worklog/V2.md](../Worklog/V2.md) "W10"의 "지운 것"에 있다. 지운 코드는 태그 `v1`과 커밋 130717f에 남아 있다. 단계를 실행 모드로 두는 이유는 [ADR-0004](../Decisions/0004-stages-as-run-modes.md)에 있다.
+v2 W10에서 사다리와 기법별 기여에 없는 옛 변형(`-LabVariant`)과 그 코드를 지웠다. 목록은 [Worklog/V2.md](../Worklog/V2.md) "W10"의 "지운 것"에 있다. 지운 코드는 태그 `v1`과 커밋 130717f에 남아 있다. 단계를 실행 모드로 두는 이유는 [ADR-0004](../Decisions/0004-stages-as-run-modes.md)에 있다.

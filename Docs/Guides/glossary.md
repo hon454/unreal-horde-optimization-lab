@@ -59,7 +59,7 @@
 | 방향 보간 병렬 사본 | 엔진 `UMassSmoothOrientationProcessor`와 같은 계산을 하는 Lab 프로세서(`ULabSmoothOrientationProcessor`). 단계 3부터 쓴다 | 한 문장([code-tour.md](code-tour.md) 선언 순서 표) |
 | 액터 상한, 전환 거리 | 하이드레이션 액터 수의 상한 1,000과 액터로 바뀌는 카메라 거리 35m. 단계 2\~8이 같다 | 한 문장([ADR-0021](../Decisions/0021-unified-actor-cap-and-hydrate-distance.md)) |
 | 최소 유지 시간 | 한 번 바뀐 개체가 2초 안에 바로 전의 표현으로 되돌아가지 않게 붙잡는다. 단계 4부터 | 한 문장([code-tour.md](code-tour.md) 68행) |
-| 전환 대책 | 액터와 인스턴스 사이를 오갈 때 증상을 막는 다섯 가지(`-LabHydrateFixMask`). 다섯의 목록은 이 문서에서 확인하지 못함 | 한 문장([commands.md](commands.md) 87행) |
+| 전환 대책 | 액터와 인스턴스 사이를 오갈 때 증상을 막는 다섯 가지(`-LabHydrateFixMask`, 단계 4부터 전부 켠다. 기본 31, 끄면 0). 비트 순서로 다섯은 (1) AnimBP 시작 시각 맞추기, (2) 액터의 포즈가 준비될 때까지 인스턴스를 그리고 되돌아갈 때 액터를 한 프레임 더 남기기, (3) 그동안 액터를 숨길 때 액터 숨김 대신 메인·깊이 패스·그림자에서만 빼기, (4) 엔진 이동(`TeleportActor`)에 캡슐 반높이 더하기, (5) 풀에 넣을 때 사망 진홍색 지우기다. 액터에 `FLabActorTag`를 붙이는 일은 이 다섯에 들지 않고 단계 2부터 늘 한다 | 한 문장([commands.md](commands.md) 87행, 다섯의 근거는 `Source/HordeOptLab/LabConfig.h` 446\~453행 `EHydrateFix`와 `LabConfig.cpp` 51행, 쓰는 곳은 `LabActorSyncProcessor.cpp`, `LabMinion.cpp`, `LabCrowdSubsystem.cpp` 128\~129행. 2026-11-17 소스 확인) |
 
 ### 1.4 기법과 표현
 
@@ -72,7 +72,7 @@
 | 액터 애니메이션 예산 | 하이드레이션 액터의 메시를 `USkeletalMeshComponentBudgeted`로 바꾸고 Animation Budget Allocator의 예산을 4ms로 둔 것. 단계 4부터. commands.md는 "액터 애니 예산"이라고 쓴다 | 한 일은 바꾼 것으로 쓴다([AGENTS.md](../../AGENTS.md) "문서와 글", [ADR-0016](../Decisions/0016-animation-budget-value.md), [commands.md](commands.md) 73, 200행) |
 | Simulation LOD | 먼 개체의 로직을 드물게 돌리고 200m 밖은 자체 이동으로 대신한다. 단계 5부터 | 한 문장. 틱 간격이 아니라 프로세서를 건너뛴다([code-tour.md](code-tour.md) 62, 67행) |
 | 엔티티 풀 | 죽은 엔티티를 파괴하지 않고 종류별 풀에 넣었다가 재생성 때 다시 쓴다. 움직이는 ISKM 엔티티를 파괴하면 트랙이 남는 엔진 문제의 우회다. 하이드레이션 액터 풀(engine-notes 4절)과 다르다. 단계 5부터 | 한 문장. 설명, 시각 자료, 문제가 있는 엔진 코드를 함께 싣는 것을 고려한다(사용자 요청 2026-11-17, [V2-w14-plan.md](../Worklog/V2-w14-plan.md) 결정 2, [code-tour.md](code-tour.md) 57행, [engine-notes.md](../Reference/engine-notes.md) 3절) |
-| 고정 바운드 | 두 가지다. ISKM 고정 바운드(`-LabFixedBounds`, 단계 6부터)와 액터 메시 고정 바운드(`-LabFixedSkelBounds`, 단계 8). 글에서는 앞에 어느 쪽인지 붙인다 | 한 문장. 이 구분은 commands.md 표기에서 읽은 것이고 코드는 읽지 않았다([commands.md](commands.md) 59, 67, 92, 101행, [measurement.md](measurement.md) 188행) |
+| 고정 바운드 | 두 가지다. ISKM 고정 바운드(`-LabFixedBounds`, 단계 6부터)는 ISKM 컴포넌트에 고정 상자를 `SetPrimitiveBoundsOverride`로 넣는다. 상자는 카메라를 따라 옮겨진다(`-LabBoundsStepM`). 액터 메시 고정 바운드(`-LabFixedSkelBounds`, 단계 8)는 하이드레이션 액터 메시의 `bComponentUseFixedSkelBounds`를 켜서 애니가 갱신될 때마다 피직스 에셋 바디로 바운드를 다시 셈하지 않고 메시 에셋의 고정 바운드를 쓰게 하고, `BoundsScale` 1.1을 곱한다. 글에서는 앞에 어느 쪽인지 붙인다 | 한 문장([commands.md](commands.md) 59, 67, 92, 101행, [measurement.md](measurement.md) 188행. 구분의 근거는 `LabCrowdSubsystem.cpp` 458\~473행 `ApplyFixedIskmBounds`, `LabMinion.cpp` 270\~277행, `LabConfig.h` 384\~392행. 2026-11-17 소스 확인) |
 | 배경 무리 | 카메라에서 200m 밖의 개체를 Niagara 메시 입자로 그리는 것(단계 7). 200\~500m는 그려지지 않는 실제 엔티티의 자리에 입자가 걷고, 500m 밖은 맵 밖 무리의 기록을 그린다 | 한 문장([code-tour.md](code-tour.md) 87행, [plan.md](../plan.md) 267행). 호드 총수에 입자를 넣는지는 확인하지 못함 |
 
 ### 1.5 묶음과 조건
@@ -161,7 +161,7 @@
 
 ## 5. 문서의 말과 식별자의 대응
 
-원본은 [full-conditions.json](../../Scripts/full-conditions.json)이다. 뜻은 조건 표, [v2-plan.md](../v2-plan.md), [measurement.md](measurement.md), [commands.md](commands.md), [code-tour.md](code-tour.md)에서 읽었다. `Source/`의 코드는 읽지 않았다. 확인하지 못한 것은 그렇게 적었다.
+원본은 [full-conditions.json](../../Scripts/full-conditions.json)이다. 뜻은 조건 표, [v2-plan.md](../v2-plan.md), [measurement.md](measurement.md), [commands.md](commands.md), [code-tour.md](code-tour.md)에서 읽었다. `Source/`의 코드는 전환 대책, 고정 바운드, `-LabFarCull`만 읽었다(2026-11-17). 확인하지 못한 것은 그렇게 적었다.
 
 ### 5.1 단계(`kind` `step`)
 
@@ -194,7 +194,7 @@
 | `a8sim` | Simulation LOD를 끈 조건. 200m 밖 자체 이동도 함께 빠진다 | `-LabSimLod=0` |
 | `a8iskm` | ISKM을 끈 조건. VAT 인스턴스로 되돌린다. ISKM 고정 바운드, 트랙 예약, 장면 규칙 `-LabFarHitIskm`도 함께 빠진다 | `-LabIskm=0` |
 | `a8bnd` | ISKM 고정 바운드를 끈 조건 | `-LabFixedBounds=0` |
-| `a8far` | 200m 밖을 그리지 않는 일을 끈 조건. 끄면 무엇이 대신 그려지는지는 확인하지 못함 | `-LabFarCull=0` |
+| `a8far` | 200m 밖을 그리지 않는 일을 끈 조건. 표현 LOD의 Off 거리가 200m에서 1,000m(맵 반경의 두 배)로 옮겨져 맵 안 개체(카메라에서 최대 515m)가 Off에 들지 않는다. 그래서 200m 밖 엔티티가 ISKM(Low, 그림자 끔)으로 맵 끝까지 그려진다. 입자는 켠 채지만 맵 안에는 표현 None 엔티티가 없어 입자는 맵 밖 무리의 기록(500\~1,000m)만 그린다. Simulation LOD의 200m 경계는 그대로다(`LabConfig.h` 354, 410\~418행, `LabCrowdSubsystem.cpp` 135행, `LabCrowdFxProcessor.cpp` 221행. 2026-11-17 소스 확인) | `-LabFarCull=0` |
 | `a8fx` | 배경 무리를 끈 조건. 장면 규칙 `-LabFarHitIskm`과 맵 밖 기록의 그리기도 함께 빠진다 | `-LabCrowdFx=0` |
 | `a8sep` | 겹침 방지(분리 프로세서)를 끈 조건 | `-LabSeparate=0` |
 | `a8cap` | 액터 캡슐을 끈 조건 | `-LabActorCollision=0` |

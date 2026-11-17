@@ -10,8 +10,8 @@ STATUS.md "명령"에는 매번 쓰는 것만 둔다. 여기에는 스크립트 
 | --- | --- | --- |
 | `build.ps1` | `HordeOptLabEditor Win64 Development` 빌드 | `UnrealEditor` 또는 `HordeOptLab` 프로세스가 떠 있으면 |
 | `run-dev.ps1 -N -Preset -Seed [-Stage 1~8] [-Tag x] [-Extra "..."] [-Small]` | Development 에디터 빌드를 `-game`으로 실행. 개발·동작 확인·오버레이 스크린샷용. 수치는 쓰지 않는다. `-Stage`는 사다리 단계(기본 8), `-Tag`는 로그 이름 `LabDev-s<단계>-<Tag>-N<N>-<P>.log`에 붙는다 | |
-| `run-dev-stages.ps1 [-Stages 1,2,…] [-Ablations]` | 사다리 단계마다 `run-dev.ps1 -Small`을 돌리고 종료 코드를 모은다. `-Ablations`는 아래 빼 보기 표의 스위치를 단계 8에 하나씩 더한다 | |
-| `run-spike.ps1 -Batch <이름> -RadiusM 57.3 -HeightM 6 -Speeds <m/s,…> -Configs <구성,…> [-Runs] [-ConfigNs s1=1000] [-ConfigRuns s8=3] [-DryRun]` | 작은 Test 패키지 묶음 러너(v2). 구성은 `s1`\~`s8`(단계), `a8*`(빼 보기), `s8av`(엔진 회피 더하기), `s<n>ser`(직렬 트레이스). 라벨 `<묶음>-V<속도 번호>-<구성>-N<N>-P1-r<i>`. 메타데이터를 구성의 기대값과 대조한다(`spike-check.py`) | 다른 실행이나 Chrome이 떠 있으면. `progress.log`가 이미 있으면 |
+| `run-dev-stages.ps1 [-Stages 1,2,…] [-Ablations]` | 사다리 단계마다 `run-dev.ps1 -Small`을 돌리고 종료 코드를 모은다. `-Ablations`는 아래 기법별 기여 표의 스위치를 단계 8에 하나씩 더한다 | |
+| `run-spike.ps1 -Batch <이름> -RadiusM 57.3 -HeightM 6 -Speeds <m/s,…> -Configs <구성,…> [-Runs] [-ConfigNs s1=1000] [-ConfigRuns s8=3] [-DryRun]` | 작은 Test 패키지 묶음 러너(v2). 구성은 `s1`\~`s8`(단계), `a8*`(기법별 기여), `s8av`(엔진 회피 더하기), `s<n>ser`(직렬 트레이스). 라벨 `<묶음>-V<속도 번호>-<구성>-N<N>-P1-r<i>`. 메타데이터를 구성의 기대값과 대조한다(`spike-check.py`) | 다른 실행이나 Chrome이 떠 있으면. `progress.log`가 이미 있으면 |
 | `package.ps1 [-Config Test]` | `RunUAT BuildCookRun` → `Packaged/<Config>/`. 끝나면 소요 시간을 출력 | 다른 실행이 떠 있으면 |
 | `run-bench.ps1 -Milestone <M> -N <수> -Preset <P1\|P2> [-Variant] [-Seed] [-Runs 3] [-Tag x] [-Trace]` | Test 패키지 실행 파일을 `-LabBench` 인자로 띄우고 종료를 기다린다. 라벨은 `<Milestone>-<Variant>-N<수>-<Preset><Tag>`로 만든다. 실행마다 `Saved/Profiling/CSV/<라벨>-rN.csv`를 확인하고, 없으면 실패 | 같은 라벨의 CSV가 있으면. 다른 실행이 떠 있으면 |
 | `summarize.py --milestone M<N>` | `Saved/Profiling/CSV/`의 라벨을 읽어 `Measurements/M<N>/runs.csv`에 행을 더하고 `summary.csv`를 다시 쓴다 | |
@@ -32,8 +32,8 @@ STATUS.md "명령"에는 매번 쓰는 것만 둔다. 여기에는 스크립트 
 | --- | --- | --- |
 | 1 | 액터 기준선: 모든 개체가 `ALabMinion`(캡슐, `CharacterMovement`, 캡슐끼리 막기) | `M0 full` |
 | 2 | Mass, 엔진 기본 경로: 엔진 이동·회피·표현, 가까운 개체는 하이드레이션 액터(캡슐 Trace, 화면 안 35m, 상한 1,000. 단계 8까지 같다, ADR-0021), 나머지는 엔진 `UMassUpdateISMProcessor`의 정지 메시 인스턴스, 200m 밖 그리지 않음 | 없음(새 조합) |
-| 3 | 직접 짠 로직: 엔진 회피 대신 `ULabSeparationProcessor`, 엔진 방향 보간 대신 같은 결과의 병렬 사본 `ULabSmoothOrientationProcessor` | `M3` + 정지 메시(새 조합) |
-| 4 | 애니메이션 표현: VAT 인스턴스, 액터 애니 예산(화면 크기), 전환 대책 다섯, 최소 유지 시간 2초 | `M3 mass` + 예산 |
+| 3 | 직접 짠 분리: 엔진 회피 대신 `ULabSeparationProcessor`, 엔진 방향 보간 대신 같은 결과의 병렬 사본 `ULabSmoothOrientationProcessor` | `M3` + 정지 메시(새 조합) |
+| 4 | 애니메이션 표현: VAT 인스턴스, 액터 애니메이션 예산(화면 크기), 전환 대책 다섯, 최소 유지 시간 2초 | `M3 mass` + 예산 |
 | 5 | Simulation LOD(80/200m, 200m 밖 자체 이동) + 엔티티 풀 | `M5 m4offpool` |
 | 6 | ISKM(카메라를 따라가는 고정 바운드, 트랙 예약) | `M5 m5bounds` |
 | 7 | 배경 무리(엔티티 구동 입자, 맵 밖 독립 입자) | `M5 q2crowd` |
@@ -66,7 +66,7 @@ STATUS.md "명령"에는 매번 쓰는 것만 둔다. 여기에는 스크립트 
 | `LabFarShadow`(`-LabFarShadow`) | - | 1 | 1 | 1 | 1 | 1 | 1 | 0 |
 | `LabFixedSkelBounds`(`-LabFixedSkelBounds`, v2 W11) | - | 0 | 0 | 0 | 0 | 0 | 0 | 1 |
 | `LabQueryIsolate`(`-LabQueryIsolate`, v2 W11) | 0 | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-| `LabActorOpt`(`-LabActorOpt`, 단계 1의 URO·애니 예산) | 0 | - | - | - | - | - | - | - |
+| `LabActorOpt`(`-LabActorOpt`, 단계 1의 URO와 Budget Allocator) | 0 | - | - | - | - | - | - | - |
 
 - `-LabFixedSkelBounds=1`은 하이드레이션 액터 메시에 `bComponentUseFixedSkelBounds`를 켜고 `BoundsScale` 1.1을 곱한다(`FLabQuality::FixedSkelBoundsScale`). `-LabQueryIsolate=1`은 게임 모듈 시작 때 `p.Chaos.AccelerationStructureIsolateQueryOnlyObjects`를 1로 둔다. 메타데이터 `LabQueryIsolate`는 그 CVar의 실제 값이다. 근거는 [Worklog/V2.md](../Worklog/V2.md) "W11"과 [engine-notes.md](../Reference/engine-notes.md) 44절이다.
 - `-LabSmoothOrient=1`은 엔진 `UMassSmoothOrientationProcessor`를 끄고 같은 식을 청크 병렬로 도는 `ULabSmoothOrientationProcessor`를 켠다. 결과는 엔진과 비트 단위로 같다. 개발 빌드의 `-LabSmoothOrientCheck`는 엔진 프로세서를 두고 사본과 견준다(메타데이터 `check`, 로그 `lab_smoothori_check`). 근거는 [Worklog/V2.md](../Worklog/V2.md) "방향 보간 병렬 사본"과 "방향 보간 병렬 사본: 사다리 배선"이다.
@@ -74,16 +74,16 @@ STATUS.md "명령"에는 매번 쓰는 것만 둔다. 여기에는 스크립트 
 
 - 메타데이터 `LabStage`와 `LabLadder`는 단계 번호다. 인자로 단계 기본값과 다르게 준 것은 `LabOverrides`에 `|`로 이어 남는다.
 - 0/1 스위치(`-LabAvoid`, `-LabSeparate`, `-LabScreenSigBudget`, `-LabEntityPool`, `-LabCrowdFx`, `-LabFxOrbFollow`, `-LabIskmTrackReserve`, `-LabFarShadow`, `-LabFixedSkelBounds`, `-LabQueryIsolate`, `-LabSmoothOrient`, `-LabActorOpt`)는 두 방향 모두 받는다. `-LabHydrate`, `-LabSimLod`, `-LabIskm`, `-LabFixedBounds`, `-LabFarCull`은 0일 때만 뜻이 있다(끄기 전용).
-- 정지 조건은 `-LabOrbOrbitSpeed=0`이다. 단계 8과 빼 보기에만 붙인다([v2-plan.md](../v2-plan.md) "사다리").
+- 정지 조건은 `-LabOrbOrbitSpeed=0`이다. 단계 8과 기법별 기여 조건에만 붙인다([v2-plan.md](../v2-plan.md) "사다리").
 
-### 빼 보기(v2 W10)
+### 기법별 기여(v2 W10)
 
-단계 8에 스위치 하나를 더한다. 총괄 묶음의 조건 표는 위 열일곱 행 모두(이동 조건. 정지 조건은 `a8fxf`와 `a8stp`를 뺀 열다섯 행)와 하위 실험 `s8av`(분리를 엔진 회피로 바꾼 것)다. 하위 실험 `s8iso`는 `-Only extra`로만 돈다. 근거는 [Worklog/V2.md](../Worklog/V2.md) "W12"에 있다.
+최종 구성(단계 8)에서 기법 하나를 끄고 같은 조건으로 잰다. 조건 표의 이름은 `ablation`이다. 단계 8에 스위치 하나를 더한다. 총괄 묶음의 조건 표는 위 열일곱 행 모두(이동 조건. 정지 조건은 `a8fxf`와 `a8stp`를 뺀 열다섯 행)와 하위 실험 `s8av`(분리를 엔진 회피로 바꾼 것)다. 하위 실험 `s8iso`는 `-Only extra`로만 돈다. 근거는 [Worklog/V2.md](../Worklog/V2.md) "W12"에 있다.
 
-| 구성(`run-spike.ps1`) | 빼는 것 | 인자 | 바뀌는 메타데이터 |
+| 구성(`run-spike.ps1`) | 끄는 것 | 인자 | 바뀌는 메타데이터 |
 | --- | --- | --- | --- |
 | `a8hyd` | 하이드레이션 액터 → 전 구간 ISKM | `-LabHydrate=0` | `LabTechHydrate` 0, `LabActorCollision` `-` |
-| `a8bud` | 액터 애니 예산 | `-LabScreenSigBudget=0` | `LabTechAnimBudget` 0, `LabBudget` 0 |
+| `a8bud` | 액터 애니메이션 예산 | `-LabScreenSigBudget=0` | `LabTechAnimBudget` 0, `LabBudget` 0 |
 | `a8fix` | 전환 대책 다섯 | `-LabHydrateFixMask=0` | `LabTechHydrateFix` 0 |
 | `a8hold` | 최소 유지 시간 | `-LabRepHold=0` | `LabRepHold` 0 |
 | `a8pool` | 엔티티 풀 | `-LabEntityPool=0` | `LabTechPool` 0 |
@@ -100,7 +100,7 @@ STATUS.md "명령"에는 매번 쓰는 것만 둔다. 여기에는 스크립트 
 | `a8shd` | 80m 밖 그림자 끔 → 켬 | `-LabFarShadow=1` | `LabFarShadow` 1 |
 | `a8fsb` | 액터 메시 고정 바운드 → 피직스 에셋 바운드(v2 W11) | `-LabFixedSkelBounds=0` | `LabFixedSkelBounds` 0 |
 
-- 하위 실험 `s8iso`(단계 8 + `-LabQueryIsolate=1`, v2 W11)와 `s8av`(엔진 회피 더하기)가 `run-spike.ps1`과 조건 표에 있다. `run-dev-stages.ps1 -Ablations`는 빼 보기 열일곱 개와 두 하위 실험, 정지 조건을 돈다. `run-spike.ps1`의 `s8sooff`(단계 8 + `-LabSmoothOrient=0`)는 방향 보간 사본을 끈 확인용 구성이고 조건 표에는 없다.
+- 하위 실험 `s8iso`(단계 8 + `-LabQueryIsolate=1`, v2 W11)와 `s8av`(엔진 회피 더하기)가 `run-spike.ps1`과 조건 표에 있다. `run-dev-stages.ps1 -Ablations`는 기법별 기여 열일곱 개와 두 하위 실험, 정지 조건을 돈다. `run-spike.ps1`의 `s8sooff`(단계 8 + `-LabSmoothOrient=0`)는 방향 보간 사본을 끈 확인용 구성이고 조건 표에는 없다.
 - v2 W11부터 `run-spike.ps1`은 `s8` 뒤에 조각을 이어 붙인 구성 이름을 받는다: `fsb`·`fsb0`(고정 바운드 켬·끔), `iso`·`iso0`(칸 나누기), `c<개수>`(`-LabActorCap`), `h<미터>`(`-LabHydrateM`), `shd0`·`shd1`(`-LabFarShadow`). 예: `s8h45`, `s8c750`. 조각마다 기대 메타데이터 하나를 대조한다.
 
 ```bash
@@ -120,17 +120,17 @@ powershell -ExecutionPolicy Bypass -File Scripts/run-spike.ps1 -Batch <묶음> -
 5. `csvprofile stop`. 프레임 수, N, 전환 수 등 요약을 로그 `lab_summary`에 남긴다. 조건이 깨졌으면(N 불일치 등) 종료 코드 1.
 6. `-Trace`면 2\~5 동안 `-trace=cpu,gpu,frame,counters,mass`로 트레이스를 남긴다. 트레이스 실행의 수치는 비교에 쓰지 않는다(이벤트 기록 비용).
 
-## 빼 보기 스위치(Q3)
+## 기법별 기여 스위치(Q3)
 
 이 절과 아래 "전환 점수", "근거리 품질 인자", "총괄 묶음 조건과 HUD"는 `v1`의 기록이다. 변형 이름(`q4final` 등)은 v2 W10에서 지웠다. 지금의 인자는 위 "사다리 단계와 스위치(v2 W10)"에 있다. 옛 명령의 `-Stage M5 -Variant q4final`은 `-Stage 8`, `-Variant q2crowd`는 `-Stage 7`로 바꿔 읽는다.
 
-빼 보기 표([plan.md](../plan.md) "품질 계획")의 행은 "최종 구성 변형 + 인자 하나"다. 최종 구성은 Q4부터 `q4final`(`-LabStage=M5`, `q2crowd` + 액터 상한 1,000·전환 거리 40m·80m 밖 그림자 끔, 아래 "근거리 품질 인자(Q4)")이고 아홉 행 모두 `q4final` 위에서 대조를 통과했다(Worklog/Q4.md, 그때 전환 거리는 79m). Q4b에서 열째 행 farshadow를 더했다(조건 표 `A8-farshadow`). 새 인자 다섯(`-LabHydrate`·`-LabSimLod`·`-LabIskm`·`-LabFixedBounds`·`-LabFarCull`)은 0일 때만 뜻이 있고(끄기 전용), 나머지 넷은 기존 인자다. 경위와 설계 선택은 [Worklog/Q3.md](../Worklog/Q3.md).
+기법별 기여 표([plan.md](../plan.md) "품질 계획")의 행은 "최종 구성 변형 + 인자 하나"다. 최종 구성은 Q4부터 `q4final`(`-LabStage=M5`, `q2crowd` + 액터 상한 1,000·전환 거리 40m·80m 밖 그림자 끔, 아래 "근거리 품질 인자(Q4)")이고 아홉 행 모두 `q4final` 위에서 대조를 통과했다(Worklog/Q4.md, 그때 전환 거리는 79m). Q4b에서 열째 행 farshadow를 더했다(조건 표 `A8-farshadow`). 새 인자 다섯(`-LabHydrate`·`-LabSimLod`·`-LabIskm`·`-LabFixedBounds`·`-LabFarCull`)은 0일 때만 뜻이 있고(끄기 전용), 나머지 넷은 기존 인자다. 경위와 설계 선택은 [Worklog/Q3.md](../Worklog/Q3.md).
 
 | 행 | 빼는 것 → 대신 | 인자 | 메타데이터에서 0이 되는 키 |
 | --- | --- | --- | --- |
 | final | 없음 | 없음 | 없음(`LabTech*` 아홉 모두 1) |
 | hydrate | 하이드레이션 → 전 구간 ISKM(액터 0) | `-LabHydrate=0` | `LabTechHydrate` |
-| budget | 애니 예산 → 예산 없는 액터(`USkeletalMeshComponent`, 매 프레임 애니) | `-LabScreenSigBudget=0` | `LabTechAnimBudget`, `LabBudget` |
+| budget | 액터 애니메이션 예산 → 예산 없는 액터(`USkeletalMeshComponent`, 매 프레임 애니) | `-LabScreenSigBudget=0` | `LabTechAnimBudget`, `LabBudget` |
 | fix | 전환 대책 다섯 → 모두 끔 | `-LabHydrateFixMask=0` | `LabTechHydrateFix`, `LabHydrateFixMask` |
 | pool | 엔티티 풀 → 매번 생성·파괴 | `-LabEntityPool=0` | `LabTechPool`, `LabPool` |
 | simlod | Simulation LOD → 엔진 이동·매 프레임 로직을 전 개체에 | `-LabSimLod=0` | `LabTechSimLod`(`LabSimLod`는 `-`) |
@@ -190,14 +190,14 @@ py -3 -I Scripts/turn-fill.py Saved/Logs/LabDev-s8-turn-N10000-P1.log
 
 이 절은 `v1`의 기록이다(조건 이름 `L1`\~`L8`, `A8-*`는 v2의 조건 표에 없다). v2의 조건 표와 러너는 아래 "총괄 묶음 러너·검사·요약·촬영"에 있다. `-LabHud`, `-LabShotAt`, `-LabActorCollision`, `-LabBudgetMs`의 뜻은 그대로다.
 
-총괄 묶음(`Full1`, 지금은 `Full2`)의 조건(사다리 8단계 `L1`\~`L8`, 빼 보기 열 행 `A8-*`, 하위 실험 `S1-budget`·`S1-uro`·`S8-col`)은 `Scripts/full-conditions.json`에 인자 줄과 기대 메타데이터로 있다. 표와 경위는 [Worklog/Q5.md](../Worklog/Q5.md).
+총괄 묶음(`Full1`, 지금은 `Full2`)의 조건(사다리 8단계 `L1`\~`L8`, 기법별 기여 열 행 `A8-*`, 하위 실험 `S1-budget`·`S1-uro`·`S8-col`)은 `Scripts/full-conditions.json`에 인자 줄과 기대 메타데이터로 있다. 표와 경위는 [Worklog/Q5.md](../Worklog/Q5.md).
 
 | 인자 | 뜻 |
 | --- | --- |
 | `-LabHud` | 상태 오버레이를 켠다. Q5부터 `-LabBench`와 함께 줘도 켜진다(촬영 실행). 메타데이터 `LabHud` |
 | `-LabShotAt=<초>` + `-LabBench` | 게임 시작부터 그 초에 창 해상도 스크린샷 한 장(`Saved/Screenshots/Lab/<라벨>-t<초>.png`, HUD 포함). 메타데이터 `LabShotAt`. 측정 실행은 주지 않는다 |
 | `-LabActorCollision=1` | 하이드레이션 액터의 캡슐 콜리전을 켠다(`Pawn` 프로필 그대로, 하위 실험 `S8-col`). 기본은 끔(`m3nocol`과 같은 처리, Q5 1b단위부터)이고 `=0`은 기본과 같다. `m3colquery`는 QueryOnly, 라벨 `m3colbase`는 켬. M0 액터는 늘 켬이다. 메타데이터 `LabActorCollision`(적용값 `0`·`1`·`query`, 액터가 없으면 `-`) |
-| `-LabBudgetMs=<ms>` | 애니메이션 예산 값(`a.Budget.BudgetMs`, 기본 4, [ADR-0016](../Decisions/0016-animation-budget-value.md)). 0 이하는 예산 끔이고 `-LabScreenSigBudget=0`(빼 보기 `A8-budget`)과 같은 길이다. 변형이 스스로 켜는 예산(M0 `budget`, `m3budgetdist`, `m3budgetsig`)은 0 이하를 받아도 기본값 4로 켜진다. 4와 다르면 `LabOverrides`에 `budget_ms=<값>`이 붙는다. 메타데이터 `LabBudgetMs`(실제 걸린 CVar 값, 예산이 꺼져 있으면 `-`). 참고 묶음 `Budget1`([Worklog/Q7.md](../Worklog/Q7.md)) |
+| `-LabBudgetMs=<ms>` | 애니메이션 예산 값(`a.Budget.BudgetMs`, 기본 4, [ADR-0016](../Decisions/0016-animation-budget-value.md)). 0 이하는 예산 끔이고 `-LabScreenSigBudget=0`(기법별 기여 `A8-budget`)과 같은 길이다. 변형이 스스로 켜는 예산(M0 `budget`, `m3budgetdist`, `m3budgetsig`)은 0 이하를 받아도 기본값 4로 켜진다. 4와 다르면 `LabOverrides`에 `budget_ms=<값>`이 붙는다. 메타데이터 `LabBudgetMs`(실제 걸린 CVar 값, 예산이 꺼져 있으면 `-`). 참고 묶음 `Budget1`([Worklog/Q7.md](../Worklog/Q7.md)) |
 
 동등성 통계: CSV 스탯 `Lab/Alive`(살아 있는 총수, 사망 중 포함), `Lab/Deaths`(누적 사망 = 범위 피해 사망 + 저격), `Lab/Near30`(오브 수평 30m 안 개체 수). 실행 끝 메타데이터 `LabDeaths`·`LabZoneKills`·`LabSnipes`·`LabDeathRate`·`LabNear30Mean`·`LabAliveMin`·`LabAliveMax`, 같은 값이 `Saved/Lab/<라벨>.summary.txt`의 `lab_summary` 줄 끝에 있다. 시작 메타데이터 `LabLadder`(사다리 단계), `LabOverrides`(변형 기본값과 다르게 준 인자, `|`로 잇는다, 없으면 `-`).
 
@@ -324,7 +324,7 @@ powershell -ExecutionPolicy Bypass -File Scripts/capture-full.ps1 -Batch Full4
 | 인자(`run-full.ps1`) | 뜻 |
 | --- | --- |
 | `-Batch` | 묶음 이름(필수). 폴더 `Measurements/<Batch>/`, 라벨 접두사. 같은 이름과 라벨은 다시 쓰지 않는다(`progress.log`가 있으면 `-Resume` 아니면 거부) |
-| `-Only` | 묶음 종류만: `ladder`(8단계 × 1만 × 이동), `ablation`(빼 보기 17행 × 이동), `still`(단계 8과 빼 보기 15행 × 정지), `sub`(`s8av`), `topview`(단계 8 × 이동 × 탑뷰 P2, 참고 한 점), `maxn`(단계 2 × 5천, 단계 3\~8 × 2만), `maxn_mid`(단계 3\~8 × 1.25만), `maxn_low`(단계 2 × 2,500), `actor`(단계 1과 `s1opt` × {500, 1천, 2천}), `aa`(단계 8 반복, 회차 11\~13), `trace`(단계 1\~8), `traceser`(단계 2\~8 직렬), `extra`(후보 `s8iso`. 적어야 돈다). 비우면 `extra`를 뺀 전부 |
+| `-Only` | 묶음 종류만: `ladder`(8단계 × 1만 × 이동), `ablation`(기법별 기여 17행 × 이동), `still`(단계 8과 기법별 기여 15행 × 정지), `sub`(`s8av`), `topview`(단계 8 × 이동 × 탑뷰 P2, 참고 한 점), `maxn`(단계 2 × 5천, 단계 3\~8 × 2만), `maxn_mid`(단계 3\~8 × 1.25만), `maxn_low`(단계 2 × 2,500), `actor`(단계 1과 `s1opt` × {500, 1천, 2천}), `aa`(단계 8 반복, 회차 11\~13), `trace`(단계 1\~8), `traceser`(단계 2\~8 직렬), `extra`(후보 `s8iso`. 적어야 돈다). 비우면 `extra`를 뺀 전부 |
 | `-Pick`, `-NFilter` | 예행용. `-Pick "ladder:s1,still:*"`은 묶음 종류:구성이 맞는 슬롯만, `-NFilter 500,10000`은 그 N인 슬롯만 남긴다 |
 | `-Runs` | 반복 묶음의 회차 수를 덮어쓴다(기본은 조건 표의 3). 트레이스와 A/A는 조건 표 값이다 |
 | `-Order round\|cond` | 기본 `round`: 회차가 바깥 루프(r1 전 슬롯, r2 전 슬롯 역순, r3). `cond`: 같은 조건 연달아 |
