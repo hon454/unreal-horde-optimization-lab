@@ -41,6 +41,7 @@ CFGS = pr.CFGS
 STEPS = [(n, f"{SPEED}-s{n}", pr.STEP_TEXT[n][0], role) for n, role in pr.STEPS]
 MAXN_STEPS = (1, 2)  # W14 decision 5: max N only for the steps that do not hold 16.7 ms at 10000
 SHADOW_M = 80        # Representation LOD Medium/Low edge; step 8 turns minion shadows off beyond it (measurement.md "최종 구성의 거리 밴드")
+AVOID_TRACE_MS, FRAME_TRACE_MS = 24.727, 32.824  # step 2 parallel trace: engine avoidance on one worker vs the frame (Posts/03-separation/measurements.md "트레이스 값")
 SEPARATION_TRACE_MS = 0.824  # step 3 serial trace, LabSeparationProcessor Incl 3.078 s / 3,737 (Posts/03-separation/measurements.md "트레이스 값"); no CSV holds it
 FAR_STREAM_M = 500   # map radius: entity-driven particles inside it, off-map records outside it (code-tour.md, ADR-0020)
 # The eight posts (V2-w14-plan.md 3.2, W14 decision 1) and the post that covers each step.
@@ -358,39 +359,34 @@ def summary_text(by, pool, max60, s):
     abl = [r for r in by.values() if r["group"] != "sub"]
     rise = diff(f"{SPEED}-s3", f"{SPEED}-s7", "frame_p95_ms")
     cut = diff(f"{SPEED}-s7", f"{SPEED}-s8", "frame_p95_ms")
-    off = pool["off"]
     assert p95(2) > TARGET_MS >= p95(3), "step 3 is the first step inside 16.7 ms"
     assert rise["real"] and rise["d"] > 0 and cut["real"] and cut["d"] < 0
     assert hyd["frame"]["real"] and hyd["frame"]["d"] < 0 and min(abl, key=lambda r: r["frame"]["d"]) is hyd
     assert fsb["frame"]["real"] and fsb["frame"]["d"] > 0 and not shd["frame"]["real"]
     assert max(abl, key=lambda r: r["frame"]["d"]) is farr and farr["frame"]["real"]
-    assert off["iskm_tracks_end"][-1] > 5 * off["iskm_tracks_end"][0]
+    assert 0.7 < AVOID_TRACE_MS / FRAME_TRACE_MS < 0.8, "the takeaway says 4분의 3"
     final95 = p95(8)
     return {
         "lead": (f"같은 호드 1만이 `ACharacter` 액터로는 프레임 p50(중앙값) {fmt(p50(1))}ms, Mass Entity로 다시 만든 최종 구성으로는 "
                  f"{fmt(p50(8))}ms다(약 {fmt_int(p50(1) / p50(8))}배). 60fps를 지키는 총수는 약 {kcount(approx2(max60[1]['n']))}에서 "
                  f"약 {kcount(approx2(n8))}으로 늘었다. 기법을 한 벌씩 바꾸며 같은 조건으로 재서, 기법마다 어느 스레드의 몇 ms가 바뀌는지 갈랐다."),
-        "why": ("Mass가 이만큼 가벼운 것은 개체를 액터가 아니라 데이터로 두기 때문이다. 같은 구성의 개체는 Fragment 배열로 청크에 모이고, "
-                "프로세서는 액터의 틱, 컴포넌트, 이동 스윕 없이 그 배열을 돈다. "
-                f"1만 개체를 서로 떼어 놓는 직접 짠 밀어내기 프로세서는 {fmt(SEPARATION_TRACE_MS)}ms다. "
-                f"가까운 액터를 모두 빼면 호드 1만을 모두 ISKM(GPU에서 스키닝하는 인스턴스 스켈레탈 메시)으로 그리고도 "
+        "why": ("Mass는 개체를 액터가 아니라 Fragment 배열로 두고, 같은 구성의 개체를 청크에 모은다. "
+                "프로세서는 이 배열을 차례로 돌며 개체를 갱신하고, 액터마다 드는 틱, 컴포넌트 갱신, 이동 스윕은 없다. "
+                f"단계 3의 밀어내기 프로세서는 1만 개체를 서로 떼어 놓는 데 {fmt(SEPARATION_TRACE_MS)}ms를 쓴다. "
+                f"가까운 액터를 모두 빼고 호드 1만을 ISKM(GPU에서 스키닝하는 인스턴스 스켈레탈 메시)으로만 그리면 "
                 f"프레임 p95(느린 쪽 5%의 경계)가 {fmt(final95 + hyd['frame']['d'])}ms다."),
         "takeaways": [
-            {"head": "Mass의 엔진 기본 경로만으로는 모자라다. 한 스레드에서 도는 엔진 프로세서를 먼저 찾는다.",
-             "body": (f"엔진의 이동·회피·표현 프로세서를 그대로 쓴 Mass는 프레임 p50이 {fmt(p50(2))}ms였다. 남은 병목은 작업자 하나에 묶인 엔진 회피였다. "
-                      f"이것을 위치를 직접 미는 밀어내기 프로세서로 바꾸자 {fmt(p50(3))}ms가 되어 처음 {fmt(TARGET_MS)}ms(60fps) 안에 들었다.")},
+            {"head": "엔진 프로세서를 그대로 쓴 Mass의 병목은 한 스레드에서 도는 엔진 회피다.",
+             "body": (f"이 구성의 프레임 p50은 {fmt(p50(2))}ms이고, 엔진 회피 하나가 작업자 스레드 하나에서 프레임의 4분의 3을 쓴다. "
+                      f"엔진 회피를 위치를 직접 미는 밀어내기 프로세서로 바꾸자 {fmt(p50(3))}ms가 되어 처음 {fmt(TARGET_MS)}ms(60fps) 안에 들었다.")},
             {"head": "게임 스레드가 병목이면 거리별 표현은 싸다.",
              "body": (f"{hm}~{far}m의 VAT 인스턴스(애니메이션을 텍스처에 구워 정점 셰이더로 재생)와 ISKM, {far}m 밖의 Niagara 입자를 "
                       f"더하는 동안 프레임 p95는 {fmt(rise['d'])}ms만 늘었다.")},
             {"head": "남은 비용의 대부분은 가까운 액터에 있다.",
              "body": (f"가까운 엔티티에 액터를 붙이는 하이드레이션을 끄면 프레임 p95가 {fmt(-hyd['frame']['d'])}ms 짧아진다. "
                       "손을 대려면 액터 쪽부터 본다. 단계 8이 줄인 시간은 거의 액터 메시 고정 바운드의 몫이다.")},
-            {"head": "먼 개체는 덜 그리는 것보다 안 그리는 것이 크다.",
-             "body": f"{far}m 밖을 ISKM 대신 입자로 채우는 일이 가장 큰 절약이다(끄면 {fmt(farr['frame']['d'], True)}ms)."},
-            {"head": "엔진의 빈틈 둘은 게임 코드로 피한다.",
-             "body": (f"움직이는 ISKM 엔티티를 파괴하면 애니메이션 트랙이 돌아오지 않아 {pool['minutes'][-1]}분에 "
-                      f"{fmt_int(off['iskm_tracks_end'][-1])}개까지 쌓인다. 그래서 엔티티를 풀로 다시 쓴다. "
-                      f"화면 안팎 판정에 여유가 없어 표현이 오가므로, 최소 유지 시간 {fmt_int(float(s(8, 'rep_hold_ms')) / 1000)}초를 둔다.")},
+            {"head": f"{far}m 밖은 ISKM 대신 Niagara 입자로 그린다.",
+             "body": f"{far}m 밖까지 ISKM으로 그리면 프레임 p95가 {fmt(farr['frame']['d'])}ms 길어진다. 기법 하나로는 가장 큰 절약이다."},
         ],
         "close": (f"최종 구성의 프레임 p95는 {fmt(final95)}ms이고, {fmt(TARGET_MS)}ms까지 {fmt(TARGET_MS - final95)}ms가 남는다. "
                   f"최대 총수 셈에서 호드 {kcount(n_out)}은 겹침 방지가 제 기능을 하지 못해 뺐다."),

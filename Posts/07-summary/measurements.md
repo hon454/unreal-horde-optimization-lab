@@ -30,10 +30,9 @@
 | 요약의 "가까운 액터를 모두 빼면 ... 7.25ms" | 7.247 | `V0-a8hyd` r5, r6, r21 | `frame_p95_ms`. 하이드레이션을 끈 조건이라 액터 캡슐, Animation Budget Allocator, 액터 메시 고정 바운드가 함께 빠진다([글 05의 측정 기록](../05-cost-cuts-and-contributions/measurements.md)) | 7.236 / 7.251 / 7.247 |
 | 요약의 단계 2 프레임 p50 34.1ms | 34.058 | `V0-s2` | `frame_p50_ms` | 34.084 / 34.058 / 33.702 |
 | 요약의 단계 3 프레임 p50 12.4ms | 12.412 | `V0-s3` | `frame_p50_ms` | 12.534 / 12.363 / 12.412 |
-| 요약의 "작업자 하나에 묶인 엔진 회피" | | `V0-s2` 트레이스 | [글 02의 측정 기록](../02-mass-engine-path/measurements.md), [글 03의 측정 기록](../03-separation/measurements.md) | |
+| 요약의 "엔진 회피 하나가 작업자 스레드 하나에서 프레임의 4분의 3" | 24.727 ÷ 32.824 = 0.753 | `Full4trace-V0-s2` | 한 프레임 32.824ms 가운데 엔진 회피 24.727ms([글 03의 측정 기록](../03-separation/measurements.md) "트레이스 값", 글 03의 "문제" 절 제목) | 트레이스 한 회 |
 | 요약의 "단계 8이 줄인 시간은 거의 액터 메시 고정 바운드의 몫" | −0.937 대 +0.978 | `V0-s8` − `V0-s7`, `V0-a8fsb` | 아래 "기법 하나로는 가장 큰 절약" 행의 `a8fsb`. 80m 밖 그림자를 다시 켠 `a8shd`는 구별되지 않는다([글 05의 측정 기록](../05-cost-cuts-and-contributions/measurements.md)) | |
-| 요약의 "16분에 120,428개" | 16분, 120,428 | `Pool2-V0-a8pool-N10000-P1-r1` | `timeline.csv` 16분 `iskm_tracks_end`. 참고 묶음, 1회([글 06의 측정 기록](../06-engine-findings/measurements.md)) | |
-| 요약의 최소 유지 시간 2초 | 2,000ms | 설정 | `LabConfig.h` 23 `DefaultRepHoldMs`, `summary.csv` `rep_hold_ms` 2000([글 05의 측정 기록](../05-cost-cuts-and-contributions/measurements.md)) | |
+| 요약의 "200m 밖까지 ISKM으로 그리면 3.54ms 길어진다" | +3.536 | `V0-a8far` | 아래 "200m 밖을 그리지 않는 일을 끈 조건" 행과 같다 | |
 | 단계 3 프레임 p95 14.1ms | 14.148 | `V0-s3` | `frame_p95_ms` | 14.265 / 13.975 / 14.148 |
 | 단계 3에서 처음 16.7ms 안 | 665.254, 36.785, 14.148 | `V0-s1`\~`V0-s3` | `full-ladder.csv` `frame_p95_ms`. 16.7보다 작은 첫 단계가 단계 3이다 | |
 | 단계 3에서 7까지 표현 셋을 더하는 동안 1.02ms 늘었다 | +1.020 | `V0-s7` − `V0-s3` | 15.168 − 14.148. 아래 "단계 사이의 차이" | |
