@@ -80,7 +80,7 @@
 | 용어 | 한 줄 뜻 | 처음 나올 때 |
 | --- | --- | --- |
 | 총괄 묶음 | 글과 README의 수치를 만드는 묶음. 조건 표 전체를 잰다. 지금은 `Full4`(패키지 de0e21b, 태그 `v2-full4`)이다 | 공개 문서에서는 이름을 쓰지 않고 풀어 쓴다(4절). 측정 기록에는 이름과 빌드 해시를 쓴다([measurement.md](measurement.md) "총괄 묶음 규약") |
-| 참고 묶음 | 총괄 묶음의 조건 표에 없는 조건으로 잰 묶음. 총괄 묶음의 값과 한 표나 그림에 잇지 않고 README 그림에 넣지 않는다. 엔티티 풀의 긴 실행이 이 묶음이 된다 | 측정 기록에서만 쓴다([measurement.md](measurement.md) "참고 묶음 규약", [V2-w14-plan.md](../Worklog/V2-w14-plan.md) 결정 2) |
+| 참고 묶음 | 총괄 묶음의 조건 표에 없는 조건으로 잰 묶음. 총괄 묶음의 값과 한 표나 그림에 잇지 않는다. README 그림에는 넣지 않되, 엔티티 풀의 긴 실행만 따로 된 그림 하나로 "참고" 표시를 달아 싣는다(사용자 결정 2) | 측정 기록에서만 쓴다([measurement.md](measurement.md) "참고 묶음 규약", [V2-w14-plan.md](../Worklog/V2-w14-plan.md) 결정 2) |
 | 작은 묶음, 개발 확인 | 측정 세 층의 둘이다. 작은 묶음은 작업 단위의 설계 근거(조건마다 3회), 개발 확인은 Development 실행이고 비교에 쓰지 않는다 | 공개 문서에 쓰지 않는다([ADR-0006](../Decisions/0006-three-measurement-tiers.md), [measurement.md](measurement.md) 31행) |
 | 조건, 구성, 실행 | 조건은 점 하나(구성, 호드 총수, 장면, 카메라)다. 구성은 스위치 한 벌이다(`s1`\~`s8`, `a8*`). 실행은 조건을 한 번 잰 것이고 조건마다 3회 잰다 | 본문에서는 "조건", "세 번 잰 중앙값"으로 쓴다([measurement.md](measurement.md) "벤치마크 조건", [full-conditions.json](../../Scripts/full-conditions.json)) |
 | 느린 실행 | 게임·렌더 스레드 중앙값이 그 조건 원 실행 중앙값보다 함께 2% 넘게 긴 실행. 새 회차로 한 번 다시 잰다 | 측정 기록에서만 쓴다([measurement.md](measurement.md) "묶음 판정") |
