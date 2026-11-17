@@ -1,0 +1,23 @@
+﻿{
+    "batch":  "Pool2",
+    "state":  "done",
+    "kind":  "entity-pool-long-run",
+    "commit":  "de0e21bd64ac6f9a8b8fa08c912920532440cea7",
+    "started":  "2026-11-17 10:16:38",
+    "ended":  "2026-11-17 10:51:00",
+    "resumes":  0,
+    "n":  10000,
+    "speed":  "V0",
+    "warmup_sec":  60,
+    "measure_sec":  960,
+    "configs":  "s8,a8pool",
+    "runs_per_config":  1,
+    "orbit":  "r57.3/h6/v2",
+    "base_mhz":  3401,
+    "planned_runs":  2,
+    "planned_runs_ok":  2,
+    "planned_runs_missing":  0,
+    "giveups":  [
+
+                ]
+}
