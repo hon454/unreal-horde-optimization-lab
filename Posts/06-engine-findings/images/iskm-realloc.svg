@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="552" viewBox="0 0 800 552" font-family="Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Segoe UI, sans-serif" font-size="16" fill="#111827">
+<defs><pattern id="hatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="8" height="8" fill="#dbeafe"/><line x1="0" y1="0" x2="0" y2="8" stroke="#2563eb" stroke-width="3"/></pattern></defs>
+<rect x="0.5" y="0.5" width="799" height="551" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+<text x="32" y="46" font-size="22" font-weight="700">트랙 수가 바뀔 때 뼈대 버퍼를 다시 잡는 순서</text>
+<text x="32" y="74" font-size="16" fill="#4b5563">한 칸은 트랙 하나의 지금·이전 자세다. 옛 자리 5칸을 새 자리 6칸으로 옮긴다</text>
+<text x="32.0" y="127.0" text-anchor="start" font-size="16" font-weight="700" fill="#111827">처음</text>
+<rect x="237.0" y="104" width="74.0" height="34" rx="4" fill="white" stroke="#9ca3af" stroke-width="2" stroke-dasharray="5 4"/>
+<text x="274.0" y="127.0" text-anchor="middle" font-size="16" font-weight="700" fill="#4b5563">빈칸</text>
+<rect x="313.0" y="104" width="188.0" height="34" rx="4" fill="#2563eb" stroke="#2563eb" stroke-width="2"/>
+<text x="407.0" y="127.0" text-anchor="middle" font-size="16" font-weight="700" fill="white">옛 자리</text>
+<rect x="503.0" y="104" width="264.0" height="34" rx="4" fill="#e5e7eb" stroke="#9ca3af" stroke-width="2"/>
+<text x="635.0" y="127.0" text-anchor="middle" font-size="16" font-weight="700" fill="#374151">다른 컴포넌트</text>
+<text x="32.0" y="182.0" text-anchor="start" font-size="16" font-weight="700" fill="#111827">① 옛 자리를</text>
+<text x="32.0" y="204.0" text-anchor="start" font-size="16" font-weight="700" fill="#111827">먼저 해제한다</text>
+<rect x="237.0" y="168" width="74.0" height="34" rx="4" fill="white" stroke="#9ca3af" stroke-width="2" stroke-dasharray="5 4"/>
+<rect x="313.0" y="168" width="188.0" height="34" rx="4" fill="url(#hatch)" stroke="#2563eb" stroke-width="2"/>
+<rect x="503.0" y="168" width="264.0" height="34" rx="4" fill="#e5e7eb" stroke="#9ca3af" stroke-width="2"/>
+<text x="635.0" y="191.0" text-anchor="middle" font-size="16" font-weight="700" fill="#374151">다른 컴포넌트</text>
+<text x="407.0" y="191" text-anchor="middle" font-size="16" font-weight="700" fill="#111827" stroke="white" stroke-width="5" paint-order="stroke">해제, 내용은 남음</text>
+<text x="32.0" y="246.0" text-anchor="start" font-size="16" font-weight="700" fill="#111827">② 새 자리를</text>
+<text x="32.0" y="268.0" text-anchor="start" font-size="16" font-weight="700" fill="#111827">할당한다</text>
+<rect x="237.0" y="232" width="226.0" height="30" rx="4" fill="#15803d" stroke="#15803d" stroke-width="2"/>
+<text x="350.0" y="253.0" text-anchor="middle" font-size="16" font-weight="700" fill="white">새 자리</text>
+<rect x="465.0" y="232" width="36.0" height="30" rx="4" fill="white" stroke="#9ca3af" stroke-width="2" stroke-dasharray="5 4"/>
+<rect x="503.0" y="232" width="264.0" height="30" rx="4" fill="#e5e7eb" stroke="#9ca3af" stroke-width="2"/>
+<text x="635.0" y="253.0" text-anchor="middle" font-size="16" font-weight="700" fill="#374151">다른 컴포넌트</text>
+<text x="236.0" y="284.0" text-anchor="start" font-size="16" font-weight="400" fill="#4b5563">맞는 빈칸이 없어 빈칸과 해제한 칸을 합치고, 그 앞에서 시작한다</text>
+<text x="32.0" y="326.0" text-anchor="start" font-size="16" font-weight="700" fill="#111827">③ 옛 → 새</text>
+<text x="32.0" y="348.0" text-anchor="start" font-size="16" font-weight="700" fill="#111827">병렬 복사</text>
+<rect x="237.0" y="312" width="188.0" height="26" rx="4" fill="#dcfce7" stroke="#15803d" stroke-width="2"/>
+<rect x="313.0" y="376" width="188.0" height="26" rx="4" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/>
+<text x="331.0" y="395" text-anchor="middle" font-size="16" fill="#2563eb">1</text>
+<text x="369.0" y="395" text-anchor="middle" font-size="16" fill="#2563eb">2</text>
+<text x="407.0" y="395" text-anchor="middle" font-size="16" fill="#2563eb">3</text>
+<text x="445.0" y="395" text-anchor="middle" font-size="16" fill="#2563eb">4</text>
+<text x="483.0" y="395" text-anchor="middle" font-size="16" fill="#2563eb">5</text>
+<text x="255.0" y="331" text-anchor="middle" font-size="16" fill="#15803d">1</text>
+<text x="293.0" y="331" text-anchor="middle" font-size="16" fill="#15803d">2</text>
+<text x="331.0" y="331" text-anchor="middle" font-size="16" fill="#15803d">3</text>
+<text x="369.0" y="331" text-anchor="middle" font-size="16" fill="#15803d">4</text>
+<text x="407.0" y="331" text-anchor="middle" font-size="16" fill="#15803d">5</text>
+<line x1="331.0" y1="374.0" x2="255.0" y2="340.0" stroke="#4b5563" stroke-width="1.5"/>
+<line x1="255.0" y1="340.0" x2="265.3" y2="339.1" stroke="#4b5563" stroke-width="1.5"/>
+<line x1="255.0" y1="340.0" x2="261.2" y2="348.2" stroke="#4b5563" stroke-width="1.5"/>
+<line x1="369.0" y1="374.0" x2="293.0" y2="340.0" stroke="#4b5563" stroke-width="1.5"/>
+<line x1="293.0" y1="340.0" x2="303.3" y2="339.1" stroke="#4b5563" stroke-width="1.5"/>
+<line x1="293.0" y1="340.0" x2="299.2" y2="348.2" stroke="#4b5563" stroke-width="1.5"/>
+<line x1="407.0" y1="374.0" x2="331.0" y2="340.0" stroke="#4b5563" stroke-width="1.5"/>
+<line x1="331.0" y1="340.0" x2="341.3" y2="339.1" stroke="#4b5563" stroke-width="1.5"/>
+<line x1="331.0" y1="340.0" x2="337.2" y2="348.2" stroke="#4b5563" stroke-width="1.5"/>
+<line x1="445.0" y1="374.0" x2="369.0" y2="340.0" stroke="#4b5563" stroke-width="1.5"/>
+<line x1="369.0" y1="340.0" x2="379.3" y2="339.1" stroke="#4b5563" stroke-width="1.5"/>
+<line x1="369.0" y1="340.0" x2="375.2" y2="348.2" stroke="#4b5563" stroke-width="1.5"/>
+<line x1="483.0" y1="374.0" x2="407.0" y2="340.0" stroke="#4b5563" stroke-width="1.5"/>
+<line x1="407.0" y1="340.0" x2="417.3" y2="339.1" stroke="#4b5563" stroke-width="1.5"/>
+<line x1="407.0" y1="340.0" x2="413.2" y2="348.2" stroke="#4b5563" stroke-width="1.5"/>
+<rect x="310.0" y="306" width="118.0" height="102" rx="6" fill="none" stroke="#dc2626" stroke-width="2.5" stroke-dasharray="6 4"/>
+<text x="518.0" y="332.0" text-anchor="start" font-size="16" font-weight="700" fill="#dc2626">겹친 칸: 같은 버퍼에서</text>
+<text x="518.0" y="354.0" text-anchor="start" font-size="16" font-weight="700" fill="#dc2626">아직 읽지 않은 옛 칸을</text>
+<text x="518.0" y="376.0" text-anchor="start" font-size="16" font-weight="700" fill="#dc2626">새 칸이 덮어쓸 수 있다</text>
+<line x1="32" y1="426" x2="768" y2="426" stroke="#e5e7eb"/>
+<text x="32.0" y="452.0" text-anchor="start" font-size="16" font-weight="400" fill="#4b5563">복사 셰이더는 두 자리가 겹치지 않는다고 가정한다.</text>
+<text x="32.0" y="474.0" text-anchor="start" font-size="16" font-weight="400" fill="#4b5563">이전 자세 칸이 깨진 프레임에는 컴포넌트의 모든 인스턴스가 틀린 속도를 받는다.</text>
+<text x="32.0" y="496.0" text-anchor="start" font-size="16" font-weight="400" fill="#4b5563">모션 블러가 그 속도로 같은 종류의 개체를 한 프레임 길게 끈다.</text>
+<text x="32.0" y="524.0" text-anchor="start" font-size="16" font-weight="700" fill="#2563eb">Lab: 컴포넌트가 처음 쓰일 때 트랙 수를 용량까지 늘려 둔다. 그 뒤로는 ①–③이 없다.</text>
+</svg>

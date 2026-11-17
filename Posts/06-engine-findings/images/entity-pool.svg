@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="484" viewBox="0 0 800 484" font-family="Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Segoe UI, sans-serif" font-size="16" fill="#111827">
+<rect x="0.5" y="0.5" width="799" height="483" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+<text x="32" y="46" font-size="22" font-weight="700">엔티티 풀: 죽은 엔티티를 파괴하지 않고 다시 쓴다</text>
+<text x="32" y="74" font-size="16" fill="#4b5563">ISKM 트랙 맵의 키는 엔티티 핸들이다. 핸들이 같으면 엔진이 옛 트랙을 다시 쓴다</text>
+<text x="32" y="108" font-size="17" font-weight="700" fill="#374151">엔티티 풀이 없을 때(파괴)</text>
+<rect x="32.0" y="120.0" width="166.0" height="76.0" rx="6" fill="#f8fafc" stroke="#9ca3af" stroke-width="2"/>
+<text x="115.0" y="153.0" text-anchor="middle" font-size="16" font-weight="400" fill="#111827">사망이 끝난</text>
+<text x="115.0" y="175.0" text-anchor="middle" font-size="16" font-weight="400" fill="#111827">엔티티 A</text>
+<line x1="200.0" y1="158.0" x2="218.0" y2="158.0" stroke="#4b5563" stroke-width="2"/>
+<line x1="218.0" y1="158.0" x2="209.0" y2="163.0" stroke="#4b5563" stroke-width="2"/>
+<line x1="218.0" y1="158.0" x2="209.0" y2="153.0" stroke="#4b5563" stroke-width="2"/>
+<rect x="220.0" y="120.0" width="166.0" height="76.0" rx="6" fill="#f8fafc" stroke="#9ca3af" stroke-width="2"/>
+<text x="303.0" y="164.0" text-anchor="middle" font-size="16" font-weight="400" fill="#111827">A를 파괴한다</text>
+<line x1="388.0" y1="158.0" x2="406.0" y2="158.0" stroke="#4b5563" stroke-width="2"/>
+<line x1="406.0" y1="158.0" x2="397.0" y2="163.0" stroke="#4b5563" stroke-width="2"/>
+<line x1="406.0" y1="158.0" x2="397.0" y2="153.0" stroke="#4b5563" stroke-width="2"/>
+<rect x="408.0" y="120.0" width="166.0" height="76.0" rx="6" fill="#f8fafc" stroke="#9ca3af" stroke-width="2"/>
+<text x="491.0" y="153.0" text-anchor="middle" font-size="16" font-weight="400" fill="#111827">새 엔티티 B를</text>
+<text x="491.0" y="175.0" text-anchor="middle" font-size="16" font-weight="400" fill="#111827">만든다</text>
+<line x1="576.0" y1="158.0" x2="594.0" y2="158.0" stroke="#4b5563" stroke-width="2"/>
+<line x1="594.0" y1="158.0" x2="585.0" y2="163.0" stroke="#4b5563" stroke-width="2"/>
+<line x1="594.0" y1="158.0" x2="585.0" y2="153.0" stroke="#4b5563" stroke-width="2"/>
+<rect x="596.0" y="120.0" width="166.0" height="76.0" rx="6" fill="#f8fafc" stroke="#9ca3af" stroke-width="2"/>
+<text x="679.0" y="153.0" text-anchor="middle" font-size="16" font-weight="400" fill="#111827">맵에 B가 없어</text>
+<text x="679.0" y="175.0" text-anchor="middle" font-size="16" font-weight="400" fill="#111827">새 트랙을 할당</text>
+<text x="762.0" y="222" text-anchor="end" font-size="16" font-weight="700" fill="#dc2626">A의 트랙은 돌려받지 않는다. 트랙 수가 계속 는다</text>
+<text x="32" y="266" font-size="17" font-weight="700" fill="#2563eb">엔티티 풀(Lab)</text>
+<rect x="32.0" y="278.0" width="166.0" height="76.0" rx="6" fill="#f8fafc" stroke="#2563eb" stroke-width="2"/>
+<text x="115.0" y="311.0" text-anchor="middle" font-size="16" font-weight="400" fill="#111827">사망이 끝난</text>
+<text x="115.0" y="333.0" text-anchor="middle" font-size="16" font-weight="400" fill="#111827">엔티티 A</text>
+<line x1="200.0" y1="316.0" x2="218.0" y2="316.0" stroke="#4b5563" stroke-width="2"/>
+<line x1="218.0" y1="316.0" x2="209.0" y2="321.0" stroke="#4b5563" stroke-width="2"/>
+<line x1="218.0" y1="316.0" x2="209.0" y2="311.0" stroke="#4b5563" stroke-width="2"/>
+<rect x="220.0" y="278.0" width="166.0" height="76.0" rx="6" fill="#f8fafc" stroke="#2563eb" stroke-width="2"/>
+<text x="303.0" y="311.0" text-anchor="middle" font-size="16" font-weight="400" fill="#111827">풀에 넣고</text>
+<text x="303.0" y="333.0" text-anchor="middle" font-size="16" font-weight="400" fill="#111827">맵 밖에 세운다</text>
+<line x1="388.0" y1="316.0" x2="406.0" y2="316.0" stroke="#4b5563" stroke-width="2"/>
+<line x1="406.0" y1="316.0" x2="397.0" y2="321.0" stroke="#4b5563" stroke-width="2"/>
+<line x1="406.0" y1="316.0" x2="397.0" y2="311.0" stroke="#4b5563" stroke-width="2"/>
+<rect x="408.0" y="278.0" width="166.0" height="76.0" rx="6" fill="#f8fafc" stroke="#2563eb" stroke-width="2"/>
+<text x="491.0" y="300.0" text-anchor="middle" font-size="16" font-weight="400" fill="#111827">재생성 때 A를 꺼내</text>
+<text x="491.0" y="322.0" text-anchor="middle" font-size="16" font-weight="400" fill="#111827">위치·체력·상태를</text>
+<text x="491.0" y="344.0" text-anchor="middle" font-size="16" font-weight="400" fill="#111827">다시 넣는다</text>
+<line x1="576.0" y1="316.0" x2="594.0" y2="316.0" stroke="#4b5563" stroke-width="2"/>
+<line x1="594.0" y1="316.0" x2="585.0" y2="321.0" stroke="#4b5563" stroke-width="2"/>
+<line x1="594.0" y1="316.0" x2="585.0" y2="311.0" stroke="#4b5563" stroke-width="2"/>
+<rect x="596.0" y="278.0" width="166.0" height="76.0" rx="6" fill="#f8fafc" stroke="#2563eb" stroke-width="2"/>
+<text x="679.0" y="311.0" text-anchor="middle" font-size="16" font-weight="400" fill="#111827">맵에서 A의</text>
+<text x="679.0" y="333.0" text-anchor="middle" font-size="16" font-weight="400" fill="#111827">옛 트랙을 찾는다</text>
+<text x="762.0" y="380" text-anchor="end" font-size="16" font-weight="700" fill="#2563eb">새 트랙이 생기지 않는다. 트랙 수가 그대로다</text>
+<line x1="32" y1="404" x2="768" y2="404" stroke="#e5e7eb"/>
+<text x="32.0" y="430.0" text-anchor="start" font-size="16" font-weight="400" fill="#4b5563">트랙은 ISKM 컴포넌트 안에서 인스턴스 하나가 애니메이션을 재생하는 칸이다.</text>
+<text x="32.0" y="452.0" text-anchor="start" font-size="16" font-weight="400" fill="#4b5563">풀에 넣은 엔티티는 표현이 꺼져 ISKM 인스턴스는 지워지지만, 트랙은 맵에 남아 있다.</text>
+</svg>

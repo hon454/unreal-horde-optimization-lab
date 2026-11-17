@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="524" viewBox="0 0 800 524" font-family="Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Segoe UI, sans-serif" font-size="16" fill="#111827">
+<rect x="0.5" y="0.5" width="799" height="523" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+<text x="32" y="46" font-size="22" font-weight="700">엔진에서 찾은 문제 다섯과 Lab의 우회</text>
+<text x="32" y="74" font-size="16" fill="#4b5563">번호는 본문의 차례다. 파란 글자가 Lab이 바꾼 것이다</text>
+<text x="32" y="108" font-size="17" font-weight="700">ISKM 개체를 그리는 한 프레임</text>
+<rect x="32.0" y="122.0" width="170.0" height="62.0" rx="6" fill="#f8fafc" stroke="#374151" stroke-width="2"/>
+<text x="117.0" y="148.0" text-anchor="middle" font-size="16" font-weight="700" fill="#111827">Mass 프로세서</text>
+<text x="117.0" y="170.0" text-anchor="middle" font-size="16" font-weight="400" fill="#111827">게임·작업자 스레드</text>
+<line x1="204.0" y1="153.0" x2="220.0" y2="153.0" stroke="#4b5563" stroke-width="2"/>
+<line x1="220.0" y1="153.0" x2="211.0" y2="158.0" stroke="#4b5563" stroke-width="2"/>
+<line x1="220.0" y1="153.0" x2="211.0" y2="148.0" stroke="#4b5563" stroke-width="2"/>
+<rect x="222.0" y="122.0" width="170.0" height="62.0" rx="6" fill="#f8fafc" stroke="#374151" stroke-width="2"/>
+<text x="307.0" y="148.0" text-anchor="middle" font-size="16" font-weight="700" fill="#111827">Mass 표현</text>
+<text x="307.0" y="170.0" text-anchor="middle" font-size="16" font-weight="400" fill="#111827">ISKM 트랙 맵</text>
+<line x1="394.0" y1="153.0" x2="410.0" y2="153.0" stroke="#4b5563" stroke-width="2"/>
+<line x1="410.0" y1="153.0" x2="401.0" y2="158.0" stroke="#4b5563" stroke-width="2"/>
+<line x1="410.0" y1="153.0" x2="401.0" y2="148.0" stroke="#4b5563" stroke-width="2"/>
+<rect x="412.0" y="122.0" width="170.0" height="62.0" rx="6" fill="#f8fafc" stroke="#374151" stroke-width="2"/>
+<text x="497.0" y="148.0" text-anchor="middle" font-size="16" font-weight="700" fill="#111827">트랙 제공자</text>
+<text x="497.0" y="170.0" text-anchor="middle" font-size="16" font-weight="400" fill="#111827">클립 → 뼈 자세</text>
+<line x1="584.0" y1="153.0" x2="600.0" y2="153.0" stroke="#4b5563" stroke-width="2"/>
+<line x1="600.0" y1="153.0" x2="591.0" y2="158.0" stroke="#4b5563" stroke-width="2"/>
+<line x1="600.0" y1="153.0" x2="591.0" y2="148.0" stroke="#4b5563" stroke-width="2"/>
+<rect x="602.0" y="122.0" width="170.0" height="62.0" rx="6" fill="#f8fafc" stroke="#374151" stroke-width="2"/>
+<text x="687.0" y="148.0" text-anchor="middle" font-size="16" font-weight="700" fill="#111827">렌더러</text>
+<text x="687.0" y="170.0" text-anchor="middle" font-size="16" font-weight="400" fill="#111827">뼈대 버퍼</text>
+<circle cx="46" cy="216" r="14" fill="#374151"/>
+<text x="46" y="222" text-anchor="middle" font-size="16" font-weight="700" fill="white">4</text>
+<text x="32.0" y="250.0" text-anchor="start" font-size="16" font-weight="400" fill="#111827">쓰기를 선언한 쿼리가</text>
+<text x="32.0" y="272.0" text-anchor="start" font-size="16" font-weight="400" fill="#111827">게임 스레드를</text>
+<text x="32.0" y="294.0" text-anchor="start" font-size="16" font-weight="400" fill="#111827">기다리게 한다</text>
+<text x="32.0" y="322.0" text-anchor="start" font-size="16" font-weight="700" fill="#2563eb">위치 쓰기를</text>
+<text x="32.0" y="344.0" text-anchor="start" font-size="16" font-weight="700" fill="#2563eb">따로 된 쿼리로</text>
+<circle cx="236" cy="216" r="14" fill="#374151"/>
+<text x="236" y="222" text-anchor="middle" font-size="16" font-weight="700" fill="white">1</text>
+<text x="222.0" y="250.0" text-anchor="start" font-size="16" font-weight="400" fill="#111827">움직이는 엔티티를</text>
+<text x="222.0" y="272.0" text-anchor="start" font-size="16" font-weight="400" fill="#111827">파괴하면 트랙이</text>
+<text x="222.0" y="294.0" text-anchor="start" font-size="16" font-weight="400" fill="#111827">남는다</text>
+<text x="222.0" y="322.0" text-anchor="start" font-size="16" font-weight="700" fill="#2563eb">엔티티 풀</text>
+<circle cx="426" cy="216" r="14" fill="#374151"/>
+<text x="426" y="222" text-anchor="middle" font-size="16" font-weight="700" fill="white">3</text>
+<text x="412.0" y="250.0" text-anchor="start" font-size="16" font-weight="400" fill="#111827">가산 클립을 그대로</text>
+<text x="412.0" y="272.0" text-anchor="start" font-size="16" font-weight="400" fill="#111827">자세로 쓴다</text>
+<text x="412.0" y="300.0" text-anchor="start" font-size="16" font-weight="700" fill="#2563eb">비가산 복제 클립</text>
+<circle cx="616" cy="216" r="14" fill="#374151"/>
+<text x="616" y="222" text-anchor="middle" font-size="16" font-weight="700" fill="white">2</text>
+<text x="602.0" y="250.0" text-anchor="start" font-size="16" font-weight="400" fill="#111827">트랙 수가 바뀌면</text>
+<text x="602.0" y="272.0" text-anchor="start" font-size="16" font-weight="400" fill="#111827">이전 자세 칸이</text>
+<text x="602.0" y="294.0" text-anchor="start" font-size="16" font-weight="400" fill="#111827">깨진다</text>
+<text x="602.0" y="322.0" text-anchor="start" font-size="16" font-weight="700" fill="#2563eb">트랙 풀을</text>
+<text x="602.0" y="344.0" text-anchor="start" font-size="16" font-weight="700" fill="#2563eb">미리 늘린다</text>
+<line x1="32" y1="384" x2="768" y2="384" stroke="#e5e7eb"/>
+<text x="32" y="418" font-size="17" font-weight="700">동등성 검사의 확인 트레이스</text>
+<rect x="32.0" y="432.0" width="170.0" height="62.0" rx="6" fill="#f8fafc" stroke="#374151" stroke-width="2"/>
+<text x="117.0" y="458.0" text-anchor="middle" font-size="16" font-weight="700" fill="#111827">오브</text>
+<text x="117.0" y="480.0" text-anchor="middle" font-size="16" font-weight="400" fill="#111827">캡슐로 선을 쏜다</text>
+<line x1="204.0" y1="463.0" x2="220.0" y2="463.0" stroke="#4b5563" stroke-width="2"/>
+<line x1="220.0" y1="463.0" x2="211.0" y2="468.0" stroke="#4b5563" stroke-width="2"/>
+<line x1="220.0" y1="463.0" x2="211.0" y2="458.0" stroke="#4b5563" stroke-width="2"/>
+<rect x="222.0" y="432.0" width="170.0" height="62.0" rx="6" fill="#f8fafc" stroke="#374151" stroke-width="2"/>
+<text x="307.0" y="458.0" text-anchor="middle" font-size="16" font-weight="700" fill="#111827">Chaos 장면 질의</text>
+<text x="307.0" y="480.0" text-anchor="middle" font-size="16" font-weight="400" fill="#111827">라인 트레이스</text>
+<circle cx="426" cy="448" r="14" fill="#374151"/>
+<text x="426" y="454" text-anchor="middle" font-size="16" font-weight="700" fill="white">5</text>
+<text x="450.0" y="454.0" text-anchor="start" font-size="16" font-weight="400" fill="#111827">캡슐 정면 평면 위에서 출발한 선을 놓친다</text>
+<text x="450.0" y="482.0" text-anchor="start" font-size="16" font-weight="700" fill="#2563eb">정지 장면의 빗나감은 보고만 한다</text>
+</svg>

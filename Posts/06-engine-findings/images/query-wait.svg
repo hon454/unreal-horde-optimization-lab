@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="480" viewBox="0 0 800 480" font-family="Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Segoe UI, sans-serif" font-size="16" fill="#111827">
+<defs><pattern id="wait" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="8" height="8" fill="#f3f4f6"/><line x1="0" y1="0" x2="0" y2="8" stroke="#9ca3af" stroke-width="3"/></pattern></defs>
+<rect x="0.5" y="0.5" width="799" height="479" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+<text x="32" y="46" font-size="22" font-weight="700">위치를 쓰는 쿼리끼리는 서로를 기다린다</text>
+<text x="32" y="74" font-size="16" fill="#4b5563">한 프레임의 개념도다. 막대의 길이는 잰 값이 아니다</text>
+<text x="32" y="112" font-size="18" font-weight="700">고치기 전</text>
+<text x="32" y="151" font-size="16" fill="#4b5563">작업자 스레드</text>
+<rect x="180.0" y="128" width="395.2" height="34" rx="5" fill="#9333ea" stroke="#9333ea" stroke-width="2"/>
+<text x="377.6" y="151.0" text-anchor="middle" font-size="16" font-weight="700" fill="white">분리 프로세서: 위치를 읽고 쓴다</text>
+<text x="32" y="197" font-size="16" fill="#4b5563">게임 스레드</text>
+<rect x="242.4" y="174" width="332.8" height="34" rx="5" fill="url(#wait)" stroke="#9ca3af" stroke-width="2"/>
+<text x="408.8" y="197" text-anchor="middle" font-size="16" font-weight="700" fill="#111827" stroke="white" stroke-width="5" paint-order="stroke">쿼리 시작 전에 기다린다</text>
+<rect x="575.2" y="174" width="41.6" height="34" rx="5" fill="#2563eb" stroke="#2563eb" stroke-width="2"/>
+<text x="626.8" y="197" font-size="16" font-weight="700" fill="#2563eb">실제 일</text>
+<text x="180.0" y="228.0" text-anchor="start" font-size="16" font-weight="400" fill="#4b5563">피격 ISKM 프로세서의 쿼리가 위치를 읽기·쓰기로 선언했다.</text>
+<text x="180.0" y="250.0" text-anchor="start" font-size="16" font-weight="400" fill="#4b5563">엔진은 두 쿼리를 아키타입과 상관없이 동시에 돌리지 않는다.</text>
+<text x="32" y="298" font-size="18" font-weight="700">고친 뒤</text>
+<text x="32" y="337" font-size="16" fill="#4b5563">작업자 스레드</text>
+<rect x="180.0" y="314" width="395.2" height="34" rx="5" fill="#9333ea" stroke="#9333ea" stroke-width="2"/>
+<text x="377.6" y="337.0" text-anchor="middle" font-size="16" font-weight="700" fill="white">분리 프로세서: 위치를 읽고 쓴다</text>
+<text x="32" y="383" font-size="16" fill="#4b5563">게임 스레드</text>
+<rect x="242.4" y="360" width="41.6" height="34" rx="5" fill="#2563eb" stroke="#2563eb" stroke-width="2"/>
+<text x="294.0" y="383" font-size="16" font-weight="700" fill="#2563eb">주 쿼리: 위치 없음, 바로 돈다</text>
+<rect x="596.0" y="360" width="93.6" height="34" rx="5" fill="white" stroke="#9ca3af" stroke-width="2" stroke-dasharray="6 4"/>
+<text x="642.8" y="383.0" text-anchor="middle" font-size="16" font-weight="700" fill="#4b5563">따라잡기</text>
+<text x="180.0" y="414.0" text-anchor="start" font-size="16" font-weight="400" fill="#4b5563">위치를 쓰는 따라잡기는 따로 된 쿼리로 뺐다.</text>
+<text x="180.0" y="436.0" text-anchor="start" font-size="16" font-weight="400" fill="#4b5563">따라잡을 개체가 있는 드문 프레임에만 돈다(점선).</text>
+</svg>
