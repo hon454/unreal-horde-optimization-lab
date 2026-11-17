@@ -342,10 +342,14 @@
   // ---------- ablation ----------
   function renderAblation() {
     var A = D.ablation;
-    $("abl-intro").textContent = "호드 총수 1만, 이동 장면, 오브 시점 카메라, 세 번 잰 중앙값. 기법별 기여는 단계 8 최종 구성에서 기법 하나만 끄고 같은 조건으로 잰 차이다. " +
-      "끄면 프레임이 길어지는 기법은 시간을 줄이고, 짧아지는 기법은 시간을 쓴다. 0은 최종 구성(프레임 p95 " +
-      fmt(A.base.frame_p95_ms) + "ms, 게임 스레드 시간 " + fmt(A.base.game_p50_ms) + "ms, GPU 시간 " + fmt(A.base.gpu_p50_ms) + "ms)이다. 최종 구성의 병목은 " +
-      BOT[A.base_bottleneck] + "라, GPU 시간만 달라지는 기법은 프레임 p95에 드러나지 않는다. 구별되는 조건이 위, 구별되지 않는 조건이 가운데, 하위 실험이 아래다. 각 부분 안에서는 프레임 p95가 많이 길어지는 순이다.";
+    $("abl-intro").innerHTML = [
+      "호드 총수 1만, 이동 장면, 오브 시점 카메라, 세 번 잰 중앙값.",
+      "기법별 기여는 단계 8 최종 구성에서 기법 하나만 끄고 같은 조건으로 잰 차이다.",
+      "끄면 프레임이 길어지는 기법은 시간을 줄이고, 짧아지는 기법은 시간을 쓴다.",
+      "0은 최종 구성(프레임 p95 " + fmt(A.base.frame_p95_ms) + "ms, 게임 스레드 시간 " + fmt(A.base.game_p50_ms) + "ms, GPU 시간 " + fmt(A.base.gpu_p50_ms) + "ms)이다.",
+      "최종 구성의 병목은 " + BOT[A.base_bottleneck] + "라, GPU 시간만 달라지는 기법은 프레임 p95에 드러나지 않는다.",
+      "구별되는 조건이 위, 구별되지 않는 조건이 가운데, 하위 실험이 아래다. 각 부분 안에서는 프레임 p95가 많이 길어지는 순이다."
+    ].map(function (t) { return "<li>" + esc(t) + "</li>"; }).join("");
     var maxAbs = 0;
     A.rows.forEach(function (r) { ["frame", "game", "gpu"].forEach(function (k) { maxAbs = Math.max(maxAbs, Math.abs(r[k].d)); }); });
     var half = Math.ceil(maxAbs);

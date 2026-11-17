@@ -95,19 +95,29 @@
 
 <section class="wrap" aria-labelledby="ladder-h">
   <h2 id="ladder-h">여덟 단계 한눈에</h2>
-  <p class="muted">호드 총수 1만, 이동 장면, 오브 시점 카메라, 세 번 잰 중앙값. 진한 막대는 프레임 p50, 옅은 연장은 프레임 p95다. 단계 1과 2는 축척 밖이라 막대를 잘랐다. 줄을 누르면 위의 단계가 바뀐다.</p>
+  <ul class="notes intro">
+    <li>호드 총수 1만, 이동 장면, 오브 시점 카메라, 세 번 잰 중앙값.</li>
+    <li>진한 막대는 프레임 p50, 옅은 연장은 프레임 p95다.</li>
+    <li>단계 1과 2는 축척 밖이라 막대를 잘랐다.</li>
+    <li>줄을 누르면 위의 단계가 바뀐다.</li>
+  </ul>
   <div class="card chart" id="ladder"></div>
 </section>
 
 <section class="wrap" aria-labelledby="margin-h2">
   <h2 id="margin-h2">16.7ms까지의 여유</h2>
-  <p class="muted">호드 총수 1만, 이동 장면, 오브 시점 카메라, 세 번 잰 중앙값. 막대는 16.7ms에서 프레임 p95를 뺀 값이다. 단계 1과 2는 프레임 p95가 16.7ms를 넘어 여유 대신 최대 N을 적는다. 최대 N은 프레임 p95가 16.7ms를 넘기 직전의 호드 총수다.</p>
+  <ul class="notes intro">
+    <li>호드 총수 1만, 이동 장면, 오브 시점 카메라, 세 번 잰 중앙값.</li>
+    <li>막대는 16.7ms에서 프레임 p95를 뺀 값이다.</li>
+    <li>단계 1과 2는 프레임 p95가 16.7ms를 넘어 여유 대신 최대 N을 적는다.</li>
+    <li>최대 N은 프레임 p95가 16.7ms를 넘기 직전의 호드 총수다.</li>
+  </ul>
   <div class="card chart" id="margin"></div>
 </section>
 
 <section class="wrap" aria-labelledby="abl-h">
   <h2 id="abl-h">기법별 기여(최종 구성에서 하나씩 껐을 때)</h2>
-  <p class="muted" id="abl-intro"></p>
+  <ul class="notes intro" id="abl-intro"></ul>
   <div class="card chart" id="ablation"></div>
   <ul class="notes" id="abl-notes"></ul>
 </section>
