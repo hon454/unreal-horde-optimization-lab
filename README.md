@@ -15,7 +15,7 @@
 - **남은 비용의 대부분은 가까운 액터에 있다.** 가까운 엔티티에 액터를 붙이는 하이드레이션을 끄면 프레임 p95가 6.98ms 짧아진다. 손을 대려면 액터 쪽부터 본다. 단계 8이 줄인 시간은 거의 액터 메시 고정 바운드의 몫이다.
 - **200m 밖은 ISKM 대신 Niagara 입자로 그린다.** 200m 밖까지 ISKM으로 그리면 프레임 p95가 3.54ms 길어진다. 기법 하나로는 가장 큰 절약이다.
 
-증상과 원인과 바꾼 코드는 [Mass 군중 최적화와 프로파일링 팁](Docs/Guides/mass-crowd-tips.md)에, 단계를 고르며 보는 화면은 [한 페이지 요약](https://hon454.github.io/unreal-horde-optimization-lab/)에 있다.
+증상과 원인과 바꾼 코드는 [Mass 군중 최적화와 프로파일링 팁](Docs/Guides/mass-crowd-tips.md)에, 단계를 고르며 보는 화면은 [한 페이지 요약](https://hon454.github.io/unreal-horde-optimization-lab/)에 있다. 같은 노하우는 다른 Unreal 프로젝트에서 쓰도록 [Claude Code 스킬](.claude/skills/) 둘(성능 측정 절차, Mass 군중 최적화)로 묶어 두었다.
 
 ## 시나리오
 
@@ -139,6 +139,7 @@ py -3 -I Scripts/plot.py --batch <묶음>
 | `Docs/figures/` | 그래프(SVG)와 그 수치(CSV), 단계별 화면(`steps/`) |
 | `Posts/` | 글과 측정 기록 |
 | `Measurements/` | 묶음별 수치와 대표 스크린샷. [최종 측정](Measurements/Full4/), 나머지는 개발 중의 측정([설명](Measurements/README.md)) |
+| `.claude/skills/` | 다른 Unreal 프로젝트에 복사해 쓰는 Claude Code 스킬. `unreal-perf-measurement`(Test 패키지 측정, 차이 판정, CsvProfiler 비교 스크립트), `unreal-mass-crowd-optimization`(적용 순서, 기법별 확인과 함정, 증상별 고칠 코드) |
 
 이 레포는 Claude Code 에이전트가 작업한다. 측정 규칙과 커밋 규칙은 훅이 강제한다([하네스](Docs/Guides/harness.md)).
 
