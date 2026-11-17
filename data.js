@@ -15,7 +15,7 @@ window.SITE_DATA = {
    "ISKM을 VAT 인스턴스로 되돌리면 GPU 시간이 1.24ms 늘고 프레임 p95는 0.67ms 짧아진다. 병목이 게임 스레드라 ISKM의 이점은 프레임 시간이 아니라 GPU 시간으로 남는다.",
    "80m 밖 그림자를 다시 켜도 프레임 p95와 GPU 시간이 최종 구성과 구별되지 않는다(GPU 시간 +0.48ms, 0.5ms 아래).",
    "배경 무리를 끄면 GPU 시간이 0.62ms 줄지만 프레임 p95는 최종 구성과 구별되지 않는다.",
-   "분리 프로세서 대신 엔진 회피를 쓰면 프레임 p95가 8.57ms 길어진다."
+   "밀어내기 프로세서 대신 엔진 회피를 쓰면 프레임 p95가 8.57ms 길어진다."
   ],
   "rows": [
    {
@@ -170,7 +170,7 @@ window.SITE_DATA = {
     },
     "group": "dist",
     "mixed": "",
-    "name": "겹침 방지(분리 프로세서)를 끈 조건",
+    "name": "겹침 방지(밀어내기 프로세서)를 끈 조건",
     "notes": [
      "겹친 쌍 1,644(최종 구성 234)"
     ],
@@ -233,7 +233,7 @@ window.SITE_DATA = {
      "real": false
     },
     "group": "dist",
-    "mixed": "하이드레이션을 끄면 액터 캡슐, 액터 애니메이션 예산, 액터 메시 고정 바운드도 함께 빠진다.",
+    "mixed": "하이드레이션을 끄면 액터 캡슐, Animation Budget Allocator, 액터 메시 고정 바운드도 함께 빠진다.",
     "name": "하이드레이션을 끈 조건",
     "notes": [
      "병목이 GPU로 바뀐다"
@@ -455,7 +455,7 @@ window.SITE_DATA = {
     },
     "group": "same",
     "mixed": "",
-    "name": "액터 애니메이션 예산을 끈 조건",
+    "name": "Animation Budget Allocator를 끈 조건",
     "notes": [],
     "state": "same",
     "sub": "끄면 액터 메시가 `USkeletalMeshComponent`이고 매 프레임 애니메이션을 평가한다."
@@ -583,12 +583,12 @@ window.SITE_DATA = {
     },
     "group": "sub",
     "mixed": "",
-    "name": "분리 프로세서 대신 엔진 회피를 쓴 조건",
+    "name": "밀어내기 프로세서 대신 엔진 회피를 쓴 조건",
     "notes": [
      "겹친 쌍 11,660(최종 구성 234)"
     ],
     "state": "slower",
-    "sub": "분리 프로세서 대신 엔진 회피 Processor로 겹침을 막는다."
+    "sub": "밀어내기 프로세서 대신 엔진 회피 Processor로 겹침을 막는다."
    }
   ]
  },
@@ -634,7 +634,8 @@ window.SITE_DATA = {
   "seed": "20261106",
   "summary_csv": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Measurements/Full4/summary.csv",
   "target_ms": 16.7,
-  "target_n": 10000
+  "target_n": 10000,
+  "tips": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Docs/Guides/mass-crowd-tips.md"
  },
  "pool": {
   "minutes": [
@@ -835,8 +836,8 @@ window.SITE_DATA = {
   {
    "num": 3,
    "ready": true,
-   "sentence": "엔진 회피를 위치를 직접 미는 분리 프로세서로 바꾸자, 작업자 하나에 묶였던 프레임이 풀려 호드 1만이 처음으로 16.7ms 안에 들었다.",
-   "title": "직접 짠 분리: 엔진 회피를 분리 프로세서로 바꿔 처음으로 16.7ms 안에",
+   "sentence": "엔진 회피를 위치를 직접 미는 밀어내기 프로세서로 바꾸자, 작업자 하나에 묶였던 프레임이 풀려 호드 1만이 처음으로 16.7ms 안에 들었다.",
+   "title": "자체 밀어내기: 엔진 회피를 밀어내기 프로세서로 바꿔 처음으로 16.7ms 안에",
    "url": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Posts/03-separation/README.md"
   },
   {
@@ -863,7 +864,7 @@ window.SITE_DATA = {
   {
    "num": 7,
    "ready": true,
-   "sentence": "엔진 회피를 직접 짠 분리로 바꾼 단계 3에서 호드 1만이 처음 16.7ms 안에 들었고, 단계 7까지 늘어난 시간은 단계 8이 거의 되돌렸다.",
+   "sentence": "엔진 회피를 직접 짠 밀어내기로 바꾼 단계 3에서 호드 1만이 처음 16.7ms 안에 들었고, 단계 7까지 늘어난 시간은 단계 8이 거의 되돌렸다.",
    "title": "요약: 단계 3에서 16.7ms 안에 들고, 표현을 셋 더한 최종 구성도 2.47ms가 남는다",
    "url": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Posts/07-summary/README.md"
   }
@@ -1156,7 +1157,7 @@ window.SITE_DATA = {
      "unmet": true
     }
    },
-   "changed": "엔진 회피를 직접 짠 분리 프로세서(`ULabSeparationProcessor`)로 바꾸고, 엔진의 방향 보간 Processor를 같은 계산을 병렬로 도는 사본으로 바꿨다. 표현은 단계 2와 같다.",
+   "changed": "엔진 회피를 직접 짠 밀어내기 프로세서(`ULabSeparationProcessor`)로 바꾸고, 엔진의 방향 보간 Processor를 같은 계산을 병렬로 도는 사본으로 바꿨다. 표현은 단계 2와 같다.",
    "clip": "assets/step3.webp",
    "clip_mb": 7.5,
    "counts": [
@@ -1190,15 +1191,15 @@ window.SITE_DATA = {
     }
    },
    "group": "earn",
-   "learned": "엔진 회피를 위치를 직접 미는 분리 프로세서로 바꾸자, 작업자 하나에 묶였던 프레임이 풀려 호드 1만이 처음으로 16.7ms 안에 들었다.",
+   "learned": "엔진 회피를 위치를 직접 미는 밀어내기 프로세서로 바꾸자, 작업자 하나에 묶였던 프레임이 풀려 호드 1만이 처음으로 16.7ms 안에 들었다.",
    "margin_ms": 2.552,
    "max60": null,
-   "name": "직접 짠 분리",
+   "name": "자체 밀어내기",
    "num": 3,
    "post": {
     "num": 3,
     "ready": true,
-    "title": "직접 짠 분리: 엔진 회피를 분리 프로세서로 바꿔 처음으로 16.7ms 안에",
+    "title": "자체 밀어내기: 엔진 회피를 밀어내기 프로세서로 바꿔 처음으로 16.7ms 안에",
     "url": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Posts/03-separation/README.md"
    }
   },
@@ -1982,5 +1983,32 @@ window.SITE_DATA = {
     "url": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Posts/05-cost-cuts-and-contributions/README.md"
    }
   }
- ]
+ ],
+ "summary": {
+  "close": "최종 구성의 프레임 p95는 14.2ms이고, 16.7ms까지 2.47ms가 남는다. 최대 총수 셈에서 호드 2만은 겹침 방지가 제 기능을 하지 못해 뺐다.",
+  "lead": "같은 호드 1만이 `ACharacter` 액터로는 프레임 p50(중앙값) 597ms, Mass Entity로 다시 만든 최종 구성으로는 12.8ms다(약 47배). 60fps를 지키는 총수는 약 780에서 약 1만 2천으로 늘었다. 기법을 한 벌씩 바꾸며 같은 조건으로 재서, 기법마다 어느 스레드의 몇 ms가 바뀌는지 갈랐다.",
+  "takeaways": [
+   {
+    "body": "엔진의 이동·회피·표현 프로세서를 그대로 쓴 Mass는 프레임 p50이 34.1ms였다. 남은 병목은 작업자 하나에 묶인 엔진 회피였다. 이것을 위치를 직접 미는 밀어내기 프로세서로 바꾸자 12.4ms가 되어 처음 16.7ms(60fps) 안에 들었다.",
+    "head": "Mass의 엔진 기본 경로만으로는 모자라다. 한 스레드에서 도는 엔진 프로세서를 먼저 찾는다."
+   },
+   {
+    "body": "35~200m의 VAT 인스턴스(애니메이션을 텍스처에 구워 정점 셰이더로 재생)와 ISKM, 200m 밖의 Niagara 입자를 더하는 동안 프레임 p95는 1.02ms만 늘었다.",
+    "head": "게임 스레드가 병목이면 거리별 표현은 싸다."
+   },
+   {
+    "body": "가까운 엔티티에 액터를 붙이는 하이드레이션을 끄면 프레임 p95가 6.98ms 짧아진다. 손을 대려면 액터 쪽부터 본다. 단계 8이 줄인 시간은 거의 액터 메시 고정 바운드의 몫이다.",
+    "head": "남은 비용의 대부분은 가까운 액터에 있다."
+   },
+   {
+    "body": "200m 밖을 ISKM 대신 입자로 채우는 일이 가장 큰 절약이다(끄면 +3.54ms).",
+    "head": "먼 개체는 덜 그리는 것보다 안 그리는 것이 크다."
+   },
+   {
+    "body": "움직이는 ISKM 엔티티를 파괴하면 애니메이션 트랙이 돌아오지 않아 16분에 120,428개까지 쌓인다. 그래서 엔티티를 풀로 다시 쓴다. 화면 안팎 판정에 여유가 없어 표현이 오가므로, 최소 유지 시간 2초를 둔다.",
+    "head": "엔진의 빈틈 둘은 게임 코드로 피한다."
+   }
+  ],
+  "why": "Mass가 이만큼 가벼운 것은 개체를 액터가 아니라 데이터로 두기 때문이다. 같은 구성의 개체는 Fragment 배열로 청크에 모이고, 프로세서는 액터의 틱, 컴포넌트, 이동 스윕 없이 그 배열을 돈다. 1만 개체를 서로 떼어 놓는 직접 짠 밀어내기 프로세서는 0.82ms다. 가까운 액터를 모두 빼면 호드 1만을 모두 ISKM(GPU에서 스키닝하는 인스턴스 스켈레탈 메시)으로 그리고도 프레임 p95(느린 쪽 5%의 경계)가 7.25ms다."
+ }
 };

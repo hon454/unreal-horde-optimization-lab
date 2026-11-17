@@ -221,6 +221,8 @@ button.c-row:hover { background: var(--soft); }
 .a-head > div { display: grid; grid-template-columns: 5.2rem minmax(0, 1fr) 7.2rem; gap: 8px; }
 .a-head .dir { display: flex; justify-content: space-between; }
 
+.summary p { max-width: 75ch; }
+.notes.takeaways li { margin-bottom: 0.6rem; }
 .notes { padding-left: 1.2em; margin: 0.8rem 0 0; }
 .notes li { margin-bottom: 0.4rem; max-width: 75ch; }
 .notes.intro { color: var(--sub); margin: 0 0 1rem; padding-left: 0; list-style: none; }

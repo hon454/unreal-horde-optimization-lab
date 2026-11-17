@@ -69,9 +69,13 @@
   // ---------- header ----------
   function renderHeader() {
     var H = D.headline;
-    $("lead").innerHTML = md("`ACharacter` 액터로 호드 1만을 돌리면 프레임 p50이 " + fmt(H.first_ms) + "ms이고, 60fps를 지키는 액터는 약 " +
-      int(approx(H.first_max60)) + "개까지다. 같은 호드를 UE 5.8의 Mass Entity로 다시 만들고, 최적화 기법을 한 단계씩 더하며 " +
-      "그때마다 같은 시나리오를 같은 방법으로 다시 쟀다.");
+    var SUM = D.summary;
+    $("lead").innerHTML = md(SUM.lead);
+    $("sum-why").innerHTML = md(SUM.why);
+    $("sum-list").innerHTML = SUM.takeaways.map(function (t) {
+      return "<li><strong>" + md(t.head) + "</strong> " + md(t.body) + "</li>";
+    }).join("");
+    $("sum-close").innerHTML = md(SUM.close) + ' 증상과 원인과 바꾼 코드는 <a href="' + D.meta.tips + '">Mass 군중 최적화와 프로파일링 팁</a>에 있다.';
     $("spec-n").textContent = kcount(D.meta.target_n);
     $("spec-ms").textContent = "한 프레임 " + fmt(BUDGET) + "ms";
     $("res-first").textContent = fmt(H.first_ms) + "ms";
