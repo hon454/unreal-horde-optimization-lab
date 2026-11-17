@@ -53,7 +53,7 @@
 <text x="176.0" y="435.0" font-size="16" text-anchor="middle" font-weight="700" fill="#111827">단계 3</text>
 <text x="176.0" y="455.0" font-size="16" text-anchor="middle" fill="#4b5563">직접 짠 분리</text>
 <text x="308.0" y="435.0" font-size="16" text-anchor="middle" font-weight="700" fill="#111827">단계 4</text>
-<text x="308.0" y="455.0" font-size="16" text-anchor="middle" fill="#4b5563">VAT 인스턴스</text>
+<text x="308.0" y="455.0" font-size="16" text-anchor="middle" fill="#4b5563">애니메이션 표현</text>
 <text x="440.0" y="435.0" font-size="16" text-anchor="middle" font-weight="700" fill="#111827">단계 5</text>
 <text x="440.0" y="455.0" font-size="16" text-anchor="middle" fill="#4b5563">Simulation LOD</text>
 <text x="572.0" y="435.0" font-size="16" text-anchor="middle" font-weight="700" fill="#111827">단계 6</text>

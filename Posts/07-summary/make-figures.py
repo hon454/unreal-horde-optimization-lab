@@ -299,7 +299,7 @@ def steps_3_to_8():
     Y = lambda ms: bot - (ms - A_LO) * A_PX
     for n, x in zip(nums, xs):
         if n in HATCHED:
-            o.append(f'<rect x="{x - colw / 2:.1f}" y="{top - 56:.1f}" width="{colw}" height="{bot - top + 118:.1f}" fill="{SHADE}"/>')
+            o.append(f'<rect x="{x - colw / 2:.1f}" y="{top - 56:.1f}" width="{colw}" height="{bot - top + 138:.1f}" fill="{SHADE}"/>')
     for t in (14, 15, 16, 17):
         o.append(f'<line x1="86" y1="{Y(t):.1f}" x2="{W - 32}" y2="{Y(t):.1f}" stroke="#eef0f3"/>')
         o.append(text(76, Y(t) + 5, str(t), fill=SUB, anchor="end"))
@@ -345,11 +345,13 @@ def steps_3_to_8():
     o.append(text(86, bot + 24, "숫자: 앞 단계와의 차이. 회색은 구별되지 않고, 빨강은 구별된다", fill=SUB))
     for n, x in zip(nums, xs):
         name = next(s[1] for s in STEPS if s[0] == n)
-        short = {"애니메이션 표현": "VAT 인스턴스", "Simulation LOD + 엔티티 풀": "Simulation LOD",
+        # two lines where the glossary name is as wide as the column ("애니메이션 표현" next to "Simulation LOD")
+        short = {"애니메이션 표현": "애니메이션\n표현", "Simulation LOD + 엔티티 풀": "Simulation\nLOD",
                  "남은 비용 줄이기": "남은 비용"}.get(name, name)
         o.append(text(x, bot + 56, f"단계 {n}", anchor="middle", weight="700"))
-        o.append(text(x, bot + 76, short, anchor="middle", fill=SUB))
-    y = bot + 112
+        for k, part in enumerate(short.split("\n")):
+            o.append(text(x, bot + 76 + 20 * k, part, anchor="middle", fill=SUB))
+    y = bot + 132
     o.append(f'<line x1="32" y1="{y - 20}" x2="{W - 32}" y2="{y - 20}" stroke="{LINE}"/>')
     for line in [f"단계 8은 단계 3과 {fmtd(net)}ms 차이로, 둘은 구별되지 않는다.",
                  "구별되지 않음: 차이가 0.5ms 아래이거나 두 조건의 세 실행 범위보다 작다.",

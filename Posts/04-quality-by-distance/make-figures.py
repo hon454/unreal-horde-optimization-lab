@@ -121,7 +121,7 @@ CHECK = []  # (figure, label, text) for the scratch comparison against the CSV (
 # ---------- 1. steps 3 to 7: frame p95 with ranges, thread medians ----------
 STEPS = [  # (condition, step line, name line, adds a representation)
     ("V0-s3", "단계 3", "직접 짠 분리", False),
-    ("V0-s4", "단계 4", "VAT 인스턴스", True),
+    ("V0-s4", "단계 4", "애니메이션 표현", True),
     ("V0-s5", "단계 5", "Simulation LOD", False),
     ("V0-s6", "단계 6", "ISKM", True),
     ("V0-s7", "단계 7", "배경 무리", True),
