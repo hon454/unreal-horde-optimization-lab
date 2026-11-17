@@ -21,12 +21,14 @@
 | 16분 실행 | 측정 960초 | `Pool2` `batch.json` `measure_sec` | 계산 16분 |
 | 풀 끔 GPU 메모리 3,370MB → 5,110MB | 3,369.6 → 5,105.3 | `Pool2` `a8pool` 1분, 16분 `gpu_mem_mean` | 유효 숫자 세 자리 |
 | 풀 켬 16분 끝 트랙 21,149개 | 21,149 | `Pool2-V0-s8-N10000-P1-r1` 16분 `iskm_tracks_end` | 참고 묶음, 1회 |
+| 풀 켬 트랙이 3분 뒤 2만 남짓에서 분당 70개쯤 는다 | 3분 20,232, 16분 21,149 | `Pool2-V0-s8-N10000-P1-r1` `iskm_tracks_end` | (21,149 − 20,232) ÷ 13 = 70.5 |
 | 풀 켬 GPU 메모리가 평평하다 | 3,345.9\~3,375.0 | `Pool2` `s8` 1\~16분 `gpu_mem_mean` | 최솟값과 최댓값 |
 | 프레임 p95는 12분까지 같은 구간끼리 차이가 0.5ms 아래다 | 차 −0.287\~+0.434 | `Pool2` 1\~12분 `frame_p95`(끔 − 켬) | 모두 0.5ms 아래 |
 | 끝의 네 구간에서 0.62\~1.14ms 높다 | +1.138, +0.730, +0.621, +0.766 | `Pool2` 13\~16분 `frame_p95`(끔 − 켬) | 1회씩이라 범위 없음 |
 | 엔티티 풀은 단계 5부터 | `Step >= 5` | `LabConfig.cpp:54`(de0e21b) | 소스 확인 |
 | ISKM은 단계 6부터, 카메라 35\~200m | `Step >= 6`, 35m, 200m | `LabConfig.h:424`, `:19` `DefaultHydrateM`, `:219` `FarM` | 소스 확인(de0e21b) |
 | 트랙 예약 용량 = 개체 수 × 1.1 + 64 | 소형 9,964, 대형 1,164 | `LabIskmProcessor.cpp:309-311` | `ceil(9000 × 1.1) + 64`, float32 곱 |
+| 200m 밖 피격 개체의 컴포넌트 용량 64 | 64 | `LabIskmProcessor.cpp:408-409` | 소스 확인 |
 | 예약한 용량의 합 22,384 | 22,384 | 아래 "트랙 예약 용량의 합" | 계산 |
 | 트랙 예약을 끈 조건 구별되지 않음 | 14.239, 14.231 | `Full4` `V0-a8res`, `V0-s8` `frame_p95_ms` | 차 +0.008ms, 0.5ms 아래 |
 | 200m 밖(저격 구간, 피격 ISKM) | 200m | `LabConfig.h:219` `FarM`(de0e21b) | 표현 LOD Off 거리 |
@@ -54,7 +56,7 @@
 
 ## 트랙 예약 용량의 합
 
-- 단계 8은 종류마다 ISKM 컴포넌트가 셋이다. 그림자를 켠 `[High, Low)`, 그림자를 끈 `[Low, Off)`, 그리는 끝 밖 피격 개체의 `[Off, Max)`다(`LabCrowdSubsystem.cpp:175-208`, de0e21b와 HEAD a4138de가 같다). 컴포넌트마다 트랙 제공자가 따로다.
+- 단계 8은 종류마다 ISKM 컴포넌트가 셋이다. 그림자를 켠 `[High, Low)`, 그림자를 끈 `[Low, Off)`, 그리는 끝 밖 피격 개체의 `[Off, Max)`다(`LabCrowdSubsystem.cpp:175-208`, de0e21b의 줄). 컴포넌트마다 트랙 제공자가 따로다.
 - 용량은 앞의 둘이 종류의 개체 수 × 1.1 + 64, 셋째가 64다(`LabIskmProcessor.cpp:305-311, 409`). 1만이면 대형이 `(N + 9) / 10` = 1,000, 소형이 9,000이다.
 - 합: 2 × 9,964 + 2 × 1,164 + 2 × 64 = 22,384.
 - 트랙 맵의 항목은 모두 활성 트랙이고 번호가 서로 다르다. 그래서 한 컴포넌트의 항목 수가 용량을 넘으면 그 컴포넌트의 끝 번호도 용량을 넘는다. `a8pool`의 30,797은 22,384보다 크므로 적어도 한 컴포넌트는 예약 뒤에 끝 번호가 늘었다. 컴포넌트별 값은 CSV에 없다.
@@ -97,11 +99,11 @@
 | 트랙 1분 17,211 / 17,711, 16분 21,149 / 120,428 | 같다 | 개수라 줄이지 않는다 |
 | GPU 메모리 1분 3,370 / 3,370 | 3,371.0 / 3,369.6 | 유효 숫자 세 자리 |
 | GPU 메모리 16분 3,370 / 5,110 | 3,370.6 / 5,105.3 | 유효 숫자 세 자리 |
-| 프레임 p95 1분 14.1 / 14 | 14.102 / 14.035 | 세 자리, 14.0은 14로 적는다 |
+| 프레임 p95 1분 14.1 / 14.0 | 14.102 / 14.035 | 세 자리, 나란히 적는 값이라 14.0의 0을 남긴다 |
 | 프레임 p95 16분 14.5 / 15.2 | 14.468 / 15.234 | 세 자리 |
 
 - 트랙 수는 구간 끝 값(`iskm_tracks_end`), GPU 메모리는 구간 평균(`gpu_mem_mean`, CSV 스탯 `GPUMem/LocalUsedMB`), 프레임 p95는 구간의 프레임 시간 95번째 백분위수(`frame_p95`)다.
-- 풀 끔의 트랙은 분당 약 6,850개씩 는다((120,428 − 17,711) ÷ 15 = 6,847.8). 풀 켬은 3분 뒤부터 분당 약 70개다((21,149 − 20,232) ÷ 13 = 70.5). 둘 다 본문에는 쓰지 않았다.
+- 풀 끔의 트랙은 분당 약 6,850개씩 는다((120,428 − 17,711) ÷ 15 = 6,847.8). 풀 켬은 3분 뒤부터 분당 약 70개다((21,149 − 20,232) ÷ 13 = 70.5). 풀 켬의 값만 본문과 대체 텍스트에 "분당 70개쯤"으로 썼다.
 
 ### [capsule-plane.svg](images/capsule-plane.svg)
 
@@ -146,6 +148,8 @@
 | 그 호출자(정지 표현) | `MassStationaryISMSwitcherProcessor.cpp:127, 238, 264`(쿼리 `:30`), `MassStationaryISMRepresentationFragmentDestructor.cpp:91`(쿼리 `:28`) | `FMassStaticRepresentationTag` 요구 |
 | 그 호출자(정지한 인스턴스 액터) | `Plugins/Runtime/InstancedActors/Source/InstancedActors/Private/InstancedActorsVisualizationSwitcherProcessor.cpp:112`, 같은 폴더 `InstancedActorsRepresentationActorManagement.cpp:217-218` | Mass 군중 경로 밖 |
 | 할당은 가장 낮은 빈 번호, 없으면 끝에 붙임 | `Source/Runtime/Engine/Classes/Animation/AnimTrackPool.h:102-120, 161-172, 274-277` | `AllocateTrack`, `DeallocateTrack`, `GetNumTracks` |
+| 트랙 풀은 트랙 제공자 인스턴스의 멤버 | `Source/Runtime/Engine/Classes/Animation/AnimSequenceTransformProviderData.h:1038, 1137` | `UAnimSequenceTransformProviderDataInstance`, `TrackPools` |
+| 인스턴스는 컴포넌트를 주인으로 만든다 | `Source/Runtime/Engine/Private/Animation/AnimSequenceTransformProviderData.cpp:1305-1312` | `CreateAnimSequenceTransformProviderDataInstance` |
 | 활성 트랙은 매 프레임 평가 | `Source/Runtime/Renderer/Private/Skinning/AnimSequenceTransformProvider.cpp:1456-1491` | `EnumerateActiveTracks` |
 | 뼈대 버퍼 크기 = 트랙 수 × 뼈 수 × 2 | `Source/Runtime/Renderer/Private/Skinning/SkinningSceneExtension.cpp:1336` | `AllocSpaceForPrimitive` |
 | 알려진 문제 | [Epic 개발자 포럼](https://forums.unrealengine.com/t/mass-crowds-using-skinnedmeshinstance-leak-gpu-memory-every-wave-of-spawned-and-killed-entities-permanently-grows-the-animation-track-pool-5-8/2742508) | [references.md](../../Docs/Reference/references.md) 49행 |
@@ -165,7 +169,7 @@
 | 맞는 빈 구간이 없으면 합친 뒤 다시 찾음 | `Source/Runtime/Engine/Public/SpanAllocator.h:23-31, 63-69` | `FSpanAllocator::Allocate`, `Free` |
 | 이웃 구간 합치기, 첫 맞춤 | `Source/Runtime/Engine/Private/SpanAllocator.cpp:58-122, 124-138` | `Consolidate`, `SearchFreeList` |
 
-알려진 문제로 올라온 이슈는 찾지 못했다([engine-notes.md](../../Docs/Reference/engine-notes.md) 42절, 2026-11-15 검색). 이 글을 쓰며 다시 검색하지는 않았다.
+알려진 문제로 올라온 이슈는 찾지 못했다([engine-notes.md](../../Docs/Reference/engine-notes.md) 42절, 2026-11-15 검색). 이 글을 쓰며 다시 검색하지는 않았다. 그래서 본문은 "2026-11-15에 찾아본 범위에서"로 쓴다.
 
 ### 3. 가산 클립
 
@@ -209,7 +213,7 @@ posting.md의 상한(글 하나에 엔진 코드 30줄)보다 작다. 문제 5�
 
 ## Lab 코드 위치
 
-`Source/HordeOptLab/`의 아래 파일은 측정 빌드 de0e21b와 이 글을 쓴 때의 HEAD(a4138de)가 같다(`git log de0e21b..HEAD`가 비었다). `LabConfig.*`는 다르므로 de0e21b의 줄을 적었다.
+아래 줄 번호는 측정 빌드 de0e21b의 것이다(`git show de0e21b:<파일>`). `LabCrowdSubsystem.cpp`는 그 뒤 c12daf7에서 바뀌었다.
 
 | 발췌와 문장 | 파일과 줄 | 심볼 |
 | --- | --- | --- |

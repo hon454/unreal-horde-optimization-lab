@@ -98,11 +98,14 @@ def _no_zero_decimals(f):
     return lambda *a, **k: re.sub(r"[.]0+$", "", f(*a, **k))
 
 
-@_no_zero_decimals
-def fmt(x):
-    """Three significant figures, rounded half up from the CSV text (12.35 -> 12.4), as in the post body."""
+def fmt_keep(x):
+    """Three significant figures, rounded half up from the CSV text (12.35 -> 12.4), keeping a trailing zero (14.0)
+    so that values written side by side show the same precision."""
     q = "1" if abs(x) >= 100 else "0.1" if abs(x) >= 10 else "0.01"
     return str(Decimal(repr(x)).quantize(Decimal(q), rounding=ROUND_HALF_UP))
+
+
+fmt = _no_zero_decimals(fmt_keep)  # as in the post body: 27.0 -> 27
 
 
 def sig3(x):
@@ -259,7 +262,7 @@ def pool_long_run():
     panels = [
         ("ISKM 트랙 수(구간 끝)", "tracks", 0, 130000, [0, 50000, 100000], lambda v: f"{int(v):,}", cnt, None),
         ("GPU 메모리(구간 평균, MB)", "mem", 3000, 5500, [3000, 4000, 5000], lambda v: f"{int(v):,}", sig3, None),
-        ("프레임 p95(ms)", "p95", 13, 17, [13, 14, 15, 16, 17], lambda v: f"{v:g}", fmt, 16.667),
+        ("프레임 p95(ms)", "p95", 13, 17, [13, 14, 15, 16, 17], lambda v: f"{v:g}", fmt_keep, 16.667),
     ]
     PH = 120
     y = 160
