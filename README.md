@@ -28,6 +28,19 @@
 
 이 시나리오가 재지 않는 것도 있다. 장애물과 경로 탐색이 없고, 지형은 평지다. 호드 총수 1만은 맵 반경 500m와 한 쌍인 값이다. 개체가 맵 중심에서 반지름 방향으로 고르게 퍼져 있어, 모든 거리 구간에 개체가 찬다.
 
+## 글
+
+| # | 제목 | 알게 된 것 |
+| --- | --- | --- |
+| 00 | [호드 1만을 60fps로: 목표 사양과 재는 법](Posts/00-goals-and-method/README.md) | 목표와 장면과 재는 법을 하나로 묶어 두면, 같은 일을 하는 기법 하나가 어느 스레드의 몇 ms를 바꾸는지가 드러난다. |
+| 01 | [액터 기준선: 캡슐과 이동 컴포넌트를 가진 액터는 약 780에서 60fps를 넘는다](Posts/01-actor-baseline/README.md) | 액터 기준선의 게임 스레드는 CharacterMovement가 쓰고, Budget Allocator는 예산에 닿기 전에는 일을 줄이지 않는다. |
+| 02 | [Mass, 엔진 기본 경로: 597ms가 34.1ms로, 남은 병목은 엔진 회피](Posts/02-mass-engine-path/README.md) | 액터를 Mass로 옮기면 이동 틱은 사라지지만, 한 스레드에서 도는 엔진 회피가 새 병목이 된다. |
+| 03 | [직접 짠 분리: 엔진 회피를 분리 프로세서로 바꿔 처음으로 16.7ms 안에](Posts/03-separation/README.md) | 엔진 회피를 위치를 직접 미는 분리 프로세서로 바꾸자, 작업자 하나에 묶였던 프레임이 풀려 호드 1만이 처음으로 16.7ms 안에 들었다. |
+| 04 | [거리별 품질: 표현 셋을 더하는 동안 프레임 p95가 1.02ms 늘었다](Posts/04-quality-by-distance/README.md) | 단계 3에서 7까지 표현 셋을 더하는 동안 프레임 p95는 1.02ms 늘었고, GPU 비용은 병목인 게임 스레드에 가려 거의 드러나지 않았다. |
+| 05 | [비용을 줄이는 단계와 기법별 기여: 최종 구성의 큰 비용은 가까운 액터에 있다](Posts/05-cost-cuts-and-contributions/README.md) | 비용을 줄이는 단계 5와 8에서 프레임 시간을 줄인 것은 액터 메시 고정 바운드이고, 엔티티 풀의 이점은 긴 실행에서 보인다. |
+| 06 | [엔진을 고치지 않고 피한 문제 다섯: ISKM 트랙, Mass 쿼리, Chaos 트레이스](Posts/06-engine-findings/README.md) | 엔진에서 찾은 문제 다섯은 모두 엔진 소스를 고치지 않고 게임 코드, 에셋, 검사 규칙에서 피할 수 있었다. |
+| 07 | [요약: 단계 3에서 16.7ms 안에 들고, 표현을 셋 더한 최종 구성도 2.47ms가 남는다](Posts/07-summary/README.md) | 엔진 회피를 직접 짠 분리로 바꾼 단계 3에서 호드 1만이 처음 16.7ms 안에 들었고, 단계 7까지 늘어난 시간은 단계 8이 거의 되돌렸다. |
+
 ## 결과
 
 | 단계 1 액터 기준선(프레임 p95 665ms) | 단계 8 최종 구성(프레임 p95 14.2ms) |
@@ -40,16 +53,16 @@
 
 모든 단계가 같은 일 넷을 한다. 오브를 쫓고, 서로 겹치지 않고, 가까운 개체는 캡슐 콜리전을 갖고, 피해를 받고 죽는다. 한 단계는 앞 단계에서 기법 한 벌만 바꾸고, 둘 이상을 바꾼 단계는 기법별 기여로 몫을 가른다.
 
-| 단계 | 바꾼 것 | 포스팅 |
-| --- | --- | --- |
-| 단계 1 액터 기준선<br><img src="Docs/figures/steps/step1-actors.webp" width="320" alt="단계 1 화면. 모든 개체가 스켈레탈 메시 액터다"> | 모든 개체가 캡슐과 CharacterMovement를 가진 `ACharacter` 액터 | [01](Posts/01-actor-baseline/README.md) |
-| 단계 2 Mass, 엔진 기본 경로<br><img src="Docs/figures/steps/step2-mass-engine.webp" width="320" alt="단계 2 화면. 35m 안은 액터, 그 밖은 엔진 기본 표현으로 그린다"> | 개체를 Mass 엔티티로. 엔진의 이동·회피·표현, 35m 안은 액터 | [02](Posts/02-mass-engine-path/README.md) |
-| 단계 3 직접 짠 분리<br><img src="Docs/figures/steps/step3-separation.webp" width="320" alt="단계 3 화면. 개체가 분리 프로세서로 서로 밀며 오브를 쫓는다"> | 엔진 회피를 분리 프로세서로, 방향 보간을 병렬 사본으로 | [03](Posts/03-separation/README.md) |
-| 단계 4 애니메이션 표현<br><img src="Docs/figures/steps/step4-vat-budget.webp" width="320" alt="단계 4 화면. 35m에서 200m 사이의 개체가 VAT 인스턴스로 움직인다"> | VAT 인스턴스, 액터 애니메이션 예산, 최소 유지 시간 | [04](Posts/04-quality-by-distance/README.md) |
-| 단계 5 Simulation LOD + 엔티티 풀<br><img src="Docs/figures/steps/step5-simlod-pool.webp" width="320" alt="단계 5 화면. 겉모습은 단계 4와 같다"> | 먼 개체의 로직을 드물게, 죽은 엔티티를 다시 쓴다 | [05](Posts/05-cost-cuts-and-contributions/README.md) |
-| 단계 6 ISKM<br><img src="Docs/figures/steps/step6-iskm.webp" width="320" alt="단계 6 화면. 35m에서 200m 사이의 개체를 ISKM으로 그린다"> | 35\~200m를 ISKM으로, ISKM 고정 바운드 | [04](Posts/04-quality-by-distance/README.md) |
-| 단계 7 배경 무리<br><img src="Docs/figures/steps/step7-crowd.webp" width="320" alt="단계 7 화면. 200m 밖을 Niagara 입자 무리가 채운다"> | 200m 밖을 Niagara 메시 입자로 | [04](Posts/04-quality-by-distance/README.md) |
-| 단계 8 남은 비용 줄이기<br><img src="Docs/figures/steps/step8-final.webp" width="320" alt="단계 8 화면. 35m 안은 액터, 35m에서 200m 사이는 ISKM, 200m 밖은 입자로 그린다"> | 80m 밖 그림자 끔, 액터 메시 고정 바운드 | [05](Posts/05-cost-cuts-and-contributions/README.md) |
+| 단계 | 바꾼 것 |
+| --- | --- |
+| 단계 1 액터 기준선<br><img src="Docs/figures/steps/step1-actors.webp" width="320" alt="단계 1 화면. 모든 개체가 스켈레탈 메시 액터다"> | 모든 개체가 캡슐과 CharacterMovement를 가진 `ACharacter` 액터 |
+| 단계 2 Mass, 엔진 기본 경로<br><img src="Docs/figures/steps/step2-mass-engine.webp" width="320" alt="단계 2 화면. 35m 안은 액터, 그 밖은 엔진 기본 표현으로 그린다"> | 개체를 Mass 엔티티로. 엔진의 이동·회피·표현, 35m 안은 액터 |
+| 단계 3 직접 짠 분리<br><img src="Docs/figures/steps/step3-separation.webp" width="320" alt="단계 3 화면. 개체가 분리 프로세서로 서로 밀며 오브를 쫓는다"> | 엔진 회피를 분리 프로세서로, 방향 보간을 병렬 사본으로 |
+| 단계 4 애니메이션 표현<br><img src="Docs/figures/steps/step4-vat-budget.webp" width="320" alt="단계 4 화면. 35m에서 200m 사이의 개체가 VAT 인스턴스로 움직인다"> | VAT 인스턴스, 액터 애니메이션 예산, 최소 유지 시간 |
+| 단계 5 Simulation LOD + 엔티티 풀<br><img src="Docs/figures/steps/step5-simlod-pool.webp" width="320" alt="단계 5 화면. 겉모습은 단계 4와 같다"> | 먼 개체의 로직을 드물게, 죽은 엔티티를 다시 쓴다 |
+| 단계 6 ISKM<br><img src="Docs/figures/steps/step6-iskm.webp" width="320" alt="단계 6 화면. 35m에서 200m 사이의 개체를 ISKM으로 그린다"> | 35\~200m를 ISKM으로, ISKM 고정 바운드 |
+| 단계 7 배경 무리<br><img src="Docs/figures/steps/step7-crowd.webp" width="320" alt="단계 7 화면. 200m 밖을 Niagara 입자 무리가 채운다"> | 200m 밖을 Niagara 메시 입자로 |
+| 단계 8 남은 비용 줄이기<br><img src="Docs/figures/steps/step8-final.webp" width="320" alt="단계 8 화면. 35m 안은 액터, 35m에서 200m 사이는 ISKM, 200m 밖은 입자로 그린다"> | 80m 밖 그림자 끔, 액터 메시 고정 바운드 |
 
 단계 4, 6, 7은 표현을 더하는 단계이고, 단계 2, 3, 5, 8은 비용을 줄이는 단계다. 단계 1은 출발점이고, 단계 8이 최종 구성이다.
 
@@ -82,19 +95,6 @@
 엔티티 풀은 죽은 개체의 엔티티를 파괴하지 않고 종류별 풀에 넣었다가, 재생성 때 다시 쓴다. 풀은 엔진이 움직이는 ISKM 엔티티를 파괴할 때 그 애니메이션 트랙을 돌려받지 않는 문제를 피한다([엔진을 고치지 않고 피한 문제 다섯](Posts/06-engine-findings/README.md)). 240초 실행에서는 풀을 꺼도 프레임 p95가 구별되지 않아, 같은 최종 구성을 풀 켬과 풀 끔으로 16분씩 한 번 더 돌렸다. 풀을 끄면 ISKM 트랙이 120,428개까지 늘고, 마지막 4분의 프레임 p95가 0.62\~1.14ms 길었다.
 
 ![엔티티 풀을 켜고 끈 16분 실행의 1분 구간 값. 참고 측정이다. 최종 구성, 호드 총수 1만, 이동 장면, 오브 시점 카메라, 조건마다 한 번. 풀을 끄면 ISKM 트랙이 17,711에서 120,428까지 늘고 GPU 메모리가 3,370MB에서 5,105MB로 는다. 풀을 켜면 트랙이 21,149에서 거의 멈추고 GPU 메모리가 평평하다. 프레임 p95는 13분부터 풀을 끈 쪽이 0.5ms 넘게 높다](Docs/figures/readme/entity-pool.svg)
-
-## 글
-
-| # | 제목 | 알게 된 것 |
-| --- | --- | --- |
-| 00 | [호드 1만을 60fps로: 목표 사양과 재는 법](Posts/00-goals-and-method/README.md) | 목표와 장면과 재는 법을 하나로 묶어 두면, 같은 일을 하는 기법 하나가 어느 스레드의 몇 ms를 바꾸는지가 드러난다. |
-| 01 | [액터 기준선: 캡슐과 이동 컴포넌트를 가진 액터는 약 780에서 60fps를 넘는다](Posts/01-actor-baseline/README.md) | 액터 기준선의 게임 스레드는 CharacterMovement가 쓰고, Budget Allocator는 예산에 닿기 전에는 일을 줄이지 않는다. |
-| 02 | [Mass, 엔진 기본 경로: 597ms가 34.1ms로, 남은 병목은 엔진 회피](Posts/02-mass-engine-path/README.md) | 액터를 Mass로 옮기면 이동 틱은 사라지지만, 한 스레드에서 도는 엔진 회피가 새 병목이 된다. |
-| 03 | [직접 짠 분리: 엔진 회피를 분리 프로세서로 바꿔 처음으로 16.7ms 안에](Posts/03-separation/README.md) | 엔진 회피를 위치를 직접 미는 분리 프로세서로 바꾸자, 작업자 하나에 묶였던 프레임이 풀려 호드 1만이 처음으로 16.7ms 안에 들었다. |
-| 04 | [거리별 품질: 표현 셋을 더하는 동안 프레임 p95가 1.02ms 늘었다](Posts/04-quality-by-distance/README.md) | 단계 3에서 7까지 표현 셋을 더하는 동안 프레임 p95는 1.02ms 늘었고, GPU 비용은 병목인 게임 스레드에 가려 거의 드러나지 않았다. |
-| 05 | [비용을 줄이는 단계와 기법별 기여: 최종 구성의 큰 비용은 가까운 액터에 있다](Posts/05-cost-cuts-and-contributions/README.md) | 비용을 줄이는 단계 5와 8에서 프레임 시간을 줄인 것은 액터 메시 고정 바운드이고, 엔티티 풀의 이점은 긴 실행에서 보인다. |
-| 06 | [엔진을 고치지 않고 피한 문제 다섯: ISKM 트랙, Mass 쿼리, Chaos 트레이스](Posts/06-engine-findings/README.md) | 엔진에서 찾은 문제 다섯은 모두 엔진 소스를 고치지 않고 게임 코드, 에셋, 검사 규칙에서 피할 수 있었다. |
-| 07 | [요약: 단계 3에서 16.7ms 안에 들고, 표현을 셋 더한 최종 구성도 2.47ms가 남는다](Posts/07-summary/README.md) | 엔진 회피를 직접 짠 분리로 바꾼 단계 3에서 호드 1만이 처음 16.7ms 안에 들었고, 단계 7까지 늘어난 시간은 단계 8이 거의 되돌렸다. |
 
 ## 측정 방법
 
