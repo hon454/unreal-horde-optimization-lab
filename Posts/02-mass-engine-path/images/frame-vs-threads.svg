@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="530" viewBox="0 0 800 530" font-family="Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Segoe UI, sans-serif" font-size="16" fill="#111827">
+<defs><pattern id="hatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="8" height="8" fill="#dbeafe"/><line x1="0" y1="0" x2="0" y2="8" stroke="#2563eb" stroke-width="3"/></pattern><pattern id="hatchgray" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="8" height="8" fill="#f3f4f6"/><line x1="0" y1="0" x2="0" y2="8" stroke="#9ca3af" stroke-width="3"/></pattern><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#374151"/></marker></defs>
+<rect x="0.5" y="0.5" width="799" height="529" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+<text x="32" y="46" font-size="22" font-weight="700">단계 2의 프레임 = 게임 스레드 시간 + 게임 스레드가 기다린 시간</text>
+<text x="32" y="74" font-size="16" fill="#4b5563">호드 총수 1만, 이동 장면, 오브 시점 카메라. 세 번 잰 중앙값(ms)</text>
+<line x1="200.0" y1="138" x2="200.0" y2="386" stroke="#e5e7eb"/>
+<text x="200.0" y="408" text-anchor="middle" font-size="16" fill="#4b5563">0</text>
+<line x1="330.0" y1="138" x2="330.0" y2="386" stroke="#e5e7eb"/>
+<text x="330.0" y="408" text-anchor="middle" font-size="16" fill="#4b5563">10</text>
+<line x1="460.0" y1="138" x2="460.0" y2="386" stroke="#e5e7eb"/>
+<text x="460.0" y="408" text-anchor="middle" font-size="16" fill="#4b5563">20</text>
+<line x1="590.0" y1="138" x2="590.0" y2="386" stroke="#e5e7eb"/>
+<text x="590.0" y="408" text-anchor="middle" font-size="16" fill="#4b5563">30</text>
+<line x1="720.0" y1="138" x2="720.0" y2="386" stroke="#e5e7eb"/>
+<text x="720.0" y="408" text-anchor="middle" font-size="16" fill="#4b5563">40</text>
+<line x1="417.1" y1="120" x2="417.1" y2="386" stroke="#b45309" stroke-width="2" stroke-dasharray="6 4"/>
+<text x="417.1" y="114" text-anchor="middle" font-size="16" font-weight="700" fill="#b45309">16.7ms(60fps)</text>
+<text x="32" y="171" font-size="17" font-weight="700">프레임 p50</text>
+<rect x="200" y="150" width="442.8" height="30" rx="4" fill="#374151"/>
+<text x="650.8" y="171" font-size="16" font-weight="700" fill="#374151">34.1</text>
+<text x="32" y="237" font-size="17" font-weight="700">게임 스레드</text>
+<rect x="200" y="216" width="234.4" height="30" rx="4" fill="#2563eb"/>
+<text x="317.2" y="237" text-anchor="middle" font-size="16" font-weight="700" fill="white">시간 18</text>
+<rect x="434.4" y="216" width="210.8" height="30" rx="4" fill="url(#hatch)" stroke="#2563eb" stroke-width="1.5"/>
+<text x="539.8" y="237" text-anchor="middle" font-size="16" font-weight="700" fill="#111827" paint-order="stroke" stroke="white" stroke-width="5" stroke-linejoin="round">기다림 16.2</text>
+<text x="653.2" y="237" font-size="16" font-weight="700" fill="#2563eb">34.2</text>
+<text x="32" y="303" font-size="17" font-weight="700">렌더 스레드</text>
+<rect x="200" y="282" width="94.8" height="30" rx="4" fill="#0d9488"/>
+<text x="302.8" y="303" font-size="16" font-weight="700" fill="#0d9488">7.29</text>
+<text x="32" y="369" font-size="17" font-weight="700">GPU</text>
+<rect x="200" y="348" width="159.0" height="30" rx="4" fill="#db2777"/>
+<text x="367.0" y="369" font-size="16" font-weight="700" fill="#db2777">12.2</text>
+<line x1="32" y1="430" x2="768" y2="430" stroke="#e5e7eb"/>
+<text x="32" y="452" font-size="16" fill="#4b5563">기다림은 프레임 CSV의 게임 스레드 EventWait 열의 합이다. 그중 14.5ms는</text>
+<text x="32" y="478" font-size="16" fill="#4b5563">Mass 처리가 도는 틱 그룹 PrePhysics에서 생긴다. 게임 스레드 시간은 기다림을 뺀 값이다.</text>
+<text x="32" y="504" font-size="16" fill="#4b5563">프레임마다 프레임 시간에서 두 값을 빼면 남는 값의 중앙값은 0.03ms보다 작다.</text>
+</svg>

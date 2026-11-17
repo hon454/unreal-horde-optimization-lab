@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="638" viewBox="0 0 800 638" font-family="Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Segoe UI, sans-serif" font-size="16" fill="#111827">
+<defs><pattern id="hatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="8" height="8" fill="#dbeafe"/><line x1="0" y1="0" x2="0" y2="8" stroke="#2563eb" stroke-width="3"/></pattern><pattern id="hatchgray" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="8" height="8" fill="#f3f4f6"/><line x1="0" y1="0" x2="0" y2="8" stroke="#9ca3af" stroke-width="3"/></pattern><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#374151"/></marker></defs>
+<rect x="0.5" y="0.5" width="799" height="637" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+<text x="32" y="46" font-size="22" font-weight="700">액터 1만이 하던 일을 단계 2에서는 누가 하나</text>
+<text x="32" y="74" font-size="16" fill="#4b5563">프레임당 횟수는 트레이스 실행의 평균이다(측정 실행과 따로 뜬 실행)</text>
+<text x="32" y="128" font-size="18" font-weight="700" fill="#dc2626">단계 1: 액터 1만</text>
+<text x="420" y="128" font-size="18" font-weight="700" fill="#2563eb">단계 2: 엔티티 1만</text>
+<text x="32" y="168" font-size="16" font-weight="700" fill="#4b5563">이동과 겹침 방지</text>
+<rect x="32" y="178" width="348" height="94" rx="8" fill="#fef2f2" stroke="#dc2626" stroke-width="1.5"/>
+<text x="46" y="204" font-size="16" font-weight="700">액터마다 CharacterMovement 틱</text>
+<text x="46" y="228" font-size="16">프레임당 9,983번</text>
+<text x="46" y="252" font-size="16">캡슐끼리 막고 스윕으로 미끄러진다</text>
+<rect x="420" y="178" width="348" height="94" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/>
+<text x="434" y="204" font-size="16" font-weight="700">엔진 프로세서가 Chunk를 돈다</text>
+<text x="434" y="228" font-size="16">조향·힘·이동·방향 보간</text>
+<text x="434" y="252" font-size="16">겹침 방지는 엔진 회피 프로세서</text>
+<line x1="386" y1="225.0" x2="412" y2="225.0" stroke="#374151" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="32" y="306" font-size="16" font-weight="700" fill="#4b5563">그리기와 애니메이션</text>
+<rect x="32" y="316" width="348" height="94" rx="8" fill="#fef2f2" stroke="#dc2626" stroke-width="1.5"/>
+<text x="46" y="342" font-size="16" font-weight="700">액터마다 스켈레탈 메시와 AnimBP</text>
+<text x="46" y="366" font-size="16">메시 틱 프레임당 9,906번</text>
+<rect x="420" y="316" width="348" height="94" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/>
+<text x="434" y="342" font-size="16" font-weight="700">35m 안만 액터(상한 1,000)</text>
+<text x="434" y="366" font-size="16">메시 틱 프레임당 973번</text>
+<text x="434" y="390" font-size="16">35~200m는 정지 메시 인스턴스</text>
+<line x1="386" y1="363.0" x2="412" y2="363.0" stroke="#374151" stroke-width="2" marker-end="url(#arrow)"/>
+<text x="32" y="444" font-size="16" font-weight="700" fill="#4b5563">액터의 위치</text>
+<rect x="32" y="454" width="348" height="70" rx="8" fill="#fef2f2" stroke="#dc2626" stroke-width="1.5"/>
+<text x="46" y="480" font-size="16" font-weight="700">액터가 스스로 옮긴다</text>
+<rect x="420" y="454" width="348" height="70" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/>
+<text x="434" y="480" font-size="16" font-weight="700">CharacterMovement 틱 없음</text>
+<text x="434" y="504" font-size="16">Lab 동기화 프로세서가 넣는다</text>
+<line x1="386" y1="489.0" x2="412" y2="489.0" stroke="#374151" stroke-width="2" marker-end="url(#arrow)"/>
+<line x1="32" y1="564" x2="768" y2="564" stroke="#e5e7eb"/>
+<text x="32" y="586" font-size="16" fill="#4b5563">컴포넌트 틱은 프레임당 19,894번에서 978번이 됐다.</text>
+<text x="32" y="612" font-size="16" fill="#4b5563">200m 밖 엔티티는 그리지 않는다.</text>
+</svg>

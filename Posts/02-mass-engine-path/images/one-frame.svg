@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="522" viewBox="0 0 800 522" font-family="Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Segoe UI, sans-serif" font-size="16" fill="#111827">
+<defs><pattern id="hatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="8" height="8" fill="#dbeafe"/><line x1="0" y1="0" x2="0" y2="8" stroke="#2563eb" stroke-width="3"/></pattern><pattern id="hatchgray" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="8" height="8" fill="#f3f4f6"/><line x1="0" y1="0" x2="0" y2="8" stroke="#9ca3af" stroke-width="3"/></pattern><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#374151"/></marker></defs>
+<rect x="0.5" y="0.5" width="799" height="521" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+<text x="32" y="46" font-size="22" font-weight="700">트레이스의 한 프레임: 게임 스레드가 엔진 회피를 기다린다</text>
+<text x="32" y="74" font-size="16" fill="#4b5563">단계 2, 호드 총수 1만, 이동 장면. 트레이스 실행의 한 프레임(측정값과 견주지 않는다)</text>
+<line x1="170.0" y1="146" x2="170.0" y2="300" stroke="#e5e7eb"/>
+<text x="170.0" y="322" text-anchor="middle" font-size="16" fill="#4b5563">0</text>
+<line x1="254.3" y1="146" x2="254.3" y2="300" stroke="#e5e7eb"/>
+<text x="254.3" y="322" text-anchor="middle" font-size="16" fill="#4b5563">5</text>
+<line x1="338.6" y1="146" x2="338.6" y2="300" stroke="#e5e7eb"/>
+<text x="338.6" y="322" text-anchor="middle" font-size="16" fill="#4b5563">10</text>
+<line x1="422.9" y1="146" x2="422.9" y2="300" stroke="#e5e7eb"/>
+<text x="422.9" y="322" text-anchor="middle" font-size="16" fill="#4b5563">15</text>
+<line x1="507.1" y1="146" x2="507.1" y2="300" stroke="#e5e7eb"/>
+<text x="507.1" y="322" text-anchor="middle" font-size="16" fill="#4b5563">20</text>
+<line x1="591.4" y1="146" x2="591.4" y2="300" stroke="#e5e7eb"/>
+<text x="591.4" y="322" text-anchor="middle" font-size="16" fill="#4b5563">25</text>
+<line x1="675.7" y1="146" x2="675.7" y2="300" stroke="#e5e7eb"/>
+<text x="675.7" y="322" text-anchor="middle" font-size="16" fill="#4b5563">30</text>
+<line x1="760.0" y1="146" x2="760.0" y2="300" stroke="#e5e7eb"/>
+<text x="760.0" y="322" text-anchor="middle" font-size="16" fill="#4b5563">35</text>
+<text x="760" y="346" text-anchor="end" font-size="16" fill="#4b5563">프레임 시작부터 ms</text>
+<line x1="755.3" y1="130" x2="755.3" y2="300" stroke="#374151" stroke-width="2"/>
+<text x="755.3" y="124" text-anchor="end" font-size="16" font-weight="700" fill="#374151">프레임 끝 34.7</text>
+<text x="32" y="186" font-size="17" font-weight="700" fill="#2563eb">게임 스레드</text>
+<rect x="170.0" y="160" width="585.3" height="40" rx="4" fill="#2563eb"/>
+<rect x="354.2" y="160" width="311.0" height="40" fill="url(#hatch)" stroke="#2563eb" stroke-width="1"/>
+<rect x="672.7" y="160" width="21.6" height="40" fill="url(#hatch)" stroke="#2563eb" stroke-width="1"/>
+<text x="509.8" y="186" text-anchor="middle" font-size="16" font-weight="700" fill="#111827" paint-order="stroke" stroke="white" stroke-width="5" stroke-linejoin="round">기다림 18.4</text>
+<path d="M181.1 154 L181.1 148 L245.7 148 L245.7 154" fill="none" stroke="#374151" stroke-width="1.5"/>
+<text x="181.1" y="142" font-size="16" fill="#374151">Mass 게임 스레드 일</text>
+<text x="32" y="270" font-size="17" font-weight="700" fill="#db2777">작업자</text>
+<text x="32" y="290" font-size="17" font-weight="700" fill="#db2777">스레드 하나</text>
+<rect x="196.5" y="252" width="431.5" height="40" rx="4" fill="#db2777"/>
+<text x="412.2" y="278" text-anchor="middle" font-size="16" font-weight="700" fill="white">엔진 이동 회피 25.6</text>
+<rect x="628.3" y="252" width="27.5" height="40" rx="3" fill="#f9a8d4"/>
+<line x1="665.3" y1="200" x2="665.3" y2="252" stroke="#374151" stroke-width="1.5" stroke-dasharray="4 3"/>
+<rect x="32" y="369" width="34" height="20" rx="3" fill="url(#hatch)" stroke="#2563eb"/>
+<text x="76" y="384" font-size="16">게임 스레드가 Mass 작업을 기다린 구간(WaitForTasks)</text>
+<rect x="32" y="397" width="34" height="20" rx="3" fill="#f9a8d4"/>
+<text x="76" y="412" font-size="16">회피 뒤에 같은 스레드가 도는 서 있는 회피</text>
+<line x1="32" y1="448" x2="768" y2="448" stroke="#e5e7eb"/>
+<text x="32" y="470" font-size="16" fill="#4b5563">회피가 끝나야 힘 적용과 이동이 돌고, 그 뒤에 게임 스레드가 다음 일로 간다.</text>
+<text x="32" y="496" font-size="16" fill="#4b5563">트레이스 50초의 평균으로 회피는 한 번에 24.7ms, 게임 스레드의 기다림은 프레임마다 15.1ms다.</text>
+</svg>
