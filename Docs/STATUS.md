@@ -19,10 +19,11 @@
 2. 코디네이터가 검토 결과를 글마다 새 세션에 넘긴다.
 3. 사용자가 README 초안을 검토한다. 물을 것 넷은 사용자가 정했다([Worklog/V2.md](Worklog/V2.md) "W14-17" 절).
 4. 사용자가 공개 자료를 검토한다(W14-19). 자료는 글, README, 사이트다.
-5. 윤문 검토와 팩트체크의 결과를 반영한 뒤 레포지토리를 최적화하고 정리한다(사용자 요청, 2026-11-17). 범위는 시작할 때 사용자와 정한다.
-6. 사용자 승인 뒤 main에 병합한다(W14-20). `gh-pages`와 Releases도 그때 올린다.
-7. 병합 때 README "실행"의 Releases 링크와 `run-final.bat` 이름을 새 패키지에 맞춘다.
-8. 병합 때 `Site/assets/`를 `gh-pages`에 따로 넣는다. `Site/assets/`는 `.gitignore`에 있다.
+5. 팩트체크가 끝나면 그 수정과 윤문 검토의 "받을 만함" 39곳을 글마다 함께 반영한다(사용자 결정, 2026-11-17). 목록은 `Saved/HumanizeReview/SUMMARY.md`와 글마다의 `review.md`다. "한 문장으로"가 바뀌면 `Posts/README.md`의 칸도 고친다.
+6. 5의 반영 뒤 레포지토리를 최적화하고 정리한다(사용자 요청, 2026-11-17). 범위는 시작할 때 사용자와 정한다.
+7. 사용자 승인 뒤 main에 병합한다(W14-20). `gh-pages`와 Releases도 그때 올린다.
+8. 병합 때 README "실행"의 Releases 링크와 `run-final.bat` 이름을 새 패키지에 맞춘다.
+9. 병합 때 `Site/assets/`를 `gh-pages`에 따로 넣는다. `Site/assets/`는 `.gitignore`에 있다.
 
 끝난 W14 작업 단위(커밋):
 
