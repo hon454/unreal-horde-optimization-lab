@@ -59,3 +59,8 @@
 - 불림: 13개 모두 기대한 스킬이 불렸거나, 불리지 않아야 할 때 불리지 않았다.
 - 내용: 맞음 9, 일부 2(5, 9), 빗나감 1(10). 질문 11\~13은 내용 대조 대상이 아니다.
 - 관찰: 하위 에이전트는 대개 `SKILL.md`만 읽고 `references/`를 열지 않았다(질문 1, 2, 9). 답에 꼭 필요한 한 줄은 `SKILL.md` 본문에 있어야 한다.
+
+## 보완(불림 시험 결과)
+
+- 작성: 성공. 측정 스킬 `SKILL.md`에 언어 한 줄, 동등성 단계에 겹침 방지·밀어내기(분리, separation)와 겹친 쌍 수, 병목 단계에 `EventWait/*` 합과 `WaitForTasks`를 넣었다. 군중 스킬 description에 밀어내기(분리, separation)와 `separation`, 말 절에 밀어내기, 함정 3번에 `ShouldTickChunkThisFrame`과 `ExecuteAfter(ProcessorGroupNames::LOD)`, 언어 한 줄을 넣었다. 다음: 확인.
+- 확인: 성공. description은 748자와 828자(1,024자 안), 물결표 없음. 스킬 폴더에서 레포 이름 검색 0건. check-tilde 0건. 다음: 커밋.

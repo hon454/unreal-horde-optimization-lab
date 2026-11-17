@@ -4,9 +4,9 @@ description: >
   UE5 Mass Entity로 수천에서 수만 개체의 군중(호드, 좀비 떼, RTS 유닛, 군중 NPC)을 만들거나 빠르게 할 때의
   적용 순서, 기법마다 효과가 나는 때와 확인 방법, 함정, 증상별 원인과 고칠 코드. 액터 군중에서 Mass로 옮기기,
   하이드레이션(가까운 개체만 액터), Representation LOD, ISM·VAT·ISKM, Niagara 원거리 군중, Simulation LOD,
-  엔티티 풀, Animation Budget Allocator와 URO, 엔진 회피 대체, 프로세서 병렬화와 쿼리 충돌을 다룬다.
+  엔티티 풀, Animation Budget Allocator와 URO, 밀어내기(분리, separation)와 엔진 회피 대체, 프로세서 병렬화와 쿼리 충돌을 다룬다.
   Use for Mass Entity crowd optimization, large crowd or horde performance, MassRepresentation, actor hydration,
-  instanced skinned mesh (ISKM), vertex animation texture (VAT, AnimToTexture), MassAvoidance slow,
+  separation, instanced skinned mesh (ISKM), vertex animation texture (VAT, AnimToTexture), MassAvoidance slow,
   ParallelForEachEntityChunk, Mass processor dependencies, entity pooling, ISKM track leak, crowd LOD.
   적용 뒤의 측정과 판정은 unreal-perf-measurement 스킬을 따른다.
   개체 수가 적은 일반 AI, Behavior Tree, GAS·전투·네트워크 복제, Unity DOTS에는 쓰지 않는다.
@@ -16,6 +16,7 @@ description: >
 
 UE5 Mass Entity로 큰 군중을 만들고 빠르게 하는 절차다. 기법을 어떤 순서로 넣는지, 기법마다 언제 효과가 있는지, 넣은 뒤 무엇으로 확인하는지, 어떤 함정이 있는지를 다룬다.
 
+- 답은 질문한 언어로 한다. 영어로 물으면 영어로 답한다.
 - 프로젝트에 측정 규약 문서가 있으면 그쪽을 따른다. 이 스킬의 일반 규칙(반복 수, 판정 문턱)보다 프로젝트 규약이 이긴다.
 - 측정, 차이 판정, 병목 판정, 동등성 검사는 `unreal-perf-measurement` 스킬의 절차를 따른다. 이 스킬은 무엇을 넣고 무엇을 볼지를 정한다.
 - 이 스킬의 모든 수치는 `references/results.md`의 조건(UE 5.8.4, Ryzen 9 5950X와 RTX 4090, Test 구성 패키지, 1만 개체, 프레임 p95)에서 잰 참고값이다. 다른 PC와 장면에서는 방향과 크기의 감으로만 쓴다.
@@ -26,6 +27,7 @@ UE5 Mass Entity로 큰 군중을 만들고 빠르게 하는 절차다. 기법을
 - **프레임 p95**: 측정 창 프레임 시간의 95번째 백분위수. 판정 지표다.
 - **병목**: 게임 스레드, 렌더 스레드, GPU 시간(각 p50) 가운데 가장 긴 쪽.
 - **하이드레이션(Hydration)**: 가까운 엔티티에만 진짜 액터를 붙이는 일.
+- **밀어내기**: 개체끼리 겹치지 않게 서로 밀어내는 일. 옛 말은 분리(separation), 겹침 방지. 끄거나 바꾼 조건은 겹친 쌍 수를 먼저 본다.
 - **표현**: 개체를 그리는 방식. 액터, 인스턴스(ISM, VAT 인스턴스, ISKM), 입자, 없음(None).
 - **최종 구성**: 모든 기법을 켠 구성. **"\~를 끈 조건"**: 최종 구성에서 기법 하나만 끄고 같은 조건으로 잰 것. 그 차이가 **기법별 기여**다.
 - **구별되지 않음**: 두 조건의 차이가 0.5ms 아래이거나 세 실행의 범위보다 작다.
@@ -107,7 +109,7 @@ UE5 Mass Entity로 큰 군중을 만들고 빠르게 하는 절차다. 기법을
 
 1. **엔진 회피는 한 스레드로 돈다.** `UMassMovingAvoidanceProcessor`는 `ForEachEntityChunk`다. 1만 개체에서 작업자 하나가 프레임마다 약 24ms를 돌았다(`references/processors.md`).
 2. **Simulation LOD 태그가 없으면 엔진 회피가 전 개체를 돈다.** 회피 쿼리는 Medium·Low·Off 태그로 개체를 뺀다. 태그는 가변 틱이나 `bSetLODTags`를 켤 때만 붙는다.
-3. **Simulation LOD는 틱 간격만 늘려서는 효과가 거의 없다.** 엔진 이동·조향은 Off를 뺀 개체를 매 프레임 돈다. 먼 개체를 Off로 빼야 한다.
+3. **Simulation LOD는 틱 간격만 늘려서는 효과가 거의 없다.** 엔진 이동·조향은 Off를 뺀 개체를 매 프레임 돈다. 먼 개체를 Off로 빼야 한다. 가변 틱은 청크 필터 `ShouldTickChunkThisFrame`을 읽는 프로세서만 건너뛰고, 그 프로세서는 `ExecuteAfter(ProcessorGroupNames::LOD)`를 적어야 주기를 놓치지 않는다(`references/processors.md`).
 4. **병렬 트레이스의 프로세서 구간은 기다림을 포함한다.** 프로세서별 시간은 `mass.FullyParallel 0`의 직렬 트레이스로 가른다.
 5. **위치를 ReadWrite로 선언한 쿼리는 전역 충돌이다.** 기본값에서 엔진은 아키타입을 보지 않고 두 쿼리를 묶는다. 드문 쓰기는 따로 된 쿼리로 뺀다.
 6. **움직이는 ISKM 엔티티를 파괴하면 트랙이 남는다.** 5.8.4에도 있다. 엔티티 풀로 다시 쓰고 `SetAutoPlayData`를 직접 부른다.
