@@ -26,6 +26,7 @@
 | 훅이 강제하는 규칙, 판정 기준, 우회 방법 | [harness.md](Docs/Guides/harness.md). 훅에 막혔을 때 연다 |
 | 빌드나 실행이 실패했을 때의 증상별 대처 | [troubleshooting.md](Docs/Guides/troubleshooting.md). 문제가 생겼을 때만 연다 |
 | 글과 README의 독자, 틀, 문장 규칙, 그림 규칙 | [posting.md](Docs/Guides/posting.md) |
+| 쓰는 말, 쓰지 않는 말과 바꿔 쓸 말, 번역하지 않는 이름, 공개 문서에 쓰지 않는 것, 문서의 말과 조건 식별자의 대응 | [glossary.md](Docs/Guides/glossary.md). 글, README, 가이드를 쓰기 전에 연다 |
 | 글 재료: 작업 중 질답에서 나온, 독자에게 설명이 필요한 부분 | [post-material.md](Docs/post-material.md). 사용자가 원인을 물어 답한 것은 여기에 더한다 |
 | 엔진 소스에서 확인한 사실(경로, 기본값, 매크로, 알려진 문제) | [engine-notes.md](Docs/Reference/engine-notes.md). 소스 위치가 필요하면 먼저 여기를 본다 |
 | 영상·문서·샘플·에셋·포럼 스레드 | [references.md](Docs/Reference/references.md) |
