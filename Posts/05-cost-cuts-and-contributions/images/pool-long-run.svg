@@ -1,0 +1,154 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="760" viewBox="0 0 800 760" font-family="Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Segoe UI, sans-serif" font-size="16" fill="#111827">
+<rect x="0.5" y="0.5" width="799" height="759" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+<text x="32" y="44" font-size="22" font-weight="700">엔티티 풀 켬과 끔을 960초 동안 1분마다 본 값</text>
+<text x="32" y="72" font-size="16" fill="#4b5563">참고 측정: 최종 구성, 호드 총수 1만, 오브 시점 카메라, 이동 장면</text>
+<text x="32" y="94" font-size="16" fill="#4b5563">조건마다 한 번 돌렸다. 범위가 없다</text>
+<line x1="32" y1="121" x2="50" y2="121" stroke="#2563eb" stroke-width="3"/>
+<text x="56.0" y="126.0" font-size="16" text-anchor="start" fill="#4b5563">엔티티 풀 켬(최종 구성)</text>
+<line x1="249.20000000000002" y1="121" x2="267.20000000000005" y2="121" stroke="#dc2626" stroke-width="3"/>
+<text x="273.2" y="126.0" font-size="16" text-anchor="start" fill="#4b5563">엔티티 풀 끔</text>
+<text x="32.0" y="172.0" font-size="16" text-anchor="start" font-weight="700" fill="#111827">ISKM 트랙 수(구간 끝)</text>
+<line x1="120" y1="316.0" x2="620" y2="316.0" stroke="#eef0f3"/>
+<text x="110.0" y="321.0" font-size="16" text-anchor="end" fill="#4b5563">0</text>
+<line x1="120" y1="266.0" x2="620" y2="266.0" stroke="#eef0f3"/>
+<text x="110.0" y="271.0" font-size="16" text-anchor="end" fill="#4b5563">50,000</text>
+<line x1="120" y1="216.0" x2="620" y2="216.0" stroke="#eef0f3"/>
+<text x="110.0" y="221.0" font-size="16" text-anchor="end" fill="#4b5563">100,000</text>
+<line x1="120" y1="316" x2="620" y2="316" stroke="#9ca3af"/>
+<path d="M120.0,298.8 L153.3,296.0 L186.7,295.8 L220.0,295.7 L253.3,295.6 L286.7,295.5 L320.0,295.5 L353.3,295.4 L386.7,295.3 L420.0,295.3 L453.3,295.2 L486.7,295.1 L520.0,295.1 L553.3,295.0 L586.7,294.9 L620.0,294.9" fill="none" stroke="#2563eb" stroke-width="2.5"/>
+<circle cx="120.0" cy="298.8" r="2.5" fill="#2563eb"/>
+<circle cx="153.3" cy="296.0" r="2.5" fill="#2563eb"/>
+<circle cx="186.7" cy="295.8" r="2.5" fill="#2563eb"/>
+<circle cx="220.0" cy="295.7" r="2.5" fill="#2563eb"/>
+<circle cx="253.3" cy="295.6" r="2.5" fill="#2563eb"/>
+<circle cx="286.7" cy="295.5" r="2.5" fill="#2563eb"/>
+<circle cx="320.0" cy="295.5" r="2.5" fill="#2563eb"/>
+<circle cx="353.3" cy="295.4" r="2.5" fill="#2563eb"/>
+<circle cx="386.7" cy="295.3" r="2.5" fill="#2563eb"/>
+<circle cx="420.0" cy="295.3" r="2.5" fill="#2563eb"/>
+<circle cx="453.3" cy="295.2" r="2.5" fill="#2563eb"/>
+<circle cx="486.7" cy="295.1" r="2.5" fill="#2563eb"/>
+<circle cx="520.0" cy="295.1" r="2.5" fill="#2563eb"/>
+<circle cx="553.3" cy="295.0" r="2.5" fill="#2563eb"/>
+<circle cx="586.7" cy="294.9" r="2.5" fill="#2563eb"/>
+<circle cx="620.0" cy="294.9" r="2.5" fill="#2563eb"/>
+<path d="M120.0,298.3 L153.3,291.0 L186.7,284.1 L220.0,277.6 L253.3,271.0 L286.7,264.3 L320.0,257.2 L353.3,249.9 L386.7,243.1 L420.0,236.5 L453.3,230.0 L486.7,223.2 L520.0,216.1 L553.3,208.9 L586.7,202.1 L620.0,195.6" fill="none" stroke="#dc2626" stroke-width="2.5"/>
+<circle cx="120.0" cy="298.3" r="2.5" fill="#dc2626"/>
+<circle cx="153.3" cy="291.0" r="2.5" fill="#dc2626"/>
+<circle cx="186.7" cy="284.1" r="2.5" fill="#dc2626"/>
+<circle cx="220.0" cy="277.6" r="2.5" fill="#dc2626"/>
+<circle cx="253.3" cy="271.0" r="2.5" fill="#dc2626"/>
+<circle cx="286.7" cy="264.3" r="2.5" fill="#dc2626"/>
+<circle cx="320.0" cy="257.2" r="2.5" fill="#dc2626"/>
+<circle cx="353.3" cy="249.9" r="2.5" fill="#dc2626"/>
+<circle cx="386.7" cy="243.1" r="2.5" fill="#dc2626"/>
+<circle cx="420.0" cy="236.5" r="2.5" fill="#dc2626"/>
+<circle cx="453.3" cy="230.0" r="2.5" fill="#dc2626"/>
+<circle cx="486.7" cy="223.2" r="2.5" fill="#dc2626"/>
+<circle cx="520.0" cy="216.1" r="2.5" fill="#dc2626"/>
+<circle cx="553.3" cy="208.9" r="2.5" fill="#dc2626"/>
+<circle cx="586.7" cy="202.1" r="2.5" fill="#dc2626"/>
+<circle cx="620.0" cy="195.6" r="2.5" fill="#dc2626"/>
+<text x="630.0" y="200.6" font-size="16" text-anchor="start" font-weight="700" fill="#dc2626">120,428 끔</text>
+<text x="630.0" y="299.9" font-size="16" text-anchor="start" font-weight="700" fill="#2563eb">21,149 켬</text>
+<text x="32.0" y="362.0" font-size="16" text-anchor="start" font-weight="700" fill="#111827">GPU 메모리 평균(MB)</text>
+<line x1="120" y1="506.0" x2="620" y2="506.0" stroke="#eef0f3"/>
+<text x="110.0" y="511.0" font-size="16" text-anchor="end" fill="#4b5563">3,000</text>
+<line x1="120" y1="454.0" x2="620" y2="454.0" stroke="#eef0f3"/>
+<text x="110.0" y="459.0" font-size="16" text-anchor="end" fill="#4b5563">4,000</text>
+<line x1="120" y1="402.0" x2="620" y2="402.0" stroke="#eef0f3"/>
+<text x="110.0" y="407.0" font-size="16" text-anchor="end" fill="#4b5563">5,000</text>
+<line x1="120" y1="506" x2="620" y2="506" stroke="#9ca3af"/>
+<path d="M120.0,486.7 L153.3,487.2 L186.7,486.6 L220.0,486.5 L253.3,488.0 L286.7,487.7 L320.0,487.1 L353.3,487.1 L386.7,487.0 L420.0,486.7 L453.3,487.9 L486.7,487.3 L520.0,486.7 L553.3,487.1 L586.7,486.5 L620.0,486.7" fill="none" stroke="#2563eb" stroke-width="2.5"/>
+<circle cx="120.0" cy="486.7" r="2.5" fill="#2563eb"/>
+<circle cx="153.3" cy="487.2" r="2.5" fill="#2563eb"/>
+<circle cx="186.7" cy="486.6" r="2.5" fill="#2563eb"/>
+<circle cx="220.0" cy="486.5" r="2.5" fill="#2563eb"/>
+<circle cx="253.3" cy="488.0" r="2.5" fill="#2563eb"/>
+<circle cx="286.7" cy="487.7" r="2.5" fill="#2563eb"/>
+<circle cx="320.0" cy="487.1" r="2.5" fill="#2563eb"/>
+<circle cx="353.3" cy="487.1" r="2.5" fill="#2563eb"/>
+<circle cx="386.7" cy="487.0" r="2.5" fill="#2563eb"/>
+<circle cx="420.0" cy="486.7" r="2.5" fill="#2563eb"/>
+<circle cx="453.3" cy="487.9" r="2.5" fill="#2563eb"/>
+<circle cx="486.7" cy="487.3" r="2.5" fill="#2563eb"/>
+<circle cx="520.0" cy="486.7" r="2.5" fill="#2563eb"/>
+<circle cx="553.3" cy="487.1" r="2.5" fill="#2563eb"/>
+<circle cx="586.7" cy="486.5" r="2.5" fill="#2563eb"/>
+<circle cx="620.0" cy="486.7" r="2.5" fill="#2563eb"/>
+<path d="M120.0,486.8 L153.3,484.3 L186.7,473.8 L220.0,464.6 L253.3,459.8 L286.7,458.3 L320.0,458.5 L353.3,461.3 L386.7,463.5 L420.0,463.2 L453.3,464.6 L486.7,418.1 L520.0,396.6 L553.3,396.6 L586.7,396.5 L620.0,396.5" fill="none" stroke="#dc2626" stroke-width="2.5"/>
+<circle cx="120.0" cy="486.8" r="2.5" fill="#dc2626"/>
+<circle cx="153.3" cy="484.3" r="2.5" fill="#dc2626"/>
+<circle cx="186.7" cy="473.8" r="2.5" fill="#dc2626"/>
+<circle cx="220.0" cy="464.6" r="2.5" fill="#dc2626"/>
+<circle cx="253.3" cy="459.8" r="2.5" fill="#dc2626"/>
+<circle cx="286.7" cy="458.3" r="2.5" fill="#dc2626"/>
+<circle cx="320.0" cy="458.5" r="2.5" fill="#dc2626"/>
+<circle cx="353.3" cy="461.3" r="2.5" fill="#dc2626"/>
+<circle cx="386.7" cy="463.5" r="2.5" fill="#dc2626"/>
+<circle cx="420.0" cy="463.2" r="2.5" fill="#dc2626"/>
+<circle cx="453.3" cy="464.6" r="2.5" fill="#dc2626"/>
+<circle cx="486.7" cy="418.1" r="2.5" fill="#dc2626"/>
+<circle cx="520.0" cy="396.6" r="2.5" fill="#dc2626"/>
+<circle cx="553.3" cy="396.6" r="2.5" fill="#dc2626"/>
+<circle cx="586.7" cy="396.5" r="2.5" fill="#dc2626"/>
+<circle cx="620.0" cy="396.5" r="2.5" fill="#dc2626"/>
+<text x="630.0" y="401.5" font-size="16" text-anchor="start" font-weight="700" fill="#dc2626">5,110MB 끔</text>
+<text x="630.0" y="491.7" font-size="16" text-anchor="start" font-weight="700" fill="#2563eb">3,370MB 켬</text>
+<text x="32.0" y="552.0" font-size="16" text-anchor="start" font-weight="700" fill="#111827">프레임 p95(ms)</text>
+<line x1="120" y1="696.0" x2="620" y2="696.0" stroke="#eef0f3"/>
+<text x="110.0" y="701.0" font-size="16" text-anchor="end" fill="#4b5563">13</text>
+<line x1="120" y1="663.5" x2="620" y2="663.5" stroke="#eef0f3"/>
+<text x="110.0" y="668.5" font-size="16" text-anchor="end" fill="#4b5563">14</text>
+<line x1="120" y1="631.0" x2="620" y2="631.0" stroke="#eef0f3"/>
+<text x="110.0" y="636.0" font-size="16" text-anchor="end" fill="#4b5563">15</text>
+<line x1="120" y1="598.5" x2="620" y2="598.5" stroke="#eef0f3"/>
+<text x="110.0" y="603.5" font-size="16" text-anchor="end" fill="#4b5563">16</text>
+<line x1="120" y1="566.0" x2="620" y2="566.0" stroke="#eef0f3"/>
+<text x="110.0" y="571.0" font-size="16" text-anchor="end" fill="#4b5563">17</text>
+<line x1="120" y1="696" x2="620" y2="696" stroke="#9ca3af"/>
+<line x1="120" y1="575.8" x2="620" y2="575.8" stroke="#b45309" stroke-width="2" stroke-dasharray="5 4"/>
+<text x="126.0" y="569.8" font-size="16" text-anchor="start" fill="#b45309">16.7ms(60fps)</text>
+<path d="M120.0,660.2 L153.3,637.7 L186.7,643.0 L220.0,639.5 L253.3,668.1 L286.7,653.3 L320.0,653.5 L353.3,627.0 L386.7,643.0 L420.0,641.8 L453.3,668.6 L486.7,660.4 L520.0,645.3 L553.3,637.0 L586.7,637.7 L620.0,648.3" fill="none" stroke="#2563eb" stroke-width="2.5"/>
+<circle cx="120.0" cy="660.2" r="2.5" fill="#2563eb"/>
+<circle cx="153.3" cy="637.7" r="2.5" fill="#2563eb"/>
+<circle cx="186.7" cy="643.0" r="2.5" fill="#2563eb"/>
+<circle cx="220.0" cy="639.5" r="2.5" fill="#2563eb"/>
+<circle cx="253.3" cy="668.1" r="2.5" fill="#2563eb"/>
+<circle cx="286.7" cy="653.3" r="2.5" fill="#2563eb"/>
+<circle cx="320.0" cy="653.5" r="2.5" fill="#2563eb"/>
+<circle cx="353.3" cy="627.0" r="2.5" fill="#2563eb"/>
+<circle cx="386.7" cy="643.0" r="2.5" fill="#2563eb"/>
+<circle cx="420.0" cy="641.8" r="2.5" fill="#2563eb"/>
+<circle cx="453.3" cy="668.6" r="2.5" fill="#2563eb"/>
+<circle cx="486.7" cy="660.4" r="2.5" fill="#2563eb"/>
+<circle cx="520.0" cy="645.3" r="2.5" fill="#2563eb"/>
+<circle cx="553.3" cy="637.0" r="2.5" fill="#2563eb"/>
+<circle cx="586.7" cy="637.7" r="2.5" fill="#2563eb"/>
+<circle cx="620.0" cy="648.3" r="2.5" fill="#2563eb"/>
+<path d="M120.0,662.4 L153.3,647.1 L186.7,651.0 L220.0,640.0 L253.3,674.6 L286.7,652.5 L320.0,650.1 L353.3,629.0 L386.7,635.8 L420.0,629.3 L453.3,659.7 L486.7,646.3 L520.0,608.3 L553.3,613.3 L586.7,617.5 L620.0,623.4" fill="none" stroke="#dc2626" stroke-width="2.5"/>
+<circle cx="120.0" cy="662.4" r="2.5" fill="#dc2626"/>
+<circle cx="153.3" cy="647.1" r="2.5" fill="#dc2626"/>
+<circle cx="186.7" cy="651.0" r="2.5" fill="#dc2626"/>
+<circle cx="220.0" cy="640.0" r="2.5" fill="#dc2626"/>
+<circle cx="253.3" cy="674.6" r="2.5" fill="#dc2626"/>
+<circle cx="286.7" cy="652.5" r="2.5" fill="#dc2626"/>
+<circle cx="320.0" cy="650.1" r="2.5" fill="#dc2626"/>
+<circle cx="353.3" cy="629.0" r="2.5" fill="#dc2626"/>
+<circle cx="386.7" cy="635.8" r="2.5" fill="#dc2626"/>
+<circle cx="420.0" cy="629.3" r="2.5" fill="#dc2626"/>
+<circle cx="453.3" cy="659.7" r="2.5" fill="#dc2626"/>
+<circle cx="486.7" cy="646.3" r="2.5" fill="#dc2626"/>
+<circle cx="520.0" cy="608.3" r="2.5" fill="#dc2626"/>
+<circle cx="553.3" cy="613.3" r="2.5" fill="#dc2626"/>
+<circle cx="586.7" cy="617.5" r="2.5" fill="#dc2626"/>
+<circle cx="620.0" cy="623.4" r="2.5" fill="#dc2626"/>
+<text x="630.0" y="628.4" font-size="16" text-anchor="start" font-weight="700" fill="#dc2626">15.2ms 끔</text>
+<text x="630.0" y="653.3" font-size="16" text-anchor="start" font-weight="700" fill="#2563eb">14.5ms 켬</text>
+<text x="120.0" y="718.0" font-size="16" text-anchor="middle" fill="#4b5563">1</text>
+<text x="220.0" y="718.0" font-size="16" text-anchor="middle" fill="#4b5563">4</text>
+<text x="353.3" y="718.0" font-size="16" text-anchor="middle" fill="#4b5563">8</text>
+<text x="486.7" y="718.0" font-size="16" text-anchor="middle" fill="#4b5563">12</text>
+<text x="620.0" y="718.0" font-size="16" text-anchor="middle" fill="#4b5563">16</text>
+<text x="370.0" y="742.0" font-size="16" text-anchor="middle" fill="#4b5563">측정 시작부터의 분(1분 구간)</text>
+</svg>

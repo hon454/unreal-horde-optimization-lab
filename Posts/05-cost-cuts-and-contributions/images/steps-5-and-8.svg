@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="596" viewBox="0 0 800 596" font-family="Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Segoe UI, sans-serif" font-size="16" fill="#111827">
+<rect x="0.5" y="0.5" width="799" height="595" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+<text x="32" y="44" font-size="22" font-weight="700">비용을 줄이는 두 단계에서 바뀐 시간</text>
+<text x="32" y="72" font-size="16" fill="#4b5563">호드 총수 1만, 오브 시점 카메라, 이동 장면, 세 번 잰 중앙값(ms)</text>
+<text x="32" y="94" font-size="16" fill="#4b5563">프레임 시간은 p95, 스레드 시간은 p50이다. 회색 글자는 구별되지 않는 차이다</text>
+<rect x="32" y="114" width="16" height="14" rx="2" fill="#cbd5e1"/>
+<text x="56.0" y="126.0" font-size="16" text-anchor="start" fill="#4b5563">앞 단계</text>
+<rect x="130.8" y="114" width="16" height="14" rx="2" fill="#1f2937"/>
+<text x="154.8" y="126.0" font-size="16" text-anchor="start" fill="#4b5563">이 단계</text>
+<line x1="229.60000000000002" y1="121" x2="247.60000000000002" y2="121" stroke="#b45309" stroke-width="2" stroke-dasharray="5 4"/>
+<text x="253.6" y="126.0" font-size="16" text-anchor="start" fill="#4b5563">16.7ms(60fps)</text>
+<text x="32.0" y="174.0" font-size="17" text-anchor="start" font-weight="700" fill="#111827">단계 5: Simulation LOD와 엔티티 풀 (단계 4 → 5)</text>
+<text x="32.0" y="208.0" font-size="16" text-anchor="start" fill="#111827">프레임 p95</text>
+<rect x="170" y="190" width="241.5" height="11" rx="2" fill="#cbd5e1"/>
+<rect x="170" y="203" width="246.8" height="11" rx="2" fill="#1f2937"/>
+<text x="472.0" y="208.0" font-size="16" text-anchor="start" fill="#9ca3af">14.2 → 14.5  (+0.31)  구별되지 않음</text>
+<text x="32.0" y="242.0" font-size="16" text-anchor="start" fill="#111827">게임 스레드</text>
+<rect x="170" y="224" width="201.0" height="11" rx="2" fill="#cbd5e1"/>
+<rect x="170" y="237" width="205.1" height="11" rx="2" fill="#1f2937"/>
+<text x="472.0" y="242.0" font-size="16" text-anchor="start" fill="#9ca3af">11.8 → 12.1  (+0.24)  구별되지 않음</text>
+<text x="32.0" y="276.0" font-size="16" text-anchor="start" fill="#111827">렌더 스레드</text>
+<rect x="170" y="258" width="95.6" height="11" rx="2" fill="#cbd5e1"/>
+<rect x="170" y="271" width="91.4" height="11" rx="2" fill="#1f2937"/>
+<text x="472.0" y="276.0" font-size="16" text-anchor="start" fill="#9ca3af">5.63 → 5.38  (−0.25)  구별되지 않음</text>
+<text x="32.0" y="310.0" font-size="16" text-anchor="start" fill="#111827">GPU</text>
+<rect x="170" y="292" width="121.4" height="11" rx="2" fill="#cbd5e1"/>
+<rect x="170" y="305" width="121.6" height="11" rx="2" fill="#1f2937"/>
+<text x="472.0" y="310.0" font-size="16" text-anchor="start" fill="#9ca3af">7.14 → 7.15  (+0.01)  구별되지 않음</text>
+<line x1="453.9" y1="186" x2="453.9" y2="320" stroke="#b45309" stroke-width="2" stroke-dasharray="5 4"/>
+<text x="32.0" y="354.0" font-size="17" text-anchor="start" font-weight="700" fill="#111827">단계 8: 80m 밖 그림자 끔, 액터 메시 고정 바운드 (단계 7 → 8)</text>
+<text x="32.0" y="388.0" font-size="16" text-anchor="start" fill="#111827">프레임 p95</text>
+<rect x="170" y="370" width="257.9" height="11" rx="2" fill="#cbd5e1"/>
+<rect x="170" y="383" width="241.9" height="11" rx="2" fill="#1f2937"/>
+<text x="472.0" y="388.0" font-size="16" text-anchor="start" font-weight="700" fill="#111827">15.2 → 14.2  (−0.94)</text>
+<text x="32.0" y="422.0" font-size="16" text-anchor="start" fill="#111827">게임 스레드</text>
+<rect x="170" y="404" width="215.7" height="11" rx="2" fill="#cbd5e1"/>
+<rect x="170" y="417" width="202.0" height="11" rx="2" fill="#1f2937"/>
+<text x="472.0" y="422.0" font-size="16" text-anchor="start" font-weight="700" fill="#111827">12.7 → 11.9  (−0.81)</text>
+<text x="32.0" y="456.0" font-size="16" text-anchor="start" fill="#111827">렌더 스레드</text>
+<rect x="170" y="438" width="67.7" height="11" rx="2" fill="#cbd5e1"/>
+<rect x="170" y="451" width="70.0" height="11" rx="2" fill="#1f2937"/>
+<text x="472.0" y="456.0" font-size="16" text-anchor="start" fill="#9ca3af">3.98 → 4.12  (+0.14)  구별되지 않음</text>
+<text x="32.0" y="490.0" font-size="16" text-anchor="start" fill="#111827">GPU</text>
+<rect x="170" y="472" width="113.0" height="11" rx="2" fill="#cbd5e1"/>
+<rect x="170" y="485" width="104.8" height="11" rx="2" fill="#1f2937"/>
+<text x="472.0" y="490.0" font-size="16" text-anchor="start" fill="#9ca3af">6.65 → 6.16  (−0.48)  구별되지 않음</text>
+<line x1="453.9" y1="366" x2="453.9" y2="500" stroke="#b45309" stroke-width="2" stroke-dasharray="5 4"/>
+<line x1="32" y1="518" x2="768" y2="518" stroke="#e5e7eb"/>
+<text x="32.0" y="544.0" font-size="16" text-anchor="start" fill="#4b5563">프레임 시간은 게임 스레드, 렌더 스레드, GPU 가운데 가장 느린 쪽이 정한다.</text>
+<text x="32.0" y="566.0" font-size="16" text-anchor="start" fill="#4b5563">네 단계 모두 게임 스레드가 가장 느리다.</text>
+</svg>

@@ -1,0 +1,224 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="1308" viewBox="0 0 800 1308" font-family="Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Segoe UI, sans-serif" font-size="16" fill="#111827">
+<rect x="0.5" y="0.5" width="799" height="1307" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+<text x="32" y="44" font-size="22" font-weight="700">기법별 기여: 최종 구성에서 하나씩 껐을 때</text>
+<text x="32" y="72" font-size="16" fill="#4b5563">호드 총수 1만, 오브 시점 카메라, 이동 장면</text>
+<text x="32" y="94" font-size="16" fill="#4b5563">막대는 프레임 p95(세 번 잰 중앙값), 검은 선은 세 실행의 범위</text>
+<rect x="32" y="114" width="16" height="14" rx="2" fill="#1f2937"/>
+<text x="56.0" y="126.0" font-size="16" text-anchor="start" fill="#4b5563">최종 구성</text>
+<rect x="146.8" y="114" width="16" height="14" rx="2" fill="#2563eb"/>
+<text x="170.8" y="126.0" font-size="16" text-anchor="start" fill="#4b5563">끄면 길어진다: 시간을 줄이는 기법</text>
+<rect x="442.40000000000003" y="114" width="16" height="14" rx="2" fill="#9333ea"/>
+<text x="466.4" y="126.0" font-size="16" text-anchor="start" fill="#4b5563">끄면 짧아진다: 시간을 쓰는 기법</text>
+<rect x="32" y="138" width="16" height="14" rx="2" fill="#9ca3af"/>
+<text x="56.0" y="150.0" font-size="16" text-anchor="start" fill="#4b5563">구별되지 않음</text>
+<line x1="178.8" y1="145" x2="196.8" y2="145" stroke="#b45309" stroke-width="2" stroke-dasharray="5 4"/>
+<text x="202.8" y="150.0" font-size="16" text-anchor="start" fill="#4b5563">16.7ms(60fps)</text>
+<line x1="336.8" y1="145" x2="354.8" y2="145" stroke="#1f2937" stroke-width="2" stroke-dasharray="2 3"/>
+<text x="360.8" y="150.0" font-size="16" text-anchor="start" fill="#4b5563">최종 구성의 프레임 p95</text>
+<line x1="272.0" y1="180" x2="272.0" y2="1058" stroke="#eef0f3"/>
+<text x="272.0" y="1078.0" font-size="16" text-anchor="middle" fill="#4b5563">0</text>
+<line x1="324.0" y1="180" x2="324.0" y2="1058" stroke="#eef0f3"/>
+<text x="324.0" y="1078.0" font-size="16" text-anchor="middle" fill="#4b5563">4</text>
+<line x1="376.0" y1="180" x2="376.0" y2="1058" stroke="#eef0f3"/>
+<text x="376.0" y="1078.0" font-size="16" text-anchor="middle" fill="#4b5563">8</text>
+<line x1="428.0" y1="180" x2="428.0" y2="1058" stroke="#eef0f3"/>
+<text x="428.0" y="1078.0" font-size="16" text-anchor="middle" fill="#4b5563">12</text>
+<line x1="480.0" y1="180" x2="480.0" y2="1058" stroke="#eef0f3"/>
+<text x="480.0" y="1078.0" font-size="16" text-anchor="middle" fill="#4b5563">16</text>
+<line x1="532.0" y1="180" x2="532.0" y2="1058" stroke="#eef0f3"/>
+<text x="532.0" y="1078.0" font-size="16" text-anchor="middle" fill="#4b5563">20</text>
+<line x1="584.0" y1="180" x2="584.0" y2="1058" stroke="#eef0f3"/>
+<text x="584.0" y="1078.0" font-size="16" text-anchor="middle" fill="#4b5563">24</text>
+<text x="428.0" y="1102.0" font-size="16" text-anchor="middle" fill="#4b5563">프레임 p95(ms)</text>
+<line x1="489.1" y1="180" x2="489.1" y2="1058" stroke="#b45309" stroke-width="2" stroke-dasharray="5 4"/>
+<line x1="457.0" y1="180" x2="457.0" y2="1058" stroke="#1f2937" stroke-width="2" stroke-dasharray="2 3"/>
+<text x="260.0" y="199.0" font-size="16" text-anchor="end" fill="#111827">최종 구성(단계 8)</text>
+<rect x="272" y="185" width="185.0" height="18" rx="2" fill="#1f2937"/>
+<line x1="454.5" y1="194" x2="459.5" y2="194" stroke="#ffffff" stroke-width="4"/>
+<line x1="454.5" y1="188" x2="454.5" y2="200" stroke="#ffffff" stroke-width="4"/>
+<line x1="459.5" y1="188" x2="459.5" y2="200" stroke="#ffffff" stroke-width="4"/>
+<line x1="454.5" y1="194" x2="459.5" y2="194" stroke="#111827" stroke-width="1.6"/>
+<line x1="454.5" y1="188" x2="454.5" y2="200" stroke="#111827" stroke-width="1.6"/>
+<line x1="459.5" y1="188" x2="459.5" y2="200" stroke="#111827" stroke-width="1.6"/>
+<text x="468.5" y="199.0" font-size="16" text-anchor="start" font-weight="700" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">14.2</text><text x="468.5" y="199.0" font-size="16" text-anchor="start" font-weight="700" fill="#111827">14.2</text>
+<text x="32.0" y="234.0" font-size="16" text-anchor="start" font-weight="700" fill="#4b5563">구별되는 행</text>
+<text x="260.0" y="265.0" font-size="16" text-anchor="end" fill="#111827">200m 밖 지우기 끔</text>
+<rect x="272" y="251" width="231.0" height="18" rx="2" fill="#2563eb"/>
+<line x1="502.9" y1="260" x2="506.8" y2="260" stroke="#ffffff" stroke-width="4"/>
+<line x1="502.9" y1="254" x2="502.9" y2="266" stroke="#ffffff" stroke-width="4"/>
+<line x1="506.8" y1="254" x2="506.8" y2="266" stroke="#ffffff" stroke-width="4"/>
+<line x1="502.9" y1="260" x2="506.8" y2="260" stroke="#111827" stroke-width="1.6"/>
+<line x1="502.9" y1="254" x2="502.9" y2="266" stroke="#111827" stroke-width="1.6"/>
+<line x1="506.8" y1="254" x2="506.8" y2="266" stroke="#111827" stroke-width="1.6"/>
+<text x="515.8" y="265.0" font-size="16" text-anchor="start" font-weight="700" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">17.8 (+3.54)</text><text x="515.8" y="265.0" font-size="16" text-anchor="start" font-weight="700" fill="#111827">17.8 (+3.54)</text>
+<text x="260.0" y="297.0" font-size="16" text-anchor="end" fill="#111827">액터 메시 고정 바운드 끔</text>
+<rect x="272" y="283" width="197.7" height="18" rx="2" fill="#2563eb"/>
+<line x1="469.3" y1="292" x2="470.6" y2="292" stroke="#ffffff" stroke-width="4"/>
+<line x1="469.3" y1="286" x2="469.3" y2="298" stroke="#ffffff" stroke-width="4"/>
+<line x1="470.6" y1="286" x2="470.6" y2="298" stroke="#ffffff" stroke-width="4"/>
+<line x1="469.3" y1="292" x2="470.6" y2="292" stroke="#111827" stroke-width="1.6"/>
+<line x1="469.3" y1="286" x2="469.3" y2="298" stroke="#111827" stroke-width="1.6"/>
+<line x1="470.6" y1="286" x2="470.6" y2="298" stroke="#111827" stroke-width="1.6"/>
+<text x="479.6" y="297.0" font-size="16" text-anchor="start" font-weight="700" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">15.2 (+0.98)</text><text x="479.6" y="297.0" font-size="16" text-anchor="start" font-weight="700" fill="#111827">15.2 (+0.98)</text>
+<text x="260.0" y="329.0" font-size="16" text-anchor="end" fill="#111827">ISKM 고정 바운드 끔</text>
+<rect x="272" y="315" width="193.5" height="18" rx="2" fill="#2563eb"/>
+<line x1="462.9" y1="324" x2="467.0" y2="324" stroke="#ffffff" stroke-width="4"/>
+<line x1="462.9" y1="318" x2="462.9" y2="330" stroke="#ffffff" stroke-width="4"/>
+<line x1="467.0" y1="318" x2="467.0" y2="330" stroke="#ffffff" stroke-width="4"/>
+<line x1="462.9" y1="324" x2="467.0" y2="324" stroke="#111827" stroke-width="1.6"/>
+<line x1="462.9" y1="318" x2="462.9" y2="330" stroke="#111827" stroke-width="1.6"/>
+<line x1="467.0" y1="318" x2="467.0" y2="330" stroke="#111827" stroke-width="1.6"/>
+<text x="476.0" y="329.0" font-size="16" text-anchor="start" font-weight="700" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">14.9 (+0.66)</text><text x="476.0" y="329.0" font-size="16" text-anchor="start" font-weight="700" fill="#111827">14.9 (+0.66)</text>
+<text x="260.0" y="361.0" font-size="16" text-anchor="end" fill="#111827">ISKM 끔 †</text>
+<rect x="272" y="347" width="176.3" height="18" rx="2" fill="#9333ea"/>
+<line x1="447.3" y1="356" x2="450.2" y2="356" stroke="#ffffff" stroke-width="4"/>
+<line x1="447.3" y1="350" x2="447.3" y2="362" stroke="#ffffff" stroke-width="4"/>
+<line x1="450.2" y1="350" x2="450.2" y2="362" stroke="#ffffff" stroke-width="4"/>
+<line x1="447.3" y1="356" x2="450.2" y2="356" stroke="#111827" stroke-width="1.6"/>
+<line x1="447.3" y1="350" x2="447.3" y2="362" stroke="#111827" stroke-width="1.6"/>
+<line x1="450.2" y1="350" x2="450.2" y2="362" stroke="#111827" stroke-width="1.6"/>
+<text x="459.2" y="361.0" font-size="16" text-anchor="start" font-weight="700" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">13.6 (−0.67)</text><text x="459.2" y="361.0" font-size="16" text-anchor="start" font-weight="700" fill="#111827">13.6 (−0.67)</text>
+<text x="272.0" y="386.0" font-size="16" text-anchor="start" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">GPU 시간 +1.24ms(VAT 인스턴스로 되돌린다)</text><text x="272.0" y="386.0" font-size="16" text-anchor="start" fill="#4b5563">GPU 시간 +1.24ms(VAT 인스턴스로 되돌린다)</text>
+<text x="260.0" y="417.0" font-size="16" text-anchor="end" fill="#111827">겹침 방지 끔</text>
+<rect x="272" y="403" width="173.0" height="18" rx="2" fill="#9333ea"/>
+<line x1="441.6" y1="412" x2="446.6" y2="412" stroke="#ffffff" stroke-width="4"/>
+<line x1="441.6" y1="406" x2="441.6" y2="418" stroke="#ffffff" stroke-width="4"/>
+<line x1="446.6" y1="406" x2="446.6" y2="418" stroke="#ffffff" stroke-width="4"/>
+<line x1="441.6" y1="412" x2="446.6" y2="412" stroke="#111827" stroke-width="1.6"/>
+<line x1="441.6" y1="406" x2="441.6" y2="418" stroke="#111827" stroke-width="1.6"/>
+<line x1="446.6" y1="406" x2="446.6" y2="418" stroke="#111827" stroke-width="1.6"/>
+<text x="455.6" y="417.0" font-size="16" text-anchor="start" font-weight="700" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">13.3 (−0.93)</text><text x="455.6" y="417.0" font-size="16" text-anchor="start" font-weight="700" fill="#111827">13.3 (−0.93)</text>
+<text x="272.0" y="442.0" font-size="16" text-anchor="start" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">몸통이 겹친 쌍 234 → 1,644</text><text x="272.0" y="442.0" font-size="16" text-anchor="start" fill="#4b5563">몸통이 겹친 쌍 234 → 1,644</text>
+<text x="260.0" y="473.0" font-size="16" text-anchor="end" fill="#111827">액터 캡슐 끔</text>
+<rect x="272" y="459" width="160.9" height="18" rx="2" fill="#9333ea"/>
+<line x1="432.7" y1="468" x2="433.1" y2="468" stroke="#ffffff" stroke-width="4"/>
+<line x1="432.7" y1="462" x2="432.7" y2="474" stroke="#ffffff" stroke-width="4"/>
+<line x1="433.1" y1="462" x2="433.1" y2="474" stroke="#ffffff" stroke-width="4"/>
+<line x1="432.7" y1="468" x2="433.1" y2="468" stroke="#111827" stroke-width="1.6"/>
+<line x1="432.7" y1="462" x2="432.7" y2="474" stroke="#111827" stroke-width="1.6"/>
+<line x1="433.1" y1="462" x2="433.1" y2="474" stroke="#111827" stroke-width="1.6"/>
+<text x="442.1" y="473.0" font-size="16" text-anchor="start" font-weight="700" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">12.4 (−1.86)</text><text x="442.1" y="473.0" font-size="16" text-anchor="start" font-weight="700" fill="#111827">12.4 (−1.86)</text>
+<text x="260.0" y="505.0" font-size="16" text-anchor="end" fill="#111827">하이드레이션 끔 †</text>
+<rect x="272" y="491" width="94.2" height="18" rx="2" fill="#9333ea"/>
+<line x1="366.1" y1="500" x2="366.3" y2="500" stroke="#ffffff" stroke-width="4"/>
+<line x1="366.1" y1="494" x2="366.1" y2="506" stroke="#ffffff" stroke-width="4"/>
+<line x1="366.3" y1="494" x2="366.3" y2="506" stroke="#ffffff" stroke-width="4"/>
+<line x1="366.1" y1="500" x2="366.3" y2="500" stroke="#111827" stroke-width="1.6"/>
+<line x1="366.1" y1="494" x2="366.1" y2="506" stroke="#111827" stroke-width="1.6"/>
+<line x1="366.3" y1="494" x2="366.3" y2="506" stroke="#111827" stroke-width="1.6"/>
+<text x="375.3" y="505.0" font-size="16" text-anchor="start" font-weight="700" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">7.25 (−6.98)</text><text x="375.3" y="505.0" font-size="16" text-anchor="start" font-weight="700" fill="#111827">7.25 (−6.98)</text>
+<text x="272.0" y="530.0" font-size="16" text-anchor="start" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">병목이 GPU로 바뀐다: 게임 스레드 5.23ms, GPU 6.21ms</text><text x="272.0" y="530.0" font-size="16" text-anchor="start" fill="#4b5563">병목이 GPU로 바뀐다: 게임 스레드 5.23ms, GPU 6.21ms</text>
+<text x="32.0" y="564.0" font-size="16" text-anchor="start" font-weight="700" fill="#4b5563">구별되지 않는 행: 차이가 0.5ms 아래이거나 세 실행 범위 안</text>
+<text x="260.0" y="595.0" font-size="16" text-anchor="end" fill="#9ca3af">입자의 오브 따라가기 끔</text>
+<rect x="272" y="581" width="189.3" height="18" rx="2" fill="#9ca3af"/>
+<line x1="457.4" y1="590" x2="462.7" y2="590" stroke="#ffffff" stroke-width="4"/>
+<line x1="457.4" y1="584" x2="457.4" y2="596" stroke="#ffffff" stroke-width="4"/>
+<line x1="462.7" y1="584" x2="462.7" y2="596" stroke="#ffffff" stroke-width="4"/>
+<line x1="457.4" y1="590" x2="462.7" y2="590" stroke="#111827" stroke-width="1.6"/>
+<line x1="457.4" y1="584" x2="457.4" y2="596" stroke="#111827" stroke-width="1.6"/>
+<line x1="462.7" y1="584" x2="462.7" y2="596" stroke="#111827" stroke-width="1.6"/>
+<text x="471.7" y="595.0" font-size="16" text-anchor="start" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">14.6 (+0.33)</text><text x="471.7" y="595.0" font-size="16" text-anchor="start" fill="#9ca3af">14.6 (+0.33)</text>
+<text x="260.0" y="627.0" font-size="16" text-anchor="end" fill="#9ca3af">ISKM 상자 따라가기 끔</text>
+<rect x="272" y="613" width="186.5" height="18" rx="2" fill="#9ca3af"/>
+<line x1="457.3" y1="622" x2="459.1" y2="622" stroke="#ffffff" stroke-width="4"/>
+<line x1="457.3" y1="616" x2="457.3" y2="628" stroke="#ffffff" stroke-width="4"/>
+<line x1="459.1" y1="616" x2="459.1" y2="628" stroke="#ffffff" stroke-width="4"/>
+<line x1="457.3" y1="622" x2="459.1" y2="622" stroke="#111827" stroke-width="1.6"/>
+<line x1="457.3" y1="616" x2="457.3" y2="628" stroke="#111827" stroke-width="1.6"/>
+<line x1="459.1" y1="616" x2="459.1" y2="628" stroke="#111827" stroke-width="1.6"/>
+<text x="468.1" y="627.0" font-size="16" text-anchor="start" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">14.3 (+0.12)</text><text x="468.1" y="627.0" font-size="16" text-anchor="start" fill="#9ca3af">14.3 (+0.12)</text>
+<text x="260.0" y="659.0" font-size="16" text-anchor="end" fill="#9ca3af">80m 밖 그림자 다시 켬</text>
+<rect x="272" y="645" width="185.9" height="18" rx="2" fill="#9ca3af"/>
+<line x1="454.8" y1="654" x2="460.6" y2="654" stroke="#ffffff" stroke-width="4"/>
+<line x1="454.8" y1="648" x2="454.8" y2="660" stroke="#ffffff" stroke-width="4"/>
+<line x1="460.6" y1="648" x2="460.6" y2="660" stroke="#ffffff" stroke-width="4"/>
+<line x1="454.8" y1="654" x2="460.6" y2="654" stroke="#111827" stroke-width="1.6"/>
+<line x1="454.8" y1="648" x2="454.8" y2="660" stroke="#111827" stroke-width="1.6"/>
+<line x1="460.6" y1="648" x2="460.6" y2="660" stroke="#111827" stroke-width="1.6"/>
+<text x="469.6" y="659.0" font-size="16" text-anchor="start" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">14.3 (+0.07)</text><text x="469.6" y="659.0" font-size="16" text-anchor="start" fill="#9ca3af">14.3 (+0.07)</text>
+<text x="272.0" y="684.0" font-size="16" text-anchor="start" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">GPU 시간 +0.48ms, 0.5ms 아래라 구별되지 않는다</text><text x="272.0" y="684.0" font-size="16" text-anchor="start" fill="#4b5563">GPU 시간 +0.48ms, 0.5ms 아래라 구별되지 않는다</text>
+<text x="260.0" y="715.0" font-size="16" text-anchor="end" fill="#9ca3af">엔티티 풀 끔</text>
+<rect x="272" y="701" width="185.1" height="18" rx="2" fill="#9ca3af"/>
+<line x1="455.1" y1="710" x2="458.8" y2="710" stroke="#ffffff" stroke-width="4"/>
+<line x1="455.1" y1="704" x2="455.1" y2="716" stroke="#ffffff" stroke-width="4"/>
+<line x1="458.8" y1="704" x2="458.8" y2="716" stroke="#ffffff" stroke-width="4"/>
+<line x1="455.1" y1="710" x2="458.8" y2="710" stroke="#111827" stroke-width="1.6"/>
+<line x1="455.1" y1="704" x2="455.1" y2="716" stroke="#111827" stroke-width="1.6"/>
+<line x1="458.8" y1="704" x2="458.8" y2="716" stroke="#111827" stroke-width="1.6"/>
+<text x="467.8" y="715.0" font-size="16" text-anchor="start" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">14.2 (+0.01)</text><text x="467.8" y="715.0" font-size="16" text-anchor="start" fill="#9ca3af">14.2 (+0.01)</text>
+<text x="272.0" y="740.0" font-size="16" text-anchor="start" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">실행 끝 ISKM 트랙 20,215 → 30,797</text><text x="272.0" y="740.0" font-size="16" text-anchor="start" fill="#4b5563">실행 끝 ISKM 트랙 20,215 → 30,797</text>
+<text x="260.0" y="771.0" font-size="16" text-anchor="end" fill="#9ca3af">ISKM 트랙 예약 끔</text>
+<rect x="272" y="757" width="185.1" height="18" rx="2" fill="#9ca3af"/>
+<line x1="456.1" y1="766" x2="459.7" y2="766" stroke="#ffffff" stroke-width="4"/>
+<line x1="456.1" y1="760" x2="456.1" y2="772" stroke="#ffffff" stroke-width="4"/>
+<line x1="459.7" y1="760" x2="459.7" y2="772" stroke="#ffffff" stroke-width="4"/>
+<line x1="456.1" y1="766" x2="459.7" y2="766" stroke="#111827" stroke-width="1.6"/>
+<line x1="456.1" y1="760" x2="456.1" y2="772" stroke="#111827" stroke-width="1.6"/>
+<line x1="459.7" y1="760" x2="459.7" y2="772" stroke="#111827" stroke-width="1.6"/>
+<text x="468.7" y="771.0" font-size="16" text-anchor="start" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">14.2 (+0.01)</text><text x="468.7" y="771.0" font-size="16" text-anchor="start" fill="#9ca3af">14.2 (+0.01)</text>
+<text x="260.0" y="803.0" font-size="16" text-anchor="end" fill="#9ca3af">전환 대책 끔</text>
+<rect x="272" y="789" width="185.0" height="18" rx="2" fill="#9ca3af"/>
+<line x1="454.9" y1="798" x2="457.8" y2="798" stroke="#ffffff" stroke-width="4"/>
+<line x1="454.9" y1="792" x2="454.9" y2="804" stroke="#ffffff" stroke-width="4"/>
+<line x1="457.8" y1="792" x2="457.8" y2="804" stroke="#ffffff" stroke-width="4"/>
+<line x1="454.9" y1="798" x2="457.8" y2="798" stroke="#111827" stroke-width="1.6"/>
+<line x1="454.9" y1="792" x2="454.9" y2="804" stroke="#111827" stroke-width="1.6"/>
+<line x1="457.8" y1="792" x2="457.8" y2="804" stroke="#111827" stroke-width="1.6"/>
+<text x="466.8" y="803.0" font-size="16" text-anchor="start" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">14.2 (0)</text><text x="466.8" y="803.0" font-size="16" text-anchor="start" fill="#9ca3af">14.2 (0)</text>
+<text x="260.0" y="835.0" font-size="16" text-anchor="end" fill="#9ca3af">액터 애니메이션 예산 끔</text>
+<rect x="272" y="821" width="182.5" height="18" rx="2" fill="#9ca3af"/>
+<line x1="452.9" y1="830" x2="455.0" y2="830" stroke="#ffffff" stroke-width="4"/>
+<line x1="452.9" y1="824" x2="452.9" y2="836" stroke="#ffffff" stroke-width="4"/>
+<line x1="455.0" y1="824" x2="455.0" y2="836" stroke="#ffffff" stroke-width="4"/>
+<line x1="452.9" y1="830" x2="455.0" y2="830" stroke="#111827" stroke-width="1.6"/>
+<line x1="452.9" y1="824" x2="452.9" y2="836" stroke="#111827" stroke-width="1.6"/>
+<line x1="455.0" y1="824" x2="455.0" y2="836" stroke="#111827" stroke-width="1.6"/>
+<text x="464.0" y="835.0" font-size="16" text-anchor="start" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">14 (−0.19)</text><text x="464.0" y="835.0" font-size="16" text-anchor="start" fill="#9ca3af">14 (−0.19)</text>
+<text x="260.0" y="867.0" font-size="16" text-anchor="end" fill="#9ca3af">최소 유지 시간 끔</text>
+<rect x="272" y="853" width="182.3" height="18" rx="2" fill="#9ca3af"/>
+<line x1="452.7" y1="862" x2="455.3" y2="862" stroke="#ffffff" stroke-width="4"/>
+<line x1="452.7" y1="856" x2="452.7" y2="868" stroke="#ffffff" stroke-width="4"/>
+<line x1="455.3" y1="856" x2="455.3" y2="868" stroke="#ffffff" stroke-width="4"/>
+<line x1="452.7" y1="862" x2="455.3" y2="862" stroke="#111827" stroke-width="1.6"/>
+<line x1="452.7" y1="856" x2="452.7" y2="868" stroke="#111827" stroke-width="1.6"/>
+<line x1="455.3" y1="856" x2="455.3" y2="868" stroke="#111827" stroke-width="1.6"/>
+<text x="464.3" y="867.0" font-size="16" text-anchor="start" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">14 (−0.21)</text><text x="464.3" y="867.0" font-size="16" text-anchor="start" fill="#9ca3af">14 (−0.21)</text>
+<text x="272.0" y="892.0" font-size="16" text-anchor="start" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">왕복 전환 초당 0 → 4.34건</text><text x="272.0" y="892.0" font-size="16" text-anchor="start" fill="#4b5563">왕복 전환 초당 0 → 4.34건</text>
+<text x="260.0" y="923.0" font-size="16" text-anchor="end" fill="#9ca3af">Simulation LOD 끔</text>
+<rect x="272" y="909" width="181.9" height="18" rx="2" fill="#9ca3af"/>
+<line x1="452.7" y1="918" x2="456.0" y2="918" stroke="#ffffff" stroke-width="4"/>
+<line x1="452.7" y1="912" x2="452.7" y2="924" stroke="#ffffff" stroke-width="4"/>
+<line x1="456.0" y1="912" x2="456.0" y2="924" stroke="#ffffff" stroke-width="4"/>
+<line x1="452.7" y1="918" x2="456.0" y2="918" stroke="#111827" stroke-width="1.6"/>
+<line x1="452.7" y1="912" x2="452.7" y2="924" stroke="#111827" stroke-width="1.6"/>
+<line x1="456.0" y1="912" x2="456.0" y2="924" stroke="#111827" stroke-width="1.6"/>
+<text x="465.0" y="923.0" font-size="16" text-anchor="start" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">14 (−0.24)</text><text x="465.0" y="923.0" font-size="16" text-anchor="start" fill="#9ca3af">14 (−0.24)</text>
+<text x="260.0" y="955.0" font-size="16" text-anchor="end" fill="#9ca3af">배경 무리 끔 †</text>
+<rect x="272" y="941" width="181.0" height="18" rx="2" fill="#9ca3af"/>
+<line x1="451.2" y1="950" x2="454.3" y2="950" stroke="#ffffff" stroke-width="4"/>
+<line x1="451.2" y1="944" x2="451.2" y2="956" stroke="#ffffff" stroke-width="4"/>
+<line x1="454.3" y1="944" x2="454.3" y2="956" stroke="#ffffff" stroke-width="4"/>
+<line x1="451.2" y1="950" x2="454.3" y2="950" stroke="#111827" stroke-width="1.6"/>
+<line x1="451.2" y1="944" x2="451.2" y2="956" stroke="#111827" stroke-width="1.6"/>
+<line x1="454.3" y1="944" x2="454.3" y2="956" stroke="#111827" stroke-width="1.6"/>
+<text x="463.3" y="955.0" font-size="16" text-anchor="start" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">13.9 (−0.31)</text><text x="463.3" y="955.0" font-size="16" text-anchor="start" fill="#9ca3af">13.9 (−0.31)</text>
+<text x="272.0" y="980.0" font-size="16" text-anchor="start" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">GPU 시간 −0.62ms</text><text x="272.0" y="980.0" font-size="16" text-anchor="start" fill="#4b5563">GPU 시간 −0.62ms</text>
+<text x="32.0" y="1014.0" font-size="16" text-anchor="start" font-weight="700" fill="#4b5563">하위 실험: 기법을 끈 것이 아니라 바꾼 조건</text>
+<text x="260.0" y="1045.0" font-size="16" text-anchor="end" fill="#111827">엔진 회피로 바꿈</text>
+<rect x="272" y="1031" width="296.4" height="18" rx="2" fill="#2563eb"/>
+<line x1="566.0" y1="1040" x2="573.2" y2="1040" stroke="#ffffff" stroke-width="4"/>
+<line x1="566.0" y1="1034" x2="566.0" y2="1046" stroke="#ffffff" stroke-width="4"/>
+<line x1="573.2" y1="1034" x2="573.2" y2="1046" stroke="#ffffff" stroke-width="4"/>
+<line x1="566.0" y1="1040" x2="573.2" y2="1040" stroke="#111827" stroke-width="1.6"/>
+<line x1="566.0" y1="1034" x2="566.0" y2="1046" stroke="#111827" stroke-width="1.6"/>
+<line x1="573.2" y1="1034" x2="573.2" y2="1046" stroke="#111827" stroke-width="1.6"/>
+<text x="582.2" y="1045.0" font-size="16" text-anchor="start" font-weight="700" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">22.8 (+8.57)</text><text x="582.2" y="1045.0" font-size="16" text-anchor="start" font-weight="700" fill="#111827">22.8 (+8.57)</text>
+<line x1="32" y1="1124" x2="768" y2="1124" stroke="#e5e7eb"/>
+<text x="32.0" y="1146.0" font-size="16" text-anchor="start" fill="#4b5563">괄호 안은 최종 구성(14.2ms)과의 차이(ms)다. 구별은 차이가 0.5ms 이상이고</text>
+<text x="32.0" y="1168.0" font-size="16" text-anchor="start" fill="#4b5563">두 조건의 세 실행 범위 가운데 큰 쪽보다 클 때만 한다.</text>
+<text x="32.0" y="1190.0" font-size="16" text-anchor="start" fill="#4b5563">80m 밖 그림자는 끈 조건이 아니라 다시 켠 조건이다.</text>
+<text x="32.0" y="1212.0" font-size="16" text-anchor="start" fill="#4b5563">† 참고 값: 다른 것이 함께 빠진다. 하이드레이션 끔은 액터 캡슐, 액터 애니메이션</text>
+<text x="32.0" y="1234.0" font-size="16" text-anchor="start" fill="#4b5563">예산, 액터 메시 고정 바운드가 함께 빠지고 전 구간이 ISKM이 된다. ISKM 끔은</text>
+<text x="32.0" y="1256.0" font-size="16" text-anchor="start" fill="#4b5563">ISKM 고정 바운드, 트랙 예약, 먼 피격 규칙이 빠진다. 배경 무리 끔은 먼 피격 규칙과</text>
+<text x="32.0" y="1278.0" font-size="16" text-anchor="start" fill="#4b5563">맵 밖 무리 그리기가 빠진다. 먼 피격 규칙은 200m 밖에서 맞은 개체를 ISKM으로 그린다.</text>
+</svg>
