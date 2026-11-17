@@ -139,4 +139,4 @@ EntityQuery.ForEachEntityChunk(Context, [FallbackLogOwner = this, &EntityManager
 - 엔진 회피를 기본 파라미터로 쓰면 개체가 오브 둘레에 쌓여 같은 일을 하지 못한다. 왜 쌓이는지는 가르지 않았다.
 - 단계 2의 시간에는 회피의 비용과 늘어난 액터의 비용이 섞여 있다.
 
-[다음 글](../03-separation/README.md)은 엔진 회피를 직접 짠 밀어내기 프로세서로 바꾼다. 여덟 단계의 결과는 [07 요약](../07-summary/README.md)에 모았다.
+[다음 글](../03-separation/README.md)은 엔진 회피를 자체 밀어내기 프로세서로 바꾼다. 여덟 단계의 결과는 [07 요약](../07-summary/README.md)에 모았다.

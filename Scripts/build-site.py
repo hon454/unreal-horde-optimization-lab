@@ -88,7 +88,7 @@ def changed_text(num, s):
                 f"화면 안에서 카메라로부터 {hm}m 안의 개체(상한 {cap})는 액터, 나머지는 애니메이션 없는 정지 메시 인스턴스이고, "
                 f"{far}m 밖은 그리지 않는다.")
     if num == 3:
-        return ("엔진 회피를 직접 짠 밀어내기 프로세서(`ULabSeparationProcessor`)로 바꾸고, 엔진의 방향 보간 Processor를 "
+        return ("엔진 회피를 자체 밀어내기 프로세서(`ULabSeparationProcessor`)로 바꾸고, 엔진의 방향 보간 Processor를 "
                 "같은 계산을 병렬로 도는 사본으로 바꿨다. 표현은 단계 2와 같다.")
     if num == 4:
         hold = fmt_int(float(s(4, "rep_hold_ms")) / 1000)

@@ -97,7 +97,7 @@
 | 할당기 | Animation Budget Allocator(처음) 또는 Budget Allocator | 사용자 2026-11-17([autonomous-decisions.md](../Worklog/autonomous-decisions.md) 끝). 한 일은 바꾼 것으로 쓴다(AGENTS.md). **`FSpanAllocator`는 Budget Allocator가 아니다.** 엔진의 GPU 버퍼 구간 관리자다([engine-notes.md](../Reference/engine-notes.md) 42절, [V2-w14-plan.md](../Worklog/V2-w14-plan.md) 7.1절). `FSpanAllocator`를 가리키는 옛 낱말은 `FSpanAllocator`로 쓴다 |
 | 빼 보기 | 기법별 기여 | 제목은 "기법별 기여(최종 구성에서 하나씩 껐을 때)", 조건은 "\~를 끈 조건"이다. 처음 쓰는 곳에서 방법을 한 문장으로 적는다(사용자 2026-11-17, 결정 7). `a8shd`는 끈 조건이 아니라 80m 밖 그림자를 다시 켠 조건이다 |
 | 분리 프로세서 | 밀어내기 프로세서 | 사용자 2026-11-18. 코드 식별자(`ULabSeparationProcessor`, `-LabSeparate`)와 엔진 회피의 파라미터 이름(분리 반경 배율 등)은 그대로 둔다 |
-| 직접 짠 분리(단계 3의 이름) | 자체 밀어내기 | 사용자 2026-11-18. 조건 표의 영어 이름은 "Own separation logic"으로 둔다 |
+| 직접 짠 분리, 직접 짠 밀어내기(단계 3의 이름) | 자체 밀어내기 | 사용자 2026-11-18. 조건 표의 영어 이름은 "Own separation logic"으로 둔다 |
 | 품질 단계 | 표현을 더하는 단계 | 단계 4, 6, 7(사용자 2026-11-17) |
 | 버는 단계 | 비용을 줄이는 단계 | 단계 2, 3, 5, 8(사용자 2026-11-17) |
 | 조각상 | VAT 인스턴스 | 사용자 지시. 이 저장소의 추적 문서에서 옛 낱말이 쓰인 곳은 찾지 못했다(`git grep` 0건) |
