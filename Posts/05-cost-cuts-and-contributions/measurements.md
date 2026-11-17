@@ -144,6 +144,29 @@
 | `a8iskm`(`-LabIskm=0`) | ISKM 고정 바운드, 트랙 예약, 먼 피격 규칙 `-LabFarHitIskm` | measurement.md 188행 |
 | `a8fx`(`-LabCrowdFx=0`) | 먼 피격 규칙 `-LabFarHitIskm`, 맵 밖 무리 그리기 | measurement.md 189행 |
 
+기법을 끄면 그 자리에 들어가는 것이다. 근거는 [용어집](../../Docs/Guides/glossary.md) 5.2절과 [commands.md](../../Docs/Guides/commands.md)의 인자 표다.
+
+| 그림의 행 | 끄면 대신 들어가는 것 | 인자 |
+| --- | --- | --- |
+| 200m 밖을 그리지 않는 일 끔 `a8far` | 200m 밖 엔티티를 맵 끝까지 그림자를 끈 ISKM으로 그린다. 입자는 맵 밖 무리만 그린다 | `-LabFarCull=0` |
+| 액터 메시 고정 바운드 끔 `a8fsb` | 액터 메시가 애니메이션을 갱신할 때마다 피직스 에셋의 바디로 바운드를 다시 셈한다 | `-LabFixedSkelBounds=0` |
+| ISKM 고정 바운드 끔 `a8bnd` | 엔진이 ISKM 컴포넌트의 바운드를 셈할 때 인스턴스를 모두 돈다 | `-LabFixedBounds=0` |
+| ISKM 끔 `a8iskm` | 35\~200m를 VAT 인스턴스로 그린다 | `-LabIskm=0` |
+| 겹침 방지 끔 `a8sep` | 개체를 서로 떼어 놓지 않는다. 겹친 쌍이 늘어 같은 일이 아니다 | `-LabSeparate=0` |
+| 액터 캡슐 끔 `a8cap` | 가까운 액터가 캡슐 콜리전 없이 그려진다 | `-LabActorCollision=0` |
+| 하이드레이션 끔 `a8hyd` | 가까운 개체도 액터 없이 ISKM으로 그린다 | `-LabHydrate=0` |
+| 입자의 오브 따라가기 끔 `a8fxf` | 입자가 향할 오브의 자리를 매 프레임 넣지 않고, 시작 전에 한 번만 넣는다 | `-LabFxOrbFollow=0` |
+| ISKM 상자 따라가기 끔 `a8stp` | 고정 바운드 상자를 카메라로 옮기지 않고 처음 오브 자리 둘레에 둔다 | `-LabBoundsStepM=0` |
+| 80m 밖 그림자 다시 켬 `a8shd` | 80m 밖 ISKM 인스턴스와 200m 밖 입자도 그림자를 그린다 | `-LabFarShadow=1` |
+| 엔티티 풀 끔 `a8pool` | 죽은 개체의 엔티티를 파괴하고 새로 만든다 | `-LabEntityPool=0` |
+| ISKM 트랙 예약 끔 `a8res` | 트랙 풀을 처음에 용량까지 늘려 두지 않는다 | `-LabIskmTrackReserve=0` |
+| 전환 대책 끔 `a8fix` | 인스턴스와 액터가 바뀌는 프레임의 보정 다섯을 모두 끈다 | `-LabHydrateFixMask=0` |
+| 액터 애니메이션 예산 끔 `a8bud` | 액터 메시가 `USkeletalMeshComponentBudgeted` 대신 `USkeletalMeshComponent`다. 메시가 매 프레임 애니메이션을 평가한다 | `-LabScreenSigBudget=0` |
+| 최소 유지 시간 끔 `a8hold` | 바뀐 개체가 2초 안에 바로 전의 표현으로 되돌아갈 수 있다 | `-LabRepHold=0` |
+| Simulation LOD 끔 `a8sim` | 80m 밖 개체도 접근·범위 피해 로직을 매 프레임 돌리고, 200m 밖 개체도 엔진의 이동·조향 프로세서로 옮긴다 | `-LabSimLod=0` |
+| 배경 무리 끔 `a8fx` | 200m 밖에 아무것도 그리지 않는다 | `-LabCrowdFx=0` |
+| 엔진 회피로 바꿈 `s8av` | 분리 프로세서 대신 엔진 회피를 쓴다. 끈 것이 아니라 바꾼 조건이다 | `-LabAvoid=1 -LabSeparate=0` |
+
 ### 그림 3 `../06-engine-findings/images/entity-pool.svg`
 
 글 06의 도식(커밋 583a770, 그 글의 `make-figures.py`가 만든다)을 그대로 링크했다. 계획안([V2-w14-plan.md](../../Docs/Worklog/V2-w14-plan.md) 3.2절)이 글 05와 06에 같은 도식을 쓰게 한다. 수치가 없는 도식이고, 근거는 아래 "엔진 소스와 코드 위치"다. "A의 트랙은 남는다"는 `EndVisualChanges`의 지우기 반복이 트랙 맵을 건드리지 않는 것이다. 풀 쪽은 `ULabCrowdSubsystem::RecycleAndRespawn`과 `SpawnEntities`의 순서다. 실제로는 방금 죽은 엔티티를 같은 플러시에서 바로 다시 꺼내고, 남은 것만 맵 밖 먼 곳(`LabPoolParkLocation`)에 세운다.
