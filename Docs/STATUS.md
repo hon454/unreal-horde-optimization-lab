@@ -170,4 +170,4 @@ Development 전환 점수는 `Full1` 때의 참고값이다(`Measurements/Full1/
 
 ## 사용자에게 요청한 일
 
-W14 결정 9(`Worklog/V2-w14-plan.md` 2.2절).
+W14 결정 9(`Worklog/V2-w14-plan.md`).
