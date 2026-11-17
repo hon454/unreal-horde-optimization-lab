@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="414" viewBox="0 0 900 414" font-family="Segoe UI, Arial, sans-serif" font-size="13">
+<rect width="100%" height="100%" fill="white"/>
+<text x="450.0" y="26" text-anchor="middle" font-size="16" font-weight="600">Frame time of the ladder at N=10,000 (moving orb)</text>
+<text x="450.0" y="46" text-anchor="middle" font-size="12" fill="#555">gray: start · blue: earned frame time · orange: spent it on quality</text>
+<line x1="674.1" y1="62" x2="674.1" y2="384" stroke="#b45309" stroke-dasharray="6 4"/>
+<text x="678.1" y="58" fill="#b45309" font-size="11">16.7 ms (60 fps)</text>
+<line x1="660.3" y1="62" x2="660.3" y2="384" stroke="#16a34a" stroke-dasharray="6 4"/>
+<text x="664.3" y="58" fill="#16a34a" font-size="11">16.1 ms (median p95 + 0.6 ms margin)</text>
+<text x="280" y="87" text-anchor="end">1. Actor baseline</text>
+<rect x="290" y="72" width="460.0" height="20" fill="#6b7280"/>
+<rect x="290" y="95" width="460.0" height="6" fill="#6b7280" opacity="0.55"/>
+<line x1="732" y1="104" x2="740" y2="70" stroke="white" stroke-width="3"/>
+<line x1="724" y1="104" x2="732" y2="70" stroke="white" stroke-width="3"/>
+<text x="756.0" y="87">665.25</text>
+<text x="280" y="125" text-anchor="end">2. Mass, engine default path</text>
+<rect x="290" y="110" width="460.0" height="20" fill="#2563eb"/>
+<rect x="290" y="133" width="460.0" height="6" fill="#2563eb" opacity="0.55"/>
+<line x1="732" y1="142" x2="740" y2="108" stroke="white" stroke-width="3"/>
+<line x1="724" y1="142" x2="732" y2="108" stroke="white" stroke-width="3"/>
+<text x="756.0" y="125">36.78</text>
+<text x="280" y="163" text-anchor="end">3. Own separation logic</text>
+<rect x="290" y="148" width="325.4" height="20" fill="#2563eb"/>
+<rect x="290" y="171" width="285.5" height="6" fill="#2563eb" opacity="0.55"/>
+<text x="621.4" y="163">14.15</text>
+<text x="280" y="201" text-anchor="end">4. Animated instances + actor budget</text>
+<rect x="290" y="186" width="326.7" height="20" fill="#ea580c"/>
+<rect x="290" y="209" width="295.7" height="6" fill="#ea580c" opacity="0.55"/>
+<text x="622.7" y="201">14.21</text>
+<text x="280" y="239" text-anchor="end">5. Simulation LOD + entity pool</text>
+<rect x="290" y="224" width="333.9" height="20" fill="#2563eb"/>
+<rect x="290" y="247" width="301.1" height="6" fill="#2563eb" opacity="0.55"/>
+<text x="629.9" y="239">14.52</text>
+<text x="280" y="277" text-anchor="end">6. ISKM</text>
+<rect x="290" y="262" width="338.3" height="20" fill="#ea580c"/>
+<rect x="290" y="285" width="303.6" height="6" fill="#ea580c" opacity="0.55"/>
+<text x="634.3" y="277">14.71</text>
+<text x="280" y="315" text-anchor="end">7. Background crowd</text>
+<rect x="290" y="300" width="348.9" height="20" fill="#ea580c"/>
+<rect x="290" y="323" width="312.0" height="6" fill="#ea580c" opacity="0.55"/>
+<text x="644.9" y="315">15.17</text>
+<text x="280" y="353" text-anchor="end">8. Trim remaining cost</text>
+<rect x="290" y="338" width="327.3" height="20" fill="#2563eb"/>
+<rect x="290" y="361" width="293.7" height="6" fill="#2563eb" opacity="0.55"/>
+<text x="623.3" y="353">14.23</text>
+<text x="290" y="406" font-size="11" fill="#555">ms. thick bar = frame p95, thin bar = frame p50 (median of runs). Steps that exceed the axis are cut</text></svg>

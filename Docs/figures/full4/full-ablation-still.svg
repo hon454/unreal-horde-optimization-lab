@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="718" viewBox="0 0 900 718" font-family="Segoe UI, Arial, sans-serif" font-size="13">
+<rect width="100%" height="100%" fill="white"/>
+<text x="450.0" y="26" text-anchor="middle" font-size="16" font-weight="600">Remove one technique from the final configuration (N=10,000, still orb)</text>
+<text x="450.0" y="46" text-anchor="middle" font-size="12" fill="#555">blue: removing it costs frame time (it earned it), gray: no cost</text>
+<line x1="700.7" y1="62" x2="700.7" y2="688" stroke="#b45309" stroke-dasharray="6 4"/>
+<text x="704.7" y="58" fill="#b45309" font-size="11">16.7 ms</text>
+<text x="280" y="87" text-anchor="end">final configuration (step 8)</text>
+<rect x="290" y="72" width="281.7" height="20" fill="#ea580c"/>
+<rect x="290" y="95" width="250.7" height="6" fill="#ea580c" opacity="0.55"/>
+<text x="577.7" y="87">11.46</text>
+<text x="280" y="125" text-anchor="end">without Hydration actors</text>
+<rect x="290" y="110" width="166.4" height="20" fill="#6b7280"/>
+<rect x="290" y="133" width="155.0" height="6" fill="#6b7280" opacity="0.55"/>
+<text x="462.4" y="125">6.76 (-4.69)</text>
+<text x="280" y="163" text-anchor="end">without Actor anim budget</text>
+<rect x="290" y="148" width="277.0" height="20" fill="#6b7280"/>
+<rect x="290" y="171" width="248.1" height="6" fill="#6b7280" opacity="0.55"/>
+<text x="573.0" y="163">11.26 (-0.19)</text>
+<text x="280" y="201" text-anchor="end">without Transition fixes</text>
+<rect x="290" y="186" width="280.5" height="20" fill="#6b7280"/>
+<rect x="290" y="209" width="251.3" height="6" fill="#6b7280" opacity="0.55"/>
+<text x="576.5" y="201">11.40 (-0.05)</text>
+<text x="280" y="239" text-anchor="end">without Min hold time</text>
+<rect x="290" y="224" width="271.4" height="20" fill="#6b7280"/>
+<rect x="290" y="247" width="240.8" height="6" fill="#6b7280" opacity="0.55"/>
+<text x="567.4" y="239">11.04 (-0.42)</text>
+<text x="280" y="277" text-anchor="end">without Entity pool</text>
+<rect x="290" y="262" width="280.4" height="20" fill="#6b7280"/>
+<rect x="290" y="285" width="251.0" height="6" fill="#6b7280" opacity="0.55"/>
+<text x="576.4" y="277">11.40 (-0.05)</text>
+<text x="280" y="315" text-anchor="end">without Simulation LOD</text>
+<rect x="290" y="300" width="277.7" height="20" fill="#6b7280"/>
+<rect x="290" y="323" width="245.2" height="6" fill="#6b7280" opacity="0.55"/>
+<text x="573.7" y="315">11.29 (-0.16)</text>
+<text x="280" y="353" text-anchor="end">without ISKM</text>
+<rect x="290" y="338" width="269.5" height="20" fill="#6b7280"/>
+<rect x="290" y="361" width="238.2" height="6" fill="#6b7280" opacity="0.55"/>
+<text x="565.5" y="353">10.96 (-0.50)</text>
+<text x="280" y="391" text-anchor="end">without Fixed bounds</text>
+<rect x="290" y="376" width="298.7" height="20" fill="#2563eb"/>
+<rect x="290" y="399" width="267.5" height="6" fill="#2563eb" opacity="0.55"/>
+<text x="594.7" y="391">12.15 (+0.69)</text>
+<text x="280" y="429" text-anchor="end">without Far cull</text>
+<rect x="290" y="414" width="370.0" height="20" fill="#2563eb"/>
+<rect x="290" y="437" width="340.7" height="6" fill="#2563eb" opacity="0.55"/>
+<text x="666.0" y="429">15.05 (+3.59)</text>
+<text x="280" y="467" text-anchor="end">without Background crowd</text>
+<rect x="290" y="452" width="271.4" height="20" fill="#6b7280"/>
+<rect x="290" y="475" width="240.5" height="6" fill="#6b7280" opacity="0.55"/>
+<text x="567.4" y="467">11.04 (-0.42)</text>
+<text x="280" y="505" text-anchor="end">without Separation</text>
+<rect x="290" y="490" width="258.8" height="20" fill="#6b7280"/>
+<rect x="290" y="513" width="225.9" height="6" fill="#6b7280" opacity="0.55"/>
+<text x="554.8" y="505">10.52 (-0.93)</text>
+<text x="280" y="543" text-anchor="end">without Actor capsule</text>
+<rect x="290" y="528" width="251.1" height="20" fill="#6b7280"/>
+<rect x="290" y="551" width="217.5" height="6" fill="#6b7280" opacity="0.55"/>
+<text x="547.1" y="543">10.21 (-1.25)</text>
+<text x="280" y="581" text-anchor="end">without Far shadow off</text>
+<rect x="290" y="566" width="283.7" height="20" fill="#2563eb"/>
+<rect x="290" y="589" width="252.1" height="6" fill="#2563eb" opacity="0.55"/>
+<text x="579.7" y="581">11.53 (+0.08)</text>
+<text x="280" y="619" text-anchor="end">without Fixed skeletal bounds</text>
+<rect x="290" y="604" width="297.5" height="20" fill="#2563eb"/>
+<rect x="290" y="627" width="269.1" height="6" fill="#2563eb" opacity="0.55"/>
+<text x="593.5" y="619">12.10 (+0.64)</text>
+<text x="280" y="657" text-anchor="end">without ISKM track reserve</text>
+<rect x="290" y="642" width="279.4" height="20" fill="#6b7280"/>
+<rect x="290" y="665" width="251.4" height="6" fill="#6b7280" opacity="0.55"/>
+<text x="575.4" y="657">11.36 (-0.09)</text>
+<text x="290" y="710" font-size="11" fill="#555">ms. thick bar = frame p95, thin bar = frame p50 (median of runs)</text></svg>
