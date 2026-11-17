@@ -12,7 +12,7 @@
 <rect x="416" y="116" width="352" height="380" rx="10" fill="#f8fafc" stroke="#e5e7eb"/>
 <text x="434" y="148" font-size="18" font-weight="700" fill="#2563eb">분리 프로세서(단계 3부터)</text>
 <text x="434" y="396" font-size="16">이웃: 둘레 9칸에서 겹친 개체 모두</text>
-<text x="434" y="426" font-size="16">결과: 겹친 깊이만큼 위치를 직접 민다</text>
+<text x="434" y="426" font-size="16">결과: 남은 겹침의 절반씩 위치를 민다</text>
 <text x="434" y="456" font-size="16">반복: 2번. 모두 같은 위치 사본을 읽는다</text>
 <text x="434" y="486" font-size="16">순회: 128개씩 나눠 ParallelFor로</text>
 <circle cx="211.9" cy="234.0" r="9" fill="#374151" stroke="#374151" stroke-width="1.5"/>
@@ -61,7 +61,7 @@
 <line x1="592.0" y1="253.0" x2="630.6" y2="263.5" stroke="#374151" stroke-width="2" marker-end="url(#arrow)"/>
 <line x1="592.0" y1="253.0" x2="556.2" y2="235.1" stroke="#374151" stroke-width="2" marker-end="url(#arrow)"/>
 <line x1="592.0" y1="253.0" x2="597.3" y2="213.4" stroke="#374151" stroke-width="2" marker-end="url(#arrow)"/>
-<text x="434" y="356" font-size="16" fill="#4b5563">겹친 이웃마다 겹친 깊이만큼 떼어 놓는다</text>
+<text x="434" y="356" font-size="16" fill="#4b5563">겹친 이웃마다 남은 겹침의 절반씩 떼어 놓는다</text>
 <line x1="32" y1="526" x2="768" y2="526" stroke="#e5e7eb"/>
 <text x="32" y="548" font-size="16" fill="#4b5563">엔진 회피는 이웃 수에 상한이 있고, 힘으로 속도만 바꾼다.</text>
 <text x="32" y="574" font-size="16" fill="#4b5563">분리 프로세서는 그 프레임의 이동 뒤에 겹침을 바로 푼다.</text>

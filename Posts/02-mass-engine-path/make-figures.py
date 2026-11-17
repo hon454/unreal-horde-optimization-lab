@@ -173,7 +173,7 @@ def summary():
         y += 2 * BH + GAP + RG
     yf = bottom + 70
     yf = footer(o, yf, ["단계 2의 프레임 p50은 게임 스레드, 렌더 스레드, GPU 어느 쪽보다도 길다.",
-                        "단계 1은 셋 가운데 가장 긴 게임 스레드에 프레임이 맞춰진다."])
+                        "단계 1은 셋 가운데 게임 스레드가 가장 길고, 프레임은 게임 스레드 시간보다 16ms쯤 길다."])
     write("summary-threads.svg", svg(yf, o, DEFS))
 
 

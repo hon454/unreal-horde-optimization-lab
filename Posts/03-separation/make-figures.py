@@ -236,7 +236,7 @@ def principle():
           "순회: 청크를 한 스레드에서 차례로"]),
         (32 + CW + GAPX, "분리 프로세서(단계 3부터)", S3, BLUE,
          ["이웃: 둘레 9칸에서 겹친 개체 모두",
-          "결과: 겹친 깊이만큼 위치를 직접 민다",
+          "결과: 남은 겹침의 절반씩 위치를 민다",
           "반복: 2번. 모두 같은 위치 사본을 읽는다",
           "순회: 128개씩 나눠 ParallelFor로"]),
     ]
@@ -281,7 +281,7 @@ def principle():
     for dx, dy in pairs[:3]:
         d = math.hypot(dx, dy)
         o.append(f'<line x1="{mx:.1f}" y1="{my:.1f}" x2="{mx - dx / d * 40:.1f}" y2="{my - dy / d * 40:.1f}" stroke="{DARK}" stroke-width="2" marker-end="url(#arrow)"/>')
-    o.append(f'<text x="{32 + CW + GAPX + 18}" y="{TOP + PH + 30}" font-size="16" fill="{SUB}">겹친 이웃마다 겹친 깊이만큼 떼어 놓는다</text>')
+    o.append(f'<text x="{32 + CW + GAPX + 18}" y="{TOP + PH + 30}" font-size="16" fill="{SUB}">겹친 이웃마다 남은 겹침의 절반씩 떼어 놓는다</text>')
     yb = TOP + PH + 40 + 30 * 4 + 10
     yend = footer(o, yb + 52, ["엔진 회피는 이웃 수에 상한이 있고, 힘으로 속도만 바꾼다.",
                                "분리 프로세서는 그 프레임의 이동 뒤에 겹침을 바로 푼다."])
@@ -328,7 +328,9 @@ def same_work():
             o.append(f'<text x="{lx:.1f}" y="{yy + 17}" font-size="16" font-weight="700" fill="{DARK if colour == S2 else BLUE}">{f(val)}</text>')
         y += 2 * 26 + 46
     yend = footer(o, y + 10, ["기준은 단계 3–8의 중앙값이다. 겹친 쌍의 허용 범위는 그 중앙값의 절반에서 두 배다.",
-                              "단계 3은 네 항목을 모두 통과했다. 단계 2는 넷 모두 기준 밖이다."])
+                              "단계 3은 기준 세 항목 안에 있고 깊게 겹친 쌍이 0이다.",
+                              "단계 2는 초당 사망과 30m 안 개체 수가 기준 밖이고,",
+                              "겹친 쌍은 분리 프로세서의 허용 범위를 크게 넘는다."])
     write("same-work.svg", svg(yend + 8, o))
 
 

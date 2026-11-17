@@ -45,5 +45,5 @@
 <text x="372.9" y="494" font-size="16" font-weight="700" fill="#2563eb" paint-order="stroke" stroke="white" stroke-width="5" stroke-linejoin="round">12.2</text>
 <line x1="32" y1="546" x2="768" y2="546" stroke="#e5e7eb"/>
 <text x="32" y="568" font-size="16" fill="#4b5563">단계 2의 프레임 p50은 게임 스레드, 렌더 스레드, GPU 어느 쪽보다도 길다.</text>
-<text x="32" y="594" font-size="16" fill="#4b5563">단계 1은 셋 가운데 가장 긴 게임 스레드에 프레임이 맞춰진다.</text>
+<text x="32" y="594" font-size="16" fill="#4b5563">단계 1은 셋 가운데 게임 스레드가 가장 길고, 프레임은 게임 스레드 시간보다 16ms쯤 길다.</text>
 </svg>
