@@ -15,7 +15,7 @@
 
 ## 다음 할 일
 
-1. 작업 세션이 스킬 계획안을 쓴다. 결정은 [autonomous-decisions.md](Worklog/autonomous-decisions.md) "사용자 확인(2026-11-18, 스킬)" 절에 있다.
+1. 사용자가 스킬 계획안 8절의 아홉 항목을 정한다([Worklog/Skills-plan.md](Worklog/Skills-plan.md), 508e04f). 앞선 결정은 [autonomous-decisions.md](Worklog/autonomous-decisions.md) "사용자 확인(2026-11-18, 스킬)" 절에 있다.
 2. 사용자가 계획안을 승인하면 코디네이터가 스킬 하나당 작업 세션 하나를 띄운다.
 3. 공개 자료를 고치면 사용자 승인을 받아 `v2.1`처럼 태그를 달아 릴리스한다.
 4. 사이트에 보이는 것을 고치면 `Scripts/build-site.py`를 다시 돌린다. `Site/assets/`는 `.gitignore`에 있어 `gh-pages`에 따로 넣는다.
@@ -66,7 +66,7 @@
 
 | 세션 | 작업 단위 | 모델 | 상태 |
 | --- | --- | --- | --- |
-| `skills-plan` | 스킬 계획안(`Docs/Worklog/Skills-plan.md`) | Opus high | 진행 중 |
+| `skills-plan` | 스킬 계획안(`Docs/Worklog/Skills-plan.md`) | Opus high | 계획안 커밋(508e04f). 사용자 결정 대기 |
 
 코디네이터는 세션을 띄우면 여기에 적는다. 끝난 세션은 결과를 확인하고 보관한 뒤 지운다.
 
