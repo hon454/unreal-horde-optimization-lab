@@ -22,7 +22,7 @@ STATUS.md "명령"에는 매번 쓰는 것만 둔다. 여기에는 스크립트 
 | `run-bench.ps1 ... [-RunIndex i] [-Trace] [-ExtraArgs "..."]` (M3b) | `-RunIndex`는 r<i> 하나만(실행 단위 섞기), `-Trace`는 `Saved/Traces/<라벨>.utrace`(`-trace=cpu,gpu,frame,counters,mass`), `-ExtraArgs`는 게임 인자 덧붙임 | |
 | `noise-table.py <라벨 접두사...>` (M3b) | 접두사별 실행의 프레임 p50·p95, Game·Render p50을 표로 내고 중앙값·최소\~최대·표준편차를 붙인다. 잡음 진단용. 예: `py -3 -I Scripts/noise-table.py M3b-m3mass-N20000-P1aff- M3b-m3mass-N20000-P1noaff-` | |
 
-`run-full.ps1`, `capture-full.ps1`, `full-conditions.json`, `ablation-check.py`, `equivalence-check.py`는 v2 W12에서 새 단계(`-LabStage=1`\~`8`)로 다시 만들었다(아래 "총괄 묶음 러너·검사·요약·촬영"). `run-bench.ps1`, `run-budget.ps1`, `run-mgr.ps1`, `run-pool.ps1`, `run-q4.ps1`, `run-transition.ps1`는 `v1`의 러너다. `-LabVariant`와 옛 단계 이름(`M0`\~`M5`)을 넘기므로 v2 W10 뒤의 빌드에서는 종료 코드 2로 끝난다.
+`run-full.ps1`, `capture-full.ps1`, `full-conditions.json`, `ablation-check.py`, `equivalence-check.py`는 v2 W12에서 새 단계(`-LabStage=1`\~`8`)로 다시 만들었다(아래 "총괄 묶음 러너·검사·요약·촬영"). `run-pool.ps1`은 v2로 옮겼다(아래 "엔티티 풀 긴 실행 러너"). `run-bench.ps1`, `run-budget.ps1`, `run-mgr.ps1`, `run-q4.ps1`, `run-transition.ps1`는 `v1`의 러너다. `-LabVariant`와 옛 단계 이름(`M0`\~`M5`)을 넘기므로 v2 W10 뒤의 빌드에서는 종료 코드 2로 끝난다.
 
 ## 사다리 단계와 스위치(v2 W10)
 
@@ -342,3 +342,36 @@ powershell -ExecutionPolicy Bypass -File Scripts/capture-full.ps1 -Batch Full4
 `capture-full.ps1`은 조건 표의 `capture` 절(단계 1\~8, 이동, 1만)을 `-LabHud -LabShotAt=45 -LabDuration=40 -LabWarmup=15`로 띄워 창이 뜬 24초 뒤부터 8초를 ffmpeg(`gdigrab`, 게임 창 클라이언트 영역의 물리 화면 좌표로 `-i desktop` 영역 녹화, `__COMPAT_LAYER=HighDpiAware`)로 녹화하고 960px 15fps 움직이는 WebP(`libwebp_anim -q:v 60 -loop 0`)로 만든다(`-Format gif`면 팔레트 2패스 GIF). 화면 메시지는 `-ExecCmds=DisableAllScreenMessages`로 끈다. 결과는 git 밖 `Saved/Capture/<Batch>/<라벨>.webp`, 경로는 `Measurements/<Batch>/captures.csv`에 적는다. 인자 `-Steps 8`, `-Seconds`, `-RecordDelaySec`, `-Width`, `-Fps`, `-Quality`, `-Format`, `-Run`, `-WarmupSec`(기본 15).
 
 러너가 쓰는 조건 이름은 `<V0|V1>-<구성>`(V0 이동, V1 정지)이다. 라벨은 `<묶음>-V0-s8-N10000-P1-r1`이다. 소형 확인 묶음(`run-spike.ps1`)의 라벨 `<묶음>-V<속도 번호>-<구성>-...`과 같은 모양이라 `summarize.py`가 둘 다 읽는다. 소형 묶음에서 속도 번호는 `-Speeds`의 순서다.
+
+### 엔티티 풀 긴 실행 러너
+
+`Scripts/run-pool.ps1`은 v2로 옮겼다([Worklog/V2.md](../Worklog/V2.md) "2026-11-17 엔티티 풀 긴 실행 러너"). 최종 구성(`s8`, 풀 켬)과 풀을 끈 조건(`a8pool`)을 총괄 묶음과 같은 시나리오(1만, 이동 장면, 궤도 2m/s, 카메라 P1, 워밍업 60초)로 돌리고 측정 구간만 960초로 늘린다. 라벨은 `<묶음>-V0-s8-N10000-P1-r1`, `<묶음>-V0-a8pool-N10000-P1-r1`이다. 묶음 이름은 `Pool2`처럼 `[A-Z][A-Za-z]+<숫자>` 꼴이어야 `summarize.py`가 읽는다. 규약은 [measurement.md](measurement.md) "엔티티 풀 묶음 규약"이다.
+
+```bash
+# 계획만 본다(게임을 띄우지 않는다): 실행 수, 예상 시간, 명령줄, 라벨 검사
+powershell -NoProfile -ExecutionPolicy Bypass -File Scripts/run-pool.ps1 -Batch Pool2 -DryRun
+# 본 측정(960초 실행 둘, 약 35분). 사용자가 시작을 요청한 뒤에 한다. 패키지 커밋에 dirty가 있으면, 다른 프로그램이 떠 있으면 시작하지 않는다
+powershell -NoProfile -ExecutionPolicy Bypass -File Scripts/run-pool.ps1 -Batch Pool2
+# 끊겼으면 이어 한다
+powershell -NoProfile -ExecutionPolicy Bypass -File Scripts/run-pool.ps1 -Batch Pool2 -Resume
+# 러너 시험(측정 60초, 창이 열린 브라우저가 있어도 시작한다. 수치는 쓰지 않는다)
+powershell -NoProfile -ExecutionPolicy Bypass -File Scripts/run-pool.ps1 -Batch PoolSmoke1 -DurationSec 60 -AllowBrowsers
+# 구간별 값만 다시 만든다(러너가 끝에 부른다). --bin은 구간 길이(초)
+py -3 -I Scripts/pool-timeline.py --batch Pool2 --bin 60
+```
+
+| 인자 | 뜻 |
+| --- | --- |
+| `-Batch` | 묶음 이름(필수). `progress.log`가 있으면 `-Resume`이 아닌 한 거부한다. 같은 라벨은 다시 쓰지 않는다 |
+| `-DurationSec` | 측정 구간(초). 기본 960. 메타데이터 `LabWindow`가 `60+<초>`인지 대조한다 |
+| `-Conds` | 쉼표로 이은 구성 이름(`full-conditions.json`의 `configs`). 기본 `s8,a8pool` |
+| `-Runs` | 구성마다 회차 수. 기본 1. 2 이상이면 짝수 회차는 구성 순서를 뒤집는다 |
+| `-Resume`, `-DryRun`, `-NoFgCheck`, `-NoClock` | 이어 하기, 계획만, 앞 창 검사 끄기, CPU 클럭 기록 끄기(측정에는 앞 창 검사를 끄지 않는다) |
+| `-StartupSec`, `-TimeoutFactor` | 예상 시간용 시작 시간(기본 30초), 시간 제한 배수(기본 2, 한 실행 예상 시간 기준) |
+| `-MaxConsecFail` | 연속 실패 중단 횟수(기본 2, 0이면 끈다). 멈추면 `ABORT` 줄, `batch.json`의 `state`가 `aborted`, 종료 코드 2 |
+| `-AllowDirty`, `-AllowBrowsers` | 시험 전용. 패키지 dirty 허용, 창이 열린 chrome·msedge·firefox 허용. 측정에는 쓰지 않는다 |
+
+- 실패한 실행(종료 코드, CSV 없음, 앞 창이 게임이 아님, 메타데이터 대조 틀림, 시간 초과)은 `Measurements/<묶음>/failures.csv`에 적고, 묶음 끝에서 새 회차(회차 + `-Runs`)로 한 번 다시 잰다. 다시 실패하면 포기하고 종료 코드 1이다.
+- 끝에서 `summarize.py`(`runs.csv`, `summary.csv`)와 `pool-timeline.py`(`timeline.csv`)를 돌린다. 동등성과 묶음 판정(`equivalence-check.py`, `batch-check.py`)은 돌지 않는다.
+- `timeline.csv`의 열: `label`, `minute`, `frames`, `frame_p50`, `game_p50`, `gpu_p50`, `iskm_tracks_end`, `iskm_tracks_max`, `gpu_mem_mean`, `gpu_mem_max`, `frame_p95`(맨 끝에 더했다). 구간은 측정 구간의 누적 프레임 시간으로 60초씩 자른다. 값은 프레임 CSV의 `FrameTime`, `GameThreadTime`, `GPUTime`, `Lab/IskmTracks`, `GPUMem/LocalUsedMB`에서 나온다.
+- 960초는 궤도 5.33바퀴다(한 바퀴 180초). 60초 구간마다 궤도 위상이 다르다. 두 조건은 같은 시드와 궤도라 같은 번호의 구간은 같은 위상이다.

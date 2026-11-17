@@ -11,6 +11,7 @@
 | `run-dev.ps1`, `run-dev-stages.ps1` | Development `-game` 실행(개발·오버레이·스크린샷). `-Stage 1`\~`8`이 사다리 단계다. `run-dev-stages.ps1`은 단계마다 작은 실행(`-Ablations`면 빼 보기도) |
 | `package.ps1` | Test 패키지 |
 | `run-full.ps1`, `full-conditions.json`, `lab_conditions.py` | 총괄 묶음 러너와 조건 표(v2 W12, 리뷰와 `Full4` 계획 점검 반영. 구성 28개: 단계 `s1`\~`s8`, 빼 보기 17개, 하위 실험 `s8av`와 `s1opt`, 후보 `s8iso`. 묶음 종류별 구성·속도·N·회차·프리셋, 구성별 N은 `n_by_config`). 본 실행 207회다. 라벨은 `<묶음>-<V0\|V1>-<구성>-N<N>-P<1\|2>-r<회차>`(P2는 `topview`만). 러너는 `-DryRun`, `-Pick`, `-NFilter`, `-Resume`, `-AllowDirty`(시험 전용), `-MaxConsecFail`(연속 실패 중단, 기본 3, 종료 코드 2), `-RetryGiveups`(실패 재측정도 실패한 실행을 회차 + 20으로 한 번 더 잰다, 기본 끔), 실행마다 CPU 클럭 기록(`clock.csv`)을 갖는다. 패키지 커밋이 dirty면 시작하지 않는다. 느린 실행을 새 회차 7\~9로 한 번 다시 재고, 끝에 `summarize.py`, `spikes.py`, `equivalence-check.py`, `batch-check.py`를 돌려 동등성 `FAIL`이나 묶음 판정 실패면 종료 코드 1이다. `lab_conditions.py`는 조건 표를 읽는 공용 코드다 |
+| `run-pool.ps1`, `pool-timeline.py` | 엔티티 풀 긴 실행 러너(v2, 참고 묶음 `Pool2`부터). 최종 구성(`s8`, 풀 켬)과 풀을 끈 조건(`a8pool`)을 1만, 이동 장면, 카메라 P1, 워밍업 60초, 측정 960초로 한 번씩 잰다(`-DurationSec`, `-Runs`로 바꾼다). 조건 표 `full-conditions.json`을 읽고 `run-full.ps1`의 절차(앞 창 검사, CPU 클럭 기록, 메타데이터 대조, 실패 재측정, `-Resume`, 연속 2회 실패 중단, dirty 패키지 거부)를 옮겼다. 끝에 `summarize.py`와 `pool-timeline.py`(1분 구간의 ISKM 트랙 수, GPU 메모리, 프레임·Game·GPU p50, 프레임 p95를 `Measurements/<묶음>/timeline.csv`에)를 부른다. `-DryRun`, `-AllowDirty`, `-AllowBrowsers`(시험 전용)가 있다. 총괄 묶음의 동등성·묶음 판정은 돌지 않는다 |
 | `ablation-check.py`, `equivalence-check.py` | 실행마다 CSV 메타데이터를 조건 표와 대조한다(`--selftest`, `--labels`도 있다. `--selftest`의 기준은 가장 최근 측정 CSV, `--reference`로 바꾼다). 단계 사이의 동등성(초당 사망, 30m 안 개체 수 ±1%, 겹친 쌍(분리 프로세서는 엄격 단계 중앙값의 0.5배\~2배, 총수 사이는 2 × 1만 기준 × (N ÷ 1만)² 이하), 캡슐 트레이스(탑뷰는 보고만), 왕복 전환)을 검사한다. 등급: `FAIL`(묶음 무효, 종료 코드 1), `UNMET`(1만이 아닌 점의 기능 미달, 그 점만 최대 N에서 뺀다). `--csv-dir`, `--dir`로 합성 입력을 돌린다 |
 | `batch-check.py`, `batch_rules.py` | 묶음 끝 판정(리뷰 M4): 느린 실행 표시와 `slow.csv`, A/A 3회와 단계 8의 차이 0.5ms, 단계 8의 모든 실행 p95 16.7ms 이하. 실패하면 종료 코드 1. `--dir`, `--out`으로 스크래치에서 돌린다. `batch_rules.py`는 느린 실행 규칙을 `summarize.py`와 나눠 쓰는 공용 코드다 |
 | `run-spike.ps1`, `spike-check.py`, `spike-timeline.py` | v2 작업 단위의 작은 묶음(`Spike1`부터 `V2W<n>`까지)의 러너, 메타데이터 대조, 구간별 정리. 구성 표(`$StepExpect`, `$Ablations`)를 러너 안에 갖고 있어 총괄 묶음의 조건 표(`full-conditions.json`)와 따로 맞춰야 한다(W12 때 같은 값이다). 새 총괄 묶음은 `run-full.ps1`을 쓴다(`Measurements/<묶음>/timeline.csv`). v2 W10부터 구성은 사다리 단계 `s1`\~`s8`과 빼 보기 `a8*`다(commands.md "사다리 단계와 스위치(v2 W10)"). 경위는 [Docs/Worklog/V2.md](../Docs/Worklog/V2.md) |
@@ -28,8 +29,8 @@
 
 | 파일 | 역할 |
 | --- | --- |
-| `run-bench.ps1` | v1 Test 패키지 한 조건 러너(`-LabVariant`를 넘긴다). `run-q4.ps1`, `run-budget.ps1`, `run-mgr.ps1`, `run-pool.ps1`, `run-transition.ps1`도 같다 |
-| `run-pool.ps1`, `pool-timeline.py`, `run-budget.ps1`, `check-budget.py`, `plot-budget.py`, `run-mgr.ps1`, `check-mgr.py`, `mgr-trace-table.py`, `plot-post02-manager.py`, `check-iskm.py` | v1 참고 묶음(`Pool1`, `Budget1`, `Mgr1`, `MgrT1`)과 글 02의 러너·그림 |
+| `run-bench.ps1` | v1 Test 패키지 한 조건 러너(`-LabVariant`를 넘긴다). `run-q4.ps1`, `run-budget.ps1`, `run-mgr.ps1`, `run-transition.ps1`도 같다 |
+| `run-budget.ps1`, `check-budget.py`, `plot-budget.py`, `run-mgr.ps1`, `check-mgr.py`, `mgr-trace-table.py`, `plot-post02-manager.py`, `check-iskm.py` | v1 참고 묶음(`Budget1`, `Mgr1`, `MgrT1`)과 글 02의 러너·그림 |
 | `plot-readme.py`, `build-site.py` | 루트 README의 그림, 사이트 데이터. v1 총괄 묶음(`Full3`)의 조건 이름(`L1`\~`L8`, `A8-*`)을 읽는다. 새 묶음의 이름으로 바꾸는 것은 W14의 일이다 |
 
 ## 에셋을 다시 만드는 것
