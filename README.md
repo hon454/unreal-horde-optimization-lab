@@ -65,7 +65,7 @@
 </tr>
 </table>
 
-모두 호드 총수 1만, 오브 시점 카메라다. 화면 왼쪽 위 HUD의 숫자는 측정값이 아니다.
+모두 호드 총수 1만, 오브 시점 카메라다.
 
 아래 값은 Test 패키지 하나에서 연달아 잰 것이다. 정확한 값은 [최종 측정의 표](Measurements/Full4/summary.csv)와 [그래프의 CSV](Docs/figures/full4/)에 있다.
 
