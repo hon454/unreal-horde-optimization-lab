@@ -171,9 +171,9 @@ SVG 다섯은 [make-figures.py](make-figures.py)가 만든다(저장소 루트�
 
 `Docs/figures/steps/step3-separation.webp`는 촬영 실행 `Full4shot-V0-s3-N10000-P1-r1`의 움직이는 WebP 원본이다(960×540, 15fps, 8초. [captures.csv](../../Measurements/Full4/captures.csv), [V2.md](../../Docs/Worklog/V2.md) "2026-11-17 W14-3 단계 화면"). HUD를 켜고 녹화와 함께 돈 실행이라 HUD의 숫자는 측정값이 아니다. 본문은 화면의 숫자를 인용하지 않는다. 화면 설명의 "35m 안은 액터, 그 밖은 정지 메시 인스턴스"는 단계 2·3의 표현이다(글 00 `stage-map.svg`의 측정 기록).
 
-## Insights 화면(아직 없다)
+## Insights 화면
 
-posting.md는 트레이스 값을 쓰는 글에 Unreal Insights 스크린샷을 싣게 한다. 이 초안은 GUI를 조작할 수 없어 화면을 찍지 못했다. README의 "문제" 절에 주석으로 자리를 두었다. 찍는 법은 [Worklog/Posts.md](../../Docs/Worklog/Posts.md) "Insights 스크린샷(글 02\~07)"과 같다(창 최대화, 구간 선택, Timers 거르기, PrintWindow 창 캡처, 위아래 붙이기, 제목 줄 자르기).
+코디네이터가 2026-11-17에 찍어 README의 "문제" 절에 넣었다(`images/insights-avoidance-separation.jpg`). 아래 표는 찍기 전에 적은 계획이고, 화면의 값은 표 아래에 있다. 찍는 법은 [Worklog/Posts.md](../../Docs/Worklog/Posts.md) "Insights 스크린샷(글 02\~07)"과 같다(창 최대화, 구간 선택, Timers 거르기, PrintWindow 창 캡처, 위아래 붙이기, 제목 줄 자르기).
 
 | 항목 | 값 |
 | --- | --- |
@@ -184,6 +184,18 @@ posting.md는 트레이스 값을 쓰는 글에 Unreal Insights 스크린샷을 
 | 트랙과 목록 | Timers 목록을 `Mass`로 거르고 GameThread(CPU)만. 위는 `MassMovingAvoidanceProcessor`, 아래는 `LabSeparationProcessor`와 `LabSmoothOrientationProcessor` 행에 표시를 단다 |
 | 화면에서 읽을 값 | 위: `MassMovingAvoidanceProcessor` Count 1,226, Incl 28.79초(프레임당 23.5ms). 아래: `LabSeparationProcessor` Count 3,737, Incl 3.08초(0.82ms), `LabSmoothOrientationProcessor` 3,738, 0.833초(0.22ms) |
 | 넣은 뒤 | README의 주석을 풀고 캡션을 화면 값으로 맞춘다. 구간을 손으로 고르면 Count가 한두 개 다를 수 있다. 그 차이는 이 절에 적는다 |
+
+화면의 값(두 트레이스 모두 손으로 끌어 고른 구간 50.21초):
+
+| 트레이스 | 행 | Count | Incl | 프레임당 |
+| --- | --- | --- | --- | --- |
+| 위(단계 2 직렬) | `MassMovingAvoidanceProcessor` | 1,232 | 28.92초 | 23.47ms |
+| 아래(단계 3 직렬) | `LabSeparationProcessor` | 3,755 | 3.09초 | 0.823ms |
+| 아래(단계 3 직렬) | `LabSmoothOrientationProcessor` | 3,755 | 837.21ms | 0.223ms |
+
+- 프레임당 값은 본문의 23.5ms, 0.82ms와 맞다. Count는 기대값보다 6과 18 많다. 구간이 0.21초 길어서다.
+- Timers 목록은 위를 `Avoidance`, 아래를 `LabS`로 걸렀다. `Mass`로 거르면 행이 많아 표시한 행이 묻힌다.
+- 그림은 트레이스마다 화면 왼쪽 절반과 오른쪽 절반을 확대 캡처해 붙이고, 게임 스레드 트랙 아래를 잘라 위아래로 붙인 것이다(2128폭). 창 제목 줄은 잘랐고 빨간 상자는 붙인 뒤에 그렸다.
 
 병렬 트레이스의 "작업자 하나" 그림을 따로 싣는다면 `Full4trace-V0-s2-N10000-P1-r1`의 Timing 뷰에서 100초 근처 프레임 서넛을 확대하고, `MassMovingAvoidanceProcessor`가 작업자 트랙 하나에서 길게 도는 구간과 GameThread의 `WaitForTasks`를 표시한다(`insights-avoidance-worker.jpg`). 지금 본문은 이 화면 없이 숫자로만 적었다.
 
@@ -243,6 +255,6 @@ posting.md는 트레이스 값을 쓰는 글에 Unreal Insights 스크린샷을 
 - 엔진 회피가 개체를 오브 둘레에 뭉치게 하는 기제. 30m 안 개체 수와 겹친 쌍만 쟀다. W3의 설명(뒤에서 미는 조향이 회피 힘보다 세다)은 V2.md에서도 추정이다. 본문은 기제를 쓰지 않았다.
 - 단계 2→3에서 장면 변화의 몫과 회피 구현의 몫을 나누는 일. 두 몫을 가르는 조건(단계 2의 장면을 둔 채 회피 비용만 빼기)은 잴 수 없었다.
 - 순서 미선언이 화면에 보이는지. 분리가 옮기는 거리의 평균은 1cm 아래지만 최대값(`lab_sep` 로그의 5초 최대 40\~75cm, V2.md "분리 프로세서 기다림")에 걸린 개체가 화면 안에 있는지는 보지 않았다.
-- Insights 스크린샷. 위 "Insights 화면(아직 없다)".
+- 병렬 트레이스에서 엔진 회피가 작업자 하나에서 도는 Insights 화면은 찍지 않았다(위 "Insights 화면").
 - 그림은 Edge 헤드리스로 PNG를 만들어 겹침과 잘림을 눈으로 봤다. 어두운 바탕에서는 보지 않았다(SVG가 자기 흰 배경을 가진다).
 - 링크한 글 02와 04는 아직 없다(폴더 이름 `02-mass-engine-path`, `04-quality-by-distance`로 미리 걸었다).

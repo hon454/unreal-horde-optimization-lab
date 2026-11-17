@@ -263,9 +263,9 @@ posting.md의 상한(글 하나에 엔진 코드 30줄)보다 작다. 남긴 줄
 | 단계 1 액터는 액터 틱을 켠다 | `Source/HordeOptLab/LabMinion.cpp:22` | `ALabMinion::ALabMinion` |
 | 하이드레이션 액터는 CharacterMovement 틱과 액터 틱을 끈다 | `LabMinion.cpp:228-229, 237, 242-247` | `LabDisableCharacterMovement`, `ALabMinionMassActor` |
 
-## Insights 스크린샷(아직 없다)
+## Insights 스크린샷
 
-posting.md는 트레이스 값을 쓰는 글에 Unreal Insights 스크린샷을 싣게 한다. 이 초안은 GUI를 조작하지 않아 화면을 찍지 못했다. README의 "게임 스레드는 작업자 스레드 하나의 엔진 회피를 기다린다" 절에 주석으로 자리를 두었다. 찍는 법은 [Worklog/Posts.md](../../Docs/Worklog/Posts.md) "Insights 스크린샷(글 02\~07)"과 같다.
+코디네이터가 2026-11-17에 화면 1을 찍어 README의 "게임 스레드는 작업자 스레드 하나의 엔진 회피를 기다린다" 절에 넣었다(`images/insights-avoidance-wait.jpg`). 아래 표는 찍기 전에 적은 계획이고, 화면의 값은 표 아래에 있다. 찍는 법은 [Worklog/Posts.md](../../Docs/Worklog/Posts.md) "Insights 스크린샷(글 02\~07)"과 같다.
 
 | 항목 | 값 |
 | --- | --- |
@@ -275,7 +275,19 @@ posting.md는 트레이스 값을 쓰는 글에 Unreal Insights 스크린샷을 
 | 저장할 파일 | `Posts/02-mass-engine-path/images/insights-avoidance-wait.jpg`(위아래로 붙인 한 장, 제목 줄을 자른다) |
 | 넣은 뒤 | README의 주석을 풀고 캡션을 화면 값으로 맞춘다. 구간을 손으로 고르면 Count가 한두 개 다를 수 있다. 그 차이는 이 절에 적는다 |
 
-화면 1의 Incl 37.7초는 1,523 × 24.727ms = 37.66초로 셈한 기대값이다. 화면에서 대조하지 않았다.
+화면 1의 Incl 37.7초는 1,523 × 24.727ms = 37.66초로 셈한 기대값이다.
+
+화면의 값(시간 눈금자를 손으로 끌어 고른 구간 50.21초):
+
+| 행 | Count | Incl | Excl |
+| --- | --- | --- | --- |
+| `MassMovingAvoidanceProcessor` | 1,529 | 37.81초 | 37.02초 |
+| `MassStandingAvoidanceProcessor` | 1,529 | 846.86ms | 73.63ms |
+
+- 37.81 ÷ 1,529 = 24.73ms로 본문의 24.7ms와 맞다. Count는 기대값보다 6 많다. 구간이 0.21초 길어서다.
+- 게임 스레드의 `WaitForTasks`(약 23.0초)는 화면에 없다. Timers 목록은 모든 스레드를 합쳐 보여서 `WaitForTasks`가 60,369번, 1분 42.7초로 나온다. 게임 스레드만의 값은 내보낸 표가 근거다. 그래서 그림에는 `Avoidance`로 거른 목록만 실었다.
+- 화면 2(한 프레임)는 찍지 않았다. 한 프레임의 기다림과 회피가 맞물리는 것은 `images/one-frame.svg`가 보인다.
+- 그림은 화면 왼쪽 절반과 오른쪽 절반을 확대 캡처해 붙인 것이다(2128폭). 창 제목 줄은 잘랐고 빨간 상자는 붙인 뒤에 그렸다.
 
 ## 확인하지 않은 것
 
@@ -286,5 +298,5 @@ posting.md는 트레이스 값을 쓰는 글에 Unreal Insights 스크린샷을 
 - 렌더 스레드 기다림(`RenderThreadIdle/NonCriticalPath`)의 대상을 트레이스로 보지 않았다. 본문은 "게임 스레드를 기다린다"로 적었고, 근거는 그 열이 렌더 스레드의 비임계 경로 유휴라는 이름과 게임 스레드 임계 경로 시간이 프레임과 같다는 것이다.
 - 단계 2의 게임 스레드 기다림이 모두 엔진 회피 때문인지 프레임마다 맞춰 보지 않았다. 프레임 3305와 앞 프레임 3304에서 기다림의 끝이 비동기 러너의 끝과 맞았다.
 - 단계 1 트레이스에서 프레임당 틱 수(메시 9,906번, CharacterMovement 9,983번)가 1만보다 적은 까닭.
-- Insights 화면(위 절).
+- 게임 스레드의 기다림을 Insights 화면으로 보이지 못했다(위 절).
 - 본문이 가리키는 글 01(`01-actor-baseline`)은 `v1` 폴더 이름과 같고 아직 `v2`로 고쳐 쓰지 않았을 수 있다. 글 03(`03-separation`)은 커밋돼 있다.

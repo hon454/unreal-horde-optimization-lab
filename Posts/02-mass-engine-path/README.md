@@ -101,9 +101,7 @@ UE::Stats::FThreadIdleStats::FScopeIdle Scope( bIgnoreThreadIdleStats );
 
 ![트레이스 실행의 한 프레임 타임라인. 게임 스레드는 Mass 게임 스레드 일을 마친 뒤 약 11ms부터 29ms까지 18.4ms를 기다린다. 같은 동안 작업자 스레드 하나가 엔진 이동 회피를 25.6ms 돌고, 회피가 끝난 직후 게임 스레드의 기다림이 끝난다](images/one-frame.svg)
 
-<!-- Insights 스크린샷 자리: images/insights-avoidance-wait.jpg. 찍을 것은 measurements.md "Insights 스크린샷(아직 없다)"에 있다. 넣은 뒤 아래 줄의 주석을 풀고 캡션의 값을 화면 값으로 채운다.
-![Unreal Insights의 Timing 뷰. 단계 2 트레이스의 70\~120초 구간에서 게임 스레드의 WaitForTasks와 작업자 스레드의 MassMovingAvoidanceProcessor](images/insights-avoidance-wait.jpg)
--->
+![Unreal Insights에서 단계 2 트레이스의 70초부터 120초까지를 고르고 Timers 목록을 Avoidance로 거른 화면. 빨간 상자의 MassMovingAvoidanceProcessor는 1,529번 불리고 구간 합계가 37.8초다. 한 번에 24.7ms꼴이다](images/insights-avoidance-wait.jpg)
 
 회피는 프레임마다 한 번 돈다. 트레이스 50초의 평균으로 회피 한 번은 24.7ms다. 같은 동안 게임 스레드는 프레임마다 15.1ms를 기다렸다. 모든 프로세서를 게임 스레드에서 차례로 돌린 트레이스에서도 회피는 23.5ms다. 이것은 Mass 프로세서 시간의 80.7%이고, 기다림이 아니라 일의 양이다.
 

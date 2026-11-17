@@ -34,13 +34,9 @@ Mass 쿼리의 `ForEachEntityChunk`는 맞는 Chunk를 한 스레드에서 차�
 
 ![단계 2의 트레이스. 병렬 실행에서 한 프레임 32.8ms 가운데 엔진 회피가 작업자 하나에서 24.7ms를 쓰고, 게임 스레드는 15.1ms를 기다린다. 직렬 실행의 프로세서 하나의 시간은 엔진 회피 23.5ms, 단계 3의 분리 프로세서 0.82ms다](images/step2-trace.svg)
 
-<!-- Insights 스크린샷 자리: images/insights-avoidance-separation.jpg
-찍을 것은 measurements.md "Insights 화면(아직 없다)"에 있다. 넣으면 이 주석을 풀고 캡션의 값을 화면 값으로 채운다.
+![Unreal Insights에서 두 직렬 트레이스의 70초부터 120초까지를 고른 화면. 위가 단계 2, 아래가 단계 3이다. 위 빨간 상자의 MassMovingAvoidanceProcessor는 1,232번 불리고 구간 합계가 28.9초다. 아래 빨간 상자의 LabSeparationProcessor는 3,755번 불리고 3.09초, LabSmoothOrientationProcessor는 0.837초다](images/insights-avoidance-separation.jpg)
 
-![Unreal Insights의 Timers 목록. 위는 단계 2, 아래는 단계 3의 직렬 트레이스이고 같은 50초 구간이다. 표시한 행은 MassMovingAvoidanceProcessor와 LabSeparationProcessor다](images/insights-avoidance-separation.jpg)
-
-표시한 행의 합계를 프레임 수로 나누면 단계 2의 엔진 회피는 프레임당 23.5ms, 단계 3의 분리 프로세서는 0.82ms다.
--->
+표시한 행의 합계를 불린 횟수로 나누면 단계 2의 엔진 회피는 프레임당 23.5ms, 단계 3의 분리 프로세서는 0.82ms다.
 
 게임 스레드가 기다린 시간은 프레임당 15.1ms다. 단계 2의 프레임 p50이 게임 스레드 시간보다 긴 까닭은 글 02가 자세히 다룬다.
 

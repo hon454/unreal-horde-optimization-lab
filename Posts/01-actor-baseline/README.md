@@ -80,9 +80,7 @@ while ( (remainingTime >= MIN_TICK_TIME) && (Iterations < MaxSimulationIteration
 
 1만의 트레이스에서 게임 스레드 한 프레임은 538ms다. 그 가운데 411ms를 CharacterMovement의 틱이 쓴다. 이 틱은 프레임마다 9,983번 불려, 개체마다 한 번꼴이다. 애니메이션 쪽 두 타이머(스켈레탈 메시 틱과 포즈 반영)는 합쳐 44.9ms다. 트레이스는 측정과 따로 돌린 실행이라 비율만 읽는다.
 
-<!-- Insights 스크린샷 자리: images/insights-gamethread.jpg. 무엇을 찍을지는 measurements.md "Insights 화면(아직 없다)"에 있다. 넣은 뒤 아래 줄의 주석을 푼다.
-![Unreal Insights, 호드 총수 1만 트레이스의 게임 스레드. 70–120초 구간에서 CharacterMovement 틱이 38.2초를 쓴다](images/insights-gamethread.jpg)
--->
+![Unreal Insights에서 호드 총수 1만 트레이스의 70초부터 120초까지를 고르고 Timers 목록을 CharacterMovement로 거른 화면. 빨간 상자의 CharacterMovement 틱은 921,277번 불리고 구간 합계가 38.0초, 자기 시간이 37.9초다. 아래 띠는 같은 구간에서 목록을 FEngineLoop::Tick으로 거른 것이고, 프레임 93개가 49.7초다](images/insights-gamethread.jpg)
 
 1만의 값은 같은 일을 한 값이 아니다. 월드 시간이 프레임마다 0.4초로 잘려, 측정 창에 451프레임만 그린다. 동등성 검사(단계 사이가 같은 일을 하는지 보는 검사)에서 초당 사망은 32.8로, 기준보다 45% 적다. 그래서 1만의 단계 1은 보고만 한다.
 
