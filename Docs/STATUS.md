@@ -16,7 +16,7 @@
 ## 다음 할 일
 
 1. 두 스킬은 커밋됐다(`.claude/skills/`, 94d35ce, f5d69e1, 436b884). 경위는 [Worklog/Skills.md](Worklog/Skills.md)에 있다.
-2. 계획안 7.1절의 질문 13개로 스킬이 불리는지 확인한다([Worklog/Skills-plan.md](Worklog/Skills-plan.md)). 방법은 사용자가 정한다.
+2. 불림 시험은 끝났다. 13개 모두 맞는 스킬이 불렸고, 내용은 셋이 일부 또는 빗나감이다([Worklog/Skills.md](Worklog/Skills.md) "불림 시험"). 고칠지는 사용자가 정한다.
 3. 공개 자료를 고치면 사용자 승인을 받아 `v2.1`처럼 태그를 달아 릴리스한다.
 4. 사이트에 보이는 것을 고치면 `Scripts/build-site.py`를 다시 돌린다. `Site/assets/`는 `.gitignore`에 있어 `gh-pages`에 따로 넣는다.
 5. `gh-pages`는 강제 푸시 없이 올린다. 방법은 [Worklog/V2.md](Worklog/V2.md) "W14-20 병합과 릴리스" 절에 있다.
@@ -66,7 +66,6 @@
 
 | 세션 | 작업 단위 | 모델 | 상태 |
 | --- | --- | --- | --- |
-| `term-push-apart` | 용어: 분리 → 밀어내기(사용자 결정, 2026-11-18) | Sonnet medium | 푸시, 사이트 배포 끝(dccbe29, gh-pages b9748b3) |
 
 코디네이터는 세션을 띄우면 여기에 적는다. 끝난 세션은 결과를 확인하고 보관한 뒤 지운다.
 
