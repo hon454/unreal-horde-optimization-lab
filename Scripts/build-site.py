@@ -95,8 +95,8 @@ def changed_text(num, s):
                 f"인스턴스와 액터가 바뀔 때의 전환 대책 다섯을 켜고, 한 번 바뀐 개체가 {hold}초 안에 바로 전의 표현으로 되돌아가지 않게 붙잡는다.")
     if num == 5:
         med = s(5, "sim_lod").split("/")[0]
-        return (f"카메라에서 {med}~{far}m 개체의 로직을 {pr.fmt(float(s(5, 'cfg_tick_medium')))}초 간격으로 돌리고, "
-                f"{far}m 밖은 엔진 이동·조향 대신 자체 Processor가 {pr.fmt(float(s(5, 'cfg_tick_low')))}초 간격으로 옮긴다. "
+        return (f"카메라에서 {med}~{far}m 개체의 로직을 {float(s(5, 'cfg_tick_medium')):g}초 간격으로 돌리고, "
+                f"{far}m 밖은 엔진 이동·조향 대신 자체 Processor가 {float(s(5, 'cfg_tick_low')):g}초 간격으로 옮긴다. "
                 "죽은 개체의 엔티티는 파괴하지 않고 풀에 두었다가 다시 쓴다.")
     if num == 6:
         return (f"{hm}~{far}m 개체를 VAT 인스턴스에서 ISKM으로 바꾸고, ISKM 컴포넌트에 카메라를 따라 옮기는 고정 바운드를 넣었다. "

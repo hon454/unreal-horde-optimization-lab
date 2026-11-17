@@ -24,11 +24,10 @@
   function pct(p) { return (p > 0 ? "+" : p < 0 ? "−" : "±") + Math.abs(p).toFixed(1) + "%"; }
   function int(n) { return Math.round(n).toLocaleString("en-US"); }
   function kcount(n) {
-    var man = Math.floor(n / 10000), r = n % 10000, cheon = Math.floor(r / 1000), h = r % 1000, out = [], t = "";
+    // 12500 -> "1만 2,500", 2500 -> "2,500", 2000 -> "2천" (the README and the posts write it this way).
+    var man = Math.floor(n / 10000), r = n % 10000, out = [];
     if (man) { out.push(man + "만"); }
-    if (cheon) { t += cheon + "천"; }
-    if (h) { t += cheon ? (h / 100) + "백" : String(h); }
-    if (t) { out.push(t); }
+    if (r) { out.push(r % 1000 === 0 ? (r / 1000) + "천" : r.toLocaleString("en-US")); }
     return out.join(" ");
   }
   // Two significant figures: 781 -> 780, 4102 -> 4,100 (the README writes the max N this way).
@@ -432,7 +431,7 @@
     var M = D.meta;
     var runs = { 1: "한", 2: "두", 3: "세", 4: "네", 5: "다섯" }[M.runs_per_condition] || M.runs_per_condition;
     var items = [
-      "Test 구성 패키지 하나(" + M.build + ")에서 여덟 단계와 기법별 기여 조건을 연달아 쟀다. 이 페이지의 값은 모두 이 측정에서 나왔다.",
+      "Test 구성 패키지 하나(" + M.build + ")에서 여덟 단계와 기법별 기여 조건을 연달아 쟀다. 엔티티 풀 절을 뺀 값은 모두 이 측정에서 나왔다. 엔티티 풀 절은 같은 패키지로 따로 잰 16분 실행이다.",
       "화면은 " + M.res + " 창 모드, 스케일러빌리티 Epic이다. 수직 동기화, 프레임 상한, 동적 해상도는 껐다.",
       "시나리오는 반경 500m 평지다. 오브가 맵 중심 둘레의 반지름 57.3m 원을 2m/s로 돌고, 개체가 사방에서 3m/s로 오브를 쫓는다. 오브는 8m 안의 개체에 피해를 주고 2초마다 화면 안의 개체 5명을 저격한다. 죽은 개체는 맵 밖 무리의 기록 자리에서 다시 생겨 호드 총수가 그대로다.",
       "카메라는 오브 뒤 15m에서 오브를 따라가며 1분에 한 바퀴 도는 오브 시점이다. 고정 시드로 개체를 미리 놓고, 워밍업 60초 뒤 180초를 잰다.",
