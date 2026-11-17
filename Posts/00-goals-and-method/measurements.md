@@ -1,115 +1,141 @@
 # 00 측정 기록
 
-본문 [README.md](README.md)의 수치마다 정밀한 값과 출처를 적는다. 본문은 유효 숫자 세 자리로 줄여 쓴다.
+본문 [README.md](README.md)의 수치마다 정밀한 값과 출처를 적는다. 본문은 유효 숫자 세 자리로 줄여 쓰고, 최대 N은 유효 숫자 둘로 쓴다([measurement.md](../../Docs/Guides/measurement.md) "지표").
 
 ## 빌드와 묶음
 
 | 항목 | 값 |
 | --- | --- |
-| 묶음 | 최종 측정(2026-11-13 16:52:49\~21:00:00). 경위는 [작업 기록의 측정 절](../../Docs/Worklog/Q7.md#2026-11-13-측정-full3) |
-| 빌드 | Test 패키지 df41c13, CSV 메타데이터 `labbuild=df41c131c650` |
-| 조건이 바뀐 이유 | 애니메이션 예산 기본값을 2ms에서 4ms로 올렸고([ADR-0016](../../Docs/Decisions/0016-animation-budget-value.md)), 오브의 저격 시점 경합을 고쳐(62b6a42) 전 조건을 다시 쟀다 |
-| 조건 | 2560x1440 창, 스케일러빌리티 Epic, `r.VSync=0`, `t.MaxFPS=0`, `r.ScreenPercentage=100`, `r.DynamicRes.OperationMode=0`, Lumen(`r.DynamicGlobalIlluminationMethod=1`)·VSM(`r.Shadow.Virtual.Enable=1`) 켬, `mass.FullyParallel=true`. 2종, 시드 20261106. 측정 창 60초, 세 회차 중앙값 |
-| 실행 수 | 계획 178회(요약 행 54개 × 3회 + 트레이스 16회) 모두 성공(`Measurements/Full3/batch.json` `planned_runs_ok` 178). 앞 창 확인(`fg`)을 못 채운 2회(`Full3-A8-farcull-N10000-P1-r2`, `Full3traceser-L3-vatcull-N10000-P1-r1`)는 수치를 쓰지 않고 새 회차(`r5`, `r2`)로 다시 쟀다. 그래서 `A8-farcull`의 세 회차는 r1, r3, r5다 |
-| 요약 파일 | [최종 측정의 요약 표](../../Measurements/Full3/summary.csv)(세 회차 중앙값과 범위), [실행별 값](../../Measurements/Full3/runs.csv), [동등성 검사](../../Measurements/Full3/equivalence.csv) |
-| 60fps를 지키는 최대 개체 수(`N@16.7ms`) | [최대 개체 수 CSV](../../Docs/figures/full3/full-n-at-60fps.csv)(`Scripts/plot.py` `n_at_budget`가 측정 N 사이를 로그 보간) |
-| 측정 PC | Ryzen 9 5950X, RTX 4090 24GB, 64GB(2666MT/s), Windows 11, NVIDIA 621.14, UE 5.8.4 소스 빌드. [pc-specs.md](../../Docs/Reference/pc-specs.md) |
+| 묶음 | 총괄 묶음 `Full4`. 2026-11-16 14:50:12\~2026-11-17 08:52:12(`batch.json`의 `started`, `ended`, `resumes` 2) |
+| 빌드 | Test 패키지 de0e21b(태그 `v2-full4`). CSV 메타데이터 `labbuild=de0e21bd64ac` |
+| 다시 쓴 이유 | `v1`(태그 `v1`)의 글과 수치를 `v2` 결과로 다시 썼다. 오브가 움직이고([ADR-0017](../../Docs/Decisions/0017-roaming-orb-and-equal-function-ladder.md)) 모든 단계가 같은 일 넷을 하므로 `v1` 수치와 잇지 않는다 |
+| 렌더 조건 | 2560×1440 창, `sg.*` 3(Epic), `r.VSync=0`, `t.MaxFPS=0`, `r.ScreenPercentage=100`, `r.DynamicRes.OperationMode=0` |
+| 렌더 조건(계속) | Lumen `r.DynamicGlobalIlluminationMethod=1`, VSM `r.Shadow.Virtual.Enable=1`, TSR `r.AntiAliasingMethod=4`, `mass.FullyParallel=true` |
+| 시나리오 | 2종, 시드 20261106, 오브 궤도 `LabOrbit` = `r57.3/v2/h6`(이동), 구간 `LabWindow` = `60+180`. 정지 장면은 워밍업 15초 + 180초 |
+| 실행 수 | 계획 207회 모두 성공(`planned_runs_ok` 207, `planned_runs_missing` 0). 실패 9회는 모두 `a8hyd`이고 본문에 쓰지 않았다(경위는 [V2.md](../../Docs/Worklog/V2.md) "2026-11-17 총괄 묶음 Full4"와 "Full4 a8hyd 보충 측정") |
+| 본문 조건의 회차 | `V0-s1`\~`V0-s8`, `V0-a8cap`은 r1, r2, r3이다. 같은 조건 다시 재기 `V0-s8-aa`는 r11, r12, r13이다(`summary.csv` `runs_used`). 버린 실행은 `Full4-V0-s1-N10000-P1-r0` 하나다 |
+| 요약 파일 | [요약 표](../../Measurements/Full4/summary.csv)(세 실행 중앙값과 범위), [실행별 값](../../Measurements/Full4/runs.csv), [동등성 검사](../../Measurements/Full4/equivalence.csv), [최대 N 표](../../Docs/figures/full4/full-n-at-60fps.csv) |
+| 측정 PC | Ryzen 9 5950X, RTX 4090 24GB, 64GB(2666MT/s), Windows 11, NVIDIA 621.14, UE 5.8.4 소스 빌드([pc-specs.md](../../Docs/Reference/pc-specs.md)) |
 
-`summary.csv`는 행을 `variant,n,preset`으로 찾는다. 범위는 세 회차의 최솟값\~최댓값이다. 실행별 p50·p95는 `Scripts/summarize.py`가 60초 측정 창의 프레임 분포에서 구하고(`percentile`), 요약은 세 회차 값의 중앙값이다(`statistics.median`). 버리는 첫 실행 `Full3-L1-full-N10000-P1-r0`은 요약에 넣지 않는다.
+`summary.csv`는 행을 `variant,n,preset`으로 찾는다. 실행별 p50·p95는 `Scripts/summarize.py`가 측정 창 180초의 프레임 분포에서 선형 보간 백분위수(`percentile`)로 구한다. 요약은 세 실행 값의 중앙값(`statistics.median`)이고 범위는 세 실행의 최솟값\~최댓값이다.
 
 ## 본문의 수치와 출처
 
-"(그림)"은 본문 산문이 아니라 그림에만 쓴 값이다. 조건은 따로 적지 않으면 호드 총수 1만, 오브 시점(P1)이다.
+조건은 따로 적지 않으면 호드 총수 1만, 이동 장면(`V0`), 오브 시점 카메라(`P1`)다. "세 실행" 열은 r1 / r2 / r3 순서다.
 
-| 본문 값 | 정밀한 값 | 조건 | 출처(열 또는 식) | 세 회차(r1 / r2 / r3) |
+| 본문 값 | 정밀한 값 | 조건 | 출처(열 또는 식) | 세 실행 |
 | --- | --- | --- | --- | --- |
-| 액터 군중이 60fps를 지키는 최대 766개 | 766 | `1 L1-full` | `full-n-at-60fps.csv` `n_p95` | 느린 쪽 5% 경계 500: 11.099, 1천: 20.206 사이에서 보간. 식: 500 × 2^t, t = (16.7 − 11.099) ÷ (20.206 − 11.099) = 0.615 |
-| 최종 구성 프레임 시간 중앙값 9.75ms | 9.746 | `L8-q4final` 10000 P1 | `frame_p50_ms` | 9.707 / 9.763 / 9.746 |
-| (그림 alt) 1단계 444ms | 444.279 | `L1-full` 10000 P1 | `frame_p50_ms` | 449.171 / 441.687 / 444.279 |
-| 오브 30m 안은 맵 넓이의 0.36% | 0.0036 | 계산 | (30 ÷ 500)² | |
-| 그 안에 개체의 6% | 0.06 | 계산 | 30 ÷ 500. 밀도 ∝ 1/r이면 반지름당 개체 수가 같다(measurement.md "시나리오") | 측정: `near30_mean` 627.97 ÷ 10000 = 6.28%(`L8-q4final`, 오브 수평 30m). 628.12 / 627.92 / 627.97 |
-| 초당 62개가 죽는다 | 62.225 | `L8-q4final` 10000 P1 | `death_rate` | 62.225 / 62.233 / 62.208. 동등성 기준값 62.204(`equivalence.csv`) |
-| 같은 수가 다시 생긴다 | 10000 | 같음 | `alive_min` = `alive_max` = 10000 | |
-| 16.7ms | 16.667 | 계산 | 1000 ÷ 60. 최대 개체 수의 보간선은 16.7(`plot.py` `BUDGET_MS`) | |
-| 3단계 GPU 7.53ms | 7.529 | `L3-vatcull` 10000 P1 | `gpu_p50_ms` | 7.529 / 7.428 / 7.547 |
-| 3단계 프레임 시간 7.91ms | 7.909 | 같음 | `frame_p50_ms` | 7.909 / 7.777 / 7.927 |
-| 3단계 게임 스레드 4.16ms | 4.156 | 같음 | `game_p50_ms` | 4.156 / 2.959 / 4.176 |
-| 4단계 게임 스레드 9.14ms | 9.136 | `L4-mass` 10000 P1 | `game_p50_ms` | 9.136 / 9.04 / 9.267 |
-| 4단계 프레임 시간 9.42ms | 9.422 | 같음 | `frame_p50_ms` | 9.422 / 9.324 / 9.568 |
-| 4단계에서 게임 스레드가 4.98ms 는다 | +4.980 | 계산 | 9.136 − 4.156 | |
-| 프레임 시간은 1.51ms만 는다 | +1.513 | 계산 | 9.422 − 7.909 | |
-| 가장 느린 쪽이 늘어난 몫 1.61ms | +1.607 | 계산 | 4단계 게임 스레드 − 3단계 GPU = 9.136 − 7.529 | |
-| "가장 느린 쪽이 GPU에서 게임 스레드로 바뀌었다" | | | `bottleneck` `L3-vatcull` = `gpu`, `L4-mass` = `game` | |
-| 약 6,100프레임 | 6061 | `L8-q4final` 10000 P1 | `runs.csv` `frames`(측정 창 안의 프레임 수) | 6065 / 6055 / 6061 |
-| 같은 구성을 측정 끝에 다시: 0.117ms 짧다 | −0.117 | 계산 | 9.629(`L8-q4final-aa`) − 9.746 | 다시 잰 값 r11 / r12 / r13: 9.627 / 9.629 / 9.675 |
-| 두 범위 가운데 큰 쪽 0.056ms | 0.056 | 계산 | 9.763 − 9.707(`L8-q4final`). 다시 잰 값의 범위는 0.048(9.675 − 9.627) | |
-| 전환 대책을 빼면 0.104ms 짧다. 범위 0.362ms | −0.104, 0.362 | 계산 | 9.642(`A8-fix`) − 9.746. 범위 9.938 − 9.576 | `A8-fix` 9.642 / 9.938 / 9.576 |
-| 애니메이션 예산을 빼면 0.292ms 짧다. 범위 0.067ms | −0.292, 0.067 | 계산 | 9.454(`A8-budget`) − 9.746. 범위 9.499 − 9.432 | `A8-budget` 9.432 / 9.499 / 9.454 |
-| 다른 때 다시 잰 2단계 0.114ms 짧다 | −0.114 | 계산 | 10.193 − 10.307([앞선 총괄 측정의 요약 표](../../Measurements/Full2/summary.csv) `L2-mass` 1만 P1) | 앞선 측정 10.185 / 10.439 / 10.307 |
-| 3단계 0.005ms 짧다 | −0.005 | 계산 | 7.909 − 7.914(같은 표 `L3-vatcull`) | 앞선 측정 7.833 / 7.956 / 7.914 |
-| 1단계 4.32ms(1.0%) 길다 | +4.321, +0.98% | 계산 | 444.279 − 439.958(같은 표 `L1-full`), ÷ 439.958 | 앞선 측정 436.39 / 440.652 / 439.958 |
-| 최종 구성 최대 개체 수 20,037 | 20037.2 | `8 L8-q4final` | `n_p95`. 식: exp(ln 20000 + t(ln 30000 − ln 20000)), t = (16.7 − 16.681) ÷ (20.844 − 16.681) = 0.0046 | 2만·3만 행은 아래 "그림의 값" |
-| 중앙값으로 판정하면 24,031 | 24031 | `8 L8-q4final` | `n_p50`. 같은 식, t = (16.7 − 15.011) ÷ (18.741 − 15.011) = 0.453 | 2만 15.011, 3만 18.741 |
-| 2\~8단계는 5천\~3만, 1단계는 500\~1만에서 잰다 | 5000·10000·20000·30000, 500·1000·2000·10000 | | `full-n-at-60fps.csv` `points` 열, `Scripts/run-full.ps1` 기본 인자(`TargetN`, `MaxNList`, `ActorNList`) | |
-| 주기적으로 튀는 프레임 0건 | 0 | 본 실행 162회, 트레이스 16회 | `Scripts/spikes.py`. [Q7.md](../../Docs/Worklog/Q7.md#2026-11-13-측정-full3) "Full3 끝(성공)" 줄 | |
-| 동등성 검사 모두 통과 | 54조건 | 요약 행 54개 모두 | `equivalence.csv` `pass` = `ok`(54행 모두). 허용: 초당 사망·30m 안 개체 수 ±3%, 살아 있는 수 = N | |
-| 빼 보기 열 가지 | 10 | | `Scripts/full-conditions.json`의 `A8-*` 조건 수 | |
+| 호드 1만, 늘 1만 | 10000 | 사다리 여덟 조건 | `alive_min` = `alive_max` = 10000, 조건 표 `scenario.target_n` | |
+| 60fps = 16.7ms | 16.667 | 계산 | 1000 ÷ 60. 그림과 판정의 선은 16.7(`Scripts/plot.py` `BUDGET_MS`) | |
+| 세 번 재고 중앙값 | 3 | 모든 조건 | `runs`, measurement.md "벤치마크 조건" 반복 행 | |
+| 최종 구성 프레임 p95 14.2ms | 14.231 | `V0-s8` | `frame_p95_ms` | 14.426 / 14.035 / 14.231 |
+| 16.7ms까지의 여유 2.47ms | 2.469 | 계산 | 16.7 − 14.231 | |
+| 판정의 0.6ms | 0.6 | 판정식 | [ADR-0019](../../Docs/Decisions/0019-step8-actor-cap-distance-and-fixed-skel-bounds.md) 결정 3 | |
+| 판정값 14.8ms | 14.831 | 계산 | 14.231 + 0.6 ≤ 16.7. 러너 출력 "14.23 + 0.6 = 14.83ms" | |
+| 반경 500m | 50000cm | 설정 | `Source/HordeOptLab/LabConfig.h:96` `FLabScenario::MapRadius` | |
+| 90%, 10% | 일련번호 10의 배수가 대형 | 설정 | measurement.md "확정값" 2종 행, 시나리오 `-LabTypes=2` | |
+| 3m/s | 300cm/s | 설정 | `LabConfig.h:104` `MoveSpeed` | |
+| 반지름 57.3m, 2m/s | 5730cm, 200cm/s | 설정 | `LabConfig.h:115-116` | |
+| 한 바퀴 180초 | 180.0 | 계산 | 2π × 57.3 ÷ 2(`FLabOrbit::PeriodSec`, `LabConfig.h:139`) | |
+| 8m 안 피해 | 800cm | 설정 | `LabConfig.h:98` `ZoneRadius` | |
+| 2초마다 쏜다 | 2.0초, 5발 | 설정 | `LabConfig.h:105-106`. 5발은 그림에만 쓴다 | |
+| 맵 밖 무리 500\~1,000m | 50000, 100000cm | 설정 | `Source/HordeOptLab/LabFarStream.h:28-29`, [ADR-0020](../../Docs/Decisions/0020-far-stream-respawn-handoff.md) | |
+| 고정 시드 | 20261106 | 설정 | `LabConfig.h:189`, 조건 표 `common_args` `-LabSeed=20261106` | |
+| 오브 뒤 15m, 1분에 한 바퀴 | 1500cm, 60초 | 설정 | `LabConfig.h:110`, `:113` `OrbViewPeriod`. 높이 9m(`:111`)는 그림에만 쓴다 | |
+| 오브 30m 안 | 수평 30m | 지표 | `near30_mean`(measurement.md "v2에서 더한 열") | |
+| 기준과 1% 안 | 0.01 | 검사 규칙 | 조건 표 `equivalence.death_rate_tol`, `near30_tol` | |
+| 겹친 쌍: 절반에서 두 배 | 0.5, 2.0 | 검사 규칙 | `overlap_rel_lo`, `overlap_rel_hi`. 1만 이동 장면의 범위는 118.2\~472.9(`equivalence.csv` `overlap_range`) | |
+| 2초마다 액터 하나에 라인 트레이스 | 실행마다 90회 | `V0-s8` | `capsule_traces` 90(180초 ÷ 2초). 시작점 오브 구체 중심, 끝점 대상 액터(`LabOrb.cpp:378-405`) | |
+| 왕복 전환, 단계 4부터 초당 0.5 이하 | 0.5 | 검사 규칙 | `round_trip_max_per_sec`. 최소 유지 시간은 단계 4부터(`LabRepHold` 2000, commands.md 스위치 표) | |
+| 단계 3\~8은 해당 항목을 모두 통과 | `pass` | `V0-s3`\~`V0-s8` | `equivalence.csv` 1만 `V0` 행. 단계 4\~8은 `ok`, 단계 3은 `report`(아래 주석) | |
+| 기준과 0.2% 안 | 최대 0.13% | `V0-s3`\~`V0-s8` | `death_rate_dev_pct` −0.08\~+0.04, `near30_mean_dev_pct` −0.08\~+0.13 | |
+| 단계 1과 2는 1% 넘게 다르다 | 아래 표 | `V0-s1`, `V0-s2` | `death_rate_dev_pct`, `near30_mean_dev_pct` | |
+| 워밍업 60초, 180초 | 60, 180 | 설정 | `Source/HordeOptLab/LabGameMode.h:18-19`, 조건 표 `scenario` | |
+| 약 1만 4천 프레임 | 14080 | `V0-s8` | `runs.csv` `frames`의 중앙값 | 13915 / 14178 / 14080 |
+| 약 700프레임 | 704 | 계산 | 14080 × 0.05 | |
+| 게임 스레드 11.9ms | 11.881 | `V0-s8` | `game_p50_ms` | 12.023 / 11.79 / 11.881 |
+| 프레임 p50 12.8ms | 12.77 | `V0-s8` | `frame_p50_ms` | 12.93 / 12.68 / 12.77 |
+| 단계 6과 7의 차이 0.46ms | +0.460 | 계산 | 15.168(`V0-s7`) − 14.708(`V0-s6`). 큰 쪽 범위 0.335 | |
+| 액터 캡슐을 끄면 1.86ms 짧다 | −1.855 | 계산 | 12.376(`V0-a8cap`) − 14.231. 큰 쪽 범위 0.391 | `V0-a8cap` 12.39 / 12.365 / 12.376 |
+| 0.5ms 아래는 구별되지 않음 | 0.5 | 규칙 | measurement.md "차이 판정", [v2-spec.md](../../Docs/v2-spec.md) 7절(0.5ms 아래 주장은 5회) | |
+| 최대 N 약 780 | 781 | `V0-s1` | `full-n-at-60fps.csv` "1 Actor baseline" `n_p95`. 식은 아래 | |
+| 최대 N 약 4,100 | 4102 | `V0-s2` | 같은 파일 "2 Mass, engine default path" `n_p95` | |
+| 주기적으로 튀는 프레임이 있는 실행 없음 | 0 | 측정 195회, 트레이스 15회 | `Scripts/spikes.py`. V2.md "Full4 a8hyd 보충 측정"의 러너 출력 | |
+| 같은 조건 다시 재기 0.08ms | +0.079 | `V0-s8-aa` | 14.31 − 14.231. `V0-s8-aa` 범위 14.301\~14.378 | r11 / r12 / r13: 14.301 / 14.31 / 14.378 |
+| 0.5ms 넘게 다르면 참고 | 0.5 | 규칙 | measurement.md "묶음 판정" A/A 행. `batch-check.py` 결과 `BATCH CHECK ok` | |
+| 정지 장면 캡슐 빗나감 약 1.7% | 1.667% | 정지 14조건 | 빗나감 합 63 ÷ (270 × 14). `equivalence.csv` `capsule_miss`(`V1-*`, 캡슐 켬) | |
+| 비용을 줄이는 단계(2, 3, 5, 8), 표현을 더하는 단계(4, 6, 7) | | | [v2-plan.md](../../Docs/v2-plan.md) "사다리", 조건 표 `role` | |
+| 단계 2부터 하이드레이션 | `LabTechHydrate` 1 | 단계 2\~8 | commands.md "사다리 단계와 스위치" | |
+
+단계 1과 2의 동등성 값(1만, 이동 장면, `equivalence.csv`):
+
+| 조건 | 초당 사망 | 차이 | 30m 안 | 차이 |
+| --- | --- | --- | --- | --- |
+| 기준(단계 3\~8) | 59.261 | | 978.245 | |
+| `V0-s1` | 32.833 | −44.60% | 796.35 | −18.59% |
+| `V0-s2` | 53.928 | −9.00% | 2147.28 | +119.50% |
+
+- 단계 3의 `pass`가 `report`인 까닭: 왕복 전환이 초당 4.32건이다. 단계 3은 최소 유지 시간이 없어 왕복 전환을 검사하지 않고 값만 보고한다(`round_ok` = `report`, 메모 "no min hold"). 나머지 항목은 `ok`다.
+- 단계 1의 1만은 월드 시간이 프레임마다 잘려 측정 창 180초에 451프레임뿐이다(`runs.csv` `frames`). 그래서 같은 일을 하지 못한다. 자세한 것은 글 01이 다룬다.
+
+최대 N의 식(`Scripts/plot.py` `n_at_budget`, 잰 N 사이를 로그 보간):
+
+- 단계 1: 500에서 10.829, 1천에서 19.956. t = (16.7 − 10.829) ÷ (19.956 − 10.829) = 0.643. N = 500 × 2^0.643 = 781.
+- 단계 2: 2,500에서 9.201, 5천에서 19.698. t = (16.7 − 9.201) ÷ (19.698 − 9.201) = 0.714. N = 2,500 × 2^0.714 = 4,102.
 
 ## 그림의 값
 
-### 요약 그림 `ladder.svg`
+### `final-reading.svg`
 
-README의 사다리 그림을 그대로 가져다 쓴다(`Docs/figures/readme/ladder.svg`, `Scripts/plot-readme.py`가 만든다). 호드 총수 1만, P1, 세 회차 중앙값(ms)이다.
+`V0-s8`, 1만, `P1`, ms. 병목은 `summary.csv` `bottleneck` = `game`이다.
 
-| 단계(조건) | 프레임 시간 | 게임 스레드 | 렌더 스레드 | GPU |
-| --- | --- | --- | --- | --- |
-| 1 액터 군중(`L1-full`) | 444.279 | 429.438 | 29.797 | 50.168 |
-| 2 Mass 로직(`L2-mass`) | 10.193 | 6.24 | 6.396 | 9.903 |
-| 3 ISM + VAT(`L3-vatcull`) | 7.909 | 4.156 | 4.122 | 7.529 |
-| 4 액터 하이드레이션(`L4-mass`) | 9.422 | 9.136 | 4.817 | 6.926 |
-| 5 Simulation LOD(`L5-m4offpool`) | 8.57 | 8.253 | 4.813 | 6.972 |
-| 6 ISKM(`L6-m5bounds`) | 8.452 | 8.292 | 3.247 | 5.373 |
-| 7 Niagara 배경 무리(`L7-q2crowd`) | 8.728 | 8.569 | 3.355 | 6.061 |
-| 8 품질 올리기(`L8-q4final`) | 9.746 | 9.592 | 3.647 | 5.752 |
+| 행 | 중앙값 | 범위 | 세 실행 |
+| --- | --- | --- | --- |
+| 프레임 p95 | 14.231 | 14.035\~14.426 | 14.426 / 14.035 / 14.231 |
+| 프레임 p50 | 12.77 | 12.68\~12.93 | 12.93 / 12.68 / 12.77 |
+| 게임 스레드 | 11.881 | 11.79\~12.023 | 12.023 / 11.79 / 11.881 |
+| 렌더 스레드 | 4.12 | 4.102\~4.125 | 4.125 / 4.12 / 4.102 |
+| GPU | 6.164 | 6.154\~6.18 | 6.18 / 6.164 / 6.154 |
 
-병목(`bottleneck`, 게임 스레드·렌더 스레드·GPU 중앙값 가운데 가장 긴 것)과 프레임 시간의 세 회차다.
-
-| 단계 | 병목 | 프레임 시간 r1 / r2 / r3 |
-| --- | --- | --- |
-| 1 | game | 449.171 / 441.687 / 444.279 |
-| 2 | gpu | 9.896 / 10.193 / 10.647 |
-| 3 | gpu | 7.909 / 7.777 / 7.927 |
-| 4 | game | 9.422 / 9.324 / 9.568 |
-| 5 | game | 8.632 / 8.57 / 8.526 |
-| 6 | game | 8.452 / 8.459 / 8.417 |
-| 7 | game | 8.728 / 8.687 / 8.762 |
-| 8 | game | 9.707 / 9.763 / 9.746 |
+그림의 "여유 2.47"은 16.7 − 14.231, "14.8"은 14.231 + 0.6이다.
 
 ### `judging-difference.svg`
 
-프레임 시간 중앙값(`frame_p50_ms`, ms). 1만 P1.
+프레임 p95(`frame_p95_ms`), 1만, `P1`, ms. 판정은 스크립트가 차이 판정 규칙(큰 쪽 범위보다 크고 0.5ms 이상)으로 계산한다.
 
-| 행 | 조건 | 중앙값 | 범위 | 큰 쪽 범위와 판정 |
+| 행 | 조건 | 중앙값 | 범위 | 판정 |
 | --- | --- | --- | --- | --- |
-| 최종 구성(8단계) | `L8-q4final` | 9.746 | 9.707\~9.763(0.056) | 기준 |
-| 같은 구성을 측정 끝에 다시 | `L8-q4final-aa`(r11\~r13) | 9.629 | 9.627\~9.675(0.048) | −0.117, 0.056 → 차이 있음 |
-| 전환 대책을 뺐을 때 | `A8-fix` | 9.642 | 9.576\~9.938(0.362) | −0.104, 0.362 → 구별되지 않음 |
-| 애니메이션 예산을 뺐을 때 | `A8-budget` | 9.454 | 9.432\~9.499(0.067) | −0.292, 0.067 → 차이 있음 |
+| 최종 구성 | `V0-s8` | 14.231 | 14.035\~14.426(0.391) | 기준 |
+| 측정 끝에 다시 잰 최종 구성 | `V0-s8-aa` | 14.31 | 14.301\~14.378(0.077) | +0.079 < 0.391, 구별되지 않음 |
+| 단계 6 ISKM | `V0-s6` | 14.708 | 14.695\~14.715(0.020) | 기준 |
+| 단계 7 배경 무리 | `V0-s7` | 15.168 | 15.091\~15.426(0.335) | +0.460 > 0.335, 0.5 아래라 구별되지 않음 |
+| 액터 캡슐을 끈 조건 | `V0-a8cap` | 12.376 | 12.365\~12.39(0.025) | −1.855, 0.391보다 크고 0.5 이상, 차이 있음 |
 
-`A8-fix` 세 회차는 9.642 / 9.938 / 9.576이다. 판정 규칙은 [measurement.md](../../Docs/Guides/measurement.md) "차이 판정"이다. 그림의 판정은 스크립트가 규칙대로 계산한다. 이전 묶음에서는 같은 구성을 다시 잰 값이 범위 안이었으나 이번에는 범위 밖이다. 원인은 확인하지 않았다. 예산을 뺀 행의 부호도 바뀌었다(이전 묶음 +1.750). 호드 1만에서 예산 4ms는 프레임 시간을 줄이지 않는다.
+세 실행: `V0-s6` 14.695 / 14.715 / 14.708, `V0-s7` 15.426 / 15.168 / 15.091.
 
 ### `max-entities-method.svg`
 
-`L8-q4final`, P1, ms.
+프레임 p95(`frame_p95_ms`), 이동 장면, `P1`, ms. 단계 1의 1만(665.254)은 그림 밖이라 주석에만 적었다.
 
-| 호드 총수 | 느린 쪽 5% 경계(`frame_p95_ms`) | 그 세 회차 | 중앙값(`frame_p50_ms`) | 그 세 회차 |
-| --- | --- | --- | --- | --- |
-| 5,000 | 6.735 | 6.618 / 6.735 / 6.813 | 5.578 | 5.501 / 5.578 / 5.671 |
-| 10,000 | 11.486 | 11.6 / 11.439 / 11.486 | 9.746 | 9.707 / 9.763 / 9.746 |
-| 20,000 | 16.681 | 16.681 / 16.873 / 16.68 | 15.011 | 14.942 / 15.146 / 15.011 |
-| 30,000 | 20.844 | 21.121 / 20.844 / 20.474 | 18.741 | 18.902 / 18.741 / 18.458 |
+| 점 | 중앙값 | 세 실행 |
+| --- | --- | --- |
+| 단계 1, 500 | 10.829 | 10.829 / 10.768 / 10.832 |
+| 단계 1, 1천 | 19.956 | 20.155 / 19.783 / 19.956 |
+| 단계 1, 2천 | 41.252 | 41.132 / 41.252 / 41.571 |
+| 단계 1, 1만 | 665.254 | 665.254 / 668.172 / 653.996 |
+| 단계 2, 2,500 | 9.201 | 9.331 / 9.201 / 9.192 |
+| 단계 2, 5천 | 19.698 | 19.517 / 19.869 / 19.698 |
+| 단계 2, 1만 | 36.785 | 37.212 / 36.694 / 36.785 |
 
-그림의 곡선은 점 사이를 `n_at_budget`와 같은 로그 보간으로 그렸다. 교차점 20,037은 `full-n-at-60fps.csv`에서 읽는다.
+그림의 "20"은 19.956을 세 자리로 줄인 20.0에서 끝의 0을 지운 값이다. 교차점 781과 4,102는 `full-n-at-60fps.csv`에서 읽는다.
+
+### `scenario.svg`
+
+측정값은 없고 설정값만 그렸다. 값의 출처는 위 표의 시나리오 행이다. 점의 자리는 시드 20261106의 난수로 그린 그림이고 측정 실행의 배치가 아니다. 반지름을 고르게 뽑아 밀도가 1/r을 따르게 했다(measurement.md "시나리오"). 축척과 궤도의 돌림 방향은 개념이다.
+
+### `frame-pipeline.svg`
+
+개념도다. 칸의 길이(게임 스레드 4, 렌더 스레드 3, GPU 7)는 지어낸 값이고 그림 안에 그렇게 적었다.
 
 ### `stage-map.svg`
 
@@ -117,87 +143,50 @@ README의 사다리 그림을 그대로 가져다 쓴다(`Docs/figures/readme/la
 
 | 그린 것 | 값 | 출처 |
 | --- | --- | --- |
-| 단계마다 켠 기법 | `LabTech*`, `LabCrowdFx` | `Scripts/full-conditions.json` 각 `L*` 조건의 `expect` |
-| 1단계 모든 거리가 액터, 2단계 모든 거리가 정적 ISM | | `LabHud.cpp` `DrawHUD`(M0 "all distances", M1 "static mesh" 전부 인스턴스) |
-| 액터 구간 30m(상한 500), 8단계 40m(상한 1,000) | `LabHydrateM`, `LabActorCap` | `full-conditions.json`, `LabConfig.h` `FLabQuality`(`:78-84`) |
-| 80m, 200m 경계 | 8000cm, `LabFarM` 200 | `LabCrowdSubsystem.cpp:125` `Bands` |
-| 화면 밖은 15m 안만 액터 | 1500cm | `LabCrowdSubsystem.cpp:144` `BaseLODDistance[Medium]` |
-| 8단계 80m 밖 그림자 끔 | `LabFarShadow` 0 | `full-conditions.json` `L8-q4final`. 4\~7단계는 1 |
-| 7단계부터 200m 밖 입자 | `LabCrowdFx` 1 | 같은 파일 `L7-q2crowd`, `L8-q4final` |
+| 단계마다 켠 기법 | `LabTech*`, `lab_ism_processor` | commands.md "사다리 단계와 스위치(v2 W10)" 표 |
+| 액터 구간 35m, 상한 1,000(단계 2\~8) | `LabHydrateM` 35, `LabActorCap` 1000 | [ADR-0021](../../Docs/Decisions/0021-unified-actor-cap-and-hydrate-distance.md), `LabCrowdSubsystem.cpp:206-209` |
+| 80m, 200m 경계 | 8000cm, `RepOffCm()` 기본 200m | `LabCrowdSubsystem.cpp:208` `Bands` |
+| 화면 밖은 15m 안만 액터 | 1500cm | `LabCrowdSubsystem.cpp:219` `BaseLODDistance[Medium]` |
+| 단계 2·3 정지 메시, 4·5 VAT, 6부터 ISKM | 메시 설명자 | `LabCrowdSubsystem.cpp:168` 주석, commands.md `lab_ism_processor` 행 |
+| 단계 7부터 200m 밖과 맵 밖 입자 | `LabTechCrowdFx` 1 | commands.md 스위치 표, [code-tour.md](../../Docs/Guides/code-tour.md) "입자 갱신" |
+| 단계 8의 80m 밖 그림자 끔(입자 포함) | `LabFarShadow` 0 | commands.md 스위치 표, measurement.md "품질 계획에서 바뀌는 값" 미니언 그림자 행 |
 
-### `frame-pipeline.svg`
+### 최종 구성의 화면 `step8.jpg`
 
-개념도다. 칸의 길이(게임 스레드 4, 렌더 스레드 3, GPU 7)는 지어낸 값이고 측정값이 아니다. 그림 안에 그렇게 적었다.
+`Measurements/Full4/shots/step8.jpg`는 촬영 실행 `Full4shot-V0-s8-N10000-P1-r1`의 움직이는 WebP에서 120프레임 가운데 60번 프레임을 뽑은 것이다([V2.md](../../Docs/Worklog/V2.md) "2026-11-17 W14-3 단계 화면", [captures.csv](../../Measurements/Full4/captures.csv)). HUD를 켜고 녹화와 함께 돈 실행이라 HUD의 숫자는 측정값이 아니다. 본문은 화면의 숫자를 인용하지 않는다.
 
-### 단계별 화면 `step8-L8-q4final.webp`
+SVG 여섯은 [make-figures.py](make-figures.py)가 만든다(저장소 루트에서 `py -3 -I Posts/00-goals-and-method/make-figures.py`). 측정값은 `summary.csv`와 `full-n-at-60fps.csv`에서 읽는다. 폭 800 기준으로 글자는 16px 이상이고, 자기 흰 배경을 가진다.
 
-`Docs/figures/steps/`의 8단계 화면을 그대로 쓴다. 촬영 실행 `Full3shot-L8-q4final-N10000-P1-r1`([captures.csv](../../Measurements/Full3/captures.csv))에서 HUD를 켜고 찍어, HUD의 숫자에는 화면 녹화 부하가 섞인다. 본문의 수치는 HUD를 끈 측정 실행의 값만 쓴다. 촬영 경위는 [Q7.md](../../Docs/Worklog/Q7.md#2026-11-13-측정-full3)의 "촬영 끝" 줄에 있다.
+## 경위와 장치의 근거
 
-SVG 넷은 [make-figures.py](make-figures.py)가 만든다(저장소 루트에서 `py -3 -I Posts/00-goals-and-method/make-figures.py`). 측정값은 `summary.csv`와 `full-n-at-60fps.csv`에서 읽는다. `judging-difference.svg`의 판정은 스크립트가 차이 판정 규칙으로 계산한다. 폭 800 기준으로 글자는 16px 이상이고, 자기 흰 배경을 가진다.
-
-## 시나리오와 측정 절차의 출처
-
-| 본문 값 | 값 | 출처 |
-| --- | --- | --- |
-| 반경 500m, 재생성 링 490\~500m | 50000cm, 1000cm | `Source/HordeOptLab/LabConfig.h:140-141` `FLabScenario` |
-| 3m/s | 300cm/s | `LabConfig.h:148` |
-| 체력은 개체마다 다르다(60\~240) | 60, 240 | `LabConfig.h:146-147`, [measurement.md](../../Docs/Guides/measurement.md) "품질 계획에서 바뀌는 값" |
-| 근접 90%, 시즈 10% | 일련번호 10의 배수가 대형 | measurement.md "확정값" 2종 행 |
-| 8m 안 피해 | 반경 8m, 초당 100\~300 | measurement.md "확정값" |
-| 2초마다 5개 저격 | 2.0, 5 | `LabConfig.h:149-150`. 60초에 150발(`snipes` 150) |
-| 처음 배치는 오래 돌린 뒤의 분포 | 밀도 ∝ 1/r | measurement.md "시나리오" |
-| 15초 뒤 60초 | 15, 60 | `LabGameMode.h:16-17` `WarmupSec`, `MeasureSec`. CSV 기록은 `LabGameMode.cpp:444` `BeginCapture`, `:502` `EndCapture` |
-| 고정 시드 | 20261106 | `LabConfig.h:201` |
-| 오브 뒤 15m, 높이 9m, 1분에 한 바퀴 | 1500, 900, 60초 | `LabConfig.h:154-157`(피치 −12도) |
-| 탑뷰 100m | 10000cm | `LabConfig.h:158` |
-| 3% 안 | ±3% | measurement.md "총괄 묶음 규약" 동등성 행, `Scripts/equivalence-check.py` |
-| 세 번, 프로세스를 새로 띄운다 | 3회 | measurement.md "벤치마크 조건" 반복 행 |
-| 수직 동기화·프레임 상한·동적 해상도 끔 | | CSV 메타데이터 `labcvars`(`summary.csv` `build` 열) |
-| 러너가 Chrome·에디터를 보면 시작하지 않는다 | | measurement.md "총괄 묶음 규약" 실행 검사 행(`Scripts/run-full.ps1`) |
-| 게임 창이 앞에 있는지 2초마다 확인 | 2초 | measurement.md "확정값" 측정 중 PC 상태 행(`Scripts/run-bench.ps1`). `summary.csv` `fg_ok`가 54행 모두 `3/3` |
-| 끝에 최종 구성을 한 번 더 잰다 | 회차 11\~13 | measurement.md "총괄 묶음 규약" 반복 행 |
-| HUD: 1초 평균, 16.7ms 초록, 33.3ms까지 주황, 5초 막대 | 1.0, 1000/60, 33.3, 5.0 | `Source/HordeOptLab/LabHud.cpp:19-21`(상수), `:44-47` `BarColor`, `:173-183`(1초 평균) |
-| Test는 프로파일링 도구를 남긴다 | | [ADR-0001](../../Docs/Decisions/0001-test-package-for-measurement.md) 표(`CSV_PROFILER`, `UE_TRACE_ENABLED`, `DO_CHECK`, `UE_ENABLE_DEBUG_DRAWING`) |
+| 본문의 말 | 출처 |
+| --- | --- |
+| 러너는 에디터, 빌드 도구, 브라우저가 떠 있으면 시작하지 않는다 | `Scripts/run-full.ps1:218-220`(`$Blockers`: 에디터, 게임, `ShaderCompileWorker`, `UnrealBuildTool`, chrome, msedge, firefox, ffmpeg) |
+| 게임 창이 앞에 없던 실행은 버리고 다시 잰다 | `run-full.ps1:340-346`(2초마다 앞 창 표본), `:356-375`(측정 구간 안에 게임이 아닌 표본이 있으면 실패). measurement.md "측정 중 PC 상태" 행 |
+| 0.6ms는 실행 하나가 중앙값보다 길게 나올 수 있는 폭이다 | measurement.md "지표" 목표 판정. 근거 값은 앞선 작은 묶음에서 나와 본문에 수치를 쓰지 않았다 |
+| 겹친 쌍은 프레임 시간을 따라 는다 | V2.md "2026-11-17 Full4 캡슐 빗나감 진단"의 "부차" 절. 분리는 프레임마다 위치를 한 번 고친다(`Source/HordeOptLab/LabSeparation.h:20-34` 주석). 이 묶음의 예: `V0-a8hyd` 프레임 p50 6.595ms에서 51.83, `V0-s8` 12.77ms에서 233.53(`overlap_mean`) |
+| 정지 장면의 캡슐 빗나감은 장치의 결함이다 | V2.md "2026-11-17 Full4 캡슐 빗나감 진단"의 "원인" 절, measurement.md "실패 등급", 조건 표 `capsule_miss_basis` |
+| 오브가 움직이면 고정 목표에서만 통하는 기법이 드러난다 | ADR-0017 "맥락"과 결정 3, [v2-spec.md](../../Docs/v2-spec.md) 4.2절 |
 
 ## 엔진 소스
 
-로컬 소스 빌드 `G:/Epic Games/UE_5.8.4`에서 확인했다. 경로는 `Engine/` 아래다.
+로컬 소스 빌드 `G:/Epic Games/UE_5.8.4`에서 확인했다(2026-11-17). 경로는 `Engine/` 아래다.
 
 | 사실 | 위치 |
 | --- | --- |
 | CSV의 `GameThreadTime`, `RenderThreadTime`, `GPUTime`은 `GGameThreadTime`, `GRenderThreadTime`, `RHIGetGPUFrameCycles()`다 | `Source/Runtime/Launch/Private/LaunchEngineLoop.cpp:1518-1520` `UpdateCoreCsvStats_EndFrame` |
-| CSV의 `FrameTime`은 앞 프레임의 같은 지점부터 흐른 실제 시간이다(기본 경로) | `Source/Runtime/Core/Private/ProfilingDebugging/CsvProfiler.cpp:4383-4390` |
-| 게임 스레드 시간 = 흐른 시간 − `Waits` | `Source/Runtime/Engine/Private/UnrealClient.cpp:1842-1844` `FViewport::Draw`(함수 시작 `:1789`), 프레임마다 `GameThread.Reset()` `:1858` |
-| `Waits`에 들어가는 것: `Sleep`과 이벤트 대기의 `FThreadIdleStats::FScopeIdle` | `Source/Runtime/Core/Private/Windows/WindowsPlatformProcess.cpp:1870`(`Sleep`), `:1940`(이벤트 `Wait`) |
-| 렌더 스레드 시간도 쉰 시간을 뺀다 | `Source/Runtime/SlateRHIRenderer/Private/SlateRHIRenderer.cpp:1359` |
-| 게임 스레드는 N−1 렌더 스레드 프레임과 맞춘다. 추가 울타리가 RHI 스레드나 스왑체인보다 너무 앞서지 않게 한다 | `Source/Runtime/RenderCore/Private/RenderingThread.cpp:2458-2478` `FFrameEndSync`, `Sync` `:2480`, `:2505-2510` |
-| 기본값 `r.OneFrameThreadLag` 1, `r.GTSyncType` 0 | 같은 파일 `:2435-2450` |
+| CSV의 `FrameTime`은 앞 프레임의 같은 지점부터 흐른 실제 시간이다 | `Source/Runtime/Core/Private/ProfilingDebugging/CsvProfiler.cpp:4383-4389` |
+| 게임 스레드 시간 = 흐른 시간 − `Waits` | `Source/Runtime/Engine/Private/UnrealClient.cpp:1842-1844` `FViewport::Draw` |
+| 게임 스레드는 N−1 렌더 스레드 프레임과 맞추고, 추가 울타리가 너무 앞서지 않게 한다 | `Source/Runtime/RenderCore/Private/RenderingThread.cpp:2458-2478` `FFrameEndSync`, 기본값 `r.OneFrameThreadLag`·`r.GTSyncType` `:2435-2450` |
 
-### 본문에 넣은 발췌
-
-글 전체의 엔진 코드는 17줄이다(3 + 14). 줄인 곳은 `// ...`로 적었다. 남긴 줄은 소스 그대로이고, 앞쪽 들여쓰기만 줄였다.
-
-| 블록 | 줄 수 | 원본 줄 |
-| --- | --- | --- |
-| `FViewport::Draw`의 게임 스레드 시간 | 3 | `UnrealClient.cpp:1842-1844` |
-| `FFrameEndSync`의 울타리 | 14 | `RenderingThread.cpp:2458-2462`, `// ...`(`:2463-2468` 생성자), `:2469-2473`, `// ...`(`:2474-2475` 배열 선언과 빈 줄), `:2476-2477` |
-
-## 경위의 근거
-
-본문 "수치를 흔든 것과 막는 장치"의 목록은 수치를 붙이지 않았다. 최종 측정 전의 묶음에서 있었던 일이고, 그 묶음의 값은 비교에 쓰지 않는다.
-
-- 모니터를 끈 채 비워 둔 뒤 뒤쪽 조건이 느려진 일: [Worklog/M0.md](../../Docs/Worklog/M0.md) "2026-11-08 E0 재측정", measurement.md "확정값"의 측정 중 PC 상태 행.
-- Chrome이 떠 있을 때의 주기적 스파이크: [Worklog/M5.md](../../Docs/Worklog/M5.md) "Chrome을 닫고 확인", measurement.md "벤치마크 조건" 묶음 검사 행.
-- 게임 창이 뒤에 있을 때 게임 스레드가 길었던 일: [Worklog/M3b.md](../../Docs/Worklog/M3b.md) "페이즈 첫 실행 효과".
-- 에디터를 켠 동안 실행마다 수준이 흩어진 일(러너가 에디터를 보면 멈추는 이유): Worklog/M3b.md "잡음 진단(어피니티)".
-- 글 재료의 사실 확인: `Docs/post-review.md` "00-3 환경이 수치를 흔든 사례"(글을 다 쓰면 지우는 문서라, 지운 뒤에는 git 이력에서 본다).
+본문의 엔진 코드 발췌는 `UnrealClient.cpp:1842-1844`의 3줄 하나다. 남긴 줄은 소스 그대로이고 앞쪽 들여쓰기만 줄였다.
 
 ## 확인하지 않은 것
 
-- 같은 구성을 다시 잰 값이 달라진 원인(1단계 +4.32ms, 측정 끝 재측정 −0.117ms). 앞선 총괄 측정과는 빌드, 측정일, 예산 기본값, 오브 수정이 모두 다르다. 2·3단계는 예산을 쓰지 않아 구성은 같지만, 한 변수만 다른 비교는 아니다.
-- `Waits`에 들어가지 않는 기다림(바쁜 대기, 기다리는 동안 다른 작업을 대신 돌리는 경우)이 게임 스레드 시간에 얼마나 섞이는지는 보지 않았다. measurement.md "함정"에 같은 스레드 시간이 기다림이 찍히는 자리에 따라 달라진 사례가 있다. 본문은 "잠든 시간이 빠진다"까지만 적었다.
-- "프레임 시간은 가장 느린 쪽에 맞춰진다"는 엔진의 동기화 규칙과 사다리의 값으로 설명했다. 단계마다 프레임 시간이 가장 느린 스레드보다 조금 긴 이유(4단계 9.422 대 9.136)는 따로 가르지 않았다.
-- 3단계 게임 스레드는 회차 사이가 넓다(2.959\~4.176). 본문의 비교(4.16 → 9.14)는 가장 작은 회차 2.959를 써도 늘어난다.
-- 1단계 1만은 측정 창 60초에 150프레임이라, 느린 쪽 5% 경계가 일곱여 프레임으로 정해진다.
-- 단계별 화면 `step8-L8-q4final.webp`는 같은 묶음의 촬영(`Full3shot-*`)이다. 본문은 HUD의 배치만 설명하고 화면의 숫자를 인용하지 않는다. 작업 기록에 적힌 그 화면의 HUD 프레임 시간(12.9ms)은 녹화 부하가 섞여 측정값(9.746)보다 높다.
-- SVG는 브라우저로 열어 보지 않았다. 글자와 값은 텍스트로 대조하고 글자 폭은 어림으로 확인했다.
+- 단계 2는 프레임 p50(34.058ms)이 세 스레드 시간(게임 18.027, 렌더 7.294, GPU 12.23ms)보다 크게 길다(`V0-s2`). 본문의 "가장 느린 스레드가 프레임 시간을 정한다"가 단계 2에서는 맞지 않는다. 원인은 보지 않았고 글 02가 트레이스로 본다.
+- 사망 색 머티리얼을 그대로 둔 결정([V2-w14-plan.md](../../Docs/Worklog/V2-w14-plan.md) 6절의 다섯째 한계)은 결정 기록을 찾지 못해 본문에 넣지 않았다. measurement.md "확정값" 2종 행에는 단계 1 액터와 정지 메시 인스턴스의 대형에 사망 색이 없다고 적혀 있다.
+- 겹친 쌍이 같은 시간 간격에서 같다는 확인(`s8` 208.2, `a8hyd` 208.3)은 Development 진단 실행의 값이라 본문에 쓰지 않았다.
+- 정지 장면 빗나감의 원인은 Development 진단 실행으로 확인했다. Test 패키지에서는 비율(1.667%)만 같은 쪽임을 봤다.
+- 그림의 HUD 숫자와 측정값의 차이는 재지 않았다.
+- `a8hyd`의 보충 실행은 다른 조건보다 늦게 쟀지만 본문에 쓰지 않는 조건이다.
+- SVG는 데스크톱 앱의 브라우저 창으로 열어 겹침과 잘림을 눈으로 봤다. 어두운 바탕 위에서는 보지 않았다(SVG가 자기 흰 배경을 가진다).
