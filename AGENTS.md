@@ -34,7 +34,7 @@
 | 영상·문서·샘플·에셋·포럼 스레드 | [references.md](Docs/Reference/references.md) |
 | 강연 두 편(Shabel, 윤준기)의 요약과 타임스탬프 | [talk-notes.md](Docs/Reference/talk-notes.md) |
 | 측정 PC 사양과 엔진 버전 | [pc-specs.md](Docs/Reference/pc-specs.md) |
-| 끝낸 작업의 경위와 실패한 실행 | `Docs/Worklog/M<N>.md`, `Q<N>.md`, 글과 README는 `Posts.md`, 에셋 복구는 `Setup.md`, `v2` 브랜치의 작업은 `V2.md`, `v2` 리뷰는 `V2-review.md`와 `V2-full4-review.md`, 공개 자료 팩트체크는 `V2-factcheck.md`(글)와 `V2-factcheck-readme-site.md`(README, 사이트), W14 계획안은 `V2-w14-plan.md`, 레포지토리 정리 조사는 `V2-cleanup-plan.md`, 스킬 계획안은 `Skills-plan.md`, 스킬 작업은 `Skills.md`(목록은 [Worklog/README.md](Docs/Worklog/README.md)). 세션 시작 때 읽지 않고 검색만 한다 |
+| 끝낸 작업의 경위와 실패한 실행 | `Docs/Worklog/`. 파일 목록과 각 파일의 내용은 [Worklog/README.md](Docs/Worklog/README.md)에 있다. 세션 시작 때 읽지 않고 검색만 한다 |
 | 코디네이터가 묻지 않고 내린 결정과 사용자 판단이 필요한 항목 | [autonomous-decisions.md](Docs/Worklog/autonomous-decisions.md) |
 | 총괄 묶음의 조건 표와 스크립트 목록 | `Scripts/full-conditions.json`, [Scripts/README.md](Scripts/README.md) |
 | 글 본문과 이미지 | `Posts/NN-이름/README.md`, `Posts/NN-이름/images/` |
@@ -61,7 +61,7 @@
 ### 진행 방식
 
 - **구현과 측정이 먼저고 글은 뒤따른다.** 글, 그래프 해석, 영상, 트레이스 분석은 작업 단위의 완료 조건이 아니다. 글은 작업 브랜치의 최신 커밋에서 쓴다.
-- **작업 브랜치는 main이다.** 시나리오와 시뮬레이션을 다시 만든 `v2`의 작업([ADR-0017](Docs/Decisions/0017-roaming-orb-and-equal-function-ladder.md))은 main에 병합됐고 태그 `v2`가 그 릴리스다. 이전 판은 태그 `v1`에 있다. 태그 `v1`과 `v2`의 자료는 지우거나 옮기지 않는다. 모든 세션은 같은 체크아웃의 main에서 일하고 브랜치를 바꾸지 않는다. 다음 릴리스는 사용자 승인을 받아 `v2.1`처럼 태그를 단다.
+- **작업 브랜치는 main이다.** 릴리스는 태그로 남긴다. `v1`은 이전 판이고, `v2`는 시나리오와 시뮬레이션을 다시 만든 판이다([ADR-0017](Docs/Decisions/0017-roaming-orb-and-equal-function-ladder.md)). 태그 `v1`과 `v2`의 자료는 지우거나 옮기지 않는다. 모든 세션은 같은 체크아웃의 main에서 일하고 브랜치를 바꾸지 않는다. 다음 릴리스는 사용자 승인을 받아 `v2.1`처럼 태그를 단다.
 - **개발 속도가 최우선이다.** 단위 테스트, CI, PR, 외부 이슈 트래커를 쓰지 않는다. main에 직접 커밋한다.
 - **커밋한 뒤 코디네이터가 푸시한다.** `git push origin main`으로 올린다. 강제 푸시는 하지 않는다. 사이트에 보이는 것을 바꿨으면 `Scripts/build-site.py`를 다시 돌리고, 사용자 승인을 받아 `gh-pages`도 올린다. 작업 세션은 푸시하지 않는다.
 - **구현 전에 문서를 확정한다.** 구현 작업 단위는 사양 문서, 계획 문서, 그 작업 단위의 상세 계획안이 사용자 승인을 받은 뒤에 시작한다. 설계 근거를 얻는 시험 실행은 예외다.
