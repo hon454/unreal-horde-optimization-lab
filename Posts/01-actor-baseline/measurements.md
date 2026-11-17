@@ -64,13 +64,15 @@
 | 하위 스텝 50ms, 여덟 번 | `MaxSimulationTimeStep = 0.05f`, `MaxSimulationIterations = 8` | `CharacterMovementComponent.cpp:698-699` | 단계 1은 이 값을 바꾸지 않는다(`Source/`, `Config/` grep 0건) |
 | 월드 시간 상한 0.4초 | `MaxUndilatedFrameTime=0.4` | `Engine/Config/BaseGame.ini:199`, `WorldSettings.cpp:334-343` | 프로젝트 `Config/`가 덮지 않는다(grep 0건) |
 | 1만에서 여덟 번 | 0.4 ÷ 0.05 = 8 | 계산 | 일곱 번째까지 `Min(0.05, 남은 시간 × 0.5)` = 0.05초, 여덟 번째는 남은 0.05초를 쓴다. 실행에서 세지 않았다 |
-| 이동 설정은 엔진 기본값, 오브 쪽 입력 | `bRunPhysicsWithNoController`, `MaxWalkSpeed` 300, `bOrientRotationToMovement` | `Source/HordeOptLab/LabMinion.cpp:39-44`, 입력 `:165` `AddMovementInput` | 이 셋 말고는 엔진 기본값이다 |
+| 하위 스텝 설정은 엔진 기본값, 바꾼 것은 걷는 속도(3m/s)·진행 방향 보기·컨트롤러 없이 이동하기 셋, 오브 쪽 입력 | `MaxWalkSpeed` 300(엔진 기본 600), `bOrientRotationToMovement`, `bRunPhysicsWithNoController` | `Source/HordeOptLab/LabMinion.cpp:39-44`, 입력 `:165` `AddMovementInput` | 이 셋 말고는 엔진 기본값이다(`MaxSimulationTimeStep`, `MaxSimulationIterations` 포함) |
 | 캡슐이 Pawn 채널을 막는다 | `ECR_Block` | `LabMinion.cpp:68`(`UsesActorBlocking`, `LabConfig.h:435`) | 조건 표 `s1`의 기대값 `LabTechSeparate` 1, `LabActorCollision` `pawn` |
 | 캡슐 반지름 = 몸통 반지름 | 소형 40cm, 대형 94cm | `LabMinion.cpp:67`, `LabUnitAssets.cpp:45`(소형), `Config/DefaultGame.ini:41` `LargeBoundRadius=94` | 대형은 액터 배율 2(`DefaultGame.ini:54`)로 나눠 넣는다. 반높이 88은 엔진 기본값 |
 | 스윕이 막히면 미끄러지고, 겹쳐 있으면 밀어낸다 | | [engine-notes.md](../../Docs/Reference/engine-notes.md) 39절 | `MoveAlongFloor`는 `SafeMoveUpdatedComponent(..., true, Hit)`로 스윕한다(`CharacterMovementComponent.cpp:5563`) |
 | 메시를 `USkeletalMeshComponentBudgeted`로 바꾼다 | `SetDefaultSubobjectClass` | `LabMinion.cpp:192-199` `ALabMinionBudget`, 스폰 클래스 `LabCrowdSpawner.cpp:351` | |
 | 예산 4ms | `FLabScenario::BudgetMs = 4` | `LabConfig.h:121`, [ADR-0016](../../Docs/Decisions/0016-animation-budget-value.md), `LabGameMode.cpp:383-391` | `a.Budget.Enabled 1`, `a.Budget.BudgetMs 4`, 월드의 Budget Allocator `SetEnabled(true)` |
 | 중요도 = 몸통 반지름 ÷ 카메라 거리 | | `LabMinion.cpp:207-214` `ALabMinionBudget::Tick` | |
+| 두 조건의 차이는 Budget Allocator와 중요도를 액터 틱마다 셈하는 일 | | `LabMinion.cpp:201-216` `ALabMinionBudget::Tick`이 틱마다 카메라 거리로 `SetComponentSignificance`를 부른다 | 단계 1의 `ALabMinion`에는 이 계산이 없다 |
+| 500\~1천에서 잰 애니메이션 시간은 예산 4ms 아래, 갱신 수는 세지 않았다 | 1.764, 3.711 < 4 | `V0-s1opt` `budgeted_anim_ms` | 갱신 수(`NumAlwaysTicked` CSV 스탯)는 `summary.csv`에 없다. "모든 메시를 매 프레임 갱신"은 엔진 식(`AnimationBudgetAllocator.cpp` `CalculateWorkDistributionAndQueue`)에서 나온 추론이다 |
 | 예산 안이면 모두 매 프레임, 넘으면 낮은 중요도부터 간격을 늘린다 | | [engine-notes.md](../../Docs/Reference/engine-notes.md) 29절, `AnimationBudgetAllocator.cpp:561, 566-567` | 정렬은 중요도가 큰 순이다(`:327-342`) |
 | 엔진은 등록할 때 URO를 끈다 | | `AnimationBudgetAllocator.cpp:1191-1197` `RegisterComponent`, 인터페이스 주석 `IAnimationBudgetAllocator.h:20-27` | [engine-notes.md](../../Docs/Reference/engine-notes.md) 52절 |
 | 단계 1의 기본 메시도 URO를 켜지 않는다 | `bEnableUpdateRateOptimizations = false` | `SkeletalMeshComponent.cpp:493` | `ALabMinion`은 이 값을 바꾸지 않는다. `ALabMinionBudget`은 생성자에서 켜고, 엔진이 등록 때 끈다(`LabMinion.cpp:198`) |
@@ -121,7 +123,7 @@
 | 90.337923\~169.700410초(측정 구간 안의 온전한 프레임) | 143 | 554.98 | 430.62 | 77.59% |
 
 - 트레이스 실행의 측정 구간은 87.6\~170.9초다. 월드 시간(프레임마다 0.4초로 잘린 값)을 첫 프레임부터 더해 60초가 되는 프레임(151번)과 120초가 되는 프레임(301번)으로 셈했다(`w1410-s1-ticks.csv`). 본문의 70\~120초는 워밍업 끝 17.6초를 포함한다.
-- 측정 구간 안의 값은 결과 파일 `w1410-s1-GT-aligned.csv`다. Excl로는 77.35%이고, 호출은 프레임마다 10,013번이다(1,431,915 ÷ 143). 세 구간 모두 "약 4분의 3"이다.
+- 측정 구간 안의 값은 결과 파일 `w1410-s1-GT-aligned.csv`다. Excl로는 77.35%이고, 호출은 프레임마다 10,013번이다(1,431,915 ÷ 143). 구간에 걸친 `FEngineLoop::Tick`은 144개이고 온전한 프레임은 143개다. 하나는 구간 끝에 걸친 조각이다(`I.Min` 0.000002초). 프레임당 값은 143으로 나눴다(Incl 79.362429초 ÷ 143 = 554.98ms). 세 구간 모두 "약 4분의 3"이다.
 
 ### Insights 화면
 
@@ -134,7 +136,7 @@
 | 볼 트랙 | `GameThread`. Timers 창을 "CharacterMovement"로 거른다. `FEngineLoop::Tick`이 함께 보이면 좋다 |
 | 화면에 보여야 할 값 | `UCharacterMovementComponent_TickComponent` Count 928,391, Incl 38.320초, Excl 38.197초. `FEngineLoop::Tick` Count 93, Incl 50.000초. 손으로 구간을 고르면 한두 프레임 다를 수 있다 |
 | 저장할 파일 | `Posts/01-actor-baseline/images/insights-gamethread.jpg`(jpg, 창 제목 줄은 잘라 낸다) |
-| 넣은 뒤 | README의 주석을 풀고, 캡션의 "38.2초"(Excl 38.197)를 화면 값과 대조한다 |
+| 넣은 뒤 | README의 주석을 풀고, 캡션 값을 화면 값(Incl 38.01초, Excl 37.89초)으로 맞췄다 |
 
 화면의 값(시간 눈금자를 손으로 끌어 고른 구간 49.72초):
 

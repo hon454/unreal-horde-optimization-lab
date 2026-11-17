@@ -45,11 +45,13 @@
 | 오브 30m 안 | 수평 30m | 지표 | `near30_mean`(measurement.md "v2에서 더한 열") | |
 | 기준과 1% 안 | 0.01 | 검사 규칙 | 조건 표 `equivalence.death_rate_tol`, `near30_tol` | |
 | 겹친 쌍: 절반에서 두 배 | 0.5, 2.0 | 검사 규칙 | `overlap_rel_lo`, `overlap_rel_hi`. 1만 이동 장면의 범위는 118.2\~472.9(`equivalence.csv` `overlap_range`) | |
-| 2초마다 액터 하나에 라인 트레이스 | 실행마다 90회 | `V0-s8` | `capsule_traces` 90(180초 ÷ 2초). 시작점 오브 구체 중심, 끝점 대상 액터(`LabOrb.cpp:378-405`) | |
+| 2초마다 액터 하나에 라인 트레이스 | 실행마다 90\~91회 | `V0-s8` | `capsule_traces`(180초 ÷ 2초 = 90 안팎). 시작점 오브 구체 중심, 끝점 대상 액터(`LabOrb.cpp:378-405`) | r1 / r2 / r3: 91 / 91 / 90 |
+| 그 액터나 앞을 가린 다른 액터의 캡슐에 맞는가(빗나감 0) | `capsule_miss` 0 | 검사 규칙 | measurement.md "동등성 검사" 캡슐 행. 다른 캡슐에 막힌 것도 통과다(`LabOrb.cpp` `Hits`/`Blocked`). `V0-s8` r1 / r2 / r3의 `capsule_hits`는 22 / 23 / 20 | |
 | 왕복 전환, 단계 4부터 초당 0.5 이하 | 0.5 | 검사 규칙 | `round_trip_max_per_sec`. 최소 유지 시간은 단계 4부터(`LabRepHold` 2000, commands.md 스위치 표) | |
 | 단계 3\~8은 해당 항목을 모두 통과 | `pass` | `V0-s3`\~`V0-s8` | `equivalence.csv` 1만 `V0` 행. 단계 4\~8은 `ok`, 단계 3은 `report`(아래 주석) | |
 | 기준과 0.2% 안 | 최대 0.13% | `V0-s3`\~`V0-s8` | `death_rate_dev_pct` −0.08\~+0.04, `near30_mean_dev_pct` −0.08\~+0.13 | |
-| 단계 1과 2는 1% 넘게 다르다 | 아래 표 | `V0-s1`, `V0-s2` | `death_rate_dev_pct`, `near30_mean_dev_pct` | |
+| 단계 1과 2는 처음부터 값만 보고하는 조건 | `"equiv": "report"` | `s1`, `s2` | 조건 표 `Scripts/full-conditions.json`의 `s1`·`s2`, measurement.md "동등성 검사" | |
+| 단계 1의 초당 사망 44.6% 적다, 단계 2의 30m 안 119.5% 많다 | −44.60%, +119.50% | `V0-s1`, `V0-s2` | `death_rate_dev_pct`, `near30_mean_dev_pct`. 아래 표 | |
 | 워밍업 60초, 180초 | 60, 180 | 설정 | `Source/HordeOptLab/LabGameMode.h:18-19`, 조건 표 `scenario` | |
 | 약 1만 4천 프레임 | 14080 | `V0-s8` | `runs.csv` `frames`의 중앙값 | 13915 / 14178 / 14080 |
 | 약 700프레임 | 704 | 계산 | 14080 × 0.05 | |
@@ -166,6 +168,9 @@ SVG 여섯은 [make-figures.py](make-figures.py)가 만든다(저장소 루트�
 | 0.6ms는 실행 하나가 중앙값보다 길게 나올 수 있는 폭이다 | measurement.md "지표" 목표 판정. 근거 값은 앞선 작은 묶음에서 나와 본문에 수치를 쓰지 않았다 |
 | 겹친 쌍은 프레임 시간을 따라 는다 | V2.md "2026-11-17 Full4 캡슐 빗나감 진단"의 "부차" 절. 분리는 프레임마다 위치를 한 번 고친다(`Source/HordeOptLab/LabSeparation.h:20-34` 주석). 이 묶음의 예: `V0-a8hyd` 프레임 p50 6.595ms에서 51.83, `V0-s8` 12.77ms에서 233.53(`overlap_mean`) |
 | 정지 장면의 캡슐 빗나감은 장치의 결함이다 | V2.md "2026-11-17 Full4 캡슐 빗나감 진단"의 "원인" 절, measurement.md "실패 등급", 조건 표 `capsule_miss_basis` |
+| 단계 2는 엔진 회피로, 나머지 단계는 분리로 겹치지 않게 한다 | 조건 표 `s2` `LabTechAvoid` 1, `LabTechSeparate` 0. 다른 단계는 `LabTechSeparate` 1. 분리는 반지름 합 × 1.2까지 뗀다(`Source/HordeOptLab/LabSeparation.h:31-34` `Skin = 0.2f`) |
+| 그림 `stage-map.svg`의 200m 밖은 그리지 않는다(단계 2\~6) | `Source/HordeOptLab/LabCrowdSubsystem.cpp:216` `LODRepresentation[EMassLOD::Off] = None`. 단계 7부터는 200m 밖을 입자로 그린다(위 `stage-map.svg` 표) |
+| 스레드 시간은 p50만 쓴다 | measurement.md "지표"의 스레드 시간 행(대기가 섞여 p95 해석이 어렵다) |
 | 오브가 움직이면 고정 목표에서만 통하는 기법이 드러난다 | ADR-0017 "맥락"과 결정 3, [v2-spec.md](../../Docs/v2-spec.md) 4.2절 |
 
 ## 엔진 소스

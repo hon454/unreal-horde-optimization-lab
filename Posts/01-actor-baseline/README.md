@@ -20,11 +20,11 @@
 
 ### CharacterMovement
 
-`UCharacterMovementComponent`는 `ACharacter`에 붙는 이동 컴포넌트다. 틱마다 속도를 셈하고, 캡슐을 바닥을 따라 스윕으로 옮긴 뒤 바닥을 다시 찾는다. 한 틱에 흐른 시간이 50ms보다 길면 시간을 나눠 이 계산을 여러 번 한다. 나눈 한 번을 하위 스텝이라 부른다. 단계 1은 이동 설정을 엔진 기본값으로 두고, 액터 틱이 오브 쪽 입력만 준다.
+`UCharacterMovementComponent`는 `ACharacter`에 붙는 이동 컴포넌트다. 틱마다 속도를 셈하고 캡슐을 바닥을 따라 스윕으로 옮긴 뒤 바닥을 다시 찾는다. 한 틱에 흐른 시간이 50ms보다 길면 시간을 나눠 이 계산을 여러 번 한다. 나눈 한 번을 하위 스텝이라 부른다. 단계 1은 하위 스텝 설정을 엔진 기본값으로 둔다. 바꾼 것은 걷는 속도(3m/s), 진행 방향 보기, 컨트롤러 없이 이동하기 셋이다. 액터 틱은 오브 쪽 입력만 준다.
 
 ### 캡슐끼리 막기
 
-단계 1의 겹침 방지는 엔진이 캐릭터에 주는 보통의 수단이다. 캡슐이 Pawn 채널을 막아, 스윕이 다른 캡슐에 닿으면 이동이 표면을 따라 미끄러진다. 시작부터 겹쳐 있으면 겹친 깊이만큼 밀어낸다. 캡슐 반지름은 몸통 반지름과 같게 두어, 막힌 두 개체를 겹친 쌍으로 세지 않는다.
+단계 1의 겹침 방지는 엔진이 캐릭터에 주는 보통의 수단이다. 캡슐이 Pawn 채널을 막아, 스윕이 다른 캡슐에 닿으면 이동이 표면을 따라 미끄러진다. 시작부터 겹쳐 있으면 겹친 깊이만큼 밀어낸다. 캡슐 반지름은 몸통 반지름과 같게 두어 막힌 두 개체를 겹친 쌍으로 세지 않는다.
 
 ### Animation Budget Allocator
 
@@ -78,7 +78,7 @@ while ( (remainingTime >= MIN_TICK_TIME) && (Iterations < MaxSimulationIteration
 
 ## 문제: 1만에서 게임 스레드는 CharacterMovement의 틱이 쓴다
 
-1만의 트레이스에서 게임 스레드 한 프레임은 538ms다. 그 가운데 411ms를 CharacterMovement의 틱이 쓴다. 이 틱은 프레임마다 9,983번 불려, 개체마다 한 번꼴이다. 애니메이션 쪽 두 타이머(스켈레탈 메시 틱과 포즈 반영)는 합쳐 44.9ms다. 트레이스는 측정과 따로 돌린 실행이라 비율만 읽는다.
+1만의 트레이스에서 게임 스레드 한 프레임은 538ms다. 그 가운데 411ms를 CharacterMovement의 틱이 쓴다. 이 틱은 프레임마다 9,983번 불려 개체마다 한 번꼴이다. 애니메이션 쪽 두 타이머(스켈레탈 메시 틱과 포즈 반영)는 합쳐 44.9ms다. 트레이스는 측정과 따로 돌린 실행이라 비율만 읽는다.
 
 ![Unreal Insights에서 호드 총수 1만 트레이스의 70초부터 120초까지를 고르고 Timers 목록을 CharacterMovement로 거른 화면. 빨간 상자의 CharacterMovement 틱은 921,277번 불리고 구간 합계가 38.0초, 자기 시간이 37.9초다. 아래 띠는 같은 구간에서 목록을 FEngineLoop::Tick으로 거른 것이고, 프레임 93개가 49.7초다](images/insights-gamethread.jpg)
 
@@ -96,7 +96,7 @@ while ( (remainingTime >= MIN_TICK_TIME) && (Iterations < MaxSimulationIteration
 
 게임 스레드 시간(중앙값)을 호드 총수로 나누면 개체 하나의 시간이 나온다. 2천까지는 18µs 안팎으로 평평하다. 이 구간은 프레임이 50ms 안이라 하위 스텝이 한 번이다. 1만은 58.1µs다. 게임 스레드도 예상한 172ms 대신 581ms가 걸렸다.
 
-하위 스텝이 는다는 예상과 같은 쪽이다. 다만 1만은 같은 일을 한 값이 아니고, 하위 스텝을 끈 실행으로 가르지도 않았다.
+하위 스텝이 는다는 예상과 같은 쪽이다. 다만 1만은 같은 일을 한 값이 아니고 하위 스텝을 끈 실행으로 가르지도 않았다.
 
 ### Budget Allocator만 켠 액터
 
@@ -113,7 +113,7 @@ if (bIsCurrentlyEnabled)
 }
 ```
 
-Budget Allocator가 켜져 있으면 메시의 URO를 끄고 갱신을 직접 맡는다. 단계 1의 기본 메시도 URO를 켜지 않는다. 엔진 기본값이 끔이다. 그래서 두 조건의 차이는 Budget Allocator 하나다.
+Budget Allocator가 켜져 있으면 메시의 URO를 끄고 갱신을 직접 맡는다. 단계 1의 기본 메시도 URO를 켜지 않는다. 엔진 기본값이 끔이다. 그래서 두 조건의 차이는 Budget Allocator와, 그에 넘길 중요도를 액터 틱마다 셈하는 일이다.
 
 Budget Allocator는 2천에서만 프레임을 줄였다. 프레임 p95가 41.3ms에서 36.9ms가 됐다. 1천에서는 오히려 0.52ms 길다. 그래서 최대 N은 약 760이다.
 
@@ -126,7 +126,7 @@ const float WorkUnitsExcess = FMath::Max(0.0f, TotalIdealWorkUnits - WorkUnitBud
 const float WorkUnitsToRunInFull = FMath::Clamp(WorkUnitBudget - (WorkUnitsExcess * Parameters.AlwaysTickFalloffAggression), (float)NumComponentsToNotSkip, (float)TotalIdealWorkUnits);
 ```
 
-수요 `TotalIdealWorkUnits`가 예산 `WorkUnitBudget` 안이면 넘친 몫이 0이다. 그러면 매 프레임 갱신하는 수가 수요와 같다. 최대 N이 정해지는 500\~1천은 예산에 닿기 전이라, Budget Allocator가 일을 줄이지 않았다.
+수요 `TotalIdealWorkUnits`가 예산 `WorkUnitBudget` 안이면 넘친 몫이 0이다. 그러면 매 프레임 갱신하는 수가 수요와 같다. 최대 N이 정해지는 500\~1천에서 Budget Allocator가 잰 애니메이션 시간은 예산 4ms 아래였다. 엔진 식대로라면 모든 메시를 매 프레임 갱신한다. 갱신 수를 직접 세지는 않았다.
 
 ## 한 문장으로
 
