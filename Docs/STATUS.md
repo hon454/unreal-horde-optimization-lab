@@ -16,10 +16,11 @@
 ## 다음 할 일
 
 1. 두 스킬은 커밋됐다(`.claude/skills/`, 94d35ce, f5d69e1, 436b884). 경위는 [Worklog/Skills.md](Worklog/Skills.md)에 있다.
-2. 불림 시험은 끝났다. 13개 모두 맞는 스킬이 불렸고, 내용은 셋이 일부 또는 빗나감이다([Worklog/Skills.md](Worklog/Skills.md) "불림 시험"). 드러난 네 곳은 고쳤다(5d5d22a). 질문 2, 5, 9, 10을 시험 폴더에서 다시 던질지는 사용자가 정한다.
-3. 공개 자료를 고치면 사용자 승인을 받아 `v2.1`처럼 태그를 달아 릴리스한다.
-4. 사이트에 보이는 것을 고치면 `Scripts/build-site.py`를 다시 돌린다. `Site/assets/`는 `.gitignore`에 있어 `gh-pages`에 따로 넣는다.
-5. `gh-pages`는 강제 푸시 없이 올린다. 방법은 [Worklog/V2.md](Worklog/V2.md) "W14-20 병합과 릴리스" 절에 있다.
+2. 불림 시험과 재시험은 끝났다. 13개 모두 맞는 스킬이 불렸다. 보완(5d5d22a) 뒤 재시험한 네 질문도 내용이 맞다([Worklog/Skills.md](Worklog/Skills.md) "재시험").
+3. 측정 스킬이 영어 질문에 한국어로 답한 일이 한 번 남았다. 더 고칠지는 사용자가 정한다.
+4. 공개 자료를 고치면 사용자 승인을 받아 `v2.1`처럼 태그를 달아 릴리스한다.
+5. 사이트에 보이는 것을 고치면 `Scripts/build-site.py`를 다시 돌린다. `Site/assets/`는 `.gitignore`에 있어 `gh-pages`에 따로 넣는다.
+6. `gh-pages`는 강제 푸시 없이 올린다. 방법은 [Worklog/V2.md](Worklog/V2.md) "W14-20 병합과 릴리스" 절에 있다.
 
 끝난 W14 작업 단위(커밋):
 
