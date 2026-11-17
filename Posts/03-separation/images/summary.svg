@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="690" viewBox="0 0 800 690" font-family="Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Segoe UI, sans-serif" font-size="16" fill="#111827">
+<rect x="0.5" y="0.5" width="799" height="689" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+<text x="32" y="46" font-size="22" font-weight="700">단계 2와 단계 3의 프레임 시간과 스레드 시간</text>
+<text x="32" y="74" font-size="16" fill="#4b5563">호드 총수 1만, 이동 장면, 오브 시점 카메라. 세 번 잰 중앙값(ms)</text>
+<rect x="32" y="99" width="18" height="16" rx="3" fill="#9ca3af"/>
+<text x="58" y="112" font-size="16">단계 2 엔진 회피</text>
+<rect x="232" y="99" width="18" height="16" rx="3" fill="#2563eb"/>
+<text x="258" y="112" font-size="16">단계 3 직접 짠 분리</text>
+<line x1="170.0" y1="160" x2="170.0" y2="536" stroke="#e5e7eb"/>
+<text x="170.0" y="558" text-anchor="middle" font-size="16" fill="#4b5563">0</text>
+<line x1="302.5" y1="160" x2="302.5" y2="536" stroke="#e5e7eb"/>
+<text x="302.5" y="558" text-anchor="middle" font-size="16" fill="#4b5563">10</text>
+<line x1="435.0" y1="160" x2="435.0" y2="536" stroke="#e5e7eb"/>
+<text x="435.0" y="558" text-anchor="middle" font-size="16" fill="#4b5563">20</text>
+<line x1="567.5" y1="160" x2="567.5" y2="536" stroke="#e5e7eb"/>
+<text x="567.5" y="558" text-anchor="middle" font-size="16" fill="#4b5563">30</text>
+<line x1="700.0" y1="160" x2="700.0" y2="536" stroke="#e5e7eb"/>
+<text x="700.0" y="558" text-anchor="middle" font-size="16" fill="#4b5563">40</text>
+<line x1="391.3" y1="144" x2="391.3" y2="536" stroke="#b45309" stroke-width="2" stroke-dasharray="6 4"/>
+<text x="397.3" y="140" font-size="16" font-weight="700" fill="#b45309">16.7ms(60fps)</text>
+<text x="32" y="200" font-size="17" font-weight="700">프레임 p95</text>
+<rect x="170" y="170" width="487.4" height="22" rx="4" fill="#9ca3af"/>
+<line x1="656.2" y1="181.0" x2="663.1" y2="181.0" stroke="#111827" stroke-width="2"/>
+<line x1="656.2" y1="174.0" x2="656.2" y2="188.0" stroke="#111827" stroke-width="2"/>
+<line x1="663.1" y1="174.0" x2="663.1" y2="188.0" stroke="#111827" stroke-width="2"/>
+<text x="671.1" y="187" font-size="16" font-weight="700" fill="#374151" paint-order="stroke" stroke="white" stroke-width="5" stroke-linejoin="round">36.8</text>
+<rect x="170" y="196" width="187.5" height="22" rx="4" fill="#2563eb"/>
+<line x1="355.2" y1="207.0" x2="359.0" y2="207.0" stroke="#111827" stroke-width="2"/>
+<line x1="355.2" y1="200.0" x2="355.2" y2="214.0" stroke="#111827" stroke-width="2"/>
+<line x1="359.0" y1="200.0" x2="359.0" y2="214.0" stroke="#111827" stroke-width="2"/>
+<text x="367.0" y="213" font-size="16" font-weight="700" fill="#2563eb" paint-order="stroke" stroke="white" stroke-width="5" stroke-linejoin="round">14.1</text>
+<text x="32" y="278" font-size="17" font-weight="700">프레임 p50</text>
+<rect x="170" y="248" width="451.3" height="22" rx="4" fill="#9ca3af"/>
+<line x1="616.6" y1="259.0" x2="621.6" y2="259.0" stroke="#111827" stroke-width="2"/>
+<line x1="616.6" y1="252.0" x2="616.6" y2="266.0" stroke="#111827" stroke-width="2"/>
+<line x1="621.6" y1="252.0" x2="621.6" y2="266.0" stroke="#111827" stroke-width="2"/>
+<text x="629.6" y="265" font-size="16" font-weight="700" fill="#374151" paint-order="stroke" stroke="white" stroke-width="5" stroke-linejoin="round">34.1</text>
+<rect x="170" y="274" width="164.5" height="22" rx="4" fill="#2563eb"/>
+<line x1="333.8" y1="285.0" x2="336.1" y2="285.0" stroke="#111827" stroke-width="2"/>
+<line x1="333.8" y1="278.0" x2="333.8" y2="292.0" stroke="#111827" stroke-width="2"/>
+<line x1="336.1" y1="278.0" x2="336.1" y2="292.0" stroke="#111827" stroke-width="2"/>
+<text x="344.1" y="291" font-size="16" font-weight="700" fill="#2563eb" paint-order="stroke" stroke="white" stroke-width="5" stroke-linejoin="round">12.4</text>
+<text x="32" y="356" font-size="17" font-weight="700">게임 스레드</text>
+<rect x="170" y="326" width="238.9" height="22" rx="4" fill="#9ca3af"/>
+<text x="416.9" y="343" font-size="16" font-weight="700" fill="#374151" paint-order="stroke" stroke="white" stroke-width="5" stroke-linejoin="round">18</text>
+<rect x="170" y="352" width="150.5" height="22" rx="4" fill="#2563eb"/>
+<text x="328.5" y="369" font-size="16" font-weight="700" fill="#2563eb" paint-order="stroke" stroke="white" stroke-width="5" stroke-linejoin="round">11.4</text>
+<text x="32" y="434" font-size="17" font-weight="700">렌더 스레드</text>
+<rect x="170" y="404" width="96.6" height="22" rx="4" fill="#9ca3af"/>
+<text x="274.6" y="421" font-size="16" font-weight="700" fill="#374151" paint-order="stroke" stroke="white" stroke-width="5" stroke-linejoin="round">7.29</text>
+<rect x="170" y="430" width="75.1" height="22" rx="4" fill="#2563eb"/>
+<text x="253.1" y="447" font-size="16" font-weight="700" fill="#2563eb" paint-order="stroke" stroke="white" stroke-width="5" stroke-linejoin="round">5.67</text>
+<text x="32" y="512" font-size="17" font-weight="700">GPU</text>
+<rect x="170" y="482" width="162.0" height="22" rx="4" fill="#9ca3af"/>
+<text x="340.0" y="499" font-size="16" font-weight="700" fill="#374151" paint-order="stroke" stroke="white" stroke-width="5" stroke-linejoin="round">12.2</text>
+<rect x="170" y="508" width="93.7" height="22" rx="4" fill="#2563eb"/>
+<text x="271.7" y="525" font-size="16" font-weight="700" fill="#2563eb" paint-order="stroke" stroke="white" stroke-width="5" stroke-linejoin="round">7.07</text>
+<line x1="32" y1="582" x2="768" y2="582" stroke="#e5e7eb"/>
+<text x="32" y="604" font-size="16" fill="#4b5563">단계 3의 프레임 p95는 14.1ms다. 16.7ms까지 여유는 2.55ms다.</text>
+<text x="32" y="630" font-size="16" fill="#4b5563">가는 선은 세 실행의 최솟값–최댓값이다. 스레드 시간은 중앙값만 쓴다.</text>
+<text x="32" y="656" font-size="16" fill="#4b5563">단계 2는 프레임 시간이 세 스레드 시간보다 길다. 까닭은 글 02가 다룬다.</text>
+</svg>

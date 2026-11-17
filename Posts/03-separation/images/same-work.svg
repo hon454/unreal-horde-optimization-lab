@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="668" viewBox="0 0 800 668" font-family="Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Segoe UI, sans-serif" font-size="16" fill="#111827">
+<rect x="0.5" y="0.5" width="799" height="667" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+<text x="32" y="46" font-size="22" font-weight="700">같은 일을 하는지: 동등성 검사의 네 항목</text>
+<text x="32" y="74" font-size="16" fill="#4b5563">호드 총수 1만, 이동 장면, 오브 시점 카메라. 세 번 잰 중앙값</text>
+<rect x="32" y="99" width="18" height="16" rx="3" fill="#9ca3af"/>
+<text x="58" y="112" font-size="16">단계 2 엔진 회피</text>
+<rect x="232" y="99" width="18" height="16" rx="3" fill="#2563eb"/>
+<text x="258" y="112" font-size="16">단계 3 직접 짠 분리</text>
+<text x="32" y="150" font-size="17" font-weight="700">초당 사망</text>
+<rect x="605.8" y="160" width="8.8" height="58" fill="#b45309" fill-opacity="0.25" stroke="#b45309" stroke-width="1.5"/>
+<text x="605.8" y="234" font-size="16" fill="#b45309">기준 ±1%</text>
+<text x="48" y="181" font-size="16">단계 2</text>
+<rect x="170" y="164" width="400.6" height="22" rx="3" fill="#9ca3af"/>
+<text x="622.6" y="181" font-size="16" font-weight="700" fill="#374151">53.9</text>
+<text x="48" y="207" font-size="16">단계 3</text>
+<rect x="170" y="190" width="439.9" height="22" rx="3" fill="#2563eb"/>
+<text x="622.6" y="207" font-size="16" font-weight="700" fill="#2563eb">59.2</text>
+<text x="32" y="262" font-size="17" font-weight="700">오브 30m 안 개체 수</text>
+<rect x="379.8" y="272" width="4.2" height="58" fill="#b45309" fill-opacity="0.25" stroke="#b45309" stroke-width="1.5"/>
+<text x="379.8" y="346" font-size="16" fill="#b45309">기준 ±1%</text>
+<text x="48" y="293" font-size="16">단계 2</text>
+<rect x="170" y="276" width="465.2" height="22" rx="3" fill="#9ca3af"/>
+<text x="643.2" y="293" font-size="16" font-weight="700" fill="#374151">2,147</text>
+<text x="48" y="319" font-size="16">단계 3</text>
+<rect x="170" y="302" width="211.8" height="22" rx="3" fill="#2563eb"/>
+<text x="392.1" y="319" font-size="16" font-weight="700" fill="#2563eb">978</text>
+<text x="32" y="374" font-size="17" font-weight="700">겹친 쌍</text>
+<rect x="174.4" y="384" width="13.2" height="58" fill="#b45309" fill-opacity="0.25" stroke="#b45309" stroke-width="1.5"/>
+<text x="174.4" y="458" font-size="16" fill="#b45309">허용 범위</text>
+<text x="48" y="405" font-size="16">단계 2</text>
+<rect x="170" y="388" width="462.1" height="22" rx="3" fill="#9ca3af"/>
+<text x="640.1" y="405" font-size="16" font-weight="700" fill="#374151">12,442</text>
+<text x="48" y="431" font-size="16">단계 3</text>
+<rect x="170" y="414" width="8.1" height="22" rx="3" fill="#2563eb"/>
+<text x="195.6" y="431" font-size="16" font-weight="700" fill="#2563eb">219</text>
+<text x="32" y="486" font-size="17" font-weight="700">깊게 겹친 쌍(반지름 합의 절반보다 가깝다)</text>
+<text x="48" y="517" font-size="16">단계 2</text>
+<rect x="170" y="500" width="466.4" height="22" rx="3" fill="#9ca3af"/>
+<text x="644.4" y="517" font-size="16" font-weight="700" fill="#374151">3,767</text>
+<text x="48" y="543" font-size="16">단계 3</text>
+<rect x="170" y="526" width="1.5" height="22" rx="3" fill="#2563eb"/>
+<text x="178.0" y="543" font-size="16" font-weight="700" fill="#2563eb">0</text>
+<line x1="32" y1="586" x2="768" y2="586" stroke="#e5e7eb"/>
+<text x="32" y="608" font-size="16" fill="#4b5563">기준은 단계 3–8의 중앙값이다. 겹친 쌍의 허용 범위는 그 중앙값의 절반에서 두 배다.</text>
+<text x="32" y="634" font-size="16" fill="#4b5563">단계 3은 네 항목을 모두 통과했다. 단계 2는 넷 모두 기준 밖이다.</text>
+</svg>
