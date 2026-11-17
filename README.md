@@ -4,7 +4,7 @@
 
 ![가운데의 빛나는 오브와 달팽이를 향해 사방에서 모여드는 작은 점토 인형 무리. 멀어질수록 인형이 단순한 모양과 점으로 바뀐다](Docs/figures/readme/cover.webp)
 
-## 한눈에
+## 요약
 
 - 액터로 호드 1만을 돌리면 프레임 p50(프레임 시간의 중앙값)이 597ms다. 60fps를 지키는 액터는 약 780개까지다.
 - 프레임 p50은 Mass의 엔진 기본 경로만 쓴 단계 2에서 34.1ms, 엔진 회피를 직접 짠 분리 프로세서로 바꾼 단계 3에서 12.4ms다. 단계 3의 프레임 p95(느린 쪽 5%의 경계)는 14.1ms로, 처음 60fps의 한 프레임인 16.7ms 안에 들었다.
@@ -40,18 +40,18 @@
 
 모든 단계가 같은 일 넷을 한다. 오브를 쫓고, 서로 겹치지 않고, 가까운 개체는 캡슐 콜리전을 갖고, 피해를 받고 죽는다. 한 단계는 앞 단계에서 기법 한 벌만 바꾸고, 둘 이상을 바꾼 단계는 기법별 기여로 몫을 가른다.
 
-| 단계 | 바꾼 것 | 글 |
+| 단계 | 바꾼 것 | 포스팅 |
 | --- | --- | --- |
-| [단계 1 액터 기준선](Docs/figures/steps/step1-actors.webp) | 모든 개체가 캡슐과 CharacterMovement를 가진 `ACharacter` 액터 | [01](Posts/01-actor-baseline/README.md) |
-| [단계 2 Mass, 엔진 기본 경로](Docs/figures/steps/step2-mass-engine.webp) | 개체를 Mass 엔티티로. 엔진의 이동·회피·표현, 35m 안은 액터 | [02](Posts/02-mass-engine-path/README.md) |
-| [단계 3 직접 짠 분리](Docs/figures/steps/step3-separation.webp) | 엔진 회피를 분리 프로세서로, 방향 보간을 병렬 사본으로 | [03](Posts/03-separation/README.md) |
-| [단계 4 애니메이션 표현](Docs/figures/steps/step4-vat-budget.webp) | VAT 인스턴스, 액터 애니메이션 예산, 최소 유지 시간 | [04](Posts/04-quality-by-distance/README.md) |
-| [단계 5 Simulation LOD + 엔티티 풀](Docs/figures/steps/step5-simlod-pool.webp) | 먼 개체의 로직을 드물게, 죽은 엔티티를 다시 쓴다 | [05](Posts/05-cost-cuts-and-contributions/README.md) |
-| [단계 6 ISKM](Docs/figures/steps/step6-iskm.webp) | 35\~200m를 ISKM으로, ISKM 고정 바운드 | [04](Posts/04-quality-by-distance/README.md) |
-| [단계 7 배경 무리](Docs/figures/steps/step7-crowd.webp) | 200m 밖을 Niagara 메시 입자로 | [04](Posts/04-quality-by-distance/README.md) |
-| [단계 8 남은 비용 줄이기](Docs/figures/steps/step8-final.webp) | 80m 밖 그림자 끔, 액터 메시 고정 바운드 | [05](Posts/05-cost-cuts-and-contributions/README.md) |
+| 단계 1 액터 기준선<br><img src="Docs/figures/steps/step1-actors.webp" width="320" alt="단계 1 화면. 모든 개체가 스켈레탈 메시 액터다"> | 모든 개체가 캡슐과 CharacterMovement를 가진 `ACharacter` 액터 | [01](Posts/01-actor-baseline/README.md) |
+| 단계 2 Mass, 엔진 기본 경로<br><img src="Docs/figures/steps/step2-mass-engine.webp" width="320" alt="단계 2 화면. 35m 안은 액터, 그 밖은 엔진 기본 표현으로 그린다"> | 개체를 Mass 엔티티로. 엔진의 이동·회피·표현, 35m 안은 액터 | [02](Posts/02-mass-engine-path/README.md) |
+| 단계 3 직접 짠 분리<br><img src="Docs/figures/steps/step3-separation.webp" width="320" alt="단계 3 화면. 개체가 분리 프로세서로 서로 밀며 오브를 쫓는다"> | 엔진 회피를 분리 프로세서로, 방향 보간을 병렬 사본으로 | [03](Posts/03-separation/README.md) |
+| 단계 4 애니메이션 표현<br><img src="Docs/figures/steps/step4-vat-budget.webp" width="320" alt="단계 4 화면. 35m에서 200m 사이의 개체가 VAT 인스턴스로 움직인다"> | VAT 인스턴스, 액터 애니메이션 예산, 최소 유지 시간 | [04](Posts/04-quality-by-distance/README.md) |
+| 단계 5 Simulation LOD + 엔티티 풀<br><img src="Docs/figures/steps/step5-simlod-pool.webp" width="320" alt="단계 5 화면. 겉모습은 단계 4와 같다"> | 먼 개체의 로직을 드물게, 죽은 엔티티를 다시 쓴다 | [05](Posts/05-cost-cuts-and-contributions/README.md) |
+| 단계 6 ISKM<br><img src="Docs/figures/steps/step6-iskm.webp" width="320" alt="단계 6 화면. 35m에서 200m 사이의 개체를 ISKM으로 그린다"> | 35\~200m를 ISKM으로, ISKM 고정 바운드 | [04](Posts/04-quality-by-distance/README.md) |
+| 단계 7 배경 무리<br><img src="Docs/figures/steps/step7-crowd.webp" width="320" alt="단계 7 화면. 200m 밖을 Niagara 입자 무리가 채운다"> | 200m 밖을 Niagara 메시 입자로 | [04](Posts/04-quality-by-distance/README.md) |
+| 단계 8 남은 비용 줄이기<br><img src="Docs/figures/steps/step8-final.webp" width="320" alt="단계 8 화면. 35m 안은 액터, 35m에서 200m 사이는 ISKM, 200m 밖은 입자로 그린다"> | 80m 밖 그림자 끔, 액터 메시 고정 바운드 | [05](Posts/05-cost-cuts-and-contributions/README.md) |
 
-단계 이름을 누르면 그 단계의 움직이는 화면이 열린다. 단계 4, 6, 7은 표현을 더하는 단계이고, 단계 2, 3, 5, 8은 비용을 줄이는 단계다. 단계 1은 출발점이고, 단계 8이 최종 구성이다.
+단계 4, 6, 7은 표현을 더하는 단계이고, 단계 2, 3, 5, 8은 비용을 줄이는 단계다. 단계 1은 출발점이고, 단계 8이 최종 구성이다.
 
 ![여덟 단계의 프레임 p95와 프레임 p50. 호드 총수 1만, 이동 장면, 오브 시점 카메라, 세 번 잰 중앙값. 단계 1은 프레임 p95 665ms, 단계 2는 36.8ms로 16.7ms를 넘는다. 단계 3부터 16.7ms 안이고, 16.7ms까지의 여유는 단계 3이 2.55ms, 단계 7이 1.53ms, 단계 8이 2.47ms다. 단계 4에서 7까지는 앞 단계와 구별되지 않는다](Docs/figures/readme/ladder.svg)
 
