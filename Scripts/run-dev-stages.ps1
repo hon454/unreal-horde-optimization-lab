@@ -1,6 +1,6 @@
 ﻿# 공용 코드를 고친 뒤의 확인: 사다리 단계마다 작은 실행(run-dev.ps1 -Small)을 차례로 돌리고 종료 코드를 모은다(AGENTS.md "완료 확인" 2).
 # 사용: powershell -ExecutionPolicy Bypass -File Scripts/run-dev-stages.ps1
-#       빼 보기까지: -Ablations (단계 8에 스위치 하나씩, Docs/Guides/commands.md "빼 보기")
+#       기법별 기여까지: -Ablations (단계 8에 스위치 하나씩, Docs/Guides/commands.md "기법별 기여(v2 W10)")
 param(
     [string[]]$Stages = @("1", "2", "3", "4", "5", "6", "7", "8"),
     [switch]$Ablations

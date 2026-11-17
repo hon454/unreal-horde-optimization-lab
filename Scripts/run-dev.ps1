@@ -1,6 +1,6 @@
 ﻿# Development 에디터 빌드를 -game으로 실행한다. 개발·동작 확인·오버레이 스크린샷용이고 수치는 비교에 쓰지 않는다(ADR-0001).
 #   -Small: N=100, P1, 20초 뒤 자동 종료. 완료 확인(AGENTS.md "완료 확인" 2번)에 쓴다.
-#   -Stage: 사다리 단계 1~8(-LabStage=, Docs/v2-plan.md "사다리"). 기본 8(최종 구성). 빼 보기는 -Extra로 스위치를 준다(Docs/Guides/commands.md).
+#   -Stage: 사다리 단계 1~8(-LabStage=, Docs/v2-plan.md "사다리"). 기본 8(최종 구성). 기법별 기여의 조건은 -Extra로 스위치를 준다(Docs/Guides/commands.md).
 param(
     [int]$N = 500,
     [ValidateSet("P1", "P2")][string]$Preset = "P1",

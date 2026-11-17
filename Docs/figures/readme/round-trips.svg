@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="520" viewBox="0 0 800 520" font-family="Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Segoe UI, sans-serif" font-size="16" fill="#111827">
+<rect x="0.5" y="0.5" width="799" height="519" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+<text x="32" y="46" font-size="22" font-weight="700">최소 유지 시간을 끄면 생기는 왕복 전환</text>
+<text x="32" y="74" font-size="16" fill="#4b5563">왕복 전환: 표현 경계를 넘은 개체가 2초 안에 같은 경계를 반대로 되넘은 수(초당)</text>
+<text x="32" y="96" font-size="16" fill="#4b5563">호드 총수 1만, 오브 시점 카메라, 세 번 잰 중앙값. 막대 위의 검은 선: 세 번 잰 범위</text>
+<text x="32" y="118" font-size="16" fill="#4b5563">최소 유지 시간: 한 번 바뀐 개체를 2초 동안 바로 전의 표현으로 되돌리지 않는다</text>
+<text x="32" y="180" font-size="17" font-weight="700">이동 장면</text>
+<text x="46" y="209" font-size="16">최종 구성</text>
+<rect x="330" y="195" width="2.0" height="18" rx="2" fill="#9ca3af"/>
+<text x="338.0" y="209.0" font-size="16" text-anchor="start" font-weight="700" fill="white" stroke="white" stroke-width="4" stroke-linejoin="round">0건</text><text x="338.0" y="209.0" font-size="16" text-anchor="start" font-weight="700" fill="#4b5563">0건</text>
+<text x="46" y="245" font-size="16">최소 유지 시간을 끈 조건</text>
+<rect x="330" y="231" width="321.5" height="18" rx="2" fill="#7c3aed"/>
+<line x1="642.9" y1="240" x2="663.0" y2="240" stroke="white" stroke-width="3.5"/>
+<line x1="642.9" y1="235" x2="642.9" y2="245" stroke="white" stroke-width="3.5"/>
+<line x1="663.0" y1="235" x2="663.0" y2="245" stroke="white" stroke-width="3.5"/>
+<line x1="642.9" y1="240" x2="663.0" y2="240" stroke="#111827" stroke-width="1.4"/>
+<line x1="642.9" y1="235" x2="642.9" y2="245" stroke="#111827" stroke-width="1.4"/>
+<line x1="663.0" y1="235" x2="663.0" y2="245" stroke="#111827" stroke-width="1.4"/>
+<text x="671.0" y="245.0" font-size="16" text-anchor="start" font-weight="700" fill="white" stroke="white" stroke-width="4" stroke-linejoin="round">4.34건</text><text x="671.0" y="245.0" font-size="16" text-anchor="start" font-weight="700" fill="#7c3aed">4.34건</text>
+<text x="32" y="288" font-size="17" font-weight="700">정지 장면</text>
+<text x="46" y="317" font-size="16">최종 구성</text>
+<rect x="330" y="303" width="2.0" height="18" rx="2" fill="#9ca3af"/>
+<text x="338.0" y="317.0" font-size="16" text-anchor="start" font-weight="700" fill="white" stroke="white" stroke-width="4" stroke-linejoin="round">0건</text><text x="338.0" y="317.0" font-size="16" text-anchor="start" font-weight="700" fill="#4b5563">0건</text>
+<text x="46" y="353" font-size="16">최소 유지 시간을 끈 조건</text>
+<rect x="330" y="339" width="168.6" height="18" rx="2" fill="#7c3aed"/>
+<line x1="494.4" y1="348" x2="500.6" y2="348" stroke="white" stroke-width="3.5"/>
+<line x1="494.4" y1="343" x2="494.4" y2="353" stroke="white" stroke-width="3.5"/>
+<line x1="500.6" y1="343" x2="500.6" y2="353" stroke="white" stroke-width="3.5"/>
+<line x1="494.4" y1="348" x2="500.6" y2="348" stroke="#111827" stroke-width="1.4"/>
+<line x1="494.4" y1="343" x2="494.4" y2="353" stroke="#111827" stroke-width="1.4"/>
+<line x1="500.6" y1="343" x2="500.6" y2="353" stroke="#111827" stroke-width="1.4"/>
+<text x="508.6" y="353.0" font-size="16" text-anchor="start" font-weight="700" fill="white" stroke="white" stroke-width="4" stroke-linejoin="round">2.28건</text><text x="508.6" y="353.0" font-size="16" text-anchor="start" font-weight="700" fill="#7c3aed">2.28건</text>
+<line x1="367.0" y1="158" x2="367.0" y2="374" stroke="#b45309" stroke-width="2" stroke-dasharray="5 4"/>
+<text x="330.0" y="394" text-anchor="middle" font-size="16" fill="#4b5563">0</text>
+<text x="404.0" y="394" text-anchor="middle" font-size="16" fill="#4b5563">1</text>
+<text x="478.0" y="394" text-anchor="middle" font-size="16" fill="#4b5563">2</text>
+<text x="552.0" y="394" text-anchor="middle" font-size="16" fill="#4b5563">3</text>
+<text x="626.0" y="394" text-anchor="middle" font-size="16" fill="#4b5563">4</text>
+<text x="700.0" y="394" text-anchor="middle" font-size="16" fill="#4b5563">5</text>
+<text x="708" y="394" font-size="16" fill="#4b5563">건/초</text>
+<line x1="337.0" y1="419" x2="359.0" y2="419" stroke="#b45309" stroke-width="2" stroke-dasharray="5 4"/>
+<text x="367.0" y="424" font-size="16" fill="#4b5563">동등성 검사의 상한(초당 0.5건)</text>
+<line x1="32" y1="442" x2="768" y2="442" stroke="#e5e7eb"/>
+<text x="32" y="462" font-size="16" fill="#4b5563">이동 장면에서 인스턴스가 액터로 바뀌는 전환은 최종 구성에서 초당 63.8건이다.</text>
+<text x="32" y="485" font-size="16" fill="#4b5563">최소 유지 시간을 끈 조건의 프레임 p95 차이(−0.21ms)는 최종 구성과 구별되지 않았다.</text>
+</svg>

@@ -1,5 +1,5 @@
 ﻿# 작은 묶음 러너(ADR-0017, Docs/Worklog/V2.md "시험 실행"). 떠다니는 오브의 궤도 속도 × 구성을 Test 패키지에서 잰다.
-#   v2 W10부터 구성은 사다리 단계 s1~s8(-LabStage=1~8)과 단계 8의 빼 보기 a8*, 직렬 트레이스용 s<n>ser다(아래 $ConfigTable).
+#   v2 W10부터 구성은 사다리 단계 s1~s8(-LabStage=1~8)과 단계 8의 기법별 기여 a8*, 직렬 트레이스용 s<n>ser다(아래 $ConfigTable).
 #   모든 조건이 같은 궤도 반지름·높이를 쓴다. 카메라는 P1(오브를 따라간다, v2 W1부터 기본)이다. 속도 0이 정지 조건이다.
 #   v2 W1부터: -WarmupSec(기본 -1 = 게임의 기본값: 이동 60초, 정지 15초)과 -DurationSec을 늘 넘긴다. 그전 묶음(Spike1, Spike2)은 P3·15초 워밍업이었다.
 # 라벨: <Batch>-V<속도 번호>-<구성>-N<N>-P1-r<i>. 속도 번호는 -Speeds의 순서다(0부터). summarize.py가 조건 "V<번호>-<구성>"으로 요약한다.
@@ -47,8 +47,8 @@ $BatchDir = "$ProjectDir\Measurements\$Batch"
 $ProgressLog = "$BatchDir\progress.log"
 $FailuresCsv = "$BatchDir\failures.csv"
 
-# v2 W10: 구성은 사다리 단계(s1~s8, -LabStage=1~8)와 단계 8의 빼 보기(a8*)다. 옛 단계·변형 이름(M0~M5, -LabVariant)은 지웠고 옛 구성(final, m1 등)도 함께 지웠다.
-# 단계별 스위치 표와 빼 보기 표는 Docs/Worklog/V2.md "W10"과 Docs/Guides/commands.md에 있다. 기대값은 그 표의 CSV 메타데이터 값이다.
+# v2 W10: 구성은 사다리 단계(s1~s8, -LabStage=1~8)와 단계 8의 기법별 기여(a8*)다. 옛 단계·변형 이름(M0~M5, -LabVariant)은 지웠고 옛 구성(final, m1 등)도 함께 지웠다.
+# 단계별 스위치 표와 기법별 기여 표는 Docs/Worklog/V2.md "W10"과 Docs/Guides/commands.md에 있다. 기대값은 그 표의 CSV 메타데이터 값이다.
 # 액터 상한과 전환 거리는 단계 2~8 모두 1000·35다(ADR-0021). 그전에는 단계 2~7 500·30, 단계 8 1000·40이었다
 $StepExpect = @{
     "1" = @("LabStage=1", "LabLadder=1", "LabTechHydrate=0", "LabTechAvoid=0", "LabTechSeparate=1", "LabActorCollision=pawn", "LabRepHold=0", "LabFarHandoff=1", "LabFarHitIskm=-", "LabSmoothOrient=-", "LabActorOpt=0")
@@ -64,7 +64,7 @@ $StepExpect = @{
 }
 $ConfigTable = @()
 foreach ($s in 1..8) { $ConfigTable += @{ Name = "s$s"; Args = @("-LabStage=$s"); Expect = @($StepExpect["$s"]) } }
-# M6 수정 A·B를 끈 확인용 구성(묶음 V2M6Fix, Docs/Worklog/V2.md "M6 수정"). 장면 규칙이라 빼 보기 표에 넣지 않는다
+# M6 수정 A·B를 끈 확인용 구성(묶음 V2M6Fix, Docs/Worklog/V2.md "M6 수정"). 장면 규칙이라 기법별 기여 표에 넣지 않는다
 foreach ($s in @(1, 8)) {
     $off = @("LabFarHandoff=0") + $(if ($s -eq 8) { @("LabFarHitIskm=0") } else { @("LabFarHitIskm=-") })
     $base = @($StepExpect["$s"] | Where-Object { $_ -notmatch '^LabFarHandoff=|^LabFarHitIskm=' })
@@ -80,7 +80,7 @@ $ConfigTable += @{ Name = "s2avt"; Args = @("-LabStage=2", "-LabAvoidTuned=1"); 
 $ConfigTable += @{ Name = "s1opt"; Args = @("-LabStage=1", "-LabActorOpt=1"); Expect = @($StepExpect["1"] | Where-Object { $_ -notmatch '^LabActorOpt=' }) + @("LabActorOpt=1", "LabBudget=1", "LabBudgetMs=4") }
 # 방향 보간 병렬 사본을 끈 단계 8(Docs/Worklog/V2.md "방향 보간 병렬 사본: 사다리 배선"). 사본은 단계 3부터 기본 켬이라 옛 s8so(묶음 V2SmoothOri)는 이제 s8과 같아 지웠다
 $ConfigTable += @{ Name = "s8sooff"; Args = @("-LabStage=8", "-LabSmoothOrient=0"); Expect = @($StepExpect["8"] | Where-Object { $_ -notmatch '^LabSmoothOrient=' }) + @("LabSmoothOrient=0") }
-# 빼 보기: 단계 8에서 스위치 하나. Expect는 바뀌는 메타데이터 값이다. LabOverrides는 정지 조건(orbit=…)과 섞이므로 대조하지 않는다
+# 기법별 기여: 단계 8에서 스위치 하나. Expect는 바뀌는 메타데이터 값이다. LabOverrides는 정지 조건(orbit=…)과 섞이므로 대조하지 않는다
 $Ablations = @(
     @{ Name = "a8hyd"; Arg = "-LabHydrate=0"; Expect = @("LabTechHydrate=0", "LabActorCollision=-") },
     @{ Name = "a8bud"; Arg = "-LabScreenSigBudget=0"; Expect = @("LabTechAnimBudget=0", "LabBudget=0") },
@@ -101,7 +101,7 @@ $Ablations = @(
     @{ Name = "a8fsb"; Arg = "-LabFixedSkelBounds=0"; Expect = @("LabFixedSkelBounds=0") }, # v2 W11 액터 메시 고정 바운드
     # 하위 실험: 단계 8에 QueryOnly 칸 나누기를 더한다(v2 W11, 묶음 V2W11Cost에서 실행 간 범위 안이라 기본값에 넣지 않았다)
     @{ Name = "s8iso"; Arg = "-LabQueryIsolate=1"; Expect = @("LabQueryIsolate=1") },
-    # 하위 실험(빼 보기가 아니라 더하기): 단계 8에 엔진 회피를 더한다(D43의 비교)
+    # 하위 실험(기법을 끄는 것이 아니라 바꾸기): 단계 8에서 분리 프로세서 대신 엔진 회피를 쓴다(D43의 비교)
     @{ Name = "s8av"; Arg = "-LabAvoid=1 -LabSeparate=0"; Expect = @("LabTechAvoid=1", "LabTechSeparate=0", "LabAvoidTuned=0") },
     # 리뷰 M3(묶음 V2M3Avoid): s8av에 엔진 회피 파라미터 한 벌(LabConfig.h FLabAvoidParams)
     @{ Name = "s8avt"; Arg = "-LabAvoid=1 -LabSeparate=0 -LabAvoidTuned=1"; Expect = @("LabTechAvoid=1", "LabTechSeparate=0", "LabAvoidTuned=1") }

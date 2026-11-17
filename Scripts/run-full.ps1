@@ -1,7 +1,7 @@
-﻿# 총괄 묶음 러너(v2 W12). Test 패키지 exe를 직접 부른다. v1의 run-full.ps1(태그 v1)을 v2의 사다리 단계(-LabStage=1~8)와 빼 보기 스위치에 맞게 다시 썼다.
-# 조건은 Scripts/full-conditions.json(v2)이 정한다: 구성(단계 s1~s8, 빼 보기 a8*), 묶음 종류(group)별 구성·속도·N·회차, 시나리오 값(궤도, 워밍업, 측정 구간).
+﻿# 총괄 묶음 러너(v2 W12). Test 패키지 exe를 직접 부른다. v1의 run-full.ps1(태그 v1)을 v2의 사다리 단계(-LabStage=1~8)와 기법별 기여의 스위치에 맞게 다시 썼다.
+# 조건은 Scripts/full-conditions.json(v2)이 정한다: 구성(단계 s1~s8, 기법별 기여 a8*), 묶음 종류(group)별 구성·속도·N·회차, 시나리오 값(궤도, 워밍업, 측정 구간).
 # 절차(앞 창 검사, 실패 CSV 이동, progress.log, failures.csv, 메타데이터 대조)는 run-spike.ps1과 v1 run-full.ps1에서 옮겼다.
-# 묶음 종류(group): ladder(8단계 x 1만 x 이동), ablation(빼 보기 x 이동), still(단계 8과 빼 보기 x 정지), sub(하위 실험), maxn(단계 2 x 5천, 단계 3~8 x 2만),
+# 묶음 종류(group): ladder(8단계 x 1만 x 이동), ablation(기법별 기여 x 이동), still(단계 8과 기법별 기여 x 정지), sub(하위 실험), maxn(단계 2 x 5천, 단계 3~8 x 2만),
 #   maxn_mid(단계 3~8 x 1.25만), maxn_low(단계 2 x 2,500), topview(단계 8 탑뷰 P2, 참고 한 점), actor(단계 1과 s1opt x {500, 1천, 2천}), aa(단계 8 반복, 회차 11~13),
 #   trace(단계 1~8 트레이스), traceser(단계 2~8 직렬 트레이스), extra(기본 묶음에 없는 후보 s8iso, -Only extra로만).
 #   그룹의 n_by_config가 있으면 그 구성은 n 대신 거기 적힌 N 목록으로 돈다(maxn의 s2).

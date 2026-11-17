@@ -1,6 +1,6 @@
 {
  "version": 2,
- "source": "Docs/Worklog/V2.md \"W12 측정 준비\". 단계와 빼 보기의 기대값은 같은 문서 \"W10\"의 표와 \"W11\"이다. 기대값은 Test 패키지 실행의 CSV 메타데이터 키(대소문자 무시)와 문자열 값이다. base가 있으면 그 설정의 expect 위에 이 expect를 덮어쓴다.",
+ "source": "Docs/Worklog/V2.md \"W12 측정 준비\". 단계와 기법별 기여의 기대값은 같은 문서 \"W10\"의 표와 \"W11\"이다. 기대값은 Test 패키지 실행의 CSV 메타데이터 키(대소문자 무시)와 문자열 값이다. base가 있으면 그 설정의 expect 위에 이 expect를 덮어쓴다.",
  "exe": "Packaged/Test/Windows/HordeOptLab/Binaries/Win64/HordeOptLab-Win64-Test.exe",
  "batch": "Full4",
  "label_format": "<Batch>-<V0|V1>-<구성>-N<N>-P<1|2>-r<i>. V0 = 오브 궤도 속도 2m/s(이동), V1 = 속도 0(정지). P1 = 오브 시점(기본), P2 = 탑뷰(그룹의 preset이 정한다). 트레이스는 <Batch>trace-..., <Batch>traceser-..., 촬영은 <Batch>shot-..., A/A는 회차 11~13, 실패 재측정은 회차 + Runs(4~6), 느린 실행 재측정은 7~9, 두 번째 재측정(러너 -RetryGiveups, 실패 재측정도 실패한 계획 실행)은 회차 + 20(21~23, A/A 31~33).",
@@ -710,7 +710,7 @@
     10000
    ],
    "runs": 3,
-   "note": "빼 보기 열일곱 행(단계 8에 스위치 하나) x 이동. 기준은 사다리의 s8. a8res, a8fxf, a8stp는 리뷰 M1에서 옮겨 왔다"
+   "note": "기법별 기여 열일곱 행(단계 8에 스위치 하나) x 이동. 기준은 사다리의 s8. a8res, a8fxf, a8stp는 리뷰 M1에서 옮겨 왔다"
   },
   "still": {
    "configs": [
@@ -736,7 +736,7 @@
     10000
    ],
    "runs": 3,
-   "note": "정지 조건: 단계 8과 빼 보기 열다섯 행(a8res 포함). a8fxf와 a8stp는 오브와 카메라가 서 있으면 단계 8과 같은 일이라 뺀다(measurement.md)"
+   "note": "정지 조건: 단계 8과 기법별 기여 열다섯 행(a8res 포함). a8fxf와 a8stp는 오브와 카메라가 서 있으면 단계 8과 같은 일이라 뺀다(measurement.md)"
   },
   "sub": {
    "configs": [

@@ -1,6 +1,6 @@
 """측정 실행의 CSV 메타데이터를 조건 표의 기대값과 대조하고 프레임 지표를 한 줄로 보인다(v2 W12).
 
-기대값은 Scripts/full-conditions.json(v2)이 정한다: 공통 기대값 + 구성(단계 s1~s8, 빼 보기 a8* 등)의 기대값(base가 있으면 그 위에 덮어쓴다)
+기대값은 Scripts/full-conditions.json(v2)이 정한다: 공통 기대값 + 구성(단계 s1~s8, 기법별 기여 a8* 등)의 기대값(base가 있으면 그 위에 덮어쓴다)
 + 실행값(오브 궤도 LabOrbit, 워밍업+측정 LabWindow, LabN, LabAlive*, LabLabel, 빌드 LabBuild).
 라벨이 <묶음>-<V0|V1>-<구성>-N<N>-P1-r<회차>면 조건을 라벨에서 고른다. 트레이스(<묶음>trace-, <묶음>traceser-)와 촬영(<묶음>shot-) 라벨도 같다.
 --cond V0-s8로 직접 고를 수도 있다.

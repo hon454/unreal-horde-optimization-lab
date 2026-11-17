@@ -1,6 +1,6 @@
 """조건 표(Scripts/full-conditions.json, v2)를 읽는 공용 코드. ablation-check.py, equivalence-check.py, summarize.py, plot.py가 쓴다.
 
-라벨: <묶음>-<V0|V1>-<구성>-N<N>-P1-r<회차>. V0는 이동(궤도 속도 2m/s), V1은 정지(속도 0)다. 구성은 단계(s1~s8)나 빼 보기(a8*)이고
+라벨: <묶음>-<V0|V1>-<구성>-N<N>-P1-r<회차>. V0는 이동(궤도 속도 2m/s), V1은 정지(속도 0)다. 구성은 단계(s1~s8)나 기법별 기여(a8*)이고
 조건 이름은 "<V0|V1>-<구성>"이다(summary.csv의 variant와 cond 열). 트레이스(<묶음>trace-)와 촬영(<묶음>shot-)은 접두사가 달라 묶음 요약에 안 잡힌다.
 표준 라이브러리만 쓴다.
 """

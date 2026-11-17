@@ -1,96 +1,95 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="800" height="624" viewBox="0 0 800 624" font-family="Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Segoe UI, sans-serif" font-size="16" fill="#111827">
-<rect x="0.5" y="0.5" width="799" height="623" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
-<defs><pattern id="spend" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(45)"><rect width="3" height="7" fill="#ffffff" fill-opacity="0.55"/></pattern></defs>
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="646" viewBox="0 0 800 646" font-family="Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Segoe UI, sans-serif" font-size="16" fill="#111827">
+<rect x="0.5" y="0.5" width="799" height="645" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+<defs><pattern id="rep" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(45)"><rect width="3" height="7" fill="#ffffff" fill-opacity="0.55"/></pattern></defs>
 <text x="32" y="46" font-size="22" font-weight="700">단계마다 쓰는 메모리와 드로우 콜</text>
-<text x="32" y="74" font-size="16" fill="#4b5563">호드 총수 1만, 오브 시점 카메라, 60초씩 세 번 잰 중앙값</text>
+<text x="32" y="74" font-size="16" fill="#4b5563">호드 총수 1만, 이동 장면, 오브 시점 카메라, 세 번 잰 중앙값</text>
 <text x="32" y="96" font-size="16" fill="#4b5563">막대 둘레의 옅은 띠: 세 번 잰 범위(좁아서 2px가 안 되는 범위는 그리지 않았다)</text>
-<text x="262.0" y="140" font-size="17" font-weight="700" fill="#2563eb">프로세스 메모리</text>
-<text x="262.0" y="161" font-size="16" fill="#4b5563">작업 집합, MB</text>
-<text x="430.7" y="140" font-size="17" font-weight="700" fill="#db2777">GPU 메모리</text>
-<text x="430.7" y="161" font-size="16" fill="#4b5563">VRAM 사용량, MB</text>
-<text x="599.3" y="140" font-size="17" font-weight="700" fill="#0d9488">드로우 콜</text>
-<text x="599.3" y="161" font-size="16" fill="#4b5563">프레임당 개수</text>
+<text x="330.0" y="140" font-size="17" font-weight="700" fill="#2563eb">프로세스 메모리</text>
+<text x="330.0" y="161" font-size="16" fill="#4b5563">작업 집합, MB</text>
+<text x="476.0" y="140" font-size="17" font-weight="700" fill="#db2777">GPU 메모리</text>
+<text x="476.0" y="161" font-size="16" fill="#4b5563">VRAM 사용량, MB</text>
+<text x="622.0" y="140" font-size="17" font-weight="700" fill="#0d9488">드로우 콜</text>
+<text x="622.0" y="161" font-size="16" fill="#4b5563">프레임당 개수</text>
 <line x1="32" y1="178" x2="768" y2="178" stroke="#e5e7eb"/>
-<text x="32" y="202" font-size="17" font-weight="700">1단계 액터 군중</text>
-<rect x="262.0" y="187" width="92.0" height="18" rx="3" fill="#2563eb"/>
-<text x="361.0" y="202" font-size="16" font-weight="700" fill="#2563eb">3,069</text>
-<rect x="430.7" y="187" width="92.0" height="18" rx="3" fill="#db2777"/>
-<text x="529.7" y="202" font-size="16" font-weight="700" fill="#db2777">8,643</text>
-<rect x="599.3" y="187" width="92.0" height="18" rx="3" fill="#0d9488"/>
-<text x="698.3" y="202" font-size="16" font-weight="700" fill="#0d9488">10,272</text>
+<text x="32" y="202" font-size="16" font-weight="700">단계 1 액터 기준선</text>
+<rect x="330.0" y="187" width="70.0" height="18" rx="3" fill="#2563eb"/>
+<text x="407.0" y="202" font-size="16" font-weight="700" fill="#2563eb">3,225</text>
+<rect x="476.0" y="187" width="70.0" height="18" rx="3" fill="#db2777"/>
+<text x="553.0" y="202" font-size="16" font-weight="700" fill="#db2777">9,253</text>
+<rect x="622.0" y="187" width="70.0" height="18" rx="3" fill="#0d9488"/>
+<text x="699.0" y="202" font-size="16" font-weight="700" fill="#0d9488">9,075</text>
 <line x1="32" y1="214" x2="768" y2="214" stroke="#e5e7eb"/>
-<text x="32" y="238" font-size="17" font-weight="700">2단계 Mass 로직</text>
-<rect x="309.6" y="219" width="4.0" height="26" rx="4" fill="#2563eb" fill-opacity="0.28"/>
-<rect x="262.0" y="223" width="51.1" height="18" rx="3" fill="#2563eb"/>
-<text x="320.6" y="238" font-size="16" font-weight="700" fill="#2563eb">1,704</text>
-<rect x="430.7" y="223" width="32.4" height="18" rx="3" fill="#db2777"/>
-<text x="470.0" y="238" font-size="16" font-weight="700" fill="#db2777">3,039</text>
-<rect x="599.3" y="223" width="1.5" height="18" rx="3" fill="#0d9488"/>
-<text x="607.4" y="238" font-size="16" font-weight="700" fill="#0d9488">123</text>
+<text x="32" y="238" font-size="16" font-weight="700">단계 2 Mass, 엔진 기본 경로</text>
+<rect x="330.0" y="223" width="37.1" height="18" rx="3" fill="#2563eb"/>
+<text x="374.1" y="238" font-size="16" font-weight="700" fill="#2563eb">1,710</text>
+<rect x="476.0" y="223" width="25.4" height="18" rx="3" fill="#db2777"/>
+<text x="508.4" y="238" font-size="16" font-weight="700" fill="#db2777">3,356</text>
+<rect x="622.0" y="223" width="22.6" height="18" rx="3" fill="#0d9488"/>
+<text x="651.6" y="238" font-size="16" font-weight="700" fill="#0d9488">2,928</text>
 <line x1="32" y1="250" x2="768" y2="250" stroke="#e5e7eb"/>
-<text x="32" y="274" font-size="17" font-weight="700">3단계 ISM + VAT</text>
-<rect x="262.0" y="259" width="52.3" height="18" rx="3" fill="#2563eb"/>
-<text x="321.3" y="274" font-size="16" font-weight="700" fill="#2563eb">1,744</text>
-<rect x="430.7" y="259" width="32.4" height="18" rx="3" fill="#db2777"/>
-<text x="470.1" y="274" font-size="16" font-weight="700" fill="#db2777">3,042</text>
-<rect x="599.3" y="259" width="1.5" height="18" rx="3" fill="#0d9488"/>
-<text x="607.4" y="274" font-size="16" font-weight="700" fill="#0d9488">123</text>
+<text x="32" y="274" font-size="16" font-weight="700">단계 3 직접 짠 분리</text>
+<rect x="330.0" y="259" width="37.0" height="18" rx="3" fill="#2563eb"/>
+<text x="374.0" y="274" font-size="16" font-weight="700" fill="#2563eb">1,706</text>
+<rect x="476.0" y="259" width="24.4" height="18" rx="3" fill="#db2777"/>
+<text x="507.4" y="274" font-size="16" font-weight="700" fill="#db2777">3,219</text>
+<rect x="622.0" y="259" width="14.1" height="18" rx="3" fill="#0d9488"/>
+<text x="643.1" y="274" font-size="16" font-weight="700" fill="#0d9488">1,825</text>
 <line x1="32" y1="286" x2="768" y2="286" stroke="#e5e7eb"/>
-<text x="32" y="310" font-size="17" font-weight="700">4단계 액터 하이드레이션</text>
-<rect x="262.0" y="295" width="52.7" height="18" rx="3" fill="#2563eb"/>
-<rect x="262.0" y="295" width="52.7" height="18" rx="3" fill="url(#spend)"/>
-<text x="321.7" y="310" font-size="16" font-weight="700" fill="#2563eb">1,759</text>
-<rect x="430.7" y="295" width="33.3" height="18" rx="3" fill="#db2777"/>
-<rect x="430.7" y="295" width="33.3" height="18" rx="3" fill="url(#spend)"/>
-<text x="471.0" y="310" font-size="16" font-weight="700" fill="#db2777">3,127</text>
-<rect x="599.3" y="295" width="11.8" height="18" rx="3" fill="#0d9488"/>
-<rect x="599.3" y="295" width="11.8" height="18" rx="3" fill="url(#spend)"/>
-<text x="618.2" y="310" font-size="16" font-weight="700" fill="#0d9488">1,320</text>
+<text x="32" y="310" font-size="16" font-weight="700">단계 4 애니메이션 표현</text>
+<rect x="330.0" y="295" width="36.5" height="18" rx="3" fill="#2563eb"/>
+<rect x="330.0" y="295" width="36.5" height="18" rx="3" fill="url(#rep)"/>
+<text x="373.5" y="310" font-size="16" font-weight="700" fill="#2563eb">1,684</text>
+<rect x="476.0" y="295" width="23.9" height="18" rx="3" fill="#db2777"/>
+<rect x="476.0" y="295" width="23.9" height="18" rx="3" fill="url(#rep)"/>
+<text x="506.9" y="310" font-size="16" font-weight="700" fill="#db2777">3,161</text>
+<rect x="622.0" y="295" width="14.1" height="18" rx="3" fill="#0d9488"/>
+<rect x="622.0" y="295" width="14.1" height="18" rx="3" fill="url(#rep)"/>
+<text x="643.1" y="310" font-size="16" font-weight="700" fill="#0d9488">1,832</text>
 <line x1="32" y1="322" x2="768" y2="322" stroke="#e5e7eb"/>
-<text x="32" y="346" font-size="17" font-weight="700">5단계 Simulation LOD</text>
-<rect x="262.0" y="331" width="53.5" height="18" rx="3" fill="#2563eb"/>
-<text x="322.5" y="346" font-size="16" font-weight="700" fill="#2563eb">1,783</text>
-<rect x="430.7" y="331" width="33.3" height="18" rx="3" fill="#db2777"/>
-<text x="471.0" y="346" font-size="16" font-weight="700" fill="#db2777">3,132</text>
-<rect x="599.3" y="331" width="11.8" height="18" rx="3" fill="#0d9488"/>
-<text x="618.2" y="346" font-size="16" font-weight="700" fill="#0d9488">1,323</text>
+<text x="32" y="346" font-size="16" font-weight="700">단계 5 Simulation LOD + 엔티티 풀</text>
+<rect x="330.0" y="331" width="36.6" height="18" rx="3" fill="#2563eb"/>
+<text x="373.6" y="346" font-size="16" font-weight="700" fill="#2563eb">1,686</text>
+<rect x="476.0" y="331" width="24.0" height="18" rx="3" fill="#db2777"/>
+<text x="507.0" y="346" font-size="16" font-weight="700" fill="#db2777">3,169</text>
+<rect x="622.0" y="331" width="14.1" height="18" rx="3" fill="#0d9488"/>
+<text x="643.1" y="346" font-size="16" font-weight="700" fill="#0d9488">1,833</text>
 <line x1="32" y1="358" x2="768" y2="358" stroke="#e5e7eb"/>
-<text x="32" y="382" font-size="17" font-weight="700">6단계 ISKM</text>
-<rect x="310.1" y="363" width="5.1" height="26" rx="4" fill="#2563eb" fill-opacity="0.28"/>
-<rect x="262.0" y="367" width="53.0" height="18" rx="3" fill="#2563eb"/>
-<text x="322.2" y="382" font-size="16" font-weight="700" fill="#2563eb">1,766</text>
-<rect x="430.7" y="367" width="34.6" height="18" rx="3" fill="#db2777"/>
-<text x="472.2" y="382" font-size="16" font-weight="700" fill="#db2777">3,247</text>
-<rect x="599.3" y="367" width="12.1" height="18" rx="3" fill="#0d9488"/>
-<text x="618.4" y="382" font-size="16" font-weight="700" fill="#0d9488">1,347</text>
+<text x="32" y="382" font-size="16" font-weight="700">단계 6 ISKM</text>
+<rect x="330.0" y="367" width="35.6" height="18" rx="3" fill="#2563eb"/>
+<rect x="330.0" y="367" width="35.6" height="18" rx="3" fill="url(#rep)"/>
+<text x="372.6" y="382" font-size="16" font-weight="700" fill="#2563eb">1,641</text>
+<rect x="476.0" y="367" width="25.0" height="18" rx="3" fill="#db2777"/>
+<rect x="476.0" y="367" width="25.0" height="18" rx="3" fill="url(#rep)"/>
+<text x="508.0" y="382" font-size="16" font-weight="700" fill="#db2777">3,304</text>
+<rect x="622.0" y="367" width="14.3" height="18" rx="3" fill="#0d9488"/>
+<rect x="622.0" y="367" width="14.3" height="18" rx="3" fill="url(#rep)"/>
+<text x="643.3" y="382" font-size="16" font-weight="700" fill="#0d9488">1,856</text>
 <line x1="32" y1="394" x2="768" y2="394" stroke="#e5e7eb"/>
-<text x="32" y="418" font-size="17" font-weight="700">7단계 Niagara 배경 무리</text>
-<rect x="262.0" y="403" width="56.1" height="18" rx="3" fill="#2563eb"/>
-<rect x="262.0" y="403" width="56.1" height="18" rx="3" fill="url(#spend)"/>
-<text x="325.1" y="418" font-size="16" font-weight="700" fill="#2563eb">1,870</text>
-<rect x="430.7" y="403" width="35.2" height="18" rx="3" fill="#db2777"/>
-<rect x="430.7" y="403" width="35.2" height="18" rx="3" fill="url(#spend)"/>
-<text x="472.9" y="418" font-size="16" font-weight="700" fill="#db2777">3,309</text>
-<rect x="599.3" y="403" width="12.2" height="18" rx="3" fill="#0d9488"/>
-<rect x="599.3" y="403" width="12.2" height="18" rx="3" fill="url(#spend)"/>
-<text x="618.5" y="418" font-size="16" font-weight="700" fill="#0d9488">1,360</text>
+<text x="32" y="418" font-size="16" font-weight="700">단계 7 배경 무리</text>
+<rect x="330.0" y="403" width="37.9" height="18" rx="3" fill="#2563eb"/>
+<rect x="330.0" y="403" width="37.9" height="18" rx="3" fill="url(#rep)"/>
+<text x="374.9" y="418" font-size="16" font-weight="700" fill="#2563eb">1,748</text>
+<rect x="476.0" y="403" width="25.3" height="18" rx="3" fill="#db2777"/>
+<rect x="476.0" y="403" width="25.3" height="18" rx="3" fill="url(#rep)"/>
+<text x="508.3" y="418" font-size="16" font-weight="700" fill="#db2777">3,346</text>
+<rect x="622.0" y="403" width="14.4" height="18" rx="3" fill="#0d9488"/>
+<rect x="622.0" y="403" width="14.4" height="18" rx="3" fill="url(#rep)"/>
+<text x="643.4" y="418" font-size="16" font-weight="700" fill="#0d9488">1,867</text>
 <line x1="32" y1="430" x2="768" y2="430" stroke="#e5e7eb"/>
-<text x="32" y="454" font-size="17" font-weight="700">8단계 품질 올리기</text>
-<rect x="262.0" y="439" width="56.7" height="18" rx="3" fill="#2563eb"/>
-<rect x="262.0" y="439" width="56.7" height="18" rx="3" fill="url(#spend)"/>
-<text x="325.7" y="454" font-size="16" font-weight="700" fill="#2563eb">1,892</text>
-<rect x="430.7" y="439" width="35.1" height="18" rx="3" fill="#db2777"/>
-<rect x="430.7" y="439" width="35.1" height="18" rx="3" fill="url(#spend)"/>
-<text x="472.8" y="454" font-size="16" font-weight="700" fill="#db2777">3,299</text>
-<rect x="599.3" y="439" width="15.3" height="18" rx="3" fill="#0d9488"/>
-<rect x="599.3" y="439" width="15.3" height="18" rx="3" fill="url(#spend)"/>
-<text x="621.7" y="454" font-size="16" font-weight="700" fill="#0d9488">1,713</text>
+<text x="32" y="454" font-size="16" font-weight="700">단계 8 남은 비용 줄이기</text>
+<rect x="330.0" y="439" width="37.7" height="18" rx="3" fill="#2563eb"/>
+<text x="374.7" y="454" font-size="16" font-weight="700" fill="#2563eb">1,736</text>
+<rect x="476.0" y="439" width="25.4" height="18" rx="3" fill="#db2777"/>
+<text x="508.4" y="454" font-size="16" font-weight="700" fill="#db2777">3,363</text>
+<rect x="622.0" y="439" width="15.1" height="18" rx="3" fill="#0d9488"/>
+<text x="644.1" y="454" font-size="16" font-weight="700" fill="#0d9488">1,956</text>
 <line x1="32" y1="466" x2="768" y2="466" stroke="#e5e7eb"/>
-<text x="32" y="498" font-size="16" font-weight="700">4단계부터 다시 느는 단계와 그 단계에서 바꾼 것</text>
-<text x="32" y="520" font-size="16" fill="#4b5563">GPU 메모리: 4단계(30m 안 액터), 6단계(ISKM), 7단계(Niagara 배경 무리)</text>
-<text x="32" y="542" font-size="16" fill="#4b5563">드로우 콜: 4단계(30m 안 액터), 8단계(액터 0~40m, 상한 1,000)</text>
-<text x="32" y="572" font-size="16" fill="#4b5563">프로세스 메모리는 같은 단계에서도 실행마다 최대 약 170MB 달랐다.</text>
-<rect x="32" y="589" width="34" height="16" rx="3" fill="#9ca3af"/>
-<rect x="32" y="589" width="34" height="16" rx="3" fill="url(#spend)"/>
-<text x="74" y="602" font-size="16" fill="#4b5563">빗금 막대: 번 시간을 품질에 쓰는 단계(4·7·8단계)</text>
+<text x="32" y="498" font-size="16" font-weight="700">단계 4부터 다시 느는 단계(세 번 잰 범위보다 큰 증가)</text>
+<text x="32" y="520" font-size="16" fill="#4b5563">프로세스 메모리: 단계 7 배경 무리</text>
+<text x="32" y="542" font-size="16" fill="#4b5563">GPU 메모리: 단계 6 ISKM, 단계 7 배경 무리, 단계 8 남은 비용 줄이기</text>
+<text x="32" y="564" font-size="16" fill="#4b5563">드로우 콜: 단계 6 ISKM, 단계 8 남은 비용 줄이기</text>
+<text x="32" y="594" font-size="16" fill="#4b5563">프로세스 메모리는 같은 단계에서도 실행마다 최대 약 50MB 달랐다.</text>
+<rect x="32" y="611" width="34" height="16" rx="3" fill="#9ca3af"/>
+<rect x="32" y="611" width="34" height="16" rx="3" fill="url(#rep)"/>
+<text x="74" y="624" font-size="16" fill="#4b5563">빗금 막대: 표현을 더하는 단계(단계 4·6·7). 나머지는 비용을 줄이는 단계와 출발점(단계 1)다</text>
 </svg>
