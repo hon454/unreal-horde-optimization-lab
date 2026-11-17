@@ -167,8 +167,7 @@
     $("next").disabled = s.num === steps.length;
 
     loadClip(s);
-    $("clip-cap").textContent = "호드 총수 1만, 이동 장면, 오브 시점 카메라." + (n !== D.meta.target_n ? " 화면은 고른 호드 총수와 상관없이 1만이다." : "") +
-      " 화면 왼쪽 위 HUD의 숫자는 측정값이 아니다.";
+    $("clip-cap").textContent = "호드 총수 1만, 이동 장면, 오브 시점 카메라." + (n !== D.meta.target_n ? " 화면은 고른 호드 총수와 상관없이 1만이다." : "");
 
     $("step-title").textContent = stepName(s);
     var g = $("step-group");
