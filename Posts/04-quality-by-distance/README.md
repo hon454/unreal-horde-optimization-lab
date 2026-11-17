@@ -42,7 +42,7 @@ Niagara 메시 렌더러는 입자 하나마다 스태틱 메시 하나를 그�
 
 ![최종 구성의 화면에 표현별 색을 입혔다. 아래에서 위로 빨강은 액터(0\~35m), 파랑은 그림자를 그리는 ISKM(35\~80m), 하늘은 그림자를 끈 ISKM(80\~200m), 노랑은 입자(200m 밖)다](../../Measurements/Full4/shots/reptint-s8-moving-t75.jpg)
 
-색과 거리 구간은 바로 위 그림과 같다. 80m 밖 그림자는 단계 8이 껐다([05번 글](../05-cost-cuts-and-contributions/README.md)). 이 화면은 Development 빌드에서 색을 입혀 찍었고 측정값이 아니다. 구간은 엔티티 구성을 만드는 코드가 정한다.
+색과 구간은 위 그림과 같다. 80m 밖 그림자는 단계 8이 껐다([05번 글](../05-cost-cuts-and-contributions/README.md)). 이 화면은 Development 빌드에서 색을 입혀 찍었고 측정값이 아니다. 구간은 엔티티 구성을 만드는 코드가 정한다.
 
 [`Source/HordeOptLab/LabCrowdSubsystem.cpp`](../../Source/HordeOptLab/LabCrowdSubsystem.cpp), `ULabCrowdSubsystem::BuildEntityConfig`
 
@@ -53,7 +53,7 @@ const int32 MaxCounts[EMassLOD::Max] = { FLabConfig::Get().ActorCap, 5000, MAX_i
 Visual->Params.LODRepresentation[EMassLOD::Off] = EMassRepresentationType::None;
 ```
 
-첫 줄은 네 구간이 시작하는 거리(cm)이고, `HydrateCm`은 35m, `RepOffCm`은 200m다. 둘째 줄의 첫 값이 액터 상한 1,000이다. 끝 줄 때문에 엔진은 200m 밖을 그리지 않는다.
+첫 줄은 네 구간이 시작하는 거리(cm)이고, `HydrateCm`은 35m, `RepOffCm`은 200m다. 둘째 줄의 첫 값이 액터 상한 1,000이다. 끝 줄은 200m 밖을 그리지 않게 한다.
 
 예상: 단계 3의 GPU 시간은 게임 스레드보다 4.29ms 짧다. 표현이 GPU에 싣는 비용은 이 차이를 넘기 전까지 프레임 시간에 보이지 않을 것이다. 게임 스레드에 싣는 비용은 그대로 프레임에 더해질 것이다.
 
@@ -63,16 +63,16 @@ Visual->Params.LODRepresentation[EMassLOD::Off] = EMassRepresentationType::None;
 
 단계 4는 네 가지를 함께 켠다.
 
-1. 35\~200m의 정지 메시를 VAT 인스턴스로 바꿨다. 갱신은 `ULabVatISMProcessor`가 맡는다.
+1. 35\~200m의 정지 메시를 VAT 인스턴스로 바꿨다.
 2. 액터 메시를 `USkeletalMeshComponentBudgeted`로 바꿨다. Animation Budget Allocator의 예산은 4ms로 두고, 화면 크기를 중요도로 넘긴다.
 3. 바뀐 개체가 2초 안에 바로 전의 표현으로 돌아가지 못하게 붙잡는다(최소 유지 시간).
-4. 전환 대책 다섯을 켰다. 액터의 포즈가 준비될 때까지 인스턴스를 그리는 일처럼, 전환 순간의 화면 튐을 막는 일이다.
+4. 전환 대책 다섯을 켰다. 액터의 포즈가 준비될 때까지 인스턴스를 그리는 일처럼 전환 순간의 화면 튐을 막는다.
 
 ![단계 5 화면에 표현별 색을 입혔다. 빨강 액터 밖은 모두 초록 VAT 인스턴스이고, 200m 밖은 비어 있다](../../Measurements/Full4/shots/reptint-s5-vat.jpg)
 
-단계 4와 5는 표현이 같아, 같은 방식으로 찍은 단계 5 화면을 실었다. 단계 4의 움직이는 화면은 [step4-vat-budget.webp](../../Docs/figures/steps/step4-vat-budget.webp)다.
+단계 4와 5는 표현이 같아 단계 5 화면을 실었다. 단계 4의 [움직이는 화면](../../Docs/figures/steps/step4-vat-budget.webp)은 따로 있다.
 
-최소 유지 시간을 둔 까닭은 엔진이 개체가 가까운 구간으로 들어올 때만 경계에 여유를 두기 때문이다.
+엔진은 가까운 구간으로 들어오는 개체에만 경계 여유를 둔다.
 
 `Engine/Plugins/Runtime/MassGameplay/Source/MassLOD/Public/MassLODCalculator.h`, `TMassLODCalculator::ComputeLODFromSettings`
 
@@ -92,9 +92,9 @@ for (; LODDistIdx > 0; LODDistIdx--)
 				LODDistIdx = PrevLOD;
 ```
 
-한 칸 가까운 구간으로 들어오는 개체는 그 구간 폭의 10%만큼 더 와야 바뀐다. 그래서 200m 경계는 188m에서 넘는다. 반복이 `LODDistIdx > 0`에서 멈춰, 액터 구간(High, 0번)에는 이 여유가 없다. 그래서 액터 경계 근처의 개체는 액터와 인스턴스 사이를 짧게 오갈 수 있다.
+여유는 들어오는 구간 폭의 10%라 200m 경계는 188m에서 넘는다. 반복이 `LODDistIdx > 0`에서 멈춰 액터 구간(High, 0번)에는 여유가 없다. 그래서 액터 경계 근처의 개체는 액터와 인스턴스를 짧게 오갈 수 있다.
 
-Lab 프로세서가 엔진이 표현을 바꾸기 전에 그런 개체를 붙잡는다.
+최소 유지 시간 규칙은 엔진이 표현을 바꾸기 전에 그런 개체를 붙잡는다.
 
 [`Source/HordeOptLab/LabMassProcessors.cpp`](../../Source/HordeOptLab/LabMassProcessors.cpp), `ULabRepHoldProcessor::Execute`
 
@@ -115,19 +115,19 @@ else
 }
 ```
 
-`bReverse`는 2초 안에 바로 전의 표현으로 돌아가려는 개체다. 액터였던 개체는 High로 남기고, 인스턴스였던 개체는 지난 LOD로 되돌린다. 이 단계의 변수 넷 각각의 몫은 최종 구성에서 하나씩 끈 조건이 가른다([05번 글](../05-cost-cuts-and-contributions/README.md)).
+`bReverse`는 2초 안에 되돌아가려는 개체다. 이 단계의 변수 넷 각각의 몫은 최종 구성에서 하나씩 끈 조건이 가른다([05번 글](../05-cost-cuts-and-contributions/README.md)).
 
 ### 단계 6: 35\~200m를 ISKM으로
 
 단계 6은 35\~200m의 VAT 인스턴스를 ISKM으로 바꿨다. `ULabIskmProcessor`가 개체마다 위치와 사망 색을 매 프레임 넘기고, 상태가 바뀐 개체의 트랙만 다시 쓴다.
 
-ISKM 컴포넌트에는 카메라를 따라 옮기는 고정 바운드 상자를 넣었다. 엔진은 상자가 없으면 바운드를 셈할 때 인스턴스를 모두 돈다. 최종 구성에서 이 상자를 끈 조건은 프레임 p95가 0.66ms 길다.
+ISKM 컴포넌트에는 카메라를 따라가는 고정 바운드 상자를 넣었다. 엔진은 상자가 없으면 바운드를 셈할 때 인스턴스를 모두 돈다. 최종 구성에서 이 상자를 끈 조건은 프레임 p95가 0.66ms 길다.
 
-ISKM의 엔진 문제 셋을 피하려고 트랙 미리 늘리기, 가산 클립 복제, 엔티티 풀을 넣었다. 원인과 코드는 [06번 글](../06-engine-findings/README.md)에 있다.
+ISKM의 엔진 문제 셋은 트랙 미리 늘리기, 가산 클립 복제, 엔티티 풀로 피한다([06번 글](../06-engine-findings/README.md)).
 
 ### 단계 7: 200m 밖을 배경 무리로
 
-단계 7은 200m 밖 개체를 Niagara 메시 입자로 그린다. `ULabCrowdFxGatherProcessor`가 엔진이 그리지 않는 걷는 엔티티의 자리, 시각, 걷기 위상을 모아 Niagara에 넘긴다.
+단계 7은 200m 밖을 Niagara 메시 입자로 그린다. `ULabCrowdFxGatherProcessor`가 그려지지 않는 걷는 엔티티의 자리, 시각, 걷기 위상을 모아 넘긴다.
 
 [`Source/HordeOptLab/LabCrowdFxProcessor.cpp`](../../Source/HordeOptLab/LabCrowdFxProcessor.cpp), `ULabCrowdFxGatherProcessor::Execute`
 
@@ -145,7 +145,7 @@ Out.Emplace(float(Location.X), float(Location.Y), T0, -Anim.StateStartTime);
 UNiagaraDataInterfaceArrayFunctionLibrary::SetNiagaraArrayVector4(Fx, SmallName, TConstArrayView<FVector4f>(Recs[LabUnitSmall]));
 ```
 
-입자는 GPU에서 받은 자리부터 오브 쪽으로 걸은 자리를 셈한다. 200m 밖 엔티티는 1초마다만 옮겨지므로, 그 사이를 입자가 메운다. 맵 밖(맵 중심 500\~1,000m)은 맵 밖 무리의 기록을 같은 배열 뒤에 붙여 그린다.
+입자는 GPU에서 받은 자리부터 오브 쪽으로 걸은 자리를 셈한다. 200m 밖 엔티티는 1초마다만 옮겨지므로, 그 사이를 입자가 메운다. 맵 밖(맵 중심 500\~1,000m)은 맵 밖 무리의 기록을 배열 뒤에 붙여 그린다.
 
 ## 결과: 단계마다는 구별되지 않고, 모으면 1.02ms다
 
@@ -161,11 +161,11 @@ GPU 시간은 프레임과 따로 움직였다. ISKM이 GPU 시간을 7.15ms에�
 
 ### 프레임에는 보이지 않는 이점
 
-최소 유지 시간의 이점은 왕복 전환에서 보인다. 왕복 전환은 2초 안에 같은 경계를 반대로 되넘은 수다. 최종 구성에서 이 규칙만 끄면 왕복 전환이 초당 4.34건 생긴다. 모두 액터 경계에서 났고, 규칙을 켜면 0건이다. 프레임 p95의 차이는 구별되지 않는다.
+최소 유지 시간의 이점은 왕복 전환에서 보인다. 왕복 전환은 2초 안에 같은 경계를 되넘은 수다. 최종 구성에서 이 규칙만 끄면 왕복 전환이 초당 4.34건 생긴다. 모두 액터 경계에서 났고, 규칙을 켜면 0건이다. 프레임 p95의 차이는 구별되지 않는다.
 
 액터 애니메이션 예산은 상한으로 일한다. 단계 4에서 액터 메시의 애니메이션 시간은 4.03ms로 예산에 닿는다. 이때 Budget Allocator는 소형 액터를 프레임의 7.02%에서 갱신도 보간도 하지 않는다. 최종 구성에서는 이 시간이 2.71ms라 예산 아래다. 그래서 예산을 끈 조건의 프레임 p95는 구별되지 않는다.
 
-전환 대책 다섯은 전환 순간의 화면을 고치는 일이고, 이 측정에는 그것을 세는 지표가 없다. 끈 조건의 프레임 p95는 최종 구성과 같다.
+전환 대책 다섯이 막는 화면 튐을 세는 지표는 이 측정에 없다. 끈 조건의 프레임 p95는 최종 구성과 같다.
 
 ## 한 문장으로
 
