@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="997" viewBox="0 0 800 997" font-family="Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Segoe UI, sans-serif" font-size="16" fill="#111827">
+<defs><pattern id="rep" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(45)"><rect width="3" height="7" fill="#ffffff" fill-opacity="0.55"/></pattern></defs>
+<rect x="0.5" y="0.5" width="799" height="996" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+<text x="32" y="44" font-size="22" font-weight="700">여덟 단계의 프레임 시간</text>
+<text x="32" y="72" font-size="16" fill="#4b5563">호드 총수 1만, 이동 장면, 오브 시점 카메라, 세 번 잰 중앙값(ms)</text>
+<rect x="32" y="103" width="22" height="16" rx="2" fill="#374151"/>
+<text x="62.0" y="116.0" font-size="16" text-anchor="start" fill="#111827">굵은 막대: 프레임 p95(느린 쪽 5%의 경계)</text>
+<rect x="420" y="108" width="22" height="7" rx="2" fill="#374151" fill-opacity="0.45"/>
+<text x="450.0" y="116.0" font-size="16" text-anchor="start" fill="#111827">가는 막대: 프레임 p50(중앙값)</text>
+<line x1="32" y1="137" x2="54" y2="137" stroke="#b45309" stroke-width="2" stroke-dasharray="5 4"/>
+<text x="62.0" y="142.0" font-size="16" text-anchor="start" fill="#111827">16.7ms(60fps). 오른쪽 글자는 16.7ms까지의 여유, 넘는 단계는 최대 N</text>
+<line x1="32" y1="160" x2="768" y2="160" stroke="#e5e7eb"/>
+<text x="32.0" y="182.0" font-size="16" text-anchor="start" fill="#4b5563">축척 A: 0–700ms(단계 1)</text>
+<line x1="32.0" y1="222" x2="32.0" y2="262" stroke="#eef0f3"/>
+<text x="32.0" y="280.0" font-size="16" text-anchor="middle" fill="#4b5563">0</text>
+<line x1="124.6" y1="222" x2="124.6" y2="262" stroke="#eef0f3"/>
+<text x="124.6" y="280.0" font-size="16" text-anchor="middle" fill="#4b5563">100</text>
+<line x1="217.1" y1="222" x2="217.1" y2="262" stroke="#eef0f3"/>
+<text x="217.1" y="280.0" font-size="16" text-anchor="middle" fill="#4b5563">200</text>
+<line x1="309.7" y1="222" x2="309.7" y2="262" stroke="#eef0f3"/>
+<text x="309.7" y="280.0" font-size="16" text-anchor="middle" fill="#4b5563">300</text>
+<line x1="402.3" y1="222" x2="402.3" y2="262" stroke="#eef0f3"/>
+<text x="402.3" y="280.0" font-size="16" text-anchor="middle" fill="#4b5563">400</text>
+<line x1="494.9" y1="222" x2="494.9" y2="262" stroke="#eef0f3"/>
+<text x="494.9" y="280.0" font-size="16" text-anchor="middle" fill="#4b5563">500</text>
+<line x1="587.4" y1="222" x2="587.4" y2="262" stroke="#eef0f3"/>
+<text x="587.4" y="280.0" font-size="16" text-anchor="middle" fill="#4b5563">600</text>
+<line x1="680.0" y1="222" x2="680.0" y2="262" stroke="#eef0f3"/>
+<text x="680.0" y="280.0" font-size="16" text-anchor="middle" fill="#4b5563">700</text>
+<text x="32" y="216" font-size="17" font-weight="700">단계 1 액터 기준선<tspan font-size="16" font-weight="400" fill="#4b5563">  ACharacter 액터, 캡슐과 이동 컴포넌트</tspan></text>
+<rect x="32.0" y="224.0" width="615.8" height="22" rx="3" fill="#374151"/>
+<rect x="32.0" y="250.0" width="552.8" height="7" rx="2" fill="#374151" fill-opacity="0.45"/>
+<line x1="47.5" y1="220" x2="47.5" y2="262" stroke="#b45309" stroke-width="2" stroke-dasharray="5 4"/>
+<text x="639.8" y="241" font-size="16" text-anchor="end" fill="#374151" stroke="#374151" stroke-width="3" stroke-linejoin="round">p50 597 · <tspan font-weight="700">p95 665</tspan></text><text x="639.8" y="241" font-size="16" text-anchor="end" fill="white">p50 597 · <tspan font-weight="700">p95 665</tspan></text>
+<text x="659.8" y="241.0" font-size="16" text-anchor="start" font-weight="700" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">최대 N 약 780</text><text x="659.8" y="241.0" font-size="16" text-anchor="start" font-weight="700" fill="#b45309">최대 N 약 780</text>
+<line x1="32" y1="304" x2="768" y2="304" stroke="#e5e7eb"/>
+<text x="32.0" y="326.0" font-size="16" text-anchor="start" fill="#4b5563">축척 B: 0–40ms(단계 2–8, 축척 A의 17.5배)</text>
+<line x1="32.0" y1="366" x2="32.0" y2="838" stroke="#eef0f3"/>
+<text x="32.0" y="856.0" font-size="16" text-anchor="middle" fill="#4b5563">0</text>
+<line x1="113.0" y1="366" x2="113.0" y2="838" stroke="#eef0f3"/>
+<text x="113.0" y="856.0" font-size="16" text-anchor="middle" fill="#4b5563">5</text>
+<line x1="194.0" y1="366" x2="194.0" y2="838" stroke="#eef0f3"/>
+<text x="194.0" y="856.0" font-size="16" text-anchor="middle" fill="#4b5563">10</text>
+<line x1="275.0" y1="366" x2="275.0" y2="838" stroke="#eef0f3"/>
+<text x="275.0" y="856.0" font-size="16" text-anchor="middle" fill="#4b5563">15</text>
+<line x1="356.0" y1="366" x2="356.0" y2="838" stroke="#eef0f3"/>
+<text x="356.0" y="856.0" font-size="16" text-anchor="middle" fill="#4b5563">20</text>
+<line x1="437.0" y1="366" x2="437.0" y2="838" stroke="#eef0f3"/>
+<text x="437.0" y="856.0" font-size="16" text-anchor="middle" fill="#4b5563">25</text>
+<line x1="518.0" y1="366" x2="518.0" y2="838" stroke="#eef0f3"/>
+<text x="518.0" y="856.0" font-size="16" text-anchor="middle" fill="#4b5563">30</text>
+<line x1="599.0" y1="366" x2="599.0" y2="838" stroke="#eef0f3"/>
+<text x="599.0" y="856.0" font-size="16" text-anchor="middle" fill="#4b5563">35</text>
+<line x1="680.0" y1="366" x2="680.0" y2="838" stroke="#eef0f3"/>
+<text x="680.0" y="856.0" font-size="16" text-anchor="middle" fill="#4b5563">40</text>
+<text x="32" y="360" font-size="17" font-weight="700">단계 2 Mass, 엔진 기본 경로<tspan font-size="16" font-weight="400" fill="#4b5563">  엔진 이동·회피·표현, 가까운 개체는 액터</tspan></text>
+<rect x="32.0" y="368.0" width="595.9" height="22" rx="3" fill="#374151"/>
+<rect x="32.0" y="394.0" width="551.7" height="7" rx="2" fill="#374151" fill-opacity="0.45"/>
+<line x1="302.5" y1="364" x2="302.5" y2="406" stroke="#b45309" stroke-width="2" stroke-dasharray="5 4"/>
+<text x="619.9" y="385" font-size="16" text-anchor="end" fill="#374151" stroke="#374151" stroke-width="3" stroke-linejoin="round">p50 34.1 · <tspan font-weight="700">p95 36.8</tspan></text><text x="619.9" y="385" font-size="16" text-anchor="end" fill="white">p50 34.1 · <tspan font-weight="700">p95 36.8</tspan></text>
+<text x="639.9" y="385.0" font-size="16" text-anchor="start" font-weight="700" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">최대 N 약 4,100</text><text x="639.9" y="385.0" font-size="16" text-anchor="start" font-weight="700" fill="#b45309">최대 N 약 4,100</text>
+<text x="32" y="432" font-size="17" font-weight="700">단계 3 직접 짠 분리<tspan font-size="16" font-weight="400" fill="#4b5563">  분리 프로세서, 방향 보간 병렬 사본</tspan></text>
+<rect x="32.0" y="440.0" width="229.2" height="22" rx="3" fill="#374151"/>
+<rect x="32.0" y="466.0" width="201.1" height="7" rx="2" fill="#374151" fill-opacity="0.45"/>
+<line x1="302.5" y1="436" x2="302.5" y2="478" stroke="#b45309" stroke-width="2" stroke-dasharray="5 4"/>
+<text x="253.2" y="457" font-size="16" text-anchor="end" fill="#374151" stroke="#374151" stroke-width="3" stroke-linejoin="round">p50 12.4 · <tspan font-weight="700">p95 14.1</tspan></text><text x="253.2" y="457" font-size="16" text-anchor="end" fill="white">p50 12.4 · <tspan font-weight="700">p95 14.1</tspan></text>
+<text x="312.5" y="457.0" font-size="16" text-anchor="start" font-weight="700" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">여유 2.55ms</text><text x="312.5" y="457.0" font-size="16" text-anchor="start" font-weight="700" fill="#b45309">여유 2.55ms</text>
+<text x="410.1" y="457.0" font-size="16" text-anchor="start" fill="#4b5563">처음 16.7ms 안</text>
+<text x="32" y="504" font-size="17" font-weight="700">단계 4 애니메이션 표현<tspan font-size="16" font-weight="400" fill="#4b5563">  VAT 인스턴스, 액터 애니메이션 예산, 최소 유지 시간</tspan></text>
+<rect x="32.0" y="512.0" width="230.1" height="22" rx="3" fill="#374151"/>
+<rect x="32.0" y="512.0" width="230.1" height="22" rx="3" fill="url(#rep)"/>
+<rect x="32.0" y="538.0" width="208.3" height="7" rx="2" fill="#374151" fill-opacity="0.45"/>
+<rect x="32.0" y="538.0" width="208.3" height="7" rx="2" fill="url(#rep)"/>
+<line x1="302.5" y1="508" x2="302.5" y2="550" stroke="#b45309" stroke-width="2" stroke-dasharray="5 4"/>
+<text x="254.1" y="529" font-size="16" text-anchor="end" fill="#374151" stroke="#374151" stroke-width="3" stroke-linejoin="round">p50 12.9 · <tspan font-weight="700">p95 14.2</tspan></text><text x="254.1" y="529" font-size="16" text-anchor="end" fill="white">p50 12.9 · <tspan font-weight="700">p95 14.2</tspan></text>
+<text x="312.5" y="529.0" font-size="16" text-anchor="start" font-weight="700" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">여유 2.50ms</text><text x="312.5" y="529.0" font-size="16" text-anchor="start" font-weight="700" fill="#b45309">여유 2.50ms</text>
+<text x="32" y="576" font-size="17" font-weight="700">단계 5 Simulation LOD + 엔티티 풀<tspan font-size="16" font-weight="400" fill="#4b5563">  먼 개체의 로직을 드물게, 엔티티를 다시 쓴다</tspan></text>
+<rect x="32.0" y="584.0" width="235.2" height="22" rx="3" fill="#374151"/>
+<rect x="32.0" y="610.0" width="212.1" height="7" rx="2" fill="#374151" fill-opacity="0.45"/>
+<line x1="302.5" y1="580" x2="302.5" y2="622" stroke="#b45309" stroke-width="2" stroke-dasharray="5 4"/>
+<text x="259.2" y="601" font-size="16" text-anchor="end" fill="#374151" stroke="#374151" stroke-width="3" stroke-linejoin="round">p50 13.1 · <tspan font-weight="700">p95 14.5</tspan></text><text x="259.2" y="601" font-size="16" text-anchor="end" fill="white">p50 13.1 · <tspan font-weight="700">p95 14.5</tspan></text>
+<text x="312.5" y="601.0" font-size="16" text-anchor="start" font-weight="700" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">여유 2.18ms</text><text x="312.5" y="601.0" font-size="16" text-anchor="start" font-weight="700" fill="#b45309">여유 2.18ms</text>
+<text x="32" y="648" font-size="17" font-weight="700">단계 6 ISKM<tspan font-size="16" font-weight="400" fill="#4b5563">  35~200m를 ISKM으로, 고정 바운드</tspan></text>
+<rect x="32.0" y="656.0" width="238.3" height="22" rx="3" fill="#374151"/>
+<rect x="32.0" y="656.0" width="238.3" height="22" rx="3" fill="url(#rep)"/>
+<rect x="32.0" y="682.0" width="213.9" height="7" rx="2" fill="#374151" fill-opacity="0.45"/>
+<rect x="32.0" y="682.0" width="213.9" height="7" rx="2" fill="url(#rep)"/>
+<line x1="302.5" y1="652" x2="302.5" y2="694" stroke="#b45309" stroke-width="2" stroke-dasharray="5 4"/>
+<text x="262.3" y="673" font-size="16" text-anchor="end" fill="#374151" stroke="#374151" stroke-width="3" stroke-linejoin="round">p50 13.2 · <tspan font-weight="700">p95 14.7</tspan></text><text x="262.3" y="673" font-size="16" text-anchor="end" fill="white">p50 13.2 · <tspan font-weight="700">p95 14.7</tspan></text>
+<text x="312.5" y="673.0" font-size="16" text-anchor="start" font-weight="700" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">여유 1.99ms</text><text x="312.5" y="673.0" font-size="16" text-anchor="start" font-weight="700" fill="#b45309">여유 1.99ms</text>
+<text x="32" y="720" font-size="17" font-weight="700">단계 7 배경 무리<tspan font-size="16" font-weight="400" fill="#4b5563">  200m 밖을 Niagara 메시 입자로</tspan></text>
+<rect x="32.0" y="728.0" width="245.7" height="22" rx="3" fill="#374151"/>
+<rect x="32.0" y="728.0" width="245.7" height="22" rx="3" fill="url(#rep)"/>
+<rect x="32.0" y="754.0" width="219.7" height="7" rx="2" fill="#374151" fill-opacity="0.45"/>
+<rect x="32.0" y="754.0" width="219.7" height="7" rx="2" fill="url(#rep)"/>
+<line x1="302.5" y1="724" x2="302.5" y2="766" stroke="#b45309" stroke-width="2" stroke-dasharray="5 4"/>
+<text x="269.7" y="745" font-size="16" text-anchor="end" fill="#374151" stroke="#374151" stroke-width="3" stroke-linejoin="round">p50 13.6 · <tspan font-weight="700">p95 15.2</tspan></text><text x="269.7" y="745" font-size="16" text-anchor="end" fill="white">p50 13.6 · <tspan font-weight="700">p95 15.2</tspan></text>
+<text x="312.5" y="745.0" font-size="16" text-anchor="start" font-weight="700" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">여유 1.53ms</text><text x="312.5" y="745.0" font-size="16" text-anchor="start" font-weight="700" fill="#b45309">여유 1.53ms</text>
+<text x="32" y="792" font-size="17" font-weight="700">단계 8 남은 비용 줄이기<tspan font-size="16" font-weight="400" fill="#4b5563">  80m 밖 그림자 끔, 액터 메시 고정 바운드</tspan></text>
+<rect x="32.0" y="800.0" width="230.5" height="22" rx="3" fill="#374151"/>
+<rect x="32.0" y="826.0" width="206.9" height="7" rx="2" fill="#374151" fill-opacity="0.45"/>
+<line x1="302.5" y1="796" x2="302.5" y2="838" stroke="#b45309" stroke-width="2" stroke-dasharray="5 4"/>
+<text x="254.5" y="817" font-size="16" text-anchor="end" fill="#374151" stroke="#374151" stroke-width="3" stroke-linejoin="round">p50 12.8 · <tspan font-weight="700">p95 14.2</tspan></text><text x="254.5" y="817" font-size="16" text-anchor="end" fill="white">p50 12.8 · <tspan font-weight="700">p95 14.2</tspan></text>
+<text x="312.5" y="817.0" font-size="16" text-anchor="start" font-weight="700" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">여유 2.47ms</text><text x="312.5" y="817.0" font-size="16" text-anchor="start" font-weight="700" fill="#b45309">여유 2.47ms</text>
+<line x1="32" y1="872" x2="768" y2="872" stroke="#e5e7eb"/>
+<text x="32.0" y="896.0" font-size="16" text-anchor="start" fill="#4b5563">단계 1과 2는 1만에서 같은 일을 하지 못해 값만 보고하고, 최대 N으로 견준다.</text>
+<text x="32.0" y="919.0" font-size="16" text-anchor="start" fill="#4b5563">최대 N: 프레임 p95가 16.7ms를 넘기 직전의 호드 총수(잰 총수 사이를 로그 보간).</text>
+<text x="32.0" y="942.0" font-size="16" text-anchor="start" fill="#4b5563">16.7ms까지의 여유: 16.7ms에서 프레임 p95를 뺀 값.</text>
+<rect x="32" y="960" width="34" height="16" rx="3" fill="#9ca3af"/>
+<rect x="32" y="960" width="34" height="16" rx="3" fill="url(#rep)"/>
+<text x="74.0" y="973.0" font-size="16" text-anchor="start" fill="#4b5563">빗금 막대: 표현을 더하는 단계(4·6·7). 나머지는 비용을 줄이는 단계와 출발점(단계 1)</text>
+</svg>

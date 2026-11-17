@@ -91,7 +91,7 @@ uint32 ThreadTime	= CurrentTime - Lastimestamp;
 GGameThreadTime		= (ThreadTime > GameThread.Waits) ? (ThreadTime - GameThread.Waits) : ThreadTime;
 ```
 
-`Waits`는 잠들거나 이벤트를 기다린 시간이다. 그래서 프레임 시간은 병목의 시간보다 조금 길다. 최종 구성은 게임 스레드가 11.9ms, 프레임 p50이 12.8ms다.
+`Waits`는 잠들거나 이벤트를 기다린 시간이다. 그래서 프레임 시간은 병목의 시간보다 조금 길다. 최종 구성은 게임 스레드가 11.9ms, 프레임 p50이 12.8ms다. 게임 스레드가 작업자 스레드를 기다린 시간도 빠지므로, [단계 2](../02-mass-engine-path/README.md)는 프레임이 세 스레드보다 길다.
 
 ### 차이 판정: 범위보다 크고 0.5ms 이상이어야 차이다
 

@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="666" viewBox="0 0 800 666" font-family="Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Segoe UI, sans-serif" font-size="16" fill="#111827">
+<defs><pattern id="rep" patternUnits="userSpaceOnUse" width="7" height="7" patternTransform="rotate(45)"><rect width="3" height="7" fill="#ffffff" fill-opacity="0.55"/></pattern></defs>
+<rect x="0.5" y="0.5" width="799" height="665" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+<text x="32" y="44" font-size="22" font-weight="700">여덟 단계의 메모리와 드로우 콜</text>
+<text x="32" y="72" font-size="16" fill="#4b5563">호드 총수 1만, 이동 장면, 오브 시점 카메라, 세 번 잰 중앙값</text>
+<text x="32" y="94" font-size="16" fill="#4b5563">막대 둘레의 옅은 띠: 세 번 잰 범위(2px보다 좁은 범위는 그리지 않았다)</text>
+<text x="330.0" y="160.0" font-size="17" text-anchor="start" font-weight="700" fill="#2563eb">프로세스 메모리</text>
+<text x="330.0" y="181.0" font-size="16" text-anchor="start" fill="#4b5563">작업 집합, MB</text>
+<text x="476.0" y="160.0" font-size="17" text-anchor="start" font-weight="700" fill="#db2777">GPU 메모리</text>
+<text x="476.0" y="181.0" font-size="16" text-anchor="start" fill="#4b5563">VRAM 사용량, MB</text>
+<text x="622.0" y="160.0" font-size="17" text-anchor="start" font-weight="700" fill="#0d9488">드로우 콜</text>
+<text x="622.0" y="181.0" font-size="16" text-anchor="start" fill="#4b5563">프레임당 개수</text>
+<line x1="32" y1="198" x2="768" y2="198" stroke="#e5e7eb"/>
+<text x="32.0" y="222.0" font-size="16" text-anchor="start" font-weight="700" fill="#111827">단계 1 액터 기준선</text>
+<rect x="330.0" y="207.0" width="70.0" height="18" rx="3" fill="#2563eb"/>
+<text x="407.0" y="222.0" font-size="16" text-anchor="start" font-weight="700" fill="#2563eb">3,220</text>
+<rect x="476.0" y="207.0" width="70.0" height="18" rx="3" fill="#db2777"/>
+<text x="553.0" y="222.0" font-size="16" text-anchor="start" font-weight="700" fill="#db2777">9,250</text>
+<rect x="622.0" y="207.0" width="70.0" height="18" rx="3" fill="#0d9488"/>
+<text x="699.0" y="222.0" font-size="16" text-anchor="start" font-weight="700" fill="#0d9488">9,075</text>
+<line x1="32" y1="234" x2="768" y2="234" stroke="#e5e7eb"/>
+<text x="32.0" y="258.0" font-size="16" text-anchor="start" font-weight="700" fill="#111827">단계 2 Mass, 엔진 기본 경로</text>
+<rect x="330.0" y="243.0" width="37.1" height="18" rx="3" fill="#2563eb"/>
+<text x="374.1" y="258.0" font-size="16" text-anchor="start" font-weight="700" fill="#2563eb">1,710</text>
+<rect x="476.0" y="243.0" width="25.4" height="18" rx="3" fill="#db2777"/>
+<text x="508.4" y="258.0" font-size="16" text-anchor="start" font-weight="700" fill="#db2777">3,360</text>
+<rect x="622.0" y="243.0" width="22.6" height="18" rx="3" fill="#0d9488"/>
+<text x="651.6" y="258.0" font-size="16" text-anchor="start" font-weight="700" fill="#0d9488">2,928</text>
+<line x1="32" y1="270" x2="768" y2="270" stroke="#e5e7eb"/>
+<text x="32.0" y="294.0" font-size="16" text-anchor="start" font-weight="700" fill="#111827">단계 3 직접 짠 분리</text>
+<rect x="330.0" y="279.0" width="37.0" height="18" rx="3" fill="#2563eb"/>
+<text x="374.0" y="294.0" font-size="16" text-anchor="start" font-weight="700" fill="#2563eb">1,710</text>
+<rect x="476.0" y="279.0" width="24.4" height="18" rx="3" fill="#db2777"/>
+<text x="507.4" y="294.0" font-size="16" text-anchor="start" font-weight="700" fill="#db2777">3,220</text>
+<rect x="622.0" y="279.0" width="14.1" height="18" rx="3" fill="#0d9488"/>
+<text x="643.1" y="294.0" font-size="16" text-anchor="start" font-weight="700" fill="#0d9488">1,825</text>
+<line x1="32" y1="306" x2="768" y2="306" stroke="#e5e7eb"/>
+<text x="32.0" y="330.0" font-size="16" text-anchor="start" font-weight="700" fill="#111827">단계 4 애니메이션 표현</text>
+<rect x="330.0" y="315.0" width="36.5" height="18" rx="3" fill="#2563eb"/>
+<rect x="330.0" y="315.0" width="36.5" height="18" rx="3" fill="url(#rep)"/>
+<text x="373.5" y="330.0" font-size="16" text-anchor="start" font-weight="700" fill="#2563eb">1,680</text>
+<rect x="476.0" y="315.0" width="23.9" height="18" rx="3" fill="#db2777"/>
+<rect x="476.0" y="315.0" width="23.9" height="18" rx="3" fill="url(#rep)"/>
+<text x="506.9" y="330.0" font-size="16" text-anchor="start" font-weight="700" fill="#db2777">3,160</text>
+<rect x="622.0" y="315.0" width="14.1" height="18" rx="3" fill="#0d9488"/>
+<rect x="622.0" y="315.0" width="14.1" height="18" rx="3" fill="url(#rep)"/>
+<text x="643.1" y="330.0" font-size="16" text-anchor="start" font-weight="700" fill="#0d9488">1,832</text>
+<line x1="32" y1="342" x2="768" y2="342" stroke="#e5e7eb"/>
+<text x="32.0" y="366.0" font-size="16" text-anchor="start" font-weight="700" fill="#111827">단계 5 Simulation LOD + 엔티티 풀</text>
+<rect x="330.0" y="351.0" width="36.6" height="18" rx="3" fill="#2563eb"/>
+<text x="373.6" y="366.0" font-size="16" text-anchor="start" font-weight="700" fill="#2563eb">1,690</text>
+<rect x="476.0" y="351.0" width="24.0" height="18" rx="3" fill="#db2777"/>
+<text x="507.0" y="366.0" font-size="16" text-anchor="start" font-weight="700" fill="#db2777">3,170</text>
+<rect x="622.0" y="351.0" width="14.1" height="18" rx="3" fill="#0d9488"/>
+<text x="643.1" y="366.0" font-size="16" text-anchor="start" font-weight="700" fill="#0d9488">1,833</text>
+<line x1="32" y1="378" x2="768" y2="378" stroke="#e5e7eb"/>
+<text x="32.0" y="402.0" font-size="16" text-anchor="start" font-weight="700" fill="#111827">단계 6 ISKM</text>
+<rect x="330.0" y="387.0" width="35.6" height="18" rx="3" fill="#2563eb"/>
+<rect x="330.0" y="387.0" width="35.6" height="18" rx="3" fill="url(#rep)"/>
+<text x="372.6" y="402.0" font-size="16" text-anchor="start" font-weight="700" fill="#2563eb">1,640</text>
+<rect x="476.0" y="387.0" width="25.0" height="18" rx="3" fill="#db2777"/>
+<rect x="476.0" y="387.0" width="25.0" height="18" rx="3" fill="url(#rep)"/>
+<text x="508.0" y="402.0" font-size="16" text-anchor="start" font-weight="700" fill="#db2777">3,300</text>
+<rect x="622.0" y="387.0" width="14.3" height="18" rx="3" fill="#0d9488"/>
+<rect x="622.0" y="387.0" width="14.3" height="18" rx="3" fill="url(#rep)"/>
+<text x="643.3" y="402.0" font-size="16" text-anchor="start" font-weight="700" fill="#0d9488">1,856</text>
+<line x1="32" y1="414" x2="768" y2="414" stroke="#e5e7eb"/>
+<text x="32.0" y="438.0" font-size="16" text-anchor="start" font-weight="700" fill="#111827">단계 7 배경 무리</text>
+<rect x="330.0" y="423.0" width="37.9" height="18" rx="3" fill="#2563eb"/>
+<rect x="330.0" y="423.0" width="37.9" height="18" rx="3" fill="url(#rep)"/>
+<text x="374.9" y="438.0" font-size="16" text-anchor="start" font-weight="700" fill="#2563eb">1,750</text>
+<rect x="476.0" y="423.0" width="25.3" height="18" rx="3" fill="#db2777"/>
+<rect x="476.0" y="423.0" width="25.3" height="18" rx="3" fill="url(#rep)"/>
+<text x="508.3" y="438.0" font-size="16" text-anchor="start" font-weight="700" fill="#db2777">3,350</text>
+<rect x="622.0" y="423.0" width="14.4" height="18" rx="3" fill="#0d9488"/>
+<rect x="622.0" y="423.0" width="14.4" height="18" rx="3" fill="url(#rep)"/>
+<text x="643.4" y="438.0" font-size="16" text-anchor="start" font-weight="700" fill="#0d9488">1,867</text>
+<line x1="32" y1="450" x2="768" y2="450" stroke="#e5e7eb"/>
+<text x="32.0" y="474.0" font-size="16" text-anchor="start" font-weight="700" fill="#111827">단계 8 남은 비용 줄이기</text>
+<rect x="330.0" y="459.0" width="37.7" height="18" rx="3" fill="#2563eb"/>
+<text x="374.7" y="474.0" font-size="16" text-anchor="start" font-weight="700" fill="#2563eb">1,740</text>
+<rect x="476.0" y="459.0" width="25.4" height="18" rx="3" fill="#db2777"/>
+<text x="508.4" y="474.0" font-size="16" text-anchor="start" font-weight="700" fill="#db2777">3,360</text>
+<rect x="622.0" y="459.0" width="15.1" height="18" rx="3" fill="#0d9488"/>
+<text x="644.1" y="474.0" font-size="16" text-anchor="start" font-weight="700" fill="#0d9488">1,956</text>
+<line x1="32" y1="486" x2="768" y2="486" stroke="#e5e7eb"/>
+<text x="32.0" y="518.0" font-size="16" text-anchor="start" font-weight="700" fill="#111827">단계 4부터 다시 느는 단계(세 번 잰 범위보다 큰 증가)</text>
+<text x="32.0" y="540.0" font-size="16" text-anchor="start" fill="#4b5563">프로세스 메모리: 단계 7 배경 무리</text>
+<text x="32.0" y="562.0" font-size="16" text-anchor="start" fill="#4b5563">GPU 메모리: 단계 6 ISKM, 단계 7 배경 무리, 단계 8 남은 비용 줄이기</text>
+<text x="32.0" y="584.0" font-size="16" text-anchor="start" fill="#4b5563">드로우 콜: 단계 6 ISKM, 단계 8 남은 비용 줄이기</text>
+<text x="32.0" y="614.0" font-size="16" text-anchor="start" fill="#4b5563">메모리는 유효 숫자 세 자리로 적었고, 드로우 콜은 개수라 줄이지 않았다.</text>
+<rect x="32" y="631" width="34" height="16" rx="3" fill="#9ca3af"/>
+<rect x="32" y="631" width="34" height="16" rx="3" fill="url(#rep)"/>
+<text x="74.0" y="644.0" font-size="16" text-anchor="start" fill="#4b5563">빗금 막대: 표현을 더하는 단계(4·6·7). 나머지는 비용을 줄이는 단계와 출발점(단계 1)</text>
+</svg>
