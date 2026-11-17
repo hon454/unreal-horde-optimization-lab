@@ -429,7 +429,7 @@ def stage_map():
          [(0, 500, ACT, False)]),
         ("2", "Mass, 엔진 기본 경로", COST, "로직을 Mass로, 엔진의 이동·회피·표현을 그대로",
          [(0, 35, ACT, False), (35, 200, STAT, False), (200, 500, None, False)]),
-        ("3", "자체 밀어내기", COST, "엔진 회피 대신 밀어내기 프로세서, 방향 보간 병렬 사본",
+        ("3", "자체 밀어내기", COST, "Mass Avoidance 대신 밀어내기 프로세서, 방향 보간 병렬 사본",
          [(0, 35, ACT, False), (35, 200, STAT, False), (200, 500, None, False)]),
         ("4", "애니메이션 표현", ADD, "VAT 인스턴스, Animation Budget Allocator, 최소 유지 시간",
          [(0, 35, ACT, False), (35, 200, VAT, False), (200, 500, None, False)]),

@@ -15,7 +15,7 @@ window.SITE_DATA = {
    "ISKM을 VAT 인스턴스로 되돌리면 GPU 시간이 1.24ms 늘고 프레임 p95는 0.67ms 짧아진다. 병목이 게임 스레드라 ISKM의 이점은 프레임 시간이 아니라 GPU 시간으로 남는다.",
    "80m 밖 그림자를 다시 켜도 프레임 p95와 GPU 시간이 최종 구성과 구별되지 않는다(GPU 시간 +0.48ms, 0.5ms 아래).",
    "배경 무리를 끄면 GPU 시간이 0.62ms 줄지만 프레임 p95는 최종 구성과 구별되지 않는다.",
-   "밀어내기 프로세서 대신 엔진 회피를 쓰면 프레임 p95가 8.57ms 길어진다."
+   "밀어내기 프로세서 대신 Mass Avoidance를 쓰면 프레임 p95가 8.57ms 길어진다."
   ],
   "rows": [
    {
@@ -583,12 +583,12 @@ window.SITE_DATA = {
     },
     "group": "sub",
     "mixed": "",
-    "name": "밀어내기 프로세서 대신 엔진 회피를 쓴 조건",
+    "name": "밀어내기 프로세서 대신 Mass Avoidance를 쓴 조건",
     "notes": [
      "겹친 쌍 11,660(최종 구성 234)"
     ],
     "state": "slower",
-    "sub": "밀어내기 프로세서 대신 엔진 회피 Processor로 겹침을 막는다."
+    "sub": "밀어내기 프로세서 대신 Mass Avoidance Processor로 겹침을 막는다."
    }
   ]
  },
@@ -829,15 +829,15 @@ window.SITE_DATA = {
   {
    "num": 2,
    "ready": true,
-   "sentence": "액터를 Mass로 옮기면 이동 틱은 사라지지만, 한 스레드에서 도는 엔진 회피가 새 병목이 된다.",
-   "title": "Mass, 엔진 기본 경로: 597ms가 34.1ms로, 남은 병목은 엔진 회피",
+   "sentence": "액터를 Mass로 옮기면 이동 틱은 사라지지만, 한 스레드에서 도는 Mass Avoidance가 새 병목이 된다.",
+   "title": "Mass, 엔진 기본 경로: 597ms가 34.1ms로, 남은 병목은 Mass Avoidance",
    "url": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Posts/02-mass-engine-path/README.md"
   },
   {
    "num": 3,
    "ready": true,
-   "sentence": "엔진 회피를 위치를 직접 미는 밀어내기 프로세서로 바꾸자, 작업자 하나에 묶였던 프레임이 풀려 호드 1만이 처음으로 16.7ms 안에 들었다.",
-   "title": "자체 밀어내기: 엔진 회피를 밀어내기 프로세서로 바꿔 처음으로 16.7ms 안에",
+   "sentence": "Mass Avoidance를 위치를 직접 미는 밀어내기 프로세서로 바꾸자, 작업자 하나에 묶였던 프레임이 풀려 호드 1만이 처음으로 16.7ms 안에 들었다.",
+   "title": "자체 밀어내기: Mass Avoidance를 밀어내기 프로세서로 바꿔 처음으로 16.7ms 안에",
    "url": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Posts/03-separation/README.md"
   },
   {
@@ -864,7 +864,7 @@ window.SITE_DATA = {
   {
    "num": 7,
    "ready": true,
-   "sentence": "엔진 회피를 자체 밀어내기로 바꾼 단계 3에서 호드 1만이 처음 16.7ms 안에 들었고, 단계 7까지 늘어난 시간은 단계 8이 거의 되돌렸다.",
+   "sentence": "Mass Avoidance를 자체 밀어내기로 바꾼 단계 3에서 호드 1만이 처음 16.7ms 안에 들었고, 단계 7까지 늘어난 시간은 단계 8이 거의 되돌렸다.",
    "title": "요약: 단계 3에서 16.7ms 안에 들고, 표현을 셋 더한 최종 구성도 2.47ms가 남는다",
    "url": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Posts/07-summary/README.md"
   }
@@ -1078,7 +1078,7 @@ window.SITE_DATA = {
     }
    },
    "group": "earn",
-   "learned": "액터를 Mass로 옮기면 이동 틱은 사라지지만, 한 스레드에서 도는 엔진 회피가 새 병목이 된다.",
+   "learned": "액터를 Mass로 옮기면 이동 틱은 사라지지만, 한 스레드에서 도는 Mass Avoidance가 새 병목이 된다.",
    "margin_ms": null,
    "max60": {
     "above": false,
@@ -1089,7 +1089,7 @@ window.SITE_DATA = {
    "post": {
     "num": 2,
     "ready": true,
-    "title": "Mass, 엔진 기본 경로: 597ms가 34.1ms로, 남은 병목은 엔진 회피",
+    "title": "Mass, 엔진 기본 경로: 597ms가 34.1ms로, 남은 병목은 Mass Avoidance",
     "url": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Posts/02-mass-engine-path/README.md"
    }
   },
@@ -1157,7 +1157,7 @@ window.SITE_DATA = {
      "unmet": true
     }
    },
-   "changed": "엔진 회피를 자체 밀어내기 프로세서(`ULabSeparationProcessor`)로 바꾸고, 엔진의 방향 보간 Processor를 같은 계산을 병렬로 도는 사본으로 바꿨다. 표현은 단계 2와 같다.",
+   "changed": "Mass Avoidance를 자체 밀어내기 프로세서(`ULabSeparationProcessor`)로 바꾸고, 엔진의 방향 보간 Processor를 같은 계산을 병렬로 도는 사본으로 바꿨다. 표현은 단계 2와 같다.",
    "clip": "assets/step3.webp",
    "clip_mb": 7.5,
    "counts": [
@@ -1191,7 +1191,7 @@ window.SITE_DATA = {
     }
    },
    "group": "earn",
-   "learned": "엔진 회피를 위치를 직접 미는 밀어내기 프로세서로 바꾸자, 작업자 하나에 묶였던 프레임이 풀려 호드 1만이 처음으로 16.7ms 안에 들었다.",
+   "learned": "Mass Avoidance를 위치를 직접 미는 밀어내기 프로세서로 바꾸자, 작업자 하나에 묶였던 프레임이 풀려 호드 1만이 처음으로 16.7ms 안에 들었다.",
    "margin_ms": 2.552,
    "max60": null,
    "name": "자체 밀어내기",
@@ -1199,7 +1199,7 @@ window.SITE_DATA = {
    "post": {
     "num": 3,
     "ready": true,
-    "title": "자체 밀어내기: 엔진 회피를 밀어내기 프로세서로 바꿔 처음으로 16.7ms 안에",
+    "title": "자체 밀어내기: Mass Avoidance를 밀어내기 프로세서로 바꿔 처음으로 16.7ms 안에",
     "url": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Posts/03-separation/README.md"
    }
   },
@@ -1997,8 +1997,8 @@ window.SITE_DATA = {
     "head": "Mass로 옮기면 같은 호드의 프레임이 수십 배 짧아진다."
    },
    {
-    "body": "이 구성의 프레임 p50은 34.1ms이고, 엔진 회피 하나가 작업자 스레드 하나에서 프레임의 4분의 3을 쓴다. 엔진 회피를 위치를 직접 미는 밀어내기 프로세서로 바꾸자 12.4ms가 되어 처음 16.7ms(60fps) 안에 들었다.",
-    "head": "엔진 프로세서를 그대로 쓴 Mass의 병목은 한 스레드에서 도는 엔진 회피다."
+    "body": "이 구성의 프레임 p50은 34.1ms이고, Mass Avoidance 하나가 작업자 스레드 하나에서 프레임의 4분의 3을 쓴다. Mass Avoidance를 위치를 직접 미는 밀어내기 프로세서로 바꾸자 12.4ms가 되어 처음 16.7ms(60fps) 안에 들었다.",
+    "head": "엔진 프로세서를 그대로 쓴 Mass의 병목은 한 스레드에서 도는 Mass Avoidance다."
    },
    {
     "body": "35~200m의 VAT 인스턴스(애니메이션을 텍스처에 구워 정점 셰이더로 재생)와 ISKM(GPU에서 스키닝하는 인스턴스 스켈레탈 메시), 200m 밖의 Niagara 입자를 더하는 동안 프레임 p95는 1.02ms만 늘었다.",

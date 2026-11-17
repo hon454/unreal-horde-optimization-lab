@@ -36,7 +36,7 @@
 | 초당 사망 9% 적다 | −9.00% | `V0-s2` | `equivalence.csv` `death_rate_dev_pct`. 53.928 ÷ 59.261 − 1 | |
 | 기준과 0.1% 안 | −0.08%, −0.07% | `V0-s3` | `death_rate_dev_pct`, `near30_mean_dev_pct` | |
 | 겹친 쌍 219는 허용 범위 안 | 118.2\~472.9 | `V0-s3` | `equivalence.csv` `overlap_range`, `overlap_ok` = `ok` | |
-| 엔진 회피로 바꾸면 +8.57ms | +8.572 | `V0-s8av` − `V0-s8` | 22.803 − 14.231. `full-ablation-moving.csv` `delta_p95_ms`. 큰 쪽 범위 0.553 | 23.169 / 22.616 / 22.803 |
+| Mass Avoidance로 바꾸면 +8.57ms | +8.572 | `V0-s8av` − `V0-s8` | 22.803 − 14.231. `full-ablation-moving.csv` `delta_p95_ms`. 큰 쪽 범위 0.553 | 23.169 / 22.616 / 22.803 |
 | 겹친 쌍 234 → 11,660(그림) | 233.53, 11659.6 | `V0-s8`, `V0-s8av` | `overlap_mean` | 235.73 / 229.24 / 233.53; 12424.68 / 11516.86 / 11659.6 |
 | 깊게 겹친 쌍 0 → 3,529 | 0.0, 3529.05 | `V0-s8`, `V0-s8av` | `overlap_deep_mean` | 0 / 0 / 0; 3914.76 / 3402.99 / 3529.05 |
 | 밀어내기를 끄면 −0.93ms | −0.926 | `V0-a8sep` − `V0-s8` | 13.305 − 14.231. 큰 쪽 범위 0.391 | 13.434 / 13.047 / 13.305 |
@@ -65,7 +65,7 @@
 | `V0-s8av` | 54.338(−8.31%) | 2066.45(+111.24%) | 11659.6(`engine`, `ok`) | `report` |
 | `V0-a8sep` | 59.713(+0.76%) | 836.21(−14.52%) | 1643.8(`off`, `ok`) | `report` |
 
-- `engine`(엔진 회피)과 `off`(겹침 방지 끔)의 겹친 쌍은 절대 범위로 보고만 한다(각각 5천\~1만 6천, 800\~3천. [measurement.md](../../Docs/Guides/measurement.md) "실패 등급" 뒤 항목). 본문의 "허용 범위"는 밀어내기 프로세서 조건의 범위 118.2\~472.9다.
+- `engine`(Mass Avoidance)과 `off`(겹침 방지 끔)의 겹친 쌍은 절대 범위로 보고만 한다(각각 5천\~1만 6천, 800\~3천. [measurement.md](../../Docs/Guides/measurement.md) "실패 등급" 뒤 항목). 본문의 "허용 범위"는 밀어내기 프로세서 조건의 범위 118.2\~472.9다.
 - 단계 3의 `report`는 왕복 전환만의 까닭이다. 단계 3은 최소 유지 시간이 없어 왕복 전환을 검사하지 않고 값만 보고한다. 본문의 "네 항목"(초당 사망, 30m 안, 겹친 쌍, 깊게 겹친 쌍)은 모두 기준 안이다. 캡슐 빗나감은 다섯 조건 모두 0이다(`capsule_miss`).
 - 깊게 겹친 쌍은 동등성 검사의 항목이 아니다. 본문과 그림은 겹친 쌍이 프레임 시간의 영향을 받는 것을 보완하려고 함께 보였다.
 
@@ -75,11 +75,11 @@
 
 | 본문 값 | 정밀한 값 | 트레이스 | 식 | 내보내기 |
 | --- | --- | --- | --- | --- |
-| 엔진 회피가 작업자 하나에서 24.7ms | 24.727 | `Full4trace-V0-s2` | `MassMovingAvoidanceProcessor` 1,523번의 길이 평균. 1,523번은 32개 스레드에 나뉘어 돌았고 두 번이 시간상 겹친 적이 없다 | `-Command TimingEvents -Extra "-threads=* -timers=*MovingAvoidance* -startTime=70 -endTime=120 -columns=ThreadId,ThreadName,TimerName,StartTime,EndTime,Depth"` |
+| Mass Avoidance가 작업자 하나에서 24.7ms | 24.727 | `Full4trace-V0-s2` | `MassMovingAvoidanceProcessor` 1,523번의 길이 평균. 1,523번은 32개 스레드에 나뉘어 돌았고 두 번이 시간상 겹친 적이 없다 | `-Command TimingEvents -Extra "-threads=* -timers=*MovingAvoidance* -startTime=70 -endTime=120 -columns=ThreadId,ThreadName,TimerName,StartTime,EndTime,Depth"` |
 | 한 프레임 32.8ms | 32.824 | 같은 트레이스 | `Game Frames` 1,524개의 길이 평균. `FEngineLoop::Tick` 49.999초 ÷ 1,524 = 32.808 | 같은 내보내기, 아래 `GameThread` 통계 |
 | 프레임의 4분의 3 | 0.753 | 계산 | 24.727 ÷ 32.824 | |
 | 게임 스레드가 기다린 시간 15.1ms | 15.066 | 같은 트레이스 | `GameThread`의 `WaitForTasks` Incl 22.960초 ÷ 1,524 | `-Command TimerStatistics -Extra "-threads=GameThread -startTime=70 -endTime=120 -columns=* -sortBy=TotalInclusiveTime"` |
-| 직렬 엔진 회피 23.5ms | 23.486 | `Full4traceser-V0-s2` | `MassMovingAvoidanceProcessor` Incl 28.793초 ÷ 1,226번(Excl과 같다). 같은 구간 프레임 40.749ms(`FEngineLoop::Tick` 49.999초 ÷ 1,227) | 같은 `TimerStatistics`, `GameThread` |
+| 직렬 Mass Avoidance 23.5ms | 23.486 | `Full4traceser-V0-s2` | `MassMovingAvoidanceProcessor` Incl 28.793초 ÷ 1,226번(Excl과 같다). 같은 구간 프레임 40.749ms(`FEngineLoop::Tick` 49.999초 ÷ 1,227) | 같은 `TimerStatistics`, `GameThread` |
 | 엔진 방향 보간 0.82ms | 0.821 | `Full4traceser-V0-s2` | `MassSmoothOrientationProcessor` Incl 1.007초 ÷ 1,226 | 같다 |
 | 밀어내기 프로세서 0.82ms | 0.824 | `Full4traceser-V0-s3` | `LabSeparationProcessor` Incl 3.078초 ÷ 3,737. Excl(한 스레드 몫) 0.421ms. 같은 구간 프레임 13.372ms(49.998초 ÷ 3,739) | 같은 `TimerStatistics`, `GameThread` |
 | 방향 보간 병렬 사본 0.22ms | 0.223 | `Full4traceser-V0-s3` | `LabSmoothOrientationProcessor` Incl 0.833초 ÷ 3,738 | 같다 |
@@ -87,7 +87,7 @@
 
 - 직렬 트레이스는 Mass 프로세서를 게임 스레드에서 차례로 돌린다. 밀어내기 프로세서 안의 `ParallelFor`는 직렬에서도 작업자로 나뉜다([Worklog/V2.md](../../Docs/Worklog/V2.md) "W4"의 "비용의 출처").
 - 병렬 트레이스 `Full4trace-V0-s3`에서 밀어내기 프로세서의 벽시계 길이는 평균 1.294ms, 중앙값 1.137ms다(3,975번). 한 프레임은 평균 12.572ms다. 본문에는 쓰지 않았다.
-- 예상의 근거: 병렬 트레이스에서 게임 스레드의 기다림(15.066ms)이 사라지면 프레임은 가장 느린 스레드인 게임 스레드에 맞춰진다고 보았다. 게임 스레드 시간은 측정값 18.027ms(`V0-s2`)를 썼다. 기다림이 모두 엔진 회피 때문인지는 가르지 않았다.
+- 예상의 근거: 병렬 트레이스에서 게임 스레드의 기다림(15.066ms)이 사라지면 프레임은 가장 느린 스레드인 게임 스레드에 맞춰진다고 보았다. 게임 스레드 시간은 측정값 18.027ms(`V0-s2`)를 썼다. 기다림이 모두 Mass Avoidance 때문인지는 가르지 않았다.
 
 ### 표현과 밀어내기의 순서(한계 1)
 
@@ -126,7 +126,7 @@ SVG 다섯은 [make-figures.py](make-figures.py)가 만든다(저장소 루트�
 
 ### `step2-trace.svg`
 
-위 "트레이스 값"의 행이다. 병렬: 한 프레임 32.824, 엔진 회피 24.727, 게임 스레드 기다림 15.066. 직렬: 단계 2 엔진 회피 23.486, 단계 3 밀어내기 프로세서 0.824, 단계 2 엔진 방향 보간 0.821, 단계 3 방향 보간 병렬 사본 0.223. 아래 글의 "1,523번"은 병렬 트레이스의 엔진 회피 실행 수다.
+위 "트레이스 값"의 행이다. 병렬: 한 프레임 32.824, Mass Avoidance 24.727, 게임 스레드 기다림 15.066. 직렬: 단계 2 Mass Avoidance 23.486, 단계 3 밀어내기 프로세서 0.824, 단계 2 엔진 방향 보간 0.821, 단계 3 방향 보간 병렬 사본 0.223. 아래 글의 "1,523번"은 병렬 트레이스의 Mass Avoidance 실행 수다.
 
 ### `principle.svg`
 
@@ -143,7 +143,7 @@ SVG 다섯은 [make-figures.py](make-figures.py)가 만든다(저장소 루트�
 | 반복마다 남은 겹침의 절반을 푼다, 반복 2번, 같은 사본을 읽는다 | `Relax` 0.5, `Iterations` 2 | `LabSeparation.h:12`, `:22`, `:23`, `:198` `Delta *= Params.Relax`, `:75-89`. 한 반복의 이동은 자기 반지름의 절반으로도 자른다(`:24` `MaxStepFrac`) |
 | 128개씩 ParallelFor | `BatchSize` | `LabSeparation.h:78`, `:93` |
 
-그림의 점 배치는 개념이다. 엔진 회피 쪽 점 26개 가운데 24개를 후보, 가까운 6개를 힘을 내는 이웃으로 칠했다.
+그림의 점 배치는 개념이다. Mass Avoidance 쪽 점 26개 가운데 24개를 후보, 가까운 6개를 힘을 내는 이웃으로 칠했다.
 
 ### `same-work.svg`
 
@@ -163,7 +163,7 @@ SVG 다섯은 [make-figures.py](make-figures.py)가 만든다(저장소 루트�
 | 행 | 조건 | 프레임 p95(범위) | 차이 | 겹친 쌍 |
 | --- | --- | --- | --- | --- |
 | 최종 구성 | `V0-s8` | 14.231(14.035\~14.426) | 기준 | 233.53 |
-| 엔진 회피로 바꾼 조건 | `V0-s8av` | 22.803(22.616\~23.169) | +8.572 | 11659.6 |
+| Mass Avoidance로 바꾼 조건 | `V0-s8av` | 22.803(22.616\~23.169) | +8.572 | 11659.6 |
 | 밀어내기를 끈 조건 | `V0-a8sep` | 13.305(13.047\~13.434) | −0.926 | 1643.83 |
 
 아래 글의 "7배"는 1643.83 ÷ 233.53 = 7.04다.
@@ -252,10 +252,10 @@ SVG 다섯은 [make-figures.py](make-figures.py)가 만든다(저장소 루트�
 ## 확인하지 않은 것
 
 - 단계 2의 프레임 p50(34.058ms)이 게임 스레드 시간(18.027ms)보다 긴 까닭. 트레이스의 `WaitForTasks`(15.066ms)와 크기가 비슷하지만, 게임 스레드 시간에서 이 기다림이 빠지는 경로는 엔진 소스로 따라가지 않았다. 글 02의 몫으로 남겼다.
-- 게임 스레드의 기다림이 모두 엔진 회피 때문인지. 병렬 트레이스에서 기다림의 끝과 회피의 끝을 프레임마다 맞춰 보지 않았다.
-- 엔진 회피가 개체를 오브 둘레에 뭉치게 하는 기제. 30m 안 개체 수와 겹친 쌍만 쟀다. W3의 설명(뒤에서 미는 조향이 회피 힘보다 세다)은 V2.md에서도 추정이다. 본문은 기제를 쓰지 않았다.
+- 게임 스레드의 기다림이 모두 Mass Avoidance 때문인지. 병렬 트레이스에서 기다림의 끝과 회피의 끝을 프레임마다 맞춰 보지 않았다.
+- Mass Avoidance가 개체를 오브 둘레에 뭉치게 하는 기제. 30m 안 개체 수와 겹친 쌍만 쟀다. W3의 설명(뒤에서 미는 조향이 회피 힘보다 세다)은 V2.md에서도 추정이다. 본문은 기제를 쓰지 않았다.
 - 단계 2→3에서 장면 변화의 몫과 회피 구현의 몫을 나누는 일. 두 몫을 가르는 조건(단계 2의 장면을 둔 채 회피 비용만 빼기)은 잴 수 없었다.
 - 순서 미선언이 화면에 보이는지. 밀어내기가 옮기는 거리의 평균은 1cm 아래지만 최대값(`lab_sep` 로그의 5초 최대 40\~75cm, V2.md "분리 프로세서 기다림")에 걸린 개체가 화면 안에 있는지는 보지 않았다.
-- 병렬 트레이스에서 엔진 회피가 작업자 하나에서 도는 Insights 화면은 찍지 않았다(위 "Insights 화면").
+- 병렬 트레이스에서 Mass Avoidance가 작업자 하나에서 도는 Insights 화면은 찍지 않았다(위 "Insights 화면").
 - 그림은 Edge 헤드리스로 PNG를 만들어 겹침과 잘림을 눈으로 봤다. 어두운 바탕에서는 보지 않았다(SVG가 자기 흰 배경을 가진다).
 - 링크한 글 02, 04, 07의 폴더(`02-mass-engine-path`, `04-quality-by-distance`, `07-summary`)는 모두 있다.

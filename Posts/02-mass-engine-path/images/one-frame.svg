@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="800" height="522" viewBox="0 0 800 522" font-family="Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Segoe UI, sans-serif" font-size="16" fill="#111827">
 <defs><pattern id="hatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="8" height="8" fill="#dbeafe"/><line x1="0" y1="0" x2="0" y2="8" stroke="#2563eb" stroke-width="3"/></pattern><pattern id="hatchgray" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="8" height="8" fill="#f3f4f6"/><line x1="0" y1="0" x2="0" y2="8" stroke="#9ca3af" stroke-width="3"/></pattern><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#374151"/></marker></defs>
 <rect x="0.5" y="0.5" width="799" height="521" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
-<text x="32" y="46" font-size="22" font-weight="700">트레이스의 한 프레임: 게임 스레드가 엔진 회피를 기다린다</text>
+<text x="32" y="46" font-size="22" font-weight="700">트레이스의 한 프레임: 게임 스레드가 Mass Avoidance를 기다린다</text>
 <text x="32" y="74" font-size="16" fill="#4b5563">단계 2, 호드 총수 1만, 이동 장면. 트레이스 실행의 한 프레임(측정값과 견주지 않는다)</text>
 <line x1="170.0" y1="146" x2="170.0" y2="300" stroke="#e5e7eb"/>
 <text x="170.0" y="322" text-anchor="middle" font-size="16" fill="#4b5563">0</text>

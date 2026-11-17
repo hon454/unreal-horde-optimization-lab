@@ -217,7 +217,7 @@ LABELS = {
     "a8sep": "겹침 방지 끔", "a8iskm": "ISKM 끔 †", "a8bnd": "ISKM 고정 바운드 끔", "a8bud": "Animation Budget Allocator 끔",
     "a8fix": "전환 대책 끔", "a8hold": "최소 유지 시간 끔", "a8pool": "엔티티 풀 끔", "a8sim": "Simulation LOD 끔",
     "a8fx": "배경 무리 끔 †", "a8shd": "80m 밖 그림자 다시 켬", "a8res": "ISKM 트랙 예약 끔", "a8fxf": "입자의 오브 따라가기 끔",
-    "a8stp": "ISKM 상자 따라가기 끔", "s8av": "엔진 회피로 바꿈",
+    "a8stp": "ISKM 상자 따라가기 끔", "s8av": "Mass Avoidance로 바꿈",
 }
 
 

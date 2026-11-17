@@ -63,7 +63,7 @@ ABL_TEXT = {
     "a8fx": "배경 무리를 끈 조건", "a8sep": "겹침 방지(밀어내기 프로세서)를 끈 조건", "a8cap": "액터 캡슐을 끈 조건",
     "a8shd": "80m 밖 그림자를 다시 켠 조건", "a8fsb": "액터 메시 고정 바운드를 끈 조건", "a8res": "ISKM 트랙 예약을 끈 조건",
     "a8fxf": "입자의 오브 따라가기를 끈 조건", "a8stp": "ISKM 바운드 상자 따라가기를 끈 조건",
-    "s8av": "밀어내기 프로세서 대신 엔진 회피를 쓴 조건",
+    "s8av": "밀어내기 프로세서 대신 Mass Avoidance를 쓴 조건",
 }
 # Rows that remove more than one thing (measurement.md "변수가 둘 이상 섞인 행"). Same keys as plot.py's FULL_ABL_MIXED.
 ABL_MIXED = {

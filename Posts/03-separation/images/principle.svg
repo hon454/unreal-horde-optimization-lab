@@ -1,10 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="800" height="608" viewBox="0 0 800 608" font-family="Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Segoe UI, sans-serif" font-size="16" fill="#111827">
 <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#374151"/></marker><marker id="arrowr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#dc2626"/></marker><marker id="arrowb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#2563eb"/></marker></defs>
 <rect x="0.5" y="0.5" width="799" height="607" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
-<text x="32" y="46" font-size="22" font-weight="700">엔진 회피는 힘을 더하고, 밀어내기 프로세서는 위치를 민다</text>
+<text x="32" y="46" font-size="22" font-weight="700">Mass Avoidance는 힘을 더하고, 밀어내기 프로세서는 위치를 민다</text>
 <text x="32" y="74" font-size="16" fill="#4b5563">개념도. 칸의 값은 엔진과 프로젝트 소스의 설정값이다</text>
 <rect x="32" y="116" width="352" height="380" rx="10" fill="#f8fafc" stroke="#e5e7eb"/>
-<text x="50" y="148" font-size="18" font-weight="700" fill="#374151">엔진 회피(단계 2)</text>
+<text x="50" y="148" font-size="18" font-weight="700" fill="#374151">Mass Avoidance(단계 2)</text>
 <text x="50" y="396" font-size="16">이웃 후보: 2.5m 칸에서 가까운 칸부터 24개까지</text>
 <text x="50" y="426" font-size="16">힘을 내는 이웃: 가장 가까운 6개</text>
 <text x="50" y="456" font-size="16">결과: 조향 힘에 더하고 가속 상한으로 자른다</text>
@@ -63,6 +63,6 @@
 <line x1="592.0" y1="253.0" x2="597.3" y2="213.4" stroke="#374151" stroke-width="2" marker-end="url(#arrow)"/>
 <text x="434" y="356" font-size="16" fill="#4b5563">겹친 이웃마다 남은 겹침의 절반씩 떼어 놓는다</text>
 <line x1="32" y1="526" x2="768" y2="526" stroke="#e5e7eb"/>
-<text x="32" y="548" font-size="16" fill="#4b5563">엔진 회피는 이웃 수에 상한이 있고, 힘으로 속도만 바꾼다.</text>
+<text x="32" y="548" font-size="16" fill="#4b5563">Mass Avoidance는 이웃 수에 상한이 있고, 힘으로 속도만 바꾼다.</text>
 <text x="32" y="574" font-size="16" fill="#4b5563">밀어내기 프로세서는 그 프레임의 이동 뒤에 겹침을 바로 푼다.</text>
 </svg>

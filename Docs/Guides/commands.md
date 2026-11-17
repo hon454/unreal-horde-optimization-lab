@@ -11,7 +11,7 @@ STATUS.md "명령"에는 매번 쓰는 것만 둔다. 여기에는 스크립트 
 | `build.ps1` | `HordeOptLabEditor Win64 Development` 빌드 | `UnrealEditor` 또는 `HordeOptLab` 프로세스가 떠 있으면 |
 | `run-dev.ps1 -N -Preset -Seed [-Stage 1~8] [-Tag x] [-Extra "..."] [-Small]` | Development 에디터 빌드를 `-game`으로 실행. 개발·동작 확인·오버레이 스크린샷용. 수치는 쓰지 않는다. `-Stage`는 사다리 단계(기본 8), `-Tag`는 로그 이름 `LabDev-s<단계>-<Tag>-N<N>-<P>.log`에 붙는다 | |
 | `run-dev-stages.ps1 [-Stages 1,2,…] [-Ablations]` | 사다리 단계마다 `run-dev.ps1 -Small`을 돌리고 종료 코드를 모은다. `-Ablations`는 아래 기법별 기여 표의 스위치를 단계 8에 하나씩 더한다 | |
-| `run-spike.ps1 -Batch <이름> -RadiusM 57.3 -HeightM 6 -Speeds <m/s,…> -Configs <구성,…> [-Runs] [-ConfigNs s1=1000] [-ConfigRuns s8=3] [-DryRun]` | 작은 Test 패키지 묶음 러너(v2). 구성은 `s1`\~`s8`(단계), `a8*`(기법별 기여), `s8av`(엔진 회피 더하기), `s<n>ser`(직렬 트레이스). 라벨 `<묶음>-V<속도 번호>-<구성>-N<N>-P1-r<i>`. 메타데이터를 구성의 기대값과 대조한다(`spike-check.py`) | 다른 실행이나 Chrome이 떠 있으면. `progress.log`가 이미 있으면 |
+| `run-spike.ps1 -Batch <이름> -RadiusM 57.3 -HeightM 6 -Speeds <m/s,…> -Configs <구성,…> [-Runs] [-ConfigNs s1=1000] [-ConfigRuns s8=3] [-DryRun]` | 작은 Test 패키지 묶음 러너(v2). 구성은 `s1`\~`s8`(단계), `a8*`(기법별 기여), `s8av`(Mass Avoidance 더하기), `s<n>ser`(직렬 트레이스). 라벨 `<묶음>-V<속도 번호>-<구성>-N<N>-P1-r<i>`. 메타데이터를 구성의 기대값과 대조한다(`spike-check.py`) | 다른 실행이나 Chrome이 떠 있으면. `progress.log`가 이미 있으면 |
 | `package.ps1 [-Config Test]` | `RunUAT BuildCookRun` → `Packaged/<Config>/`. 끝나면 소요 시간을 출력 | 다른 실행이 떠 있으면 |
 | `run-bench.ps1 -Milestone <M> -N <수> -Preset <P1\|P2> [-Variant] [-Seed] [-Runs 3] [-Tag x] [-Trace]` | Test 패키지 실행 파일을 `-LabBench` 인자로 띄우고 종료를 기다린다. 라벨은 `<Milestone>-<Variant>-N<수>-<Preset><Tag>`로 만든다. 실행마다 `Saved/Profiling/CSV/<라벨>-rN.csv`를 확인하고, 없으면 실패 | 같은 라벨의 CSV가 있으면. 다른 실행이 떠 있으면 |
 | `summarize.py --milestone M<N>` | `Saved/Profiling/CSV/`의 라벨을 읽어 `Measurements/M<N>/runs.csv`에 행을 더하고 `summary.csv`를 다시 쓴다 | |
@@ -32,7 +32,7 @@ STATUS.md "명령"에는 매번 쓰는 것만 둔다. 여기에는 스크립트 
 | --- | --- | --- |
 | 1 | 액터 기준선: 모든 개체가 `ALabMinion`(캡슐, `CharacterMovement`, 캡슐끼리 막기) | `M0 full` |
 | 2 | Mass, 엔진 기본 경로: 엔진 이동·회피·표현, 가까운 개체는 하이드레이션 액터(캡슐 Trace, 화면 안 35m, 상한 1,000. 단계 8까지 같다, ADR-0021), 나머지는 엔진 `UMassUpdateISMProcessor`의 정지 메시 인스턴스, 200m 밖 그리지 않음 | 없음(새 조합) |
-| 3 | 자체 밀어내기: 엔진 회피 대신 `ULabSeparationProcessor`, 엔진 방향 보간 대신 같은 결과의 병렬 사본 `ULabSmoothOrientationProcessor` | `M3` + 정지 메시(새 조합) |
+| 3 | 자체 밀어내기: Mass Avoidance 대신 `ULabSeparationProcessor`, 엔진 방향 보간 대신 같은 결과의 병렬 사본 `ULabSmoothOrientationProcessor` | `M3` + 정지 메시(새 조합) |
 | 4 | 애니메이션 표현: VAT 인스턴스, Animation Budget Allocator(화면 크기), 전환 대책 다섯, 최소 유지 시간 2초 | `M3 mass` + 예산 |
 | 5 | Simulation LOD(80/200m, 200m 밖 자체 이동) + 엔티티 풀 | `M5 m4offpool` |
 | 6 | ISKM(카메라를 따라가는 고정 바운드, 트랙 예약) | `M5 m5bounds` |
@@ -78,7 +78,7 @@ STATUS.md "명령"에는 매번 쓰는 것만 둔다. 여기에는 스크립트 
 
 ### 기법별 기여(v2 W10)
 
-최종 구성(단계 8)에서 기법 하나를 끄고 같은 조건으로 잰다. 조건 표의 이름은 `ablation`이다. 단계 8에 스위치 하나를 더한다. 총괄 묶음의 조건 표는 위 열일곱 행 모두(이동 조건. 정지 조건은 `a8fxf`와 `a8stp`를 뺀 열다섯 행)와 하위 실험 `s8av`(밀어내기를 엔진 회피로 바꾼 것)다. 하위 실험 `s8iso`는 `-Only extra`로만 돈다. 근거는 [Worklog/V2.md](../Worklog/V2.md) "W12"에 있다.
+최종 구성(단계 8)에서 기법 하나를 끄고 같은 조건으로 잰다. 조건 표의 이름은 `ablation`이다. 단계 8에 스위치 하나를 더한다. 총괄 묶음의 조건 표는 위 열일곱 행 모두(이동 조건. 정지 조건은 `a8fxf`와 `a8stp`를 뺀 열다섯 행)와 하위 실험 `s8av`(밀어내기를 Mass Avoidance로 바꾼 것)다. 하위 실험 `s8iso`는 `-Only extra`로만 돈다. 근거는 [Worklog/V2.md](../Worklog/V2.md) "W12"에 있다.
 
 | 구성(`run-spike.ps1`) | 끄는 것 | 인자 | 바뀌는 메타데이터 |
 | --- | --- | --- | --- |
@@ -100,7 +100,7 @@ STATUS.md "명령"에는 매번 쓰는 것만 둔다. 여기에는 스크립트 
 | `a8shd` | 80m 밖 그림자 끔 → 켬 | `-LabFarShadow=1` | `LabFarShadow` 1 |
 | `a8fsb` | 액터 메시 고정 바운드 → 피직스 에셋 바운드(v2 W11) | `-LabFixedSkelBounds=0` | `LabFixedSkelBounds` 0 |
 
-- 하위 실험 `s8iso`(단계 8 + `-LabQueryIsolate=1`, v2 W11)와 `s8av`(엔진 회피 더하기)가 `run-spike.ps1`과 조건 표에 있다. `run-dev-stages.ps1 -Ablations`는 기법별 기여 열일곱 개와 두 하위 실험, 정지 조건을 돈다. `run-spike.ps1`의 `s8sooff`(단계 8 + `-LabSmoothOrient=0`)는 방향 보간 사본을 끈 확인용 구성이고 조건 표에는 없다.
+- 하위 실험 `s8iso`(단계 8 + `-LabQueryIsolate=1`, v2 W11)와 `s8av`(Mass Avoidance 더하기)가 `run-spike.ps1`과 조건 표에 있다. `run-dev-stages.ps1 -Ablations`는 기법별 기여 열일곱 개와 두 하위 실험, 정지 조건을 돈다. `run-spike.ps1`의 `s8sooff`(단계 8 + `-LabSmoothOrient=0`)는 방향 보간 사본을 끈 확인용 구성이고 조건 표에는 없다.
 - v2 W11부터 `run-spike.ps1`은 `s8` 뒤에 조각을 이어 붙인 구성 이름을 받는다: `fsb`·`fsb0`(고정 바운드 켬·끔), `iso`·`iso0`(칸 나누기), `c<개수>`(`-LabActorCap`), `h<미터>`(`-LabHydrateM`), `shd0`·`shd1`(`-LabFarShadow`). 예: `s8h45`, `s8c750`. 조각마다 기대 메타데이터 하나를 대조한다.
 
 ```bash

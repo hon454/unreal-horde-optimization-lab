@@ -131,7 +131,7 @@ def summary():
     o = []
     title(o, "단계 2와 단계 3의 프레임 시간과 스레드 시간",
           "호드 총수 1만, 이동 장면, 오브 시점 카메라. 세 번 잰 중앙값(ms)")
-    legend(o, 32, 112, [(S2, "단계 2 엔진 회피"), (S3, "단계 3 자체 밀어내기")])
+    legend(o, 32, 112, [(S2, "단계 2 Mass Avoidance"), (S3, "단계 3 자체 밀어내기")])
     items = [("프레임 p95", "frame_p95_ms", True), ("프레임 p50", "frame_p50_ms", True),
              ("게임 스레드", "game_p50_ms", False), ("렌더 스레드", "render_p50_ms", False), ("GPU", "gpu_p50_ms", False)]
     X0, X1, XMAX = 170, 700, 40.0
@@ -174,7 +174,7 @@ def summary():
 # ---------- 2. step 2 trace: one worker runs the engine avoidance ----------
 def step2_trace():
     o = []
-    title(o, "단계 2의 엔진 회피는 작업자 스레드 하나에서 돈다",
+    title(o, "단계 2의 Mass Avoidance는 작업자 스레드 하나에서 돈다",
           "호드 총수 1만, 이동 장면, 오브 시점 카메라. 트레이스 50초의 프레임 평균(ms)",
           "트레이스 실행의 값이라 측정값과 견주지 않는다")
     X0, X1, XMAX = 300, 700, 42.0
@@ -198,7 +198,7 @@ def step2_trace():
     o.append(f'<text x="32" y="{y}" font-size="18" font-weight="700">병렬 실행(측정과 같은 설정), 단계 2</text>')
     top = y + 22
     rows_a = [("한 프레임", "", TRACE["s2par_frame"], DARK),
-              ("엔진 회피 프로세서", "프레임마다 작업자 하나에서만", TRACE["s2par_avoid"], RED),
+              ("Mass Avoidance 프로세서", "프레임마다 작업자 하나에서만", TRACE["s2par_avoid"], RED),
               ("게임 스레드가 기다린 시간", "작업이 끝나기를 기다린다", TRACE["s2par_gt_wait"], MID)]
     pos = [top, top + 52, top + 112]
     axis(top, pos[-1] + 52)
@@ -208,7 +208,7 @@ def step2_trace():
     y = pos[-1] + 120
     o.append(f'<text x="32" y="{y}" font-size="18" font-weight="700">직렬 실행(프로세서를 차례로 돌린다), 프로세서 하나</text>')
     top = y + 22
-    rows_b = [("단계 2 엔진 회피", TRACE["s2ser_avoid"], S2),
+    rows_b = [("단계 2 Mass Avoidance", TRACE["s2ser_avoid"], S2),
               ("단계 3 밀어내기 프로세서", TRACE["s3ser_sep"], S3),
               ("단계 2 엔진 방향 보간", TRACE["s2ser_orient"], S2),
               ("단계 3 방향 보간 병렬 사본", TRACE["s3ser_orient"], S3)]
@@ -217,7 +217,7 @@ def step2_trace():
     for (label, val, colour), yy in zip(rows_b, pos):
         bar(yy, label, "", val, colour)
     yf = pos[-1] + 106
-    yend = footer(o, yf, [f"병렬 실행의 엔진 회피 {TRACE_AVOID_RUNS:,}번은 저마다 한 스레드에서 돌았고 서로 겹치지 않았다.",
+    yend = footer(o, yf, [f"병렬 실행의 Mass Avoidance {TRACE_AVOID_RUNS:,}번은 저마다 한 스레드에서 돌았고 서로 겹치지 않았다.",
                           "직렬 실행은 프로세서별 시간을 가르려고 Mass 프로세서를 한 스레드에 둔다."])
     write("step2-trace.svg", svg(yend + 8, o, ARROW))
 
@@ -225,11 +225,11 @@ def step2_trace():
 # ---------- 3. principle: engine avoidance and the hand-written separation (concept) ----------
 def principle():
     o = []
-    title(o, "엔진 회피는 힘을 더하고, 밀어내기 프로세서는 위치를 민다",
+    title(o, "Mass Avoidance는 힘을 더하고, 밀어내기 프로세서는 위치를 민다",
           "개념도. 칸의 값은 엔진과 프로젝트 소스의 설정값이다")
     CW, GAPX, TOP = 352, 32, 116
     cols = [
-        (32, "엔진 회피(단계 2)", S2, DARK,
+        (32, "Mass Avoidance(단계 2)", S2, DARK,
          ["이웃 후보: 2.5m 칸에서 가까운 칸부터 24개까지",
           "힘을 내는 이웃: 가장 가까운 6개",
           "결과: 조향 힘에 더하고 가속 상한으로 자른다",
@@ -283,7 +283,7 @@ def principle():
         o.append(f'<line x1="{mx:.1f}" y1="{my:.1f}" x2="{mx - dx / d * 40:.1f}" y2="{my - dy / d * 40:.1f}" stroke="{DARK}" stroke-width="2" marker-end="url(#arrow)"/>')
     o.append(f'<text x="{32 + CW + GAPX + 18}" y="{TOP + PH + 30}" font-size="16" fill="{SUB}">겹친 이웃마다 남은 겹침의 절반씩 떼어 놓는다</text>')
     yb = TOP + PH + 40 + 30 * 4 + 10
-    yend = footer(o, yb + 52, ["엔진 회피는 이웃 수에 상한이 있고, 힘으로 속도만 바꾼다.",
+    yend = footer(o, yb + 52, ["Mass Avoidance는 이웃 수에 상한이 있고, 힘으로 속도만 바꾼다.",
                                "밀어내기 프로세서는 그 프레임의 이동 뒤에 겹침을 바로 푼다."])
     write("principle.svg", svg(yend + 8, o, ARROW))
 
@@ -293,7 +293,7 @@ def same_work():
     o = []
     title(o, "같은 일을 하는지: 동등성 검사의 네 항목",
           "호드 총수 1만, 이동 장면, 오브 시점 카메라. 세 번 잰 중앙값")
-    legend(o, 32, 112, [(S2, "단계 2 엔진 회피"), (S3, "단계 3 자체 밀어내기")])
+    legend(o, 32, 112, [(S2, "단계 2 Mass Avoidance"), (S3, "단계 3 자체 밀어내기")])
     ref_death = float(e("V0-s3", "death_rate_ref"))
     ref_near = float(e("V0-s3", "near30_mean_ref"))
     lo, hi = (float(x) for x in e("V0-s3", "overlap_range").split(".."))
@@ -340,9 +340,9 @@ def final_swaps():
     title(o, "최종 구성에서 겹침 방지를 바꾸거나 끄면",
           "호드 총수 1만, 이동 장면, 오브 시점 카메라. 세 번 잰 중앙값")
     items = [("V0-s8", "최종 구성", "밀어내기 프로세서"),
-             ("V0-s8av", "엔진 회피로 바꾼 조건", "하위 실험"),
+             ("V0-s8av", "Mass Avoidance로 바꾼 조건", "하위 실험"),
              ("V0-a8sep", "밀어내기를 끈 조건", "겹침 방지가 없다")]
-    X0, X1, XMAX = 260, 560, 25.0
+    X0, X1, XMAX = 285, 575, 25.0
     X = lambda ms: X0 + ms / XMAX * (X1 - X0)
     CX = 640
     top = 150
@@ -380,7 +380,7 @@ def final_swaps():
         o.append(f'<text x="{CX + 60}" y="{y + 21}" text-anchor="middle" font-size="17" font-weight="700" fill="{colour}">{count(v(var, "overlap_mean"))}</text>')
         y += RH
     ratio = v("V0-a8sep", "overlap_mean") / v("V0-s8", "overlap_mean")
-    yend = footer(o, bottom + 96, ["엔진 회피로 바꾸면 프레임이 길어지고 겹친 쌍이 크게 는다.",
+    yend = footer(o, bottom + 96, ["Mass Avoidance로 바꾸면 프레임이 길어지고 겹친 쌍이 크게 는다.",
                                     f"밀어내기를 끄면 프레임은 짧지만 겹친 쌍이 {ratio:.0f}배로 늘어 같은 일이 아니다.",
                                     "가는 선은 세 실행의 최솟값–최댓값이다."])
     write("final-swaps.svg", svg(yend + 8, o))

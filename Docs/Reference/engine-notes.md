@@ -519,7 +519,7 @@
 - 쿼리는 실행할 때 자기 요구 조건으로 접근 범위를 다시 잡는다(`MassEntity/Private/MassEntityQuery.cpp:50-53`). 그래서 프로세서 단위로 선언한 서브시스템은 `ForEachEntityChunk` 밖에서 얻는다.
 - 얻는 함수는 `FMassExecutionContext::GetSubsystem<T>()`(읽기)와 `GetMutableSubsystem<T>()`(쓰기)다(`MassEntity/Public/MassExecutionContext.h:732-746`).
 
-## 36. 엔진 회피 프로세서가 도는 조건과 구조(2026-11-15, v2 W3)
+## 36. Mass Avoidance 프로세서가 도는 조건과 구조(2026-11-15, v2 W3)
 
 경로는 `Engine/Plugins/AI/MassAI/Source/MassNavigation` 기준이다(MN).
 

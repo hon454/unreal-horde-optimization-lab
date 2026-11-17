@@ -551,7 +551,7 @@ Index 1 Param 1..4 = TimeOffset, Playrate, StartFrame, EndFrame
 
 **절차**
 1. 엔진 프로세서를 쓰기 전에 소스에서 `ForEachEntityChunk`인지 `ParallelForEachEntityChunk`인지 본다.
-2. 엔진 회피 대신 위치를 직접 미는 밀어내기 프로세서를 짠다.
+2. Mass Avoidance 대신 위치를 직접 미는 밀어내기 프로세서를 짠다.
 3. 밀어내기 프로세서의 이웃 계산을 128개씩 묶어 `ParallelFor`로 나눈다.
 4. 모든 개체가 같은 위치 사본을 읽게 한다.
 
@@ -566,10 +566,10 @@ ParallelFor(NumBatches, [this, &Params, Num](int32 Batch)
 ```
 
 **결과**
-- 엔진 회피를 그대로 쓴 단계에서 회피는 작업자 하나에서 프레임마다 24.7ms를 돌았다.
+- Mass Avoidance를 그대로 쓴 단계에서 회피는 작업자 하나에서 프레임마다 24.7ms를 돌았다.
 - 직렬 트레이스에서 그 회피는 Mass 프로세서 시간의 80.7%(23.5ms)였다.
 - 밀어내기 프로세서의 결과는 스레드 수와 무관하게 같다.
-- 최종 구성에서 밀어내기 프로세서를 엔진 회피로 되돌린 조건은 프레임 p95가 8.57ms 길다.
+- 최종 구성에서 밀어내기 프로세서를 Mass Avoidance로 되돌린 조건은 프레임 p95가 8.57ms 길다.
 
 ### 개체마다 독립인 엔진 프로세서는 청크 병렬 사본으로 바꾼다
 
@@ -684,7 +684,7 @@ IConsoleManager::Get().FindConsoleVariable(TEXT("mass.FullyParallel"))->Set(0, E
 ```
 
 **결과**
-- 엔진 회피를 쓴 단계의 병렬 트레이스 한 프레임에서 엔진 방향 보간의 구간은 0.69ms부터 28.8ms까지 걸쳐 있었다.
+- Mass Avoidance를 쓴 단계의 병렬 트레이스 한 프레임에서 엔진 방향 보간의 구간은 0.69ms부터 28.8ms까지 걸쳐 있었다.
 - 직렬 트레이스에서 같은 프로세서는 프레임당 0.82ms였다.
 
 ### 틱 간격을 늘리기보다 큰 몫의 프로세서를 쿼리에서 뺀다
@@ -852,7 +852,7 @@ GGameThreadTime = (ThreadTime > GameThread.Waits) ? (ThreadTime - GameThread.Wai
 5. 그 순간에 끝나는 작업자 이벤트를 찾는다.
 
 **결과**
-- 엔진 회피를 그대로 쓴 단계의 값은 다음과 같았다.
+- Mass Avoidance를 그대로 쓴 단계의 값은 다음과 같았다.
   - 프레임 p50: 34.1ms
   - 게임 스레드 시간: 18.0ms
   - GPU 시간: 12.2ms
@@ -860,7 +860,7 @@ GGameThreadTime = (ThreadTime > GameThread.Waits) ? (ThreadTime - GameThread.Wai
 - 그 단계의 게임 스레드는 프레임마다 16.2ms를 기다렸다.
 - 그중 14.5ms는 `EventWait/PrePhysics`였다. 이 틱 그룹에서 Mass 처리 페이즈가 돈다.
 - 게임 스레드 시간에 기다림을 더하면 프레임 시간과 0.03ms 안에서 맞았다.
-- 게임 스레드가 기다린 작업자 이벤트는 작업자 하나의 엔진 회피였다. 그 회피는 한 프레임에서 25.6ms였다.
+- 게임 스레드가 기다린 작업자 이벤트는 작업자 하나의 Mass Avoidance였다. 그 회피는 한 프레임에서 25.6ms였다.
 
 ### 액터 군중은 불린 횟수와 한 번의 시간으로 나눠 본다
 
@@ -911,9 +911,9 @@ UnrealInsights.exe -OpenTraceFile=<trace.utrace> -NoUI -AutoQuit
 ```
 
 **결과**
-- 엔진 회피를 쓴 단계의 50초 구간에서 `WaitForTasks`는 목록에 60,369번, 1분 42.7초로 나왔다.
+- Mass Avoidance를 쓴 단계의 50초 구간에서 `WaitForTasks`는 목록에 60,369번, 1분 42.7초로 나왔다.
 - 같은 구간의 게임 스레드만의 값은 22.96초(프레임당 15.1ms)였다.
-- 직렬 트레이스의 엔진 회피는 28.92초 ÷ 1,232번 = 23.5ms였다.
+- 직렬 트레이스의 Mass Avoidance는 28.92초 ÷ 1,232번 = 23.5ms였다.
 
 ### 기법 하나만 끄고 재서 기여를 가른다
 

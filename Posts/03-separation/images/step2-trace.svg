@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="800" height="704" viewBox="0 0 800 704" font-family="Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Segoe UI, sans-serif" font-size="16" fill="#111827">
 <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#374151"/></marker><marker id="arrowr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#dc2626"/></marker><marker id="arrowb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#2563eb"/></marker></defs>
 <rect x="0.5" y="0.5" width="799" height="703" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
-<text x="32" y="46" font-size="22" font-weight="700">단계 2의 엔진 회피는 작업자 스레드 하나에서 돈다</text>
+<text x="32" y="46" font-size="22" font-weight="700">단계 2의 Mass Avoidance는 작업자 스레드 하나에서 돈다</text>
 <text x="32" y="74" font-size="16" fill="#4b5563">호드 총수 1만, 이동 장면, 오브 시점 카메라. 트레이스 50초의 프레임 평균(ms)</text>
 <text x="32" y="98" font-size="16" fill="#4b5563">트레이스 실행의 값이라 측정값과 견주지 않는다</text>
 <text x="32" y="142" font-size="18" font-weight="700">병렬 실행(측정과 같은 설정), 단계 2</text>
@@ -18,7 +18,7 @@
 <text x="32" y="182" font-size="16" font-weight="700">한 프레임</text>
 <rect x="300" y="164" width="312.6" height="26" rx="4" fill="#374151"/>
 <text x="620.6" y="183" font-size="16" font-weight="700" fill="#374151">32.8</text>
-<text x="32" y="234" font-size="16" font-weight="700">엔진 회피 프로세서</text>
+<text x="32" y="234" font-size="16" font-weight="700">Mass Avoidance 프로세서</text>
 <text x="32" y="256" font-size="16" fill="#4b5563">프레임마다 작업자 하나에서만</text>
 <rect x="300" y="216" width="235.5" height="26" rx="4" fill="#dc2626"/>
 <text x="543.5" y="235" font-size="16" font-weight="700" fill="#dc2626">24.7</text>
@@ -37,7 +37,7 @@
 <text x="585.7" y="598" text-anchor="middle" font-size="16" fill="#4b5563">30</text>
 <line x1="681.0" y1="410" x2="681.0" y2="576" stroke="#e5e7eb"/>
 <text x="681.0" y="598" text-anchor="middle" font-size="16" fill="#4b5563">40</text>
-<text x="32" y="436" font-size="16" font-weight="700">단계 2 엔진 회피</text>
+<text x="32" y="436" font-size="16" font-weight="700">단계 2 Mass Avoidance</text>
 <rect x="300" y="418" width="223.7" height="26" rx="4" fill="#9ca3af"/>
 <text x="531.7" y="437" font-size="16" font-weight="700" fill="#374151">23.5</text>
 <text x="32" y="476" font-size="16" font-weight="700">단계 3 밀어내기 프로세서</text>
@@ -50,6 +50,6 @@
 <rect x="300" y="538" width="2.1" height="26" rx="4" fill="#2563eb"/>
 <text x="310.1" y="557" font-size="16" font-weight="700" fill="#2563eb">0.22</text>
 <line x1="32" y1="622" x2="768" y2="622" stroke="#e5e7eb"/>
-<text x="32" y="644" font-size="16" fill="#4b5563">병렬 실행의 엔진 회피 1,523번은 저마다 한 스레드에서 돌았고 서로 겹치지 않았다.</text>
+<text x="32" y="644" font-size="16" fill="#4b5563">병렬 실행의 Mass Avoidance 1,523번은 저마다 한 스레드에서 돌았고 서로 겹치지 않았다.</text>
 <text x="32" y="670" font-size="16" fill="#4b5563">직렬 실행은 프로세서별 시간을 가르려고 Mass 프로세서를 한 스레드에 둔다.</text>
 </svg>

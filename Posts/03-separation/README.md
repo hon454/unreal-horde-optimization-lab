@@ -1,8 +1,8 @@
-# 03 자체 밀어내기: 엔진 회피를 밀어내기 프로세서로 바꿔 처음으로 16.7ms 안에
+# 03 자체 밀어내기: Mass Avoidance를 밀어내기 프로세서로 바꿔 처음으로 16.7ms 안에
 
 ## 요약
 
-단계 3은 엔진 회피 프로세서를 자체 밀어내기 프로세서로 바꾸고 엔진의 방향 보간 프로세서를 같은 계산의 병렬 사본으로 바꿨다. 단계 2에서는 작업자 스레드 하나가 엔진 회피를 도는 동안 게임 스레드가 기다렸다. 프레임 p50(프레임 시간의 중앙값)은 34.1ms에서 12.4ms가 됐다. 프레임 p95(느린 쪽 5%의 경계)는 14.1ms로, 사다리에서 처음 16.7ms 안에 든다. 깊게 겹친 쌍(몸통 반지름 합의 절반보다 가까운 개체 쌍의 수)은 3,767에서 0이 되어 같은 일을 더 잘 하면서 빨라졌다.
+단계 3은 엔진의 Mass Avoidance 프로세서(`UMassMovingAvoidanceProcessor`)를 자체 밀어내기 프로세서로 바꾸고 엔진의 방향 보간 프로세서를 같은 계산의 병렬 사본으로 바꿨다. 단계 2에서는 작업자 스레드 하나가 Mass Avoidance를 도는 동안 게임 스레드가 기다렸다. 프레임 p50(프레임 시간의 중앙값)은 34.1ms에서 12.4ms가 됐다. 프레임 p95(느린 쪽 5%의 경계)는 14.1ms로, 사다리에서 처음 16.7ms 안에 든다. 깊게 겹친 쌍(몸통 반지름 합의 절반보다 가까운 개체 쌍의 수)은 3,767에서 0이 되어 같은 일을 더 잘 하면서 빨라졌다.
 
 ![단계 2와 단계 3의 프레임 p95, 프레임 p50, 게임 스레드, 렌더 스레드, GPU 시간. 호드 총수 1만, 이동 장면, 오브 시점 카메라, 세 번 잰 중앙값. 단계 3의 프레임 p95는 14.1ms로 16.7ms 안이다](images/summary.svg)
 
@@ -14,9 +14,9 @@
 
 ## 배경 지식
 
-### 엔진 회피
+### Mass Avoidance
 
-엔진 회피는 MassAI 플러그인의 `UMassMovingAvoidanceProcessor`가 하는 일이다. 개체마다 장애물 격자에서 가까운 이웃을 찾고 부딪칠 이웃에게서 멀어지는 힘을 조향 힘에 더한다. 힘은 이동 프로세서가 쓰는 속도를 바꿀 뿐이고 위치를 직접 옮기지 않는다. 단계 2는 이 프로세서를 엔진 기본 파라미터로 켰다.
+Mass Avoidance는 MassAI 플러그인의 `UMassMovingAvoidanceProcessor`가 하는 일이다. 개체마다 장애물 격자에서 가까운 이웃을 찾고 부딪칠 이웃에게서 멀어지는 힘을 조향 힘에 더한다. 힘은 이동 프로세서가 쓰는 속도를 바꿀 뿐이고 위치를 직접 옮기지 않는다. 단계 2는 이 프로세서를 엔진 기본 파라미터로 켰다.
 
 ### 위치를 직접 고치는 밀어내기
 
@@ -24,23 +24,23 @@
 
 ### 한 스레드 순회와 청크 병렬 순회
 
-Mass 쿼리의 `ForEachEntityChunk`는 맞는 Chunk를 한 스레드에서 차례로 돈다. `ParallelForEachEntityChunk`는 Chunk마다 작업을 띄워 작업자 스레드에 나눈다. 개체마다 자기 Fragment만 쓰면 둘의 결과는 같다. 엔진 회피와 엔진 방향 보간은 앞쪽을 쓴다.
+Mass 쿼리의 `ForEachEntityChunk`는 맞는 Chunk를 한 스레드에서 차례로 돈다. `ParallelForEachEntityChunk`는 Chunk마다 작업을 띄워 작업자 스레드에 나눈다. 개체마다 자기 Fragment만 쓰면 둘의 결과는 같다. Mass Avoidance와 엔진 방향 보간은 앞쪽을 쓴다.
 
 > Mass의 Fragment, Processor, Chunk는 [Mass, 엔진 기본 경로](../02-mass-engine-path/README.md)가 설명한다.
 
-## 문제: 엔진 회피가 작업자 하나에서 프레임의 4분의 3을 쓴다
+## 문제: Mass Avoidance가 작업자 하나에서 프레임의 4분의 3을 쓴다
 
-[Mass, 엔진 기본 경로](../02-mass-engine-path/README.md)에서 본 대로 단계 2의 병목은 엔진 회피다. 프레임 p50은 34.1ms인데 게임 스레드 시간(중앙값)은 18ms다. 트레이스를 열면 엔진 회피 프로세서가 프레임마다 작업자 스레드 하나에서 평균 24.7ms를 돈다. 한 프레임은 평균 32.8ms이고, 게임 스레드는 그동안 작업이 끝나기를 기다린다.
+[Mass, 엔진 기본 경로](../02-mass-engine-path/README.md)에서 본 대로 단계 2의 병목은 Mass Avoidance다. 프레임 p50은 34.1ms인데 게임 스레드 시간(중앙값)은 18ms다. 트레이스를 열면 Mass Avoidance 프로세서가 프레임마다 작업자 스레드 하나에서 평균 24.7ms를 돈다. 한 프레임은 평균 32.8ms이고, 게임 스레드는 그동안 작업이 끝나기를 기다린다.
 
-![단계 2의 트레이스. 병렬 실행에서 한 프레임 32.8ms 가운데 엔진 회피가 작업자 하나에서 24.7ms를 쓰고, 게임 스레드는 15.1ms를 기다린다. 직렬 실행의 프로세서 하나의 시간은 엔진 회피 23.5ms, 단계 3의 밀어내기 프로세서 0.82ms다](images/step2-trace.svg)
+![단계 2의 트레이스. 병렬 실행에서 한 프레임 32.8ms 가운데 Mass Avoidance가 작업자 하나에서 24.7ms를 쓰고, 게임 스레드는 15.1ms를 기다린다. 직렬 실행의 프로세서 하나의 시간은 Mass Avoidance 23.5ms, 단계 3의 밀어내기 프로세서 0.82ms다](images/step2-trace.svg)
 
 ![Unreal Insights에서 두 직렬 트레이스의 70초부터 120초까지를 고른 화면. 위가 단계 2, 아래가 단계 3이다. 위 빨간 상자의 MassMovingAvoidanceProcessor는 1,232번 불리고 구간 합계가 28.9초다. 아래 빨간 상자의 LabSeparationProcessor는 3,755번 불리고 3.09초, LabSmoothOrientationProcessor는 0.837초다](images/insights-avoidance-separation.jpg)
 
-표시한 행의 합계를 불린 횟수로 나누면 단계 2의 엔진 회피는 프레임당 23.5ms, 단계 3의 밀어내기 프로세서는 0.82ms다.
+표시한 행의 합계를 불린 횟수로 나누면 단계 2의 Mass Avoidance는 프레임당 23.5ms, 단계 3의 밀어내기 프로세서는 0.82ms다.
 
 게임 스레드가 기다린 시간은 프레임당 15.1ms다. 단계 2의 프레임 p50이 게임 스레드 시간보다 긴 까닭은 [Mass, 엔진 기본 경로](../02-mass-engine-path/README.md)가 자세히 다룬다.
 
-엔진 회피가 한 스레드에 묶이는 자리는 순회 한 줄이다.
+Mass Avoidance가 한 스레드에 묶이는 자리는 순회 한 줄이다.
 
 `Engine/Plugins/AI/MassAI/Source/MassNavigation/Private/MassAvoidanceProcessors.cpp`, `UMassMovingAvoidanceProcessor::Execute`
 
@@ -61,19 +61,19 @@ EntityQuery.ForEachEntityChunk(Context, [FallbackLogOwner = this, &EntityManager
 
 첫 줄이 `ForEachEntityChunk`라 모든 Chunk를 한 스레드에서 차례로 돈다. 단계 2에는 Simulation LOD가 없어 1만 개체가 모두 이 순회에 든다. 개체마다 이웃 후보를 24개까지 모으고, 가까운 6개만 힘을 낸다. 끝 줄이 합친 힘을 가속 상한으로 자른다.
 
-엔진 회피는 겹침도 막지 못한다. 단계 2의 겹친 쌍(몸통이 겹친 개체 쌍의 수)은 12,442다. 개체가 오브 둘레에 뭉쳐 오브 30m 안 개체도 기준의 두 배를 넘는다.
+Mass Avoidance는 겹침도 막지 못한다. 단계 2의 겹친 쌍(몸통이 겹친 개체 쌍의 수)은 12,442다. 개체가 오브 둘레에 뭉쳐 오브 30m 안 개체도 기준의 두 배를 넘는다.
 
 ## 원리: 위치를 직접 밀고, 이웃 계산을 스레드에 나눈다
 
-밀어내기 프로세서는 엔진 회피와 두 곳이 다르다. 하나는 힘이 아니라 위치를 고친다는 것이다. 그 프레임의 이동이 끝난 뒤 겹친 쌍을 바로 떼어 놓으므로, 뒤에서 미는 조향이 세도 깊은 겹침이 쌓이지 않는다. 다른 하나는 이웃 계산을 128개씩 묶어 작업자 스레드에 나눈다는 것이다. 이웃 수에도 상한을 두지 않는다.
+밀어내기 프로세서는 Mass Avoidance와 두 곳이 다르다. 하나는 힘이 아니라 위치를 고친다는 것이다. 그 프레임의 이동이 끝난 뒤 겹친 쌍을 바로 떼어 놓으므로, 뒤에서 미는 조향이 세도 깊은 겹침이 쌓이지 않는다. 다른 하나는 이웃 계산을 128개씩 묶어 작업자 스레드에 나눈다는 것이다. 이웃 수에도 상한을 두지 않는다.
 
-![엔진 회피와 밀어내기 프로세서의 차이를 그린 개념도. 엔진 회피는 후보 24개 가운데 가까운 6개의 힘을 조향 힘에 더하고 한 스레드에서 돈다. 밀어내기 프로세서는 둘레 9칸에서 겹친 이웃을 모두 찾아 위치를 밀고 ParallelFor로 나눈다](images/principle.svg)
+![Mass Avoidance와 밀어내기 프로세서의 차이를 그린 개념도. Mass Avoidance는 후보 24개 가운데 가까운 6개의 힘을 조향 힘에 더하고 한 스레드에서 돈다. 밀어내기 프로세서는 둘레 9칸에서 겹친 이웃을 모두 찾아 위치를 밀고 ParallelFor로 나눈다](images/principle.svg)
 
-예상: 엔진 회피를 빼면 게임 스레드의 기다림이 사라진다. 그러면 프레임 p50은 게임 스레드 시간인 18ms 근처까지 줄 것이다.
+예상: Mass Avoidance를 빼면 게임 스레드의 기다림이 사라진다. 그러면 프레임 p50은 게임 스레드 시간인 18ms 근처까지 줄 것이다.
 
 ## 바꾼 것: 회피를 밀어내기 프로세서로, 방향 보간을 병렬 사본으로
 
-단계 3부터 엔티티에 엔진 회피 Trait을 붙이지 않는다([LabCrowdSubsystem.cpp](../../Source/HordeOptLab/LabCrowdSubsystem.cpp)). 대신 게임 모듈이 `ULabSeparationProcessor`를 등록한다([HordeOptLab.cpp](../../Source/HordeOptLab/HordeOptLab.cpp)). 밀어내기 프로세서는 엔진 이동 프로세서 뒤에 돈다. 풀이는 Mass를 모르는 계산부에 있다.
+단계 3부터 엔티티에 Mass Avoidance Trait을 붙이지 않는다([LabCrowdSubsystem.cpp](../../Source/HordeOptLab/LabCrowdSubsystem.cpp)). 대신 게임 모듈이 `ULabSeparationProcessor`를 등록한다([HordeOptLab.cpp](../../Source/HordeOptLab/HordeOptLab.cpp)). 밀어내기 프로세서는 엔진 이동 프로세서 뒤에 돈다. 풀이는 Mass를 모르는 계산부에 있다.
 
 [`Source/HordeOptLab/LabSeparation.h`](../../Source/HordeOptLab/LabSeparation.h), `FLabSeparationSolver::Solve`
 
@@ -130,9 +130,9 @@ LowResEntityQuery_Conditional.ParallelForEachEntityChunk(Context, LowRes);
 
 ### 최종 구성에서 바꾸거나 끄면
 
-최종 구성에서도 엔진 회피는 더 비싸고 일을 못 한다. 밀어내기 프로세서를 엔진 회피로 바꾸는 하위 실험은 프레임 p95가 8.57ms 길다. 깊게 겹친 쌍은 0에서 3,529가 된다. 밀어내기를 끈 조건은 프레임 p95가 0.93ms 짧다. 그러나 겹친 쌍이 1,644로 늘어 같은 일이 아니다.
+최종 구성에서도 Mass Avoidance는 더 비싸고 일을 못 한다. 밀어내기 프로세서를 Mass Avoidance로 바꾸는 하위 실험은 프레임 p95가 8.57ms 길다. 깊게 겹친 쌍은 0에서 3,529가 된다. 밀어내기를 끈 조건은 프레임 p95가 0.93ms 짧다. 그러나 겹친 쌍이 1,644로 늘어 같은 일이 아니다.
 
-![최종 구성, 엔진 회피로 바꾼 조건, 밀어내기를 끈 조건의 프레임 p95와 겹친 쌍. 엔진 회피로 바꾸면 +8.57ms에 겹친 쌍 11,660, 밀어내기를 끄면 −0.93ms에 겹친 쌍 1,644다](images/final-swaps.svg)
+![최종 구성, Mass Avoidance로 바꾼 조건, 밀어내기를 끈 조건의 프레임 p95와 겹친 쌍. Mass Avoidance로 바꾸면 +8.57ms에 겹친 쌍 11,660, 밀어내기를 끄면 −0.93ms에 겹친 쌍 1,644다](images/final-swaps.svg)
 
 ### 한계 둘
 
@@ -150,7 +150,7 @@ LowResEntityQuery_Conditional.ParallelForEachEntityChunk(Context, LowRes);
 
 ## 한 문장으로
 
-엔진 회피를 위치를 직접 미는 밀어내기 프로세서로 바꾸자, 작업자 하나에 묶였던 프레임이 풀려 호드 1만이 처음으로 16.7ms 안에 들었다.
+Mass Avoidance를 위치를 직접 미는 밀어내기 프로세서로 바꾸자, 작업자 하나에 묶였던 프레임이 풀려 호드 1만이 처음으로 16.7ms 안에 들었다.
 
 - 빠른지보다 같은 일을 하는지를 먼저 본다. 밀어내기를 끈 조건은 더 빠르지만 겹친 쌍이 7배다.
 - 한 스레드로 도는 엔진 프로세서는 트레이스에서 작업자 하나의 긴 구간으로 보인다. 계산이 개체마다 독립이면 청크 병렬 사본으로 바꿀 수 있다.

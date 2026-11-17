@@ -3,9 +3,9 @@
 <text x="32" y="46" font-size="22" font-weight="700">단계 2와 단계 3의 프레임 시간과 스레드 시간</text>
 <text x="32" y="74" font-size="16" fill="#4b5563">호드 총수 1만, 이동 장면, 오브 시점 카메라. 세 번 잰 중앙값(ms)</text>
 <rect x="32" y="99" width="18" height="16" rx="3" fill="#9ca3af"/>
-<text x="58" y="112" font-size="16">단계 2 엔진 회피</text>
-<rect x="232" y="99" width="18" height="16" rx="3" fill="#2563eb"/>
-<text x="258" y="112" font-size="16">단계 3 자체 밀어내기</text>
+<text x="58" y="112" font-size="16">단계 2 Mass Avoidance</text>
+<rect x="376" y="99" width="18" height="16" rx="3" fill="#2563eb"/>
+<text x="402" y="112" font-size="16">단계 3 자체 밀어내기</text>
 <line x1="170.0" y1="160" x2="170.0" y2="536" stroke="#e5e7eb"/>
 <text x="170.0" y="558" text-anchor="middle" font-size="16" fill="#4b5563">0</text>
 <line x1="302.5" y1="160" x2="302.5" y2="536" stroke="#e5e7eb"/>

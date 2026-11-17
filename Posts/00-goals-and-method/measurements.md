@@ -168,7 +168,7 @@ SVG 여섯은 [make-figures.py](make-figures.py)가 만든다(저장소 루트�
 | 0.6ms는 실행 하나가 중앙값보다 길게 나올 수 있는 폭이다 | measurement.md "지표" 목표 판정. 근거 값은 앞선 작은 묶음에서 나와 본문에 수치를 쓰지 않았다 |
 | 겹친 쌍은 프레임 시간을 따라 는다 | V2.md "2026-11-17 Full4 캡슐 빗나감 진단"의 "부차" 절. 밀어내기는 프레임마다 위치를 한 번 고친다(`Source/HordeOptLab/LabSeparation.h:20-34` 주석). 이 묶음의 예: `V0-a8hyd` 프레임 p50 6.595ms에서 51.83, `V0-s8` 12.77ms에서 233.53(`overlap_mean`) |
 | 정지 장면의 캡슐 빗나감은 장치의 결함이다 | V2.md "2026-11-17 Full4 캡슐 빗나감 진단"의 "원인" 절, measurement.md "실패 등급", 조건 표 `capsule_miss_basis` |
-| 단계 2는 엔진 회피로, 나머지 단계는 밀어내기로 겹치지 않게 한다 | 조건 표 `s2` `LabTechAvoid` 1, `LabTechSeparate` 0. 다른 단계는 `LabTechSeparate` 1. 밀어내기는 반지름 합 × 1.2까지 뗀다(`Source/HordeOptLab/LabSeparation.h:31-34` `Skin = 0.2f`) |
+| 단계 2는 Mass Avoidance로, 나머지 단계는 밀어내기로 겹치지 않게 한다 | 조건 표 `s2` `LabTechAvoid` 1, `LabTechSeparate` 0. 다른 단계는 `LabTechSeparate` 1. 밀어내기는 반지름 합 × 1.2까지 뗀다(`Source/HordeOptLab/LabSeparation.h:31-34` `Skin = 0.2f`) |
 | 그림 `stage-map.svg`의 200m 밖은 그리지 않는다(단계 2\~6) | `Source/HordeOptLab/LabCrowdSubsystem.cpp:216` `LODRepresentation[EMassLOD::Off] = None`. 단계 7부터는 200m 밖을 입자로 그린다(위 `stage-map.svg` 표) |
 | 스레드 시간은 p50만 쓴다 | measurement.md "지표"의 스레드 시간 행(대기가 섞여 p95 해석이 어렵다) |
 | 오브가 움직이면 고정 목표에서만 통하는 기법이 드러난다 | ADR-0017 "맥락"과 결정 3, [v2-spec.md](../../Docs/v2-spec.md) 4.2절 |
@@ -188,7 +188,7 @@ SVG 여섯은 [make-figures.py](make-figures.py)가 만든다(저장소 루트�
 
 ## 확인하지 않은 것
 
-- 단계 2는 프레임 p50(34.058ms)이 세 스레드 시간(게임 18.027, 렌더 7.294, GPU 12.23ms)보다 크게 길다(`V0-s2`). 본문의 "가장 느린 스레드가 프레임 시간을 정한다"가 단계 2에서는 맞지 않는다. 원인은 글 02가 트레이스로 봤다. 게임 스레드가 작업자 스레드 하나의 엔진 회피를 기다린 시간이 프레임을 늘린다. 기다림이 모두 엔진 회피 때문인지는 프레임마다 맞춰 보지 않았다(글 02 측정 기록).
+- 단계 2는 프레임 p50(34.058ms)이 세 스레드 시간(게임 18.027, 렌더 7.294, GPU 12.23ms)보다 크게 길다(`V0-s2`). 본문의 "가장 느린 스레드가 프레임 시간을 정한다"가 단계 2에서는 맞지 않는다. 원인은 글 02가 트레이스로 봤다. 게임 스레드가 작업자 스레드 하나의 Mass Avoidance를 기다린 시간이 프레임을 늘린다. 기다림이 모두 Mass Avoidance 때문인지는 프레임마다 맞춰 보지 않았다(글 02 측정 기록).
 - 사망 색 머티리얼을 그대로 둔 결정([V2-w14-plan.md](../../Docs/Worklog/V2-w14-plan.md) 6절의 다섯째 한계)은 결정 기록을 찾지 못해 본문에 넣지 않았다. measurement.md "확정값" 2종 행에는 단계 1 액터와 정지 메시 인스턴스의 대형에 사망 색이 없다고 적혀 있다.
 - 겹친 쌍이 같은 시간 간격에서 같다는 확인(`s8` 208.2, `a8hyd` 208.3)은 Development 진단 실행의 값이라 본문에 쓰지 않았다.
 - 정지 장면 빗나감의 원인은 Development 진단 실행으로 확인했다. Test 패키지에서는 비율(1.667%)만 같은 쪽임을 봤다.

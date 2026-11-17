@@ -2,48 +2,48 @@
 <rect x="0.5" y="0.5" width="799" height="535" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
 <text x="32" y="46" font-size="22" font-weight="700">최종 구성에서 겹침 방지를 바꾸거나 끄면</text>
 <text x="32" y="74" font-size="16" fill="#4b5563">호드 총수 1만, 이동 장면, 오브 시점 카메라. 세 번 잰 중앙값</text>
-<text x="260" y="128" font-size="16" fill="#4b5563">프레임 p95(ms)</text>
+<text x="285" y="128" font-size="16" fill="#4b5563">프레임 p95(ms)</text>
 <text x="700" y="128" text-anchor="middle" font-size="16" fill="#4b5563">겹친 쌍</text>
-<line x1="260.0" y1="142" x2="260.0" y2="360" stroke="#e5e7eb"/>
-<text x="260.0" y="382" text-anchor="middle" font-size="16" fill="#4b5563">0</text>
-<line x1="320.0" y1="142" x2="320.0" y2="360" stroke="#e5e7eb"/>
-<text x="320.0" y="382" text-anchor="middle" font-size="16" fill="#4b5563">5</text>
-<line x1="380.0" y1="142" x2="380.0" y2="360" stroke="#e5e7eb"/>
-<text x="380.0" y="382" text-anchor="middle" font-size="16" fill="#4b5563">10</text>
-<line x1="440.0" y1="142" x2="440.0" y2="360" stroke="#e5e7eb"/>
-<text x="440.0" y="382" text-anchor="middle" font-size="16" fill="#4b5563">15</text>
-<line x1="500.0" y1="142" x2="500.0" y2="360" stroke="#e5e7eb"/>
-<text x="500.0" y="382" text-anchor="middle" font-size="16" fill="#4b5563">20</text>
-<line x1="560.0" y1="142" x2="560.0" y2="360" stroke="#e5e7eb"/>
-<text x="560.0" y="382" text-anchor="middle" font-size="16" fill="#4b5563">25</text>
-<line x1="460.4" y1="142" x2="460.4" y2="360" stroke="#b45309" stroke-width="2" stroke-dasharray="6 4"/>
-<text x="460.4" y="404" text-anchor="middle" font-size="16" font-weight="700" fill="#b45309">16.7</text>
+<line x1="285.0" y1="142" x2="285.0" y2="360" stroke="#e5e7eb"/>
+<text x="285.0" y="382" text-anchor="middle" font-size="16" fill="#4b5563">0</text>
+<line x1="343.0" y1="142" x2="343.0" y2="360" stroke="#e5e7eb"/>
+<text x="343.0" y="382" text-anchor="middle" font-size="16" fill="#4b5563">5</text>
+<line x1="401.0" y1="142" x2="401.0" y2="360" stroke="#e5e7eb"/>
+<text x="401.0" y="382" text-anchor="middle" font-size="16" fill="#4b5563">10</text>
+<line x1="459.0" y1="142" x2="459.0" y2="360" stroke="#e5e7eb"/>
+<text x="459.0" y="382" text-anchor="middle" font-size="16" fill="#4b5563">15</text>
+<line x1="517.0" y1="142" x2="517.0" y2="360" stroke="#e5e7eb"/>
+<text x="517.0" y="382" text-anchor="middle" font-size="16" fill="#4b5563">20</text>
+<line x1="575.0" y1="142" x2="575.0" y2="360" stroke="#e5e7eb"/>
+<text x="575.0" y="382" text-anchor="middle" font-size="16" fill="#4b5563">25</text>
+<line x1="478.7" y1="142" x2="478.7" y2="360" stroke="#b45309" stroke-width="2" stroke-dasharray="6 4"/>
+<text x="478.7" y="404" text-anchor="middle" font-size="16" font-weight="700" fill="#b45309">16.7</text>
 <text x="32" y="166" font-size="17" font-weight="700">최종 구성</text>
 <text x="32" y="190" font-size="16" fill="#4b5563">밀어내기 프로세서</text>
-<rect x="260" y="150" width="170.8" height="30" rx="4" fill="#2563eb"/>
-<line x1="428.4" y1="165" x2="433.1" y2="165" stroke="#111827" stroke-width="2"/>
-<line x1="428.4" y1="158" x2="428.4" y2="172" stroke="#111827" stroke-width="2"/>
-<line x1="433.1" y1="158" x2="433.1" y2="172" stroke="#111827" stroke-width="2"/>
-<text x="441.1" y="171" font-size="16" font-weight="700" fill="#2563eb" paint-order="stroke" stroke="white" stroke-width="5" stroke-linejoin="round">14.2</text>
+<rect x="285" y="150" width="165.1" height="30" rx="4" fill="#2563eb"/>
+<line x1="447.8" y1="165" x2="452.3" y2="165" stroke="#111827" stroke-width="2"/>
+<line x1="447.8" y1="158" x2="447.8" y2="172" stroke="#111827" stroke-width="2"/>
+<line x1="452.3" y1="158" x2="452.3" y2="172" stroke="#111827" stroke-width="2"/>
+<text x="460.3" y="171" font-size="16" font-weight="700" fill="#2563eb" paint-order="stroke" stroke="white" stroke-width="5" stroke-linejoin="round">14.2</text>
 <text x="700" y="171" text-anchor="middle" font-size="17" font-weight="700" fill="#2563eb">234</text>
-<text x="32" y="244" font-size="17" font-weight="700">엔진 회피로 바꾼 조건</text>
+<text x="32" y="244" font-size="17" font-weight="700">Mass Avoidance로 바꾼 조건</text>
 <text x="32" y="268" font-size="16" fill="#4b5563">하위 실험</text>
-<rect x="260" y="228" width="273.6" height="30" rx="4" fill="#dc2626"/>
-<line x1="531.4" y1="243" x2="538.0" y2="243" stroke="#111827" stroke-width="2"/>
-<line x1="531.4" y1="236" x2="531.4" y2="250" stroke="#111827" stroke-width="2"/>
-<line x1="538.0" y1="236" x2="538.0" y2="250" stroke="#111827" stroke-width="2"/>
-<text x="546.0" y="249" font-size="16" font-weight="700" fill="#dc2626" paint-order="stroke" stroke="white" stroke-width="5" stroke-linejoin="round">22.8 (+8.57)</text>
+<rect x="285" y="228" width="264.5" height="30" rx="4" fill="#dc2626"/>
+<line x1="547.3" y1="243" x2="553.8" y2="243" stroke="#111827" stroke-width="2"/>
+<line x1="547.3" y1="236" x2="547.3" y2="250" stroke="#111827" stroke-width="2"/>
+<line x1="553.8" y1="236" x2="553.8" y2="250" stroke="#111827" stroke-width="2"/>
+<text x="561.8" y="249" font-size="16" font-weight="700" fill="#dc2626" paint-order="stroke" stroke="white" stroke-width="5" stroke-linejoin="round">22.8 (+8.57)</text>
 <text x="700" y="249" text-anchor="middle" font-size="17" font-weight="700" fill="#dc2626">11,660</text>
 <text x="32" y="322" font-size="17" font-weight="700">밀어내기를 끈 조건</text>
 <text x="32" y="346" font-size="16" fill="#4b5563">겹침 방지가 없다</text>
-<rect x="260" y="306" width="159.7" height="30" rx="4" fill="#6b7280"/>
-<line x1="416.6" y1="321" x2="421.2" y2="321" stroke="#111827" stroke-width="2"/>
-<line x1="416.6" y1="314" x2="416.6" y2="328" stroke="#111827" stroke-width="2"/>
-<line x1="421.2" y1="314" x2="421.2" y2="328" stroke="#111827" stroke-width="2"/>
-<text x="429.2" y="327" font-size="16" font-weight="700" fill="#6b7280" paint-order="stroke" stroke="white" stroke-width="5" stroke-linejoin="round">13.3 (−0.93)</text>
+<rect x="285" y="306" width="154.3" height="30" rx="4" fill="#6b7280"/>
+<line x1="436.3" y1="321" x2="440.8" y2="321" stroke="#111827" stroke-width="2"/>
+<line x1="436.3" y1="314" x2="436.3" y2="328" stroke="#111827" stroke-width="2"/>
+<line x1="440.8" y1="314" x2="440.8" y2="328" stroke="#111827" stroke-width="2"/>
+<text x="448.8" y="327" font-size="16" font-weight="700" fill="#6b7280" paint-order="stroke" stroke="white" stroke-width="5" stroke-linejoin="round">13.3 (−0.93)</text>
 <text x="700" y="327" text-anchor="middle" font-size="17" font-weight="700" fill="#6b7280">1,644</text>
 <line x1="32" y1="428" x2="768" y2="428" stroke="#e5e7eb"/>
-<text x="32" y="450" font-size="16" fill="#4b5563">엔진 회피로 바꾸면 프레임이 길어지고 겹친 쌍이 크게 는다.</text>
+<text x="32" y="450" font-size="16" fill="#4b5563">Mass Avoidance로 바꾸면 프레임이 길어지고 겹친 쌍이 크게 는다.</text>
 <text x="32" y="476" font-size="16" fill="#4b5563">밀어내기를 끄면 프레임은 짧지만 겹친 쌍이 7배로 늘어 같은 일이 아니다.</text>
 <text x="32" y="502" font-size="16" fill="#4b5563">가는 선은 세 실행의 최솟값–최댓값이다.</text>
 </svg>

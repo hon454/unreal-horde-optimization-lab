@@ -53,7 +53,7 @@
 - 한 문단에 주제 하나. 다섯 문장을 넘기지 않는다. 첫 문장이 결론이다.
 - 주어를 밝힌 능동문. "프로세서가 청크를 순회한다"로 쓰고 "청크가 순회된다"로 쓰지 않는다.
 - 한 용어는 한 뜻. 글마다 쓸 동사를 먼저 정하고 한 동작에 한 동사만 쓴다.
-- 엔진 이름은 번역하지 않는다: Mass, Fragment, Processor, Archetype, Chunk, Representation LOD, Simulation LOD, ISM, VAT, ISKM, Animation Budget Allocator, URO, Significance. 정의한 뒤에는 그 이름으로만 쓴다.
+- 엔진 이름은 번역하지 않는다: Mass, Fragment, Processor, Archetype, Chunk, Representation LOD, Simulation LOD, ISM, VAT, ISKM, Animation Budget Allocator, URO, Mass Avoidance, Significance. 정의한 뒤에는 그 이름으로만 쓴다.
 - 한글로 옮겨 적은 영어 낱말은 처음 나올 때 괄호 안에 영어를 함께 적는다: 오브(Orb), 하이드레이션(Hydration, 가까운 엔티티에만 진짜 액터를 붙이는 일).
 - 소수점 아래가 0뿐인 값은 정수로 적는다. 27.0이 아니라 27이다. 그림의 숫자도 같다.
 - 한 일은 바꾼 것으로 쓴다. "Budget Allocator를 적용했다"가 아니라 "액터 메시를 `USkeletalMeshComponentBudgeted`로 바꾸고 예산을 4ms로 두었다".
@@ -84,7 +84,7 @@
 - **원리를 코드가 정하는 곳에는 그 코드를 발췌해 넣는다.** 엔진이나 프로젝트 코드에서 동작을 정하는 구간만 15줄 안으로 자르고, 줄인 곳은 `// ...`로 표시한다. 코드 블록 위에 파일과 함수 이름을 적고, 블록 아래에서 읽을 줄을 한두 문장으로 짚는다. 줄 번호는 측정 기록에 둔다. 엔진 코드는 Epic의 사용 약관이 공개 발췌를 30줄까지만 허용하므로 글 하나의 엔진 코드를 모두 합쳐 30줄을 넘기지 않는다.
 - 전후 비교는 같은 오브 시점 카메라의 같은 시점 프레임을 나란히. 영상은 움직이는 WebP(폭 960px, 15fps, 8초)로 본문에 넣는다. 단계별 화면은 `Docs/figures/steps/`에 있다.
 - 표현별 색 정지 화면(액터 = 빨강, ISKM 그림자 켬 = 파랑, ISKM 그림자 끔 = 하늘, VAT 인스턴스 = 초록, 200m 밖 입자와 맵 밖 무리 = 노랑)이 표현을 더하는 단계(4, 6, 7)를 다루는 글의 구조 그림 후보다. Development 빌드의 `-LabRepTint`로 찍은 것이라 측정값이 아니다. 캡션에 거리 구간을 글자로도 적는다. 색 배정은 [V2-w14-plan.md](../Worklog/V2-w14-plan.md) 10.2절이고 사용자가 최종으로 고른다.
-- Unreal Insights로 분석한 부분은 본문에 스크린샷과 함께 보인다. 스크린샷 하나에 읽을 곳 하나를 표시하고, 읽은 값은 스크린샷 아래 한두 문장으로 적는다. 스크린샷은 `Posts/NN-이름/images/`에 jpg로 넣는다. 나머지 캡처는 측정 기록에 둔다. 스크린샷은 코디네이터가 최종 측정의 트레이스(`Saved/Traces/Full4trace-*`는 단계 1\~8 병렬, `Full4traceser-*`는 단계 2\~8 직렬. 이동 장면, 호드 총수 1만, 오브 시점 카메라)를 Unreal Insights로 열어 찍고, 어느 트레이스의 어느 구간인지 측정 기록에 적는다. 넣을 곳은 글 01(이동 컴포넌트 비중, `Full4trace-V0-s1`), 02(Mass 프로세서, 엔진 회피), 03(밀어내기 프로세서, `Full4traceser-V0-s2`와 `-s3`)이다.
+- Unreal Insights로 분석한 부분은 본문에 스크린샷과 함께 보인다. 스크린샷 하나에 읽을 곳 하나를 표시하고, 읽은 값은 스크린샷 아래 한두 문장으로 적는다. 스크린샷은 `Posts/NN-이름/images/`에 jpg로 넣는다. 나머지 캡처는 측정 기록에 둔다. 스크린샷은 코디네이터가 최종 측정의 트레이스(`Saved/Traces/Full4trace-*`는 단계 1\~8 병렬, `Full4traceser-*`는 단계 2\~8 직렬. 이동 장면, 호드 총수 1만, 오브 시점 카메라)를 Unreal Insights로 열어 찍고, 어느 트레이스의 어느 구간인지 측정 기록에 적는다. 넣을 곳은 글 01(이동 컴포넌트 비중, `Full4trace-V0-s1`), 02(Mass 프로세서, Mass Avoidance), 03(밀어내기 프로세서, `Full4traceser-V0-s2`와 `-s3`)이다.
 - 지난 구성의 화면은 최신 빌드에서 그 단계의 실행 모드(`-LabStage=`)로 찍는다. 다른 단계의 화면으로 대신하지 않는다.
 
 ## 루트 README

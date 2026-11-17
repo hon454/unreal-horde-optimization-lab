@@ -13,7 +13,7 @@
 <rect x="420" y="178" width="348" height="94" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/>
 <text x="434" y="204" font-size="16" font-weight="700">엔진 프로세서가 Chunk를 돈다</text>
 <text x="434" y="228" font-size="16">조향·힘·이동·방향 보간</text>
-<text x="434" y="252" font-size="16">겹침 방지는 엔진 회피 프로세서</text>
+<text x="434" y="252" font-size="16">겹침 방지는 Mass Avoidance 프로세서</text>
 <line x1="386" y1="225.0" x2="412" y2="225.0" stroke="#374151" stroke-width="2" marker-end="url(#arrow)"/>
 <text x="32" y="306" font-size="16" font-weight="700" fill="#4b5563">그리기와 애니메이션</text>
 <rect x="32" y="316" width="348" height="94" rx="8" fill="#fef2f2" stroke="#dc2626" stroke-width="1.5"/>

@@ -56,7 +56,7 @@
 | 최종 구성 | 단계 8(`-LabStage=8`, 기본값). 기법별 기여의 기준이다 | 한 문장([code-tour.md](code-tour.md) 머리, [measurement.md](measurement.md)) |
 | 기법별 기여 | 최종 구성에서 기법 하나만 끄고 같은 조건으로 잰 차이. 단계 8과의 차이다. 제목은 "기법별 기여(최종 구성에서 하나씩 껐을 때)", 조건은 "\~를 끈 조건"이다 | 처음 쓰는 곳(README, 글 00)에서 한 문장으로 방법을 적는다. README와 글 본문에는 조건 표의 이름 `ablation`을 적지 않는다(사용자 결정, 2026-11-17. [V2-w14-plan.md](../Worklog/V2-w14-plan.md) 결정 7의 이 부분을 바꾼다) |
 | 하위 실험 | 기법을 끈 것이 아니라 바꾼 조건(`s8av`, `s1opt`). 조건 표에 이름이 있는 것만 총괄 묶음에서 잰다 | 한 문장([measurement.md](measurement.md) "벤치마크 조건") |
-| 밀어내기 프로세서, 엔진 회피 | 겹침 방지의 구현 둘. 밀어내기는 겹친 두 개체의 위치를 서로 반대로 밀어 겹침을 푸는 일이다. 단계 2는 엔진 회피(`-LabAvoid=1`), 단계 3부터 Lab 밀어내기 프로세서(`ULabSeparationProcessor`)다. 겹침 방지는 기능 이름이다 | 한 문장([measurement.md](measurement.md) "확정값" 비켜 가기 행, [code-tour.md](code-tour.md)) |
+| 밀어내기 프로세서, Mass Avoidance | 겹침 방지의 구현 둘. 밀어내기는 겹친 두 개체의 위치를 서로 반대로 밀어 겹침을 푸는 일이다. 단계 2는 Mass Avoidance(`-LabAvoid=1`), 단계 3부터 Lab 밀어내기 프로세서(`ULabSeparationProcessor`)다. 겹침 방지는 기능 이름이다 | 한 문장([measurement.md](measurement.md) "확정값" 비켜 가기 행, [code-tour.md](code-tour.md)) |
 | 방향 보간 병렬 사본 | 엔진 `UMassSmoothOrientationProcessor`와 같은 계산을 하는 Lab 프로세서(`ULabSmoothOrientationProcessor`). 단계 3부터 쓴다 | 한 문장([code-tour.md](code-tour.md) 선언 순서 표) |
 | 액터 상한, 전환 거리 | 하이드레이션 액터 수의 상한 1,000과 액터로 바뀌는 카메라 거리 35m. 단계 2\~8이 같다 | 한 문장([ADR-0021](../Decisions/0021-unified-actor-cap-and-hydrate-distance.md)) |
 | 최소 유지 시간 | 한 번 바뀐 개체가 2초 안에 바로 전의 표현으로 되돌아가지 않게 붙잡는다. 단계 4부터 | 한 문장([code-tour.md](code-tour.md) 68행) |
@@ -96,10 +96,11 @@
 | --- | --- | --- |
 | 할당기 | Animation Budget Allocator(처음) 또는 Budget Allocator | 사용자 2026-11-17([autonomous-decisions.md](../Worklog/autonomous-decisions.md) 끝). 한 일은 바꾼 것으로 쓴다(AGENTS.md). **`FSpanAllocator`는 Budget Allocator가 아니다.** 엔진의 GPU 버퍼 구간 관리자다([engine-notes.md](../Reference/engine-notes.md) 42절, [V2-w14-plan.md](../Worklog/V2-w14-plan.md) 7.1절). `FSpanAllocator`를 가리키는 옛 낱말은 `FSpanAllocator`로 쓴다 |
 | 빼 보기 | 기법별 기여 | 제목은 "기법별 기여(최종 구성에서 하나씩 껐을 때)", 조건은 "\~를 끈 조건"이다. 처음 쓰는 곳에서 방법을 한 문장으로 적는다(사용자 2026-11-17, 결정 7). `a8shd`는 끈 조건이 아니라 80m 밖 그림자를 다시 켠 조건이다 |
-| 분리 프로세서 | 밀어내기 프로세서 | 사용자 2026-11-18. 코드 식별자(`ULabSeparationProcessor`, `-LabSeparate`)와 엔진 회피의 파라미터 이름(분리 반경 배율 등)은 그대로 둔다 |
+| 분리 프로세서 | 밀어내기 프로세서 | 사용자 2026-11-18. 코드 식별자(`ULabSeparationProcessor`, `-LabSeparate`)와 Mass Avoidance의 파라미터 이름(분리 반경 배율 등)은 그대로 둔다 |
 | 직접 짠 분리, 직접 짠 밀어내기(단계 3의 이름) | 자체 밀어내기 | 사용자 2026-11-18. 조건 표의 영어 이름은 "Own separation logic"으로 둔다 |
 | 품질 단계 | 표현을 더하는 단계 | 단계 4, 6, 7(사용자 2026-11-17) |
 | 버는 단계 | 비용을 줄이는 단계 | 단계 2, 3, 5, 8(사용자 2026-11-17) |
+| 엔진 회피 | Mass Avoidance | 사용자 2026-11-18. "엔진을 회피한다"로도 읽혀 글 06 "엔진을 고치지 않고 피한 문제 다섯"과 섞인다. 각 글에서 처음에는 "엔진의 Mass Avoidance(`UMassMovingAvoidanceProcessor`)"로 쓴다. 코드 식별자(`-LabAvoid`, `s8av`)는 그대로 둔다 |
 | 조각상 | VAT 인스턴스 | 사용자 지시. 이 저장소의 추적 문서에서 옛 낱말이 쓰인 곳은 찾지 못했다(`git grep` 0건) |
 | 품질 올리기(단계 8의 이름) | 남은 비용 줄이기 | 사용자가 2026-11-16에 바꿨다([v2-plan.md](../v2-plan.md) 28행). 같은 이름의 옛 작업 단위 W11은 그대로 둔다 |
 | 그리기 호출 | 드로우 콜 | 글 02가 쓰던 말을 글 07과 README 그림에 맞췄다(2026-11-17 글 표기 맞추기) |
@@ -133,6 +134,7 @@
 | 이름 | 출처 |
 | --- | --- |
 | Mass, Representation LOD, ISM, VAT, ISKM, Animation Budget Allocator, URO | [AGENTS.md](../../AGENTS.md) "문서와 글" |
+| Mass Avoidance | 사용자 2026-11-18. 엔진 `UMassMovingAvoidanceProcessor`의 기능 이름 |
 | Fragment, Processor, Archetype, Chunk, Simulation LOD, Significance | [posting.md](posting.md) 52행(위 일곱과 겹치는 이름은 같다) |
 
 ### 3.2 문서에서 쓰는 이름
@@ -208,7 +210,7 @@
 | `a8res` | ISKM 트랙 예약을 끈 조건 | `-LabIskmTrackReserve=0` |
 | `a8fxf` | 입자가 오브를 따라가는 일(외삽 목표를 매 프레임 갱신)을 끈 조건 | `-LabFxOrbFollow=0` |
 | `a8stp` | ISKM 바운드 상자가 카메라를 따라가는 일을 끈 조건 | `-LabBoundsStepM=0` |
-| `s8av` | 하위 실험. 밀어내기 프로세서 대신 엔진 회피를 쓴 조건. 끈 조건이 아니라 바꾼 조건이다 | `-LabAvoid=1 -LabSeparate=0` |
+| `s8av` | 하위 실험. 밀어내기 프로세서 대신 Mass Avoidance를 쓴 조건. 끈 조건이 아니라 바꾼 조건이다 | `-LabAvoid=1 -LabSeparate=0` |
 | `s1opt` | 하위 실험. 단계 1 액터에 Animation Budget Allocator(4ms)를 더한 조건 | `-LabStage=1 -LabActorOpt=1` |
 | `s8iso` | 후보. 단계 8에 `-LabQueryIsolate=1`(Chaos CVar `p.Chaos.AccelerationStructureIsolateQueryOnlyObjects` 1)을 더한 조건. 기본 묶음에 없고 `Full4`의 `summary.csv`에 행이 없다 | `-LabQueryIsolate=1` |
 

@@ -13,7 +13,7 @@
 | 요약 파일 | [summary.csv](../../Measurements/Full4/summary.csv), [runs.csv](../../Measurements/Full4/runs.csv), [equivalence.csv](../../Measurements/Full4/equivalence.csv), [최대 N 표](../../Docs/figures/full4/full-n-at-60fps.csv) |
 | 프레임 CSV | `Saved/Profiling/CSV/Full4-V0-s2-N10000-P1-r1.csv`, `-r2.csv`, `-r3.csv`(git 밖). 측정 창 180초의 프레임마다 한 줄이다 |
 | 트레이스 | `Saved/Traces/Full4trace-V0-s1-N10000-P1-r1.utrace`, `Full4trace-V0-s2-N10000-P1-r1.utrace`(병렬), `Full4traceser-V0-s2-N10000-P1-r1.utrace`(직렬, `-LabFullyParallel=0`). git 밖. 트레이스 실행은 측정 60초이고 수치를 비교에 쓰지 않는다 |
-| 참고 묶음 | `V2M3Avoid`(Test 3072e96). 엔진 회피 파라미터를 바꾼 한 벌이다. `Full4`와 다른 묶음이라 본문에 "참고"로만 적었고 그림에 넣지 않았다(아래 "참고 묶음") |
+| 참고 묶음 | `V2M3Avoid`(Test 3072e96). Mass Avoidance 파라미터를 바꾼 한 벌이다. `Full4`와 다른 묶음이라 본문에 "참고"로만 적었고 그림에 넣지 않았다(아래 "참고 묶음") |
 
 ## 본문의 수치와 출처
 
@@ -103,9 +103,9 @@
 | 컴포넌트 틱, 메시 틱 | 같다 | `FActorComponentTickFunction::ExecuteTick` 1,489,909, `USkinnedMeshComponent_TickComponent` 1,482,294 | 프레임당 977.6, 972.6 |
 | 액터 위치 넣기 | 같다 | `LabActorMove` 1,473,332, `LabActorSyncProcessor` Incl 5.400초 | 프레임당 966.8번, 3.543ms |
 | CharacterMovement 틱 | 같다 | `GameThread` 통계에 `CharacterMovement` 이름의 타이머가 없다 | 0 |
-| 엔진 회피 | 같다(`TimingEvents`) | `MassMovingAvoidanceProcessor` 1,523번의 길이 평균. 32개 작업자 스레드에 나뉘어 돌았고 두 번이 시간상 겹친 적이 없다 | 24.727ms(중앙값 24.512) |
+| Mass Avoidance | 같다(`TimingEvents`) | `MassMovingAvoidanceProcessor` 1,523번의 길이 평균. 32개 작업자 스레드에 나뉘어 돌았고 두 번이 시간상 겹친 적이 없다 | 24.727ms(중앙값 24.512) |
 | 프레임 수, 한 프레임 | `Full4traceser-V0-s2` | `FEngineLoop::Tick` 1,227번, Incl 49.999초 | 40.749ms |
-| 엔진 회피(직렬) | 같다 | Incl 28.793초 ÷ 1,226번(Excl과 같다) | 23.486ms |
+| Mass Avoidance(직렬) | 같다 | Incl 28.793초 ÷ 1,226번(Excl과 같다) | 23.486ms |
 | Mass 프로세서 합(직렬) | 같다 | `…Processor_<번호>` 타이머 Incl의 합 35.686초. 다음으로 큰 것은 `LabActorSyncProcessor` 3.322초 | 회피 몫 80.7% |
 
 - 트레이스 실행의 프레임은 측정 실행보다 짧거나 길 수 있다(병렬 32.8ms, 측정 34.1ms). 그래서 트레이스 값은 어디에 시간을 쓰는지만 보이고, `summary.csv`의 값과 견주지 않는다.
@@ -133,7 +133,7 @@
 
 ## 참고 묶음 `V2M3Avoid`
 
-엔진 회피 파라미터 셋(분리 반경 배율 1.5, 분리 강성 3,000, 예측 시간 0.5초)을 바꾼 한 벌이다. Test 3072e96, 1만, 이동 장면, 오브 시점 카메라, 3회. 값은 [V2.md](../../Docs/Worklog/V2.md) "묶음 `V2M3Avoid`"와 `Measurements/V2M3Avoid/runs.csv`다. 사용자가 단계 2를 엔진 기본 파라미터로 두고 이 묶음을 글에서 참고로만 인용하기로 정했다([V2-full4-review.md](../../Docs/Worklog/V2-full4-review.md) "사용자 판단").
+Mass Avoidance 파라미터 셋(분리 반경 배율 1.5, 분리 강성 3,000, 예측 시간 0.5초)을 바꾼 한 벌이다. Test 3072e96, 1만, 이동 장면, 오브 시점 카메라, 3회. 값은 [V2.md](../../Docs/Worklog/V2.md) "묶음 `V2M3Avoid`"와 `Measurements/V2M3Avoid/runs.csv`다. 사용자가 단계 2를 엔진 기본 파라미터로 두고 이 묶음을 글에서 참고로만 인용하기로 정했다([V2-full4-review.md](../../Docs/Worklog/V2-full4-review.md) "사용자 판단").
 
 | 지표 | `s2`(엔진 기본값) | `s2avt`(한 벌) | 변화 |
 | --- | --- | --- | --- |
@@ -169,7 +169,7 @@
 | 컴포넌트 틱 19,894번 → 978번 | 19,893.7, 977.6 | 같다 |
 | 35m 안 액터, 상한 1,000 | 35, 1000 | `hydrate_m`, `actor_cap` |
 | 35\~200m 정지 메시 인스턴스, 200m 밖은 그리지 않는다 | | [code-tour.md](../../Docs/Guides/code-tour.md) "최종 구성에서는 돌지 않는 코드"의 `UMassUpdateISMProcessor` 행, 글 00 측정 기록의 `stage-map.svg` |
-| 조향·힘·이동·방향 보간, 엔진 회피 | | `BuildEntityConfig`의 Trait(아래 "Lab 코드 위치"), [code-tour.md](../../Docs/Guides/code-tour.md) "이동과 겹침 방지" |
+| 조향·힘·이동·방향 보간, Mass Avoidance | | `BuildEntityConfig`의 Trait(아래 "Lab 코드 위치"), [code-tour.md](../../Docs/Guides/code-tour.md) "이동과 겹침 방지" |
 | 액터 위치는 Lab 동기화 프로세서가 넣는다 | | `LabActorMove` 프레임당 966.8번(위), [engine-notes.md](../../Docs/Reference/engine-notes.md) 43절 끝 |
 
 ### `frame-vs-threads.svg`
@@ -231,10 +231,10 @@ SVG 여섯은 [make-figures.py](make-figures.py)가 만든다. 측정값은 `sum
 | 게임 스레드 시간 = 흐른 시간 − `Waits`, 임계 경로 시간 = 흐른 시간 − 비임계 기다림 | `Source/Runtime/Engine/Private/UnrealClient.cpp:1844, 1847-1849` `FViewport::Draw` |
 | 게임 스레드가 작업을 기다리는 곳(`WaitForTasks` 스코프)과 그 이벤트 기다림 | `Source/Runtime/Core/Private/Async/TaskGraph.cpp:781-784` |
 | 이 기다림의 둘째 인자 `bCountAsStall`은 `#if STATS` 안에서만 참이 된다. Test 구성은 `STATS`가 0이라 거짓이고 기다림이 유휴 시간에 든다 | `TaskGraph.cpp:729-755`, `STATS`의 Test 값은 [engine-notes.md](../../Docs/Reference/engine-notes.md) 6절 |
-| 엔진 회피 쿼리는 Medium·Low·Off LOD 태그가 있는 엔티티를 뺀다 | `Plugins/AI/MassAI/Source/MassNavigation/Private/MassAvoidanceProcessors.cpp:301-303` |
-| 엔진 회피는 `ForEachEntityChunk`(한 스레드)로 돈다 | 같은 파일 `:321, 331` `UMassMovingAvoidanceProcessor::Execute` |
-| 엔진 회피는 그룹 `Avoidance`, 힘 적용은 `Avoidance` 뒤다 | 같은 파일 `:287-288`, [engine-notes.md](../../Docs/Reference/engine-notes.md) 27절, 37절 |
-| 엔진 회피 파라미터 기본값, 이웃 수 상한 | [engine-notes.md](../../Docs/Reference/engine-notes.md) 36절, 51절(`MassAvoidanceProcessors.cpp:49-51, 832`) |
+| Mass Avoidance 쿼리는 Medium·Low·Off LOD 태그가 있는 엔티티를 뺀다 | `Plugins/AI/MassAI/Source/MassNavigation/Private/MassAvoidanceProcessors.cpp:301-303` |
+| Mass Avoidance는 `ForEachEntityChunk`(한 스레드)로 돈다 | 같은 파일 `:321, 331` `UMassMovingAvoidanceProcessor::Execute` |
+| Mass Avoidance는 그룹 `Avoidance`, 힘 적용은 `Avoidance` 뒤다 | 같은 파일 `:287-288`, [engine-notes.md](../../Docs/Reference/engine-notes.md) 27절, 37절 |
+| Mass Avoidance 파라미터 기본값, 이웃 수 상한 | [engine-notes.md](../../Docs/Reference/engine-notes.md) 36절, 51절(`MassAvoidanceProcessors.cpp:49-51, 832`) |
 
 ## 엔진 코드 발췌의 줄 수
 
@@ -256,7 +256,7 @@ posting.md의 상한(글 하나에 엔진 코드 30줄)보다 작다. 남긴 줄
 | Trait 붙이기(발췌) | `Source/HordeOptLab/LabCrowdSubsystem.cpp:62-92`(발췌 `:69-71, 79, 90, 92`) | `ULabCrowdSubsystem::BuildEntityConfig` |
 | 발췌의 `ULabMovementTrait`는 엔진 `UMassMovementTrait`의 하위 클래스다. 본문은 엔진의 이동을 붙인다고 적었다 | `Source/HordeOptLab/LabMassTraits.h:28` | `ULabMovementTrait` |
 | 발췌의 `UMassObstacleAvoidanceTrait` 줄은 실제로 `-LabAvoidTuned=1`이 아닐 때의 `else` 갈래다. 단계 2는 이 갈래다(`LabAvoidTuned` 0) | 같은 파일 `:84-91` | 같다 |
-| 엔진 회피는 단계 2에서만 켠다 | `Source/HordeOptLab/LabConfig.cpp:47`(`C.bAvoid = C.Step == 2`), `LabConfig.h:428` `UsesAvoidance` | `FLabConfig` |
+| Mass Avoidance는 단계 2에서만 켠다 | `Source/HordeOptLab/LabConfig.cpp:47`(`C.bAvoid = C.Step == 2`), `LabConfig.h:428` `UsesAvoidance` | `FLabConfig` |
 | Simulation LOD는 단계 5부터 | `LabConfig.h:422` `UsesSimLod`, `LabCrowdSubsystem.cpp:73-78` | 같다 |
 | 단계 2는 엔진 방향 보간 프로세서를 쓴다 | `LabConfig.cpp:49`, `Source/HordeOptLab/HordeOptLab.cpp:70` | |
 | 정지 메시 인스턴스는 엔진 `UMassUpdateISMProcessor` | `HordeOptLab.cpp:41` | |
@@ -266,7 +266,7 @@ posting.md의 상한(글 하나에 엔진 코드 30줄)보다 작다. 남긴 줄
 
 ## Insights 스크린샷
 
-코디네이터가 2026-11-17에 화면 1을 찍어 README의 "게임 스레드는 작업자 스레드 하나의 엔진 회피를 기다린다" 절에 넣었다(`images/insights-avoidance-wait.jpg`). 아래 표는 찍기 전에 적은 계획이고, 화면의 값은 표 아래에 있다. 찍는 법은 [Worklog/Posts.md](../../Docs/Worklog/Posts.md) "Insights 스크린샷(글 02\~07)"과 같다.
+코디네이터가 2026-11-17에 화면 1을 찍어 README의 "게임 스레드는 작업자 스레드 하나의 Mass Avoidance를 기다린다" 절에 넣었다(`images/insights-avoidance-wait.jpg`). 아래 표는 찍기 전에 적은 계획이고, 화면의 값은 표 아래에 있다. 찍는 법은 [Worklog/Posts.md](../../Docs/Worklog/Posts.md) "Insights 스크린샷(글 02\~07)"과 같다.
 
 | 항목 | 값 |
 | --- | --- |
@@ -292,12 +292,12 @@ posting.md의 상한(글 하나에 엔진 코드 30줄)보다 작다. 남긴 줄
 
 ## 확인하지 않은 것
 
-- 엔진 회피가 왜 개체를 오브 둘레에 쌓는지. 회피 힘이 속도 조향이고 가속 상한으로 잘린다는 것, 힘을 내는 이웃이 여섯이라는 것은 소스로 확인했다([engine-notes.md](../../Docs/Reference/engine-notes.md) 51절). 이것이 쌓임의 원인이라는 것은 추정이라 본문에 쓰지 않았다.
+- Mass Avoidance가 왜 개체를 오브 둘레에 쌓는지. 회피 힘이 속도 조향이고 가속 상한으로 잘린다는 것, 힘을 내는 이웃이 여섯이라는 것은 소스로 확인했다([engine-notes.md](../../Docs/Reference/engine-notes.md) 51절). 이것이 쌓임의 원인이라는 것은 추정이라 본문에 쓰지 않았다.
 - 단계 2의 시간을 회피 자체의 비용과 뭉침이 늘린 액터의 비용으로 나누지 않았다. 같은 장면에서 회피만 뺀 조건이 총괄 묶음에 없다.
 - 예상(4분의 1)은 트레이스 실행의 프레임(537.63ms)에서 셌고, 측정 실행의 프레임(597.108ms)과 다르다. 단계 2에서 메시 틱과 드로우 콜이 프레임을 얼마나 줄였는지는 나누지 않았다.
 - 트레이스 구간 70\~120초가 측정 구간 안인지 트레이스 시각으로 맞춰 보지 않았다. 글 03과 같은 구간이다.
 - 렌더 스레드 기다림(`RenderThreadIdle/NonCriticalPath`)의 대상을 트레이스로 보지 않았다. 그래서 본문은 "26.4ms를 쉬며 보낸다"로만 적고 무엇을 기다리는지 쓰지 않았다(팩트체크로 "게임 스레드를 기다린다"를 고쳤다).
-- 단계 2의 게임 스레드 기다림이 모두 엔진 회피 때문인지 프레임마다 맞춰 보지 않았다. 프레임 3305와 앞 프레임 3304에서 기다림의 끝이 비동기 러너의 끝과 맞았다.
+- 단계 2의 게임 스레드 기다림이 모두 Mass Avoidance 때문인지 프레임마다 맞춰 보지 않았다. 프레임 3305와 앞 프레임 3304에서 기다림의 끝이 비동기 러너의 끝과 맞았다.
 - 단계 1 트레이스에서 프레임당 틱 수(메시 9,906번, CharacterMovement 9,983번)가 1만보다 적은 까닭.
 - 게임 스레드의 기다림을 Insights 화면으로 보이지 못했다(위 절).
 - 본문이 가리키는 글 00, 01, 03, 07의 폴더(`00-goals-and-method`, `01-actor-baseline`, `03-separation`, `07-summary`)는 모두 있다.

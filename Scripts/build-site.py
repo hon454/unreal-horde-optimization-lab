@@ -71,7 +71,7 @@ ABL_SUB = {
     "a8res": "끄면 ISKM 트랙을 미리 늘려 두지 않는다.",
     "a8fxf": "끄면 입자가 걸어갈 목표를 시작 때 한 번만 정한다.",
     "a8stp": "끄면 ISKM 바운드 상자가 카메라를 따라 옮겨지지 않고, 대신 궤도를 덮게 커진다.",
-    "s8av": "밀어내기 프로세서 대신 엔진 회피 Processor로 겹침을 막는다.",
+    "s8av": "밀어내기 프로세서 대신 Mass Avoidance Processor로 겹침을 막는다.",
 }
 assert set(ABL_SUB) == set(pr.ABL_TEXT)
 
@@ -87,7 +87,7 @@ def changed_text(num, s):
                 f"화면 안에서 카메라로부터 {hm}m 안의 개체(상한 {cap})는 액터, 나머지는 애니메이션 없는 정지 메시 인스턴스이고, "
                 f"{far}m 밖은 그리지 않는다.")
     if num == 3:
-        return ("엔진 회피를 자체 밀어내기 프로세서(`ULabSeparationProcessor`)로 바꾸고, 엔진의 방향 보간 Processor를 "
+        return ("Mass Avoidance를 자체 밀어내기 프로세서(`ULabSeparationProcessor`)로 바꾸고, 엔진의 방향 보간 Processor를 "
                 "같은 계산을 병렬로 도는 사본으로 바꿨다. 표현은 단계 2와 같다.")
     if num == 4:
         hold = fmt_int(float(s(4, "rep_hold_ms")) / 1000)
@@ -298,7 +298,7 @@ def ablation_notes(by):
          if shd["gpu"]["real"] else
          f"80m 밖 그림자를 다시 켜면 프레임 p95가 {fmt(shd['frame']['d'])}ms 는다."),
         f"배경 무리를 끄면 GPU 시간이 {fmt(-fx['gpu']['d'])}ms 줄지만 프레임 p95는 최종 구성과 구별되지 않는다.",
-        f"밀어내기 프로세서 대신 엔진 회피를 쓰면 프레임 p95가 {fmt(av['frame']['d'])}ms 길어진다.",
+        f"밀어내기 프로세서 대신 Mass Avoidance를 쓰면 프레임 p95가 {fmt(av['frame']['d'])}ms 길어진다.",
     ]
     return out
 
@@ -376,9 +376,9 @@ def summary_text(by, pool, max60, s):
             {"head": "Mass로 옮기면 같은 호드의 프레임이 수십 배 짧아진다.",
              "body": (f"호드 1만의 프레임 p50(중앙값)은 `ACharacter` 액터로 {fmt(p50(1))}ms, 최종 구성으로 {fmt(p50(8))}ms다(약 {fmt_int(p50(1) / p50(8))}배). "
                       "Mass는 개체를 Fragment 배열로 두고 프로세서가 그 배열을 차례로 돌아, 액터마다 드는 틱, 컴포넌트 갱신, 이동 스윕이 없다.")},
-            {"head": "엔진 프로세서를 그대로 쓴 Mass의 병목은 한 스레드에서 도는 엔진 회피다.",
-             "body": (f"이 구성의 프레임 p50은 {fmt(p50(2))}ms이고, 엔진 회피 하나가 작업자 스레드 하나에서 프레임의 4분의 3을 쓴다. "
-                      f"엔진 회피를 위치를 직접 미는 밀어내기 프로세서로 바꾸자 {fmt(p50(3))}ms가 되어 처음 {fmt(TARGET_MS)}ms(60fps) 안에 들었다.")},
+            {"head": "엔진 프로세서를 그대로 쓴 Mass의 병목은 한 스레드에서 도는 Mass Avoidance다.",
+             "body": (f"이 구성의 프레임 p50은 {fmt(p50(2))}ms이고, Mass Avoidance 하나가 작업자 스레드 하나에서 프레임의 4분의 3을 쓴다. "
+                      f"Mass Avoidance를 위치를 직접 미는 밀어내기 프로세서로 바꾸자 {fmt(p50(3))}ms가 되어 처음 {fmt(TARGET_MS)}ms(60fps) 안에 들었다.")},
             {"head": "게임 스레드가 병목이면 거리별 표현은 싸다.",
              "body": (f"{hm}~{far}m의 VAT 인스턴스(애니메이션을 텍스처에 구워 정점 셰이더로 재생)와 ISKM(GPU에서 스키닝하는 인스턴스 스켈레탈 메시), {far}m 밖의 Niagara 입자를 "
                       f"더하는 동안 프레임 p95는 {fmt(rise['d'])}ms만 늘었다.")},

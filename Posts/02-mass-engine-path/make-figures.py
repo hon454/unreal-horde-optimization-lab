@@ -188,7 +188,7 @@ def what_changed():
     rows = [
         ("이동과 겹침 방지",
          ["액터마다 CharacterMovement 틱", f"프레임당 {count(TRACE['s1_cmc_ticks'])}번", "캡슐끼리 막고 스윕으로 미끄러진다"],
-         ["엔진 프로세서가 Chunk를 돈다", "조향·힘·이동·방향 보간", "겹침 방지는 엔진 회피 프로세서"]),
+         ["엔진 프로세서가 Chunk를 돈다", "조향·힘·이동·방향 보간", "겹침 방지는 Mass Avoidance 프로세서"]),
         ("그리기와 애니메이션",
          ["액터마다 스켈레탈 메시와 AnimBP", f"메시 틱 프레임당 {count(TRACE['s1_mesh_ticks'])}번", ""],
          ["35m 안만 액터(상한 1,000)", f"메시 틱 프레임당 {count(TRACE['s2_mesh_ticks'])}번", "35~200m는 정지 메시 인스턴스"]),
@@ -267,7 +267,7 @@ def frame_vs_threads():
 # ---------- 4. one frame of the trace: the game thread waits for the avoidance on one worker ----------
 def one_frame():
     o = []
-    title(o, "트레이스의 한 프레임: 게임 스레드가 엔진 회피를 기다린다",
+    title(o, "트레이스의 한 프레임: 게임 스레드가 Mass Avoidance를 기다린다",
           "단계 2, 호드 총수 1만, 이동 장면. 트레이스 실행의 한 프레임(측정값과 견주지 않는다)")
     X0, X1, XMAX = 170, 760, 35.0
     X = lambda ms: X0 + ms / XMAX * (X1 - X0)

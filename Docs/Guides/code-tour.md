@@ -42,7 +42,7 @@ Lab 프로세서는 모두 기본 처리 단계인 PrePhysics에 등록된다(`U
 | 14 | `ULabActorSyncProcessor`(그룹 없음) | Representation 뒤. 게임 스레드 |
 | — | `ULabNearOrbCountProcessor`, `ULabOverlapCountProcessor`(그룹 없음) | 선언 없음. 언제 도는지 정해져 있지 않다 |
 
-Avoidance 그룹과 `SyncWorldToMass` 그룹에는 최종 구성의 엔티티를 도는 프로세서가 없다(회피 Trait을 붙이지 않는다). 두 이름은 순서의 기준점으로만 쓰인다. 엔진 회피는 단계 2에서만 켜진다(`-LabAvoid=1`).
+Avoidance 그룹과 `SyncWorldToMass` 그룹에는 최종 구성의 엔티티를 도는 프로세서가 없다(회피 Trait을 붙이지 않는다). 두 이름은 순서의 기준점으로만 쓰인다. Mass Avoidance는 단계 2에서만 켜진다(`-LabAvoid=1`).
 
 ### 순서가 정해져 있지 않은 곳
 
@@ -60,7 +60,7 @@ Avoidance 그룹과 `SyncWorldToMass` 그룹에는 최종 구성의 엔티티를
 
 - **접근.** `ULabApproachProcessor`가 걷는 엔티티마다 `FMassMoveTargetFragment`를 오브의 지금 위치 쪽으로 채운다. 실제 이동은 엔진의 `UMassSteerToMoveTargetProcessor`(조향), `UMassApplyMovementProcessor`(이동)가 한다. 단계 2부터 같다. 회전(방향 보간)은 단계 2에서 엔진 `UMassSmoothOrientationProcessor`가 하고, 단계 3부터 `ULabSmoothOrientationProcessor`([LabSmoothOrientation.h](../../Source/HordeOptLab/LabSmoothOrientation.h))가 한다. 엔진과 같은 쿼리와 식을 청크 병렬(`ParallelForEachEntityChunk`)로 돌려 결과가 비트 단위로 같다(`-LabSmoothOrient=0`이 엔진 프로세서로 되돌린다). 단계 5부터 접근은 청크 필터(`ShouldTickChunkThisFrame`)를 걸어 80\~200m 청크는 0.5초 간격으로만 돈다.
 - **200m 밖.** 카메라에서 200m 밖은 Simulation LOD가 Off라 엔진 이동·조향이 돌지 않는다. `ULabOffMoveProcessor`가 틱 간격(1초)이 온 청크만 마지막으로 옮긴 뒤 흐른 시간 × 걷는 속도만큼 오브의 지금 위치 쪽으로 곧게 옮긴다. Off에 들어오는 순간은 관찰자 `ULabOffMoveEnterObserver`가 지연 명령 플러시 때 받아 마지막 이동 시각을 맞춘다. 단계 5에서 들어왔다. 엔진이 Off 엔티티를 이동 목표로 순간 이동시키는 `UMassOffLODNavigationProcessor`는 이 단계부터 등록하지 않는다([HordeOptLab.cpp](../../Source/HordeOptLab/HordeOptLab.cpp)).
-- **겹침 방지.** `ULabSeparationProcessor`가 그 프레임에 옮겨진 위치에서 균일 격자로 이웃을 찾아, 몸통 반지름(소형 40, 대형 94)의 합보다 가까운 쌍을 직접 떼어 놓는다([LabSeparation.h](../../Source/HordeOptLab/LabSeparation.h)). 모으기와 쓰기는 한 스레드, 풀이는 Jacobi 2회다. 반복마다 격자를 다시 만들고(한 스레드) 이웃 계산을 ParallelFor로 나눈다. 사망 중인 개체는 밀지도 밀리지도 않는다. 단계 3(자체 밀어내기)에서 들어왔다. 단계 2는 엔진 회피(`UMassObstacleAvoidanceTrait`)를 쓰고, 단계 1은 액터 캡슐끼리 막는다.
+- **겹침 방지.** `ULabSeparationProcessor`가 그 프레임에 옮겨진 위치에서 균일 격자로 이웃을 찾아, 몸통 반지름(소형 40, 대형 94)의 합보다 가까운 쌍을 직접 떼어 놓는다([LabSeparation.h](../../Source/HordeOptLab/LabSeparation.h)). 모으기와 쓰기는 한 스레드, 풀이는 Jacobi 2회다. 반복마다 격자를 다시 만들고(한 스레드) 이웃 계산을 ParallelFor로 나눈다. 사망 중인 개체는 밀지도 밀리지도 않는다. 단계 3(자체 밀어내기)에서 들어왔다. 단계 2는 Mass Avoidance(`UMassObstacleAvoidanceTrait`)를 쓰고, 단계 1은 액터 캡슐끼리 막는다.
 
 ### 거리 판정과 표현 전환
 
@@ -108,7 +108,7 @@ Avoidance 그룹과 `SyncWorldToMass` 그룹에는 최종 구성의 엔티티를
 | 이름 | 붙이는 곳 | 쓰는 프로세서 |
 | --- | --- | --- |
 | `FTransformFragment` | `ULabMinionTrait` | 이동·밀어내기(쓰기), Lab 로직·표현·LOD(읽기), `ULabOffMoveProcessor`(쓰기) |
-| `FAgentRadiusFragment` | `ULabMinionTrait` | 몸통 반지름(소형 40, 대형 94). 밀어내기, 겹친 쌍 집계, 엔진 회피 |
+| `FAgentRadiusFragment` | `ULabMinionTrait` | 몸통 반지름(소형 40, 대형 94). 밀어내기, 겹친 쌍 집계, Mass Avoidance |
 | `FMassActorFragment` | `ULabMinionTrait` | 엔진 표현, `ULabActorSyncProcessor`, 저격 확인 대상 |
 | `FLabMinionFragment` | `ULabMinionTrait` | 범위 피해, 저격, 상태 타이머 |
 | `FLabHealthFragment` | `ULabMinionTrait` | 범위 피해(쓰기), 저격(읽기) |
@@ -130,7 +130,7 @@ Avoidance 그룹과 `SyncWorldToMass` 그룹에는 최종 구성의 엔티티를
 ## 실행 인자에서 설정까지
 
 1. `FLabConfig::Get()`([LabConfig.cpp](../../Source/HordeOptLab/LabConfig.cpp))이 처음 불릴 때 명령줄을 한 번 읽어 정적 값으로 둔다. `-LabStage=8`(없으면 8)이 `Step`이 된다. 1\~8이 아니거나 `-LabVariant=`가 있으면 게임 모드가 종료 코드 2로 끝낸다.
-2. 같은 함수 안에서 단계가 기본값을 정한다. 단계 8은 엔진 회피 끔(`bAvoid`), 밀어내기 켬(`bSeparate`), 화면 크기 Budget 켬(`bScreenSigBudget`), 전환 대책 전부(`HydrateFixMask` 31), 최소 유지 시간 2,000ms(`RepHoldMs`), 엔티티 풀 켬(`bEntityPool`), 배경 무리 켬(`bCrowdFx`), 액터 상한 1,000과 전환 거리 35m(`FLabQuality::DefaultActorCap`, `DefaultHydrateM`, 단계 2부터 같다, ADR-0021), 원거리 그림자 끔(`bFarShadow` 거짓), 액터 메시 고정 바운드 켬(`bFixedSkelBounds`, `BoundsScale` `FLabQuality::FixedSkelBoundsScale` 1.1, v2 W11), 방향 보간 병렬 사본 켬(`bSmoothOrient`, 단계 3부터)이다. 인자(`-LabSeparate=0` 등)를 주면 인자가 이기고 `Overrides`에 남는다.
+2. 같은 함수 안에서 단계가 기본값을 정한다. 단계 8은 Mass Avoidance 끔(`bAvoid`), 밀어내기 켬(`bSeparate`), 화면 크기 Budget 켬(`bScreenSigBudget`), 전환 대책 전부(`HydrateFixMask` 31), 최소 유지 시간 2,000ms(`RepHoldMs`), 엔티티 풀 켬(`bEntityPool`), 배경 무리 켬(`bCrowdFx`), 액터 상한 1,000과 전환 거리 35m(`FLabQuality::DefaultActorCap`, `DefaultHydrateM`, 단계 2부터 같다, ADR-0021), 원거리 그림자 끔(`bFarShadow` 거짓), 액터 메시 고정 바운드 켬(`bFixedSkelBounds`, `BoundsScale` `FLabQuality::FixedSkelBoundsScale` 1.1, v2 W11), 방향 보간 병렬 사본 켬(`bSmoothOrient`, 단계 3부터)이다. 인자(`-LabSeparate=0` 등)를 주면 인자가 이기고 `Overrides`에 남는다.
 3. 판정 함수가 나머지를 정한다. `IsMass()`(단계 2부터), `UsesHydration()`, `CullsFar()`, `UsesVat()`(인스턴스가 움직인다, 단계 4부터), `UsesSimLod()`(단계 5부터), `UsesIskm()`(단계 6부터), `UsesFixedBounds()`, `UsesCrowdFxEntity()`, `UsesSeparation()`, `UsesRepHold()`, `UsesSmoothOrient()`.
 4. 게임 모듈 시작(`FLabGameModule::StartupModule`, [HordeOptLab.cpp](../../Source/HordeOptLab/HordeOptLab.cpp))이 이 함수들로 프로세서 CDO의 `bAutoRegisterWithProcessingPhases`를 바꾼다. 최종 구성에서는 `ULabIskmProcessor`, `ULabActorSyncProcessor`, `ULabOffMoveProcessor`, `ULabCrowdFxGatherProcessor`, `ULabSeparationProcessor`, `ULabRepHoldProcessor`, `ULabSmoothOrientationProcessor`가 켜지고 `UMassUpdateISMProcessor`, `ULabVatISMProcessor`, `UMassOffLODNavigationProcessor`, `UMassSmoothOrientationProcessor`가 꺼진다. 관찰자 `ULabOffMoveEnterObserver`는 자기 생성자에서 `bAutoRegisterWithObserverRegistry`를 같은 조건으로 정한다.
 5. 엔티티 구성(`BuildEntityConfig`), 쿼리 구성(`ConfigureQueries`의 `UsesSimLod()` 분기), 게임 모드(`ALabGameMode::StartPlay`의 `SetupCrowdFx`, `ApplyBudgetCVars`의 `a.Budget.Enabled`)가 같은 설정을 읽는다.
@@ -146,7 +146,7 @@ Avoidance 그룹과 `SyncWorldToMass` 그룹에는 최종 구성의 엔티티를
 | `ULabVatISMProcessor`([LabVatProcessor.cpp](../../Source/HordeOptLab/LabVatProcessor.cpp)) | 단계 4·5 VAT, 기법별 기여 `-LabIskm=0`(ISKM을 끈 조건) | 등록하지 않는다 |
 | `UMassOffLODNavigationProcessor`(엔진) | 단계 4까지, 기법별 기여 `-LabSimLod=0`(Simulation LOD를 끈 조건) | 등록하지 않는다 |
 | `UMassSmoothOrientationProcessor`(엔진) | 단계 2, `-LabSmoothOrient=0`, 개발 검사 `-LabSmoothOrientCheck` | 등록하지 않는다. `ULabSmoothOrientationProcessor`가 같은 일을 한다 |
-| `UMassObstacleAvoidanceTrait`, `UMassNavigationObstacleTrait` | 단계 2(엔진 회피), 하위 실험 `-LabAvoid=1` | 붙이지 않는다 |
+| `UMassObstacleAvoidanceTrait`, `UMassNavigationObstacleTrait` | 단계 2(Mass Avoidance), 하위 실험 `-LabAvoid=1` | 붙이지 않는다 |
 | `ALabMinionMassActor`, `ALabMinionMassActorLarge` | 단계 2·3 예산 없는 액터, 기법별 기여 `-LabScreenSigBudget=0`(Animation Budget Allocator를 끈 조건) | 만들지 않는다 |
 | `-LabBandFloor`, `LabLogScreenEvent`, `-LabSimLodLog`, `-LabOrbDiag`, `-LabFlashDiag`, `-LabDiag*` 등 | 개발 진단 | Test 빌드에는 코드가 없다(`#if !UE_BUILD_TEST`) |
 | `UMassConsumeInstancedSkinnedMeshAnimationProcessor`(엔진) | 엔진 ISKM 경로 | 요구하는 `FMassRepresentationAnimationFragment`가 엔티티에 없다 |
