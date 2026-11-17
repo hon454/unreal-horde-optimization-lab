@@ -41,6 +41,7 @@ CFGS = pr.CFGS
 STEPS = [(n, f"{SPEED}-s{n}", pr.STEP_TEXT[n][0], role) for n, role in pr.STEPS]
 MAXN_STEPS = (1, 2)  # W14 decision 5: max N only for the steps that do not hold 16.7 ms at 10000
 SHADOW_M = 80        # Representation LOD Medium/Low edge; step 8 turns minion shadows off beyond it (measurement.md "최종 구성의 거리 밴드")
+SEPARATION_TRACE_MS = 0.824  # step 3 serial trace, LabSeparationProcessor Incl 3.078 s / 3,737 (Posts/03-separation/measurements.md "트레이스 값"); no CSV holds it
 FAR_STREAM_M = 500   # map radius: entity-driven particles inside it, off-map records outside it (code-tour.md, ADR-0020)
 # The eight posts (V2-w14-plan.md 3.2, W14 decision 1) and the post that covers each step.
 POSTS = [(0, "00-goals-and-method"), (1, "01-actor-baseline"), (2, "02-mass-engine-path"), (3, "03-separation"),
@@ -320,6 +321,82 @@ def pool_notes(p):
     ]
 
 
+def load_final_max60():
+    """Step 8's max N and the excluded count, from the same CSV as load_max60()."""
+    with open(path("Docs", "figures", BATCH.lower(), "full-n-at-60fps.csv"), encoding="utf-8") as f:
+        for r in csv.DictReader(f):
+            if r["series"].split(" ", 1)[0] == "8":
+                m = re.search(r"N=(\d+) unmet", r["excluded"])
+                assert r["n_p95"] and m, r
+                return int(r["n_p95"]), int(m.group(1))
+    raise ValueError("step 8 row missing")
+
+
+def approx2(n):
+    """Two significant figures, as approx() in Site/site.js: 781 -> 780, 12026 -> 12000."""
+    p = 10 ** (len(str(int(n))) - 2)
+    return int(math.floor(n / p + 0.5)) * p
+
+
+def kcount(n):
+    """12000 -> "1만 2천", 780 -> "780", as kcount() in Site/site.js."""
+    man, r = divmod(int(n), 10000)
+    out = [f"{man}만"] if man else []
+    if r:
+        out.append(f"{r // 1000}천" if r % 1000 == 0 else f"{r:,}")
+    return " ".join(out)
+
+
+def summary_text(by, pool, max60, s):
+    """The page-top summary: the same sentences as the README "요약" and post 07, with every number from the CSVs.
+    Each claim is asserted so a new batch cannot keep a stale sentence."""
+    p50 = lambda n: sv(f"{SPEED}-s{n}", "frame_p50_ms")
+    p95 = lambda n: sv(f"{SPEED}-s{n}", "frame_p95_ms")
+    n8, n_out = load_final_max60()
+    hm, far = fmt_int(s(8, "hydrate_m")), fmt_int(s(8, "far_m"))
+    hyd, fsb, shd, farr = by["a8hyd"], by["a8fsb"], by["a8shd"], by["a8far"]
+    abl = [r for r in by.values() if r["group"] != "sub"]
+    rise = diff(f"{SPEED}-s3", f"{SPEED}-s7", "frame_p95_ms")
+    cut = diff(f"{SPEED}-s7", f"{SPEED}-s8", "frame_p95_ms")
+    off = pool["off"]
+    assert p95(2) > TARGET_MS >= p95(3), "step 3 is the first step inside 16.7 ms"
+    assert rise["real"] and rise["d"] > 0 and cut["real"] and cut["d"] < 0
+    assert hyd["frame"]["real"] and hyd["frame"]["d"] < 0 and min(abl, key=lambda r: r["frame"]["d"]) is hyd
+    assert fsb["frame"]["real"] and fsb["frame"]["d"] > 0 and not shd["frame"]["real"]
+    assert max(abl, key=lambda r: r["frame"]["d"]) is farr and farr["frame"]["real"]
+    assert off["iskm_tracks_end"][-1] > 5 * off["iskm_tracks_end"][0]
+    final95 = p95(8)
+    return {
+        "lead": (f"같은 호드 1만이 `ACharacter` 액터로는 프레임 p50(중앙값) {fmt(p50(1))}ms, Mass Entity로 다시 만든 최종 구성으로는 "
+                 f"{fmt(p50(8))}ms다(약 {fmt_int(p50(1) / p50(8))}배). 60fps를 지키는 총수는 약 {kcount(approx2(max60[1]['n']))}에서 "
+                 f"약 {kcount(approx2(n8))}으로 늘었다. 기법을 한 벌씩 바꾸며 같은 조건으로 재서, 기법마다 어느 스레드의 몇 ms가 바뀌는지 갈랐다."),
+        "why": ("Mass가 이만큼 가벼운 것은 개체를 액터가 아니라 데이터로 두기 때문이다. 같은 구성의 개체는 Fragment 배열로 청크에 모이고, "
+                "프로세서는 액터의 틱, 컴포넌트, 이동 스윕 없이 그 배열을 돈다. "
+                f"1만 개체를 서로 떼어 놓는 직접 짠 분리 프로세서는 {fmt(SEPARATION_TRACE_MS)}ms다. "
+                f"가까운 액터를 모두 빼면 호드 1만을 모두 ISKM(GPU에서 스키닝하는 인스턴스 스켈레탈 메시)으로 그리고도 "
+                f"프레임 p95(느린 쪽 5%의 경계)가 {fmt(final95 + hyd['frame']['d'])}ms다."),
+        "takeaways": [
+            {"head": "Mass의 엔진 기본 경로만으로는 모자라다. 한 스레드에서 도는 엔진 프로세서를 먼저 찾는다.",
+             "body": (f"엔진의 이동·회피·표현 프로세서를 그대로 쓴 Mass는 프레임 p50이 {fmt(p50(2))}ms였다. 남은 병목은 작업자 하나에 묶인 엔진 회피였다. "
+                      f"이것을 위치를 직접 미는 분리 프로세서로 바꾸자 {fmt(p50(3))}ms가 되어 처음 {fmt(TARGET_MS)}ms(60fps) 안에 들었다.")},
+            {"head": "게임 스레드가 병목이면 거리별 표현은 싸다.",
+             "body": (f"{hm}~{far}m의 VAT 인스턴스(애니메이션을 텍스처에 구워 정점 셰이더로 재생)와 ISKM, {far}m 밖의 Niagara 입자를 "
+                      f"더하는 동안 프레임 p95는 {fmt(rise['d'])}ms만 늘었다.")},
+            {"head": "남은 비용의 대부분은 가까운 액터에 있다.",
+             "body": (f"가까운 엔티티에 액터를 붙이는 하이드레이션을 끄면 프레임 p95가 {fmt(-hyd['frame']['d'])}ms 짧아진다. "
+                      "손을 대려면 액터 쪽부터 본다. 단계 8이 줄인 시간은 거의 액터 메시 고정 바운드의 몫이다.")},
+            {"head": "먼 개체는 덜 그리는 것보다 안 그리는 것이 크다.",
+             "body": f"{far}m 밖을 ISKM 대신 입자로 채우는 일이 가장 큰 절약이다(끄면 {fmt(farr['frame']['d'], True)}ms)."},
+            {"head": "엔진의 빈틈 둘은 게임 코드로 피한다.",
+             "body": (f"움직이는 ISKM 엔티티를 파괴하면 애니메이션 트랙이 돌아오지 않아 {pool['minutes'][-1]}분에 "
+                      f"{fmt_int(off['iskm_tracks_end'][-1])}개까지 쌓인다. 그래서 엔티티를 풀로 다시 쓴다. "
+                      f"화면 안팎 판정에 여유가 없어 표현이 오가므로, 최소 유지 시간 {fmt_int(float(s(8, 'rep_hold_ms')) / 1000)}초를 둔다.")},
+        ],
+        "close": (f"최종 구성의 프레임 p95는 {fmt(final95)}ms이고, {fmt(TARGET_MS)}ms까지 {fmt(TARGET_MS - final95)}ms가 남는다. "
+                  f"최대 총수 셈에서 호드 {kcount(n_out)}은 겹침 방지가 제 기능을 하지 못해 뺐다."),
+    }
+
+
 def copy_if_changed(src, dst):
     if os.path.exists(dst) and os.path.getsize(dst) == os.path.getsize(src):
         with open(src, "rb") as a, open(dst, "rb") as b:
@@ -342,6 +419,7 @@ def main():
     base, ab_rows = ablation()
     by = {r["key"]: r for r in ab_rows}
     notes = ablation_notes(by)
+    summary = summary_text(by, pool, max60, lambda num, col: S[f"{SPEED}-s{num}", N0][col])
     for r in ab_rows:
         del r["key"]  # the public data carries no condition label
 
@@ -388,6 +466,7 @@ def main():
             "release": f"{REPO}/releases/tag/v2",  # release tag; later releases are v2.1, v2.2, ...
             "pc_specs": f"{REPO}/blob/main/Docs/Reference/pc-specs.md",
             "measurement_guide": f"{REPO}/blob/main/Docs/Guides/measurement.md",
+            "tips": f"{REPO}/blob/main/Docs/Guides/mass-crowd-tips.md",
             "summary_csv": f"{REPO}/blob/main/Measurements/{BATCH}/summary.csv",
             "build": build,
             "res": f"{args['ResX']}×{args['ResY']}",
@@ -399,6 +478,7 @@ def main():
         "headline": {"first_ms": l1, "final_ms": l8, "first_p95_ms": sv(STEPS[0][1], "frame_p95_ms"),
                      "final_p95_ms": sv(base_c, "frame_p95_ms"), "final_margin_ms": round(TARGET_MS - sv(base_c, "frame_p95_ms"), 3),
                      "first_max60": max60[1]["n"], "first_over_budget": round(l1 / TARGET_MS, 1), "speedup": round(l1 / l8, 1)},
+        "summary": summary,
         "groups": GROUPS,
         "counts": sorted(all_counts),
         "steps": steps,

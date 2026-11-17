@@ -23,6 +23,17 @@
 | 호드 1만, 시나리오 카드의 2m/s | 10000, 200cm/s | 설정 | [글 00의 측정 기록](../00-goals-and-method/measurements.md) "본문의 수치와 출처" | |
 | 60fps = 16.7ms | 16.667 | 계산 | 1000 ÷ 60. 그림과 여유의 선은 16.7(`Scripts/plot.py` `BUDGET_MS`) | |
 | 단계 1 프레임 p50 597ms | 597.108 | `V0-s1` | `frame_p50_ms` | 599.009 / 597.108 / 594.037 |
+| 요약의 최종 구성 프레임 p50 12.8ms | 12.77 | `V0-s8` | `frame_p50_ms` | 12.93 / 12.68 / 12.77 |
+| 요약의 약 47배 | 46.8 | 계산 | 597.108 ÷ 12.77 = 46.76. 사이트의 `headline.speedup`과 같은 식 | |
+| 요약의 60fps를 지키는 총수 약 780 → 약 1만 2천 | 781, 12,026 | `V0-s1`, `V0-s8` | 아래 "여덟 단계의 최대 N". 둘 다 `full-n-at-60fps.csv` `n_p95`를 유효 숫자 둘로 줄였다 | |
+| 요약의 분리 프로세서 0.82ms | 0.824 | `Full4traceser-V0-s3` | 직렬 트레이스의 `LabSeparationProcessor` Incl 3.078초 ÷ 3,737([글 03의 측정 기록](../03-separation/measurements.md) "트레이스 값"). 단계 3, 호드 1만 | 트레이스 한 회 |
+| 요약의 "가까운 액터를 모두 빼면 ... 7.25ms" | 7.247 | `V0-a8hyd` r5, r6, r21 | `frame_p95_ms`. 하이드레이션을 끈 조건이라 액터 캡슐, Animation Budget Allocator, 액터 메시 고정 바운드가 함께 빠진다([글 05의 측정 기록](../05-cost-cuts-and-contributions/measurements.md)) | 7.236 / 7.251 / 7.247 |
+| 요약의 단계 2 프레임 p50 34.1ms | 34.058 | `V0-s2` | `frame_p50_ms` | 34.084 / 34.058 / 33.702 |
+| 요약의 단계 3 프레임 p50 12.4ms | 12.412 | `V0-s3` | `frame_p50_ms` | 12.534 / 12.363 / 12.412 |
+| 요약의 "작업자 하나에 묶인 엔진 회피" | | `V0-s2` 트레이스 | [글 02의 측정 기록](../02-mass-engine-path/measurements.md), [글 03의 측정 기록](../03-separation/measurements.md) | |
+| 요약의 "단계 8이 줄인 시간은 거의 액터 메시 고정 바운드의 몫" | −0.937 대 +0.978 | `V0-s8` − `V0-s7`, `V0-a8fsb` | 아래 "기법 하나로는 가장 큰 절약" 행의 `a8fsb`. 80m 밖 그림자를 다시 켠 `a8shd`는 구별되지 않는다([글 05의 측정 기록](../05-cost-cuts-and-contributions/measurements.md)) | |
+| 요약의 "16분에 120,428개" | 16분, 120,428 | `Pool2-V0-a8pool-N10000-P1-r1` | `timeline.csv` 16분 `iskm_tracks_end`. 참고 묶음, 1회([글 06의 측정 기록](../06-engine-findings/measurements.md)) | |
+| 요약의 최소 유지 시간 2초 | 2,000ms | 설정 | `LabConfig.h` 23 `DefaultRepHoldMs`, `summary.csv` `rep_hold_ms` 2000([글 05의 측정 기록](../05-cost-cuts-and-contributions/measurements.md)) | |
 | 단계 3 프레임 p95 14.1ms | 14.148 | `V0-s3` | `frame_p95_ms` | 14.265 / 13.975 / 14.148 |
 | 단계 3에서 처음 16.7ms 안 | 665.254, 36.785, 14.148 | `V0-s1`\~`V0-s3` | `full-ladder.csv` `frame_p95_ms`. 16.7보다 작은 첫 단계가 단계 3이다 | |
 | 단계 3에서 7까지 표현 셋을 더하는 동안 1.02ms 늘었다 | +1.020 | `V0-s7` − `V0-s3` | 15.168 − 14.148. 아래 "단계 사이의 차이" | |
