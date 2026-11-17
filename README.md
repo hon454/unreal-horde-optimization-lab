@@ -14,11 +14,12 @@
 - 최대 N은 프레임 p95가 16.7ms를 넘기 직전의 호드 총수다. 최종 구성이 60fps를 지키는 최대 N은 잰 두 총수의 프레임 p95를 이어 셈하면 약 1만 2천이다. 호드 2만에서는 겹침 방지가 제 기능을 하지 못해 이 셈에서 뺐다.
 - 최종 구성에서 기법을 하나씩 끄고 재면, 가장 큰 절약은 200m 밖을 그리지 않는 일이다(끄면 프레임 p95 +3.54ms). 가장 큰 비용은 하이드레이션(Hydration, 가까운 엔티티에만 진짜 액터를 붙이는 일)이다. 끄면 액터 캡슐 등이 함께 빠지고 프레임 p95가 6.98ms 짧아진다.
 
-단계를 고르면 화면과 측정값이 바뀌는 한 페이지 요약은 <https://hon454.github.io/unreal-horde-optimization-lab/>에 있다.
+단계를 고르면 화면과 측정값이 바뀌는 [한 페이지 요약](https://hon454.github.io/unreal-horde-optimization-lab/)도 있다.
 
 - **대상**: 클라이언트 한 대에서 그리고 움직이는 군중의 비용. 게임 스레드, 렌더 스레드, GPU, 메모리.
 - **최적화**: Mass Entity, 분리 프로세서, Representation LOD, 하이드레이션, Animation Budget Allocator, Simulation LOD, 엔티티 풀, Niagara 배경 무리, 80m 밖 그림자 끄기, 고정 바운드.
 - **측정 도구**: Test 구성 패키지에서 `csvprofile`과 Unreal Insights.
+- **팁**: Mass로 군중을 만들고 프로파일링하며 겪은 증상, 엔진이 그렇게 도는 까닭, 바꾼 코드는 [Mass 군중 최적화와 프로파일링 팁](Docs/Guides/mass-crowd-tips.md)에 모았다.
 
 ## 시나리오
 
@@ -108,8 +109,6 @@
 - 동등성 검사가 살아 있는 총수, 겹친 쌍, 캡슐 확인 트레이스 등으로 단계 사이가 같은 일을 하는지 조건마다 확인한다.
 
 규약 전체는 [Docs/Guides/measurement.md](Docs/Guides/measurement.md)에 있다. 이전 판은 태그 `v1`에 있고 겹침 방지와 캡슐이 없어 수치를 잇지 않는다.
-
-Mass로 군중을 만들고 프로파일링할 때의 기술 팁은 [Mass 군중 최적화와 프로파일링 팁](Docs/Guides/mass-crowd-tips.md)에 모았다.
 
 ## 실행
 
