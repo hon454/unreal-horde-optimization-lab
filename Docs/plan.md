@@ -1,5 +1,7 @@
 # 마일스톤 계획
 
+> `v1` 때의 기록이다. 지금 계획은 [v2-plan.md](v2-plan.md)와 [v2-spec.md](v2-spec.md)에 있다.
+
 M0\~M5가 필수였고 끝났다. 지금 계획은 아래 "품질 계획"이다. 마일스톤마다 바꾸는 최적화 변수는 하나고, 끝에 측정과 태그가 있다. 글은 완료 조건이 아니다([AGENTS.md](../AGENTS.md) "진행 방식"). 아래 M0\~M5 절이 가리키는 backlog 항목(미룬 마일스톤, 잘라낸 실험, 선택 심화)은 2026-11-11에 지웠고 git 이력에 남아 있다. [backlog.md](backlog.md)에는 글 대기열만 있다. 측정 조건과 지표는 [measurement.md](Guides/measurement.md)를 따른다.
 
 ## 공통 완료 조건

@@ -14,4 +14,6 @@
 - [V2-factcheck-readme-site.md](V2-factcheck-readme-site.md): 루트 README와 사이트의 팩트체크.
 - [V2-cleanup-plan.md](V2-cleanup-plan.md): main 병합 전 레포지토리 정리 조사(묶음 여섯의 후보, 크기, 끊어지는 링크, 선택지).
 - [V2-w14-plan.md](V2-w14-plan.md): W14(글, README, 사이트 교체와 main 병합)의 상세 계획안(제안, 사용자 결정, 작업 단위, 개발 지침 후보).
+- [Q5-hud.md](Q5-hud.md): 품질 계획 Q5의 HUD 작업 기록.
+- [autonomous-decisions.md](autonomous-decisions.md): 코디네이터가 묻지 않고 내린 결정과 사용자 판단이 필요한 항목.
 - [Setup.md](Setup.md): 클론 뒤 에셋 복구 스크립트(`Scripts/restore-assets.ps1`)와 준비 가이드(`Docs/Guides/setup.md`)를 만든 기록.
