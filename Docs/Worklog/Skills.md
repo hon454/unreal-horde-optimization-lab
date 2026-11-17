@@ -64,3 +64,18 @@
 
 - 작성: 성공. 측정 스킬 `SKILL.md`에 언어 한 줄, 동등성 단계에 겹침 방지·밀어내기(분리, separation)와 겹친 쌍 수, 병목 단계에 `EventWait/*` 합과 `WaitForTasks`를 넣었다. 군중 스킬 description에 밀어내기(분리, separation)와 `separation`, 말 절에 밀어내기, 함정 3번에 `ShouldTickChunkThisFrame`과 `ExecuteAfter(ProcessorGroupNames::LOD)`, 언어 한 줄을 넣었다. 다음: 확인.
 - 확인: 성공. description은 748자와 828자(1,024자 안), 물결표 없음. 스킬 폴더에서 레포 이름 검색 0건. check-tilde 0건. 다음: 커밋.
+- 커밋: 성공(5d5d22a). 코디네이터가 푸시하고 시험 폴더의 두 `SKILL.md`를 새 판으로 맞췄다.
+
+## 재시험(질문 2, 5, 9, 10)
+
+2026-11-18 작업 세션(Sonnet medium)이 같은 시험 폴더에서 처음과 같은 방식으로 네 질문을 다시 던졌다. 원문은 `../skill-trigger-test/retest-results.md`(git 밖)다. 대조는 코디네이터가 했다.
+
+| # | 불린 스킬 | 답의 언어 | 처음 시험과의 차이 |
+| --- | --- | --- | --- |
+| 2 | 군중 | 영어 | 맞음. 이번에는 영어로 답했다 |
+| 5 | 군중, 측정 | 한국어 | 일부 → 맞음. `ShouldTickChunkThisFrame`과 `ExecuteAfter(ProcessorGroupNames::LOD)`를 들었다 |
+| 9 | 측정 | 한국어 | 내용은 일부 → 맞음. `EventWait/*` 합과 `WaitForTasks` 절차를 들었다. 영어 질문에 여전히 한국어로 답했다 |
+| 10 | 측정, 군중 | 한국어 | 빗나감 → 맞음. "분리"를 밀어내기로 알아보고 겹친 쌍 확인을 먼저 들었다 |
+
+- 내용: 네 질문 모두 기대 동작과 맞다.
+- 남은 것: 측정 스킬이 영어 질문에 한국어로 답한 일이 한 번 더 있었다(질문 9). 언어 줄은 `SKILL.md` 본문에 있다.
