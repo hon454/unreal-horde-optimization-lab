@@ -111,7 +111,7 @@ Mass로 군중을 만들고 프로파일링할 때의 기술 팁은 [Mass 군중
 
 ## 실행
 
-빌드 없이 보려면 [Releases의 Test 패키지](https://github.com/hon454/unreal-horde-optimization-lab/releases/tag/test-package-08e45f2)를 받아 압축을 풀고 `run-final.bat`을 실행한다.
+빌드 없이 보려면 [Releases의 Test 패키지](https://github.com/hon454/unreal-horde-optimization-lab/releases/tag/v2)를 받아 압축을 풀고 `run-final.bat`을 실행한다.
 
 직접 빌드하고 재려면 먼저 세 가지를 갖춘다. 순서와 명령은 [Docs/Guides/setup.md](Docs/Guides/setup.md)에 있다.
 

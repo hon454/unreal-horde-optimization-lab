@@ -385,7 +385,7 @@ def main():
     data = {
         "meta": {
             "repo": REPO,
-            "release": f"{REPO}/releases/tag/test-package-{build}",
+            "release": f"{REPO}/releases/tag/v2",  # release tag; later releases are v2.1, v2.2, ...
             "pc_specs": f"{REPO}/blob/main/Docs/Reference/pc-specs.md",
             "measurement_guide": f"{REPO}/blob/main/Docs/Guides/measurement.md",
             "summary_csv": f"{REPO}/blob/main/Measurements/{BATCH}/summary.csv",

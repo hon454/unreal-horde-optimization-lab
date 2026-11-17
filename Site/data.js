@@ -627,7 +627,7 @@ window.SITE_DATA = {
   "distinct_floor_ms": 0.5,
   "measurement_guide": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Docs/Guides/measurement.md",
   "pc_specs": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Docs/Reference/pc-specs.md",
-  "release": "https://github.com/hon454/unreal-horde-optimization-lab/releases/tag/test-package-de0e21b",
+  "release": "https://github.com/hon454/unreal-horde-optimization-lab/releases/tag/v2",
   "repo": "https://github.com/hon454/unreal-horde-optimization-lab",
   "res": "2560×1440",
   "runs_per_condition": 3,
