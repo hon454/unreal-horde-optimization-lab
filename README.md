@@ -43,28 +43,30 @@
 
 ## 결과
 
-| 단계 1 액터 기준선(프레임 p95 665ms) | 단계 8 최종 구성(프레임 p95 14.2ms) |
-| --- | --- |
-| ![단계 1 화면. 모든 개체가 스켈레탈 메시 액터다](Docs/figures/steps/step1-actors.webp) | ![단계 8 화면. 35m 안은 액터, 35\~200m는 ISKM, 200m 밖은 입자로 그린다](Docs/figures/steps/step8-final.webp) |
+<table>
+<tr>
+<td align="center" valign="top"><img src="Docs/figures/steps/step1-actors.webp" width="400" alt="단계 1 화면. 모든 개체가 스켈레탈 메시 액터다"><br><b>단계 1 액터 기준선</b> · 출발점<br>모든 개체가 <code>ACharacter</code> 액터<br><b>프레임 p95 665ms</b></td>
+<td align="center" valign="top"><img src="Docs/figures/steps/step2-mass-engine.webp" width="400" alt="단계 2 화면. 35m 안은 액터, 그 밖은 엔진 기본 표현으로 그린다"><br><b>단계 2 Mass, 엔진 기본 경로</b> · 비용을 줄임<br>Mass 엔티티, 35m 안은 액터<br><b>프레임 p95 36.8ms (−628ms)</b></td>
+</tr>
+<tr>
+<td align="center" valign="top"><img src="Docs/figures/steps/step3-separation.webp" width="400" alt="단계 3 화면. 개체가 분리 프로세서로 서로 밀며 오브를 쫓는다"><br><b>단계 3 직접 짠 분리</b> · 비용을 줄임<br>엔진 회피를 분리 프로세서로<br><b>프레임 p95 14.1ms (−22.6ms)</b></td>
+<td align="center" valign="top"><img src="Docs/figures/steps/step4-vat-budget.webp" width="400" alt="단계 4 화면. 35m에서 200m 사이의 개체가 VAT 인스턴스로 움직인다"><br><b>단계 4 애니메이션 표현</b> · 표현을 더함<br>VAT 인스턴스, 애니메이션 예산<br><b>프레임 p95 14.2ms (+0.06ms, 구별되지 않음)</b></td>
+</tr>
+<tr>
+<td align="center" valign="top"><img src="Docs/figures/steps/step5-simlod-pool.webp" width="400" alt="단계 5 화면. 겉모습은 단계 4와 같다"><br><b>단계 5 Simulation LOD + 엔티티 풀</b> · 비용을 줄임<br>먼 개체 로직을 드물게, 엔티티 재사용<br><b>프레임 p95 14.5ms (+0.31ms, 구별되지 않음)</b></td>
+<td align="center" valign="top"><img src="Docs/figures/steps/step6-iskm.webp" width="400" alt="단계 6 화면. 35m에서 200m 사이의 개체를 ISKM으로 그린다"><br><b>단계 6 ISKM</b> · 표현을 더함<br>35m에서 200m를 ISKM으로<br><b>프레임 p95 14.7ms (+0.19ms, 구별되지 않음)</b></td>
+</tr>
+<tr>
+<td align="center" valign="top"><img src="Docs/figures/steps/step7-crowd.webp" width="400" alt="단계 7 화면. 200m 밖을 Niagara 입자 무리가 채운다"><br><b>단계 7 배경 무리</b> · 표현을 더함<br>200m 밖을 Niagara 입자로<br><b>프레임 p95 15.2ms (+0.46ms, 구별되지 않음)</b></td>
+<td align="center" valign="top"><img src="Docs/figures/steps/step8-final.webp" width="400" alt="단계 8 화면. 35m 안은 액터, 35m에서 200m 사이는 ISKM, 200m 밖은 입자로 그린다"><br><b>단계 8 남은 비용 줄이기</b> · 비용을 줄임, 최종 구성<br>그림자 끔, 액터 메시 고정 바운드<br><b>프레임 p95 14.2ms (−0.94ms)</b></td>
+</tr>
+</table>
 
-같은 호드 총수 1만, 같은 오브 시점 카메라다. 화면 왼쪽 위 HUD의 숫자는 측정값이 아니다.
+모두 호드 총수 1만, 오브 시점 카메라다. 괄호는 앞 단계와의 프레임 p95 차이다. 화면 왼쪽 위 HUD의 숫자는 측정값이 아니다.
 
 아래 값은 Test 패키지 하나에서 연달아 잰 것이다. 정확한 값은 [최종 측정의 표](Measurements/Full4/summary.csv)와 [그래프의 CSV](Docs/figures/full4/)에 있다.
 
 모든 단계가 같은 일 넷을 한다. 오브를 쫓고, 서로 겹치지 않고, 가까운 개체는 캡슐 콜리전을 갖고, 피해를 받고 죽는다. 한 단계는 앞 단계에서 기법 한 벌만 바꾸고, 둘 이상을 바꾼 단계는 기법별 기여로 몫을 가른다.
-
-| 단계 | 바꾼 것 |
-| --- | --- |
-| 단계 1 액터 기준선<br><img src="Docs/figures/steps/step1-actors.webp" width="320" alt="단계 1 화면. 모든 개체가 스켈레탈 메시 액터다"> | 모든 개체가 캡슐과 CharacterMovement를 가진 `ACharacter` 액터 |
-| 단계 2 Mass, 엔진 기본 경로<br><img src="Docs/figures/steps/step2-mass-engine.webp" width="320" alt="단계 2 화면. 35m 안은 액터, 그 밖은 엔진 기본 표현으로 그린다"> | 개체를 Mass 엔티티로. 엔진의 이동·회피·표현, 35m 안은 액터 |
-| 단계 3 직접 짠 분리<br><img src="Docs/figures/steps/step3-separation.webp" width="320" alt="단계 3 화면. 개체가 분리 프로세서로 서로 밀며 오브를 쫓는다"> | 엔진 회피를 분리 프로세서로, 방향 보간을 병렬 사본으로 |
-| 단계 4 애니메이션 표현<br><img src="Docs/figures/steps/step4-vat-budget.webp" width="320" alt="단계 4 화면. 35m에서 200m 사이의 개체가 VAT 인스턴스로 움직인다"> | VAT 인스턴스, 액터 애니메이션 예산, 최소 유지 시간 |
-| 단계 5 Simulation LOD + 엔티티 풀<br><img src="Docs/figures/steps/step5-simlod-pool.webp" width="320" alt="단계 5 화면. 겉모습은 단계 4와 같다"> | 먼 개체의 로직을 드물게, 죽은 엔티티를 다시 쓴다 |
-| 단계 6 ISKM<br><img src="Docs/figures/steps/step6-iskm.webp" width="320" alt="단계 6 화면. 35m에서 200m 사이의 개체를 ISKM으로 그린다"> | 35\~200m를 ISKM으로, ISKM 고정 바운드 |
-| 단계 7 배경 무리<br><img src="Docs/figures/steps/step7-crowd.webp" width="320" alt="단계 7 화면. 200m 밖을 Niagara 입자 무리가 채운다"> | 200m 밖을 Niagara 메시 입자로 |
-| 단계 8 남은 비용 줄이기<br><img src="Docs/figures/steps/step8-final.webp" width="320" alt="단계 8 화면. 35m 안은 액터, 35m에서 200m 사이는 ISKM, 200m 밖은 입자로 그린다"> | 80m 밖 그림자 끔, 액터 메시 고정 바운드 |
-
-단계 4, 6, 7은 표현을 더하는 단계이고, 단계 2, 3, 5, 8은 비용을 줄이는 단계다. 단계 1은 출발점이고, 단계 8이 최종 구성이다.
 
 ![여덟 단계의 프레임 p95와 프레임 p50. 호드 총수 1만, 이동 장면, 오브 시점 카메라, 세 번 잰 중앙값. 단계 1은 프레임 p95 665ms, 단계 2는 36.8ms로 16.7ms를 넘는다. 단계 3부터 16.7ms 안이고, 16.7ms까지의 여유는 단계 3이 2.55ms, 단계 7이 1.53ms, 단계 8이 2.47ms다. 단계 4에서 7까지는 앞 단계와 구별되지 않는다](Docs/figures/readme/ladder.svg)
 
