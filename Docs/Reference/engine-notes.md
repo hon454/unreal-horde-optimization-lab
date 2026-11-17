@@ -533,7 +533,7 @@
 - `UMassNavigationSubsystem`의 특성은 `GameThreadOnly = false`, `ThreadSafeWrite = false`다(`MN/Public/MassNavigationSubsystem.h:55-61`). 격자 갱신(쓰기)과 두 회피(읽기)는 서로 순서가 생기고, 작업자 스레드에서 돌 수 있다. 두 회피 프로세서도 병렬 순회(`ParallelForEachEntityChunk`)를 쓰지 않는다.
 - 이동 회피 파라미터 기본값(`MN/Public/Avoidance/MassAvoidanceFragments.h:35-114`): 분리 반경 배율 0.9, 장애물 분리 강성 250, 분리 거리 75cm, 예측 시간 2.5초, 예측 반경 배율 0.65, 예측 거리 75cm, 예측 강성 700.
 
-## 37. 분리 프로세서의 자리와 엔진 이동의 식(2026-11-15, v2 W4)
+## 37. 밀어내기 프로세서의 자리와 엔진 이동의 식(2026-11-15, v2 W4)
 
 경로는 `Engine/Plugins/Runtime/MassGameplay/Source/MassMovement` 기준이다(MM). Lab의 `ULabSeparationProcessor`가 이 사실에 기댄다.
 
@@ -696,7 +696,7 @@ for (const int32 TrackIndex : Temp)
 | 서브시스템 요구는 쿼리 충돌에 들지 않는다 | `bAggregateRequirements`(기본 거짓)이면 프로세서 단위로 선언한 서브시스템은 프로세서 충돌(`ContentionIndex`)에만 든다. 쿼리의 데이터 접근에는 쿼리에 선언한 서브시스템만 든다 | `ME/MassProcessingQueueTypes.cpp:137-163`, `Engine/Source/Runtime/MassEntity/Public/MassProcessor.h:261-264` |
 | 프로세서는 쿼리를 골라 돌릴 수 있다 | 실행 중 쿼리는 `SetCurrentQuery`가 소유 쿼리 목록에서 찾는다. 쿼리 순서는 자유이고 돌리지 않은 쿼리를 검사하지 않는다. 그래서 드물게 쓰는 프래그먼트는 따로 된 쿼리로 빼고 필요한 프레임에만 돌릴 수 있다 | `ME/MassProcessingQueueTypes.cpp:547-559` |
 
-## 48. 병렬 처리 큐의 프로세서 충돌과 게임 스레드 러너(2026-11-16, 분리 프로세서 기다림)
+## 48. 병렬 처리 큐의 프로세서 충돌과 게임 스레드 러너(2026-11-16, V2.md의 분리 프로세서 기다림)
 
 줄임말: **ME** = `Engine/Source/Runtime/MassEntity/Private`. 실행 결과는 [Worklog/V2.md](../Worklog/V2.md) "분리 프로세서 기다림"에 있다.
 

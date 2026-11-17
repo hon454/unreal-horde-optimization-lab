@@ -32,7 +32,7 @@ STATUS.md "명령"에는 매번 쓰는 것만 둔다. 여기에는 스크립트 
 | --- | --- | --- |
 | 1 | 액터 기준선: 모든 개체가 `ALabMinion`(캡슐, `CharacterMovement`, 캡슐끼리 막기) | `M0 full` |
 | 2 | Mass, 엔진 기본 경로: 엔진 이동·회피·표현, 가까운 개체는 하이드레이션 액터(캡슐 Trace, 화면 안 35m, 상한 1,000. 단계 8까지 같다, ADR-0021), 나머지는 엔진 `UMassUpdateISMProcessor`의 정지 메시 인스턴스, 200m 밖 그리지 않음 | 없음(새 조합) |
-| 3 | 직접 짠 분리: 엔진 회피 대신 `ULabSeparationProcessor`, 엔진 방향 보간 대신 같은 결과의 병렬 사본 `ULabSmoothOrientationProcessor` | `M3` + 정지 메시(새 조합) |
+| 3 | 자체 밀어내기: 엔진 회피 대신 `ULabSeparationProcessor`, 엔진 방향 보간 대신 같은 결과의 병렬 사본 `ULabSmoothOrientationProcessor` | `M3` + 정지 메시(새 조합) |
 | 4 | 애니메이션 표현: VAT 인스턴스, Animation Budget Allocator(화면 크기), 전환 대책 다섯, 최소 유지 시간 2초 | `M3 mass` + 예산 |
 | 5 | Simulation LOD(80/200m, 200m 밖 자체 이동) + 엔티티 풀 | `M5 m4offpool` |
 | 6 | ISKM(카메라를 따라가는 고정 바운드, 트랙 예약) | `M5 m5bounds` |
@@ -78,7 +78,7 @@ STATUS.md "명령"에는 매번 쓰는 것만 둔다. 여기에는 스크립트 
 
 ### 기법별 기여(v2 W10)
 
-최종 구성(단계 8)에서 기법 하나를 끄고 같은 조건으로 잰다. 조건 표의 이름은 `ablation`이다. 단계 8에 스위치 하나를 더한다. 총괄 묶음의 조건 표는 위 열일곱 행 모두(이동 조건. 정지 조건은 `a8fxf`와 `a8stp`를 뺀 열다섯 행)와 하위 실험 `s8av`(분리를 엔진 회피로 바꾼 것)다. 하위 실험 `s8iso`는 `-Only extra`로만 돈다. 근거는 [Worklog/V2.md](../Worklog/V2.md) "W12"에 있다.
+최종 구성(단계 8)에서 기법 하나를 끄고 같은 조건으로 잰다. 조건 표의 이름은 `ablation`이다. 단계 8에 스위치 하나를 더한다. 총괄 묶음의 조건 표는 위 열일곱 행 모두(이동 조건. 정지 조건은 `a8fxf`와 `a8stp`를 뺀 열다섯 행)와 하위 실험 `s8av`(밀어내기를 엔진 회피로 바꾼 것)다. 하위 실험 `s8iso`는 `-Only extra`로만 돈다. 근거는 [Worklog/V2.md](../Worklog/V2.md) "W12"에 있다.
 
 | 구성(`run-spike.ps1`) | 끄는 것 | 인자 | 바뀌는 메타데이터 |
 | --- | --- | --- | --- |
@@ -92,7 +92,7 @@ STATUS.md "명령"에는 매번 쓰는 것만 둔다. 여기에는 스크립트 
 | `a8bnd` | 고정 바운드 | `-LabFixedBounds=0` | `LabTechFixedBounds` 0, `LabIskmBounds` 0 |
 | `a8far` | 200m 밖 지우기 | `-LabFarCull=0` | `LabTechFarCull` 0 |
 | `a8fx` | 배경 무리 | `-LabCrowdFx=0` | `LabTechCrowdFx` 0 |
-| `a8sep` | 겹침 방지(Lab 분리) | `-LabSeparate=0` | `LabTechSeparate` 0 |
+| `a8sep` | 겹침 방지(Lab 밀어내기) | `-LabSeparate=0` | `LabTechSeparate` 0 |
 | `a8cap` | 액터 캡슐 | `-LabActorCollision=0` | `LabActorCollision` 0 |
 | `a8res` | ISKM 트랙 예약 | `-LabIskmTrackReserve=0` | `LabIskmTrackReserve` 0 |
 | `a8fxf` | 입자 외삽 목표 매 프레임 | `-LabFxOrbFollow=0` | `LabFxOrbFollow` 0 |

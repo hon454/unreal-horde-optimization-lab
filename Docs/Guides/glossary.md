@@ -56,7 +56,7 @@
 | 최종 구성 | 단계 8(`-LabStage=8`, 기본값). 기법별 기여의 기준이다 | 한 문장([code-tour.md](code-tour.md) 머리, [measurement.md](measurement.md)) |
 | 기법별 기여 | 최종 구성에서 기법 하나만 끄고 같은 조건으로 잰 차이. 단계 8과의 차이다. 제목은 "기법별 기여(최종 구성에서 하나씩 껐을 때)", 조건은 "\~를 끈 조건"이다 | 처음 쓰는 곳(README, 글 00)에서 한 문장으로 방법을 적는다. README와 글 본문에는 조건 표의 이름 `ablation`을 적지 않는다(사용자 결정, 2026-11-17. [V2-w14-plan.md](../Worklog/V2-w14-plan.md) 결정 7의 이 부분을 바꾼다) |
 | 하위 실험 | 기법을 끈 것이 아니라 바꾼 조건(`s8av`, `s1opt`). 조건 표에 이름이 있는 것만 총괄 묶음에서 잰다 | 한 문장([measurement.md](measurement.md) "벤치마크 조건") |
-| 분리 프로세서, 엔진 회피 | 겹침 방지의 구현 둘. 단계 2는 엔진 회피(`-LabAvoid=1`), 단계 3부터 Lab 분리 프로세서(`ULabSeparationProcessor`)다. 겹침 방지는 기능 이름이다 | 한 문장([measurement.md](measurement.md) "확정값" 비켜 가기 행, [code-tour.md](code-tour.md)) |
+| 밀어내기 프로세서, 엔진 회피 | 겹침 방지의 구현 둘. 밀어내기는 겹친 두 개체의 위치를 서로 반대로 밀어 겹침을 푸는 일이다. 단계 2는 엔진 회피(`-LabAvoid=1`), 단계 3부터 Lab 밀어내기 프로세서(`ULabSeparationProcessor`)다. 겹침 방지는 기능 이름이다 | 한 문장([measurement.md](measurement.md) "확정값" 비켜 가기 행, [code-tour.md](code-tour.md)) |
 | 방향 보간 병렬 사본 | 엔진 `UMassSmoothOrientationProcessor`와 같은 계산을 하는 Lab 프로세서(`ULabSmoothOrientationProcessor`). 단계 3부터 쓴다 | 한 문장([code-tour.md](code-tour.md) 선언 순서 표) |
 | 액터 상한, 전환 거리 | 하이드레이션 액터 수의 상한 1,000과 액터로 바뀌는 카메라 거리 35m. 단계 2\~8이 같다 | 한 문장([ADR-0021](../Decisions/0021-unified-actor-cap-and-hydrate-distance.md)) |
 | 최소 유지 시간 | 한 번 바뀐 개체가 2초 안에 바로 전의 표현으로 되돌아가지 않게 붙잡는다. 단계 4부터 | 한 문장([code-tour.md](code-tour.md) 68행) |
@@ -96,6 +96,8 @@
 | --- | --- | --- |
 | 할당기 | Animation Budget Allocator(처음) 또는 Budget Allocator | 사용자 2026-11-17([autonomous-decisions.md](../Worklog/autonomous-decisions.md) 끝). 한 일은 바꾼 것으로 쓴다(AGENTS.md). **`FSpanAllocator`는 Budget Allocator가 아니다.** 엔진의 GPU 버퍼 구간 관리자다([engine-notes.md](../Reference/engine-notes.md) 42절, [V2-w14-plan.md](../Worklog/V2-w14-plan.md) 7.1절). `FSpanAllocator`를 가리키는 옛 낱말은 `FSpanAllocator`로 쓴다 |
 | 빼 보기 | 기법별 기여 | 제목은 "기법별 기여(최종 구성에서 하나씩 껐을 때)", 조건은 "\~를 끈 조건"이다. 처음 쓰는 곳에서 방법을 한 문장으로 적는다(사용자 2026-11-17, 결정 7). `a8shd`는 끈 조건이 아니라 80m 밖 그림자를 다시 켠 조건이다 |
+| 분리 프로세서 | 밀어내기 프로세서 | 사용자 2026-11-18. 코드 식별자(`ULabSeparationProcessor`, `-LabSeparate`)와 엔진 회피의 파라미터 이름(분리 반경 배율 등)은 그대로 둔다 |
+| 직접 짠 분리(단계 3의 이름) | 자체 밀어내기 | 사용자 2026-11-18. 조건 표의 영어 이름은 "Own separation logic"으로 둔다 |
 | 품질 단계 | 표현을 더하는 단계 | 단계 4, 6, 7(사용자 2026-11-17) |
 | 버는 단계 | 비용을 줄이는 단계 | 단계 2, 3, 5, 8(사용자 2026-11-17) |
 | 조각상 | VAT 인스턴스 | 사용자 지시. 이 저장소의 추적 문서에서 옛 낱말이 쓰인 곳은 찾지 못했다(`git grep` 0건) |
@@ -174,14 +176,14 @@
 | --- | --- | --- | --- |
 | `s1` | 단계 1 액터 기준선 | 출발점 | `start` |
 | `s2` | 단계 2 Mass, 엔진 기본 경로 | 비용을 줄이는 단계 | `earn` |
-| `s3` | 단계 3 직접 짠 분리(분리 프로세서, 방향 보간 병렬 사본) | 비용을 줄이는 단계 | `earn` |
+| `s3` | 단계 3 자체 밀어내기(밀어내기 프로세서, 방향 보간 병렬 사본) | 비용을 줄이는 단계 | `earn` |
 | `s4` | 단계 4 애니메이션 표현(VAT 인스턴스, Animation Budget Allocator, 최소 유지 시간) | 표현을 더하는 단계 | `quality` |
 | `s5` | 단계 5 Simulation LOD + 엔티티 풀 | 비용을 줄이는 단계 | `earn` |
 | `s6` | 단계 6 ISKM | 표현을 더하는 단계 | `quality` |
 | `s7` | 단계 7 배경 무리 | 표현을 더하는 단계 | `quality` |
 | `s8` | 단계 8 남은 비용 줄이기 = 최종 구성 | 비용을 줄이는 단계 | `earn` |
 
-- 단계 3의 이름은 "직접 짠 분리"로 쓴다([v2-plan.md](../v2-plan.md), [V2-w14-plan.md](../Worklog/V2-w14-plan.md) 3.2절). 조건 표의 영어 이름은 "Own separation logic"이다.
+- 단계 3의 이름은 "자체 밀어내기"로 쓴다([v2-plan.md](../v2-plan.md), [V2-w14-plan.md](../Worklog/V2-w14-plan.md) 3.2절). 조건 표의 영어 이름은 "Own separation logic"이다. 이름은 2026-11-18에 "직접 짠 분리"에서 바꿨다.
 
 ### 5.2 구성(`kind` `ablation`, `sub`, `extra`)
 
@@ -199,14 +201,14 @@
 | `a8bnd` | ISKM 고정 바운드를 끈 조건 | `-LabFixedBounds=0` |
 | `a8far` | 200m 밖을 그리지 않는 일을 끈 조건. 표현 LOD의 Off 거리가 200m에서 1,000m(맵 반경의 두 배)로 옮겨져 맵 안 개체(카메라에서 최대 515m)가 Off에 들지 않는다. 그래서 200m 밖 엔티티가 ISKM(Low, 그림자 끔)으로 맵 끝까지 그려진다. 입자는 켠 채지만 맵 안에는 표현 None 엔티티가 없어 입자는 맵 밖 무리의 기록(500\~1,000m)만 그린다. Simulation LOD의 200m 경계는 그대로다(`LabConfig.h` 354, 410\~418행, `LabCrowdSubsystem.cpp` 135행, `LabCrowdFxProcessor.cpp` 221행. 2026-11-17 소스 확인) | `-LabFarCull=0` |
 | `a8fx` | 배경 무리를 끈 조건. 장면 규칙 `-LabFarHitIskm`과 맵 밖 기록의 그리기도 함께 빠진다 | `-LabCrowdFx=0` |
-| `a8sep` | 겹침 방지(분리 프로세서)를 끈 조건 | `-LabSeparate=0` |
+| `a8sep` | 겹침 방지(밀어내기 프로세서)를 끈 조건 | `-LabSeparate=0` |
 | `a8cap` | 액터 캡슐을 끈 조건 | `-LabActorCollision=0` |
 | `a8shd` | 80m 밖 그림자를 다시 켠 조건. 끈 조건이 아니다 | `-LabFarShadow=1` |
 | `a8fsb` | 액터 메시 고정 바운드를 끈 조건. 피직스 에셋 바운드로 돌아간다 | `-LabFixedSkelBounds=0` |
 | `a8res` | ISKM 트랙 예약을 끈 조건 | `-LabIskmTrackReserve=0` |
 | `a8fxf` | 입자가 오브를 따라가는 일(외삽 목표를 매 프레임 갱신)을 끈 조건 | `-LabFxOrbFollow=0` |
 | `a8stp` | ISKM 바운드 상자가 카메라를 따라가는 일을 끈 조건 | `-LabBoundsStepM=0` |
-| `s8av` | 하위 실험. 분리 프로세서 대신 엔진 회피를 쓴 조건. 끈 조건이 아니라 바꾼 조건이다 | `-LabAvoid=1 -LabSeparate=0` |
+| `s8av` | 하위 실험. 밀어내기 프로세서 대신 엔진 회피를 쓴 조건. 끈 조건이 아니라 바꾼 조건이다 | `-LabAvoid=1 -LabSeparate=0` |
 | `s1opt` | 하위 실험. 단계 1 액터에 Animation Budget Allocator(4ms)를 더한 조건 | `-LabStage=1 -LabActorOpt=1` |
 | `s8iso` | 후보. 단계 8에 `-LabQueryIsolate=1`(Chaos CVar `p.Chaos.AccelerationStructureIsolateQueryOnlyObjects` 1)을 더한 조건. 기본 묶음에 없고 `Full4`의 `summary.csv`에 행이 없다 | `-LabQueryIsolate=1` |
 

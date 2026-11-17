@@ -51,7 +51,7 @@
 <text x="440.0" y="207.6" font-size="16" text-anchor="middle" font-weight="700" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">단계 3 → 7: +1.02ms, 구별된다</text><text x="440.0" y="207.6" font-size="16" text-anchor="middle" font-weight="700" fill="#dc2626">단계 3 → 7: +1.02ms, 구별된다</text>
 <text x="96.0" y="405.0" font-size="16" text-anchor="start" fill="#4b5563">회색 숫자: 앞 단계와의 차이. 모두 0.5ms 아래라 구별되지 않는다</text>
 <text x="176.0" y="435.0" font-size="16" text-anchor="middle" font-weight="700" fill="#111827">단계 3</text>
-<text x="176.0" y="455.0" font-size="16" text-anchor="middle" fill="#4b5563">직접 짠 분리</text>
+<text x="176.0" y="455.0" font-size="16" text-anchor="middle" fill="#4b5563">자체 밀어내기</text>
 <text x="308.0" y="435.0" font-size="16" text-anchor="middle" font-weight="700" fill="#111827">단계 4</text>
 <text x="308.0" y="455.0" font-size="16" text-anchor="middle" fill="#4b5563">애니메이션 표현</text>
 <text x="440.0" y="435.0" font-size="16" text-anchor="middle" font-weight="700" fill="#111827">단계 5</text>

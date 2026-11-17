@@ -171,7 +171,7 @@ CHECK = []  # (figure, label, text) printed with LAB_FIG_CHECK=1
 STEPS = [
     (1, "액터 기준선", "ACharacter 액터, 캡슐과 이동 컴포넌트", "start"),
     (2, "Mass, 엔진 기본 경로", "엔진 이동·회피·표현, 가까운 개체는 액터", "earn"),
-    (3, "직접 짠 분리", "분리 프로세서, 방향 보간 병렬 사본", "earn"),
+    (3, "자체 밀어내기", "밀어내기 프로세서, 방향 보간 병렬 사본", "earn"),
     (4, "애니메이션 표현", "VAT 인스턴스, Animation Budget Allocator, 최소 유지 시간", "quality"),
     (5, "Simulation LOD + 엔티티 풀", "먼 개체의 로직을 드물게, 엔티티를 다시 쓴다", "earn"),
     (6, "ISKM", "35~200m를 ISKM으로, 고정 바운드", "quality"),

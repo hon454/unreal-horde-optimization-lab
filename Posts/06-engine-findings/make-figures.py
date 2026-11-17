@@ -392,7 +392,7 @@ def query_wait():
         o.append(f'<text x="{LX}" y="{y + 4}" font-size="18" font-weight="700">{head}</text>')
         y += 20
         o.append(f'<text x="{LX}" y="{y + 23}" font-size="16" fill="{SUB}">작업자 스레드</text>')
-        bar(y, 0, 76, PURPLE, "분리 프로세서: 위치를 읽고 쓴다")
+        bar(y, 0, 76, PURPLE, "밀어내기 프로세서: 위치를 읽고 쓴다")
         y += 46
         o.append(f'<text x="{LX}" y="{y + 23}" font-size="16" fill="{SUB}">게임 스레드</text>')
         if not fixed:

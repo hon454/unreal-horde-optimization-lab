@@ -71,7 +71,7 @@ ABL_SUB = {
     "a8res": "끄면 ISKM 트랙을 미리 늘려 두지 않는다.",
     "a8fxf": "끄면 입자가 걸어갈 목표를 시작 때 한 번만 정한다.",
     "a8stp": "끄면 ISKM 바운드 상자가 카메라를 따라 옮겨지지 않고, 대신 궤도를 덮게 커진다.",
-    "s8av": "분리 프로세서 대신 엔진 회피 Processor로 겹침을 막는다.",
+    "s8av": "밀어내기 프로세서 대신 엔진 회피 Processor로 겹침을 막는다.",
 }
 assert set(ABL_SUB) == set(pr.ABL_TEXT)
 
@@ -87,7 +87,7 @@ def changed_text(num, s):
                 f"화면 안에서 카메라로부터 {hm}m 안의 개체(상한 {cap})는 액터, 나머지는 애니메이션 없는 정지 메시 인스턴스이고, "
                 f"{far}m 밖은 그리지 않는다.")
     if num == 3:
-        return ("엔진 회피를 직접 짠 분리 프로세서(`ULabSeparationProcessor`)로 바꾸고, 엔진의 방향 보간 Processor를 "
+        return ("엔진 회피를 직접 짠 밀어내기 프로세서(`ULabSeparationProcessor`)로 바꾸고, 엔진의 방향 보간 Processor를 "
                 "같은 계산을 병렬로 도는 사본으로 바꿨다. 표현은 단계 2와 같다.")
     if num == 4:
         hold = fmt_int(float(s(4, "rep_hold_ms")) / 1000)
@@ -298,7 +298,7 @@ def ablation_notes(by):
          if shd["gpu"]["real"] else
          f"80m 밖 그림자를 다시 켜면 프레임 p95가 {fmt(shd['frame']['d'])}ms 는다."),
         f"배경 무리를 끄면 GPU 시간이 {fmt(-fx['gpu']['d'])}ms 줄지만 프레임 p95는 최종 구성과 구별되지 않는다.",
-        f"분리 프로세서 대신 엔진 회피를 쓰면 프레임 p95가 {fmt(av['frame']['d'])}ms 길어진다.",
+        f"밀어내기 프로세서 대신 엔진 회피를 쓰면 프레임 p95가 {fmt(av['frame']['d'])}ms 길어진다.",
     ]
     return out
 
@@ -372,13 +372,13 @@ def summary_text(by, pool, max60, s):
                  f"약 {kcount(approx2(n8))}으로 늘었다. 기법을 한 벌씩 바꾸며 같은 조건으로 재서, 기법마다 어느 스레드의 몇 ms가 바뀌는지 갈랐다."),
         "why": ("Mass가 이만큼 가벼운 것은 개체를 액터가 아니라 데이터로 두기 때문이다. 같은 구성의 개체는 Fragment 배열로 청크에 모이고, "
                 "프로세서는 액터의 틱, 컴포넌트, 이동 스윕 없이 그 배열을 돈다. "
-                f"1만 개체를 서로 떼어 놓는 직접 짠 분리 프로세서는 {fmt(SEPARATION_TRACE_MS)}ms다. "
+                f"1만 개체를 서로 떼어 놓는 직접 짠 밀어내기 프로세서는 {fmt(SEPARATION_TRACE_MS)}ms다. "
                 f"가까운 액터를 모두 빼면 호드 1만을 모두 ISKM(GPU에서 스키닝하는 인스턴스 스켈레탈 메시)으로 그리고도 "
                 f"프레임 p95(느린 쪽 5%의 경계)가 {fmt(final95 + hyd['frame']['d'])}ms다."),
         "takeaways": [
             {"head": "Mass의 엔진 기본 경로만으로는 모자라다. 한 스레드에서 도는 엔진 프로세서를 먼저 찾는다.",
              "body": (f"엔진의 이동·회피·표현 프로세서를 그대로 쓴 Mass는 프레임 p50이 {fmt(p50(2))}ms였다. 남은 병목은 작업자 하나에 묶인 엔진 회피였다. "
-                      f"이것을 위치를 직접 미는 분리 프로세서로 바꾸자 {fmt(p50(3))}ms가 되어 처음 {fmt(TARGET_MS)}ms(60fps) 안에 들었다.")},
+                      f"이것을 위치를 직접 미는 밀어내기 프로세서로 바꾸자 {fmt(p50(3))}ms가 되어 처음 {fmt(TARGET_MS)}ms(60fps) 안에 들었다.")},
             {"head": "게임 스레드가 병목이면 거리별 표현은 싸다.",
              "body": (f"{hm}~{far}m의 VAT 인스턴스(애니메이션을 텍스처에 구워 정점 셰이더로 재생)와 ISKM, {far}m 밖의 Niagara 입자를 "
                       f"더하는 동안 프레임 p95는 {fmt(rise['d'])}ms만 늘었다.")},

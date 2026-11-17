@@ -157,7 +157,7 @@ full.set_editor_property("additive_anim_type", unreal.AdditiveAnimationType.AAT_
 
 ## 4. 위치를 쓰겠다고 선언한 쿼리는 게임 스레드를 묶는다
 
-200m 밖 피격 개체를 ISKM으로 올리는 게임 스레드 프로세서가 하는 일보다 오래 걸렸다. 트레이스에서 이 프로세서는 작업자 스레드의 분리 프로세서가 끝나는 순간에 함께 끝났다. 위치는 드물게만 고치는데 기다림은 매 프레임 생겼다.
+200m 밖 피격 개체를 ISKM으로 올리는 게임 스레드 프로세서가 하는 일보다 오래 걸렸다. 트레이스에서 이 프로세서는 작업자 스레드의 밀어내기 프로세서가 끝나는 순간에 함께 끝났다. 위치는 드물게만 고치는데 기다림은 매 프레임 생겼다.
 
 두 쿼리가 모두 `FTransformFragment`를 읽기·쓰기로 선언한 탓이다.
 
@@ -173,9 +173,9 @@ if (UE::Mass::Tweakables::bForceInlineProcessorExecution)
 		ContentionMatrix.SetMutual(QueryInfos[MyQueryIndex].ChunkGlobalContentionIndex, Other.QueryInfos[OtherQueryIndex].ChunkGlobalContentionIndex);
 ```
 
-`mass.ForceInlineProcessorExecution`의 기본값은 참이다. 이때 한 쿼리의 직접 쓰기가 다른 쿼리의 직접 읽기와 겹치면, 엔진은 두 쿼리를 전역 충돌로 묶는다. 읽기·쓰기 선언은 읽기와 쓰기 양쪽에 든다. 두 쿼리가 다루는 아키타입이 겹치는지는 보지 않는다. 묶인 쿼리는 상대가 끝날 때까지 시작하지 못해서, 게임 스레드가 분리 프로세서를 기다렸다.
+`mass.ForceInlineProcessorExecution`의 기본값은 참이다. 이때 한 쿼리의 직접 쓰기가 다른 쿼리의 직접 읽기와 겹치면, 엔진은 두 쿼리를 전역 충돌로 묶는다. 읽기·쓰기 선언은 읽기와 쓰기 양쪽에 든다. 두 쿼리가 다루는 아키타입이 겹치는지는 보지 않는다. 묶인 쿼리는 상대가 끝날 때까지 시작하지 못해서, 게임 스레드가 밀어내기 프로세서를 기다렸다.
 
-![위치를 쓰는 쿼리끼리 기다리는 모습의 개념도. 고치기 전에는 작업자 스레드의 분리 프로세서가 위치를 읽고 쓰는 동안 게임 스레드의 피격 ISKM 프로세서가 쿼리 시작 전에 기다린다. 고친 뒤에는 주 쿼리가 위치를 요구하지 않아 바로 돌고, 위치를 쓰는 따라잡기 쿼리는 드문 프레임에만 돈다](images/query-wait.svg)
+![위치를 쓰는 쿼리끼리 기다리는 모습의 개념도. 고치기 전에는 작업자 스레드의 밀어내기 프로세서가 위치를 읽고 쓰는 동안 게임 스레드의 피격 ISKM 프로세서가 쿼리 시작 전에 기다린다. 고친 뒤에는 주 쿼리가 위치를 요구하지 않아 바로 돌고, 위치를 쓰는 따라잡기 쿼리는 드문 프레임에만 돈다](images/query-wait.svg)
 
 이 레포는 위치를 쓰는 일을 따로 된 쿼리로 뺐다.
 

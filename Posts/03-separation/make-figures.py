@@ -131,7 +131,7 @@ def summary():
     o = []
     title(o, "단계 2와 단계 3의 프레임 시간과 스레드 시간",
           "호드 총수 1만, 이동 장면, 오브 시점 카메라. 세 번 잰 중앙값(ms)")
-    legend(o, 32, 112, [(S2, "단계 2 엔진 회피"), (S3, "단계 3 직접 짠 분리")])
+    legend(o, 32, 112, [(S2, "단계 2 엔진 회피"), (S3, "단계 3 자체 밀어내기")])
     items = [("프레임 p95", "frame_p95_ms", True), ("프레임 p50", "frame_p50_ms", True),
              ("게임 스레드", "game_p50_ms", False), ("렌더 스레드", "render_p50_ms", False), ("GPU", "gpu_p50_ms", False)]
     X0, X1, XMAX = 170, 700, 40.0
@@ -209,7 +209,7 @@ def step2_trace():
     o.append(f'<text x="32" y="{y}" font-size="18" font-weight="700">직렬 실행(프로세서를 차례로 돌린다), 프로세서 하나</text>')
     top = y + 22
     rows_b = [("단계 2 엔진 회피", TRACE["s2ser_avoid"], S2),
-              ("단계 3 분리 프로세서", TRACE["s3ser_sep"], S3),
+              ("단계 3 밀어내기 프로세서", TRACE["s3ser_sep"], S3),
               ("단계 2 엔진 방향 보간", TRACE["s2ser_orient"], S2),
               ("단계 3 방향 보간 병렬 사본", TRACE["s3ser_orient"], S3)]
     pos = [top + 40 * k for k in range(len(rows_b))]
@@ -225,7 +225,7 @@ def step2_trace():
 # ---------- 3. principle: engine avoidance and the hand-written separation (concept) ----------
 def principle():
     o = []
-    title(o, "엔진 회피는 힘을 더하고, 분리 프로세서는 위치를 민다",
+    title(o, "엔진 회피는 힘을 더하고, 밀어내기 프로세서는 위치를 민다",
           "개념도. 칸의 값은 엔진과 프로젝트 소스의 설정값이다")
     CW, GAPX, TOP = 352, 32, 116
     cols = [
@@ -234,7 +234,7 @@ def principle():
           "힘을 내는 이웃: 가장 가까운 6개",
           "결과: 조향 힘에 더하고 가속 상한으로 자른다",
           "순회: 청크를 한 스레드에서 차례로"]),
-        (32 + CW + GAPX, "분리 프로세서(단계 3부터)", S3, BLUE,
+        (32 + CW + GAPX, "밀어내기 프로세서(단계 3부터)", S3, BLUE,
          ["이웃: 둘레 9칸에서 겹친 개체 모두",
           "결과: 남은 겹침의 절반씩 위치를 민다",
           "반복: 2번. 모두 같은 위치 사본을 읽는다",
@@ -284,7 +284,7 @@ def principle():
     o.append(f'<text x="{32 + CW + GAPX + 18}" y="{TOP + PH + 30}" font-size="16" fill="{SUB}">겹친 이웃마다 남은 겹침의 절반씩 떼어 놓는다</text>')
     yb = TOP + PH + 40 + 30 * 4 + 10
     yend = footer(o, yb + 52, ["엔진 회피는 이웃 수에 상한이 있고, 힘으로 속도만 바꾼다.",
-                               "분리 프로세서는 그 프레임의 이동 뒤에 겹침을 바로 푼다."])
+                               "밀어내기 프로세서는 그 프레임의 이동 뒤에 겹침을 바로 푼다."])
     write("principle.svg", svg(yend + 8, o, ARROW))
 
 
@@ -293,7 +293,7 @@ def same_work():
     o = []
     title(o, "같은 일을 하는지: 동등성 검사의 네 항목",
           "호드 총수 1만, 이동 장면, 오브 시점 카메라. 세 번 잰 중앙값")
-    legend(o, 32, 112, [(S2, "단계 2 엔진 회피"), (S3, "단계 3 직접 짠 분리")])
+    legend(o, 32, 112, [(S2, "단계 2 엔진 회피"), (S3, "단계 3 자체 밀어내기")])
     ref_death = float(e("V0-s3", "death_rate_ref"))
     ref_near = float(e("V0-s3", "near30_mean_ref"))
     lo, hi = (float(x) for x in e("V0-s3", "overlap_range").split(".."))
@@ -330,7 +330,7 @@ def same_work():
     yend = footer(o, y + 10, ["기준은 단계 3–8의 중앙값이다. 겹친 쌍의 허용 범위는 그 중앙값의 절반에서 두 배다.",
                               "단계 3은 기준 세 항목 안에 있고 깊게 겹친 쌍이 0이다.",
                               "단계 2는 초당 사망과 30m 안 개체 수가 기준 밖이고,",
-                              "겹친 쌍은 분리 프로세서의 허용 범위를 크게 넘는다."])
+                              "겹친 쌍은 밀어내기 프로세서의 허용 범위를 크게 넘는다."])
     write("same-work.svg", svg(yend + 8, o))
 
 
@@ -339,9 +339,9 @@ def final_swaps():
     o = []
     title(o, "최종 구성에서 겹침 방지를 바꾸거나 끄면",
           "호드 총수 1만, 이동 장면, 오브 시점 카메라. 세 번 잰 중앙값")
-    items = [("V0-s8", "최종 구성", "분리 프로세서"),
+    items = [("V0-s8", "최종 구성", "밀어내기 프로세서"),
              ("V0-s8av", "엔진 회피로 바꾼 조건", "하위 실험"),
-             ("V0-a8sep", "분리를 끈 조건", "겹침 방지가 없다")]
+             ("V0-a8sep", "밀어내기를 끈 조건", "겹침 방지가 없다")]
     X0, X1, XMAX = 260, 560, 25.0
     X = lambda ms: X0 + ms / XMAX * (X1 - X0)
     CX = 640
@@ -381,7 +381,7 @@ def final_swaps():
         y += RH
     ratio = v("V0-a8sep", "overlap_mean") / v("V0-s8", "overlap_mean")
     yend = footer(o, bottom + 96, ["엔진 회피로 바꾸면 프레임이 길어지고 겹친 쌍이 크게 는다.",
-                                    f"분리를 끄면 프레임은 짧지만 겹친 쌍이 {ratio:.0f}배로 늘어 같은 일이 아니다.",
+                                    f"밀어내기를 끄면 프레임은 짧지만 겹친 쌍이 {ratio:.0f}배로 늘어 같은 일이 아니다.",
                                     "가는 선은 세 실행의 최솟값–최댓값이다."])
     write("final-swaps.svg", svg(yend + 8, o))
 

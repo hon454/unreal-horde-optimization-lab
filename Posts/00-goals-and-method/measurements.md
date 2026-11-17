@@ -166,9 +166,9 @@ SVG 여섯은 [make-figures.py](make-figures.py)가 만든다(저장소 루트�
 | 러너는 에디터, 빌드 도구, 브라우저가 떠 있으면 시작하지 않는다 | `Scripts/run-full.ps1:218-220`(`$Blockers`: 에디터, 게임, `ShaderCompileWorker`, `UnrealBuildTool`, chrome, msedge, firefox, ffmpeg) |
 | 게임 창이 앞에 없던 실행은 버리고 다시 잰다 | `run-full.ps1:340-346`(2초마다 앞 창 표본), `:356-375`(측정 구간 안에 게임이 아닌 표본이 있으면 실패). measurement.md "측정 중 PC 상태" 행 |
 | 0.6ms는 실행 하나가 중앙값보다 길게 나올 수 있는 폭이다 | measurement.md "지표" 목표 판정. 근거 값은 앞선 작은 묶음에서 나와 본문에 수치를 쓰지 않았다 |
-| 겹친 쌍은 프레임 시간을 따라 는다 | V2.md "2026-11-17 Full4 캡슐 빗나감 진단"의 "부차" 절. 분리는 프레임마다 위치를 한 번 고친다(`Source/HordeOptLab/LabSeparation.h:20-34` 주석). 이 묶음의 예: `V0-a8hyd` 프레임 p50 6.595ms에서 51.83, `V0-s8` 12.77ms에서 233.53(`overlap_mean`) |
+| 겹친 쌍은 프레임 시간을 따라 는다 | V2.md "2026-11-17 Full4 캡슐 빗나감 진단"의 "부차" 절. 밀어내기는 프레임마다 위치를 한 번 고친다(`Source/HordeOptLab/LabSeparation.h:20-34` 주석). 이 묶음의 예: `V0-a8hyd` 프레임 p50 6.595ms에서 51.83, `V0-s8` 12.77ms에서 233.53(`overlap_mean`) |
 | 정지 장면의 캡슐 빗나감은 장치의 결함이다 | V2.md "2026-11-17 Full4 캡슐 빗나감 진단"의 "원인" 절, measurement.md "실패 등급", 조건 표 `capsule_miss_basis` |
-| 단계 2는 엔진 회피로, 나머지 단계는 분리로 겹치지 않게 한다 | 조건 표 `s2` `LabTechAvoid` 1, `LabTechSeparate` 0. 다른 단계는 `LabTechSeparate` 1. 분리는 반지름 합 × 1.2까지 뗀다(`Source/HordeOptLab/LabSeparation.h:31-34` `Skin = 0.2f`) |
+| 단계 2는 엔진 회피로, 나머지 단계는 밀어내기로 겹치지 않게 한다 | 조건 표 `s2` `LabTechAvoid` 1, `LabTechSeparate` 0. 다른 단계는 `LabTechSeparate` 1. 밀어내기는 반지름 합 × 1.2까지 뗀다(`Source/HordeOptLab/LabSeparation.h:31-34` `Skin = 0.2f`) |
 | 그림 `stage-map.svg`의 200m 밖은 그리지 않는다(단계 2\~6) | `Source/HordeOptLab/LabCrowdSubsystem.cpp:216` `LODRepresentation[EMassLOD::Off] = None`. 단계 7부터는 200m 밖을 입자로 그린다(위 `stage-map.svg` 표) |
 | 스레드 시간은 p50만 쓴다 | measurement.md "지표"의 스레드 시간 행(대기가 섞여 p95 해석이 어렵다) |
 | 오브가 움직이면 고정 목표에서만 통하는 기법이 드러난다 | ADR-0017 "맥락"과 결정 3, [v2-spec.md](../../Docs/v2-spec.md) 4.2절 |

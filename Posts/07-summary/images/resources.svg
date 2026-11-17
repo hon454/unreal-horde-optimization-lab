@@ -27,7 +27,7 @@
 <rect x="622.0" y="243.0" width="22.6" height="18" rx="3" fill="#0d9488"/>
 <text x="651.6" y="258.0" font-size="16" text-anchor="start" font-weight="700" fill="#0d9488">2,928</text>
 <line x1="32" y1="270" x2="768" y2="270" stroke="#e5e7eb"/>
-<text x="32.0" y="294.0" font-size="16" text-anchor="start" font-weight="700" fill="#111827">단계 3 직접 짠 분리</text>
+<text x="32.0" y="294.0" font-size="16" text-anchor="start" font-weight="700" fill="#111827">단계 3 자체 밀어내기</text>
 <rect x="330.0" y="279.0" width="37.0" height="18" rx="3" fill="#2563eb"/>
 <text x="374.0" y="294.0" font-size="16" text-anchor="start" font-weight="700" fill="#2563eb">1,706</text>
 <rect x="476.0" y="279.0" width="24.4" height="18" rx="3" fill="#db2777"/>

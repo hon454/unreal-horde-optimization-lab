@@ -19,7 +19,7 @@
 <line x1="460.4" y1="142" x2="460.4" y2="360" stroke="#b45309" stroke-width="2" stroke-dasharray="6 4"/>
 <text x="460.4" y="404" text-anchor="middle" font-size="16" font-weight="700" fill="#b45309">16.7</text>
 <text x="32" y="166" font-size="17" font-weight="700">최종 구성</text>
-<text x="32" y="190" font-size="16" fill="#4b5563">분리 프로세서</text>
+<text x="32" y="190" font-size="16" fill="#4b5563">밀어내기 프로세서</text>
 <rect x="260" y="150" width="170.8" height="30" rx="4" fill="#2563eb"/>
 <line x1="428.4" y1="165" x2="433.1" y2="165" stroke="#111827" stroke-width="2"/>
 <line x1="428.4" y1="158" x2="428.4" y2="172" stroke="#111827" stroke-width="2"/>
@@ -34,7 +34,7 @@
 <line x1="538.0" y1="236" x2="538.0" y2="250" stroke="#111827" stroke-width="2"/>
 <text x="546.0" y="249" font-size="16" font-weight="700" fill="#dc2626" paint-order="stroke" stroke="white" stroke-width="5" stroke-linejoin="round">22.8 (+8.57)</text>
 <text x="700" y="249" text-anchor="middle" font-size="17" font-weight="700" fill="#dc2626">11,660</text>
-<text x="32" y="322" font-size="17" font-weight="700">분리를 끈 조건</text>
+<text x="32" y="322" font-size="17" font-weight="700">밀어내기를 끈 조건</text>
 <text x="32" y="346" font-size="16" fill="#4b5563">겹침 방지가 없다</text>
 <rect x="260" y="306" width="159.7" height="30" rx="4" fill="#6b7280"/>
 <line x1="416.6" y1="321" x2="421.2" y2="321" stroke="#111827" stroke-width="2"/>
@@ -44,6 +44,6 @@
 <text x="700" y="327" text-anchor="middle" font-size="17" font-weight="700" fill="#6b7280">1,644</text>
 <line x1="32" y1="428" x2="768" y2="428" stroke="#e5e7eb"/>
 <text x="32" y="450" font-size="16" fill="#4b5563">엔진 회피로 바꾸면 프레임이 길어지고 겹친 쌍이 크게 는다.</text>
-<text x="32" y="476" font-size="16" fill="#4b5563">분리를 끄면 프레임은 짧지만 겹친 쌍이 7배로 늘어 같은 일이 아니다.</text>
+<text x="32" y="476" font-size="16" fill="#4b5563">밀어내기를 끄면 프레임은 짧지만 겹친 쌍이 7배로 늘어 같은 일이 아니다.</text>
 <text x="32" y="502" font-size="16" fill="#4b5563">가는 선은 세 실행의 최솟값–최댓값이다.</text>
 </svg>

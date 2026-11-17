@@ -40,7 +40,7 @@
 <text x="32" y="436" font-size="16" font-weight="700">단계 2 엔진 회피</text>
 <rect x="300" y="418" width="223.7" height="26" rx="4" fill="#9ca3af"/>
 <text x="531.7" y="437" font-size="16" font-weight="700" fill="#374151">23.5</text>
-<text x="32" y="476" font-size="16" font-weight="700">단계 3 분리 프로세서</text>
+<text x="32" y="476" font-size="16" font-weight="700">단계 3 밀어내기 프로세서</text>
 <rect x="300" y="458" width="7.8" height="26" rx="4" fill="#2563eb"/>
 <text x="315.8" y="477" font-size="16" font-weight="700" fill="#2563eb">0.82</text>
 <text x="32" y="516" font-size="16" font-weight="700">단계 2 엔진 방향 보간</text>

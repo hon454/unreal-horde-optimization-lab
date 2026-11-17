@@ -43,7 +43,7 @@ CFGS = lc.configs(DOC)
 STEP_TEXT = {
     1: ("액터 기준선", "ACharacter 액터, 캡슐과 이동 컴포넌트"),
     2: ("Mass, 엔진 기본 경로", "엔진 이동·회피·표현, 가까운 개체는 액터"),
-    3: ("직접 짠 분리", "분리 프로세서, 방향 보간 병렬 사본"),
+    3: ("자체 밀어내기", "밀어내기 프로세서, 방향 보간 병렬 사본"),
     4: ("애니메이션 표현", "VAT 인스턴스, Animation Budget Allocator, 최소 유지 시간"),
     5: ("Simulation LOD + 엔티티 풀", "먼 개체의 로직을 드물게, 엔티티를 다시 쓴다"),
     6: ("ISKM", "35~200m를 ISKM으로, 고정 바운드"),
@@ -60,10 +60,10 @@ ABL_TEXT = {
     "a8hyd": "하이드레이션을 끈 조건", "a8bud": "Animation Budget Allocator를 끈 조건", "a8fix": "전환 대책을 끈 조건",
     "a8hold": "최소 유지 시간을 끈 조건", "a8pool": "엔티티 풀을 끈 조건", "a8sim": "Simulation LOD를 끈 조건",
     "a8iskm": "ISKM을 끈 조건", "a8bnd": "ISKM 고정 바운드를 끈 조건", "a8far": "200m 밖을 그리지 않는 일을 끈 조건",
-    "a8fx": "배경 무리를 끈 조건", "a8sep": "겹침 방지(분리 프로세서)를 끈 조건", "a8cap": "액터 캡슐을 끈 조건",
+    "a8fx": "배경 무리를 끈 조건", "a8sep": "겹침 방지(밀어내기 프로세서)를 끈 조건", "a8cap": "액터 캡슐을 끈 조건",
     "a8shd": "80m 밖 그림자를 다시 켠 조건", "a8fsb": "액터 메시 고정 바운드를 끈 조건", "a8res": "ISKM 트랙 예약을 끈 조건",
     "a8fxf": "입자의 오브 따라가기를 끈 조건", "a8stp": "ISKM 바운드 상자 따라가기를 끈 조건",
-    "s8av": "분리 프로세서 대신 엔진 회피를 쓴 조건",
+    "s8av": "밀어내기 프로세서 대신 엔진 회피를 쓴 조건",
 }
 # Rows that remove more than one thing (measurement.md "변수가 둘 이상 섞인 행"). Same keys as plot.py's FULL_ABL_MIXED.
 ABL_MIXED = {

@@ -6,7 +6,7 @@
 <text x="32" y="112" font-size="18" font-weight="700">고치기 전</text>
 <text x="32" y="151" font-size="16" fill="#4b5563">작업자 스레드</text>
 <rect x="180.0" y="128" width="395.2" height="34" rx="5" fill="#9333ea" stroke="#9333ea" stroke-width="2"/>
-<text x="377.6" y="151.0" text-anchor="middle" font-size="16" font-weight="700" fill="white">분리 프로세서: 위치를 읽고 쓴다</text>
+<text x="377.6" y="151.0" text-anchor="middle" font-size="16" font-weight="700" fill="white">밀어내기 프로세서: 위치를 읽고 쓴다</text>
 <text x="32" y="197" font-size="16" fill="#4b5563">게임 스레드</text>
 <rect x="242.4" y="174" width="332.8" height="34" rx="5" fill="url(#wait)" stroke="#9ca3af" stroke-width="2"/>
 <text x="408.8" y="197" text-anchor="middle" font-size="16" font-weight="700" fill="#111827" stroke="white" stroke-width="5" paint-order="stroke">쿼리 시작 전에 기다린다</text>
@@ -17,7 +17,7 @@
 <text x="32" y="298" font-size="18" font-weight="700">고친 뒤</text>
 <text x="32" y="337" font-size="16" fill="#4b5563">작업자 스레드</text>
 <rect x="180.0" y="314" width="395.2" height="34" rx="5" fill="#9333ea" stroke="#9333ea" stroke-width="2"/>
-<text x="377.6" y="337.0" text-anchor="middle" font-size="16" font-weight="700" fill="white">분리 프로세서: 위치를 읽고 쓴다</text>
+<text x="377.6" y="337.0" text-anchor="middle" font-size="16" font-weight="700" fill="white">밀어내기 프로세서: 위치를 읽고 쓴다</text>
 <text x="32" y="383" font-size="16" fill="#4b5563">게임 스레드</text>
 <rect x="242.4" y="360" width="41.6" height="34" rx="5" fill="#2563eb" stroke="#2563eb" stroke-width="2"/>
 <text x="294.0" y="383" font-size="16" font-weight="700" fill="#2563eb">주 쿼리: 위치 없음, 바로 돈다</text>
