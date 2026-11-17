@@ -247,7 +247,7 @@
 | 발췌 | 위치 |
 | --- | --- |
 | ISKM 설명자 둘 | `Source/HordeOptLab/LabCrowdSubsystem.cpp` 179\~184(`ULabCrowdSubsystem::BuildEntityConfig`) |
-| 고정 바운드 | `Source/HordeOptLab/LabMinion.cpp` 272\~277(`ALabMinionMassActor::BeginPlay`) |
+| 고정 바운드 | `Source/HordeOptLab/LabMinion.cpp` 272\~277(`ALabMinionMassActor::BeginPlay`). 275행 주석은 뺐다 |
 | 풀에서 꺼내기 | `Source/HordeOptLab/LabCrowdSubsystem.cpp` 264\~274(`ULabCrowdSubsystem::SpawnEntities`), 줄인 곳은 270\~273 |
 | 상태 프로세서의 풀 분기 | `Source/HordeOptLab/LabMassProcessors.cpp` 1463\~1474(`ULabMinionStateProcessor::Execute`), 파괴 경로 1481 |
 
