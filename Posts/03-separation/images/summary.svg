@@ -56,7 +56,7 @@
 <rect x="170" y="508" width="93.7" height="22" rx="4" fill="#2563eb"/>
 <text x="271.7" y="525" font-size="16" font-weight="700" fill="#2563eb" paint-order="stroke" stroke="white" stroke-width="5" stroke-linejoin="round">7.07</text>
 <line x1="32" y1="582" x2="768" y2="582" stroke="#e5e7eb"/>
-<text x="32" y="604" font-size="16" fill="#4b5563">단계 3의 프레임 p95는 14.1ms다. 16.7ms까지 여유는 2.55ms다.</text>
+<text x="32" y="604" font-size="16" fill="#4b5563">단계 3의 프레임 p95는 14.1ms다. 16.7ms까지의 여유는 2.55ms다.</text>
 <text x="32" y="630" font-size="16" fill="#4b5563">가는 선은 세 실행의 최솟값–최댓값이다. 스레드 시간은 중앙값만 쓴다.</text>
 <text x="32" y="656" font-size="16" fill="#4b5563">단계 2는 프레임 시간이 세 스레드 시간보다 길다. 까닭은 글 02가 다룬다.</text>
 </svg>

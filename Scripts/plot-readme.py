@@ -32,7 +32,8 @@ BUDGET_MS = plot.BUDGET_MS  # 16.7 ms, the line and the "16.7ms까지의 여유"
 FONT = "Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Segoe UI, sans-serif"
 INK, SUB, LINE, BG, CARD = "#111827", "#4b5563", "#e5e7eb", "#ffffff", "#f8fafc"
 BLUE, TEAL, PINK, AMBER, DARK, GRAY = "#2563eb", "#0d9488", "#db2777", "#b45309", "#374151", "#9ca3af"
-PURPLE = "#7c3aed"
+PURPLE = "#9333ea"   # same as the post figures ("끄면 짧아진다")
+RED = "#dc2626"      # same as the post figures (entity pool off)
 W = 800
 
 DOC = lc.load()
@@ -583,7 +584,7 @@ def round_trips():
 # ---------- 5. entity pool over a long run (reference batch) ----------
 # Measurements/Pool2/timeline.csv: one run each with a 960 s window (Scripts/run-pool.ps1), 1-minute bins (Scripts/pool-timeline.py).
 # Pool on = s8 arguments, pool off = a8pool arguments (-LabEntityPool=0). One run each, so no run range and no distinguishable test.
-POOL_RUNS = [("s8", "풀 켬(최종 구성)", BLUE, ""), ("a8pool", "풀 끔", PINK, "6 4")]
+POOL_RUNS = [("s8", "풀 켬(최종 구성)", BLUE, ""), ("a8pool", "풀 끔", RED, "6 4")]
 POOL_PANELS = [("iskm_tracks_end", "ISKM 트랙 수", "개", 30000, 0.0),
                ("gpu_mem_mean", "GPU 메모리", "MB", 1000, None),
                ("frame_p95", "프레임 p95", "ms", 1, None)]

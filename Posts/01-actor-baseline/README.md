@@ -2,7 +2,7 @@
 
 ## 요약
 
-단계 1은 모든 개체가 캡슐과 CharacterMovement를 가진 `ACharacter` 액터다. 호드 총수 1만에서 프레임 p50(측정 창 프레임 시간의 중앙값)은 597ms이고, 병목은 게임 스레드다. 60fps를 지키는 최대 N은 약 780이다. Animation Budget Allocator만 켠 액터(예산 4ms)도 약 760이다. 트레이스에서 게임 스레드 시간의 약 4분의 3은 CharacterMovement의 틱이 쓴다.
+단계 1은 모든 개체가 캡슐과 CharacterMovement를 가진 `ACharacter` 액터다. 호드 총수 1만에서 프레임 p50(프레임 시간의 중앙값)은 597ms이고, 병목은 게임 스레드다. 60fps를 지키는 최대 N은 약 780이다. Animation Budget Allocator만 켠 액터(예산 4ms)도 약 760이다. 트레이스에서 게임 스레드 시간의 약 4분의 3은 CharacterMovement의 틱이 쓴다.
 
 ![단계 1의 프레임 p95, 프레임 p50, 게임 스레드, 렌더 스레드, GPU 시간. 이동 장면, 오브 시점 카메라, 세 번 잰 중앙값. 호드 총수 1천에서 프레임 p95는 20ms, 게임 스레드는 17.2ms다. 1만에서 프레임 p95는 665ms, 게임 스레드는 581ms다. 두 총수 모두 병목은 게임 스레드다](images/step1-threads.svg)
 
@@ -136,4 +136,4 @@ const float WorkUnitsToRunInFull = FMath::Clamp(WorkUnitBudget - (WorkUnitsExces
 - 개체당 비용은 2천까지만 일정했다. 1만의 증가를 하위 스텝 하나로 가르지는 않았다.
 - 트레이스는 1만 한 회다. 2천에서 CharacterMovement의 비중은 보지 않았다.
 
-[다음 글](../02-mass-engine-path/README.md)에서는 같은 일을 Mass로 옮긴다. 가까운 개체만 액터로 남고, CharacterMovement의 틱은 없어진다.
+[다음 글](../02-mass-engine-path/README.md)에서는 같은 일을 Mass로 옮긴다. 가까운 개체만 액터로 남고, CharacterMovement의 틱은 없어진다. 여덟 단계의 결과는 [07 요약](../07-summary/README.md)에 모았다.

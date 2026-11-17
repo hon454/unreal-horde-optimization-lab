@@ -215,7 +215,7 @@ def steps():
 
 # ---------- 2. technique contributions: every row, grey when not distinguishable ----------
 LABELS = {
-    "a8hyd": "하이드레이션 끔 †", "a8far": "200m 밖 지우기 끔", "a8cap": "액터 캡슐 끔", "a8fsb": "액터 메시 고정 바운드 끔",
+    "a8hyd": "하이드레이션 끔 †", "a8far": "200m 밖을 그리지 않는 일 끔", "a8cap": "액터 캡슐 끔", "a8fsb": "액터 메시 고정 바운드 끔",
     "a8sep": "겹침 방지 끔", "a8iskm": "ISKM 끔 †", "a8bnd": "ISKM 고정 바운드 끔", "a8bud": "액터 애니메이션 예산 끔",
     "a8fix": "전환 대책 끔", "a8hold": "최소 유지 시간 끔", "a8pool": "엔티티 풀 끔", "a8sim": "Simulation LOD 끔",
     "a8fx": "배경 무리 끔 †", "a8shd": "80m 밖 그림자 다시 켬", "a8res": "ISKM 트랙 예약 끔", "a8fxf": "입자의 오브 따라가기 끔",

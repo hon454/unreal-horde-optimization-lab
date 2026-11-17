@@ -24,7 +24,7 @@
 <text x="679.0" y="153.0" text-anchor="middle" font-size="16" font-weight="400" fill="#111827">맵에 B가 없어</text>
 <text x="679.0" y="175.0" text-anchor="middle" font-size="16" font-weight="400" fill="#111827">새 트랙을 할당</text>
 <text x="762.0" y="222" text-anchor="end" font-size="16" font-weight="700" fill="#dc2626">A의 트랙은 돌려받지 않는다. 트랙 수가 계속 는다</text>
-<text x="32" y="266" font-size="17" font-weight="700" fill="#2563eb">엔티티 풀(Lab)</text>
+<text x="32" y="266" font-size="17" font-weight="700" fill="#2563eb">엔티티 풀(이 레포)</text>
 <rect x="32.0" y="278.0" width="166.0" height="76.0" rx="6" fill="#f8fafc" stroke="#2563eb" stroke-width="2"/>
 <text x="115.0" y="311.0" text-anchor="middle" font-size="16" font-weight="400" fill="#111827">사망이 끝난</text>
 <text x="115.0" y="333.0" text-anchor="middle" font-size="16" font-weight="400" fill="#111827">엔티티 A</text>

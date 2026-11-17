@@ -62,5 +62,5 @@
 <text x="32.0" y="452.0" text-anchor="start" font-size="16" font-weight="400" fill="#4b5563">복사 셰이더는 두 자리가 겹치지 않는다고 가정한다.</text>
 <text x="32.0" y="474.0" text-anchor="start" font-size="16" font-weight="400" fill="#4b5563">이전 자세 칸이 깨진 프레임에는 컴포넌트의 모든 인스턴스가 틀린 속도를 받는다.</text>
 <text x="32.0" y="496.0" text-anchor="start" font-size="16" font-weight="400" fill="#4b5563">모션 블러가 그 속도로 같은 종류의 개체를 한 프레임 길게 끈다.</text>
-<text x="32.0" y="524.0" text-anchor="start" font-size="16" font-weight="700" fill="#2563eb">Lab: 컴포넌트가 처음 쓰일 때 트랙 수를 용량까지 늘려 둔다. 그 뒤로는 ①–③이 없다.</text>
+<text x="32.0" y="524.0" text-anchor="start" font-size="16" font-weight="700" fill="#2563eb">이 레포: 컴포넌트가 처음 쓰일 때 트랙 수를 용량까지 늘려 둔다. 그 뒤로는 ①–③이 없다.</text>
 </svg>

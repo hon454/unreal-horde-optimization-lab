@@ -6,7 +6,7 @@
 <text x="32" y="118" font-size="16" fill="#4b5563">최종 구성의 병목은 게임 스레드다. 프레임에 드러나지 않는 차이는 행 아래에 적었다</text>
 <rect x="32" y="139" width="16" height="16" rx="3" fill="#2563eb"/>
 <text x="54" y="152" font-size="16">길어진다(그 기법이 시간을 줄인다)</text>
-<rect x="334" y="139" width="16" height="16" rx="3" fill="#7c3aed"/>
+<rect x="334" y="139" width="16" height="16" rx="3" fill="#9333ea"/>
 <text x="356" y="152" font-size="16">짧아진다(그 기법이 시간을 쓴다)</text>
 <rect x="620" y="139" width="16" height="16" rx="3" fill="#9ca3af"/>
 <text x="642" y="152" font-size="16">구별되지 않는다</text>
@@ -63,36 +63,36 @@
 <line x1="558.7" y1="355.0" x2="558.7" y2="365.0" stroke="#111827" stroke-width="1.4"/>
 <text x="565.7" y="365.0" font-size="16" text-anchor="start" font-weight="700" fill="white" stroke="white" stroke-width="4" stroke-linejoin="round">+0.66</text><text x="565.7" y="365.0" font-size="16" text-anchor="start" font-weight="700" fill="#2563eb">+0.66</text>
 <text x="32" y="403" font-size="16" font-weight="700" fill="#111827">ISKM을 끈 조건 †</text>
-<rect x="526.1" y="389" width="15.2" height="18" rx="2" fill="#7c3aed"/>
+<rect x="526.1" y="389" width="15.2" height="18" rx="2" fill="#9333ea"/>
 <line x1="524.5" y1="398.0" x2="529.5" y2="398.0" stroke="white" stroke-width="3.5"/>
 <line x1="524.5" y1="393.0" x2="524.5" y2="403.0" stroke="white" stroke-width="3.5"/>
 <line x1="529.5" y1="393.0" x2="529.5" y2="403.0" stroke="white" stroke-width="3.5"/>
 <line x1="524.5" y1="398.0" x2="529.5" y2="398.0" stroke="#111827" stroke-width="1.4"/>
 <line x1="524.5" y1="393.0" x2="524.5" y2="403.0" stroke="#111827" stroke-width="1.4"/>
 <line x1="529.5" y1="393.0" x2="529.5" y2="403.0" stroke="#111827" stroke-width="1.4"/>
-<text x="517.5" y="403.0" font-size="16" text-anchor="end" font-weight="700" fill="white" stroke="white" stroke-width="4" stroke-linejoin="round">−0.67</text><text x="517.5" y="403.0" font-size="16" text-anchor="end" font-weight="700" fill="#7c3aed">−0.67</text>
+<text x="517.5" y="403.0" font-size="16" text-anchor="end" font-weight="700" fill="white" stroke="white" stroke-width="4" stroke-linejoin="round">−0.67</text><text x="517.5" y="403.0" font-size="16" text-anchor="end" font-weight="700" fill="#9333ea">−0.67</text>
 <text x="46" y="427" font-size="16" font-weight="700" fill="#2563eb">GPU 시간 +1.24ms</text>
 <text x="32" y="461" font-size="16" font-weight="700" fill="#111827">겹침 방지(분리 프로세서)를 끈 조건</text>
-<rect x="520.3" y="447" width="21.0" height="18" rx="2" fill="#7c3aed"/>
+<rect x="520.3" y="447" width="21.0" height="18" rx="2" fill="#9333ea"/>
 <line x1="514.5" y1="456.0" x2="523.3" y2="456.0" stroke="white" stroke-width="3.5"/>
 <line x1="514.5" y1="451.0" x2="514.5" y2="461.0" stroke="white" stroke-width="3.5"/>
 <line x1="523.3" y1="451.0" x2="523.3" y2="461.0" stroke="white" stroke-width="3.5"/>
 <line x1="514.5" y1="456.0" x2="523.3" y2="456.0" stroke="#111827" stroke-width="1.4"/>
 <line x1="514.5" y1="451.0" x2="514.5" y2="461.0" stroke="#111827" stroke-width="1.4"/>
 <line x1="523.3" y1="451.0" x2="523.3" y2="461.0" stroke="#111827" stroke-width="1.4"/>
-<text x="507.5" y="461.0" font-size="16" text-anchor="end" font-weight="700" fill="white" stroke="white" stroke-width="4" stroke-linejoin="round">−0.93</text><text x="507.5" y="461.0" font-size="16" text-anchor="end" font-weight="700" fill="#7c3aed">−0.93</text>
+<text x="507.5" y="461.0" font-size="16" text-anchor="end" font-weight="700" fill="white" stroke="white" stroke-width="4" stroke-linejoin="round">−0.93</text><text x="507.5" y="461.0" font-size="16" text-anchor="end" font-weight="700" fill="#9333ea">−0.93</text>
 <text x="46" y="485" font-size="16" font-weight="700" fill="#2563eb">겹친 쌍 1,644(최종 구성 234)</text>
 <text x="32" y="519" font-size="16" font-weight="700" fill="#111827">액터 캡슐을 끈 조건</text>
-<rect x="499.3" y="505" width="42.0" height="18" rx="2" fill="#7c3aed"/>
+<rect x="499.3" y="505" width="42.0" height="18" rx="2" fill="#9333ea"/>
 <line x1="499.0" y1="514.0" x2="499.6" y2="514.0" stroke="white" stroke-width="3.5"/>
 <line x1="499.0" y1="509.0" x2="499.0" y2="519.0" stroke="white" stroke-width="3.5"/>
 <line x1="499.6" y1="509.0" x2="499.6" y2="519.0" stroke="white" stroke-width="3.5"/>
 <line x1="499.0" y1="514.0" x2="499.6" y2="514.0" stroke="#111827" stroke-width="1.4"/>
 <line x1="499.0" y1="509.0" x2="499.0" y2="519.0" stroke="#111827" stroke-width="1.4"/>
 <line x1="499.6" y1="509.0" x2="499.6" y2="519.0" stroke="#111827" stroke-width="1.4"/>
-<text x="492.0" y="519.0" font-size="16" text-anchor="end" font-weight="700" fill="white" stroke="white" stroke-width="4" stroke-linejoin="round">−1.86</text><text x="492.0" y="519.0" font-size="16" text-anchor="end" font-weight="700" fill="#7c3aed">−1.86</text>
+<text x="492.0" y="519.0" font-size="16" text-anchor="end" font-weight="700" fill="white" stroke="white" stroke-width="4" stroke-linejoin="round">−1.86</text><text x="492.0" y="519.0" font-size="16" text-anchor="end" font-weight="700" fill="#9333ea">−1.86</text>
 <text x="32" y="557" font-size="16" font-weight="700" fill="#111827">하이드레이션을 끈 조건 †</text>
-<rect x="383.0" y="543" width="158.3" height="18" rx="2" fill="#7c3aed"/>
+<rect x="383.0" y="543" width="158.3" height="18" rx="2" fill="#9333ea"/>
 <line x1="382.8" y1="552.0" x2="383.1" y2="552.0" stroke="white" stroke-width="3.5"/>
 <line x1="382.8" y1="547.0" x2="382.8" y2="557.0" stroke="white" stroke-width="3.5"/>
 <line x1="383.1" y1="547.0" x2="383.1" y2="557.0" stroke="white" stroke-width="3.5"/>

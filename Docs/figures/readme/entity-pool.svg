@@ -5,7 +5,7 @@
 <text x="32" y="96" font-size="16" fill="#4b5563">호드 총수 1만, 이동 장면, 오브 시점 카메라. 1분 구간마다의 값. 실행이 한 번씩이라 범위는 없다</text>
 <line x1="32" y1="125" x2="58" y2="125" stroke="#2563eb" stroke-width="3"/>
 <text x="66" y="130" font-size="16">풀 켬(최종 구성)</text>
-<line x1="219.2" y1="125" x2="245.2" y2="125" stroke="#db2777" stroke-width="3" stroke-dasharray="6 4"/>
+<line x1="219.2" y1="125" x2="245.2" y2="125" stroke="#dc2626" stroke-width="3" stroke-dasharray="6 4"/>
 <text x="253.2" y="130" font-size="16">풀 끔</text>
 <text x="32" y="170" font-size="17" font-weight="700">ISKM 트랙 수</text><text x="147" y="170" font-size="16" fill="#4b5563">(개)</text>
 <line x1="120" y1="296.0" x2="650" y2="296.0" stroke="#e5e7eb"/>
@@ -21,11 +21,11 @@
 <line x1="120" y1="186.0" x2="650" y2="186.0" stroke="#e5e7eb"/>
 <text x="112" y="191.0" text-anchor="end" font-size="16" fill="#4b5563">15만</text>
 <polyline points="120.0,283.4 155.3,281.3 190.7,281.2 226.0,281.1 261.3,281.0 296.7,281.0 332.0,280.9 367.3,280.9 402.7,280.8 438.0,280.8 473.3,280.7 508.7,280.7 544.0,280.6 579.3,280.6 614.7,280.5 650.0,280.5" fill="none" stroke="#2563eb" stroke-width="2.5"/>
-<polyline points="120.0,283.0 155.3,277.7 190.7,272.6 226.0,267.8 261.3,263.0 296.7,258.1 332.0,252.9 367.3,247.5 402.7,242.5 438.0,237.7 473.3,232.9 508.7,228.0 544.0,222.7 579.3,217.4 614.7,212.4 650.0,207.7" fill="none" stroke="#db2777" stroke-width="2.5" stroke-dasharray="6 4"/>
+<polyline points="120.0,283.0 155.3,277.7 190.7,272.6 226.0,267.8 261.3,263.0 296.7,258.1 332.0,252.9 367.3,247.5 402.7,242.5 438.0,237.7 473.3,232.9 508.7,228.0 544.0,222.7 579.3,217.4 614.7,212.4 650.0,207.7" fill="none" stroke="#dc2626" stroke-width="2.5" stroke-dasharray="6 4"/>
 <circle cx="650.0" cy="280.5" r="4" fill="#2563eb"/>
 <text x="660" y="285.5" font-size="16" font-weight="700" fill="#2563eb">21,149</text>
-<circle cx="650.0" cy="207.7" r="4" fill="#db2777"/>
-<text x="660" y="212.7" font-size="16" font-weight="700" fill="#db2777">120,428</text>
+<circle cx="650.0" cy="207.7" r="4" fill="#dc2626"/>
+<text x="660" y="212.7" font-size="16" font-weight="700" fill="#dc2626">120,428</text>
 <text x="32" y="360" font-size="17" font-weight="700">GPU 메모리</text><text x="132" y="360" font-size="16" fill="#4b5563">(MB)</text>
 <line x1="120" y1="486.0" x2="650" y2="486.0" stroke="#e5e7eb"/>
 <text x="112" y="491.0" text-anchor="end" font-size="16" fill="#4b5563">3,000</text>
@@ -36,11 +36,11 @@
 <line x1="120" y1="376.0" x2="650" y2="376.0" stroke="#e5e7eb"/>
 <text x="112" y="381.0" text-anchor="end" font-size="16" fill="#4b5563">6,000</text>
 <polyline points="120.0,472.4 155.3,472.8 190.7,472.3 226.0,472.2 261.3,473.3 296.7,473.1 332.0,472.7 367.3,472.7 402.7,472.6 438.0,472.4 473.3,473.2 508.7,472.8 544.0,472.4 579.3,472.7 614.7,472.3 650.0,472.4" fill="none" stroke="#2563eb" stroke-width="2.5"/>
-<polyline points="120.0,472.4 155.3,470.7 190.7,463.3 226.0,456.8 261.3,453.4 296.7,452.3 332.0,452.5 367.3,454.5 402.7,456.0 438.0,455.8 473.3,456.8 508.7,424.0 544.0,408.8 579.3,408.9 614.7,408.8 650.0,408.8" fill="none" stroke="#db2777" stroke-width="2.5" stroke-dasharray="6 4"/>
+<polyline points="120.0,472.4 155.3,470.7 190.7,463.3 226.0,456.8 261.3,453.4 296.7,452.3 332.0,452.5 367.3,454.5 402.7,456.0 438.0,455.8 473.3,456.8 508.7,424.0 544.0,408.8 579.3,408.9 614.7,408.8 650.0,408.8" fill="none" stroke="#dc2626" stroke-width="2.5" stroke-dasharray="6 4"/>
 <circle cx="650.0" cy="472.4" r="4" fill="#2563eb"/>
 <text x="660" y="477.4" font-size="16" font-weight="700" fill="#2563eb">3,371</text>
-<circle cx="650.0" cy="408.8" r="4" fill="#db2777"/>
-<text x="660" y="413.8" font-size="16" font-weight="700" fill="#db2777">5,105</text>
+<circle cx="650.0" cy="408.8" r="4" fill="#dc2626"/>
+<text x="660" y="413.8" font-size="16" font-weight="700" fill="#dc2626">5,105</text>
 <text x="32" y="550" font-size="17" font-weight="700">프레임 p95</text><text x="132" y="550" font-size="16" fill="#4b5563">(ms)</text>
 <line x1="120" y1="676.0" x2="650" y2="676.0" stroke="#e5e7eb"/>
 <text x="112" y="681.0" text-anchor="end" font-size="16" fill="#4b5563">13</text>
@@ -51,11 +51,11 @@
 <line x1="120" y1="566.0" x2="650" y2="566.0" stroke="#e5e7eb"/>
 <text x="112" y="571.0" text-anchor="end" font-size="16" fill="#4b5563">16</text>
 <polyline points="120.0,635.6 155.3,610.3 190.7,616.2 226.0,612.2 261.3,644.6 296.7,627.8 332.0,628.1 367.3,598.1 402.7,616.2 438.0,614.8 473.3,645.1 508.7,635.9 544.0,618.8 579.3,609.5 614.7,610.2 650.0,622.2" fill="none" stroke="#2563eb" stroke-width="2.5"/>
-<polyline points="120.0,638.0 155.3,620.8 190.7,625.3 226.0,612.9 261.3,651.9 296.7,626.9 332.0,624.2 367.3,600.4 402.7,608.1 438.0,600.8 473.3,635.1 508.7,619.9 544.0,577.1 579.3,582.7 614.7,587.5 650.0,594.1" fill="none" stroke="#db2777" stroke-width="2.5" stroke-dasharray="6 4"/>
+<polyline points="120.0,638.0 155.3,620.8 190.7,625.3 226.0,612.9 261.3,651.9 296.7,626.9 332.0,624.2 367.3,600.4 402.7,608.1 438.0,600.8 473.3,635.1 508.7,619.9 544.0,577.1 579.3,582.7 614.7,587.5 650.0,594.1" fill="none" stroke="#dc2626" stroke-width="2.5" stroke-dasharray="6 4"/>
 <circle cx="650.0" cy="622.2" r="4" fill="#2563eb"/>
 <text x="660" y="627.2" font-size="16" font-weight="700" fill="#2563eb">14.5</text>
-<circle cx="650.0" cy="594.1" r="4" fill="#db2777"/>
-<text x="660" y="599.1" font-size="16" font-weight="700" fill="#db2777">15.2</text>
+<circle cx="650.0" cy="594.1" r="4" fill="#dc2626"/>
+<text x="660" y="599.1" font-size="16" font-weight="700" fill="#dc2626">15.2</text>
 <text x="120.0" y="700" text-anchor="middle" font-size="16" fill="#4b5563">1분</text>
 <text x="226.0" y="700" text-anchor="middle" font-size="16" fill="#4b5563">4분</text>
 <text x="367.3" y="700" text-anchor="middle" font-size="16" fill="#4b5563">8분</text>

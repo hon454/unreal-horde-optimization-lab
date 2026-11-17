@@ -165,7 +165,7 @@ def summary():
         y += rowh
     p95 = v("V0-s3", "frame_p95_ms")
     yf = bottom + 74
-    yend = footer(o, yf, [f"단계 3의 프레임 p95는 {fmt(p95)}ms다. 16.7ms까지 여유는 {fmt(BUDGET_MS - p95)}ms다.",
+    yend = footer(o, yf, [f"단계 3의 프레임 p95는 {fmt(p95)}ms다. 16.7ms까지의 여유는 {fmt(BUDGET_MS - p95)}ms다.",
                           "가는 선은 세 실행의 최솟값–최댓값이다. 스레드 시간은 중앙값만 쓴다.",
                           "단계 2는 프레임 시간이 세 스레드 시간보다 길다. 까닭은 글 02가 다룬다."])
     write("summary.svg", svg(yend + 8, o))
