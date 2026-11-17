@@ -6,16 +6,16 @@
   var BUDGET = D.meta.target_ms;
   var BOT = D.bottleneck_names;
   var METRICS = [
-    { key: "frame_p50_ms", label: "프레임 시간 중앙값", short: "프레임 중앙값", color: "var(--frame)" },
-    { key: "frame_p95_ms", label: "느린 쪽 5% 경계", short: "느린 쪽 5%", color: "var(--frame)" },
-    { key: "game_p50_ms", label: "게임 스레드", short: "게임 스레드", color: "var(--game)", bot: "game" },
-    { key: "render_p50_ms", label: "렌더 스레드", short: "렌더 스레드", color: "var(--render)", bot: "render" },
-    { key: "gpu_p50_ms", label: "GPU", short: "GPU", color: "var(--gpu)", bot: "gpu" }
+    { key: "frame_p50_ms", label: "프레임 p50", short: "프레임 p50", color: "var(--frame)" },
+    { key: "frame_p95_ms", label: "프레임 p95", short: "프레임 p95", color: "var(--frame)" },
+    { key: "game_p50_ms", label: "게임 스레드 시간", short: "게임 스레드", color: "var(--game)", bot: "game" },
+    { key: "render_p50_ms", label: "렌더 스레드 시간", short: "렌더 스레드", color: "var(--render)", bot: "render" },
+    { key: "gpu_p50_ms", label: "GPU 시간", short: "GPU", color: "var(--gpu)", bot: "gpu" }
   ];
 
   // ---------- formatting (same rule as Scripts/plot-readme.py fmt) ----------
   function fmt(x, signed) {
-    var a = Math.abs(x);
+    var a = Math.abs(x) + 1e-9;  // round half up like Python's Decimal in plot-readme.py (toFixed alone gives 1.85 for 1.855)
     var s = a >= 100 ? a.toFixed(0) : a >= 10 ? a.toFixed(1) : a.toFixed(2);
     if (parseFloat(s) === 0) { return s; }
     if (signed) { return (x > 0 ? "+" : x < 0 ? "−" : "±") + s; }
@@ -24,16 +24,23 @@
   function pct(p) { return (p > 0 ? "+" : p < 0 ? "−" : "±") + Math.abs(p).toFixed(1) + "%"; }
   function int(n) { return Math.round(n).toLocaleString("en-US"); }
   function kcount(n) {
-    if (n >= 10000) { return (n / 10000) + "만"; }
-    if (n >= 1000) { return (n / 1000) + "천"; }
-    return String(n);
+    // 12500 -> "1만 2,500", 2500 -> "2,500", 2000 -> "2천" (the README and the posts write it this way).
+    var man = Math.floor(n / 10000), r = n % 10000, out = [];
+    if (man) { out.push(man + "만"); }
+    if (r) { out.push(r % 1000 === 0 ? (r / 1000) + "천" : r.toLocaleString("en-US")); }
+    return out.join(" ");
+  }
+  // Two significant figures: 781 -> 780, 4102 -> 4,100 (the README writes the max N this way).
+  function approx(n) {
+    var p = Math.pow(10, Math.floor(Math.log10(n)) - 1);
+    return Math.round(n / p) * p;
   }
   function esc(t) {
     return String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   }
   function md(t) { return esc(t).replace(/`([^`]+)`/g, "<code>$1</code>"); }
   function $(id) { return document.getElementById(id); }
-  function stepName(s) { return s.num + "단계 " + s.name; }
+  function stepName(s) { return "단계 " + s.num + " " + s.name; }
 
   // ---------- state ----------
   var steps = D.steps;
@@ -62,15 +69,15 @@
   // ---------- header ----------
   function renderHeader() {
     var H = D.headline;
-    $("lead").innerHTML = md("`ACharacter` 액터로 만든 호드는 60fps를 지키며 " + int(H.first_max60) +
-      "개까지만 돈다. 같은 호드를 UE 5.8의 Mass Entity로 다시 만들고, 최적화 기법을 한 단계에 하나씩 더하며 " +
+    $("lead").innerHTML = md("`ACharacter` 액터로 호드 1만을 돌리면 프레임 p50이 " + fmt(H.first_ms) + "ms이고, 60fps를 지키는 액터는 약 " +
+      int(approx(H.first_max60)) + "개까지다. 같은 호드를 UE 5.8의 Mass Entity로 다시 만들고, 최적화 기법을 한 단계씩 더하며 " +
       "그때마다 같은 시나리오를 같은 방법으로 다시 쟀다.");
     $("spec-n").textContent = kcount(D.meta.target_n);
     $("spec-ms").textContent = "한 프레임 " + fmt(BUDGET) + "ms";
     $("res-first").textContent = fmt(H.first_ms) + "ms";
     $("res-final").textContent = fmt(H.final_ms) + "ms";
-    $("res-note").textContent = "1단계는 60fps 한 프레임의 " + H.first_over_budget + "배다. 최종 구성은 느린 쪽 5% 경계도 " +
-      fmt(H.final_p95_ms) + "ms로 " + fmt(BUDGET) + "ms 안이다.";
+    $("res-note").textContent = "단계 1의 프레임 p50은 " + fmt(BUDGET) + "ms의 " + H.first_over_budget + "배다. 단계 8의 프레임 p95는 " +
+      fmt(H.final_p95_ms) + "ms이고, " + fmt(BUDGET) + "ms까지의 여유는 " + fmt(H.final_margin_ms) + "ms다.";
     ["link-repo", "foot-repo"].forEach(function (id) { $(id).href = D.meta.repo; });
     ["link-release", "foot-release"].forEach(function (id) { $(id).href = D.meta.release; });
     $("foot-csv").href = D.meta.summary_csv;
@@ -79,9 +86,9 @@
   // ---------- tabs ----------
   function renderTabs() {
     var html = steps.map(function (s) {
-      return '<button type="button" role="tab" class="tab' + (s.group === "spend" ? " spend" : "") + '" id="tab-' + s.num +
+      return '<button type="button" role="tab" class="tab' + (s.group === "quality" ? " quality" : "") + '" id="tab-' + s.num +
         '" aria-controls="panel" aria-selected="false" tabindex="-1" data-step="' + s.num + '">' +
-        '<span class="t-num">' + s.num + '단계</span><span class="t-name">' + esc(s.name) + '</span></button>';
+        '<span class="t-num">단계 ' + s.num + '</span><span class="t-name">' + esc(s.name) + '</span></button>';
     }).join("");
     var tabs = $("tabs");
     tabs.innerHTML = html;
@@ -160,13 +167,13 @@
     $("next").disabled = s.num === steps.length;
 
     loadClip(s);
-    $("clip-cap").textContent = "호드 총수 1만, 오브 시점 카메라." + (n !== D.meta.target_n ? " 화면은 고른 호드 총수와 상관없이 1만이다." : "") +
-      " 측정 뒤 HUD를 켜고 따로 녹화했다. 녹화 부하로 HUD의 프레임 시간이 측정값보다 높을 수 있다.";
+    $("clip-cap").textContent = "호드 총수 1만, 이동 장면, 오브 시점 카메라." + (n !== D.meta.target_n ? " 화면은 고른 호드 총수와 상관없이 1만이다." : "") +
+      " 화면 왼쪽 위 HUD의 숫자는 측정값이 아니다.";
 
     $("step-title").textContent = stepName(s);
     var g = $("step-group");
     g.textContent = D.groups[s.group];
-    g.className = "tag" + (s.group === "spend" ? " spend" : "");
+    g.className = "tag" + (s.group === "quality" ? " quality" : "");
     $("step-changed").innerHTML = md(s.changed);
     $("step-learned").innerHTML = md(s.learned);
     var a = $("step-post");
@@ -187,18 +194,34 @@
         '<span class="m-label"><span class="sw" style="background:' + m.color + '"></span>' + m.label +
         (isBot ? '<span class="badge">병목</span>' : "") + "</span>" +
         '<span class="m-val num">' + fmt(v) + "<small>ms</small></span>" +
-        '<span class="m-range num">세 번: ' + fmt(row[m.key + "_min"]) + "–" + fmt(row[m.key + "_max"]) + "</span></div>";
+        '<span class="m-range num">세 번 잰 범위: ' + fmt(row[m.key + "_min"]) + "–" + fmt(row[m.key + "_max"]) + "</span></div>";
     }).join("");
+    $("unmet").textContent = row.unmet ? "이 호드 총수에서는 이 단계가 다른 단계와 같은 일을 하지 못했다(기능 미달). 값은 참고이고, 최대 N 셈에서 뺀다." : "";
 
     renderBudget(row);
     renderDelta(s, n);
-    var mx = s.max60;
-    $("max60").textContent = mx.above ? "3만에서도 60fps" : int(mx.n) + "개";
+    renderMargin(s);
 
     highlightCharts();
     if (user) {
-      $("announce").textContent = stepName(s) + ", 호드 총수 " + kcount(n) + ": 프레임 시간 중앙값 " + fmt(row.frame_p50_ms) +
-        "ms, 병목 " + BOT[row.bottleneck];
+      $("announce").textContent = stepName(s) + ", 호드 총수 " + kcount(n) + ": 프레임 p50 " + fmt(row.frame_p50_ms) +
+        "ms, 프레임 p95 " + fmt(row.frame_p95_ms) + "ms, 병목 " + BOT[row.bottleneck];
+    }
+  }
+
+  // Steps 1 and 2 give the max N; steps 3 to 8 give the margin to 16.7 ms at horde 10000 (W14 decision 5).
+  function renderMargin(s) {
+    var r = s.by_n[String(D.meta.target_n)];
+    var h = $("margin-h"), v = $("max60"), note = $("max60-note");
+    if (s.max60) {
+      h.textContent = "60fps를 지키는 최대 개체 수(최대 N)";
+      v.textContent = "약 " + int(approx(s.max60.n)) + "개";
+      note.textContent = "프레임 p95가 " + fmt(BUDGET) + "ms를 넘기 직전의 호드 총수다. 잰 호드 총수 사이를 로그 보간했다. 호드 총수 1만에서는 프레임 p95가 " +
+        fmt(r.frame_p95_ms) + "ms라 " + fmt(BUDGET) + "ms를 넘는다.";
+    } else {
+      h.textContent = fmt(BUDGET) + "ms까지의 여유";
+      v.textContent = s.margin_ms === null ? fmt(BUDGET) + "ms를 넘는다" : fmt(s.margin_ms) + "ms";
+      note.textContent = "호드 총수 1만의 프레임 p95 " + fmt(r.frame_p95_ms) + "ms를 " + fmt(BUDGET) + "ms에서 뺀 값이다. 고른 호드 총수와 상관없이 1만 기준이다.";
     }
   }
 
@@ -218,7 +241,7 @@
       return '<span style="left:' + x(t) + '%">' + t + "</span>";
     }).join("") + "</div><span></span></div>";
     html = '<div class="b-row" style="margin:0"><span></span><div class="b-track" style="height:16px"><span class="b-line-label" style="left:' +
-      lineX.toFixed(2) + '%">' + fmt(BUDGET) + "ms · 60fps</span></div><span></span></div>" + html;
+      lineX.toFixed(2) + '%">' + fmt(BUDGET) + "ms</span></div><span></span></div>" + html;
     if (anyOver) { html += '<p class="muted small">끝이 끊긴 막대는 20ms 축척 밖이다.</p>'; }
     $("budget").innerHTML = html;
   }
@@ -240,12 +263,12 @@
     var row = s.by_n[String(n)];
     var line = function (label, x) {
       var v = fmt(x.d, true) + "ms";
-      var tail = x.real ? " (" + pct(x.pct) + ")" : ' <span class="same">· 세 번 잰 범위 안</span>';
+      var tail = x.real ? " (" + pct(x.pct) + ")" : ' <span class="same">· 구별되지 않음</span>';
       return "<li><span>" + label + '</span><span class="d-val num">' + v + tail + "</span></li>";
     };
     var bot = d.bottleneck_prev === row.bottleneck ? BOT[row.bottleneck] + ' <span class="same">· 그대로</span>'
       : BOT[d.bottleneck_prev] + " → " + BOT[row.bottleneck];
-    box.innerHTML = '<ul class="delta">' + line("프레임 시간 중앙값", d.frame) + line("게임 스레드", d.game) + line("GPU", d.gpu) +
+    box.innerHTML = '<ul class="delta">' + line("프레임 p50", d.frame) + line("프레임 p95", d.frame95) + line("게임 스레드 시간", d.game) + line("GPU 시간", d.gpu) +
       '<li><span>병목</span><span class="d-val">' + bot + "</span></li></ul>";
   }
 
@@ -257,12 +280,12 @@
     steps.forEach(function (s, i) {
       var r = s.by_n[String(D.meta.target_n)];
       var cut = r.frame_p50_ms > MAX;
-      var sp = s.group === "spend" ? " spend" : "";
+      var sp = s.group === "quality" ? " quality" : "";
       var bars = cut ? '<div class="c-bar cut' + sp + '" style="width:100%"></div>'
         : '<div class="c-bar p95' + sp + '" style="width:' + x(r.frame_p95_ms).toFixed(2) + '%"></div>' +
           '<div class="c-bar' + sp + '" style="width:' + x(r.frame_p50_ms).toFixed(2) + '%"></div>';
-      var sub = (cut ? "축척 밖 · " + D.headline.first_over_budget + "배" : "5% 경계 " + fmt(r.frame_p95_ms)) + "<br>병목 " + BOT[r.bottleneck];
-      html += '<button type="button" class="c-row" data-step="' + s.num + '" aria-label="' + esc(stepName(s)) + " 보기: 프레임 시간 중앙값 " + fmt(r.frame_p50_ms) + 'ms">' +
+      var sub = (cut ? "축척 밖 · " + (r.frame_p50_ms / BUDGET).toFixed(1) + "배<br>" : "") + "프레임 p95 " + fmt(r.frame_p95_ms) + "<br>병목 " + BOT[r.bottleneck];
+      html += '<button type="button" class="c-row" data-step="' + s.num + '" aria-label="' + esc(stepName(s)) + " 보기: 프레임 p50 " + fmt(r.frame_p50_ms) + "ms, 프레임 p95 " + fmt(r.frame_p95_ms) + 'ms">' +
         '<span class="c-label"><b>' + s.num + "</b>" + esc(s.name) + "</span>" +
         '<span class="c-track">' + bars + '<span class="c-line" style="left:' + x(BUDGET).toFixed(2) + '%"></span></span>' +
         '<span class="c-val num">' + fmt(r.frame_p50_ms) + "ms<small>" + sub + "</small></span></button>";
@@ -270,8 +293,8 @@
     html += '<div class="c-foot"><span></span><div>' + [0, 5, 10, 15].map(function (t) {
       return '<span style="left:' + x(t) + '%">' + t + "</span>";
     }).join("") + '<span class="target" style="left:' + x(BUDGET) + '%;top:14px">' + fmt(BUDGET) + "ms</span></div><span></span></div>";
-    html += '<p class="c-key"><span><i></i>프레임 시간 중앙값</span><span><i class="k-p95"></i>느린 쪽 5% 경계</span>' +
-      '<span><i class="k-line"></i>60fps(' + fmt(BUDGET) + "ms)</span><span><i class=\"k-spend\"></i>빗금: 번 시간을 품질에 쓰는 단계</span></p>";
+    html += '<p class="c-key"><span><i></i>프레임 p50</span><span><i class="k-p95"></i>프레임 p95</span>' +
+      '<span><i class="k-line"></i>' + fmt(BUDGET) + "ms</span><span><i class=\"k-quality\"></i>빗금: " + D.groups.quality + "</span></p>";
     var el = $("ladder");
     el.innerHTML = html;
     el.addEventListener("click", function (e) {
@@ -283,26 +306,32 @@
     });
   }
 
-  function renderMaxN() {
-    var MAX = 32000;
+  // Steps 3 to 8: bar = 16.7 ms minus the frame p95 at horde 10000. Steps 1 and 2 exceed 16.7 ms there, so they show the max N instead.
+  function renderMarginChart() {
+    var MAX = 3;
     var x = function (v) { return v / MAX * 100; };
     var html = "";
-    steps.forEach(function (s, i) {
-      var m = s.max60, sp = s.group === "spend" ? " spend" : "";
-      var bar = m.above ? '<div class="c-bar dashed" style="width:' + x(m.n).toFixed(2) + '%"></div>'
-        : '<div class="c-bar' + sp + '" style="width:' + x(m.n).toFixed(2) + '%"></div>';
+    steps.forEach(function (s) {
+      var r = s.by_n[String(D.meta.target_n)], sp = s.group === "quality" ? " quality" : "", track, val;
+      if (s.max60) {
+        track = '<span class="c-none">' + fmt(BUDGET) + 'ms를 넘음</span>';
+        val = "최대 N 약 " + int(approx(s.max60.n)) + "<small>프레임 p95 " + fmt(r.frame_p95_ms) + "ms</small>";
+      } else {
+        track = '<div class="c-bar' + sp + '" style="width:' + x(s.margin_ms).toFixed(2) + '%"></div>';
+        val = fmt(s.margin_ms) + "ms<small>프레임 p95 " + fmt(r.frame_p95_ms) + "ms</small>";
+      }
       html += '<div class="c-row" data-row="' + s.num + '"><span class="c-label"><b>' + s.num + "</b>" + esc(s.name) + "</span>" +
-        '<span class="c-track">' + bar + '<span class="c-line" style="left:' + x(D.meta.target_n) + '%"></span></span>' +
-        '<span class="c-val num">' + (m.above ? "3만에서도<small>60fps</small>" : int(m.n)) + "</span></div>";
+        '<span class="c-track">' + track + '</span><span class="c-val num">' + val + "</span></div>";
     });
-    html += '<div class="c-foot"><span></span><div>' + [0, 20000, 30000].map(function (t) {
-      return '<span style="left:' + x(t) + '%">' + (t ? kcount(t) : "0") + "</span>";
-    }).join("") + '<span class="target" style="left:' + x(D.meta.target_n) + '%;top:15px">목표 ' + kcount(D.meta.target_n) + "</span></div><span></span></div>";
-    $("maxn").innerHTML = html;
+    html += '<div class="c-foot"><span></span><div>' + [0, 1, 2, 3].map(function (t) {
+      return '<span style="left:' + x(t) + '%">' + t + (t ? "ms" : "") + "</span>";
+    }).join("") + '</div><span></span></div>';
+    html += '<p class="c-key"><span><i class="k-quality"></i>빗금: ' + D.groups.quality + "</span></p>";
+    $("margin").innerHTML = html;
   }
 
   function highlightCharts() {
-    Array.prototype.forEach.call(document.querySelectorAll("#ladder .c-row, #maxn .c-row"), function (r) {
+    Array.prototype.forEach.call(document.querySelectorAll("#ladder .c-row, #margin .c-row"), function (r) {
       var on = +(r.getAttribute("data-step") || r.getAttribute("data-row")) === state.step;
       r.classList.toggle("sel", on);
       if (r.tagName === "BUTTON") { r.setAttribute("aria-current", on ? "true" : "false"); }
@@ -312,27 +341,34 @@
   // ---------- ablation ----------
   function renderAblation() {
     var A = D.ablation;
-    $("abl-intro").textContent = "호드 총수 1만, 오브 시점 카메라. 같은 조건에서 8단계 최종 구성의 기법을 하나씩 끈 실행이다. 0은 최종 구성(프레임 시간 " +
-      fmt(A.base.frame_p50_ms) + "ms, 게임 스레드 " + fmt(A.base.game_p50_ms) + "ms, GPU " + fmt(A.base.gpu_p50_ms) + "ms)이다. 최종 구성의 병목은 " +
-      BOT[A.base_bottleneck] + "라, GPU 시간만 달라지는 기법은 프레임 시간에 드러나지 않는다. 위에서부터 프레임 시간이 많이 느려지는 순이다.";
+    $("abl-intro").innerHTML = [
+      "호드 총수 1만, 이동 장면, 오브 시점 카메라, 세 번 잰 중앙값. 기법별 기여는 단계 8 최종 구성에서 기법 하나만 끄고 같은 조건으로 잰 차이다.",
+      "끄면 프레임이 길어지는 기법은 시간을 줄이고, 짧아지는 기법은 시간을 쓴다.",
+      "0은 최종 구성(프레임 p95 " + fmt(A.base.frame_p95_ms) + "ms, 게임 스레드 시간 " + fmt(A.base.game_p50_ms) + "ms, GPU 시간 " + fmt(A.base.gpu_p50_ms) + "ms)이다.",
+      "최종 구성의 병목은 " + BOT[A.base_bottleneck] + "라, GPU 시간만 달라지는 기법은 프레임 p95에 드러나지 않는다.",
+      "구별되는 조건이 위, 구별되지 않는 조건이 가운데, 하위 실험이 아래다. 각 부분 안에서는 프레임 p95가 많이 길어지는 순이다."
+    ].map(function (t) { return "<li>" + esc(t) + "</li>"; }).join("");
     var maxAbs = 0;
     A.rows.forEach(function (r) { ["frame", "game", "gpu"].forEach(function (k) { maxAbs = Math.max(maxAbs, Math.abs(r[k].d)); }); });
     var half = Math.ceil(maxAbs);
-    var mets = [["frame", "프레임", "var(--frame)"], ["game", "게임 스레드", "var(--game)"], ["gpu", "GPU", "var(--gpu)"]];
+    var mets = [["frame", "프레임 p95", "var(--frame)"], ["game", "게임 스레드", "var(--game)"], ["gpu", "GPU", "var(--gpu)"]];
     var html = '<div class="a-head"><span></span><div><span></span><span class="dir"><span>← 빨라짐</span><span>느려짐 →</span></span><span></span></div></div>';
     A.rows.forEach(function (r) {
       var tag = r.bottleneck !== A.base_bottleneck ? '<span class="tagline">병목이 ' + BOT[r.bottleneck] + "로 바뀜</span>" : "";
-      html += '<div class="a-row"><div class="a-name">' + esc(r.name) + (r.sub ? "<small>" + esc(r.sub) + "</small>" : "") + tag + '</div><div class="a-bars">';
+      var notes = (r.notes || []).filter(function (t) { return t.indexOf("병목이") !== 0; });  // the bottleneck change has its own tag line
+      var extra = (r.mixed ? '<small class="mixed">참고 값. ' + md(r.mixed) + "</small>" : "") +
+        (notes.length ? "<small>" + esc(notes.join(", ")) + "</small>" : "");
+      html += '<div class="a-row"><div class="a-name">' + esc(r.name) + (r.sub ? "<small>" + md(r.sub) + "</small>" : "") + extra + tag + '</div><div class="a-bars">';
       mets.forEach(function (m) {
         var v = r[m[0]], w = Math.abs(v.d) / half * 50;
         var left = v.d >= 0 ? 50 : 50 - w;
         html += '<div class="a-line"><span class="a-m">' + m[1] + '</span><span class="a-track"><span class="a-bar' + (v.real ? "" : " faint") +
           '" style="left:' + left.toFixed(2) + "%;width:" + Math.max(w, 0.4).toFixed(2) + "%;background:" + m[2] + '"></span></span>' +
-          '<span class="a-v num' + (v.real ? " real" : "") + '">' + fmt(v.d, true) + (v.real ? "" : ' <span class="same">범위 안</span>') + "</span></div>";
+          '<span class="a-v num' + (v.real ? " real" : "") + '">' + fmt(v.d, true) + (v.real ? "" : ' <span class="same">구별되지 않음</span>') + "</span></div>";
       });
       html += "</div></div>";
     });
-    html += '<p class="c-key">단위 ms, 세 번 잰 중앙값의 차이. 흐린 막대와 "범위 안": 차이가 세 번 잰 범위보다 작아 구별되지 않는다. 가로 끝은 ±' + half + "ms다.</p>";
+    html += '<p class="c-key">단위 ms, 세 번 잰 중앙값의 차이. 흐린 막대와 "구별되지 않음": 차이가 두 조건의 범위 중 큰 쪽보다 작거나 0.5ms 아래다. 가로 끝은 ±' + half + "ms다.</p>";
     $("ablation").innerHTML = html;
     $("abl-notes").innerHTML = A.notes.map(function (t) { return "<li>" + md(t) + "</li>"; }).join("");
   }
@@ -341,7 +377,7 @@
   var POOL = [
     { key: "iskm_tracks_end", title: "ISKM 트랙 수", unit: "", tick: function (v) { return v ? (v / 10000) + "만" : "0"; }, end: function (v) { return int(v); }, zero: true },
     { key: "gpu_mem_mean", title: "GPU 메모리(MB)", unit: "MB", tick: function (v) { return int(v); }, end: function (v) { return int(v); } },
-    { key: "frame_p50", title: "프레임 시간 중앙값(ms)", unit: "ms", tick: function (v) { return String(v); }, end: function (v) { return fmt(v); } }
+    { key: "frame_p95", title: "프레임 p95(ms)", unit: "ms", tick: function (v) { return String(v); }, end: function (v) { return fmt(v); } }
   ];
   function niceStep(span) {
     var raw = span / 3, p = Math.pow(10, Math.floor(Math.log10(raw)));
@@ -357,7 +393,7 @@
     var mins = P.minutes, m0 = mins[0], m1 = mins[mins.length - 1];
     var html = '<p class="c-key" style="margin:0 0 12px"><span><svg width="26" height="10" aria-hidden="true"><line x1="0" y1="5" x2="26" y2="5" style="stroke:var(--game);stroke-width:3"/></svg> 풀 켬(최종 구성)</span>' +
       '<span><svg width="26" height="10" aria-hidden="true"><line x1="0" y1="5" x2="26" y2="5" style="stroke:var(--gpu);stroke-width:3;stroke-dasharray:6 4"/></svg> 풀 끔</span>' +
-      "<span>가로: 실행 시작부터 분, 1분 구간마다의 값</span></p><div class=\"pool-grid\">";
+      "<span>가로: 실행 시작부터 분, 1분 구간마다의 값. 호드 총수 1만, 이동 장면, 오브 시점 카메라, 조건마다 한 번</span></p><div class=\"pool-grid\">";
     POOL.forEach(function (c) {
       var vals = P.on[c.key].concat(P.off[c.key]);
       var lo = c.zero ? 0 : Math.min.apply(null, vals), hi = Math.max.apply(null, vals);
@@ -393,14 +429,18 @@
   // ---------- method and posts ----------
   function renderMethod() {
     var M = D.meta;
+    var runs = { 1: "한", 2: "두", 3: "세", 4: "네", 5: "다섯" }[M.runs_per_condition] || M.runs_per_condition;
     var items = [
-      "Test 구성 패키지 하나(빌드 " + M.build + ")로 여덟 단계와 빼 보기 조건을 연달아 쟀다. 이 페이지의 값은 모두 이 최종 측정에서 나왔다.",
-      "화면은 " + M.res + " 창 모드, 스케일러빌리티 Epic이다. 수직 동기화와 프레임 상한은 껐다. 그래서 프레임 시간은 모니터 주사율에 묶이지 않는다.",
-      "시나리오는 반경 500m 평지다. 맵 중앙의 오브로 미니언이 사방에서 걸어오고, 오브는 가까운 개체에 피해를 주고 먼 개체를 저격한다. 죽은 만큼 맵 가장자리에서 다시 생겨 호드 총수가 그대로다.",
-      "카메라는 오브 뒤에서 오브 둘레를 도는 오브 시점이다. 고정 시드로 처음 배치를 정하고, 15초 뒤 60초를 잰다.",
-      "조건마다 " + ({ 1: "한", 2: "두", 3: "세", 4: "네", 5: "다섯" }[M.runs_per_condition] || M.runs_per_condition) + " 번 재서 중앙값과 범위를 적는다. 중앙값의 차이가 두 구성의 범위 중 큰 쪽보다 작으면 \"구별되지 않는다\"고 적는다.",
-      "프레임 시간은 게임 스레드, 렌더 스레드, GPU 가운데 가장 느린 쪽(병목)이 정한다. 느린 쪽 5% 경계는 프레임의 95%가 그 안에 드는 값이고, 60fps 판정에 쓴다.",
-      "측정 PC는 Ryzen 9 5950X, RTX 4090, 64GB, Windows 11, UE 5.8.4 소스 빌드다. 값은 이 PC 한 대와 평지 시나리오 하나에서 나왔다."
+      "Test 구성 패키지 하나에서 여덟 단계와 기법별 기여 조건을 연달아 쟀다. 엔티티 풀 절을 뺀 값은 모두 이 측정에서 나왔다. 엔티티 풀 절은 같은 패키지로 따로 잰 16분 실행이다.",
+      "화면은 " + M.res + " 창 모드, 스케일러빌리티 Epic이다. 수직 동기화, 프레임 상한, 동적 해상도는 껐다.",
+      "시나리오는 반경 500m 평지다. 오브가 맵 중심 둘레의 반지름 57.3m 원을 2m/s로 돌고, 개체가 사방에서 3m/s로 오브를 쫓는다. 오브는 8m 안의 개체에 피해를 주고 2초마다 화면 안의 개체 5명을 저격한다. 죽은 개체는 맵 밖 무리의 기록 자리에서 다시 생겨 호드 총수가 그대로다.",
+      "카메라는 오브 뒤 15m에서 오브를 따라가며 1분에 한 바퀴 도는 오브 시점이다. 고정 시드로 개체를 미리 놓고, 워밍업 60초 뒤 180초를 잰다.",
+      "궤적이 비결정적이라 같은 조건을 " + runs + " 번 재고, 중앙값과 범위를 함께 적는다. 중앙값의 차이가 두 조건 범위 가운데 큰 쪽보다 작거나 " + fmt(M.distinct_floor_ms) + "ms 아래면 \"구별되지 않는다\"고 적는다.",
+      "프레임 p50과 프레임 p95는 측정 창에서 프레임 시간의 50번째, 95번째 백분위수다. 프레임 시간은 게임 스레드, 렌더 스레드, GPU 가운데 가장 느린 쪽(병목)이 정한다.",
+      "판정은 프레임 p95와 " + fmt(M.target_ms) + "ms로 한다. " + fmt(M.target_ms) + "ms까지의 여유는 " + fmt(M.target_ms) + "ms에서 프레임 p95를 뺀 값이다. 최대 N은 프레임 p95가 " + fmt(M.target_ms) + "ms를 넘기 직전의 호드 총수이고, 호드 1만에서 " + fmt(M.target_ms) + "ms를 넘는 단계 1과 2에만 쓴다.",
+      "동등성 검사가 살아 있는 총수, 겹친 쌍, 캡슐 확인 트레이스 등으로 단계 사이가 같은 일을 하는지 조건마다 확인한다. 단계 3부터 8까지에서 같은 일을 하지 못한 점은 기능 미달로 표시한다.",
+      "측정 PC는 Ryzen 9 5950X, RTX 4090, 64GB, Windows 11, UE 5.8.4 소스 빌드다. 값은 이 PC 한 대와 평지 시나리오 하나에서 나왔다.",
+      "이전 판은 태그 `v1`에 있고 겹침 방지와 캡슐이 없어 수치를 잇지 않는다."
     ];
     $("method").innerHTML = items.map(function (t) { return "<li>" + md(t) + "</li>"; }).join("") +
       '<li><a href="' + M.pc_specs + '">측정 PC 사양</a> · <a href="' + M.measurement_guide + '">측정 규약 전체</a> · <a href="' + M.summary_csv + '">최종 측정의 표(CSV)</a></li>';
@@ -454,7 +494,7 @@
   renderHeader();
   renderTabs();
   renderLadder();
-  renderMaxN();
+  renderMarginChart();
   renderAblation();
   renderPool();
   renderMethod();
