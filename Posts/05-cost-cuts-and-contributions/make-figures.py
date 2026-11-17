@@ -82,11 +82,9 @@ def cnt(x):
 
 
 def big3(x):
-    """A large measured value that is not a count, to three significant figures: 5105.3 MB -> 5,110."""
-    d = Decimal(repr(x))
-    exp = d.adjusted() - 2
-    q = d.scaleb(-exp).quantize(Decimal("1"), rounding=ROUND_HALF_UP).scaleb(exp)
-    return f"{int(q):,}"
+    """A large measured value that is not a count, to the nearest integer: 5105.3 MB -> 5,105.
+    The README and the site write the pool run's GPU memory this way."""
+    return f"{int(Decimal(repr(x)).quantize(Decimal('1'), rounding=ROUND_HALF_UP)):,}"
 
 
 def esc(t):

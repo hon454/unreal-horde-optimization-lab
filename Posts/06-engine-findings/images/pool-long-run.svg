@@ -28,7 +28,7 @@
 <line x1="120" y1="476" x2="620" y2="476" stroke="#4b5563"/>
 <polyline points="120.0,458.3 153.3,455.9 186.7,446.3 220.0,437.8 253.3,433.3 286.7,431.9 320.0,432.2 353.3,434.8 386.7,436.8 420.0,436.5 453.3,437.8 486.7,394.8 520.0,375.0 553.3,375.1 586.7,374.9 620.0,374.9" fill="none" stroke="#dc2626" stroke-width="2.5" stroke-dasharray="7 5"/>
 <polyline points="120.0,458.2 153.3,458.7 186.7,458.1 220.0,458.0 253.3,459.4 286.7,459.1 320.0,458.5 353.3,458.6 386.7,458.5 420.0,458.2 453.3,459.3 486.7,458.7 520.0,458.2 553.3,458.6 586.7,458.0 620.0,458.2" fill="none" stroke="#2563eb" stroke-width="2.5"/>
-<text x="768" y="342" text-anchor="end" font-size="16" fill="#4b5563">1분: 풀 켬 <tspan font-weight="700" fill="#2563eb">3,370</tspan>, 풀 끔 <tspan font-weight="700" fill="#dc2626">3,370</tspan></text>
+<text x="768" y="342" text-anchor="end" font-size="16" fill="#4b5563">1분: 풀 켬 <tspan font-weight="700" fill="#2563eb">3,371</tspan>, 풀 끔 <tspan font-weight="700" fill="#dc2626">3,370</tspan></text>
 <text x="32" y="520" font-size="17" font-weight="700">프레임 p95(ms)</text>
 <line x1="120" y1="654.0" x2="620" y2="654.0" stroke="#e5e7eb"/>
 <text x="110" y="660.0" text-anchor="end" font-size="16" fill="#4b5563">13</text>
@@ -48,8 +48,8 @@
 <text x="768" y="520" text-anchor="end" font-size="16" fill="#4b5563">1분: 풀 켬 <tspan font-weight="700" fill="#2563eb">14.1</tspan>, 풀 끔 <tspan font-weight="700" fill="#dc2626">14.0</tspan></text>
 <text x="630" y="192.8" font-size="16" font-weight="700" fill="#dc2626">120,428</text>
 <text x="630" y="284.5" font-size="16" font-weight="700" fill="#2563eb">21,149</text>
-<text x="630" y="380.9" font-size="16" font-weight="700" fill="#dc2626">5,110</text>
-<text x="630" y="464.2" font-size="16" font-weight="700" fill="#2563eb">3,370</text>
+<text x="630" y="380.9" font-size="16" font-weight="700" fill="#dc2626">5,105</text>
+<text x="630" y="464.2" font-size="16" font-weight="700" fill="#2563eb">3,371</text>
 <text x="630" y="593.0" font-size="16" font-weight="700" fill="#dc2626">15.2</text>
 <text x="630" y="616.0" font-size="16" font-weight="700" fill="#2563eb">14.5</text>
 <line x1="120.0" y1="654" x2="120.0" y2="659" stroke="#4b5563"/>

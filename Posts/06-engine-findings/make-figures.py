@@ -109,10 +109,9 @@ fmt = _no_zero_decimals(fmt_keep)  # as in the post body: 27.0 -> 27
 
 
 def sig3(x):
-    """Three significant figures for values of 1,000 or more (3369.6 -> 3,370), with thousands separators."""
-    e = int(math.floor(math.log10(abs(x)))) - 2
-    q = Decimal(1).scaleb(e)
-    return f"{int(Decimal(repr(x)).quantize(q, rounding=ROUND_HALF_UP)):,}"
+    """A value of 1,000 or more to the nearest integer (5105.3 -> 5,105), with thousands separators.
+    The README and the site write the pool run's GPU memory this way."""
+    return f"{int(Decimal(repr(x)).quantize(Decimal('1'), rounding=ROUND_HALF_UP)):,}"
 
 
 def cnt(x):

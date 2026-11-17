@@ -93,8 +93,8 @@
 <circle cx="553.3" cy="396.6" r="2.5" fill="#dc2626"/>
 <circle cx="586.7" cy="396.5" r="2.5" fill="#dc2626"/>
 <circle cx="620.0" cy="396.5" r="2.5" fill="#dc2626"/>
-<text x="630.0" y="401.5" font-size="16" text-anchor="start" font-weight="700" fill="#dc2626">5,110MB 끔</text>
-<text x="630.0" y="491.7" font-size="16" text-anchor="start" font-weight="700" fill="#2563eb">3,370MB 켬</text>
+<text x="630.0" y="401.5" font-size="16" text-anchor="start" font-weight="700" fill="#dc2626">5,105MB 끔</text>
+<text x="630.0" y="491.7" font-size="16" text-anchor="start" font-weight="700" fill="#2563eb">3,371MB 켬</text>
 <text x="32.0" y="552.0" font-size="16" text-anchor="start" font-weight="700" fill="#111827">프레임 p95(ms)</text>
 <line x1="120" y1="696.0" x2="620" y2="696.0" stroke="#eef0f3"/>
 <text x="110.0" y="701.0" font-size="16" text-anchor="end" fill="#4b5563">13</text>
