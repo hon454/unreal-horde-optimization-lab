@@ -10,7 +10,7 @@
 
 | 항목 | 측정 스킬 | 군중 스킬 |
 | --- | --- | --- |
-| 폴더(추천, 8절 항목 1) | `.claude/skills/unreal-perf-measurement/` | `.claude/skills/mass-crowd-optimization/` |
+| 폴더(추천, 8절 항목 1) | `.claude/skills/unreal-perf-measurement/` | `.claude/skills/unreal-mass-crowd-optimization/` |
 | 하는 일 | Unreal 성능을 Test 패키지에서 재고, 조건끼리 차이를 판정하고, 병목 스레드를 정하고, 빨라진 조건이 같은 일을 하는지 본다 | Mass 군중에 기법을 어떤 순서로 넣는지, 기법마다 언제 효과가 있고 어떻게 확인하는지, 함정과 증상별 고칠 코드 |
 | 파일 | `SKILL.md`, `references/` 다섯, `scripts/compare_csv.py` | `SKILL.md`, `references/` 여섯 |
 | 분량(가늠) | `SKILL.md` 약 170줄, 참조 합 약 650줄, 스크립트 약 350줄 | `SKILL.md` 약 200줄, 참조 합 약 1,100줄 |
@@ -106,7 +106,7 @@ description: >
 11. **기여를 가른다.** 여러 기법을 쌓았으면 최종 구성에서 하나만 끈 조건을 같은 빌드에서 잰다. 다른 것이 함께 빠지는 조건은 "참고"다.
 12. **기록한다.** 빌드 해시, 실행 이름, 세 실행의 값, 판정, 측정 PC, 엔진 버전을 남긴다. 측정 장치(스포너, 시드, 카메라, CSV 열, 조건)를 바꾸면 모든 조건을 새로 잰다.
 
-본문 끝에 "Mass 군중이면 프로세서별 시간은 `mass-crowd-optimization`의 `references/processors.md`(직렬 트레이스)를 본다"를 둔다.
+본문 끝에 "Mass 군중이면 프로세서별 시간은 `unreal-mass-crowd-optimization`의 `references/processors.md`(직렬 트레이스)를 본다"를 둔다.
 
 ### 2.4 참조 파일의 내용
 
@@ -257,7 +257,7 @@ description: >
 ### 4.1 파일 구성
 
 ```text
-.claude/skills/mass-crowd-optimization/
+.claude/skills/unreal-mass-crowd-optimization/
 ├── SKILL.md                     약 200줄. 범위, 진단 흐름, 적용 순서 표, 참조 안내
 └── references/
     ├── ladder.md                약 200줄. 적용 순서 여덟 칸: 기법, 효과가 나는 때, 확인, 참고값
@@ -273,7 +273,7 @@ description: >
 ### 4.2 description 초안
 
 ```yaml
-name: mass-crowd-optimization
+name: unreal-mass-crowd-optimization
 description: >
   UE5 Mass Entity로 수천에서 수만 개체의 군중(호드, 좀비 떼, RTS 유닛, 군중 NPC)을 만들거나 빠르게 할 때의
   적용 순서, 기법마다 효과가 나는 때와 확인 방법, 함정, 증상별 원인과 고칠 코드. 액터 군중에서 Mass로 옮기기,
@@ -429,7 +429,7 @@ description: >
 | `.../references/tracing.md` | mass-crowd-tips.md "프레임이 세 스레드보다 길면...", "액터 군중은 불린 횟수와...", "Insights의 Timers 합계는..."; engine-notes.md 6절, 7절; measurement.md "산출물" 트레이스 행 |
 | `.../references/troubleshooting.md` | [troubleshooting.md](../Guides/troubleshooting.md)의 Test 스탯, 종료 코드, 쿡 ini 변경, DLL 잠금, 프레임 수 행; engine-notes.md 30절, 50절; measurement.md "벤치마크 조건" 측정 중 행(브라우저 스파이크), "함정"(0.5ms 긴 실행) |
 | `.../scripts/compare_csv.py` | `Scripts/summarize.py` `read_profile`, `column`, `percentile`, `bottleneck`, `summarize_run`; measurement.md "차이 판정", "묶음 판정" 느린 실행 행; engine-notes.md 6절(엔진 CSV 기본 스탯) |
-| `mass-crowd-optimization/SKILL.md` | [v2-plan.md](../v2-plan.md) "사다리"; mass-crowd-tips.md "읽는 법", 목차, "프로파일링할 때" 머리; [code-tour.md](../Guides/code-tour.md) "요약과 읽는 순서"; measurement.md "시나리오"(기능 넷) |
+| `unreal-mass-crowd-optimization/SKILL.md` | [v2-plan.md](../v2-plan.md) "사다리"; mass-crowd-tips.md "읽는 법", 목차, "프로파일링할 때" 머리; [code-tour.md](../Guides/code-tour.md) "요약과 읽는 순서"; measurement.md "시나리오"(기능 넷) |
 | `.../references/ladder.md` | v2-plan.md "사다리"; `Measurements/Full4/summary.csv`의 사다리 행(`V0-s1`\~`V0-s8`, 1만, P1); glossary.md 1.3, 1.4절; measurement.md "함정"(단계 2의 뭉침) |
 | `.../references/actors.md` | mass-crowd-tips.md "액터 전환을 만들 때" 일곱 항목; engine-notes.md 4, 19, 28, 29, 38, 40, 44, 52, 53절 |
 | `.../references/instances.md` | mass-crowd-tips.md "인스턴스와 입자를 쓸 때" 아홉 항목; engine-notes.md 17, 22, 41, 42, 46절 |
@@ -522,8 +522,10 @@ grep -rnE 'HordeOptLab|\bU?A?F?Lab[A-Z]|-Lab[A-Z]|\bFull[0-9]|\bPool[0-9]|\ba8[a
 
 한 번에 하나씩 묻는다. 각 항목의 첫 선택지가 추천안이다.
 
+결정(2026-11-18): 사용자가 항목 1을 `unreal-perf-measurement`, `unreal-mass-crowd-optimization`으로 바꿨다. 이 문서의 군중 스킬 폴더 이름은 그에 맞춰 고쳤다. 항목 2\~9는 추천안대로다([autonomous-decisions.md](autonomous-decisions.md) "사용자 확인(2026-11-18, 스킬)").
+
 **항목 1. 스킬 폴더 이름**
-- 추천: `unreal-perf-measurement`, `mass-crowd-optimization`. 측정 절차는 Mass와 무관하게 Unreal 전체에 쓰이고(Test 구성, CsvProfiler 열), 군중 기법은 모두 Mass API에 묶여 있어서다. 이름이 description의 트리거 범위와 맞는다.
+- 추천: `unreal-perf-measurement`, `unreal-mass-crowd-optimization`. 측정 절차는 Mass와 무관하게 Unreal 전체에 쓰이고(Test 구성, CsvProfiler 열), 군중 기법은 모두 Mass API에 묶여 있어서다. 이름이 description의 트리거 범위와 맞는다.
 - `ue-perf-measurement`, `ue-mass-crowd`: 짧다. "ue"가 description 밖에서 덜 읽힌다.
 - `perf-measurement`, `crowd-optimization`: 다른 엔진의 질문에도 이름이 맞아 보여 잘못 불릴 수 있다.
 
@@ -567,6 +569,6 @@ grep -rnE 'HordeOptLab|\bU?A?F?Lab[A-Z]|-Lab[A-Z]|\bFull[0-9]|\bPool[0-9]|\ba8[a
 ## 9. 다음 순서
 
 1. 사용자가 8절 항목을 정한다. 코디네이터가 결정을 [autonomous-decisions.md](autonomous-decisions.md)에 적는다.
-2. 코디네이터가 작업 세션 둘을 띄운다. 두 세션은 파일이 겹치지 않아 함께 돌 수 있다(`.claude/skills/unreal-perf-measurement/`, `.claude/skills/mass-crowd-optimization/`, 각자의 Worklog 절은 [Skills.md](Skills.md)).
+2. 코디네이터가 작업 세션 둘을 띄운다. 두 세션은 파일이 겹치지 않아 함께 돌 수 있다(`.claude/skills/unreal-perf-measurement/`, `.claude/skills/unreal-mass-crowd-optimization/`, 각자의 Worklog 절은 [Skills.md](Skills.md)).
 3. 각 세션은 이 문서의 해당 절대로 만들고 7.2·7.3절을 확인하고 커밋한다.
 4. 둘이 끝나면 한 세션이 7.1절의 질문을 던지고 결과를 Skills.md에 적는다.
