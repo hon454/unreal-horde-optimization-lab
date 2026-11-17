@@ -864,7 +864,7 @@ window.SITE_DATA = {
   {
    "num": 7,
    "ready": true,
-   "sentence": "엔진 회피를 직접 짠 밀어내기로 바꾼 단계 3에서 호드 1만이 처음 16.7ms 안에 들었고, 단계 7까지 늘어난 시간은 단계 8이 거의 되돌렸다.",
+   "sentence": "엔진 회피를 자체 밀어내기로 바꾼 단계 3에서 호드 1만이 처음 16.7ms 안에 들었고, 단계 7까지 늘어난 시간은 단계 8이 거의 되돌렸다.",
    "title": "요약: 단계 3에서 16.7ms 안에 들고, 표현을 셋 더한 최종 구성도 2.47ms가 남는다",
    "url": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Posts/07-summary/README.md"
   }
@@ -1157,7 +1157,7 @@ window.SITE_DATA = {
      "unmet": true
     }
    },
-   "changed": "엔진 회피를 직접 짠 밀어내기 프로세서(`ULabSeparationProcessor`)로 바꾸고, 엔진의 방향 보간 Processor를 같은 계산을 병렬로 도는 사본으로 바꿨다. 표현은 단계 2와 같다.",
+   "changed": "엔진 회피를 자체 밀어내기 프로세서(`ULabSeparationProcessor`)로 바꾸고, 엔진의 방향 보간 Processor를 같은 계산을 병렬로 도는 사본으로 바꿨다. 표현은 단계 2와 같다.",
    "clip": "assets/step3.webp",
    "clip_mb": 7.5,
    "counts": [
