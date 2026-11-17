@@ -223,8 +223,8 @@ button.c-row:hover { background: var(--soft); }
 
 .notes { padding-left: 1.2em; margin: 0.8rem 0 0; }
 .notes li { margin-bottom: 0.4rem; max-width: 75ch; }
-.notes.intro { color: var(--sub); margin: 0 0 1rem; }
-.notes.intro li { margin-bottom: 0.2rem; }
+.notes.intro { color: var(--sub); margin: 0 0 1rem; padding-left: 0; list-style: none; }
+.notes.intro li { margin-bottom: 0.15rem; }
 
 /* Pool */
 .pool-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
