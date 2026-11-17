@@ -69,7 +69,6 @@
 | 세션 | 작업 단위 | 모델 | 상태 |
 | --- | --- | --- | --- |
 | post-factcheck | 글 00\~07 팩트체크(`Docs/Worklog/V2-factcheck.md`, 글은 고치지 않는다) | Opus high | 진행 중 |
-| readme-site-factcheck | README와 사이트 팩트체크(`Docs/Worklog/V2-factcheck-readme-site.md`, 고치지 않는다) | Opus high | 진행 중 |
 
 코디네이터는 세션을 띄우면 여기에 적는다. 끝난 세션은 결과를 확인하고 보관한 뒤 지운다.
 
