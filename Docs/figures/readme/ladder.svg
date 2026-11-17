@@ -110,5 +110,5 @@
 <text x="32" y="953" font-size="16" fill="#4b5563">빗금은 단계가 하려던 일을 나타내고, 잰 결과가 아니다.</text>
 <rect x="32" y="971" width="34" height="16" rx="3" fill="#9ca3af"/>
 <rect x="32" y="971" width="34" height="16" rx="3" fill="url(#rep)"/>
-<text x="74" y="984" font-size="16" fill="#4b5563">빗금 막대: 표현을 더하는 단계(단계 4·6·7). 나머지는 비용을 줄이는 단계와 출발점(단계 1)다</text>
+<text x="74" y="984" font-size="16" fill="#4b5563">빗금 막대: 표현을 더하는 단계(단계 4·6·7). 나머지는 비용을 줄이는 단계와 출발점(단계 1)이다</text>
 </svg>

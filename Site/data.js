@@ -849,7 +849,7 @@ window.SITE_DATA = {
   {
    "num": 5,
    "ready": true,
-   "sentence": "비용을 줄이는 두 단계에서 프레임 시간을 줄인 것은 액터 메시 고정 바운드이고, 엔티티 풀의 이점은 긴 실행에서 보인다.",
+   "sentence": "비용을 줄이는 단계 5와 8에서 프레임 시간을 줄인 것은 액터 메시 고정 바운드이고, 엔티티 풀의 이점은 긴 실행에서 보인다.",
    "title": "비용을 줄이는 단계와 기법별 기여: 최종 구성의 큰 비용은 가까운 액터에 있다",
    "url": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Posts/05-cost-cuts-and-contributions/README.md"
   },
@@ -1502,7 +1502,7 @@ window.SITE_DATA = {
     }
    },
    "group": "earn",
-   "learned": "비용을 줄이는 두 단계에서 프레임 시간을 줄인 것은 액터 메시 고정 바운드이고, 엔티티 풀의 이점은 긴 실행에서 보인다.",
+   "learned": "비용을 줄이는 단계 5와 8에서 프레임 시간을 줄인 것은 액터 메시 고정 바운드이고, 엔티티 풀의 이점은 긴 실행에서 보인다.",
    "margin_ms": 2.184,
    "max60": null,
    "name": "Simulation LOD + 엔티티 풀",
@@ -1970,7 +1970,7 @@ window.SITE_DATA = {
     }
    },
    "group": "earn",
-   "learned": "비용을 줄이는 두 단계에서 프레임 시간을 줄인 것은 액터 메시 고정 바운드이고, 엔티티 풀의 이점은 긴 실행에서 보인다.",
+   "learned": "비용을 줄이는 단계 5와 8에서 프레임 시간을 줄인 것은 액터 메시 고정 바운드이고, 엔티티 풀의 이점은 긴 실행에서 보인다.",
    "margin_ms": 2.469,
    "max60": null,
    "name": "남은 비용 줄이기",

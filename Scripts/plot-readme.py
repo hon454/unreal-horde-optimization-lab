@@ -215,7 +215,7 @@ def hatch_key(o, y):
     o.append(f'<rect x="32" y="{y - 13}" width="34" height="16" rx="3" fill="{GRAY}"/>')
     o.append(f'<rect x="32" y="{y - 13}" width="34" height="16" rx="3" fill="url(#rep)"/>')
     o.append(f'<text x="74" y="{y}" font-size="16" fill="{SUB}">빗금 막대: {ROLE_TEXT["quality"]}(단계 {nums}). '
-             f'나머지는 {ROLE_TEXT["earn"]}와 {ROLE_TEXT["start"]}(단계 1)다</text>')
+             f'나머지는 {ROLE_TEXT["earn"]}와 {ROLE_TEXT["start"]}(단계 1)이다</text>')
 
 
 def run_values(c, col):
