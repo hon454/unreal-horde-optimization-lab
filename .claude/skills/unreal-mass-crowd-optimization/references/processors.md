@@ -43,7 +43,7 @@ Mass 프로세서의 비용과 순서를 다루는 일곱 항목이다. Mass 고
 5. 프로세서의 자리는 엔진 이동(`UMassApplyMovementProcessor`) 뒤로 둔다. 그 클래스는 `MinimalAPI`라 `StaticClass()->GetFName()`으로 순서를 적을 수 있다.
 
 ```cpp
-// 예시 이름: FSeparationSolver::Solve
+// 예시 이름: FPushApartSolver::Solve
 ParallelFor(NumBatches, [this, &Params, Num](int32 Batch)
 {
 	for (int32 I = Batch * BatchSize; I < FMath::Min(Num, (Batch + 1) * BatchSize); ++I)
