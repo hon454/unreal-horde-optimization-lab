@@ -228,6 +228,8 @@
 | 풀에서 꺼내기 | `Source/HordeOptLab/LabCrowdSubsystem.cpp` 264\~274(`ULabCrowdSubsystem::SpawnEntities`), 줄인 곳은 270\~273 |
 | 상태 프로세서의 풀 분기 | `Source/HordeOptLab/LabMassProcessors.cpp` 1463\~1474(`ULabMinionStateProcessor::Execute`), 파괴 경로 1481 |
 
+본문은 80m 밖 그림자 끄기를 단계 8 절의 한 문단으로 줄였다. 본문에서 뺀 설명(그림자는 컴포넌트 단위, 중요도 Low는 80m부터, ISKM 설명자 둘의 발췌)은 이 기록의 같은 이름 행과 [engine-notes.md](../../Docs/Reference/engine-notes.md) 22절에 남는다.
+
 ## 확인하지 않은 것
 
 - 단계 5가 프레임 시간을 줄이지 못한 원인. 트레이스로 가르지 않았다. 본문에는 원인을 적지 않았다.
