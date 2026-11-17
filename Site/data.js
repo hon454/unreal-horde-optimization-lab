@@ -2,220 +2,593 @@
 window.SITE_DATA = {
  "ablation": {
   "base": {
-   "frame_p50_ms": 9.746,
-   "frame_p95_ms": 11.486,
-   "game_p50_ms": 9.592,
-   "gpu_p50_ms": 5.752,
-   "render_p50_ms": 3.647
+   "frame_p50_ms": 12.77,
+   "frame_p95_ms": 14.231,
+   "game_p50_ms": 11.881,
+   "gpu_p50_ms": 6.164,
+   "render_p50_ms": 4.12
   },
   "base_bottleneck": "game",
   "notes": [
-   "200m 밖을 입자 대신 ISKM으로 그리면 게임 스레드가 3.95ms 늘어 프레임 시간이 가장 크게 는다.",
-   "액터 하이드레이션을 빼면 게임 스레드는 5.84ms 줄지만 병목이 GPU로 바뀌어 프레임 시간은 3.57ms만 준다.",
-   "ISKM을 VAT로 되돌리면 GPU 시간이 1.13ms 늘고 게임 스레드는 0.20ms 준다. 병목이 게임 스레드라 ISKM의 이점은 프레임 시간이 아니라 GPU 시간으로 남는다.",
-   "80m 밖 그림자를 다시 켜면 GPU 시간이 0.35ms 늘고 프레임 시간은 0.13ms 는다.",
-   "Niagara 배경 무리를 아예 끄면 프레임 시간이 0.40ms 짧아질 뿐이다."
+   "200m 밖을 그리지 않는 일을 끄면 프레임 p95가 3.54ms 길어진다. 200m 밖 엔티티도 ISKM으로 맵 끝까지 그리고, 게임 스레드가 3.23ms 는다.",
+   "하이드레이션을 끄면 게임 스레드가 6.65ms 줄고 병목이 GPU로 바뀐다. 프레임 p95는 6.98ms 짧아진다.",
+   "ISKM을 VAT 인스턴스로 되돌리면 GPU 시간이 1.24ms 늘고 프레임 p95는 0.67ms 짧아진다. 병목이 게임 스레드라 ISKM의 이점은 프레임 시간이 아니라 GPU 시간으로 남는다.",
+   "80m 밖 그림자를 다시 켜도 프레임 p95와 GPU 시간이 최종 구성과 구별되지 않는다(GPU 시간 +0.48ms, 0.5ms 아래).",
+   "배경 무리를 끄면 GPU 시간이 0.62ms 줄지만 프레임 p95는 최종 구성과 구별되지 않는다.",
+   "분리 프로세서 대신 엔진 회피를 쓰면 프레임 p95가 8.57ms 길어진다."
   ],
   "rows": [
    {
     "bottleneck": "game",
     "frame": {
-     "d": 4.004,
-     "pct": 41.1,
+     "d": 3.536,
+     "hi": 3.829,
+     "lo": 3.529,
+     "pct": 24.8,
+     "real": true
+    },
+    "frame50": {
+     "d": 3.253,
+     "pct": 25.5,
      "real": true
     },
     "game": {
-     "d": 3.952,
-     "pct": 41.2,
+     "d": 3.233,
+     "pct": 27.2,
      "real": true
     },
     "gpu": {
-     "d": 0.026,
-     "pct": 0.5,
+     "d": 0.06,
+     "pct": 1.0,
      "real": false
     },
-    "name": "200m 밖 엔티티를 입자로",
-    "sub": "빼면 입자 대신 ISKM으로 그림"
+    "group": "dist",
+    "mixed": "",
+    "name": "200m 밖을 그리지 않는 일을 끈 조건",
+    "notes": [],
+    "state": "slower",
+    "sub": "끄면 200m 밖 엔티티도 ISKM으로 맵 끝까지 그린다."
    },
    {
     "bottleneck": "game",
     "frame": {
-     "d": 0.754,
-     "pct": 7.7,
+     "d": 0.978,
+     "hi": 1.044,
+     "lo": 0.946,
+     "pct": 6.9,
+     "real": true
+    },
+    "frame50": {
+     "d": 0.889,
+     "pct": 7.0,
      "real": true
     },
     "game": {
-     "d": 0.769,
-     "pct": 8.0,
+     "d": 0.895,
+     "pct": 7.5,
      "real": true
     },
     "gpu": {
-     "d": 0.007,
-     "pct": 0.1,
-     "real": false
-    },
-    "name": "Simulation LOD",
-    "sub": "빼면 80m 밖도 접근·피해 로직을 매 프레임, 200m 밖도 엔진 이동·조향으로 옮김"
-   },
-   {
-    "bottleneck": "game",
-    "frame": {
-     "d": 0.542,
-     "pct": 5.6,
-     "real": true
-    },
-    "game": {
-     "d": 0.086,
-     "pct": 0.9,
-     "real": false
-    },
-    "gpu": {
-     "d": 0.008,
-     "pct": 0.1,
-     "real": false
-    },
-    "name": "ISKM 컴포넌트의 고정 바운드",
-    "sub": "빼면 엔진이 매 프레임 바운드를 다시 계산"
-   },
-   {
-    "bottleneck": "game",
-    "frame": {
-     "d": 0.127,
-     "pct": 1.3,
-     "real": true
-    },
-    "game": {
-     "d": 0.117,
-     "pct": 1.2,
-     "real": true
-    },
-    "gpu": {
-     "d": 0.352,
-     "pct": 6.1,
-     "real": true
-    },
-    "name": "80m 밖 인스턴스 그림자 끔",
-    "sub": "빼면 80m 밖도 그림자를 그림"
-   },
-   {
-    "bottleneck": "game",
-    "frame": {
-     "d": -0.07,
-     "pct": -0.7,
-     "real": false
-    },
-    "game": {
-     "d": -0.059,
-     "pct": -0.6,
-     "real": false
-    },
-    "gpu": {
-     "d": -0.006,
-     "pct": -0.1,
-     "real": false
-    },
-    "name": "엔티티 풀",
-    "sub": "빼면 죽은 개체의 엔티티를 파괴하고 새로 만듦"
-   },
-   {
-    "bottleneck": "game",
-    "frame": {
-     "d": -0.104,
-     "pct": -1.1,
-     "real": false
-    },
-    "game": {
-     "d": -0.091,
-     "pct": -0.9,
-     "real": false
-    },
-    "gpu": {
-     "d": 0.012,
+     "d": 0.011,
      "pct": 0.2,
-     "real": true
+     "real": false
     },
-    "name": "액터 전환 대책 다섯 가지",
-    "sub": "빼면 인스턴스와 액터가 바뀔 때의 보정을 모두 끔"
+    "group": "dist",
+    "mixed": "",
+    "name": "액터 메시 고정 바운드를 끈 조건",
+    "notes": [],
+    "state": "slower",
+    "sub": "끄면 액터 메시가 애니메이션이 갱신될 때마다 피직스 에셋 바디로 바운드를 다시 셈한다."
    },
    {
     "bottleneck": "game",
     "frame": {
-     "d": -0.132,
-     "pct": -1.4,
+     "d": 0.656,
+     "hi": 0.768,
+     "lo": 0.451,
+     "pct": 4.6,
+     "real": true
+    },
+    "frame50": {
+     "d": 0.58,
+     "pct": 4.5,
      "real": true
     },
     "game": {
-     "d": -0.196,
-     "pct": -2.0,
-     "real": true
+     "d": 0.157,
+     "pct": 1.3,
+     "real": false
     },
     "gpu": {
-     "d": 1.125,
-     "pct": 19.6,
-     "real": true
-    },
-    "name": "40~200m를 ISKM으로",
-    "sub": "빼면 ISM + VAT로 그림"
-   },
-   {
-    "bottleneck": "game",
-    "frame": {
-     "d": -0.292,
-     "pct": -3.0,
-     "real": true
-    },
-    "game": {
-     "d": -0.281,
-     "pct": -2.9,
-     "real": true
-    },
-    "gpu": {
-     "d": 0.017,
+     "d": 0.02,
      "pct": 0.3,
      "real": false
     },
-    "name": "Animation Budget Allocator",
-    "sub": "빼면 액터가 예산 없이 매 프레임 애니메이션을 평가"
+    "group": "dist",
+    "mixed": "",
+    "name": "ISKM 고정 바운드를 끈 조건",
+    "notes": [],
+    "state": "slower",
+    "sub": "끄면 엔진이 매 프레임 모든 ISKM 인스턴스의 바운드를 합쳐 컴포넌트 바운드를 다시 만든다."
    },
    {
     "bottleneck": "game",
     "frame": {
-     "d": -0.398,
-     "pct": -4.1,
+     "d": -0.672,
+     "hi": -0.52,
+     "lo": -0.743,
+     "pct": -4.7,
+     "real": true
+    },
+    "frame50": {
+     "d": -0.706,
+     "pct": -5.5,
      "real": true
     },
     "game": {
-     "d": -0.385,
-     "pct": -4.0,
+     "d": -0.802,
+     "pct": -6.8,
      "real": true
     },
     "gpu": {
-     "d": -0.465,
-     "pct": -8.1,
+     "d": 1.242,
+     "pct": 20.1,
      "real": true
     },
-    "name": "Niagara 배경 무리",
-    "sub": "빼면 200m 밖에 아무것도 그리지 않음"
+    "group": "dist",
+    "mixed": "ISKM을 끄면 ISKM 고정 바운드, 트랙 예약, 200m 밖에서 맞은 개체를 ISKM으로 그리는 규칙도 함께 빠진다.",
+    "name": "ISKM을 끈 조건",
+    "notes": [
+     "GPU 시간 +1.24ms"
+    ],
+    "state": "faster",
+    "sub": "끄면 35~200m를 VAT 인스턴스로 그린다."
+   },
+   {
+    "bottleneck": "game",
+    "frame": {
+     "d": -0.926,
+     "hi": -0.797,
+     "lo": -1.184,
+     "pct": -6.5,
+     "real": true
+    },
+    "frame50": {
+     "d": -1.07,
+     "pct": -8.4,
+     "real": true
+    },
+    "game": {
+     "d": -1.061,
+     "pct": -8.9,
+     "real": true
+    },
+    "gpu": {
+     "d": -0.044,
+     "pct": -0.7,
+     "real": false
+    },
+    "group": "dist",
+    "mixed": "",
+    "name": "겹침 방지(분리 프로세서)를 끈 조건",
+    "notes": [
+     "겹친 쌍 1,644(최종 구성 234)"
+    ],
+    "state": "faster",
+    "sub": "끄면 개체끼리 떼어 놓지 않는다."
+   },
+   {
+    "bottleneck": "game",
+    "frame": {
+     "d": -1.855,
+     "hi": -1.841,
+     "lo": -1.866,
+     "pct": -13.0,
+     "real": true
+    },
+    "frame50": {
+     "d": -1.988,
+     "pct": -15.6,
+     "real": true
+    },
+    "game": {
+     "d": -1.251,
+     "pct": -10.5,
+     "real": true
+    },
+    "gpu": {
+     "d": -0.004,
+     "pct": -0.1,
+     "real": false
+    },
+    "group": "dist",
+    "mixed": "",
+    "name": "액터 캡슐을 끈 조건",
+    "notes": [],
+    "state": "faster",
+    "sub": "끄면 액터에 캡슐 콜리전이 없다."
    },
    {
     "bottleneck": "gpu",
     "frame": {
-     "d": -3.572,
-     "pct": -36.7,
+     "d": -6.984,
+     "hi": -6.98,
+     "lo": -6.995,
+     "pct": -49.1,
+     "real": true
+    },
+    "frame50": {
+     "d": -6.175,
+     "pct": -48.4,
      "real": true
     },
     "game": {
-     "d": -5.839,
-     "pct": -60.9,
+     "d": -6.651,
+     "pct": -56.0,
      "real": true
     },
     "gpu": {
-     "d": -0.015,
+     "d": 0.047,
+     "pct": 0.8,
+     "real": false
+    },
+    "group": "dist",
+    "mixed": "하이드레이션을 끄면 액터 캡슐, 액터 애니메이션 예산, 액터 메시 고정 바운드도 함께 빠진다.",
+    "name": "하이드레이션을 끈 조건",
+    "notes": [
+     "병목이 GPU로 바뀐다"
+    ],
+    "state": "faster",
+    "sub": "끄면 액터 없이 모든 거리를 ISKM으로 그린다."
+   },
+   {
+    "bottleneck": "game",
+    "frame": {
+     "d": 0.333,
+     "hi": 0.441,
+     "lo": 0.034,
+     "pct": 2.3,
+     "real": false
+    },
+    "frame50": {
+     "d": 0.235,
+     "pct": 1.8,
+     "real": false
+    },
+    "game": {
+     "d": 0.219,
+     "pct": 1.8,
+     "real": false
+    },
+    "gpu": {
+     "d": 0.009,
+     "pct": 0.1,
+     "real": false
+    },
+    "group": "same",
+    "mixed": "",
+    "name": "입자의 오브 따라가기를 끈 조건",
+    "notes": [],
+    "state": "same",
+    "sub": "끄면 입자가 걸어갈 목표를 시작 때 한 번만 정한다."
+   },
+   {
+    "bottleneck": "game",
+    "frame": {
+     "d": 0.115,
+     "hi": 0.162,
+     "lo": 0.021,
+     "pct": 0.8,
+     "real": false
+    },
+    "frame50": {
+     "d": 0.086,
+     "pct": 0.7,
+     "real": false
+    },
+    "game": {
+     "d": 0.073,
+     "pct": 0.6,
+     "real": false
+    },
+    "gpu": {
+     "d": 0.005,
+     "pct": 0.1,
+     "real": false
+    },
+    "group": "same",
+    "mixed": "",
+    "name": "ISKM 바운드 상자 따라가기를 끈 조건",
+    "notes": [],
+    "state": "same",
+    "sub": "끄면 ISKM 바운드 상자가 카메라를 따라 옮겨지지 않고, 대신 궤도를 덮게 커진다."
+   },
+   {
+    "bottleneck": "game",
+    "frame": {
+     "d": 0.071,
+     "hi": 0.28,
+     "lo": -0.171,
+     "pct": 0.5,
+     "real": false
+    },
+    "frame50": {
+     "d": 0.022,
+     "pct": 0.2,
+     "real": false
+    },
+    "game": {
+     "d": 0.007,
+     "pct": 0.1,
+     "real": false
+    },
+    "gpu": {
+     "d": 0.482,
+     "pct": 7.8,
+     "real": false
+    },
+    "group": "same",
+    "mixed": "",
+    "name": "80m 밖 그림자를 다시 켠 조건",
+    "notes": [],
+    "state": "same",
+    "sub": "다시 켜면 80m 밖 인스턴스도 그림자를 그린다."
+   },
+   {
+    "bottleneck": "game",
+    "frame": {
+     "d": 0.009,
+     "hi": 0.138,
+     "lo": -0.143,
+     "pct": 0.1,
+     "real": false
+    },
+    "frame50": {
+     "d": -0.017,
+     "pct": -0.1,
+     "real": false
+    },
+    "game": {
+     "d": -0.04,
      "pct": -0.3,
      "real": false
     },
-    "name": "가까운 개체를 액터로(하이드레이션)",
-    "sub": "빼면 가까운 개체도 ISKM으로 그림"
+    "gpu": {
+     "d": 0.038,
+     "pct": 0.6,
+     "real": false
+    },
+    "group": "same",
+    "mixed": "",
+    "name": "엔티티 풀을 끈 조건",
+    "notes": [
+     "240초 끝 ISKM 트랙 30,797개(최종 구성 20,215개)"
+    ],
+    "state": "same",
+    "sub": "끄면 죽은 개체의 엔티티를 파괴하고 새로 만든다."
+   },
+   {
+    "bottleneck": "game",
+    "frame": {
+     "d": 0.008,
+     "hi": 0.205,
+     "lo": -0.071,
+     "pct": 0.1,
+     "real": false
+    },
+    "frame50": {
+     "d": 0.018,
+     "pct": 0.1,
+     "real": false
+    },
+    "game": {
+     "d": 0.008,
+     "pct": 0.1,
+     "real": false
+    },
+    "gpu": {
+     "d": -0.001,
+     "pct": -0.0,
+     "real": false
+    },
+    "group": "same",
+    "mixed": "",
+    "name": "ISKM 트랙 예약을 끈 조건",
+    "notes": [],
+    "state": "same",
+    "sub": "끄면 ISKM 트랙을 미리 늘려 두지 않는다."
+   },
+   {
+    "bottleneck": "game",
+    "frame": {
+     "d": 0.0,
+     "hi": 0.064,
+     "lo": -0.159,
+     "pct": 0.0,
+     "real": false
+    },
+    "frame50": {
+     "d": -0.001,
+     "pct": -0.0,
+     "real": false
+    },
+    "game": {
+     "d": -0.013,
+     "pct": -0.1,
+     "real": false
+    },
+    "gpu": {
+     "d": 0.003,
+     "pct": 0.0,
+     "real": false
+    },
+    "group": "same",
+    "mixed": "",
+    "name": "전환 대책을 끈 조건",
+    "notes": [],
+    "state": "same",
+    "sub": "끄면 인스턴스와 액터가 바뀔 때의 전환 대책 다섯을 모두 끈다."
+   },
+   {
+    "bottleneck": "game",
+    "frame": {
+     "d": -0.189,
+     "hi": -0.153,
+     "lo": -0.319,
+     "pct": -1.3,
+     "real": false
+    },
+    "frame50": {
+     "d": -0.183,
+     "pct": -1.4,
+     "real": false
+    },
+    "game": {
+     "d": -0.179,
+     "pct": -1.5,
+     "real": false
+    },
+    "gpu": {
+     "d": -0.004,
+     "pct": -0.1,
+     "real": false
+    },
+    "group": "same",
+    "mixed": "",
+    "name": "액터 애니메이션 예산을 끈 조건",
+    "notes": [],
+    "state": "same",
+    "sub": "끄면 액터 메시가 `USkeletalMeshComponent`이고 매 프레임 애니메이션을 평가한다."
+   },
+   {
+    "bottleneck": "game",
+    "frame": {
+     "d": -0.21,
+     "hi": -0.131,
+     "lo": -0.33,
+     "pct": -1.5,
+     "real": false
+    },
+    "frame50": {
+     "d": -0.347,
+     "pct": -2.7,
+     "real": false
+    },
+    "game": {
+     "d": -0.365,
+     "pct": -3.1,
+     "real": false
+    },
+    "gpu": {
+     "d": 0.002,
+     "pct": 0.0,
+     "real": false
+    },
+    "group": "same",
+    "mixed": "",
+    "name": "최소 유지 시간을 끈 조건",
+    "notes": [
+     "왕복 전환 초당 4.34건(최종 구성 0건)"
+    ],
+    "state": "same",
+    "sub": "끄면 바뀐 개체가 곧바로 앞의 표현으로 되돌아갈 수 있다."
+   },
+   {
+    "bottleneck": "game",
+    "frame": {
+     "d": -0.235,
+     "hi": -0.081,
+     "lo": -0.334,
+     "pct": -1.7,
+     "real": false
+    },
+    "frame50": {
+     "d": -0.326,
+     "pct": -2.6,
+     "real": false
+    },
+    "game": {
+     "d": -0.33,
+     "pct": -2.8,
+     "real": false
+    },
+    "gpu": {
+     "d": 0.003,
+     "pct": 0.0,
+     "real": false
+    },
+    "group": "same",
+    "mixed": "",
+    "name": "Simulation LOD를 끈 조건",
+    "notes": [],
+    "state": "same",
+    "sub": "끄면 80m 밖도 로직을 매 프레임 돌리고, 200m 밖도 엔진 이동·조향으로 옮긴다."
+   },
+   {
+    "bottleneck": "game",
+    "frame": {
+     "d": -0.309,
+     "hi": -0.208,
+     "lo": -0.446,
+     "pct": -2.2,
+     "real": false
+    },
+    "frame50": {
+     "d": -0.439,
+     "pct": -3.4,
+     "real": false
+    },
+    "game": {
+     "d": -0.463,
+     "pct": -3.9,
+     "real": false
+    },
+    "gpu": {
+     "d": -0.622,
+     "pct": -10.1,
+     "real": true
+    },
+    "group": "same",
+    "mixed": "배경 무리를 끄면 200m 밖에서 맞은 개체를 ISKM으로 그리는 규칙과 맵 밖 무리의 그리기도 함께 빠진다.",
+    "name": "배경 무리를 끈 조건",
+    "notes": [
+     "GPU 시간 −0.62ms"
+    ],
+    "state": "same",
+    "sub": "끄면 200m 밖에 입자를 그리지 않는다."
+   },
+   {
+    "bottleneck": "game",
+    "frame": {
+     "d": 8.572,
+     "hi": 8.938,
+     "lo": 8.385,
+     "pct": 60.2,
+     "real": true
+    },
+    "frame50": {
+     "d": 7.558,
+     "pct": 59.2,
+     "real": true
+    },
+    "game": {
+     "d": 4.231,
+     "pct": 35.6,
+     "real": true
+    },
+    "gpu": {
+     "d": 1.345,
+     "pct": 21.8,
+     "real": true
+    },
+    "group": "sub",
+    "mixed": "",
+    "name": "분리 프로세서 대신 엔진 회피를 쓴 조건",
+    "notes": [
+     "겹친 쌍 11,660(최종 구성 234)"
+    ],
+    "state": "slower",
+    "sub": "분리 프로세서 대신 엔진 회피 Processor로 겹침을 막는다."
    }
   ]
  },
@@ -228,35 +601,39 @@ window.SITE_DATA = {
   500,
   1000,
   2000,
+  2500,
   5000,
   10000,
-  20000,
-  30000
+  12500,
+  20000
  ],
  "groups": {
-  "earn": "기법을 더해 프레임 시간을 버는 단계",
-  "spend": "번 시간을 품질에 쓰는 단계"
+  "earn": "비용을 줄이는 단계",
+  "quality": "표현을 더하는 단계",
+  "start": "출발점"
  },
  "headline": {
-  "final_ms": 9.746,
-  "final_p95_ms": 11.486,
-  "first_max60": 766,
-  "first_ms": 444.279,
-  "first_over_budget": 26.7,
-  "first_p95_ms": 469.662,
-  "speedup": 45.6
+  "final_margin_ms": 2.469,
+  "final_ms": 12.77,
+  "final_p95_ms": 14.231,
+  "first_max60": 781,
+  "first_ms": 597.108,
+  "first_over_budget": 35.8,
+  "first_p95_ms": 665.254,
+  "speedup": 46.8
  },
  "meta": {
-  "build": "df41c13",
+  "build": "de0e21b",
+  "distinct_floor_ms": 0.5,
   "measurement_guide": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Docs/Guides/measurement.md",
   "pc_specs": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Docs/Reference/pc-specs.md",
-  "release": "https://github.com/hon454/unreal-horde-optimization-lab/releases/tag/test-package-df41c13",
+  "release": "https://github.com/hon454/unreal-horde-optimization-lab/releases/tag/test-package-de0e21b",
   "repo": "https://github.com/hon454/unreal-horde-optimization-lab",
   "res": "2560×1440",
   "runs_per_condition": 3,
   "seed": "20261106",
-  "summary_csv": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Measurements/Full3/summary.csv",
-  "target_ms": 16.667,
+  "summary_csv": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Measurements/Full4/summary.csv",
+  "target_ms": 16.7,
   "target_n": 10000
  },
  "pool": {
@@ -279,270 +656,306 @@ window.SITE_DATA = {
    16
   ],
   "notes": [
-   "최종 구성을 엔티티 풀을 켜고 끈 채 16분씩 한 번 돌렸다. 60초 측정에서는 둘이 구별되지 않았다.",
+   "최종 구성을 엔티티 풀을 켜고 끈 채 16분씩 한 번 돌렸다. 다른 값과 따로 잰 참고 값이다.",
    "엔진은 움직이는 ISKM 인스턴스의 엔티티가 파괴될 때 그 애니메이션 트랙을 돌려받지 않는다(`MassVisualizationComponent.cpp`). 풀을 끄면 죽은 개체마다 엔티티를 파괴하므로 트랙이 샌다.",
-   "풀을 끄면 16분 동안 ISKM 트랙이 119,473까지 늘고, GPU 메모리가 3,310MB에서 5,063MB로, 프레임 시간 중앙값이 7.74ms에서 9.64ms로 는다.",
-   "풀을 켜면 트랙이 20,053에서 멈추고 메모리와 프레임 시간이 평평하다. 실행이 한 번씩이라 범위는 없다."
+   "풀을 끄면 16분 동안 ISKM 트랙이 17,711에서 120,428로 늘고, GPU 메모리가 3,370MB에서 5,105MB로 는다.",
+   "마지막 4분의 프레임 p95는 풀 끔이 0.62–1.14ms 길었다. 풀을 켜면 2분째부터 트랙이 분당 약 80개만 는다. 실행이 한 번씩이라 범위는 없다."
   ],
   "off": {
    "frame_p50": [
-    7.737,
-    7.721,
-    7.882,
-    7.912,
-    8.15,
-    8.367,
-    8.555,
-    8.679,
-    8.98,
-    8.954,
-    9.103,
-    9.267,
-    9.171,
-    9.201,
-    9.481,
-    9.642
+    12.424,
+    12.971,
+    12.879,
+    13.096,
+    12.362,
+    12.348,
+    12.934,
+    13.59,
+    13.176,
+    13.349,
+    12.59,
+    12.681,
+    13.392,
+    13.585,
+    13.53,
+    13.25
+   ],
+   "frame_p95": [
+    14.035,
+    14.506,
+    14.384,
+    14.722,
+    13.658,
+    14.339,
+    14.413,
+    15.062,
+    14.852,
+    15.051,
+    14.116,
+    14.529,
+    15.697,
+    15.545,
+    15.415,
+    15.234
    ],
    "gpu_mem_mean": [
-    3310.1,
-    3354.1,
-    3476.0,
-    3523.8,
-    3732.1,
-    3914.6,
-    3892.6,
-    3891.1,
-    3755.5,
-    3759.4,
-    3752.3,
-    3760.0,
-    4913.1,
-    5055.8,
-    5057.3,
-    5062.5
+    3369.6,
+    3417.9,
+    3618.5,
+    3795.3,
+    3888.8,
+    3918.2,
+    3912.8,
+    3858.8,
+    3817.3,
+    3823.3,
+    3796.8,
+    4690.8,
+    5104.5,
+    5102.9,
+    5106.2,
+    5105.3
    ],
    "iskm_tracks_end": [
-    12481.0,
-    19525.0,
-    26726.0,
-    33889.0,
-    40881.0,
-    48153.0,
-    55271.0,
-    62360.0,
-    69653.0,
-    76599.0,
-    83809.0,
-    91051.0,
-    98114.0,
-    105259.0,
-    112455.0,
-    119473.0
+    17711.0,
+    24971.0,
+    31940.0,
+    38420.0,
+    44972.0,
+    51673.0,
+    58752.0,
+    66071.0,
+    72937.0,
+    79468.0,
+    86049.0,
+    92756.0,
+    99901.0,
+    107148.0,
+    113948.0,
+    120428.0
    ]
   },
   "on": {
    "frame_p50": [
-    7.814,
-    7.784,
-    7.996,
-    8.093,
-    7.994,
-    8.138,
-    8.102,
-    8.029,
-    8.172,
-    8.032,
-    8.097,
-    8.184,
-    8.038,
-    8.13,
-    8.186,
-    8.079
+    12.569,
+    13.297,
+    13.084,
+    13.113,
+    12.351,
+    12.19,
+    12.678,
+    13.615,
+    12.973,
+    13.051,
+    12.43,
+    12.414,
+    12.948,
+    13.283,
+    13.086,
+    12.632
+   ],
+   "frame_p95": [
+    14.102,
+    14.793,
+    14.632,
+    14.74,
+    13.857,
+    14.314,
+    14.307,
+    15.124,
+    14.632,
+    14.668,
+    13.844,
+    14.095,
+    14.559,
+    14.815,
+    14.794,
+    14.468
    ],
    "gpu_mem_mean": [
-    3339.4,
-    3371.2,
-    3344.4,
-    3339.8,
-    3339.3,
-    3343.3,
-    3339.0,
-    3338.9,
-    3341.7,
-    3340.7,
-    3343.8,
-    3346.6,
-    3340.4,
-    3343.2,
-    3344.2,
-    3341.9
+    3371.0,
+    3360.7,
+    3373.4,
+    3375.0,
+    3345.9,
+    3351.9,
+    3363.6,
+    3363.4,
+    3365.5,
+    3371.5,
+    3348.9,
+    3360.4,
+    3371.5,
+    3363.4,
+    3374.3,
+    3370.6
    ],
    "iskm_tracks_end": [
-    12478.0,
-    19162.0,
-    19853.0,
-    20018.0,
-    20047.0,
-    20050.0,
-    20053.0,
-    20053.0,
-    20053.0,
-    20053.0,
-    20053.0,
-    20053.0,
-    20053.0,
-    20053.0,
-    20053.0,
-    20053.0
+    17211.0,
+    20048.0,
+    20232.0,
+    20338.0,
+    20408.0,
+    20476.0,
+    20549.0,
+    20615.0,
+    20685.0,
+    20747.0,
+    20816.0,
+    20887.0,
+    20950.0,
+    21019.0,
+    21084.0,
+    21149.0
    ]
   }
  },
  "posts": [
   {
    "num": 0,
-   "sentence": "목표 사양과 시나리오와 재는 법을 하나로 고정해 두면, 기법 하나가 어느 스레드의 몇 ms를 바꾸는지가 드러난다.",
+   "ready": true,
+   "sentence": "목표와 장면과 재는 법을 하나로 묶어 두면, 같은 일을 하는 기법 하나가 어느 스레드의 몇 ms를 바꾸는지가 드러난다.",
    "title": "호드 1만을 60fps로: 목표 사양과 재는 법",
    "url": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Posts/00-goals-and-method/README.md"
   },
   {
    "num": 1,
-   "sentence": "액터 1만의 프레임을 잡아먹는 것은 이동 컴포넌트이고, 이 컴포넌트는 프레임이 느려질수록 하위 스텝을 늘려 더 느려진다.",
-   "title": "목표 사양을 액터로 돌리면: URO와 Animation Budget Allocator를 켜도 남는 것",
+   "ready": true,
+   "sentence": "액터 기준선의 게임 스레드는 CharacterMovement가 쓰고, Budget Allocator는 예산에 닿기 전에는 일을 줄이지 않는다.",
+   "title": "액터 기준선: 캡슐과 이동 컴포넌트를 가진 액터는 약 780에서 60fps를 넘는다",
    "url": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Posts/01-actor-baseline/README.md"
   },
   {
    "num": 2,
-   "sentence": "로직을 Mass로 옮기고 표현을 ISM 하나로 바꾸자 개체당 게임 스레드 비용이 27분의 1로 줄었다. 이 몫은 개체마다 도는 틱을 없애면 Mass 없이도 얻는다. Mass가 준 것은 뒤 단계가 쓰는 표현 LOD와 표현 전환의 경로다.",
-   "title": "로직을 Mass로: 액터마다 돌던 틱이 Processor 몇 개가 된다",
-   "url": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Posts/02-mass-logic/README.md"
+   "ready": true,
+   "sentence": "액터를 Mass로 옮기면 이동 틱은 사라지지만, 한 스레드에서 도는 엔진 회피가 새 병목이 된다.",
+   "title": "Mass, 엔진 기본 경로: 597ms가 34.1ms로, 남은 병목은 엔진 회피",
+   "url": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Posts/02-mass-engine-path/README.md"
   },
   {
    "num": 3,
-   "sentence": "먼 개체에 애니메이션을 붙이는 비용보다, 화면 높이의 1%도 안 되는 개체를 그리지 않아 버는 시간이 더 컸다.",
-   "title": "먼 개체에 애니메이션을 붙이고 더 빨라졌다: ISM + VAT와 200m 밖 지우기",
-   "url": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Posts/03-ism-vat/README.md"
+   "ready": true,
+   "sentence": "엔진 회피를 위치를 직접 미는 분리 프로세서로 바꾸자, 작업자 하나에 묶였던 프레임이 풀려 호드 1만이 처음으로 16.7ms 안에 들었다.",
+   "title": "직접 짠 분리: 엔진 회피를 분리 프로세서로 바꿔 처음으로 16.7ms 안에",
+   "url": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Posts/03-separation/README.md"
   },
   {
    "num": 4,
-   "sentence": "가까운 개체를 진짜 액터로 바꾸면 게임 스레드가 두 배 넘게 늘고, 프레임 시간을 정하는 쪽이 GPU에서 게임 스레드로 바뀐다.",
-   "title": "가까운 개체를 진짜 액터로: 하이드레이션과 애니메이션 예산",
-   "url": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Posts/04-hydration-anim-budget/README.md"
+   "ready": true,
+   "sentence": "단계 3에서 7까지 표현 셋을 더하는 동안 프레임 p95는 1.02ms 늘었고, GPU 비용은 병목인 게임 스레드에 가려 거의 드러나지 않았다.",
+   "title": "거리별 품질: 표현 셋을 더하는 동안 프레임 p95가 1.02ms 늘었다",
+   "url": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Posts/04-quality-by-distance/README.md"
   },
   {
    "num": 5,
-   "sentence": "Simulation LOD의 효과는 LOD 태그를 읽는 Processor에서만 나온다. 자체 로직에 간격을 준 것으로는 프레임이 줄지 않았고, 줄인 것은 먼 개체를 엔진 이동·조향에서 뺀 일이었다.",
-   "title": "먼 개체를 엔진 이동에서 빼자 게임 스레드가 줄었다: Simulation LOD와 엔티티 풀",
-   "url": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Posts/05-simulation-lod-entity-pool/README.md"
+   "ready": true,
+   "sentence": "비용을 줄이는 두 단계에서 프레임 시간을 줄인 것은 액터 메시 고정 바운드이고, 엔티티 풀의 이점은 긴 실행에서 보인다.",
+   "title": "비용을 줄이는 단계와 기법별 기여: 최종 구성의 큰 비용은 가까운 액터에 있다",
+   "url": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Posts/05-cost-cuts-and-contributions/README.md"
   },
   {
    "num": 6,
-   "sentence": "ISKM은 먼 개체의 GPU 시간을 23% 줄였지만, 게임 스레드가 병목인 동안 그 이점은 GPU 여유로만 남는다.",
-   "title": "GPU 시간은 23% 줄고 프레임 시간은 거의 그대로였다: ISKM과 고정 바운드",
-   "url": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Posts/06-iskm/README.md"
+   "ready": true,
+   "sentence": "엔진에서 찾은 문제 다섯은 모두 엔진 소스를 고치지 않고 게임 코드, 에셋, 검사 규칙에서 피할 수 있었다.",
+   "title": "엔진을 고치지 않고 피한 문제 다섯: ISKM 트랙, Mass 쿼리, Chaos 트레이스",
+   "url": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Posts/06-engine-findings/README.md"
   },
   {
    "num": 7,
-   "sentence": "200m 밖 엔티티의 자리에 GPU 입자를 그리자 호드가 지평선까지 이어졌고, 값은 게임 스레드가 정한 프레임 0.276ms였다.",
-   "title": "지평선까지 이어진 호드에 0.276ms: 엔티티가 움직이는 Niagara 배경 무리",
-   "url": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Posts/07-niagara-crowd/README.md"
-  },
-  {
-   "num": 8,
-   "sentence": "8단계는 남은 애니메이션 예산 안에서 가까운 액터를 84개 늘렸고, 그 대가로 프레임 시간이 1.02ms 길어지고 60fps를 지키는 호드 총수가 약 2만으로 내려왔다.",
-   "title": "품질 올리기: 남은 예산을 액터 수와 전환 거리에 쓰기",
-   "url": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Posts/08-quality/README.md"
-  },
-  {
-   "num": 9,
-   "sentence": "호드 1만의 60fps는 2단계에서 이미 지켰고, 나머지 여섯 단계는 번 시간을 품질로 바꿨으며 그 값은 게임 스레드가 치렀다.",
-   "title": "444ms에서 9.75ms로, 그리고 남은 5.21ms: 사다리, 빼 보기, 목표 총수",
-   "url": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Posts/09-summary/README.md"
+   "ready": true,
+   "sentence": "엔진 회피를 직접 짠 분리로 바꾼 단계 3에서 호드 1만이 처음 16.7ms 안에 들었고, 단계 7까지 늘어난 시간은 단계 8이 거의 되돌렸다.",
+   "title": "요약: 단계 3에서 16.7ms 안에 들고, 표현을 셋 더한 최종 구성도 2.47ms가 남는다",
+   "url": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Posts/07-summary/README.md"
   }
  ],
  "steps": [
   {
-   "alt": "1단계 화면: 호드 총수 1만, 오브 시점 카메라. 모든 개체가 AnimBP로 움직이는 액터다.",
+   "alt": "단계 1 화면: 호드 총수 1만, 이동 장면, 오브 시점 카메라. 모든 개체가 AnimBP로 움직이는 액터다.",
    "by_n": {
     "1000": {
      "actors_mean": null,
      "bottleneck": "game",
-     "frame_p50_ms": 17.955,
-     "frame_p50_ms_max": 18.086,
-     "frame_p50_ms_min": 17.785,
-     "frame_p95_ms": 20.206,
-     "frame_p95_ms_max": 20.349,
-     "frame_p95_ms_min": 20.152,
-     "game_p50_ms": 17.018,
-     "game_p50_ms_max": 17.165,
-     "game_p50_ms_min": 16.847,
-     "gpu_p50_ms": 5.886,
-     "gpu_p50_ms_max": 5.991,
-     "gpu_p50_ms_min": 5.855,
-     "render_p50_ms": 3.637,
-     "render_p50_ms_max": 3.643,
-     "render_p50_ms_min": 3.598
+     "frame_p50_ms": 18.255,
+     "frame_p50_ms_max": 18.27,
+     "frame_p50_ms_min": 17.992,
+     "frame_p95_ms": 19.956,
+     "frame_p95_ms_max": 20.155,
+     "frame_p95_ms_min": 19.783,
+     "game_p50_ms": 17.244,
+     "game_p50_ms_max": 17.258,
+     "game_p50_ms_min": 16.996,
+     "gpu_p50_ms": 6.162,
+     "gpu_p50_ms_max": 6.34,
+     "gpu_p50_ms_min": 6.122,
+     "render_p50_ms": 3.812,
+     "render_p50_ms_max": 3.871,
+     "render_p50_ms_min": 3.768,
+     "unmet": false
     },
     "10000": {
      "actors_mean": null,
      "bottleneck": "game",
-     "frame_p50_ms": 444.279,
-     "frame_p50_ms_max": 449.171,
-     "frame_p50_ms_min": 441.687,
-     "frame_p95_ms": 469.662,
-     "frame_p95_ms_max": 474.961,
-     "frame_p95_ms_min": 468.347,
-     "game_p50_ms": 429.438,
-     "game_p50_ms_max": 433.98,
-     "game_p50_ms_min": 425.808,
-     "gpu_p50_ms": 50.168,
-     "gpu_p50_ms_max": 50.952,
-     "gpu_p50_ms_min": 50.145,
-     "render_p50_ms": 29.797,
-     "render_p50_ms_max": 30.041,
-     "render_p50_ms_min": 28.86
+     "frame_p50_ms": 597.108,
+     "frame_p50_ms_max": 599.009,
+     "frame_p50_ms_min": 594.037,
+     "frame_p95_ms": 665.254,
+     "frame_p95_ms_max": 668.172,
+     "frame_p95_ms_min": 653.996,
+     "game_p50_ms": 580.969,
+     "game_p50_ms_max": 582.745,
+     "game_p50_ms_min": 578.155,
+     "gpu_p50_ms": 54.68,
+     "gpu_p50_ms_max": 54.775,
+     "gpu_p50_ms_min": 52.757,
+     "render_p50_ms": 28.661,
+     "render_p50_ms_max": 28.931,
+     "render_p50_ms_min": 28.362,
+     "unmet": false
     },
     "2000": {
      "actors_mean": null,
      "bottleneck": "game",
-     "frame_p50_ms": 37.087,
-     "frame_p50_ms_max": 37.16,
-     "frame_p50_ms_min": 36.991,
-     "frame_p95_ms": 40.046,
-     "frame_p95_ms_max": 40.273,
-     "frame_p95_ms_min": 39.658,
-     "game_p50_ms": 35.287,
-     "game_p50_ms_max": 35.346,
-     "game_p50_ms_min": 35.186,
-     "gpu_p50_ms": 11.789,
-     "gpu_p50_ms_max": 11.844,
-     "gpu_p50_ms_min": 11.772,
-     "render_p50_ms": 6.115,
-     "render_p50_ms_max": 6.265,
-     "render_p50_ms_min": 6.115
+     "frame_p50_ms": 38.914,
+     "frame_p50_ms_max": 39.231,
+     "frame_p50_ms_min": 38.875,
+     "frame_p95_ms": 41.252,
+     "frame_p95_ms_max": 41.571,
+     "frame_p95_ms_min": 41.132,
+     "game_p50_ms": 36.896,
+     "game_p50_ms_max": 37.189,
+     "game_p50_ms_min": 36.85,
+     "gpu_p50_ms": 12.858,
+     "gpu_p50_ms_max": 12.93,
+     "gpu_p50_ms_min": 12.763,
+     "render_p50_ms": 6.307,
+     "render_p50_ms_max": 6.332,
+     "render_p50_ms_min": 6.285,
+     "unmet": false
     },
     "500": {
      "actors_mean": null,
      "bottleneck": "game",
-     "frame_p50_ms": 9.502,
-     "frame_p50_ms_max": 9.561,
-     "frame_p50_ms_min": 9.418,
-     "frame_p95_ms": 11.099,
-     "frame_p95_ms_max": 11.553,
-     "frame_p95_ms_min": 11.05,
-     "game_p50_ms": 8.949,
-     "game_p50_ms_max": 8.995,
-     "game_p50_ms_min": 8.858,
-     "gpu_p50_ms": 4.201,
-     "gpu_p50_ms_max": 4.204,
-     "gpu_p50_ms_min": 4.19,
-     "render_p50_ms": 2.713,
-     "render_p50_ms_max": 2.784,
-     "render_p50_ms_min": 2.713
+     "frame_p50_ms": 9.27,
+     "frame_p50_ms_max": 9.373,
+     "frame_p50_ms_min": 9.195,
+     "frame_p95_ms": 10.829,
+     "frame_p95_ms_max": 10.832,
+     "frame_p95_ms_min": 10.768,
+     "game_p50_ms": 8.688,
+     "game_p50_ms_max": 8.803,
+     "game_p50_ms_min": 8.614,
+     "gpu_p50_ms": 4.253,
+     "gpu_p50_ms_max": 4.258,
+     "gpu_p50_ms_min": 4.245,
+     "render_p50_ms": 2.731,
+     "render_p50_ms_max": 2.731,
+     "render_p50_ms_min": 2.707,
+     "unmet": false
     }
    },
-   "changed": "모든 개체가 `ACharacter` 액터이고 AnimBP로 움직인다. 이후 단계를 견주는 기준선이다.",
+   "changed": "모든 개체가 `ACharacter` 액터다. 캡슐끼리 막고 `UCharacterMovementComponent`의 스윕 이동으로 서로 겹치지 않으며, AnimBP로 움직인다. 이후 단계를 견주는 출발점이다.",
    "clip": "assets/step1.webp",
-   "clip_mb": 1.2,
+   "clip_mb": 0.9,
    "counts": [
     500,
     1000,
@@ -550,601 +963,516 @@ window.SITE_DATA = {
     10000
    ],
    "delta": {},
-   "group": "earn",
-   "learned": "액터 1만의 프레임을 잡아먹는 것은 이동 컴포넌트이고, 이 컴포넌트는 프레임이 느려질수록 하위 스텝을 늘려 더 느려진다.",
+   "group": "start",
+   "learned": "액터 기준선의 게임 스레드는 CharacterMovement가 쓰고, Budget Allocator는 예산에 닿기 전에는 일을 줄이지 않는다.",
+   "margin_ms": null,
    "max60": {
     "above": false,
-    "n": 766
+    "n": 781
    },
-   "name": "액터 군중",
+   "name": "액터 기준선",
    "num": 1,
    "post": {
     "num": 1,
-    "title": "목표 사양을 액터로 돌리면: URO와 Animation Budget Allocator를 켜도 남는 것",
+    "ready": true,
+    "title": "액터 기준선: 캡슐과 이동 컴포넌트를 가진 액터는 약 780에서 60fps를 넘는다",
     "url": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Posts/01-actor-baseline/README.md"
    }
   },
   {
-   "alt": "2단계 화면: 호드 총수 1만, 오브 시점 카메라. 모든 개체가 애니메이션 없는 같은 자세로 움직인다.",
+   "alt": "단계 2 화면: 호드 총수 1만, 이동 장면, 오브 시점 카메라. 35m 안은 액터, 35~200m는 애니메이션 없는 정지 메시 인스턴스이고, 200m 밖은 빈 땅이다.",
    "by_n": {
     "10000": {
-     "actors_mean": null,
-     "bottleneck": "gpu",
-     "frame_p50_ms": 10.193,
-     "frame_p50_ms_max": 10.647,
-     "frame_p50_ms_min": 9.896,
-     "frame_p95_ms": 10.837,
-     "frame_p95_ms_max": 11.226,
-     "frame_p95_ms_min": 10.598,
-     "game_p50_ms": 6.24,
-     "game_p50_ms_max": 6.24,
-     "game_p50_ms_min": 6.199,
-     "gpu_p50_ms": 9.903,
-     "gpu_p50_ms_max": 10.356,
-     "gpu_p50_ms_min": 9.62,
-     "render_p50_ms": 6.396,
-     "render_p50_ms_max": 6.493,
-     "render_p50_ms_min": 6.276
+     "actors_mean": 970.75,
+     "bottleneck": "game",
+     "frame_p50_ms": 34.058,
+     "frame_p50_ms_max": 34.084,
+     "frame_p50_ms_min": 33.702,
+     "frame_p95_ms": 36.785,
+     "frame_p95_ms_max": 37.212,
+     "frame_p95_ms_min": 36.694,
+     "game_p50_ms": 18.027,
+     "game_p50_ms_max": 18.092,
+     "game_p50_ms_min": 17.904,
+     "gpu_p50_ms": 12.23,
+     "gpu_p50_ms_max": 12.247,
+     "gpu_p50_ms_min": 12.206,
+     "render_p50_ms": 7.294,
+     "render_p50_ms_max": 7.442,
+     "render_p50_ms_min": 7.162,
+     "unmet": false
     },
-    "20000": {
-     "actors_mean": null,
+    "2500": {
+     "actors_mean": 215.75,
      "bottleneck": "gpu",
-     "frame_p50_ms": 15.692,
-     "frame_p50_ms_max": 16.066,
-     "frame_p50_ms_min": 15.336,
-     "frame_p95_ms": 16.897,
-     "frame_p95_ms_max": 16.972,
-     "frame_p95_ms_min": 16.891,
-     "game_p50_ms": 12.255,
-     "game_p50_ms_max": 12.359,
-     "game_p50_ms_min": 12.236,
-     "gpu_p50_ms": 15.392,
-     "gpu_p50_ms_max": 15.726,
-     "gpu_p50_ms_min": 15.021,
-     "render_p50_ms": 11.306,
-     "render_p50_ms_max": 11.443,
-     "render_p50_ms_min": 11.251
-    },
-    "30000": {
-     "actors_mean": null,
-     "bottleneck": "gpu",
-     "frame_p50_ms": 20.498,
-     "frame_p50_ms_max": 20.65,
-     "frame_p50_ms_min": 20.282,
-     "frame_p95_ms": 24.052,
-     "frame_p95_ms_max": 24.356,
-     "frame_p95_ms_min": 23.098,
-     "game_p50_ms": 18.525,
-     "game_p50_ms_max": 18.974,
-     "game_p50_ms_min": 18.499,
-     "gpu_p50_ms": 19.369,
-     "gpu_p50_ms_max": 19.883,
-     "gpu_p50_ms_min": 19.213,
-     "render_p50_ms": 15.674,
-     "render_p50_ms_max": 15.722,
-     "render_p50_ms_min": 15.54
+     "frame_p50_ms": 7.979,
+     "frame_p50_ms_max": 8.138,
+     "frame_p50_ms_min": 7.899,
+     "frame_p95_ms": 9.201,
+     "frame_p95_ms_max": 9.331,
+     "frame_p95_ms_min": 9.192,
+     "game_p50_ms": 4.278,
+     "game_p50_ms_max": 4.291,
+     "game_p50_ms_min": 4.187,
+     "gpu_p50_ms": 5.097,
+     "gpu_p50_ms_max": 5.108,
+     "gpu_p50_ms_min": 5.092,
+     "render_p50_ms": 2.981,
+     "render_p50_ms_max": 2.986,
+     "render_p50_ms_min": 2.913,
+     "unmet": false
     },
     "5000": {
-     "actors_mean": null,
-     "bottleneck": "gpu",
-     "frame_p50_ms": 7.474,
-     "frame_p50_ms_max": 7.539,
-     "frame_p50_ms_min": 7.329,
-     "frame_p95_ms": 8.016,
-     "frame_p95_ms_max": 8.031,
-     "frame_p95_ms_min": 7.787,
-     "game_p50_ms": 3.313,
-     "game_p50_ms_max": 3.373,
-     "game_p50_ms_min": 3.224,
-     "gpu_p50_ms": 7.108,
-     "gpu_p50_ms_max": 7.226,
-     "gpu_p50_ms_min": 7.013,
-     "render_p50_ms": 4.153,
-     "render_p50_ms_max": 4.159,
-     "render_p50_ms_min": 4.106
+     "actors_mean": 656.99,
+     "bottleneck": "game",
+     "frame_p50_ms": 17.452,
+     "frame_p50_ms_max": 17.566,
+     "frame_p50_ms_min": 17.421,
+     "frame_p95_ms": 19.698,
+     "frame_p95_ms_max": 19.869,
+     "frame_p95_ms_min": 19.517,
+     "game_p50_ms": 10.904,
+     "game_p50_ms_max": 10.927,
+     "game_p50_ms_min": 10.89,
+     "gpu_p50_ms": 6.537,
+     "gpu_p50_ms_max": 6.551,
+     "gpu_p50_ms_min": 6.508,
+     "render_p50_ms": 4.749,
+     "render_p50_ms_max": 4.845,
+     "render_p50_ms_min": 4.674,
+     "unmet": false
     }
    },
-   "changed": "이동·피해·사망 로직을 Mass Entity의 Fragment와 Processor로 옮겼다. 표현은 애니메이션 없는 ISM 하나로 바꿨다.",
+   "changed": "이동·피해·사망 로직을 Mass Entity의 Fragment와 Processor로 옮기고, 엔진의 이동·회피·표현 Processor를 그대로 썼다. 화면 안에서 카메라로부터 35m 안의 개체(상한 1,000)는 액터, 나머지는 애니메이션 없는 정지 메시 인스턴스이고, 200m 밖은 그리지 않는다.",
    "clip": "assets/step2.webp",
-   "clip_mb": 7.0,
+   "clip_mb": 7.9,
    "counts": [
+    2500,
     5000,
-    10000,
-    20000,
-    30000
+    10000
    ],
    "delta": {
     "10000": {
      "bottleneck_prev": "game",
      "frame": {
-      "d": -434.086,
-      "pct": -97.7,
+      "d": -563.05,
+      "pct": -94.3,
+      "real": true
+     },
+     "frame95": {
+      "d": -628.469,
+      "pct": -94.5,
       "real": true
      },
      "game": {
-      "d": -423.198,
-      "pct": -98.5,
+      "d": -562.942,
+      "pct": -96.9,
       "real": true
      },
      "gpu": {
-      "d": -40.265,
-      "pct": -80.3,
+      "d": -42.45,
+      "pct": -77.6,
       "real": true
      }
     }
    },
    "group": "earn",
-   "learned": "로직을 Mass로 옮기고 표현을 ISM 하나로 바꾸자 개체당 게임 스레드 비용이 27분의 1로 줄었다. 이 몫은 개체마다 도는 틱을 없애면 Mass 없이도 얻는다. Mass가 준 것은 뒤 단계가 쓰는 표현 LOD와 표현 전환의 경로다.",
+   "learned": "액터를 Mass로 옮기면 이동 틱은 사라지지만, 한 스레드에서 도는 엔진 회피가 새 병목이 된다.",
+   "margin_ms": null,
    "max60": {
     "above": false,
-    "n": 19554
+    "n": 4102
    },
-   "name": "Mass 로직",
+   "name": "Mass, 엔진 기본 경로",
    "num": 2,
    "post": {
     "num": 2,
-    "title": "로직을 Mass로: 액터마다 돌던 틱이 Processor 몇 개가 된다",
-    "url": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Posts/02-mass-logic/README.md"
+    "ready": true,
+    "title": "Mass, 엔진 기본 경로: 597ms가 34.1ms로, 남은 병목은 엔진 회피",
+    "url": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Posts/02-mass-engine-path/README.md"
    }
   },
   {
-   "alt": "3단계 화면: 호드 총수 1만, 오브 시점 카메라. 오브 가까이의 개체도 VAT 인스턴스이고, 200m 밖은 빈 땅이다.",
+   "alt": "단계 3 화면: 호드 총수 1만, 이동 장면, 오브 시점 카메라. 단계 2와 표현이 같다.",
    "by_n": {
     "10000": {
-     "actors_mean": null,
-     "bottleneck": "gpu",
-     "frame_p50_ms": 7.909,
-     "frame_p50_ms_max": 7.927,
-     "frame_p50_ms_min": 7.777,
-     "frame_p95_ms": 8.478,
-     "frame_p95_ms_max": 8.494,
-     "frame_p95_ms_min": 8.236,
-     "game_p50_ms": 4.156,
-     "game_p50_ms_max": 4.176,
-     "game_p50_ms_min": 2.959,
-     "gpu_p50_ms": 7.529,
-     "gpu_p50_ms_max": 7.547,
-     "gpu_p50_ms_min": 7.428,
-     "render_p50_ms": 4.122,
-     "render_p50_ms_max": 4.153,
-     "render_p50_ms_min": 4.079
+     "actors_mean": 577.11,
+     "bottleneck": "game",
+     "frame_p50_ms": 12.412,
+     "frame_p50_ms_max": 12.534,
+     "frame_p50_ms_min": 12.363,
+     "frame_p95_ms": 14.148,
+     "frame_p95_ms_max": 14.265,
+     "frame_p95_ms_min": 13.975,
+     "game_p50_ms": 11.356,
+     "game_p50_ms_max": 11.488,
+     "game_p50_ms_min": 11.312,
+     "gpu_p50_ms": 7.069,
+     "gpu_p50_ms_max": 7.165,
+     "gpu_p50_ms_min": 7.043,
+     "render_p50_ms": 5.669,
+     "render_p50_ms_max": 5.696,
+     "render_p50_ms_min": 5.594,
+     "unmet": false
+    },
+    "12500": {
+     "actors_mean": 710.1,
+     "bottleneck": "game",
+     "frame_p50_ms": 15.198,
+     "frame_p50_ms_max": 15.245,
+     "frame_p50_ms_min": 15.022,
+     "frame_p95_ms": 17.076,
+     "frame_p95_ms_max": 17.271,
+     "frame_p95_ms_min": 16.754,
+     "game_p50_ms": 13.942,
+     "game_p50_ms_max": 13.97,
+     "game_p50_ms_min": 13.78,
+     "gpu_p50_ms": 7.715,
+     "gpu_p50_ms_max": 7.725,
+     "gpu_p50_ms_min": 7.667,
+     "render_p50_ms": 6.508,
+     "render_p50_ms_max": 6.513,
+     "render_p50_ms_min": 6.44,
+     "unmet": false
     },
     "20000": {
-     "actors_mean": null,
-     "bottleneck": "gpu",
-     "frame_p50_ms": 10.8,
-     "frame_p50_ms_max": 10.993,
-     "frame_p50_ms_min": 10.669,
-     "frame_p95_ms": 11.636,
-     "frame_p95_ms_max": 11.782,
-     "frame_p95_ms_min": 11.329,
-     "game_p50_ms": 8.126,
-     "game_p50_ms_max": 8.168,
-     "game_p50_ms_min": 7.999,
-     "gpu_p50_ms": 10.489,
-     "gpu_p50_ms_max": 10.679,
-     "gpu_p50_ms_min": 10.327,
-     "render_p50_ms": 6.249,
-     "render_p50_ms_max": 6.283,
-     "render_p50_ms_min": 6.249
-    },
-    "30000": {
-     "actors_mean": null,
-     "bottleneck": "gpu",
-     "frame_p50_ms": 13.8,
-     "frame_p50_ms_max": 13.831,
-     "frame_p50_ms_min": 13.781,
-     "frame_p95_ms": 15.349,
-     "frame_p95_ms_max": 15.601,
-     "frame_p95_ms_min": 15.326,
-     "game_p50_ms": 11.867,
-     "game_p50_ms_max": 12.12,
-     "game_p50_ms_min": 11.687,
-     "gpu_p50_ms": 13.472,
-     "gpu_p50_ms_max": 13.515,
-     "gpu_p50_ms_min": 13.409,
-     "render_p50_ms": 8.316,
-     "render_p50_ms_max": 8.36,
-     "render_p50_ms_min": 8.238
-    },
-    "5000": {
-     "actors_mean": null,
-     "bottleneck": "gpu",
-     "frame_p50_ms": 6.3,
-     "frame_p50_ms_max": 6.432,
-     "frame_p50_ms_min": 6.265,
-     "frame_p95_ms": 6.728,
-     "frame_p95_ms_max": 6.945,
-     "frame_p95_ms_min": 6.672,
-     "game_p50_ms": 1.856,
-     "game_p50_ms_max": 1.862,
-     "game_p50_ms_min": 1.854,
-     "gpu_p50_ms": 5.954,
-     "gpu_p50_ms_max": 6.016,
-     "gpu_p50_ms_min": 5.92,
-     "render_p50_ms": 2.933,
-     "render_p50_ms_max": 2.97,
-     "render_p50_ms_min": 2.929
+     "actors_mean": 987.53,
+     "bottleneck": "game",
+     "frame_p50_ms": 22.137,
+     "frame_p50_ms_max": 22.451,
+     "frame_p50_ms_min": 21.935,
+     "frame_p95_ms": 24.15,
+     "frame_p95_ms_max": 24.47,
+     "frame_p95_ms_min": 23.75,
+     "game_p50_ms": 20.262,
+     "game_p50_ms_max": 20.555,
+     "game_p50_ms_min": 20.082,
+     "gpu_p50_ms": 9.704,
+     "gpu_p50_ms_max": 9.714,
+     "gpu_p50_ms_min": 9.667,
+     "render_p50_ms": 9.51,
+     "render_p50_ms_max": 9.598,
+     "render_p50_ms_min": 9.422,
+     "unmet": true
     }
    },
-   "changed": "인스턴스에 VAT로 걷기·피격·죽기 애니메이션을 붙이고, 200m 밖 개체는 그리지 않는다.",
+   "changed": "엔진 회피를 직접 짠 분리 프로세서(`ULabSeparationProcessor`)로 바꾸고, 엔진의 방향 보간 Processor를 같은 계산을 병렬로 도는 사본으로 바꿨다. 표현은 단계 2와 같다.",
    "clip": "assets/step3.webp",
-   "clip_mb": 6.4,
+   "clip_mb": 7.5,
    "counts": [
-    5000,
     10000,
-    20000,
-    30000
-   ],
-   "delta": {
-    "10000": {
-     "bottleneck_prev": "gpu",
-     "frame": {
-      "d": -2.284,
-      "pct": -22.4,
-      "real": true
-     },
-     "game": {
-      "d": -2.084,
-      "pct": -33.4,
-      "real": true
-     },
-     "gpu": {
-      "d": -2.374,
-      "pct": -24.0,
-      "real": true
-     }
-    },
-    "20000": {
-     "bottleneck_prev": "gpu",
-     "frame": {
-      "d": -4.892,
-      "pct": -31.2,
-      "real": true
-     },
-     "game": {
-      "d": -4.129,
-      "pct": -33.7,
-      "real": true
-     },
-     "gpu": {
-      "d": -4.903,
-      "pct": -31.9,
-      "real": true
-     }
-    },
-    "30000": {
-     "bottleneck_prev": "gpu",
-     "frame": {
-      "d": -6.698,
-      "pct": -32.7,
-      "real": true
-     },
-     "game": {
-      "d": -6.658,
-      "pct": -35.9,
-      "real": true
-     },
-     "gpu": {
-      "d": -5.897,
-      "pct": -30.4,
-      "real": true
-     }
-    },
-    "5000": {
-     "bottleneck_prev": "gpu",
-     "frame": {
-      "d": -1.174,
-      "pct": -15.7,
-      "real": true
-     },
-     "game": {
-      "d": -1.457,
-      "pct": -44.0,
-      "real": true
-     },
-     "gpu": {
-      "d": -1.154,
-      "pct": -16.2,
-      "real": true
-     }
-    }
-   },
-   "group": "earn",
-   "learned": "먼 개체에 애니메이션을 붙이는 비용보다, 화면 높이의 1%도 안 되는 개체를 그리지 않아 버는 시간이 더 컸다.",
-   "max60": {
-    "above": true,
-    "n": 30000
-   },
-   "name": "ISM + VAT",
-   "num": 3,
-   "post": {
-    "num": 3,
-    "title": "먼 개체에 애니메이션을 붙이고 더 빨라졌다: ISM + VAT와 200m 밖 지우기",
-    "url": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Posts/03-ism-vat/README.md"
-   }
-  },
-  {
-   "alt": "4단계 화면: 호드 총수 1만, 오브 시점 카메라. 30m 안은 액터, 30~200m는 VAT 인스턴스다.",
-   "by_n": {
-    "10000": {
-     "actors_mean": 372.73,
-     "bottleneck": "game",
-     "frame_p50_ms": 9.422,
-     "frame_p50_ms_max": 9.568,
-     "frame_p50_ms_min": 9.324,
-     "frame_p95_ms": 10.981,
-     "frame_p95_ms_max": 11.244,
-     "frame_p95_ms_min": 10.532,
-     "game_p50_ms": 9.136,
-     "game_p50_ms_max": 9.267,
-     "game_p50_ms_min": 9.04,
-     "gpu_p50_ms": 6.926,
-     "gpu_p50_ms_max": 6.957,
-     "gpu_p50_ms_min": 6.838,
-     "render_p50_ms": 4.817,
-     "render_p50_ms_max": 4.965,
-     "render_p50_ms_min": 4.802
-    },
-    "20000": {
-     "actors_mean": 492.23,
-     "bottleneck": "game",
-     "frame_p50_ms": 15.153,
-     "frame_p50_ms_max": 15.257,
-     "frame_p50_ms_min": 14.967,
-     "frame_p95_ms": 16.72,
-     "frame_p95_ms_max": 17.278,
-     "frame_p95_ms_min": 16.617,
-     "game_p50_ms": 14.653,
-     "game_p50_ms_max": 14.765,
-     "game_p50_ms_min": 14.454,
-     "gpu_p50_ms": 9.754,
-     "gpu_p50_ms_max": 9.768,
-     "gpu_p50_ms_min": 9.696,
-     "render_p50_ms": 7.375,
-     "render_p50_ms_max": 7.566,
-     "render_p50_ms_min": 7.215
-    },
-    "30000": {
-     "actors_mean": 485.71,
-     "bottleneck": "game",
-     "frame_p50_ms": 18.942,
-     "frame_p50_ms_max": 18.979,
-     "frame_p50_ms_min": 18.755,
-     "frame_p95_ms": 21.115,
-     "frame_p95_ms_max": 21.253,
-     "frame_p95_ms_min": 20.556,
-     "game_p50_ms": 18.249,
-     "game_p50_ms_max": 18.269,
-     "game_p50_ms_min": 18.039,
-     "gpu_p50_ms": 12.315,
-     "gpu_p50_ms_max": 12.323,
-     "gpu_p50_ms_min": 12.253,
-     "render_p50_ms": 9.425,
-     "render_p50_ms_max": 9.487,
-     "render_p50_ms_min": 9.083
-    },
-    "5000": {
-     "actors_mean": 181.13,
-     "bottleneck": "gpu",
-     "frame_p50_ms": 6.077,
-     "frame_p50_ms_max": 6.193,
-     "frame_p50_ms_min": 6.03,
-     "frame_p95_ms": 6.569,
-     "frame_p95_ms_max": 6.767,
-     "frame_p95_ms_min": 6.538,
-     "game_p50_ms": 4.3,
-     "game_p50_ms_max": 4.456,
-     "game_p50_ms_min": 4.279,
-     "gpu_p50_ms": 5.697,
-     "gpu_p50_ms_max": 5.743,
-     "gpu_p50_ms_min": 5.649,
-     "render_p50_ms": 3.408,
-     "render_p50_ms_max": 3.478,
-     "render_p50_ms_min": 3.39
-    }
-   },
-   "changed": "오브에서 30m 안의 개체(상한 500)를 VAT 인스턴스에서 AnimBP로 움직이는 액터로 바꿨다. 액터 메시는 `USkeletalMeshComponentBudgeted`로 바꾸고 애니메이션 예산을 4ms로 두었다.",
-   "clip": "assets/step4.webp",
-   "clip_mb": 7.1,
-   "counts": [
-    5000,
-    10000,
-    20000,
-    30000
-   ],
-   "delta": {
-    "10000": {
-     "bottleneck_prev": "gpu",
-     "frame": {
-      "d": 1.513,
-      "pct": 19.1,
-      "real": true
-     },
-     "game": {
-      "d": 4.98,
-      "pct": 119.8,
-      "real": true
-     },
-     "gpu": {
-      "d": -0.603,
-      "pct": -8.0,
-      "real": true
-     }
-    },
-    "20000": {
-     "bottleneck_prev": "gpu",
-     "frame": {
-      "d": 4.353,
-      "pct": 40.3,
-      "real": true
-     },
-     "game": {
-      "d": 6.527,
-      "pct": 80.3,
-      "real": true
-     },
-     "gpu": {
-      "d": -0.735,
-      "pct": -7.0,
-      "real": true
-     }
-    },
-    "30000": {
-     "bottleneck_prev": "gpu",
-     "frame": {
-      "d": 5.142,
-      "pct": 37.3,
-      "real": true
-     },
-     "game": {
-      "d": 6.382,
-      "pct": 53.8,
-      "real": true
-     },
-     "gpu": {
-      "d": -1.157,
-      "pct": -8.6,
-      "real": true
-     }
-    },
-    "5000": {
-     "bottleneck_prev": "gpu",
-     "frame": {
-      "d": -0.223,
-      "pct": -3.5,
-      "real": true
-     },
-     "game": {
-      "d": 2.444,
-      "pct": 131.7,
-      "real": true
-     },
-     "gpu": {
-      "d": -0.257,
-      "pct": -4.3,
-      "real": true
-     }
-    }
-   },
-   "group": "spend",
-   "learned": "가까운 개체를 진짜 액터로 바꾸면 게임 스레드가 두 배 넘게 늘고, 프레임 시간을 정하는 쪽이 GPU에서 게임 스레드로 바뀐다.",
-   "max60": {
-    "above": false,
-    "n": 19952
-   },
-   "name": "액터 하이드레이션",
-   "num": 4,
-   "post": {
-    "num": 4,
-    "title": "가까운 개체를 진짜 액터로: 하이드레이션과 애니메이션 예산",
-    "url": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Posts/04-hydration-anim-budget/README.md"
-   }
-  },
-  {
-   "alt": "5단계 화면: 호드 총수 1만, 오브 시점 카메라. 30m 안은 액터, 30~200m는 VAT 인스턴스다. 4단계와 표현이 같다.",
-   "by_n": {
-    "10000": {
-     "actors_mean": 373.33,
-     "bottleneck": "game",
-     "frame_p50_ms": 8.57,
-     "frame_p50_ms_max": 8.632,
-     "frame_p50_ms_min": 8.526,
-     "frame_p95_ms": 10.341,
-     "frame_p95_ms_max": 10.414,
-     "frame_p95_ms_min": 10.023,
-     "game_p50_ms": 8.253,
-     "game_p50_ms_max": 8.351,
-     "game_p50_ms_min": 8.23,
-     "gpu_p50_ms": 6.972,
-     "gpu_p50_ms_max": 6.986,
-     "gpu_p50_ms_min": 6.844,
-     "render_p50_ms": 4.813,
-     "render_p50_ms_max": 5.935,
-     "render_p50_ms_min": 4.654
-    },
-    "20000": {
-     "actors_mean": 494.11,
-     "bottleneck": "game",
-     "frame_p50_ms": 13.668,
-     "frame_p50_ms_max": 13.832,
-     "frame_p50_ms_min": 13.63,
-     "frame_p95_ms": 15.575,
-     "frame_p95_ms_max": 15.697,
-     "frame_p95_ms_min": 15.354,
-     "game_p50_ms": 13.152,
-     "game_p50_ms_max": 13.335,
-     "game_p50_ms_min": 13.146,
-     "gpu_p50_ms": 9.813,
-     "gpu_p50_ms_max": 9.823,
-     "gpu_p50_ms_min": 9.538,
-     "render_p50_ms": 7.18,
-     "render_p50_ms_max": 7.351,
-     "render_p50_ms_min": 7.132
-    },
-    "30000": {
-     "actors_mean": 488.66,
-     "bottleneck": "game",
-     "frame_p50_ms": 16.931,
-     "frame_p50_ms_max": 17.162,
-     "frame_p50_ms_min": 16.723,
-     "frame_p95_ms": 18.991,
-     "frame_p95_ms_max": 19.063,
-     "frame_p95_ms_min": 18.873,
-     "game_p50_ms": 16.241,
-     "game_p50_ms_max": 16.453,
-     "game_p50_ms_min": 16.023,
-     "gpu_p50_ms": 12.417,
-     "gpu_p50_ms_max": 12.522,
-     "gpu_p50_ms_min": 12.377,
-     "render_p50_ms": 8.937,
-     "render_p50_ms_max": 8.958,
-     "render_p50_ms_min": 8.922
-    },
-    "5000": {
-     "actors_mean": 181.22,
-     "bottleneck": "gpu",
-     "frame_p50_ms": 6.169,
-     "frame_p50_ms_max": 6.23,
-     "frame_p50_ms_min": 6.072,
-     "frame_p95_ms": 6.705,
-     "frame_p95_ms_max": 6.77,
-     "frame_p95_ms_min": 6.525,
-     "game_p50_ms": 4.31,
-     "game_p50_ms_max": 4.314,
-     "game_p50_ms_min": 4.161,
-     "gpu_p50_ms": 5.712,
-     "gpu_p50_ms_max": 5.78,
-     "gpu_p50_ms_min": 5.69,
-     "render_p50_ms": 3.397,
-     "render_p50_ms_max": 3.421,
-     "render_p50_ms_min": 3.341
-    }
-   },
-   "changed": "카메라에서 먼 개체의 로직을 덜 자주 돌리고, 200m 밖 개체는 엔진 이동·조향 대신 자체 프로세서로 옮겼다. 죽은 개체의 엔티티는 파괴하지 않고 풀에 두었다가 다시 쓴다.",
-   "clip": "assets/step5.webp",
-   "clip_mb": 7.2,
-   "counts": [
-    5000,
-    10000,
-    20000,
-    30000
+    12500,
+    20000
    ],
    "delta": {
     "10000": {
      "bottleneck_prev": "game",
      "frame": {
-      "d": -0.852,
-      "pct": -9.0,
+      "d": -21.646,
+      "pct": -63.6,
+      "real": true
+     },
+     "frame95": {
+      "d": -22.637,
+      "pct": -61.5,
       "real": true
      },
      "game": {
-      "d": -0.883,
-      "pct": -9.7,
+      "d": -6.671,
+      "pct": -37.0,
       "real": true
      },
      "gpu": {
-      "d": 0.046,
+      "d": -5.161,
+      "pct": -42.2,
+      "real": true
+     }
+    }
+   },
+   "group": "earn",
+   "learned": "엔진 회피를 위치를 직접 미는 분리 프로세서로 바꾸자, 작업자 하나에 묶였던 프레임이 풀려 호드 1만이 처음으로 16.7ms 안에 들었다.",
+   "margin_ms": 2.552,
+   "max60": null,
+   "name": "직접 짠 분리",
+   "num": 3,
+   "post": {
+    "num": 3,
+    "ready": true,
+    "title": "직접 짠 분리: 엔진 회피를 분리 프로세서로 바꿔 처음으로 16.7ms 안에",
+    "url": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Posts/03-separation/README.md"
+   }
+  },
+  {
+   "alt": "단계 4 화면: 호드 총수 1만, 이동 장면, 오브 시점 카메라. 35m 안은 액터, 35~200m는 VAT 인스턴스이고, 200m 밖은 빈 땅이다.",
+   "by_n": {
+    "10000": {
+     "actors_mean": 576.58,
+     "bottleneck": "game",
+     "frame_p50_ms": 12.858,
+     "frame_p50_ms_max": 12.863,
+     "frame_p50_ms_min": 12.709,
+     "frame_p95_ms": 14.205,
+     "frame_p95_ms_max": 14.37,
+     "frame_p95_ms_min": 14.086,
+     "game_p50_ms": 11.825,
+     "game_p50_ms_max": 11.838,
+     "game_p50_ms_min": 11.699,
+     "gpu_p50_ms": 7.142,
+     "gpu_p50_ms_max": 7.157,
+     "gpu_p50_ms_min": 7.113,
+     "render_p50_ms": 5.626,
+     "render_p50_ms_max": 5.668,
+     "render_p50_ms_min": 5.502,
+     "unmet": false
+    },
+    "12500": {
+     "actors_mean": 710.27,
+     "bottleneck": "game",
+     "frame_p50_ms": 14.762,
+     "frame_p50_ms_max": 14.873,
+     "frame_p50_ms_min": 14.663,
+     "frame_p95_ms": 16.176,
+     "frame_p95_ms_max": 16.507,
+     "frame_p95_ms_min": 16.082,
+     "game_p50_ms": 13.493,
+     "game_p50_ms_max": 13.585,
+     "game_p50_ms_min": 13.414,
+     "gpu_p50_ms": 7.814,
+     "gpu_p50_ms_max": 7.822,
+     "gpu_p50_ms_min": 7.801,
+     "render_p50_ms": 6.633,
+     "render_p50_ms_max": 6.727,
+     "render_p50_ms_min": 6.57,
+     "unmet": false
+    },
+    "20000": {
+     "actors_mean": 974.59,
+     "bottleneck": "game",
+     "frame_p50_ms": 19.262,
+     "frame_p50_ms_max": 19.377,
+     "frame_p50_ms_min": 19.099,
+     "frame_p95_ms": 20.979,
+     "frame_p95_ms_max": 21.046,
+     "frame_p95_ms_min": 20.821,
+     "game_p50_ms": 17.461,
+     "game_p50_ms_max": 17.562,
+     "game_p50_ms_min": 17.306,
+     "gpu_p50_ms": 9.79,
+     "gpu_p50_ms_max": 9.802,
+     "gpu_p50_ms_min": 9.76,
+     "render_p50_ms": 9.125,
+     "render_p50_ms_max": 9.232,
+     "render_p50_ms_min": 9.001,
+     "unmet": true
+    }
+   },
+   "changed": "35~200m 개체를 VAT 인스턴스로 그려 걷기·피격·죽기 애니메이션을 붙였다. 액터 메시를 `USkeletalMeshComponentBudgeted`로 바꾸고 예산을 4ms로 두었다. 인스턴스와 액터가 바뀔 때의 전환 대책 다섯을 켜고, 한 번 바뀐 개체가 2초 안에 바로 전의 표현으로 되돌아가지 않게 붙잡는다.",
+   "clip": "assets/step4.webp",
+   "clip_mb": 7.3,
+   "counts": [
+    10000,
+    12500,
+    20000
+   ],
+   "delta": {
+    "10000": {
+     "bottleneck_prev": "game",
+     "frame": {
+      "d": 0.446,
+      "pct": 3.6,
+      "real": false
+     },
+     "frame95": {
+      "d": 0.057,
+      "pct": 0.4,
+      "real": false
+     },
+     "game": {
+      "d": 0.469,
+      "pct": 4.1,
+      "real": false
+     },
+     "gpu": {
+      "d": 0.073,
+      "pct": 1.0,
+      "real": false
+     }
+    },
+    "12500": {
+     "bottleneck_prev": "game",
+     "frame": {
+      "d": -0.436,
+      "pct": -2.9,
+      "real": false
+     },
+     "frame95": {
+      "d": -0.9,
+      "pct": -5.3,
+      "real": true
+     },
+     "game": {
+      "d": -0.449,
+      "pct": -3.2,
+      "real": false
+     },
+     "gpu": {
+      "d": 0.099,
+      "pct": 1.3,
+      "real": false
+     }
+    },
+    "20000": {
+     "bottleneck_prev": "game",
+     "frame": {
+      "d": -2.875,
+      "pct": -13.0,
+      "real": true
+     },
+     "frame95": {
+      "d": -3.171,
+      "pct": -13.1,
+      "real": true
+     },
+     "game": {
+      "d": -2.801,
+      "pct": -13.8,
+      "real": true
+     },
+     "gpu": {
+      "d": 0.086,
+      "pct": 0.9,
+      "real": false
+     }
+    }
+   },
+   "group": "quality",
+   "learned": "단계 3에서 7까지 표현 셋을 더하는 동안 프레임 p95는 1.02ms 늘었고, GPU 비용은 병목인 게임 스레드에 가려 거의 드러나지 않았다.",
+   "margin_ms": 2.495,
+   "max60": null,
+   "name": "애니메이션 표현",
+   "num": 4,
+   "post": {
+    "num": 4,
+    "ready": true,
+    "title": "거리별 품질: 표현 셋을 더하는 동안 프레임 p95가 1.02ms 늘었다",
+    "url": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Posts/04-quality-by-distance/README.md"
+   }
+  },
+  {
+   "alt": "단계 5 화면: 호드 총수 1만, 이동 장면, 오브 시점 카메라. 단계 4와 표현이 같다.",
+   "by_n": {
+    "10000": {
+     "actors_mean": 577.27,
+     "bottleneck": "game",
+     "frame_p50_ms": 13.093,
+     "frame_p50_ms_max": 13.252,
+     "frame_p50_ms_min": 13.066,
+     "frame_p95_ms": 14.516,
+     "frame_p95_ms_max": 14.7,
+     "frame_p95_ms_min": 14.513,
+     "game_p50_ms": 12.065,
+     "game_p50_ms_max": 12.204,
+     "game_p50_ms_min": 12.043,
+     "gpu_p50_ms": 7.154,
+     "gpu_p50_ms_max": 7.19,
+     "gpu_p50_ms_min": 7.132,
+     "render_p50_ms": 5.377,
+     "render_p50_ms_max": 5.39,
+     "render_p50_ms_min": 5.301,
+     "unmet": false
+    },
+    "12500": {
+     "actors_mean": 710.78,
+     "bottleneck": "game",
+     "frame_p50_ms": 15.255,
+     "frame_p50_ms_max": 15.317,
+     "frame_p50_ms_min": 15.24,
+     "frame_p95_ms": 16.656,
+     "frame_p95_ms_max": 16.783,
+     "frame_p95_ms_min": 16.632,
+     "game_p50_ms": 13.983,
+     "game_p50_ms_max": 14.032,
+     "game_p50_ms_min": 13.977,
+     "gpu_p50_ms": 7.872,
+     "gpu_p50_ms_max": 7.889,
+     "gpu_p50_ms_min": 7.866,
+     "render_p50_ms": 6.256,
+     "render_p50_ms_max": 6.294,
+     "render_p50_ms_min": 6.254,
+     "unmet": false
+    },
+    "20000": {
+     "actors_mean": 973.93,
+     "bottleneck": "game",
+     "frame_p50_ms": 20.268,
+     "frame_p50_ms_max": 20.303,
+     "frame_p50_ms_min": 20.154,
+     "frame_p95_ms": 21.708,
+     "frame_p95_ms_max": 21.756,
+     "frame_p95_ms_min": 21.601,
+     "game_p50_ms": 18.444,
+     "game_p50_ms_max": 18.475,
+     "game_p50_ms_min": 18.366,
+     "gpu_p50_ms": 9.896,
+     "gpu_p50_ms_max": 9.944,
+     "gpu_p50_ms_min": 9.859,
+     "render_p50_ms": 8.845,
+     "render_p50_ms_max": 8.864,
+     "render_p50_ms_min": 8.638,
+     "unmet": true
+    }
+   },
+   "changed": "카메라에서 80~200m 개체의 로직을 0.50초 간격으로 돌리고, 200m 밖은 엔진 이동·조향 대신 자체 Processor가 1초 간격으로 옮긴다. 죽은 개체의 엔티티는 파괴하지 않고 풀에 두었다가 다시 쓴다.",
+   "clip": "assets/step5.webp",
+   "clip_mb": 7.5,
+   "counts": [
+    10000,
+    12500,
+    20000
+   ],
+   "delta": {
+    "10000": {
+     "bottleneck_prev": "game",
+     "frame": {
+      "d": 0.235,
+      "pct": 1.8,
+      "real": false
+     },
+     "frame95": {
+      "d": 0.311,
+      "pct": 2.2,
+      "real": false
+     },
+     "game": {
+      "d": 0.24,
+      "pct": 2.0,
+      "real": false
+     },
+     "gpu": {
+      "d": 0.012,
+      "pct": 0.2,
+      "real": false
+     }
+    },
+    "12500": {
+     "bottleneck_prev": "game",
+     "frame": {
+      "d": 0.493,
+      "pct": 3.3,
+      "real": false
+     },
+     "frame95": {
+      "d": 0.48,
+      "pct": 3.0,
+      "real": false
+     },
+     "game": {
+      "d": 0.49,
+      "pct": 3.6,
+      "real": false
+     },
+     "gpu": {
+      "d": 0.058,
       "pct": 0.7,
       "real": false
      }
@@ -1152,601 +1480,506 @@ window.SITE_DATA = {
     "20000": {
      "bottleneck_prev": "game",
      "frame": {
-      "d": -1.485,
-      "pct": -9.8,
+      "d": 1.006,
+      "pct": 5.2,
+      "real": true
+     },
+     "frame95": {
+      "d": 0.729,
+      "pct": 3.5,
       "real": true
      },
      "game": {
-      "d": -1.501,
-      "pct": -10.2,
+      "d": 0.983,
+      "pct": 5.6,
       "real": true
      },
      "gpu": {
-      "d": 0.059,
-      "pct": 0.6,
-      "real": false
-     }
-    },
-    "30000": {
-     "bottleneck_prev": "game",
-     "frame": {
-      "d": -2.011,
-      "pct": -10.6,
-      "real": true
-     },
-     "game": {
-      "d": -2.008,
-      "pct": -11.0,
-      "real": true
-     },
-     "gpu": {
-      "d": 0.102,
-      "pct": 0.8,
-      "real": false
-     }
-    },
-    "5000": {
-     "bottleneck_prev": "gpu",
-     "frame": {
-      "d": 0.092,
-      "pct": 1.5,
-      "real": false
-     },
-     "game": {
-      "d": 0.01,
-      "pct": 0.2,
-      "real": false
-     },
-     "gpu": {
-      "d": 0.015,
-      "pct": 0.3,
+      "d": 0.106,
+      "pct": 1.1,
       "real": false
      }
     }
    },
    "group": "earn",
-   "learned": "Simulation LOD의 효과는 LOD 태그를 읽는 Processor에서만 나온다. 자체 로직에 간격을 준 것으로는 프레임이 줄지 않았고, 줄인 것은 먼 개체를 엔진 이동·조향에서 뺀 일이었다.",
-   "max60": {
-    "above": false,
-    "n": 22857
-   },
-   "name": "Simulation LOD",
+   "learned": "비용을 줄이는 두 단계에서 프레임 시간을 줄인 것은 액터 메시 고정 바운드이고, 엔티티 풀의 이점은 긴 실행에서 보인다.",
+   "margin_ms": 2.184,
+   "max60": null,
+   "name": "Simulation LOD + 엔티티 풀",
    "num": 5,
    "post": {
     "num": 5,
-    "title": "먼 개체를 엔진 이동에서 빼자 게임 스레드가 줄었다: Simulation LOD와 엔티티 풀",
-    "url": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Posts/05-simulation-lod-entity-pool/README.md"
+    "ready": true,
+    "title": "비용을 줄이는 단계와 기법별 기여: 최종 구성의 큰 비용은 가까운 액터에 있다",
+    "url": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Posts/05-cost-cuts-and-contributions/README.md"
    }
   },
   {
-   "alt": "6단계 화면: 호드 총수 1만, 오브 시점 카메라. 30m 안은 액터, 30~200m는 ISKM이고, 200m 밖은 빈 땅이다.",
+   "alt": "단계 6 화면: 호드 총수 1만, 이동 장면, 오브 시점 카메라. 35m 안은 액터, 35~200m는 ISKM이고, 200m 밖은 빈 땅이다.",
    "by_n": {
     "10000": {
-     "actors_mean": 372.81,
+     "actors_mean": 577.88,
      "bottleneck": "game",
-     "frame_p50_ms": 8.452,
-     "frame_p50_ms_max": 8.459,
-     "frame_p50_ms_min": 8.417,
-     "frame_p95_ms": 10.143,
-     "frame_p95_ms_max": 10.235,
-     "frame_p95_ms_min": 10.033,
-     "game_p50_ms": 8.292,
-     "game_p50_ms_max": 8.298,
-     "game_p50_ms_min": 8.254,
-     "gpu_p50_ms": 5.373,
-     "gpu_p50_ms_max": 5.385,
-     "gpu_p50_ms_min": 5.365,
-     "render_p50_ms": 3.247,
-     "render_p50_ms_max": 3.255,
-     "render_p50_ms_min": 3.246
+     "frame_p50_ms": 13.201,
+     "frame_p50_ms_max": 13.204,
+     "frame_p50_ms_min": 13.199,
+     "frame_p95_ms": 14.708,
+     "frame_p95_ms_max": 14.715,
+     "frame_p95_ms_min": 14.695,
+     "game_p50_ms": 12.31,
+     "game_p50_ms_max": 12.313,
+     "game_p50_ms_min": 12.306,
+     "gpu_p50_ms": 5.599,
+     "gpu_p50_ms_max": 5.603,
+     "gpu_p50_ms_min": 5.594,
+     "render_p50_ms": 3.865,
+     "render_p50_ms_max": 3.871,
+     "render_p50_ms_min": 3.824,
+     "unmet": false
+    },
+    "12500": {
+     "actors_mean": 711.59,
+     "bottleneck": "game",
+     "frame_p50_ms": 15.535,
+     "frame_p50_ms_max": 15.536,
+     "frame_p50_ms_min": 15.437,
+     "frame_p95_ms": 16.957,
+     "frame_p95_ms_max": 17.018,
+     "frame_p95_ms_min": 16.746,
+     "game_p50_ms": 14.451,
+     "game_p50_ms_max": 14.454,
+     "game_p50_ms_min": 14.369,
+     "gpu_p50_ms": 5.923,
+     "gpu_p50_ms_max": 5.931,
+     "gpu_p50_ms_min": 5.923,
+     "render_p50_ms": 4.254,
+     "render_p50_ms_max": 4.259,
+     "render_p50_ms_min": 4.24,
+     "unmet": false
     },
     "20000": {
-     "actors_mean": 492.11,
+     "actors_mean": 971.99,
      "bottleneck": "game",
-     "frame_p50_ms": 13.448,
-     "frame_p50_ms_max": 13.476,
-     "frame_p50_ms_min": 13.414,
-     "frame_p95_ms": 15.287,
-     "frame_p95_ms_max": 15.356,
-     "frame_p95_ms_min": 15.227,
-     "game_p50_ms": 13.19,
-     "game_p50_ms_max": 13.213,
-     "game_p50_ms_min": 13.148,
-     "gpu_p50_ms": 6.441,
-     "gpu_p50_ms_max": 6.443,
-     "gpu_p50_ms_min": 6.434,
-     "render_p50_ms": 4.003,
-     "render_p50_ms_max": 4.019,
-     "render_p50_ms_min": 3.999
-    },
-    "30000": {
-     "actors_mean": 485.72,
-     "bottleneck": "game",
-     "frame_p50_ms": 16.447,
-     "frame_p50_ms_max": 16.695,
-     "frame_p50_ms_min": 16.081,
-     "frame_p95_ms": 18.601,
-     "frame_p95_ms_max": 18.63,
-     "frame_p95_ms_min": 17.93,
-     "game_p50_ms": 16.25,
-     "game_p50_ms_max": 16.487,
-     "game_p50_ms_min": 15.874,
-     "gpu_p50_ms": 7.64,
-     "gpu_p50_ms_max": 7.647,
-     "gpu_p50_ms_min": 7.537,
-     "render_p50_ms": 4.226,
-     "render_p50_ms_max": 4.229,
-     "render_p50_ms_min": 4.148
-    },
-    "5000": {
-     "actors_mean": 181.06,
-     "bottleneck": "gpu",
-     "frame_p50_ms": 5.329,
-     "frame_p50_ms_max": 5.366,
-     "frame_p50_ms_min": 5.196,
-     "frame_p95_ms": 6.197,
-     "frame_p95_ms_max": 6.207,
-     "frame_p95_ms_min": 6.035,
-     "game_p50_ms": 4.263,
-     "game_p50_ms_max": 4.331,
-     "game_p50_ms_min": 4.19,
-     "gpu_p50_ms": 4.845,
-     "gpu_p50_ms_max": 4.862,
-     "gpu_p50_ms_min": 4.786,
-     "render_p50_ms": 2.573,
-     "render_p50_ms_max": 2.62,
-     "render_p50_ms_min": 2.529
+     "frame_p50_ms": 21.063,
+     "frame_p50_ms_max": 21.122,
+     "frame_p50_ms_min": 21.005,
+     "frame_p95_ms": 22.553,
+     "frame_p95_ms_max": 22.653,
+     "frame_p95_ms_min": 22.45,
+     "game_p50_ms": 19.63,
+     "game_p50_ms_max": 19.676,
+     "game_p50_ms_min": 19.572,
+     "gpu_p50_ms": 7.685,
+     "gpu_p50_ms_max": 7.713,
+     "gpu_p50_ms_min": 7.67,
+     "render_p50_ms": 5.264,
+     "render_p50_ms_max": 5.27,
+     "render_p50_ms_min": 5.226,
+     "unmet": true
     }
    },
-   "changed": "30~200m 개체를 VAT 인스턴스에서 ISKM으로 바꾸고, ISKM 컴포넌트의 바운드를 고정했다.",
+   "changed": "35~200m 개체를 VAT 인스턴스에서 ISKM으로 바꾸고, ISKM 컴포넌트에 카메라를 따라 옮기는 고정 바운드를 넣었다. ISKM 트랙은 미리 늘려 둔다.",
    "clip": "assets/step6.webp",
    "clip_mb": 7.4,
    "counts": [
-    5000,
     10000,
-    20000,
-    30000
+    12500,
+    20000
    ],
    "delta": {
     "10000": {
      "bottleneck_prev": "game",
      "frame": {
-      "d": -0.118,
-      "pct": -1.4,
-      "real": true
+      "d": 0.108,
+      "pct": 0.8,
+      "real": false
+     },
+     "frame95": {
+      "d": 0.192,
+      "pct": 1.3,
+      "real": false
      },
      "game": {
-      "d": 0.039,
-      "pct": 0.5,
+      "d": 0.245,
+      "pct": 2.0,
       "real": false
      },
      "gpu": {
-      "d": -1.599,
-      "pct": -22.9,
+      "d": -1.555,
+      "pct": -21.7,
       "real": true
      }
     },
-    "20000": {
+    "12500": {
      "bottleneck_prev": "game",
      "frame": {
-      "d": -0.22,
-      "pct": -1.6,
-      "real": true
-     },
-     "game": {
-      "d": 0.038,
-      "pct": 0.3,
+      "d": 0.28,
+      "pct": 1.8,
       "real": false
      },
-     "gpu": {
-      "d": -3.372,
-      "pct": -34.4,
-      "real": true
-     }
-    },
-    "30000": {
-     "bottleneck_prev": "game",
-     "frame": {
-      "d": -0.484,
-      "pct": -2.9,
+     "frame95": {
+      "d": 0.301,
+      "pct": 1.8,
       "real": false
      },
      "game": {
-      "d": 0.009,
-      "pct": 0.1,
-      "real": false
-     },
-     "gpu": {
-      "d": -4.777,
-      "pct": -38.5,
-      "real": true
-     }
-    },
-    "5000": {
-     "bottleneck_prev": "gpu",
-     "frame": {
-      "d": -0.84,
-      "pct": -13.6,
-      "real": true
-     },
-     "game": {
-      "d": -0.047,
-      "pct": -1.1,
-      "real": false
-     },
-     "gpu": {
-      "d": -0.867,
-      "pct": -15.2,
-      "real": true
-     }
-    }
-   },
-   "group": "earn",
-   "learned": "ISKM은 먼 개체의 GPU 시간을 23% 줄였지만, 게임 스레드가 병목인 동안 그 이점은 GPU 여유로만 남는다.",
-   "max60": {
-    "above": false,
-    "n": 23774
-   },
-   "name": "ISKM",
-   "num": 6,
-   "post": {
-    "num": 6,
-    "title": "GPU 시간은 23% 줄고 프레임 시간은 거의 그대로였다: ISKM과 고정 바운드",
-    "url": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Posts/06-iskm/README.md"
-   }
-  },
-  {
-   "alt": "7단계 화면: 호드 총수 1만, 오브 시점 카메라. 30m 안은 액터이고, 200m 밖은 입자 무리가 채운다.",
-   "by_n": {
-    "10000": {
-     "actors_mean": 373.41,
-     "bottleneck": "game",
-     "frame_p50_ms": 8.728,
-     "frame_p50_ms_max": 8.762,
-     "frame_p50_ms_min": 8.687,
-     "frame_p95_ms": 10.572,
-     "frame_p95_ms_max": 10.574,
-     "frame_p95_ms_min": 10.391,
-     "game_p50_ms": 8.569,
-     "game_p50_ms_max": 8.589,
-     "game_p50_ms_min": 8.525,
-     "gpu_p50_ms": 6.061,
-     "gpu_p50_ms_max": 6.12,
-     "gpu_p50_ms_min": 6.025,
-     "render_p50_ms": 3.355,
-     "render_p50_ms_max": 3.401,
-     "render_p50_ms_min": 3.352
-    },
-    "20000": {
-     "actors_mean": 491.9,
-     "bottleneck": "game",
-     "frame_p50_ms": 13.977,
-     "frame_p50_ms_max": 14.024,
-     "frame_p50_ms_min": 13.971,
-     "frame_p95_ms": 15.939,
-     "frame_p95_ms_max": 16.155,
-     "frame_p95_ms_min": 15.795,
-     "game_p50_ms": 13.726,
-     "game_p50_ms_max": 13.764,
-     "game_p50_ms_min": 13.712,
-     "gpu_p50_ms": 7.785,
-     "gpu_p50_ms_max": 7.801,
-     "gpu_p50_ms_min": 7.768,
-     "render_p50_ms": 4.213,
-     "render_p50_ms_max": 4.218,
-     "render_p50_ms_min": 4.175
-    },
-    "30000": {
-     "actors_mean": 485.31,
-     "bottleneck": "game",
-     "frame_p50_ms": 17.264,
-     "frame_p50_ms_max": 17.644,
-     "frame_p50_ms_min": 17.11,
-     "frame_p95_ms": 19.127,
-     "frame_p95_ms_max": 20.256,
-     "frame_p95_ms_min": 19.095,
-     "game_p50_ms": 17.048,
-     "game_p50_ms_max": 17.429,
-     "game_p50_ms_min": 16.902,
-     "gpu_p50_ms": 9.413,
-     "gpu_p50_ms_max": 9.444,
-     "gpu_p50_ms_min": 9.369,
-     "render_p50_ms": 4.439,
-     "render_p50_ms_max": 4.607,
-     "render_p50_ms_min": 4.372
-    },
-    "5000": {
-     "actors_mean": 181.43,
-     "bottleneck": "gpu",
-     "frame_p50_ms": 5.678,
-     "frame_p50_ms_max": 5.753,
-     "frame_p50_ms_min": 5.631,
-     "frame_p95_ms": 6.534,
-     "frame_p95_ms_max": 6.637,
-     "frame_p95_ms_min": 6.419,
-     "game_p50_ms": 4.339,
-     "game_p50_ms_max": 4.417,
-     "game_p50_ms_min": 4.282,
-     "gpu_p50_ms": 5.209,
-     "gpu_p50_ms_max": 5.245,
-     "gpu_p50_ms_min": 5.181,
-     "render_p50_ms": 2.68,
-     "render_p50_ms_max": 2.68,
-     "render_p50_ms_min": 2.635
-    }
-   },
-   "changed": "그리지 않던 200m 밖을 Niagara 메시 입자로 채웠다. 입자는 실제 엔티티의 자리에 그린다. 앞 단계들이 번 시간을 화면의 품질에 쓰는 단계다.",
-   "clip": "assets/step7.webp",
-   "clip_mb": 7.6,
-   "counts": [
-    5000,
-    10000,
-    20000,
-    30000
-   ],
-   "delta": {
-    "10000": {
-     "bottleneck_prev": "game",
-     "frame": {
-      "d": 0.276,
+      "d": 0.468,
       "pct": 3.3,
-      "real": true
-     },
-     "game": {
-      "d": 0.277,
-      "pct": 3.3,
-      "real": true
+      "real": false
      },
      "gpu": {
-      "d": 0.688,
-      "pct": 12.8,
+      "d": -1.949,
+      "pct": -24.8,
       "real": true
      }
     },
     "20000": {
      "bottleneck_prev": "game",
      "frame": {
-      "d": 0.529,
+      "d": 0.795,
+      "pct": 3.9,
+      "real": true
+     },
+     "frame95": {
+      "d": 0.845,
       "pct": 3.9,
       "real": true
      },
      "game": {
-      "d": 0.536,
-      "pct": 4.1,
+      "d": 1.186,
+      "pct": 6.4,
       "real": true
      },
      "gpu": {
-      "d": 1.344,
-      "pct": 20.9,
-      "real": true
-     }
-    },
-    "30000": {
-     "bottleneck_prev": "game",
-     "frame": {
-      "d": 0.817,
-      "pct": 5.0,
-      "real": true
-     },
-     "game": {
-      "d": 0.798,
-      "pct": 4.9,
-      "real": true
-     },
-     "gpu": {
-      "d": 1.773,
-      "pct": 23.2,
-      "real": true
-     }
-    },
-    "5000": {
-     "bottleneck_prev": "gpu",
-     "frame": {
-      "d": 0.349,
-      "pct": 6.5,
-      "real": true
-     },
-     "game": {
-      "d": 0.076,
-      "pct": 1.8,
-      "real": false
-     },
-     "gpu": {
-      "d": 0.364,
-      "pct": 7.5,
+      "d": -2.211,
+      "pct": -22.3,
       "real": true
      }
     }
    },
-   "group": "spend",
-   "learned": "200m 밖 엔티티의 자리에 GPU 입자를 그리자 호드가 지평선까지 이어졌고, 값은 게임 스레드가 정한 프레임 0.276ms였다.",
-   "max60": {
-    "above": false,
-    "n": 22033
-   },
-   "name": "Niagara 배경 무리",
-   "num": 7,
+   "group": "quality",
+   "learned": "단계 3에서 7까지 표현 셋을 더하는 동안 프레임 p95는 1.02ms 늘었고, GPU 비용은 병목인 게임 스레드에 가려 거의 드러나지 않았다.",
+   "margin_ms": 1.992,
+   "max60": null,
+   "name": "ISKM",
+   "num": 6,
    "post": {
-    "num": 7,
-    "title": "지평선까지 이어진 호드에 0.276ms: 엔티티가 움직이는 Niagara 배경 무리",
-    "url": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Posts/07-niagara-crowd/README.md"
+    "num": 4,
+    "ready": true,
+    "title": "거리별 품질: 표현 셋을 더하는 동안 프레임 p95가 1.02ms 늘었다",
+    "url": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Posts/04-quality-by-distance/README.md"
    }
   },
   {
-   "alt": "8단계 화면: 호드 총수 1만, 오브 시점 카메라. 40m 안은 액터이고, 200m 밖은 입자 무리가 채운다.",
+   "alt": "단계 7 화면: 호드 총수 1만, 이동 장면, 오브 시점 카메라. 35m 안은 액터, 35~200m는 ISKM이고, 200m 밖은 입자 무리가 채운다.",
    "by_n": {
     "10000": {
-     "actors_mean": 457.22,
+     "actors_mean": 578.39,
      "bottleneck": "game",
-     "frame_p50_ms": 9.746,
-     "frame_p50_ms_max": 9.763,
-     "frame_p50_ms_min": 9.707,
-     "frame_p95_ms": 11.486,
-     "frame_p95_ms_max": 11.6,
-     "frame_p95_ms_min": 11.439,
-     "game_p50_ms": 9.592,
-     "game_p50_ms_max": 9.616,
-     "game_p50_ms_min": 9.559,
-     "gpu_p50_ms": 5.752,
-     "gpu_p50_ms_max": 5.757,
-     "gpu_p50_ms_min": 5.746,
-     "render_p50_ms": 3.647,
-     "render_p50_ms_max": 3.7,
-     "render_p50_ms_min": 3.625
+     "frame_p50_ms": 13.564,
+     "frame_p50_ms_max": 13.827,
+     "frame_p50_ms_min": 13.558,
+     "frame_p95_ms": 15.168,
+     "frame_p95_ms_max": 15.426,
+     "frame_p95_ms_min": 15.091,
+     "game_p50_ms": 12.686,
+     "game_p50_ms_max": 12.931,
+     "game_p50_ms_min": 12.686,
+     "gpu_p50_ms": 6.648,
+     "gpu_p50_ms_max": 6.657,
+     "gpu_p50_ms_min": 6.624,
+     "render_p50_ms": 3.981,
+     "render_p50_ms_max": 4.128,
+     "render_p50_ms_min": 3.977,
+     "unmet": false
+    },
+    "12500": {
+     "actors_mean": 712.57,
+     "bottleneck": "game",
+     "frame_p50_ms": 16.064,
+     "frame_p50_ms_max": 16.171,
+     "frame_p50_ms_min": 16.038,
+     "frame_p95_ms": 17.446,
+     "frame_p95_ms_max": 17.625,
+     "frame_p95_ms_min": 17.36,
+     "game_p50_ms": 15.016,
+     "game_p50_ms_max": 15.097,
+     "game_p50_ms_min": 14.965,
+     "gpu_p50_ms": 7.17,
+     "gpu_p50_ms_max": 7.181,
+     "gpu_p50_ms_min": 7.16,
+     "render_p50_ms": 4.466,
+     "render_p50_ms_max": 4.484,
+     "render_p50_ms_min": 4.407,
+     "unmet": false
     },
     "20000": {
-     "actors_mean": 928.45,
+     "actors_mean": 971.32,
      "bottleneck": "game",
-     "frame_p50_ms": 15.011,
-     "frame_p50_ms_max": 15.146,
-     "frame_p50_ms_min": 14.942,
-     "frame_p95_ms": 16.681,
-     "frame_p95_ms_max": 16.873,
-     "frame_p95_ms_min": 16.68,
-     "game_p50_ms": 14.772,
-     "game_p50_ms_max": 14.906,
-     "game_p50_ms_min": 14.715,
-     "gpu_p50_ms": 7.205,
-     "gpu_p50_ms_max": 7.208,
-     "gpu_p50_ms_min": 7.201,
-     "render_p50_ms": 5.12,
-     "render_p50_ms_max": 5.16,
-     "render_p50_ms_min": 4.844
-    },
-    "30000": {
-     "actors_mean": 985.89,
-     "bottleneck": "game",
-     "frame_p50_ms": 18.741,
-     "frame_p50_ms_max": 18.902,
-     "frame_p50_ms_min": 18.458,
-     "frame_p95_ms": 20.844,
-     "frame_p95_ms_max": 21.121,
-     "frame_p95_ms_min": 20.474,
-     "game_p50_ms": 18.51,
-     "game_p50_ms_max": 18.65,
-     "game_p50_ms_min": 18.206,
-     "gpu_p50_ms": 8.511,
-     "gpu_p50_ms_max": 8.552,
-     "gpu_p50_ms_min": 8.479,
-     "render_p50_ms": 5.698,
-     "render_p50_ms_max": 5.729,
-     "render_p50_ms_min": 5.453
-    },
-    "5000": {
-     "actors_mean": 221.87,
-     "bottleneck": "gpu",
-     "frame_p50_ms": 5.578,
-     "frame_p50_ms_max": 5.671,
-     "frame_p50_ms_min": 5.501,
-     "frame_p95_ms": 6.735,
-     "frame_p95_ms_max": 6.813,
-     "frame_p95_ms_min": 6.618,
-     "game_p50_ms": 4.832,
-     "game_p50_ms_max": 4.941,
-     "game_p50_ms_min": 4.747,
-     "gpu_p50_ms": 5.012,
-     "gpu_p50_ms_max": 5.064,
-     "gpu_p50_ms_min": 5.005,
-     "render_p50_ms": 2.804,
-     "render_p50_ms_max": 2.82,
-     "render_p50_ms_min": 2.734
+     "frame_p50_ms": 21.871,
+     "frame_p50_ms_max": 22.018,
+     "frame_p50_ms_min": 21.805,
+     "frame_p95_ms": 23.499,
+     "frame_p95_ms_max": 23.563,
+     "frame_p95_ms_min": 23.317,
+     "game_p50_ms": 20.417,
+     "game_p50_ms_max": 20.578,
+     "game_p50_ms_min": 20.371,
+     "gpu_p50_ms": 8.604,
+     "gpu_p50_ms_max": 8.651,
+     "gpu_p50_ms_min": 8.599,
+     "render_p50_ms": 5.44,
+     "render_p50_ms_max": 5.613,
+     "render_p50_ms_min": 5.377,
+     "unmet": true
     }
    },
-   "changed": "액터로 그리는 거리를 30m에서 40m로, 액터 상한을 500에서 1,000으로 올리고, 80m 밖 미니언의 그림자를 껐다. 남은 시간을 가까운 개체의 품질에 쓰는 단계다.",
-   "clip": "assets/step8.webp",
-   "clip_mb": 7.6,
+   "changed": "그리지 않던 200m 밖을 Niagara 메시 입자로 채웠다. 200~500m는 실제 엔티티의 자리에, 500m 밖은 맵 밖 무리의 기록 자리에 입자를 그린다.",
+   "clip": "assets/step7.webp",
+   "clip_mb": 7.8,
    "counts": [
-    5000,
     10000,
-    20000,
-    30000
+    12500,
+    20000
    ],
    "delta": {
     "10000": {
      "bottleneck_prev": "game",
      "frame": {
-      "d": 1.018,
-      "pct": 11.7,
-      "real": true
+      "d": 0.363,
+      "pct": 2.7,
+      "real": false
+     },
+     "frame95": {
+      "d": 0.46,
+      "pct": 3.1,
+      "real": false
      },
      "game": {
-      "d": 1.023,
-      "pct": 11.9,
+      "d": 0.376,
+      "pct": 3.1,
+      "real": false
+     },
+     "gpu": {
+      "d": 1.049,
+      "pct": 18.7,
+      "real": true
+     }
+    },
+    "12500": {
+     "bottleneck_prev": "game",
+     "frame": {
+      "d": 0.529,
+      "pct": 3.4,
+      "real": true
+     },
+     "frame95": {
+      "d": 0.489,
+      "pct": 2.9,
+      "real": false
+     },
+     "game": {
+      "d": 0.565,
+      "pct": 3.9,
       "real": true
      },
      "gpu": {
-      "d": -0.309,
-      "pct": -5.1,
+      "d": 1.247,
+      "pct": 21.1,
       "real": true
      }
     },
     "20000": {
      "bottleneck_prev": "game",
      "frame": {
-      "d": 1.034,
-      "pct": 7.4,
+      "d": 0.808,
+      "pct": 3.8,
+      "real": true
+     },
+     "frame95": {
+      "d": 0.946,
+      "pct": 4.2,
       "real": true
      },
      "game": {
-      "d": 1.046,
-      "pct": 7.6,
+      "d": 0.787,
+      "pct": 4.0,
       "real": true
      },
      "gpu": {
-      "d": -0.58,
-      "pct": -7.5,
-      "real": true
-     }
-    },
-    "30000": {
-     "bottleneck_prev": "game",
-     "frame": {
-      "d": 1.477,
-      "pct": 8.6,
-      "real": true
-     },
-     "game": {
-      "d": 1.462,
-      "pct": 8.6,
-      "real": true
-     },
-     "gpu": {
-      "d": -0.902,
-      "pct": -9.6,
-      "real": true
-     }
-    },
-    "5000": {
-     "bottleneck_prev": "gpu",
-     "frame": {
-      "d": -0.1,
-      "pct": -1.8,
-      "real": false
-     },
-     "game": {
-      "d": 0.493,
-      "pct": 11.4,
-      "real": true
-     },
-     "gpu": {
-      "d": -0.197,
-      "pct": -3.8,
+      "d": 0.919,
+      "pct": 12.0,
       "real": true
      }
     }
    },
-   "group": "spend",
-   "learned": "8단계는 남은 애니메이션 예산 안에서 가까운 액터를 84개 늘렸고, 그 대가로 프레임 시간이 1.02ms 길어지고 60fps를 지키는 호드 총수가 약 2만으로 내려왔다.",
-   "max60": {
-    "above": false,
-    "n": 20037
+   "group": "quality",
+   "learned": "단계 3에서 7까지 표현 셋을 더하는 동안 프레임 p95는 1.02ms 늘었고, GPU 비용은 병목인 게임 스레드에 가려 거의 드러나지 않았다.",
+   "margin_ms": 1.532,
+   "max60": null,
+   "name": "배경 무리",
+   "num": 7,
+   "post": {
+    "num": 4,
+    "ready": true,
+    "title": "거리별 품질: 표현 셋을 더하는 동안 프레임 p95가 1.02ms 늘었다",
+    "url": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Posts/04-quality-by-distance/README.md"
+   }
+  },
+  {
+   "alt": "단계 8 화면: 호드 총수 1만, 이동 장면, 오브 시점 카메라. 단계 7과 표현이 같고, 80m 밖 개체는 그림자가 없다.",
+   "by_n": {
+    "10000": {
+     "actors_mean": 577.79,
+     "bottleneck": "game",
+     "frame_p50_ms": 12.77,
+     "frame_p50_ms_max": 12.93,
+     "frame_p50_ms_min": 12.68,
+     "frame_p95_ms": 14.231,
+     "frame_p95_ms_max": 14.426,
+     "frame_p95_ms_min": 14.035,
+     "game_p50_ms": 11.881,
+     "game_p50_ms_max": 12.023,
+     "game_p50_ms_min": 11.79,
+     "gpu_p50_ms": 6.164,
+     "gpu_p50_ms_max": 6.18,
+     "gpu_p50_ms_min": 6.154,
+     "render_p50_ms": 4.12,
+     "render_p50_ms_max": 4.125,
+     "render_p50_ms_min": 4.102,
+     "unmet": false
+    },
+    "12500": {
+     "actors_mean": 710.91,
+     "bottleneck": "game",
+     "frame_p50_ms": 15.656,
+     "frame_p50_ms_max": 15.906,
+     "frame_p50_ms_min": 15.364,
+     "frame_p95_ms": 17.217,
+     "frame_p95_ms_max": 17.607,
+     "frame_p95_ms_min": 16.978,
+     "game_p50_ms": 14.604,
+     "game_p50_ms_max": 14.835,
+     "game_p50_ms_min": 14.319,
+     "gpu_p50_ms": 6.635,
+     "gpu_p50_ms_max": 6.652,
+     "gpu_p50_ms_min": 6.635,
+     "render_p50_ms": 4.734,
+     "render_p50_ms_max": 4.838,
+     "render_p50_ms_min": 4.477,
+     "unmet": false
+    },
+    "20000": {
+     "actors_mean": 971.28,
+     "bottleneck": "game",
+     "frame_p50_ms": 22.228,
+     "frame_p50_ms_max": 22.316,
+     "frame_p50_ms_min": 22.162,
+     "frame_p95_ms": 23.732,
+     "frame_p95_ms_max": 23.92,
+     "frame_p95_ms_min": 23.6,
+     "game_p50_ms": 20.781,
+     "game_p50_ms_max": 20.875,
+     "game_p50_ms_min": 20.73,
+     "gpu_p50_ms": 8.344,
+     "gpu_p50_ms_max": 8.354,
+     "gpu_p50_ms_min": 8.336,
+     "render_p50_ms": 5.92,
+     "render_p50_ms_max": 5.986,
+     "render_p50_ms_min": 5.901,
+     "unmet": true
+    }
    },
-   "name": "품질 올리기",
+   "changed": "80m 밖 인스턴스의 그림자를 끄고, 액터 메시가 피직스 에셋 바디 대신 메시의 고정 바운드를 쓰게 했다(`bComponentUseFixedSkelBounds`).",
+   "clip": "assets/step8.webp",
+   "clip_mb": 7.8,
+   "counts": [
+    10000,
+    12500,
+    20000
+   ],
+   "delta": {
+    "10000": {
+     "bottleneck_prev": "game",
+     "frame": {
+      "d": -0.794,
+      "pct": -5.9,
+      "real": true
+     },
+     "frame95": {
+      "d": -0.937,
+      "pct": -6.2,
+      "real": true
+     },
+     "game": {
+      "d": -0.805,
+      "pct": -6.3,
+      "real": true
+     },
+     "gpu": {
+      "d": -0.484,
+      "pct": -7.3,
+      "real": false
+     }
+    },
+    "12500": {
+     "bottleneck_prev": "game",
+     "frame": {
+      "d": -0.408,
+      "pct": -2.5,
+      "real": false
+     },
+     "frame95": {
+      "d": -0.229,
+      "pct": -1.3,
+      "real": false
+     },
+     "game": {
+      "d": -0.412,
+      "pct": -2.7,
+      "real": false
+     },
+     "gpu": {
+      "d": -0.535,
+      "pct": -7.5,
+      "real": true
+     }
+    },
+    "20000": {
+     "bottleneck_prev": "game",
+     "frame": {
+      "d": 0.357,
+      "pct": 1.6,
+      "real": false
+     },
+     "frame95": {
+      "d": 0.233,
+      "pct": 1.0,
+      "real": false
+     },
+     "game": {
+      "d": 0.364,
+      "pct": 1.8,
+      "real": false
+     },
+     "gpu": {
+      "d": -0.26,
+      "pct": -3.0,
+      "real": false
+     }
+    }
+   },
+   "group": "earn",
+   "learned": "비용을 줄이는 두 단계에서 프레임 시간을 줄인 것은 액터 메시 고정 바운드이고, 엔티티 풀의 이점은 긴 실행에서 보인다.",
+   "margin_ms": 2.469,
+   "max60": null,
+   "name": "남은 비용 줄이기",
    "num": 8,
    "post": {
-    "num": 8,
-    "title": "품질 올리기: 남은 예산을 액터 수와 전환 거리에 쓰기",
-    "url": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Posts/08-quality/README.md"
+    "num": 5,
+    "ready": true,
+    "title": "비용을 줄이는 단계와 기법별 기여: 최종 구성의 큰 비용은 가까운 액터에 있다",
+    "url": "https://github.com/hon454/unreal-horde-optimization-lab/blob/main/Posts/05-cost-cuts-and-contributions/README.md"
    }
   }
  ]

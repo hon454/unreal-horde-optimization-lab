@@ -22,11 +22,11 @@
       <p class="spec-line"><span class="big num">60fps</span><span class="spec-unit" id="spec-ms"></span></p>
     </div>
     <div class="card result">
-      <p class="card-label">결과 · 호드 총수 1만, 프레임 시간 중앙값</p>
+      <p class="card-label">결과 · 호드 총수 1만, 프레임 p50</p>
       <div class="result-row">
-        <div><p class="big num" id="res-first"></p><p class="muted">1단계 액터 군중</p></div>
+        <div><p class="big num" id="res-first"></p><p class="muted">단계 1 액터 기준선</p></div>
         <span class="arrow" aria-hidden="true">→</span>
-        <div><p class="big num accent" id="res-final"></p><p class="muted">8단계 최종 구성</p></div>
+        <div><p class="big num accent" id="res-final"></p><p class="muted">단계 8 최종 구성</p></div>
       </div>
       <p class="muted small" id="res-note"></p>
     </div>
@@ -74,17 +74,18 @@
         <div class="seg" role="group" aria-labelledby="nsel-label" id="nsel"></div>
       </div>
       <div class="metrics" id="metrics"></div>
+      <p class="muted small" id="unmet"></p>
       <div class="cols">
         <div>
-          <h4>16.7ms 예산 대비</h4>
+          <h4>16.7ms와 견주기</h4>
           <div class="budget" id="budget"></div>
         </div>
         <div>
           <h4 id="delta-h">앞 단계 대비</h4>
           <div id="delta"></div>
-          <h4>60fps를 지키는 최대 개체 수</h4>
+          <h4 id="margin-h"></h4>
           <p class="max60" id="max60"></p>
-          <p class="muted small">프레임 시간의 느린 쪽 5% 경계가 16.7ms 이하인 가장 큰 호드 총수. 단계마다 네 가지 호드 총수에서 잰 값 사이를 보간했다.</p>
+          <p class="muted small" id="max60-note"></p>
         </div>
       </div>
     </div>
@@ -94,18 +95,18 @@
 
 <section class="wrap" aria-labelledby="ladder-h">
   <h2 id="ladder-h">여덟 단계 한눈에</h2>
-  <p class="muted">호드 총수 1만, 오브 시점 카메라. 막대는 프레임 시간 중앙값, 옅은 연장은 느린 쪽 5% 경계다. 1단계는 축척 밖이라 막대를 잘랐다. 줄을 누르면 위의 단계가 바뀐다.</p>
+  <p class="muted">호드 총수 1만, 이동 장면, 오브 시점 카메라, 세 번 잰 중앙값. 진한 막대는 프레임 p50, 옅은 연장은 프레임 p95다. 단계 1과 2는 축척 밖이라 막대를 잘랐다. 줄을 누르면 위의 단계가 바뀐다.</p>
   <div class="card chart" id="ladder"></div>
 </section>
 
-<section class="wrap" aria-labelledby="maxn-h">
-  <h2 id="maxn-h">60fps를 지키는 최대 개체 수</h2>
-  <p class="muted">오브 시점 카메라. 프레임 시간의 느린 쪽 5% 경계가 16.7ms 이하인 가장 큰 호드 총수다. 점선 막대는 잰 범위의 끝인 3만에서도 16.7ms 안이라 실제 최대가 더 크다.</p>
-  <div class="card chart" id="maxn"></div>
+<section class="wrap" aria-labelledby="margin-h2">
+  <h2 id="margin-h2">16.7ms까지의 여유</h2>
+  <p class="muted">호드 총수 1만, 이동 장면, 오브 시점 카메라, 세 번 잰 중앙값. 막대는 16.7ms에서 프레임 p95를 뺀 값이다. 단계 1과 2는 프레임 p95가 16.7ms를 넘어 여유 대신 최대 N을 적는다. 최대 N은 프레임 p95가 16.7ms를 넘기 직전의 호드 총수다.</p>
+  <div class="card chart" id="margin"></div>
 </section>
 
 <section class="wrap" aria-labelledby="abl-h">
-  <h2 id="abl-h">최종 구성에서 기법 하나를 뺀 값</h2>
+  <h2 id="abl-h">기법별 기여(최종 구성에서 하나씩 껐을 때)</h2>
   <p class="muted" id="abl-intro"></p>
   <div class="card chart" id="ablation"></div>
   <ul class="notes" id="abl-notes"></ul>
@@ -118,12 +119,12 @@
 </section>
 
 <section class="wrap" aria-labelledby="method-h">
-  <h2 id="method-h">재는 법</h2>
+  <h2 id="method-h">측정 방법</h2>
   <ul class="notes" id="method"></ul>
 </section>
 
 <section class="wrap" aria-labelledby="posts-h">
-  <h2 id="posts-h">글 열 편</h2>
+  <h2 id="posts-h">글 여덟 편</h2>
   <ol class="posts" id="posts"></ol>
 </section>
 </main>
