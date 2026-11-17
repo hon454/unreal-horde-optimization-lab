@@ -71,7 +71,6 @@
     var H = D.headline;
     var SUM = D.summary;
     $("lead").innerHTML = md(SUM.lead);
-    $("sum-why").innerHTML = md(SUM.why);
     $("sum-list").innerHTML = SUM.takeaways.map(function (t) {
       return "<li><strong>" + md(t.head) + "</strong> " + md(t.body) + "</li>";
     }).join("");
