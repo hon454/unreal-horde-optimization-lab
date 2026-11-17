@@ -92,3 +92,26 @@ MCP로 만들 때 남는 것: MCP `SetEmitterData`는 `PostEditChange`를 부르
 3. 확인: `run-dev.ps1 -Small -Stage 8`의 로그 `lab_crowdfx`에 `particles=` 값과 `small_recs=1 large_recs=1`이 있다. 화면 비교는 같은 시드 P1 20초 스크린샷의 지평선 띠다(`Measurements/CrowdFx2/shots/lod-compare-horizon.jpg`).
 
 비교용으로 다른 메시를 시험할 때는 에셋을 바꾸지 않고 `NS_LabCrowd`를 다른 경로에 복제해 메시와 인스턴스를 바꾼 뒤 실행 인자 `-ini:Game:[Lab]:CrowdFxSystem=<복제본 경로>`로 고른다. Git Bash에서 부르면 `/Game/...`이 Windows 경로로 바뀌므로 `MSYS_NO_PATHCONV=1`을 둔다. 복제본은 끝나면 지운다.
+
+## 7. 디버그용 색 사본(2026-11-17)
+
+표현별 색(개발 전용 `-LabRepTint`)을 켜면 코드가 원본 대신 사본 `/Game/LabDebug/FX/NS_LabCrowdTint`를 읽는다(`Config/DefaultGame.ini` `[Lab] CrowdFxTintSystem`, `ALabGameMode::SetupCrowdFx`). 사본 MI의 `UnitTint`가 노랑이라 배경 무리가 노랗게 그려진다. 측정에 쓰는 원본(1\~6절의 셋)은 바꾸지 않는다. 경위는 [Docs/Worklog/V2.md](../Docs/Worklog/V2.md) "2026-11-17 W14-5 입자 색 사본"에 있다.
+
+- 사본은 `/Game/LabDebug/`에 둔다. 이 폴더는 `DirectoriesToAlwaysCook`(`/Game/Lab`) 밖이라 Test 패키지에 쿡되지 않는다. 맵과 코드에 이 폴더의 하드 참조가 없다. ini의 경로 문자열은 쿡 대상이 아니다. 쿡은 시작 때 읽힌 `FSoftObjectPath`(`GRedirectCollector`)와 `GameMapsSettings`의 기본 맵만 더한다(`Engine/Source/Editor/UnrealEd/Private/CookOnTheFlyServer.cpp` 11790\~11836행, 8992\~9032행).
+- 원본의 구성(이미터, 모듈, 메시, 미리 할당 수)을 바꾸면 사본을 지우고 아래 순서로 다시 만든다. 사본은 복제한 시점의 원본을 따른다.
+
+2026-11-17에 Unreal MCP로 이 순서로 만들었다. 에디터에서 손으로 해도 같다(콘텐츠 브라우저 복제, MI의 `UnitTint` 체크, 이미터마다 메시 렌더러의 Override Materials).
+
+1. AssetTools(`editor_toolset.toolsets.asset.AssetTools`) `create_folder` `/Game/LabDebug/FX`. 이어서 `duplicate`로 셋을 복제한다.
+   - `/Game/Lab/FX/MI_LabCrowdSmall` → `/Game/LabDebug/FX/MI_LabCrowdSmallTint`
+   - `/Game/Lab/FX/MI_LabCrowdLarge` → `/Game/LabDebug/FX/MI_LabCrowdLargeTint`
+   - `/Game/Lab/FX/NS_LabCrowd` → `/Game/LabDebug/FX/NS_LabCrowdTint`
+2. MIT `set_vector_parameter`로 두 사본 MI의 `UnitTint` = (0.95, 0.8, 0.1, 1). 원본 MI는 `UnitTint`를 덮지 않는다. 그래서 부모 값(소형 (1, 1, 1), 대형 (0.15, 0.15, 0.18))이 쓰인다. 부모(`MI_LabMinionVAT_Bone_Lod4`, `MI_LabMinionLargeVAT_Bone_Lod4`)와 정적 스위치 `AutoPlay`·`UseDynamicParameters` = true는 복제로 그대로 온다(`get_static_switch_parameter`로 본다).
+3. 사본 시스템의 네 이미터(`Small`, `Large`, `SmallEnt`, `LargeEnt`)마다 NS `GetRendererData`로 렌더러 0번의 `OverrideMaterials`를 읽는다. 렌더러 참조는 `emitterName`과 `rendererIndex` 0이고, `scriptName`·`moduleName`은 빈 문자열, `inputNameStack`은 빈 배열이다.
+4. 읽은 배열에서 `explicitMat`만 사본 MI로 바꾼다. 소형 이미터(`Small`, `SmallEnt`)는 `MI_LabCrowdSmallTint`, 대형(`Large`, `LargeEnt`)은 `MI_LabCrowdLargeTint`다. NS `SetRendererData`의 `propertyValues`에 `{"OverrideMaterials": [...]}`만 넣는다. 메시, 그림자, 컬링 값은 건드리지 않는다.
+5. `AssetTools.save_assets`로 셋을 저장한다. 시스템은 저장할 때 컴파일된다(`UNiagaraSystem::PreSave`가 `WaitForCompilationComplete`를 부른다, `Engine/Plugins/FX/Niagara/Source/Niagara/Private/NiagaraSystem.cpp` 357\~365행). 로그에 `LogNiagara: Compiling System NiagaraSystem /Game/LabDebug/FX/NS_LabCrowdTint...`와 `LogSavePackage: Moving output files for package: /Game/LabDebug/FX/NS_LabCrowdTint`가 남는다.
+6. 확인: `GetSystemCompileState`가 `UpToDate`이고 오류·경고가 0이다. `GetStackIssues`는 정보 8건(`ParticleState` 버전 노트, `SpawnPerFrame` 실험단계 표시, 보간 스폰 끔 안내)이다. `GetSystemSummary`의 사용자 변수 아홉이 원본과 같은 이름이다. `get_dependencies`가 사본 MI 둘과 LOD4 메시 둘을 가리키고 원본 MI를 가리키지 않는다. 원본 셋의 파일이 바뀌지 않았는지 `git status Content/Lab`로 본다.
+
+복제한 시스템을 저장하기 전에 `GetSystemCompileState`나 `GetStackIssues`를 부르면 120초 기다린 뒤 시간 초과로 끝난다. 복제본은 컴파일 요청이 걸린 채 남는데, 툴은 요청을 내지 않고 끝나기만 기다린다(`Engine/Plugins/Experimental/Toolsets/NiagaraToolsets/Source/NiagaraToolsets/Private/NiagaraToolset_System.cpp` 485\~512행, `UNiagaraSystem::HasOutstandingCompilationRequests`). 먼저 저장하고 부른다.
+
+실행 확인: `run-dev.ps1 -N 10000 -Stage 8 -Duration 80 -ShotAt 75 -Extra "-LabRepTint"`의 로그에 `lab_reptint rep=crowd on=1 system=NS_LabCrowdTint`와 `lab_crowdfx on=1 system=NS_LabCrowdTint ... small_recs=1 large_recs=1 now=1 orb_pos=1`이 있다. 스크린샷에서 ISKM 띠 너머의 입자가 노랑이다. 인자 없는 실행의 `lab_crowdfx`는 `system=NS_LabCrowd`다.
