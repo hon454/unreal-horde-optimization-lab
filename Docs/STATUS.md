@@ -20,7 +20,7 @@
 3. 사용자가 README 초안을 검토한다. 물을 것 넷은 사용자가 정했다([Worklog/V2.md](Worklog/V2.md) "W14-17" 절).
 4. 사용자가 공개 자료를 검토한다(W14-19). 자료는 글, README, 사이트다.
 5. 윤문 검토와 팩트체크의 반영은 끝났다. 결정 열과 커밋은 [Worklog/V2.md](Worklog/V2.md) "W14 팩트체크 결정과 표기 정리" 절에 있다.
-6. 레포지토리를 최적화하고 정리한다(사용자 요청, 2026-11-17). 범위는 시작할 때 사용자와 정한다.
+6. 레포지토리를 정리한다. 조사는 [V2-cleanup-plan.md](Worklog/V2-cleanup-plan.md)에 있다(678aa2f). 사용자가 묶음 여섯을 하나씩 정한다.
 7. 사용자 승인 뒤 main에 병합한다(W14-20). `gh-pages`와 Releases도 그때 올린다.
 8. 병합 때 README "실행"의 Releases 링크와 `run-final.bat` 이름을 새 패키지에 맞춘다.
 9. 병합 때 `Site/assets/`를 `gh-pages`에 따로 넣는다. `Site/assets/`는 `.gitignore`에 있다.
@@ -70,7 +70,7 @@
 
 | 세션 | 작업 단위 | 모델 | 상태 |
 | --- | --- | --- | --- |
-| repo-cleanup-survey | 레포지토리 정리 조사(`Docs/Worklog/V2-cleanup-plan.md`, 지우지 않는다) | Opus high | 진행 중 |
+| 없음 | | | |
 
 코디네이터는 세션을 띄우면 여기에 적는다. 끝난 세션은 결과를 확인하고 보관한 뒤 지운다.
 
