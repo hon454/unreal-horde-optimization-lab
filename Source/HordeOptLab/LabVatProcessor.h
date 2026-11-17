@@ -9,7 +9,7 @@
  * 커스텀 데이터는 위치와 같은 순서로 쌓여야 하므로 같은 반복에서 쓴다(MassVisualizationComponent.cpp:566-571).
  * 구조는 City Sample MassCrowdUpdateISMVertexAnimationProcessor와 같다(../unreal-horde-references/CitySample/Plugins/CitySampleMassCrowd).
  *
- * 엔진 프로세서와 이 프로세서 중 하나만 돈다. 기본은 꺼져 있고, 게임 모듈 시작 때 VAT 단계(사다리 단계 4·5, ISKM을 끈 빼 보기)이면
+ * 엔진 프로세서와 이 프로세서 중 하나만 돈다. 기본은 꺼져 있고, 게임 모듈 시작 때 VAT 단계(사다리 단계 4·5, ISKM을 끈 조건)이면
  * 엔진 것을 끄고 이것을 켠다(HordeOptLab.cpp, plan.md "M2").
  *
  * 애니 상태는 표현 전용 FLabAnimStateFragment(상태, 들어간 시각)에서 읽는다. 재생 시각 = 월드 시각 − 들어간 시각. 걷기는 위상을 음수 시각으로 둔 루프다.

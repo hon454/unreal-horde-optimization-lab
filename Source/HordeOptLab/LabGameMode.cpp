@@ -6,6 +6,7 @@
 #include "LabCrowdSubsystem.h"
 #include "LabUnitAssets.h"
 #include "LabHud.h"
+#include "LabRepTint.h" // 개발 전용 표현별 색(Test 빌드에서는 빈 헤더)
 #include "InputCoreTypes.h"
 #include "LabOrb.h"
 #include "LabSnipe.h" // FLabSnipeBands(바닥 띠 반경)
@@ -42,6 +43,10 @@ namespace
 {
 	/** 결정 6 바닥 띠가 켜져 있는가(개발 전용 -LabBandFloor가 1로 둔다). 측정 CSV 메타데이터 LabCVars에 찍혀 켜고 잰 실행을 걸러낸다. Test 빌드에서는 늘 0. */
 	TAutoConsoleVariable<int32> CVarLabBandFloor(TEXT("lab.BandFloor"), 0, TEXT("1 if the dev-only -LabBandFloor orb-centred band floor is active (never in Test builds)"), ECVF_Default);
+#if !UE_BUILD_TEST
+	/** 표현별 색이 켜져 있는가(개발 전용 -LabRepTint가 1로 둔다, LabRepTint.h). LabCVars에 찍혀 켜고 잰 실행을 걸러낸다. Test 빌드에는 CVar가 없어 LabCVars가 전과 같다. */
+	TAutoConsoleVariable<int32> CVarLabRepTint(TEXT("lab.RepTint"), 0, TEXT("1 if the dev-only -LabRepTint representation tint is active (never in Test builds)"), ECVF_Default);
+#endif
 
 	void LabSetCVar(const TCHAR* Name, const TCHAR* Value)
 	{
@@ -67,6 +72,9 @@ namespace
 			TEXT("r.DynamicGlobalIlluminationMethod"), TEXT("r.Shadow.Virtual.Enable"), TEXT("r.AntiAliasingMethod"),
 			TEXT("mass.FullyParallel"), TEXT("mass.commands.LockObserversDuringFlushing"),
 			TEXT("lab.BandFloor"), // 결정 6 바닥 띠(개발 전용). 1이면 그 실행은 비교에 쓰지 않는다
+#if !UE_BUILD_TEST
+			TEXT("lab.RepTint"),   // 표현별 색(개발 전용). 1이면 그 실행은 비교에 쓰지 않는다. Test 빌드의 문자열은 바뀌지 않는다
+#endif
 		};
 		FString Out;
 		for (const TCHAR* Name : Names)
@@ -83,7 +91,7 @@ namespace
 
 bool ALabGameMode::IsBudgetActive() const
 {
-	// 할당기는 CVar a.Budget.Enabled == 1(bCachedEnabled)과 월드 할당기의 bEnabled가 둘 다 참일 때만 돈다(AnimationBudgetAllocator.cpp:75, 115, 135).
+	// Animation Budget Allocator는 CVar a.Budget.Enabled == 1(bCachedEnabled)과 월드 Budget Allocator의 bEnabled가 둘 다 참일 때만 돈다(AnimationBudgetAllocator.cpp:75, 115, 135).
 	const IConsoleVariable* Var = IConsoleManager::Get().FindConsoleVariable(TEXT("a.Budget.Enabled"));
 	const IAnimationBudgetAllocator* Allocator = IAnimationBudgetAllocator::Get(GetWorld());
 	return Var && Var->GetInt() == 1 && Allocator && Allocator->GetEnabled();
@@ -91,7 +99,7 @@ bool ALabGameMode::IsBudgetActive() const
 
 FString ALabGameMode::AppliedString() const
 {
-	// Q3: 설정(lab_config tech=)이 아니라 실제로 적용된 값. 빼 보기 러너가 설정과 함께 대조한다.
+	// Q3: 설정(lab_config tech=)이 아니라 실제로 적용된 값. 기법별 기여 러너가 설정과 함께 대조한다.
 	const ULabCrowdSubsystem* Crowd = GetWorld()->GetSubsystem<ULabCrowdSubsystem>();
 	const bool bCrowd = Crowd && Crowd->IsActive();
 	return FString::Printf(TEXT("stage=%d budget=%d pool=%d iskm_bounds=%d fixmask=%d crowdfx_active=%d %s"), FLabConfig::Get().Step, IsBudgetActive() ? 1 : 0,
@@ -214,6 +222,12 @@ void ALabGameMode::StartPlay()
 	{
 		UE_LOG(LogLab, Log, TEXT("lab_bandfloor on=0 reason=P2"));
 	}
+	// 표현별 색(개발 전용 -LabRepTint, LabRepTint.h). 바닥 띠와 같이 CVar를 lab_build 로그 앞에 둔다. 색은 액터 BeginPlay, 표현 설명자, 배경 무리 사본이 넣는다
+	if (LabRepTint::IsOn())
+	{
+		LabSetCVar(TEXT("lab.RepTint"), TEXT("1"));
+		UE_LOG(LogLab, Log, TEXT("lab_reptint on=1 param=%s colors=%s"), LabRepTint::ParamName, *LabRepTint::ColorTable());
+	}
 #endif
 	UE_LOG(LogLab, Log, TEXT("lab_build commit=%s driver=%s %s cvars=%s crowdfx=%d crowdfx_particles=%d"), TEXT(LAB_BUILD_COMMIT), *GRHIAdapterName, *GRHIAdapterUserDriverVersion, *LabFixedCVarString(),
 		Config.bCrowdFx ? 1 : 0, Config.CrowdFxParticles());
@@ -307,6 +321,30 @@ void ALabGameMode::SetupCrowdFx()
 		UE_LOG(LogLab, Warning, TEXT("lab_crowdfx on=0 reason=system_missing %s"), *SystemPath);
 		return;
 	}
+#if !UE_BUILD_TEST
+	if (LabRepTint::IsOn())
+	{
+		// 표현별 색(개발 전용, LabRepTint.h). 입자 머티리얼은 고정 인스턴스라 실행 중에 UnitTint를 바꿀 길이 없어 디버그용 사본 시스템을 읽는다(V2-w14-plan.md 결정 4).
+		// 사본은 시스템과 MI(MI_LabCrowdSmall·Large)의 사본이고 사본 MI의 UnitTint가 노랑이다(에디터 작업, Scripts/create-crowd-fx.md). 경로는 ini [Lab] CrowdFxTintSystem.
+		// 사용자 변수 이름은 원본과 같아야 한다(아래 확인이 같은 이름을 본다). 사본이 없으면 원본을 그대로 쓰고 한 줄 남긴다.
+		FString TintPath;
+		UNiagaraSystem* TintSystem = nullptr;
+		if (GConfig && GConfig->GetString(TEXT("Lab"), TEXT("CrowdFxTintSystem"), TintPath, GGameIni) && !TintPath.IsEmpty())
+		{
+			TintSystem = LoadObject<UNiagaraSystem>(nullptr, *TintPath, nullptr, LOAD_Quiet | LOAD_NoWarn);
+		}
+		if (TintSystem)
+		{
+			UE_LOG(LogLab, Log, TEXT("lab_reptint rep=crowd on=1 system=%s original=%s"), *TintSystem->GetName(), *System->GetName());
+			System = TintSystem;
+		}
+		else
+		{
+			UE_LOG(LogLab, Warning, TEXT("lab_reptint rep=crowd on=0 reason=%s path=%s original=%s (particles keep the original colour)"), TintPath.IsEmpty() ? TEXT("no_ini_key") : TEXT("system_missing"),
+				TintPath.IsEmpty() ? TEXT("[Lab]CrowdFxTintSystem") : *TintPath, *System->GetName());
+		}
+	}
+#endif
 	const float Lifetime = Config.CrowdFxLifetime();
 	if (Lifetime <= 0.f)
 	{
@@ -384,7 +422,7 @@ void ALabGameMode::ApplyBudgetCVars()
 	// 예산 값은 -LabBudgetMs=로 바꾼다(기본 FLabScenario::BudgetMs = 4, ADR-0016). 0 이하는 FLabConfig가 이미 화면 크기 Budget을 껐으므로 여기 오지 않는다.
 	const float BudgetMs = FLabConfig::Get().BudgetMs;
 	LabSetCVar(TEXT("a.Budget.BudgetMs"), *FString::SanitizeFloat(BudgetMs));
-	// CVar만으로는 켜지지 않는다. 월드마다 만들어지는 할당기는 bEnabled(false)로 시작한다(AnimationBudgetAllocator.cpp:71).
+	// CVar만으로는 켜지지 않는다. 월드마다 만들어지는 Budget Allocator는 bEnabled(false)로 시작한다(AnimationBudgetAllocator.cpp:71).
 	// 이걸 빠뜨린 2026-11-07 첫 E0의 budget 3조건은 무효로 하고 다시 쟀다.
 	if (IAnimationBudgetAllocator* Allocator = IAnimationBudgetAllocator::Get(GetWorld()))
 	{
@@ -436,11 +474,11 @@ void ALabGameMode::TickBench()
 			// Q2b: 엔티티 구동 입자(1) / 배경 무리 끔(-). 엔티티 구동 입자 수는 CSV 스탯 Lab/CrowdRecs, 모으기 시간은 Lab/CrowdFxGather.
 			// v2 W10에서 옛 방식(전부 독립 입자, 0)을 지웠다
 			CSV_METADATA(TEXT("LabCrowdFxEntity"), !Config.bCrowdFx ? TEXT("-") : TEXT("1"));
-			// Q3 빼 보기: 사다리 단계(1~8, v2 W10부터. 그전에는 M0~M5), 실제로 적용된 값(Budget 할당기, 엔티티 풀, 고정 바운드가 들어간 ISKM 컴포넌트 수, 전환 대책 마스크),
+			// Q3 기법별 기여: 사다리 단계(1~8, v2 W10부터. 그전에는 M0~M5), 실제로 적용된 값(Budget Allocator, 엔티티 풀, 고정 바운드가 들어간 ISKM 컴포넌트 수, 전환 대책 마스크),
 			// 기법의 설정 켬·끔(LabTech*, FLabConfig::TechList). 러너가 실행마다 기대값과 대조한다. v2 W10에서 LabVariant를 지웠다
 			CSV_METADATA(TEXT("LabStage"), *FString::FromInt(Config.Step));
 			CSV_METADATA(TEXT("LabBudget"), IsBudgetActive() ? TEXT("1") : TEXT("0"));
-			// 실제로 걸린 예산(a.Budget.BudgetMs의 값). 할당기가 꺼져 있으면 "-". 참고 묶음 Budget1이 조건을 가리는 키다
+			// 실제로 걸린 예산(a.Budget.BudgetMs의 값). Budget Allocator가 꺼져 있으면 "-". 참고 묶음 Budget1이 조건을 가리는 키다
 			{
 				const IConsoleVariable* BudgetVar = IConsoleManager::Get().FindConsoleVariable(TEXT("a.Budget.BudgetMs"));
 				CSV_METADATA(TEXT("LabBudgetMs"), IsBudgetActive() && BudgetVar ? *BudgetVar->GetString() : TEXT("-"));

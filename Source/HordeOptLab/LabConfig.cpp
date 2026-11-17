@@ -56,7 +56,7 @@ const FLabConfig& FLabConfig::Get()
 		C.ActorCap = FLabQuality::DefaultActorCap;       // 2~8 같은 값(ADR-0021). 단계 1은 쓰지 않는다
 		C.HydrateM = FLabQuality::DefaultHydrateM;
 		C.bFarShadow = C.Step != 8;                      // 8: 80m 밖 그림자 끔(남은 비용 줄이기)
-		C.bFixedSkelBounds = C.Step == 8;                // 8: 액터 메시 고정 바운드(v2 W11, 번 시간을 품질에 쓰는 단계의 비용 줄이기)
+		C.bFixedSkelBounds = C.Step == 8;                // 8: 액터 메시 고정 바운드(v2 W11, 남은 비용 줄이기)
 
 		// Q5: 단계 기본값과 다르게 준 인자를 모은다(LabOverrides, HUD). 기본값과 같은 값을 준 인자는 넣지 않는다.
 		TArray<FString> Overrides;
@@ -151,7 +151,7 @@ const FLabConfig& FLabConfig::Get()
 				if (!C.bCrowdFxOuter && C.bCrowdFx) { NoteOverride(TEXT("crowdfx_outer=0")); }
 			}
 		}
-		// Q3 빼 보기 스위치(끄기 전용): 0을 줄 때만 그 기법을 뺀다. 다른 값은 단계 기본값 그대로다(LabConfig.h).
+		// Q3 기법별 기여 스위치(끄기 전용): 0을 줄 때만 그 기법을 끈다. 다른 값은 단계 기본값 그대로다(LabConfig.h).
 		auto OffSwitch = [Cmd](const TCHAR* Key)
 		{
 			int32 V = -1;
@@ -190,7 +190,7 @@ const FLabConfig& FLabConfig::Get()
 		C.HydrateM = FMath::Clamp(C.HydrateM, 1.f, FLabQuality::MaxHydrateM);
 		if (C.ActorCap != DefaultCap) { NoteOverride(FString::Printf(TEXT("actor_cap=%d"), C.ActorCap)); }
 		if (C.HydrateM != DefaultHydrateM) { NoteOverride(FString::Printf(TEXT("hydrate_m=%.0f"), C.HydrateM)); }
-		// Q4b 원거리 그림자: 단계 8은 끔, 그 밖은 켬. -LabFarShadow=0|1이 이긴다(빼 보기 = 단계 8 + -LabFarShadow=1)
+		// Q4b 원거리 그림자: 단계 8은 끔, 그 밖은 켬. -LabFarShadow=0|1이 이긴다(80m 밖 그림자를 다시 켠 조건 = 단계 8 + -LabFarShadow=1)
 		Switch(TEXT("-LabFarShadow="), TEXT("far_shadow"), C.bFarShadow);
 		// 시나리오 쪽 인자: 기본값(확정값)과 다르면 적는다
 		FParse::Value(Cmd, TEXT("-LabHydrateFixMask="), C.HydrateFixMask);
@@ -232,7 +232,7 @@ TArray<FLabConfig::FTech> FLabConfig::TechList() const
 		{ TEXT("LabTechPool"), TEXT("pool"), B(bEntityPool) },
 		{ TEXT("LabTechSimLod"), TEXT("sim"), B(UsesSimLod()) },
 		{ TEXT("LabTechIskm"), TEXT("iskm"), B(UsesIskm()) },
-		{ TEXT("LabTechFixedBounds"), TEXT("bnd"), B(Step >= 6 && !bNoFixedBounds) }, // 설정 기준(ISKM을 끈 빼 보기에서도 1). 실제 적용은 UsesFixedBounds와 LabIskmBounds
+		{ TEXT("LabTechFixedBounds"), TEXT("bnd"), B(Step >= 6 && !bNoFixedBounds) }, // 설정 기준(ISKM을 끈 조건에서도 1). 실제 적용은 UsesFixedBounds와 LabIskmBounds
 		{ TEXT("LabTechFarCull"), TEXT("far"), B(CullsFar()) },
 		{ TEXT("LabTechCrowdFx"), TEXT("fx"), B(bCrowdFx) },
 		{ TEXT("LabTechAvoid"), TEXT("av"), B(UsesAvoidance()) },
@@ -334,7 +334,7 @@ FString FLabConfig::ToLogString() const
 	const FString Far = FarM != 200 ? FString::Printf(TEXT(" far=%d"), FarM) : FString();
 	const FString Health = HealthFixed > 0.f ? FString::Printf(TEXT(" health_fixed=%.0f"), HealthFixed) : FString();
 	const FString Crowd = bCrowdFx ? FString::Printf(TEXT(" crowdfx=1 crowdfx_particles=%d crowdfx_outer=%d"), CrowdFxParticles(), bCrowdFxOuter ? 1 : 0) : FString();
-	// tech는 빼 보기 기법의 켬·끔이다(Q3). 모든 실행에 붙여 러너와 사람이 기대값과 대조한다.
+	// tech는 기법별 기여에서 끄는 기법의 켬·끔이다(Q3). 모든 실행에 붙여 러너와 사람이 기대값과 대조한다.
 	return FString::Printf(TEXT("lab_config stage=%d n=%d preset=P%d seed=%d bench=%d label=%s duration=%.1f types=%d simlod=%s%s pool=%d screensig_budget=%d actor_cap=%d hydrate_m=%.0f far_shadow=%s%s%s %s overrides=%s hud=%d actor_col=%s rep_hold=%d fixmask=%d fx_orb_follow=%s bounds_step=%s iskm_track_reserve=%s fixed_skel_bounds=%s query_isolate=%d far_handoff=%d far_hit_iskm=%s smooth_orient=%s avoid_tuned=%s%s actor_opt=%s"),
 		Step, N, Preset, Seed, bBench ? 1 : 0, *Label, DurationSec, Types, *SimLodString(), *Far, bEntityPool ? 1 : 0, bScreenSigBudget ? 1 : 0, ActorCap, HydrateM, FarShadowString(),
 		*Health, *Crowd, *TechString(), Overrides.IsEmpty() ? TEXT("-") : *Overrides, bHud ? 1 : 0, ActorCollisionString(), UsesRepHold() ? RepHoldMs : 0, HydrateFixMask,

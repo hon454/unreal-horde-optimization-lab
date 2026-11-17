@@ -3,6 +3,7 @@
 #include "LabCrowdSpawner.h"
 #include "LabSnipe.h" // LabSnipeTraceChannel(v2 W5)
 #include "LabUnitAssets.h"
+#include "LabRepTint.h" // 개발 전용 표현별 색(Test 빌드에서는 빈 헤더)
 #include "HordeOptLab.h"
 #include "Animation/AnimSequence.h"
 #include "Animation/AnimInstance.h"
@@ -267,6 +268,14 @@ void ALabMinionMassActor::BeginPlay()
 		SetActorScale3D(FVector(Scale));
 	}
 	SkelMesh->SetCustomPrimitiveDataFloat(0, 0.f);
+#if !UE_BUILD_TEST
+	if (LabRepTint::IsOn())
+	{
+		// 표현별 색(개발 전용 -LabRepTint, LabRepTint.h): 슬롯의 머티리얼을 UnitTint만 바꾼 MID로 바꾼다. 커스텀 프리미티브 데이터 0번(사망 정도)은 그대로다.
+		// 풀에서 다시 꺼낸 액터는 BeginPlay를 다시 부르지 않지만 MID가 남아 있다(PrepareForPooling은 머티리얼을 건드리지 않는다)
+		LabRepTint::TintComponent(*SkelMesh, LabRepTint::ERep::Actor);
+	}
+#endif
 	// v2 W11(-LabFixedSkelBounds, Docs/Worklog/V2.md "W11"): 애니 갱신마다 피직스 에셋 바디로 바운드를 다시 셈하지 않고 메시 에셋의 고정 바운드를 쓴다
 	// (PhysAnim.cpp FinalizeAnimationUpdate → InvalidateCachedBounds·UpdateBounds, SkinnedMeshComponent.cpp CalcMeshBound). 보이지 않는 컴포넌트는 엔진이 이미 이 길을 쓴다
 	SkelMesh->bComponentUseFixedSkelBounds = FLabConfig::Get().bFixedSkelBounds;

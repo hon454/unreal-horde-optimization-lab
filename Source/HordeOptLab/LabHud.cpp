@@ -67,7 +67,7 @@ namespace
 	/** 독자용 문구(Docs/Worklog/Q5-hud.md "문구 표"). Tag는 강조색 머리, Title은 굵은 첫 줄, Change는 앞 단계에서 바꾼 것 */
 	struct FHudStepText { FString Tag; FString Title; FString Change; };
 
-	/** 빼 보기·하위 실험 인자 하나(LabOverrides 토큰)의 문구. bMinus면 최종 구성에서 기법 하나를 뺀 것이다 */
+	/** 기법별 기여·하위 실험 인자 하나(LabOverrides 토큰)의 문구. bMinus면 최종 구성에서 기법 하나를 끈 조건이다 */
 	bool OverrideText(const FString& Token, const FLabConfig& Config, FString& OutWhat, FString& OutChange, bool& bMinus)
 	{
 		bMinus = true;
@@ -81,7 +81,7 @@ namespace
 		if (Token == TEXT("far_cull=0")) { OutWhat = FString::Printf(TEXT("%d m cull"), Config.FarM); OutChange = TEXT("instances are drawn to the map edge"); return true; }
 		if (Token == TEXT("crowdfx=0")) { OutWhat = TEXT("Niagara crowd"); OutChange = FString::Printf(TEXT("nothing is drawn past %d m"), Config.FarM); return true; }
 		if (Token == TEXT("far_shadow=1")) { OutWhat = TEXT("far shadow cut"); OutChange = TEXT("instances past 80 m cast shadows again"); return true; }
-		// v2 빼 보기(Docs/Worklog/V2.md "W10" 빼 보기 표)
+		// v2 기법별 기여(Docs/Worklog/V2.md "W10"의 기법별 기여 표)
 		if (Token == TEXT("separate=0")) { OutWhat = TEXT("separation"); OutChange = TEXT("minions may overlap"); return true; }
 		if (Token == TEXT("actor_collision=0")) { OutWhat = TEXT("actor capsules"); OutChange = TEXT("near actors have no capsule collision"); return true; }
 		if (Token == TEXT("rep_hold=0")) { OutWhat = TEXT("minimum hold"); OutChange = TEXT("minions may switch back within 2 s"); return true; }
@@ -124,7 +124,7 @@ namespace
 		else if (Id == TEXT("7")) { T.Title = FString::Printf(TEXT("Niagara crowd past %s"), *Far); T.Change = TEXT("+ particles where minions are not drawn"); }
 		else if (Id == TEXT("8")) { T.Title = TEXT("Final: quality by distance"); T.Change = TEXT("+ no instance shadows past 80 m, fixed actor mesh bounds"); } // ADR-0021: 상한과 전환 거리는 단계 2부터 같다
 
-		// 빼 보기·하위 실험(최종 구성 + 인자): 첫 줄을 "Final minus: <뺀 것>"으로 바꾼다
+		// 기법별 기여·하위 실험(최종 구성 + 인자): 첫 줄을 "Final minus: <끈 것>"으로 바꾼다
 		if (Id == TEXT("8") && !Config.Overrides.IsEmpty())
 		{
 			TArray<FString> Tokens;

@@ -300,14 +300,14 @@ void ULabActorSyncProcessor::Execute(FMassEntityManager& EntityManager, FMassExe
 			if (bScreenSig)
 			{
 				// E3 (3c): 중요도 = 화면 크기 = 바운드 반경 ÷ 카메라 거리(Significance Manager의 기본형). 크기와 거리를 한 수로 합친다.
-				// 할당기는 큰 값을 먼저 틱하고 절대값은 쓰지 않는다(AnimationBudgetAllocator.cpp:327-342). 거리 단계·LOD 중요도 방식(E3 (3a)·(3b))은 v2 W10에서 지웠다.
+				// Budget Allocator는 큰 값을 먼저 틱하고 절대값은 쓰지 않는다(AnimationBudgetAllocator.cpp:327-342). 거리 단계·LOD 중요도 방식(E3 (3a)·(3b))은 v2 W10에서 지웠다.
 				if (USkeletalMeshComponentBudgeted* Budgeted = Cast<USkeletalMeshComponentBudgeted>(SkelMesh))
 				{
 					Budgeted->SetComponentSignificance(TypeParams.BoundRadius / FMath::Max(FVector::Dist(Xf.GetLocation(), CameraLocation), 1.f));
 				}
 			}
 			{
-				// 애니 갱신 통계. 할당기는 매 프레임 액터 틱보다 먼저(OnWorldPreActorTick, LevelTick.cpp:1675) 컴포넌트마다 세 가지를 정한다(AnimationBudgetAllocator.cpp:465-500).
+				// 애니 갱신 통계. Budget Allocator는 매 프레임 액터 틱보다 먼저(OnWorldPreActorTick, LevelTick.cpp:1675) 컴포넌트마다 세 가지를 정한다(AnimationBudgetAllocator.cpp:465-500).
 				// 갱신: EnableExternalUpdate(true)라 ShouldTickAnimation()이 참이다(SkeletalMeshComponent.cpp:1918-1923).
 				// 보간: 틱은 켜고 갱신은 끈다. 틱 간격이 2 이상이고 bInterpolate면 EnableExternalInterpolation(true)라 이전 두 포즈 사이를 잇는다(SkeletalMeshComponent.cpp:2909-2911).
 				// 건너뜀: 틱을 끄고 갱신도 끈다. 포즈가 그대로 멈춘다.

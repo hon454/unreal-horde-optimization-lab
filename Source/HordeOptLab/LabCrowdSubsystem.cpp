@@ -31,6 +31,10 @@
 #include "Misc/Parse.h"
 #include "MassRepresentationSubsystem.h"         // M6 수정 B: [Off, Max) 범위의 ISKM 컴포넌트 찾기
 #include "MassSkinnedMeshRepresentationTypes.h"
+#include "LabRepTint.h" // 개발 전용 표현별 색(Test 빌드에서는 빈 헤더)
+#if !UE_BUILD_TEST
+#include "Materials/MaterialInstanceDynamic.h"
+#endif
 
 CSV_DECLARE_CATEGORY_EXTERN(Lab);
 
@@ -44,6 +48,75 @@ namespace
 		Config.GetMutableConfig().AddTrait(*Trait);
 		return Trait;
 	}
+
+#if !UE_BUILD_TEST
+	/** 슬롯마다 UnitTint만 바꾼 MID를 Overrides에 넣는다. UnitTint가 없는 슬롯은 nullptr(엔진이 건너뛴다, MassVisualizationComponent.cpp:250, 1317). 칠한 슬롯이 없으면 비운다 */
+	int32 LabFillTintOverrides(TArray<TObjectPtr<UMaterialInterface>>& Overrides, const TArray<UMaterialInterface*>& Parents, LabRepTint::ERep Rep, UObject& Outer, FString& OutParents)
+	{
+		Overrides.Reset();
+		int32 Tinted = 0;
+		for (int32 Slot = 0; Slot < Parents.Num(); ++Slot)
+		{
+			UMaterialInstanceDynamic* Mid = LabRepTint::MakeMid(Parents[Slot], Rep, &Outer);
+			Overrides.Add(Mid);
+			Tinted += Mid ? 1 : 0;
+			OutParents += FString::Printf(TEXT("%s%s:%d"), OutParents.IsEmpty() ? TEXT("") : TEXT(","), *GetNameSafe(Parents[Slot]), Mid ? 1 : 0);
+		}
+		if (Tinted == 0)
+		{
+			Overrides.Reset();
+		}
+		return Tinted;
+	}
+
+	/**
+	 * 표현별 색(개발 전용 -LabRepTint, LabRepTint.h). 다 만든 설명자마다 MaterialOverrides에 MID를 넣는다. 설명자의 수·범위·그림자는 바꾸지 않는다.
+	 * 설명자는 이미 그림자 켬, 그림자 끔, 그리는 끝 밖 피격으로 나뉘어 있고 엔진은 설명자 해시마다 컴포넌트를 하나 만든다. MID는 해시에 들어가지만
+	 * (MassRepresentationTypes.h:139-145, MassSkinnedMeshRepresentationTypes.h:129-135) 설명자마다 MID가 하나라 컴포넌트 수는 인자를 주지 않은 실행과 같다.
+	 * ISKM 색: [Off, Max) 범위 자홍, 그림자 켬 파랑, 그림자 끔 하늘. 80m에서 그림자를 나누는 것은 단계 8(-LabFarShadow=0)뿐이라 단계 6·7의 ISKM은 35~200m가 모두 파랑이다.
+	 * 단계 2·3의 정지 메시 인스턴스는 칠하지 않는다(머티리얼에 UnitTint가 없다).
+	 */
+	void LabApplyRepTint(UMassMovableVisualizationTrait& Visual, int32 UnitType, UObject& Outer)
+	{
+		using LabRepTint::ERep;
+		const bool bVat = FLabConfig::Get().UsesVat();
+		for (int32 i = 0; i < Visual.StaticMeshInstanceDesc.Meshes.Num(); ++i)
+		{
+			FMassStaticMeshInstanceVisualizationMeshDesc& Desc = Visual.StaticMeshInstanceDesc.Meshes[i];
+			if (!bVat)
+			{
+				UE_LOG(LogLab, Log, TEXT("lab_reptint rep=static type=%d desc=ism%d mesh=%s tinted=0 reason=static_mesh"), UnitType, i, *GetNameSafe(Desc.Mesh.Get()));
+				continue;
+			}
+			TArray<UMaterialInterface*> Parents;
+			for (int32 Slot = 0; Desc.Mesh && Slot < Desc.Mesh->GetStaticMaterials().Num(); ++Slot)
+			{
+				Parents.Add(Desc.Mesh->GetMaterial(Slot));
+			}
+			FString Names;
+			const int32 Tinted = LabFillTintOverrides(Desc.MaterialOverrides, Parents, ERep::Vat, Outer, Names);
+			UE_LOG(LogLab, Log, TEXT("lab_reptint rep=%s type=%d desc=ism%d range=%.1f-%.1f shadow=%d mesh=%s tinted=%d/%d parents=%s"), LabRepTint::Name(ERep::Vat), UnitType, i,
+				Desc.MinLODSignificance, Desc.MaxLODSignificance, Desc.bCastShadows ? 1 : 0, *GetNameSafe(Desc.Mesh.Get()), Tinted, Parents.Num(), *Names);
+		}
+		for (int32 i = 0; i < Visual.SkinnedMeshInstanceDesc.Meshes.Num(); ++i)
+		{
+			FMassSkinnedMeshInstanceVisualizationMeshDesc& Desc = Visual.SkinnedMeshInstanceDesc.Meshes[i];
+			const ERep Rep = Desc.MinLODSignificance >= float(EMassLOD::Off) ? ERep::FarHit : Desc.bCastShadows ? ERep::IskmShadow : ERep::IskmNoShadow;
+			TArray<UMaterialInterface*> Parents;
+			if (Desc.Asset)
+			{
+				for (const FSkeletalMaterial& Material : Desc.Asset->GetMaterials())
+				{
+					Parents.Add(Material.MaterialInterface);
+				}
+			}
+			FString Names;
+			const int32 Tinted = LabFillTintOverrides(Desc.MaterialOverrides, Parents, Rep, Outer, Names);
+			UE_LOG(LogLab, Log, TEXT("lab_reptint rep=%s type=%d desc=iskm%d range=%.1f-%.1f shadow=%d mesh=%s tinted=%d/%d parents=%s"), LabRepTint::Name(Rep), UnitType, i,
+				Desc.MinLODSignificance, Desc.MaxLODSignificance, Desc.bCastShadows ? 1 : 0, *GetNameSafe(Desc.Asset.Get()), Tinted, Parents.Num(), *Names);
+		}
+	}
+#endif
 }
 
 void ULabCrowdSubsystem::Activate(ALabCrowdSpawner* InSpawner, TConstArrayView<UStaticMesh*> MeshesByType, float InHitDuration, float InDeathDuration)
@@ -119,7 +192,7 @@ UMassEntityConfigAsset* ULabCrowdSubsystem::BuildEntityConfig(int32 UnitType, US
 		{
 			Visual->HighResTemplateActor = bBudget ? ALabMinionMassActorBudget::StaticClass() : ALabMinionMassActor::StaticClass();
 		}
-		// 빼 보기 -LabHydrate=0은 가까운 구간도 인스턴스다(ISKM 단계면 아래에서 ISKM으로 바뀐다). 밴드·상한은 그대로 둔다
+		// 하이드레이션을 끈 조건(-LabHydrate=0)은 가까운 구간도 인스턴스다(ISKM 단계면 아래에서 ISKM으로 바뀐다). 밴드·상한은 그대로 둔다
 		Visual->Params.LODRepresentation[EMassLOD::High] = FLabConfig::Get().UsesHydration() ? EMassRepresentationType::HighResSpawnedActor : EMassRepresentationType::StaticMeshInstance;
 		// 전환 팝핑 대책(단계 4부터, FLabConfig::HydrateFixMask). 인스턴스 → 액터: 액터의 포즈가 준비될 때까지 인스턴스를 그린다.
 		// 액터 → 인스턴스: 액터를 한 프레임 더 남긴다(엔진 군중 기본값도 켠다, MassCrowdVisualizationTrait.cpp:22). bKeepLowResActors가 켜져 있어야 동작한다(MassRepresentationProcessor.h:27-30).
@@ -131,7 +204,7 @@ UMassEntityConfigAsset* ULabCrowdSubsystem::BuildEntityConfig(int32 UnitType, US
 	{
 		// 전환 거리와 액터 상한은 FLabConfig가 정한다(단계 2~8 모두 35m·1,000, ADR-0021, -LabHydrateM·-LabActorCap). 80m·200m 밴드와 Medium 상한은 그대로
 		const float HydrateCm = FLabConfig::Get().HydrateCm();
-		// Off 거리: 기본 200m, -LabFarM=으로 옮긴다. Q3 빼 보기 -LabFarCull=0이면 1,000m라 맵 끝까지 그린다(RepOffCm)
+		// Off 거리: 기본 200m, -LabFarM=으로 옮긴다. Q3 200m 밖을 그리지 않는 일을 끈 조건(-LabFarCull=0)이면 1,000m라 맵 끝까지 그린다(RepOffCm)
 		const float Bands[EMassLOD::Max] = { 0.f, HydrateCm, 8000.f, FLabConfig::Get().RepOffCm() };
 		const int32 MaxCounts[EMassLOD::Max] = { FLabConfig::Get().ActorCap, 5000, MAX_int32, MAX_int32 }; // 확정값 LODMaxCount(High는 Q4에서 인자로)
 		for (int32 LOD = 0; LOD < EMassLOD::Max; ++LOD)
@@ -223,6 +296,12 @@ UMassEntityConfigAsset* ULabCrowdSubsystem::BuildEntityConfig(int32 UnitType, US
 	{
 		UE_LOG(LogLab, Log, TEXT("lab_vat_far_shadow type=%d descs=%d far_shadow=0"), UnitType, Visual->StaticMeshInstanceDesc.Meshes.Num());
 	}
+#if !UE_BUILD_TEST
+	if (LabRepTint::IsOn())
+	{
+		LabApplyRepTint(*Visual, UnitType, *EntityConfig); // 표현별 색(개발 전용). 설명자를 다 나눈 뒤에 넣는다(나눌 때 복사하므로)
+	}
+#endif
 
 	UE_LOG(LogLab, Log, TEXT("lab_mass_config type=%d traits=%d mesh=%s actor=%s"), UnitType, EntityConfig->GetConfig().GetTraits().Num(), *GetNameSafe(Mesh), *GetNameSafe(Visual->HighResTemplateActor.Get()));
 	return EntityConfig;
@@ -410,7 +489,7 @@ float ULabCrowdSubsystem::IskmBoundsHalfXY()
 	// 그리는 끝(히스테리시스 10%, MassRepresentationFragments.h:309) + 상자 중심에서 카메라가 벗어날 수 있는 거리 + 여유 10m.
 	// W7까지(간격 0): 상자 중심은 처음 오브 위치이고 카메라는 오브 뒤 15m라 벗어나는 거리가 OrbViewBack이다.
 	// v2 W8(간격 > 0): 상자 중심은 카메라이고 카메라가 간격만큼 벗어나면 옮긴다.
-	// Q3 빼 보기 -LabFarCull=0(끝까지 그리기)이면 그리는 범위가 맵 반경이라 상자도 맵을 덮는다(DrawExtentCm).
+	// Q3 200m 밖을 그리지 않는 일을 끈 조건(-LabFarCull=0, 끝까지 그리기)이면 그리는 범위가 맵 반경이라 상자도 맵을 덮는다(DrawExtentCm).
 	const float StepCm = FLabConfig::Get().BoundsStepM * 100.f;
 	return FLabConfig::Get().DrawExtentCm() * 1.1f + (StepCm > 0.f ? StepCm : FLabScenario::OrbViewBack) + 1000.f;
 }

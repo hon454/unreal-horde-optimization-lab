@@ -117,7 +117,7 @@ struct FLabScenario
 	static constexpr float OrbHeight = 600.f;        // 구체 높이 6m
 	static constexpr float TopDownHeight = 10000.f;  // P2 탑뷰 100m. 가장 가까운 개체도 100m 떨어져 근거리 밴드(초안 30m)에 들지 않는다. 300m는 너무 멀었다
 
-	// 애니메이션 예산 기본값(ms). 할당기를 켜는 모든 실행이 쓰고, -LabBudgetMs= 비교도 이 값과 한다. 4ms 근거: Docs/Decisions/0016-animation-budget-value.md
+	// 애니메이션 예산 기본값(ms). Animation Budget Allocator를 켜는 모든 실행이 쓰고, -LabBudgetMs= 비교도 이 값과 한다. 4ms 근거: Docs/Decisions/0016-animation-budget-value.md
 	static constexpr float BudgetMs = 4.f;
 };
 
@@ -166,7 +166,7 @@ struct FLabIskmParams
 
 /**
  * 실행 인자. 프로세스 시작 시 한 번 읽는다.
- * v2 W10(Docs/Worklog/V2.md "W10"): 사다리 단계 하나(-LabStage=1~8)가 무엇을 켜는지 정하고, 빼 보기와 하위 실험은 스위치 인자로 기법 하나를 바꾼다.
+ * v2 W10(Docs/Worklog/V2.md "W10"): 사다리 단계 하나(-LabStage=1~8)가 무엇을 켜는지 정하고, 기법별 기여 조건(최종 구성에서 기법 하나를 끈 조건)과 하위 실험은 스위치 인자로 기법 하나를 바꾼다.
  * 단계는 한 빌드 안의 실행 모드다(ADR-0004). 단계별 스위치 표는 Docs/Worklog/V2.md "W10"과 Docs/Guides/commands.md에 있다.
  */
 struct FLabConfig
@@ -200,7 +200,7 @@ struct FLabConfig
 	float ShotAtSec = 0.f;     // 0보다 크면 그 시각에 QHD 스크린샷 한 장(Saved/Screenshots/)
 	/**
 	 * 전환 대책(Measurements/M3/shots/transition/README.md)을 하나씩 켜고 끈다(-LabHydrateFixMask=, 비트는 EHydrateFix). 기본은 사다리 단계 4부터 31(전부), 그 앞은 0.
-	 * 빼 보기 -LabHydrateFixMask=0이 전부 끈다. CSV 메타데이터 LabHydrateFixMask, LabTechHydrateFix.
+	 * 전환 대책을 끈 조건(-LabHydrateFixMask=0)이 전부 끈다. CSV 메타데이터 LabHydrateFixMask, LabTechHydrateFix.
 	 */
 	int32 HydrateFixMask = 31;
 	/**
@@ -269,12 +269,12 @@ struct FLabConfig
 	/**
 	 * M6 수정 A(ADR-0020, -LabFarHandoff=0/1, 기본 1, 모든 단계). 맵 밖 무리를 코드가 기록 N개로 굴리고(FLabFarStream), 죽은 개체는 같은 종류에서 오브에 가장 가까운 기록의 자리에서 다시 생긴다.
 	 * 단계 7·8은 기록을 엔티티 구동 입자 배열 뒤에 붙여 그리고 독립 이미터의 스폰율을 0으로 넣는다. 0이면 옛 동작(맵 중심 490~500m 고리의 무작위 자리, 독립 입자)이다.
-	 * 시나리오 규칙이라 빼 보기가 아니다. CSV 메타데이터 LabFarHandoff, lab_config far_handoff=.
+	 * 시나리오 규칙이라 기법별 기여에서 끄는 기법이 아니다. CSV 메타데이터 LabFarHandoff, lab_config far_handoff=.
 	 */
 	bool bFarHandoff = true;
 	/**
 	 * M6 수정 B(-LabFarHitIskm=0/1, 기본 1). 그리는 끝(200m) 밖에서 피격·사망한 개체를 제거될 때까지 그림자 없는 ISKM으로 그린다(ULabFarHitIskmProcessor).
-	 * 엔티티 구동 입자와 ISKM을 함께 쓰는 실행(단계 7·8)에서만 뜻이 있다(UsesFarHitIskm). 시나리오 규칙이라 빼 보기가 아니다. CSV 메타데이터 LabFarHitIskm, 그 밖의 실행은 "-".
+	 * 엔티티 구동 입자와 ISKM을 함께 쓰는 실행(단계 7·8)에서만 뜻이 있다(UsesFarHitIskm). 시나리오 규칙이라 기법별 기여에서 끄는 기법이 아니다. CSV 메타데이터 LabFarHitIskm, 그 밖의 실행은 "-".
 	 */
 	bool bFarHitIskm = true;
 	/**
@@ -301,11 +301,11 @@ struct FLabConfig
 	FLabSeparationParams Separation;
 	/**
 	 * Animation Budget Allocator, 중요도 = 화면 크기(-LabScreenSigBudget=0/1). 액터를 Budget 템플릿으로 만들고 ActorSync가 화면 크기를 중요도로 넣는다.
-	 * 기본: 사다리 단계 4부터 1. 인자를 주면 그 값이 이긴다(빼 보기 -LabScreenSigBudget=0).
+	 * 기본: 사다리 단계 4부터 1. 인자를 주면 그 값이 이긴다(끈 조건 -LabScreenSigBudget=0).
 	 */
 	bool bScreenSigBudget = false;
 	/**
-	 * 애니메이션 예산(ms, -LabBudgetMs=<값>, 기본 FLabScenario::BudgetMs = 4, ADR-0016). 할당기를 켜는 실행에서 a.Budget.BudgetMs에 넣는다(ALabGameMode::ApplyBudgetCVars).
+	 * 애니메이션 예산(ms, -LabBudgetMs=<값>, 기본 FLabScenario::BudgetMs = 4, ADR-0016). Budget Allocator를 켜는 실행에서 a.Budget.BudgetMs에 넣는다(ALabGameMode::ApplyBudgetCVars).
 	 * 0 이하면 예산을 끈다(-LabScreenSigBudget=0과 같다). 기본값과 다르면 LabOverrides에 budget_ms=<값>으로 남는다.
 	 */
 	float BudgetMs = FLabScenario::BudgetMs;
@@ -320,7 +320,7 @@ struct FLabConfig
 	/** 단계 1 액터를 위해 Budget Allocator를 켜는가(스위치 켬이고 예산이 0보다 크다). 0 이하면 Budget Allocator가 꺼져 메시는 URO로 돈다 */
 	bool UsesActorBudget() const { return UsesActorOpt() && BudgetMs > 0.f; }
 	const TCHAR* ActorOptString() const { return !IsActorCrowd() ? TEXT("-") : bActorOpt ? TEXT("1") : TEXT("0"); }
-	/** Q2 Niagara 배경 무리(-LabCrowdFx=0/1). 기본: 사다리 단계 7부터 1. 인자를 주면 그 값이 이긴다(빼 보기 -LabCrowdFx=0) */
+	/** Q2 Niagara 배경 무리(-LabCrowdFx=0/1). 기본: 사다리 단계 7부터 1. 인자를 주면 그 값이 이긴다(끈 조건 -LabCrowdFx=0) */
 	bool bCrowdFx = false;
 	/**
 	 * Q5b(-LabCrowdFxOuter=0/1, 기본 1). 0이면 바깥 독립 이미터(Small·Large)의 스폰율을 0으로 넣어(CrowdFxTotalRate) 입자를 내지 않는다. 에셋은 고치지 않는다.
@@ -344,7 +344,7 @@ struct FLabConfig
 	/** M6 수정 A의 기록을 엔티티 구동 입자로 그리는가(바깥 무리를 끄는 -LabCrowdFxOuter=0이면 그리지 않는다) */
 	bool DrawsFarStream() const { return UsesCrowdFxEntity() && bFarHandoff && bCrowdFxOuter; }
 	/**
-	 * Q3 빼 보기 스위치(Docs/Worklog/V2.md "W10" 빼 보기 표). 단계가 정한 구성에서 기법 하나만 뺀다. 0을 줄 때만 뜻이 있다(끄기 전용).
+	 * Q3 기법별 기여 스위치(Docs/Worklog/V2.md "W10"의 기법별 기여 표). 단계가 정한 구성에서 기법 하나만 끈다. 0을 줄 때만 뜻이 있다(끄기 전용).
 	 * 1이나 다른 값은 단계의 기본 동작 그대로다. 그 단계에 없는 기법을 켜지 않는다.
 	 */
 	bool bNoHydrate = false;     // -LabHydrate=0: 액터 구간도 인스턴스(ISKM 단계는 ISKM)로 그린다. 액터 0
@@ -403,7 +403,7 @@ struct FLabConfig
 	bool IsActorCrowd() const { return Step == 1; }
 	/** 사다리 단계 2부터: 개체가 Mass 엔티티이고 표현 LOD가 액터(가까이)·인스턴스·없음을 고른다 */
 	bool IsMass() const { return Step >= 2; }
-	/** 인스턴스가 움직이는가(단계 4부터: 4·5와 ISKM을 끈 빼 보기는 VAT, 6부터 ISKM). 단계 2·3은 엔진 ISM 프로세서(UMassUpdateISMProcessor)와 정지 메시다. CSV 메타데이터 LabTechInstAnim */
+	/** 인스턴스가 움직이는가(단계 4부터: 4·5와 ISKM을 끈 조건은 VAT, 6부터 ISKM). 단계 2·3은 엔진 ISM 프로세서(UMassUpdateISMProcessor)와 정지 메시다. CSV 메타데이터 LabTechInstAnim */
 	bool UsesVat() const { return Step >= 4; }
 	/** 가까운 개체를 하이드레이션 액터로 그리는가(Mass 단계, -LabHydrate=0이면 거짓) */
 	bool UsesHydration() const { return IsMass() && !bNoHydrate; }
@@ -435,7 +435,7 @@ struct FLabConfig
 	bool UsesActorBlocking() const { return IsActorCrowd() && bSeparate; }
 
 	/**
-	 * 빼 보기 기법의 켬·끔(설정 기준). 메타데이터 키(LabTech*)와 로그 키, 값("1"/"0", 전환 대책 일부만 켜면 "m<마스크>").
+	 * 기법별 기여에서 끄는 기법의 켬·끔(설정 기준). 메타데이터 키(LabTech*)와 로그 키, 값("1"/"0", 전환 대책 일부만 켜면 "m<마스크>").
 	 * 기법끼리 딸린 효과(하이드레이션을 끄면 예산을 받을 액터가 없다, ISKM을 끄면 고정 바운드를 넣을 컴포넌트가 없다)는 여기서 지우지 않고
 	 * 실제 적용값 메타데이터(LabBudget, LabIskmBounds)로 본다.
 	 */
