@@ -178,7 +178,7 @@
 | `s7` | 단계 7 배경 무리 | 표현을 더하는 단계 | `quality` |
 | `s8` | 단계 8 남은 비용 줄이기 = 최종 구성 | 비용을 줄이는 단계 | `earn` |
 
-- 단계 3의 이름이 문서마다 다르다: [v2-plan.md](../v2-plan.md) "직접 짠 로직", 글 구성안 "직접 짠 분리"([V2-w14-plan.md](../Worklog/V2-w14-plan.md) 3.2절), json "Own separation logic".
+- 단계 3의 이름은 "직접 짠 분리"로 쓴다([v2-plan.md](../v2-plan.md), [V2-w14-plan.md](../Worklog/V2-w14-plan.md) 3.2절). 조건 표의 영어 이름은 "Own separation logic"이다.
 
 ### 5.2 구성(`kind` `ablation`, `sub`, `extra`)
 
