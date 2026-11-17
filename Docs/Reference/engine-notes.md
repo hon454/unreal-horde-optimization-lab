@@ -774,3 +774,15 @@ for (const int32 TrackIndex : Temp)
 | 그 경로의 캡슐 레이캐스트 | `Chaos::Raycasts::RayCapsule`다 | `CC/Private/Chaos/Raycasts.cpp:181-396` |
 | 확인하지 못한 것 | `RayCapsule` 안에서 놓치는 분기를 가르지 못했다. 장면 질의만 놓친 32%가 어느 경로(브로드페이즈 레이캐스트, 장면 질의 쪽 내로페이즈)인지도 모른다. 정지 장면 빗나감의 시작점이 실제로 로컬 Y ≈ 0인지는 직접 찍지 않았다. 이동 장면의 정면 평면 실험과 1.7cm 비킨 시작점의 0회로 추론했다. Test 패키지에서는 비율만 견주었다(`Full4` 정지 1.67%, Development 1.39\~2.0%) | — |
 | 이 프로젝트의 대처 | 정지 장면의 캡슐 빗나감은 동등성 검사에서 보고만 한다. 다음 총괄 묶음 전에 저격 캡슐 트레이스(`ALabOrb::TraceSnipeCapsules`)의 시작점이나 끝점을 정면 평면에서 비킨다 | [measurement.md](../Guides/measurement.md) "실패 등급", `Scripts/full-conditions.json` `equivalence.capsule_miss_basis` |
+
+## 54. Mass 표현 설명자의 머티리얼 덮어쓰기와 MID 파라미터(2026-11-17, W14-4 코드 세션)
+
+줄임말: **MR** = `Engine/Plugins/Runtime/MassGameplay/Source/MassRepresentation`, **ENG** = `Engine/Source/Runtime/Engine`.
+
+| 항목 | 확인한 것 | 위치 |
+| --- | --- | --- |
+| 설명자의 머티리얼 덮어쓰기 | ISM 설명자(`FMassStaticMeshInstanceVisualizationMeshDesc`)와 ISKM 설명자(`FMassSkinnedMeshInstanceVisualizationMeshDesc`)에 `MaterialOverrides`가 있다(배열 번호 = 메시 슬롯). 엔진은 설명자마다 컴포넌트를 처음 만들 때 null이 아닌 원소만 `SetMaterial(슬롯, 머티리얼)`로 넣는다. ISM과 ISKM이 같다 | `MR/Public/MassRepresentationTypes.h:87-93`, `MR/Public/MassSkinnedMeshRepresentationTypes.h:61-67`, `MR/Private/MassVisualizationComponent.cpp:248-254`(ISM), `:1315-1321`(ISKM) |
+| 설명자 해시와 머티리얼 | `MaterialOverrides`는 `operator==`와 `GetTypeHash`에 든다. 해시는 null 원소를 건너뛴다. 컴포넌트는 설명자 해시로 찾으므로 MID가 다른 설명자는 컴포넌트가 따로다. 두 해시 모두 `Min/MaxLODSignificance`를 넣지 않는다(`operator==`는 넣는다) | `MR/Public/MassRepresentationTypes.h:121-147`, `MR/Public/MassSkinnedMeshRepresentationTypes.h:103-137`, `MR/Private/MassVisualizationComponent.cpp:232, 1299` |
+| 파라미터가 있는지 묻기 | `UMaterialInterface::GetVectorParameterValue`는 파라미터가 없으면 거짓이다. MID의 `SetVectorParameterValue`는 이름을 확인하지 않고 값 칸을 더한다(없는 이름에 조용하다). 그래서 MID를 만들기 전에 부모에 묻는다(`LabRepTint::MakeMid`) | `ENG/Private/Materials/MaterialInterface.cpp:1215-1224`, `ENG/Private/Materials/MaterialInstanceDynamic.cpp:164-168`, `ENG/Private/Materials/MaterialInstance.cpp:4172-4195` |
+| MID의 바깥과 이름 | `UMaterialInstanceDynamic::Create(부모, Outer)`는 Outer가 없으면 임시 패키지에 만들고 이름을 `MID_<부모 이름>`으로 붙인다 | `ENG/Private/Materials/MaterialInstanceDynamic.cpp:111-121` |
+| 실행 확인(2026-11-17, `LabDev-s8-reptint-N100-P1.log`, `LabDev-s5-reptint10k-N10000-P1.log`) | `UnitTint`가 있는 머티리얼: `M_LabMinionActor`, `M_LabMinionLargeActor`, `M_LabMinionVAT_Bone`(MI `MI_LabMinionVAT_Bone`이 물려받음), `M_LabMinionLargeVAT_Bone`, `M_LabMinionISKM`, `M_LabMinionLargeISKM`. 단계 2·3의 정지 메시 머티리얼에는 없다. MID로 바꾼 색이 화면에 나온다 | 로그 `lab_reptint … tinted=1/1`, `unit_tint=(0.90,0.10,0.10)` |
