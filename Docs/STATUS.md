@@ -67,7 +67,6 @@
 
 | 세션 | 작업 단위 | 모델 | 상태 |
 | --- | --- | --- | --- |
-| humanize-review | 글 00\~07 윤문 검토(`Saved/HumanizeReview/`, 글은 고치지 않는다) | Opus high | 진행 중 |
 | post-factcheck | 글 00\~07 팩트체크(`Docs/Worklog/V2-factcheck.md`, 글은 고치지 않는다) | Opus high | 진행 중 |
 | readme-site-factcheck | README와 사이트 팩트체크(`Docs/Worklog/V2-factcheck-readme-site.md`, 고치지 않는다) | Opus high | 진행 중 |
 
