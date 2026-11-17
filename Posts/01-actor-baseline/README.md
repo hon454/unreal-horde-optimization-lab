@@ -20,7 +20,7 @@
 
 ### CharacterMovement
 
-`UCharacterMovementComponent`는 `ACharacter`에 붙는 이동 컴포넌트다. 틱마다 속도를 셈하고 캡슐을 바닥을 따라 스윕으로 옮긴 뒤 바닥을 다시 찾는다. 한 틱에 흐른 시간이 50ms보다 길면 시간을 나눠 이 계산을 여러 번 한다. 나눈 한 번을 하위 스텝이라 부른다. 단계 1은 하위 스텝 설정을 엔진 기본값으로 둔다. 바꾼 것은 걷는 속도(3m/s), 진행 방향 보기, 컨트롤러 없이 이동하기 셋이다. 액터 틱은 오브 쪽 입력만 준다.
+`UCharacterMovementComponent`는 `ACharacter`에 붙는 이동 컴포넌트다. 틱마다 속도를 셈하고 캡슐을 바닥을 따라 스윕으로 옮긴 뒤 바닥을 다시 찾는다. 한 틱에 흐른 시간이 50ms보다 길면 시간을 나눠 이 계산을 여러 번 한다. 나눈 한 번을 하위 스텝이라 부른다. 단계 1은 하위 스텝 설정을 엔진 기본값으로 두고, 액터 틱이 오브 쪽 입력만 준다.
 
 ### 캡슐끼리 막기
 
@@ -113,7 +113,7 @@ if (bIsCurrentlyEnabled)
 }
 ```
 
-Budget Allocator가 켜져 있으면 메시의 URO를 끄고 갱신을 직접 맡는다. 단계 1의 기본 메시도 URO를 켜지 않는다. 엔진 기본값이 끔이다. 그래서 두 조건의 차이는 Budget Allocator와, 그에 넘길 중요도를 액터 틱마다 셈하는 일이다.
+Budget Allocator가 켜져 있으면 메시의 URO를 끄고 갱신을 직접 맡는다. 단계 1의 기본 메시도 URO를 켜지 않는다. 엔진 기본값이 끔이다. 그래서 두 조건의 차이는 Budget Allocator 하나다.
 
 Budget Allocator는 2천에서만 프레임을 줄였다. 프레임 p95가 41.3ms에서 36.9ms가 됐다. 1천에서는 오히려 0.52ms 길다. 그래서 최대 N은 약 760이다.
 
@@ -126,7 +126,7 @@ const float WorkUnitsExcess = FMath::Max(0.0f, TotalIdealWorkUnits - WorkUnitBud
 const float WorkUnitsToRunInFull = FMath::Clamp(WorkUnitBudget - (WorkUnitsExcess * Parameters.AlwaysTickFalloffAggression), (float)NumComponentsToNotSkip, (float)TotalIdealWorkUnits);
 ```
 
-수요 `TotalIdealWorkUnits`가 예산 `WorkUnitBudget` 안이면 넘친 몫이 0이다. 그러면 매 프레임 갱신하는 수가 수요와 같다. 최대 N이 정해지는 500\~1천에서 Budget Allocator가 잰 애니메이션 시간은 예산 4ms 아래였다. 엔진 식대로라면 모든 메시를 매 프레임 갱신한다. 갱신 수를 직접 세지는 않았다.
+수요 `TotalIdealWorkUnits`가 예산 `WorkUnitBudget` 안이면 넘친 몫이 0이다. 그러면 매 프레임 갱신하는 수가 수요와 같다. 최대 N이 정해지는 500\~1천은 예산에 닿기 전이라, Budget Allocator가 일을 줄이지 않았다.
 
 ## 한 문장으로
 
