@@ -6,7 +6,7 @@
 
 ![호드 총수 1만, 오브 시점 카메라, 이동 장면에서 단계 4와 5, 단계 7과 8의 프레임 p95와 스레드별 시간. 단계 5는 네 값의 차이가 모두 구별되지 않는다. 단계 8은 프레임 p95가 15.2ms에서 14.2ms로, 게임 스레드가 12.7ms에서 11.9ms로 준다](images/steps-5-and-8.svg)
 
-프레임 시간은 게임 스레드, 렌더 스레드, GPU 가운데 가장 느린 쪽이 정한다. 그 쪽을 병목이라 부른다. 구별되지 않는다는 것은 중앙값의 차이가 0.5ms 아래이거나 두 조건의 범위 가운데 큰 쪽을 넘지 않는다는 뜻이다. 지표의 자세한 설명은 [00번 글](../00-goals-and-method/README.md)에 있다.
+프레임 시간은 게임 스레드, 렌더 스레드, GPU 가운데 가장 느린 쪽이 정한다. 그 쪽을 병목이라 부른다. 구별되지 않는다는 것은 중앙값의 차이가 0.5ms 아래이거나 두 조건의 범위 가운데 큰 쪽을 넘지 않는다는 뜻이다. 지표의 자세한 설명은 [목표 사양과 재는 법](../00-goals-and-method/README.md)에 있다.
 
 ![단계 8 화면. 호드 총수 1만, 오브 시점 카메라, 이동 장면이다. 35m 안은 액터, 35\~200m는 ISKM, 200m 밖은 입자로 그린다](../../Docs/figures/steps/step8-final.webp)
 
@@ -28,7 +28,7 @@ Simulation LOD는 카메라와의 거리로 개체의 로직을 얼마나 자주
 
 ## 단계 5: Simulation LOD와 엔티티 풀은 프레임 시간을 줄이지 못했다
 
-[04번 글](../04-quality-by-distance/README.md)의 단계 4는 게임 스레드가 병목이다. 단계 5는 두 기법을 함께 넣었다.
+[거리별 품질](../04-quality-by-distance/README.md)의 단계 4는 게임 스레드가 병목이다. 단계 5는 두 기법을 함께 넣었다.
 
 첫째는 Simulation LOD다. 80m 안의 개체는 지금처럼 매 프레임 돈다. 그 밖에서 200m까지는 자체 로직인 접근과 범위 피해만 0.5초 간격으로 돈다. 200m 밖은 Off 등급이라 엔진 이동·조향에서 빠지고, 자체 프로세서가 1초 간격으로 그 개체를 오브 쪽으로 옮긴다. 둘째는 엔티티 풀이고 아래 절에서 따로 다룬다.
 
@@ -68,7 +68,7 @@ if (FLabConfig::Get().bFixedSkelBounds)
 
 가장 큰 절약은 200m 밖을 그리지 않는 일이다. 이 일을 끄면 200m 밖 엔티티가 맵 끝까지 ISKM으로 그려진다. 그러면 프레임 p95가 3.54ms 길어진다. 게임 스레드가 11.9ms에서 15.1ms로 는다.
 
-분리 프로세서를 엔진 회피로 바꾼 하위 실험은 8.57ms 길다. 이 차이는 [03번 글](../03-separation/README.md)이 다룬다.
+분리 프로세서를 엔진 회피로 바꾼 하위 실험은 8.57ms 길다. 이 차이는 [직접 짠 분리](../03-separation/README.md)가 다룬다.
 
 나머지 열 행은 구별되지 않는다. 그중 둘은 다른 값으로 이점이 보인다. 최소 유지 시간은 바뀐 표현을 2초 동안 붙잡는 규칙이다. 이 규칙을 끄면 왕복 전환(2초 안에 같은 경계를 되넘은 수)이 초당 4.34건 생긴다. 엔티티 풀은 다음 절에서 본다.
 
@@ -102,7 +102,7 @@ InstancedSkinnedMeshComponent->RemoveInstances(RemovedInstancedSkinnedMeshInstan
 
 첫 줄은 엔티티 핸들을 키로 트랙 맵을 찾는다. 맵에 없을 때만 셋째 줄이 트랙을 새로 잡는다. 아래 반복은 이번 프레임에 갱신되지 않은 움직이는 인스턴스를 지운다. 이 반복은 인스턴스 맵만 비우고 트랙 맵은 건드리지 않는다.
 
-트랙을 돌려받는 `DeallocateTrack`은 정지 표현 엔티티를 지우는 경로에서만 불린다. 그래서 움직이는 엔티티를 파괴하면 트랙이 남는다. 같은 문제를 다룬 [Epic 개발자 포럼 글](https://forums.unrealengine.com/t/mass-crowds-using-skinnedmeshinstance-leak-gpu-memory-every-wave-of-spawned-and-killed-entities-permanently-grows-the-animation-track-pool-5-8/2742508)이 있다. 원인 코드는 [06번 글](../06-engine-findings/README.md)에서 자세히 본다.
+트랙을 돌려받는 `DeallocateTrack`은 정지 표현 엔티티를 지우는 경로에서만 불린다. 그래서 움직이는 엔티티를 파괴하면 트랙이 남는다. 같은 문제를 다룬 [Epic 개발자 포럼 글](https://forums.unrealengine.com/t/mass-crowds-using-skinnedmeshinstance-leak-gpu-memory-every-wave-of-spawned-and-killed-entities-permanently-grows-the-animation-track-pool-5-8/2742508)이 있다. 원인 코드는 [엔진을 고치지 않고 피한 문제 다섯](../06-engine-findings/README.md)에서 자세히 본다.
 
 이 레포는 상태 프로세서가 사망이 끝난 엔티티를 풀로 넘기고, 재생성이 풀의 엔티티를 먼저 꺼낸다.
 

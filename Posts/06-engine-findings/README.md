@@ -14,7 +14,7 @@
 
 ### ISKM의 트랙
 
-ISKM(Instanced Skinned Mesh)은 스켈레탈 메시를 인스턴스로 모아 그리고 GPU에서 스키닝하는 컴포넌트다. 단계 6부터 카메라 35\~200m의 개체를 ISKM으로 그린다([04번 글](../04-quality-by-distance/README.md)). 인스턴스가 재생할 애니메이션은 트랙에 담긴다. 트랙은 컴포넌트마다 만드는 트랙 제공자 인스턴스(`UAnimSequenceTransformProviderDataInstance`) 안의 재생 칸이고, 클립 번호와 시작 시각을 가진다. Mass는 엔티티가 컴포넌트에 처음 들어올 때 트랙을 만들어 엔티티 핸들을 키로 트랙 맵에 적고, 렌더러는 트랙 수만큼 뼈대 버퍼를 잡는다.
+ISKM(Instanced Skinned Mesh)은 스켈레탈 메시를 인스턴스로 모아 그리고 GPU에서 스키닝하는 컴포넌트다. 단계 6부터 카메라 35\~200m의 개체를 ISKM으로 그린다([거리별 품질](../04-quality-by-distance/README.md)). 인스턴스가 재생할 애니메이션은 트랙에 담긴다. 트랙은 컴포넌트마다 만드는 트랙 제공자 인스턴스(`UAnimSequenceTransformProviderDataInstance`) 안의 재생 칸이고, 클립 번호와 시작 시각을 가진다. Mass는 엔티티가 컴포넌트에 처음 들어올 때 트랙을 만들어 엔티티 핸들을 키로 트랙 맵에 적고, 렌더러는 트랙 수만큼 뼈대 버퍼를 잡는다.
 
 ### Mass 병렬 처리 큐
 
@@ -26,7 +26,7 @@ Mass는 프로세서(Processor)를 게임 스레드와 작업자 스레드에 �
 
 ## 1. 움직이는 엔티티를 파괴하면 ISKM 트랙이 남는다
 
-단계 5부터 쓰는 엔티티 풀([05번 글](../05-cost-cuts-and-contributions/README.md))을 끄면 ISKM 트랙 수가 계속 는다. 호드 총수 1만, 오브 시점 카메라로 최종 구성을 4분씩 돌렸다. 끝날 무렵 트랙은 풀을 켜면 20,215개, 끄면 30,797개다. 프레임 p95(느린 쪽 5%의 경계, [00번 글](../00-goals-and-method/README.md))는 둘이 구별되지 않는다.
+단계 5부터 쓰는 엔티티 풀([비용을 줄이는 단계와 기법별 기여](../05-cost-cuts-and-contributions/README.md))을 끄면 ISKM 트랙 수가 계속 는다. 호드 총수 1만, 오브 시점 카메라로 최종 구성을 4분씩 돌렸다. 끝날 무렵 트랙은 풀을 켜면 20,215개, 끄면 30,797개다. 프레임 p95(느린 쪽 5%의 경계, [목표 사양과 재는 법](../00-goals-and-method/README.md))는 둘이 구별되지 않는다.
 
 `Engine/Plugins/Runtime/MassGameplay/Source/MassRepresentation/Private/MassVisualizationComponent.cpp`, `UMassVisualizationComponent::EndVisualChanges`
 
