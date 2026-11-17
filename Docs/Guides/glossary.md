@@ -54,7 +54,7 @@
 | 비용을 줄이는 단계 | 단계 2, 3, 5, 8. 성격은 의도다. 단계 5는 잰 값에서 프레임 p95가 +0.31ms였고 구별되지 않았다 | 한 문장([V2-w14-plan.md](../Worklog/V2-w14-plan.md) 3.1절) |
 | 출발점 | 단계 1. 성격은 둘 어디에도 넣지 않는다 | 공개 문서에서도 "출발점"으로 쓴다(사용자 결정, 2026-11-17). 가이드도 "출발점"이다([v2-plan.md](../v2-plan.md) "사다리") |
 | 최종 구성 | 단계 8(`-LabStage=8`, 기본값). 기법별 기여의 기준이다 | 한 문장([code-tour.md](code-tour.md) 머리, [measurement.md](measurement.md)) |
-| 기법별 기여 | 최종 구성에서 기법 하나만 끄고 같은 조건으로 잰 차이. 단계 8과의 차이다. 제목은 "기법별 기여(최종 구성에서 하나씩 껐을 때)", 조건은 "\~를 끈 조건"이다 | 처음 쓰는 곳(README, 글 00)에서 한 문장으로 방법을 적는다. 그 문장에 조건 표의 이름 `ablation`을 적어 잇는다([V2-w14-plan.md](../Worklog/V2-w14-plan.md) 결정 7, 7.2절) |
+| 기법별 기여 | 최종 구성에서 기법 하나만 끄고 같은 조건으로 잰 차이. 단계 8과의 차이다. 제목은 "기법별 기여(최종 구성에서 하나씩 껐을 때)", 조건은 "\~를 끈 조건"이다 | 처음 쓰는 곳(README, 글 00)에서 한 문장으로 방법을 적는다. README와 글 본문에는 조건 표의 이름 `ablation`을 적지 않는다(사용자 결정, 2026-11-17. [V2-w14-plan.md](../Worklog/V2-w14-plan.md) 결정 7의 이 부분을 바꾼다) |
 | 하위 실험 | 기법을 끈 것이 아니라 바꾼 조건(`s8av`, `s1opt`). 조건 표에 이름이 있는 것만 총괄 묶음에서 잰다 | 한 문장([measurement.md](measurement.md) "벤치마크 조건") |
 | 분리 프로세서, 엔진 회피 | 겹침 방지의 구현 둘. 단계 2는 엔진 회피(`-LabAvoid=1`), 단계 3부터 Lab 분리 프로세서(`ULabSeparationProcessor`)다. 겹침 방지는 기능 이름이다 | 한 문장([measurement.md](measurement.md) "확정값" 비켜 가기 행, [code-tour.md](code-tour.md)) |
 | 방향 보간 병렬 사본 | 엔진 `UMassSmoothOrientationProcessor`와 같은 계산을 하는 Lab 프로세서(`ULabSmoothOrientationProcessor`). 단계 3부터 쓴다 | 한 문장([code-tour.md](code-tour.md) 선언 순서 표) |

@@ -14,8 +14,6 @@
 
 ## 배경 지식
 
-Mass의 Fragment, Processor, Chunk는 [글 02](../02-mass-engine-path/README.md)가 설명한다.
-
 ### 엔진 회피
 
 엔진 회피는 MassAI 플러그인의 `UMassMovingAvoidanceProcessor`가 하는 일이다. 개체마다 장애물 격자에서 가까운 이웃을 찾고, 부딪칠 이웃에게서 멀어지는 힘을 조향 힘에 더한다. 힘은 이동 프로세서가 쓰는 속도를 바꿀 뿐이고 위치를 직접 옮기지 않는다. 단계 2는 이 프로세서를 엔진 기본 파라미터로 켰다.
@@ -27,6 +25,8 @@ Mass의 Fragment, Processor, Chunk는 [글 02](../02-mass-engine-path/README.md)
 ### 한 스레드 순회와 청크 병렬 순회
 
 Mass 쿼리의 `ForEachEntityChunk`는 맞는 Chunk를 한 스레드에서 차례로 돈다. `ParallelForEachEntityChunk`는 Chunk마다 작업을 띄워 작업자 스레드에 나눈다. 개체마다 자기 Fragment만 쓰면 둘의 결과는 같다. 엔진 회피와 엔진 방향 보간은 앞쪽을 쓴다.
+
+> Mass의 Fragment, Processor, Chunk는 [글 02](../02-mass-engine-path/README.md)가 설명한다.
 
 ## 문제: 엔진 회피가 작업자 하나에서 프레임의 4분의 3을 쓴다
 
