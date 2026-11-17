@@ -88,6 +88,12 @@ def fmt(x):
     return ("−" if x < 0 else "") + s
 
 
+def mb(x):
+    """Memory in MB to the nearest integer (9252.58 -> 9,253), as the README figures write it."""
+    x = x if isinstance(x, Decimal) else Decimal(repr(x))
+    return f"{int(x.quantize(Decimal(1), rounding=ROUND_HALF_UP)):,}"
+
+
 def fmtd(x):
     """Signed difference in ms with two decimals, minus sign U+2212."""
     x = x if isinstance(x, Decimal) else Decimal(repr(x))
@@ -366,8 +372,8 @@ def steps_3_to_8():
 # gpu_mem_p50    = CSV GPUMem/LocalUsedMB, local video memory in use by the process
 # draw_calls_p50 = CSV RHI/DrawCalls per frame
 # (column meanings and engine lines: Scripts/plot-readme.py RESOURCES, Docs/Guides/measurement.md)
-RESOURCES = [("프로세스 메모리", "작업 집합, MB", "mem_total_mb", BLUE, fmt),
-             ("GPU 메모리", "VRAM 사용량, MB", "gpu_mem_p50", PINK, fmt),
+RESOURCES = [("프로세스 메모리", "작업 집합, MB", "mem_total_mb", BLUE, mb),
+             ("GPU 메모리", "VRAM 사용량, MB", "gpu_mem_p50", PINK, mb),
              ("드로우 콜", "프레임당 개수", "draw_calls_p50", TEAL, count)]
 # Rises after step 3 that are larger than both run ranges, named under the figure. resources() checks them.
 RISES = {"mem_total_mb": [7], "gpu_mem_p50": [6, 7, 8], "draw_calls_p50": [6, 8]}

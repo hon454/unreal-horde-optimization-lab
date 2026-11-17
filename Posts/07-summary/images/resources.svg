@@ -13,9 +13,9 @@
 <line x1="32" y1="198" x2="768" y2="198" stroke="#e5e7eb"/>
 <text x="32.0" y="222.0" font-size="16" text-anchor="start" font-weight="700" fill="#111827">단계 1 액터 기준선</text>
 <rect x="330.0" y="207.0" width="70.0" height="18" rx="3" fill="#2563eb"/>
-<text x="407.0" y="222.0" font-size="16" text-anchor="start" font-weight="700" fill="#2563eb">3,220</text>
+<text x="407.0" y="222.0" font-size="16" text-anchor="start" font-weight="700" fill="#2563eb">3,225</text>
 <rect x="476.0" y="207.0" width="70.0" height="18" rx="3" fill="#db2777"/>
-<text x="553.0" y="222.0" font-size="16" text-anchor="start" font-weight="700" fill="#db2777">9,250</text>
+<text x="553.0" y="222.0" font-size="16" text-anchor="start" font-weight="700" fill="#db2777">9,253</text>
 <rect x="622.0" y="207.0" width="70.0" height="18" rx="3" fill="#0d9488"/>
 <text x="699.0" y="222.0" font-size="16" text-anchor="start" font-weight="700" fill="#0d9488">9,075</text>
 <line x1="32" y1="234" x2="768" y2="234" stroke="#e5e7eb"/>
@@ -23,44 +23,44 @@
 <rect x="330.0" y="243.0" width="37.1" height="18" rx="3" fill="#2563eb"/>
 <text x="374.1" y="258.0" font-size="16" text-anchor="start" font-weight="700" fill="#2563eb">1,710</text>
 <rect x="476.0" y="243.0" width="25.4" height="18" rx="3" fill="#db2777"/>
-<text x="508.4" y="258.0" font-size="16" text-anchor="start" font-weight="700" fill="#db2777">3,360</text>
+<text x="508.4" y="258.0" font-size="16" text-anchor="start" font-weight="700" fill="#db2777">3,356</text>
 <rect x="622.0" y="243.0" width="22.6" height="18" rx="3" fill="#0d9488"/>
 <text x="651.6" y="258.0" font-size="16" text-anchor="start" font-weight="700" fill="#0d9488">2,928</text>
 <line x1="32" y1="270" x2="768" y2="270" stroke="#e5e7eb"/>
 <text x="32.0" y="294.0" font-size="16" text-anchor="start" font-weight="700" fill="#111827">단계 3 직접 짠 분리</text>
 <rect x="330.0" y="279.0" width="37.0" height="18" rx="3" fill="#2563eb"/>
-<text x="374.0" y="294.0" font-size="16" text-anchor="start" font-weight="700" fill="#2563eb">1,710</text>
+<text x="374.0" y="294.0" font-size="16" text-anchor="start" font-weight="700" fill="#2563eb">1,706</text>
 <rect x="476.0" y="279.0" width="24.4" height="18" rx="3" fill="#db2777"/>
-<text x="507.4" y="294.0" font-size="16" text-anchor="start" font-weight="700" fill="#db2777">3,220</text>
+<text x="507.4" y="294.0" font-size="16" text-anchor="start" font-weight="700" fill="#db2777">3,219</text>
 <rect x="622.0" y="279.0" width="14.1" height="18" rx="3" fill="#0d9488"/>
 <text x="643.1" y="294.0" font-size="16" text-anchor="start" font-weight="700" fill="#0d9488">1,825</text>
 <line x1="32" y1="306" x2="768" y2="306" stroke="#e5e7eb"/>
 <text x="32.0" y="330.0" font-size="16" text-anchor="start" font-weight="700" fill="#111827">단계 4 애니메이션 표현</text>
 <rect x="330.0" y="315.0" width="36.5" height="18" rx="3" fill="#2563eb"/>
 <rect x="330.0" y="315.0" width="36.5" height="18" rx="3" fill="url(#rep)"/>
-<text x="373.5" y="330.0" font-size="16" text-anchor="start" font-weight="700" fill="#2563eb">1,680</text>
+<text x="373.5" y="330.0" font-size="16" text-anchor="start" font-weight="700" fill="#2563eb">1,684</text>
 <rect x="476.0" y="315.0" width="23.9" height="18" rx="3" fill="#db2777"/>
 <rect x="476.0" y="315.0" width="23.9" height="18" rx="3" fill="url(#rep)"/>
-<text x="506.9" y="330.0" font-size="16" text-anchor="start" font-weight="700" fill="#db2777">3,160</text>
+<text x="506.9" y="330.0" font-size="16" text-anchor="start" font-weight="700" fill="#db2777">3,161</text>
 <rect x="622.0" y="315.0" width="14.1" height="18" rx="3" fill="#0d9488"/>
 <rect x="622.0" y="315.0" width="14.1" height="18" rx="3" fill="url(#rep)"/>
 <text x="643.1" y="330.0" font-size="16" text-anchor="start" font-weight="700" fill="#0d9488">1,832</text>
 <line x1="32" y1="342" x2="768" y2="342" stroke="#e5e7eb"/>
 <text x="32.0" y="366.0" font-size="16" text-anchor="start" font-weight="700" fill="#111827">단계 5 Simulation LOD + 엔티티 풀</text>
 <rect x="330.0" y="351.0" width="36.6" height="18" rx="3" fill="#2563eb"/>
-<text x="373.6" y="366.0" font-size="16" text-anchor="start" font-weight="700" fill="#2563eb">1,690</text>
+<text x="373.6" y="366.0" font-size="16" text-anchor="start" font-weight="700" fill="#2563eb">1,686</text>
 <rect x="476.0" y="351.0" width="24.0" height="18" rx="3" fill="#db2777"/>
-<text x="507.0" y="366.0" font-size="16" text-anchor="start" font-weight="700" fill="#db2777">3,170</text>
+<text x="507.0" y="366.0" font-size="16" text-anchor="start" font-weight="700" fill="#db2777">3,169</text>
 <rect x="622.0" y="351.0" width="14.1" height="18" rx="3" fill="#0d9488"/>
 <text x="643.1" y="366.0" font-size="16" text-anchor="start" font-weight="700" fill="#0d9488">1,833</text>
 <line x1="32" y1="378" x2="768" y2="378" stroke="#e5e7eb"/>
 <text x="32.0" y="402.0" font-size="16" text-anchor="start" font-weight="700" fill="#111827">단계 6 ISKM</text>
 <rect x="330.0" y="387.0" width="35.6" height="18" rx="3" fill="#2563eb"/>
 <rect x="330.0" y="387.0" width="35.6" height="18" rx="3" fill="url(#rep)"/>
-<text x="372.6" y="402.0" font-size="16" text-anchor="start" font-weight="700" fill="#2563eb">1,640</text>
+<text x="372.6" y="402.0" font-size="16" text-anchor="start" font-weight="700" fill="#2563eb">1,641</text>
 <rect x="476.0" y="387.0" width="25.0" height="18" rx="3" fill="#db2777"/>
 <rect x="476.0" y="387.0" width="25.0" height="18" rx="3" fill="url(#rep)"/>
-<text x="508.0" y="402.0" font-size="16" text-anchor="start" font-weight="700" fill="#db2777">3,300</text>
+<text x="508.0" y="402.0" font-size="16" text-anchor="start" font-weight="700" fill="#db2777">3,304</text>
 <rect x="622.0" y="387.0" width="14.3" height="18" rx="3" fill="#0d9488"/>
 <rect x="622.0" y="387.0" width="14.3" height="18" rx="3" fill="url(#rep)"/>
 <text x="643.3" y="402.0" font-size="16" text-anchor="start" font-weight="700" fill="#0d9488">1,856</text>
@@ -68,19 +68,19 @@
 <text x="32.0" y="438.0" font-size="16" text-anchor="start" font-weight="700" fill="#111827">단계 7 배경 무리</text>
 <rect x="330.0" y="423.0" width="37.9" height="18" rx="3" fill="#2563eb"/>
 <rect x="330.0" y="423.0" width="37.9" height="18" rx="3" fill="url(#rep)"/>
-<text x="374.9" y="438.0" font-size="16" text-anchor="start" font-weight="700" fill="#2563eb">1,750</text>
+<text x="374.9" y="438.0" font-size="16" text-anchor="start" font-weight="700" fill="#2563eb">1,748</text>
 <rect x="476.0" y="423.0" width="25.3" height="18" rx="3" fill="#db2777"/>
 <rect x="476.0" y="423.0" width="25.3" height="18" rx="3" fill="url(#rep)"/>
-<text x="508.3" y="438.0" font-size="16" text-anchor="start" font-weight="700" fill="#db2777">3,350</text>
+<text x="508.3" y="438.0" font-size="16" text-anchor="start" font-weight="700" fill="#db2777">3,346</text>
 <rect x="622.0" y="423.0" width="14.4" height="18" rx="3" fill="#0d9488"/>
 <rect x="622.0" y="423.0" width="14.4" height="18" rx="3" fill="url(#rep)"/>
 <text x="643.4" y="438.0" font-size="16" text-anchor="start" font-weight="700" fill="#0d9488">1,867</text>
 <line x1="32" y1="450" x2="768" y2="450" stroke="#e5e7eb"/>
 <text x="32.0" y="474.0" font-size="16" text-anchor="start" font-weight="700" fill="#111827">단계 8 남은 비용 줄이기</text>
 <rect x="330.0" y="459.0" width="37.7" height="18" rx="3" fill="#2563eb"/>
-<text x="374.7" y="474.0" font-size="16" text-anchor="start" font-weight="700" fill="#2563eb">1,740</text>
+<text x="374.7" y="474.0" font-size="16" text-anchor="start" font-weight="700" fill="#2563eb">1,736</text>
 <rect x="476.0" y="459.0" width="25.4" height="18" rx="3" fill="#db2777"/>
-<text x="508.4" y="474.0" font-size="16" text-anchor="start" font-weight="700" fill="#db2777">3,360</text>
+<text x="508.4" y="474.0" font-size="16" text-anchor="start" font-weight="700" fill="#db2777">3,363</text>
 <rect x="622.0" y="459.0" width="15.1" height="18" rx="3" fill="#0d9488"/>
 <text x="644.1" y="474.0" font-size="16" text-anchor="start" font-weight="700" fill="#0d9488">1,956</text>
 <line x1="32" y1="486" x2="768" y2="486" stroke="#e5e7eb"/>
