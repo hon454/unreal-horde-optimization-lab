@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="630" viewBox="0 0 800 630" font-family="Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Segoe UI, sans-serif" font-size="16" fill="#111827">
+<defs><pattern id="hatch" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="10" height="10" fill="#f9e759"/><line x1="0" y1="0" x2="0" y2="10" stroke="#ffffff" stroke-width="5"/></pattern></defs>
+<rect x="0.5" y="0.5" width="799" height="629" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+<text x="32" y="44" font-size="22" font-weight="700">카메라 거리마다 개체를 그리는 표현(최종 구성)</text>
+<text x="32" y="72" font-size="16" fill="#4b5563">색은 아래 화면에 입힌 표현별 색이다. 눈금 간격은 거리에 비례하지 않는다</text>
+<text x="32.0" y="108.0" font-size="16" text-anchor="start" fill="#4b5563">가까워지는 쪽으로 경계를 넘을 때의 여유(엔진 기본 10%)</text>
+<line x1="152" y1="144" x2="152" y2="158" stroke="#4b5563" stroke-width="1.5"/>
+<text x="152.0" y="138.0" font-size="16" text-anchor="middle" font-weight="700" fill="#4b5563">여유 없음</text>
+<line x1="282" y1="144" x2="282" y2="158" stroke="#4b5563" stroke-width="1.5"/>
+<text x="282.0" y="138.0" font-size="16" text-anchor="middle" font-weight="700" fill="#4b5563">75.5m에서</text>
+<line x1="432" y1="144" x2="432" y2="158" stroke="#4b5563" stroke-width="1.5"/>
+<text x="432.0" y="138.0" font-size="16" text-anchor="middle" font-weight="700" fill="#4b5563">188m에서</text>
+<rect x="32" y="158" width="120" height="40" fill="#f35959" stroke="#ffffff" stroke-width="2"/>
+<text x="92.0" y="184.0" font-size="16" text-anchor="middle" font-weight="700" fill="#111827">액터</text>
+<rect x="152" y="158" width="130" height="40" fill="#5995f3" stroke="#ffffff" stroke-width="2"/>
+<text x="217.0" y="184.0" font-size="16" text-anchor="middle" font-weight="700" fill="#111827">ISKM</text>
+<rect x="282" y="158" width="150" height="40" fill="#7ce7f3" stroke="#ffffff" stroke-width="2"/>
+<text x="357.0" y="184.0" font-size="16" text-anchor="middle" font-weight="700" fill="#111827">ISKM</text>
+<rect x="432" y="158" width="170" height="40" fill="#f9e759" stroke="#ffffff" stroke-width="2"/>
+<text x="517.0" y="184.0" font-size="16" text-anchor="middle" font-weight="700" fill="#111827">입자</text>
+<rect x="602" y="158" width="166" height="40" fill="url(#hatch)" stroke="#ffffff" stroke-width="2"/>
+<text x="685.0" y="184.0" font-size="16" text-anchor="middle" font-weight="700" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">입자</text><text x="685.0" y="184.0" font-size="16" text-anchor="middle" font-weight="700" fill="#111827">입자</text>
+<line x1="32" y1="198" x2="32" y2="206" stroke="#4b5563"/>
+<text x="32.0" y="226.0" font-size="16" text-anchor="start" fill="#4b5563">0</text>
+<line x1="152" y1="198" x2="152" y2="206" stroke="#4b5563"/>
+<text x="152.0" y="226.0" font-size="16" text-anchor="middle" fill="#4b5563">35m</text>
+<line x1="282" y1="198" x2="282" y2="206" stroke="#4b5563"/>
+<text x="282.0" y="226.0" font-size="16" text-anchor="middle" fill="#4b5563">80m</text>
+<line x1="432" y1="198" x2="432" y2="206" stroke="#4b5563"/>
+<text x="432.0" y="226.0" font-size="16" text-anchor="middle" fill="#4b5563">200m</text>
+<line x1="602" y1="198" x2="602" y2="206" stroke="#4b5563"/>
+<text x="602.0" y="226.0" font-size="16" text-anchor="middle" fill="#4b5563">맵 끝</text>
+<line x1="768" y1="198" x2="768" y2="206" stroke="#4b5563"/>
+<text x="768.0" y="226.0" font-size="16" text-anchor="end" fill="#4b5563">1,000m</text>
+<text x="32.0" y="250.0" font-size="16" text-anchor="start" fill="#4b5563">0~200m는 카메라 거리, 맵 끝(맵 중심 500m)부터는 맵 중심 거리다</text>
+<rect x="32" y="275" width="22" height="18" rx="3" fill="#f35959" stroke="#e5e7eb"/>
+<text x="66.0" y="290.0" font-size="16" text-anchor="start" font-weight="700" fill="#111827">0~35m</text>
+<text x="220.0" y="290.0" font-size="16" text-anchor="start" fill="#111827">하이드레이션 액터. 상한 1,000</text>
+<text x="220.0" y="312.0" font-size="16" text-anchor="start" fill="#4b5563">단계 2부터. 액터 애니메이션 예산과 최소 유지 시간 2초는 단계 4부터</text>
+<rect x="32" y="331" width="22" height="18" rx="3" fill="#5995f3" stroke="#e5e7eb"/>
+<text x="66.0" y="346.0" font-size="16" text-anchor="start" font-weight="700" fill="#111827">35~80m</text>
+<text x="220.0" y="346.0" font-size="16" text-anchor="start" fill="#111827">ISKM, 그림자를 그린다</text>
+<text x="220.0" y="368.0" font-size="16" text-anchor="start" fill="#4b5563">단계 6부터. 단계 4·5는 VAT 인스턴스, 단계 2·3은 정지 메시</text>
+<rect x="32" y="387" width="22" height="18" rx="3" fill="#7ce7f3" stroke="#e5e7eb"/>
+<text x="66.0" y="402.0" font-size="16" text-anchor="start" font-weight="700" fill="#111827">80~200m</text>
+<text x="220.0" y="402.0" font-size="16" text-anchor="start" fill="#111827">ISKM, 그림자를 끈다</text>
+<text x="220.0" y="424.0" font-size="16" text-anchor="start" fill="#4b5563">단계 6부터 ISKM. 그림자를 끈 것은 단계 8(글 05)</text>
+<rect x="32" y="443" width="22" height="18" rx="3" fill="#f9e759" stroke="#e5e7eb"/>
+<text x="66.0" y="458.0" font-size="16" text-anchor="start" font-weight="700" fill="#111827">200m 밖, 맵 안</text>
+<text x="220.0" y="458.0" font-size="16" text-anchor="start" fill="#111827">입자가 그려지지 않는 엔티티의 자리를 걷는다</text>
+<text x="220.0" y="480.0" font-size="16" text-anchor="start" fill="#4b5563">단계 7부터. 단계 2~6은 그리지 않는다</text>
+<rect x="32" y="499" width="22" height="18" rx="3" fill="url(#hatch)" stroke="#e5e7eb"/>
+<text x="66.0" y="514.0" font-size="16" text-anchor="start" font-weight="700" fill="#111827">맵 밖</text>
+<text x="220.0" y="514.0" font-size="16" text-anchor="start" fill="#111827">입자가 맵 밖 무리의 기록을 그린다</text>
+<text x="220.0" y="536.0" font-size="16" text-anchor="start" fill="#4b5563">단계 7부터. 맵 중심 500~1,000m</text>
+<line x1="32" y1="552" x2="768" y2="552" stroke="#e5e7eb"/>
+<text x="32.0" y="578.0" font-size="16" text-anchor="start" fill="#4b5563">액터 경계(35m)에는 엔진의 여유가 없다. 그래서 바뀐 개체를 2초 동안 붙잡는다.</text>
+<text x="32.0" y="600.0" font-size="16" text-anchor="start" fill="#4b5563">엔진이 그리는 것은 200m 안의 엔티티다. 그 밖은 입자가 그린다.</text>
+</svg>

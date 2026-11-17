@@ -1,0 +1,119 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="943" viewBox="0 0 800 943" font-family="Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Segoe UI, sans-serif" font-size="16" fill="#111827">
+<rect x="0.5" y="0.5" width="799" height="942" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+<text x="32" y="44" font-size="22" font-weight="700">표현을 더한 단계 4, 6, 7의 프레임 시간과 스레드 시간</text>
+<text x="32" y="72" font-size="16" fill="#4b5563">호드 총수 1만, 오브 시점 카메라, 이동 장면, 세 번 잰 중앙값(ms)</text>
+<text x="32" y="94" font-size="16" fill="#4b5563">프레임 시간은 p95, 스레드 시간은 p50이다. 노란 칸이 표현을 더하는 단계다</text>
+<rect x="246.0" y="156.0" width="124" height="675.0" fill="#fef3c7"/>
+<rect x="510.0" y="156.0" width="124" height="675.0" fill="#fef3c7"/>
+<rect x="642.0" y="156.0" width="124" height="675.0" fill="#fef3c7"/>
+<text x="32.0" y="142.0" font-size="16" text-anchor="start" font-weight="700" fill="#111827">프레임 p95(점은 중앙값, 세로선은 세 실행의 범위)</text>
+<line x1="96" y1="352.0" x2="768" y2="352.0" stroke="#eef0f3"/>
+<text x="86.0" y="357.0" font-size="16" text-anchor="end" fill="#4b5563">14</text>
+<line x1="96" y1="290.0" x2="768" y2="290.0" stroke="#eef0f3"/>
+<text x="86.0" y="295.0" font-size="16" text-anchor="end" fill="#4b5563">15</text>
+<line x1="96" y1="228.0" x2="768" y2="228.0" stroke="#eef0f3"/>
+<text x="86.0" y="233.0" font-size="16" text-anchor="end" fill="#4b5563">16</text>
+<line x1="96" y1="166.0" x2="768" y2="166.0" stroke="#eef0f3"/>
+<text x="86.0" y="171.0" font-size="16" text-anchor="end" fill="#4b5563">17</text>
+<line x1="96" y1="184.6" x2="768" y2="184.6" stroke="#b45309" stroke-width="2" stroke-dasharray="6 4"/>
+<text x="764.0" y="177.6" font-size="16" text-anchor="end" font-weight="700" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">16.7ms(60fps)</text><text x="764.0" y="177.6" font-size="16" text-anchor="end" font-weight="700" fill="#b45309">16.7ms(60fps)</text>
+<line x1="176" y1="353.6" x2="176" y2="335.6" stroke="#111827" stroke-width="2"/>
+<line x1="170" y1="353.6" x2="182" y2="353.6" stroke="#111827" stroke-width="2"/>
+<line x1="170" y1="335.6" x2="182" y2="335.6" stroke="#111827" stroke-width="2"/>
+<line x1="308" y1="346.7" x2="308" y2="329.1" stroke="#111827" stroke-width="2"/>
+<line x1="302" y1="346.7" x2="314" y2="346.7" stroke="#111827" stroke-width="2"/>
+<line x1="302" y1="329.1" x2="314" y2="329.1" stroke="#111827" stroke-width="2"/>
+<line x1="440" y1="320.2" x2="440" y2="308.6" stroke="#111827" stroke-width="2"/>
+<line x1="434" y1="320.2" x2="446" y2="320.2" stroke="#111827" stroke-width="2"/>
+<line x1="434" y1="308.6" x2="446" y2="308.6" stroke="#111827" stroke-width="2"/>
+<line x1="572" y1="308.9" x2="572" y2="307.7" stroke="#111827" stroke-width="2"/>
+<line x1="566" y1="308.9" x2="578" y2="308.9" stroke="#111827" stroke-width="2"/>
+<line x1="566" y1="307.7" x2="578" y2="307.7" stroke="#111827" stroke-width="2"/>
+<line x1="704" y1="284.4" x2="704" y2="263.6" stroke="#111827" stroke-width="2"/>
+<line x1="698" y1="284.4" x2="710" y2="284.4" stroke="#111827" stroke-width="2"/>
+<line x1="698" y1="263.6" x2="710" y2="263.6" stroke="#111827" stroke-width="2"/>
+<path d="M176.0,342.8 L308.0,339.3 L440.0,320.0 L572.0,308.1 L704.0,279.6" fill="none" stroke="#1f2937" stroke-width="2.5"/>
+<circle cx="176.0" cy="342.8" r="5.5" fill="#1f2937"/>
+<text x="188.0" y="364.8" font-size="16" text-anchor="start" font-weight="700" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">14.1</text><text x="188.0" y="364.8" font-size="16" text-anchor="start" font-weight="700" fill="#111827">14.1</text>
+<circle cx="308.0" cy="339.3" r="5.5" fill="#1f2937"/>
+<text x="320.0" y="361.3" font-size="16" text-anchor="start" font-weight="700" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">14.2</text><text x="320.0" y="361.3" font-size="16" text-anchor="start" font-weight="700" fill="#111827">14.2</text>
+<circle cx="440.0" cy="320.0" r="5.5" fill="#1f2937"/>
+<text x="452.0" y="342.0" font-size="16" text-anchor="start" font-weight="700" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">14.5</text><text x="452.0" y="342.0" font-size="16" text-anchor="start" font-weight="700" fill="#111827">14.5</text>
+<circle cx="572.0" cy="308.1" r="5.5" fill="#1f2937"/>
+<text x="584.0" y="330.1" font-size="16" text-anchor="start" font-weight="700" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">14.7</text><text x="584.0" y="330.1" font-size="16" text-anchor="start" font-weight="700" fill="#111827">14.7</text>
+<circle cx="704.0" cy="279.6" r="5.5" fill="#1f2937"/>
+<text x="716.0" y="301.6" font-size="16" text-anchor="start" font-weight="700" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">15.2</text><text x="716.0" y="301.6" font-size="16" text-anchor="start" font-weight="700" fill="#111827">15.2</text>
+<text x="242.0" y="375.6" font-size="16" text-anchor="middle" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">+0.06</text><text x="242.0" y="375.6" font-size="16" text-anchor="middle" fill="#9ca3af">+0.06</text>
+<text x="374.0" y="375.6" font-size="16" text-anchor="middle" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">+0.31</text><text x="374.0" y="375.6" font-size="16" text-anchor="middle" fill="#9ca3af">+0.31</text>
+<text x="506.0" y="375.6" font-size="16" text-anchor="middle" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">+0.19</text><text x="506.0" y="375.6" font-size="16" text-anchor="middle" fill="#9ca3af">+0.19</text>
+<text x="638.0" y="375.6" font-size="16" text-anchor="middle" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">+0.46</text><text x="638.0" y="375.6" font-size="16" text-anchor="middle" fill="#9ca3af">+0.46</text>
+<path d="M176,223.6 L176,215.6 L704,215.6 L704,223.6" fill="none" stroke="#dc2626" stroke-width="2"/>
+<text x="440.0" y="207.6" font-size="16" text-anchor="middle" font-weight="700" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">단계 3 → 7: +1.02ms, 구별된다</text><text x="440.0" y="207.6" font-size="16" text-anchor="middle" font-weight="700" fill="#dc2626">단계 3 → 7: +1.02ms, 구별된다</text>
+<text x="96.0" y="405.0" font-size="16" text-anchor="start" fill="#4b5563">회색 숫자: 앞 단계와의 차이. 모두 0.5ms 아래라 구별되지 않는다</text>
+<text x="176.0" y="435.0" font-size="16" text-anchor="middle" font-weight="700" fill="#111827">단계 3</text>
+<text x="176.0" y="455.0" font-size="16" text-anchor="middle" fill="#4b5563">직접 짠 분리</text>
+<text x="308.0" y="435.0" font-size="16" text-anchor="middle" font-weight="700" fill="#111827">단계 4</text>
+<text x="308.0" y="455.0" font-size="16" text-anchor="middle" fill="#4b5563">VAT 인스턴스</text>
+<text x="440.0" y="435.0" font-size="16" text-anchor="middle" font-weight="700" fill="#111827">단계 5</text>
+<text x="440.0" y="455.0" font-size="16" text-anchor="middle" fill="#4b5563">Simulation LOD</text>
+<text x="572.0" y="435.0" font-size="16" text-anchor="middle" font-weight="700" fill="#111827">단계 6</text>
+<text x="572.0" y="455.0" font-size="16" text-anchor="middle" fill="#4b5563">ISKM</text>
+<text x="704.0" y="435.0" font-size="16" text-anchor="middle" font-weight="700" fill="#111827">단계 7</text>
+<text x="704.0" y="455.0" font-size="16" text-anchor="middle" fill="#4b5563">배경 무리</text>
+<text x="32.0" y="501.0" font-size="16" text-anchor="start" font-weight="700" fill="#111827">스레드 시간(중앙값)</text>
+<line x1="210" y1="496.0" x2="232" y2="496.0" stroke="#1f2937" stroke-width="3"/>
+<text x="240.0" y="501.0" font-size="16" text-anchor="start" fill="#4b5563">게임 스레드</text>
+<line x1="358" y1="496.0" x2="380" y2="496.0" stroke="#0d9488" stroke-width="3"/>
+<text x="388.0" y="501.0" font-size="16" text-anchor="start" fill="#4b5563">렌더 스레드</text>
+<line x1="506" y1="496.0" x2="528" y2="496.0" stroke="#9333ea" stroke-width="3"/>
+<text x="536.0" y="501.0" font-size="16" text-anchor="start" fill="#4b5563">GPU</text>
+<line x1="96" y1="821.0" x2="768" y2="821.0" stroke="#eef0f3"/>
+<text x="86.0" y="826.0" font-size="16" text-anchor="end" fill="#4b5563">0</text>
+<line x1="96" y1="741.0" x2="768" y2="741.0" stroke="#eef0f3"/>
+<text x="86.0" y="746.0" font-size="16" text-anchor="end" fill="#4b5563">4</text>
+<line x1="96" y1="661.0" x2="768" y2="661.0" stroke="#eef0f3"/>
+<text x="86.0" y="666.0" font-size="16" text-anchor="end" fill="#4b5563">8</text>
+<line x1="96" y1="581.0" x2="768" y2="581.0" stroke="#eef0f3"/>
+<text x="86.0" y="586.0" font-size="16" text-anchor="end" fill="#4b5563">12</text>
+<path d="M176.0,593.9 L308.0,584.5 L440.0,579.7 L572.0,574.8 L704.0,567.3" fill="none" stroke="#1f2937" stroke-width="2.5"/>
+<circle cx="176.0" cy="593.9" r="4" fill="#1f2937"/>
+<text x="176.0" y="581.9" font-size="16" text-anchor="middle" font-weight="700" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">11.4</text><text x="176.0" y="581.9" font-size="16" text-anchor="middle" font-weight="700" fill="#1f2937">11.4</text>
+<circle cx="308.0" cy="584.5" r="4" fill="#1f2937"/>
+<text x="308.0" y="572.5" font-size="16" text-anchor="middle" font-weight="700" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">11.8</text><text x="308.0" y="572.5" font-size="16" text-anchor="middle" font-weight="700" fill="#1f2937">11.8</text>
+<circle cx="440.0" cy="579.7" r="4" fill="#1f2937"/>
+<text x="440.0" y="567.7" font-size="16" text-anchor="middle" font-weight="700" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">12.1</text><text x="440.0" y="567.7" font-size="16" text-anchor="middle" font-weight="700" fill="#1f2937">12.1</text>
+<circle cx="572.0" cy="574.8" r="4" fill="#1f2937"/>
+<text x="572.0" y="562.8" font-size="16" text-anchor="middle" font-weight="700" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">12.3</text><text x="572.0" y="562.8" font-size="16" text-anchor="middle" font-weight="700" fill="#1f2937">12.3</text>
+<circle cx="704.0" cy="567.3" r="4" fill="#1f2937"/>
+<text x="704.0" y="555.3" font-size="16" text-anchor="middle" font-weight="700" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">12.7</text><text x="704.0" y="555.3" font-size="16" text-anchor="middle" font-weight="700" fill="#1f2937">12.7</text>
+<path d="M176.0,679.6 L308.0,678.2 L440.0,677.9 L572.0,709.0 L704.0,688.0" fill="none" stroke="#9333ea" stroke-width="2.5"/>
+<circle cx="176.0" cy="679.6" r="4" fill="#9333ea"/>
+<text x="176.0" y="667.6" font-size="16" text-anchor="middle" font-weight="700" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">7.07</text><text x="176.0" y="667.6" font-size="16" text-anchor="middle" font-weight="700" fill="#9333ea">7.07</text>
+<circle cx="308.0" cy="678.2" r="4" fill="#9333ea"/>
+<text x="308.0" y="666.2" font-size="16" text-anchor="middle" font-weight="700" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">7.14</text><text x="308.0" y="666.2" font-size="16" text-anchor="middle" font-weight="700" fill="#9333ea">7.14</text>
+<circle cx="440.0" cy="677.9" r="4" fill="#9333ea"/>
+<text x="440.0" y="665.9" font-size="16" text-anchor="middle" font-weight="700" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">7.15</text><text x="440.0" y="665.9" font-size="16" text-anchor="middle" font-weight="700" fill="#9333ea">7.15</text>
+<circle cx="572.0" cy="709.0" r="4" fill="#9333ea"/>
+<text x="572.0" y="697.0" font-size="16" text-anchor="middle" font-weight="700" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">5.60</text><text x="572.0" y="697.0" font-size="16" text-anchor="middle" font-weight="700" fill="#9333ea">5.60</text>
+<circle cx="704.0" cy="688.0" r="4" fill="#9333ea"/>
+<text x="704.0" y="676.0" font-size="16" text-anchor="middle" font-weight="700" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">6.65</text><text x="704.0" y="676.0" font-size="16" text-anchor="middle" font-weight="700" fill="#9333ea">6.65</text>
+<path d="M176.0,707.6 L308.0,708.5 L440.0,713.5 L572.0,743.7 L704.0,741.4" fill="none" stroke="#0d9488" stroke-width="2.5"/>
+<circle cx="176.0" cy="707.6" r="4" fill="#0d9488"/>
+<text x="176.0" y="731.6" font-size="16" text-anchor="middle" font-weight="700" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">5.67</text><text x="176.0" y="731.6" font-size="16" text-anchor="middle" font-weight="700" fill="#0d9488">5.67</text>
+<circle cx="308.0" cy="708.5" r="4" fill="#0d9488"/>
+<text x="308.0" y="732.5" font-size="16" text-anchor="middle" font-weight="700" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">5.63</text><text x="308.0" y="732.5" font-size="16" text-anchor="middle" font-weight="700" fill="#0d9488">5.63</text>
+<circle cx="440.0" cy="713.5" r="4" fill="#0d9488"/>
+<text x="440.0" y="737.5" font-size="16" text-anchor="middle" font-weight="700" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">5.38</text><text x="440.0" y="737.5" font-size="16" text-anchor="middle" font-weight="700" fill="#0d9488">5.38</text>
+<circle cx="572.0" cy="743.7" r="4" fill="#0d9488"/>
+<text x="572.0" y="767.7" font-size="16" text-anchor="middle" font-weight="700" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">3.87</text><text x="572.0" y="767.7" font-size="16" text-anchor="middle" font-weight="700" fill="#0d9488">3.87</text>
+<circle cx="704.0" cy="741.4" r="4" fill="#0d9488"/>
+<text x="704.0" y="765.4" font-size="16" text-anchor="middle" font-weight="700" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">3.98</text><text x="704.0" y="765.4" font-size="16" text-anchor="middle" font-weight="700" fill="#0d9488">3.98</text>
+<text x="506.0" y="663.5" font-size="16" text-anchor="middle" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">ISKM</text><text x="506.0" y="663.5" font-size="16" text-anchor="middle" fill="#9333ea">ISKM</text>
+<text x="506.0" y="681.5" font-size="16" text-anchor="middle" font-weight="700" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">GPU −1.56</text><text x="506.0" y="681.5" font-size="16" text-anchor="middle" font-weight="700" fill="#9333ea">GPU −1.56</text>
+<text x="638.0" y="668.5" font-size="16" text-anchor="middle" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">배경 무리</text><text x="638.0" y="668.5" font-size="16" text-anchor="middle" fill="#9333ea">배경 무리</text>
+<text x="638.0" y="686.5" font-size="16" text-anchor="middle" font-weight="700" fill="#ffffff" stroke="#ffffff" stroke-width="5" stroke-linejoin="round">GPU +1.05</text><text x="638.0" y="686.5" font-size="16" text-anchor="middle" font-weight="700" fill="#9333ea">GPU +1.05</text>
+<line x1="32" y1="847.0" x2="768" y2="847.0" stroke="#e5e7eb"/>
+<text x="32.0" y="869.0" font-size="16" text-anchor="start" fill="#4b5563">프레임 시간은 게임 스레드, 렌더 스레드, GPU 가운데 가장 느린 쪽이 정한다.</text>
+<text x="32.0" y="891.0" font-size="16" text-anchor="start" fill="#4b5563">다섯 단계 모두 게임 스레드가 가장 느리다. GPU의 움직임은 프레임에 거의 보이지 않는다.</text>
+<text x="32.0" y="913.0" font-size="16" text-anchor="start" fill="#4b5563">단계 5는 비용을 줄이는 단계다(Simulation LOD와 엔티티 풀, 글 05).</text>
+</svg>
