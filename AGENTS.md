@@ -31,7 +31,7 @@
 | 영상·문서·샘플·에셋·포럼 스레드 | [references.md](Docs/Reference/references.md) |
 | 강연 두 편(Shabel, 윤준기)의 요약과 타임스탬프 | [talk-notes.md](Docs/Reference/talk-notes.md) |
 | 측정 PC 사양과 엔진 버전 | [pc-specs.md](Docs/Reference/pc-specs.md) |
-| 끝낸 작업의 경위와 실패한 실행 | `Docs/Worklog/M<N>.md`, `Q<N>.md`, 글과 README는 `Posts.md`, 에셋 복구는 `Setup.md`, `v2` 브랜치의 작업은 `V2.md`, `v2` 리뷰는 `V2-review.md`와 `V2-full4-review.md`(목록은 [Worklog/README.md](Docs/Worklog/README.md)). 세션 시작 때 읽지 않고 검색만 한다 |
+| 끝낸 작업의 경위와 실패한 실행 | `Docs/Worklog/M<N>.md`, `Q<N>.md`, 글과 README는 `Posts.md`, 에셋 복구는 `Setup.md`, `v2` 브랜치의 작업은 `V2.md`, `v2` 리뷰는 `V2-review.md`와 `V2-full4-review.md`, W14 계획안은 `V2-w14-plan.md`(목록은 [Worklog/README.md](Docs/Worklog/README.md)). 세션 시작 때 읽지 않고 검색만 한다 |
 | 코디네이터가 묻지 않고 내린 결정과 사용자 판단이 필요한 항목 | [autonomous-decisions.md](Docs/Worklog/autonomous-decisions.md) |
 | 총괄 묶음의 조건 표와 스크립트 목록 | `Scripts/full-conditions.json`, [Scripts/README.md](Scripts/README.md) |
 | 글 본문과 이미지 | `Posts/NN-이름/README.md`, `Posts/NN-이름/images/` |
