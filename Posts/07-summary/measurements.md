@@ -64,11 +64,9 @@
 | 목표 판정의 0.6ms, 실행 하나가 중앙값보다 길게 나올 수 있는 폭 | 0.6 | 판정식 | [ADR-0019](../../Docs/Decisions/0019-step8-actor-cap-distance-and-fixed-skel-bounds.md) 결정 3, measurement.md "지표" 목표 판정. 글 00과 같은 문장이다 | |
 | 판정값 14.8ms | 14.831 | 계산 | 14.231 + 0.6 ≤ 16.7 | |
 | 최종 구성이 60fps를 지키는 최대 N 약 1만 2천 | 12,026 | `V0-s8`, 1만과 1만 2,500 | `full-n-at-60fps.csv` "8 Trim remaining cost" `n_p95`. `frame_p95_ms` 14.231과 17.217 사이를 로그 보간(`Scripts/plot.py` `n_at_budget`). 아래 "여덟 단계의 최대 N" | 1만 2,500: 16.978 / 17.217 / 17.607 |
-| 호드 2만은 겹침 방지가 제 기능을 하지 못해 뺐다 | 겹친 쌍 2,584.3, 상한 1,891.7 | `V0-s8`, 2만 | `equivalence.csv` `overlap_xn_ok` = `UNMET`, 최대 N 표 `excluded`. 아래 "여덟 단계의 최대 N" 첫 항목, [V2.md](../../Docs/Worklog/V2.md) "2026-11-17 총괄 묶음 Full4"의 `UNMET` 6건 | |
 | 정지 장면 11.5ms | 11.456 | `V1-s8` | `frame_p95_ms`. 워밍업 15초 + 측정 180초 | 11.284 / 11.456 / 11.727 |
 | 오브 100m 위의 탑뷰 6.23ms | 6.225 | `V0-s8`, `P2` | `frame_p95_ms`. 100m는 `LabConfig.h:118` `FLabScenario::TopDownHeight`(de0e21b) | 6.256 / 6.141 / 6.225 |
 | 워밍업이나 카메라가 다르다 | 15초 대 60초, `P2` 대 `P1` | 설정 | 조건 표 `scenario.speeds`, `groups.topview`. `LabGameMode.h:18-20`(de0e21b) | |
-| 2초마다, 약 1.7% 빗나간다 | 2초, 63 ÷ 3,780 = 1.667% | 정지 14조건 | [글 06의 측정 기록](../06-engine-findings/measurements.md) "캡슐 빗나감" | |
 | 약 10%의 프레임 | 371 ÷ 3,814 = 9.7% | `Full4trace-V0-s8` | [글 03의 측정 기록](../03-separation/measurements.md) "표현과 밀어내기의 순서" | 트레이스 한 회 |
 | 세 번씩 재서 0.5ms 아래는 가르지 못한다 | 3, 0.5 | 규칙 | measurement.md "차이 판정", [v2-spec.md](../../Docs/v2-spec.md) 7절 | |
 
@@ -185,7 +183,6 @@
 
 | 본문의 말 | 출처 |
 | --- | --- |
-| 정지 장면의 확인 트레이스 빗나감, 정면 평면, 장치의 결함, 분기는 찾지 못했다 | [글 06](../06-engine-findings/README.md) 5절과 측정 기록, [V2.md](../../Docs/Worklog/V2.md) "2026-11-17 Full4 캡슐 빗나감 진단", [engine-notes.md](../../Docs/Reference/engine-notes.md) 53절 |
 | 표현 프로세서와 밀어내기 프로세서 사이에 순서 선언이 없어, 표현이 밀어내기 전의 위치를 읽는 프레임이 섞인다 | [글 03](../03-separation/README.md) "한계 둘", [code-tour.md](../../Docs/Guides/code-tour.md) "순서가 정해져 있지 않은 곳", [autonomous-decisions.md](../../Docs/Worklog/autonomous-decisions.md) D60 |
 | 겹친 쌍은 프레임 시간이 길수록 는다 | [글 00의 측정 기록](../00-goals-and-method/measurements.md) "경위와 장치의 근거", 글 03 "한계 둘" |
 | 측정 PC 한 대, 장애물 없는 평지 하나 | [pc-specs.md](../../Docs/Reference/pc-specs.md), [measurement.md](../../Docs/Guides/measurement.md) "시나리오", 글 00 "측정의 한계" |

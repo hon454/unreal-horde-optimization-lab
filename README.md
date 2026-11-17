@@ -15,7 +15,7 @@
 - **남은 비용의 대부분은 가까운 액터에 있다.** 가까운 엔티티에 액터를 붙이는 하이드레이션을 끄면 프레임 p95가 6.98ms 짧아진다. 손을 대려면 액터 쪽부터 본다. 단계 8이 줄인 시간은 거의 액터 메시 고정 바운드의 몫이다.
 - **200m 밖은 ISKM 대신 Niagara 입자로 그린다.** 200m 밖까지 ISKM으로 그리면 프레임 p95가 3.54ms 길어진다. 기법 하나로는 가장 큰 절약이다.
 
-최대 총수 셈에서 호드 2만은 겹침 방지가 제 기능을 하지 못해 뺐다. 증상과 원인과 바꾼 코드는 [Mass 군중 최적화와 프로파일링 팁](Docs/Guides/mass-crowd-tips.md)에, 단계를 고르며 보는 화면은 [한 페이지 요약](https://hon454.github.io/unreal-horde-optimization-lab/)에 있다.
+증상과 원인과 바꾼 코드는 [Mass 군중 최적화와 프로파일링 팁](Docs/Guides/mass-crowd-tips.md)에, 단계를 고르며 보는 화면은 [한 페이지 요약](https://hon454.github.io/unreal-horde-optimization-lab/)에 있다.
 
 ## 시나리오
 

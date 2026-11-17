@@ -352,7 +352,7 @@ def summary_text(by, pool, max60, s):
     Each claim is asserted so a new batch cannot keep a stale sentence."""
     p50 = lambda n: sv(f"{SPEED}-s{n}", "frame_p50_ms")
     p95 = lambda n: sv(f"{SPEED}-s{n}", "frame_p95_ms")
-    n8, n_out = load_final_max60()
+    n8, _ = load_final_max60()
     hm, far = fmt_int(s(8, "hydrate_m")), fmt_int(s(8, "far_m"))
     hyd, fsb, shd, farr = by["a8hyd"], by["a8fsb"], by["a8shd"], by["a8far"]
     abl = [r for r in by.values() if r["group"] != "sub"]
@@ -388,7 +388,6 @@ def summary_text(by, pool, max60, s):
             {"head": f"{far}m 밖은 ISKM 대신 Niagara 입자로 그린다.",
              "body": f"{far}m 밖까지 ISKM으로 그리면 프레임 p95가 {fmt(farr['frame']['d'])}ms 길어진다. 기법 하나로는 가장 큰 절약이다."},
         ],
-        "close": (f"최대 총수 셈에서 호드 {kcount(n_out)}은 겹침 방지가 제 기능을 하지 못해 뺐다."),
     }
 
 

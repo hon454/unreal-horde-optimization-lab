@@ -74,7 +74,7 @@
     $("sum-list").innerHTML = SUM.takeaways.map(function (t) {
       return "<li><strong>" + md(t.head) + "</strong> " + md(t.body) + "</li>";
     }).join("");
-    $("sum-close").innerHTML = md(SUM.close) + ' 증상과 원인과 바꾼 코드는 <a href="' + D.meta.tips + '">Mass 군중 최적화와 프로파일링 팁</a>에 있다.';
+    $("sum-close").innerHTML = '증상과 원인과 바꾼 코드는 <a href="' + D.meta.tips + '">Mass 군중 최적화와 프로파일링 팁</a>에 있다.';
     $("spec-n").textContent = kcount(D.meta.target_n);
     $("spec-ms").textContent = "한 프레임 " + fmt(BUDGET) + "ms";
     $("res-first").textContent = fmt(H.first_ms) + "ms";
