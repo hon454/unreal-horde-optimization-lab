@@ -2,9 +2,9 @@ series,n_p95,note_p95,n_p95_bound,n_p50,note_p50,excluded,points,overlap_points
 1 Actor baseline,781,,,887,,,500:10.83 1000:19.96 2000:41.25 10000:665.25,500:0 1000:0 2000:0 10000:7
 1+ Animation Budget Allocator,760,,,866,,,500:10.95 1000:20.47 2000:36.94,500:0 1000:0 2000:0
 "2 Mass, engine default path",4102,,,4732,,,2500:9.20 5000:19.70 10000:36.78,2500:110 5000:1862 10000:12442
-3 Own separation logic,12147,,,,≥12500 (above kept range),N=20000 기능 미달로 뺌,10000:14.15 12500:17.08 20000:24.15,10000:219 12500:637 20000:2562
-4 Animated instances + actor budget,,above kept range,≥12500,,≥12500 (above kept range),N=20000 기능 미달로 뺌,10000:14.21 12500:16.18 20000:20.98,10000:232 12500:626 20000:2441
-5 Simulation LOD + entity pool,,above kept range,≥12500,,≥12500 (above kept range),N=20000 기능 미달로 뺌,10000:14.52 12500:16.66 20000:21.71,10000:239 12500:645 20000:2499
-6 ISKM,12185,,,,≥12500 (above kept range),N=20000 기능 미달로 뺌,10000:14.71 12500:16.96 20000:22.55,10000:243 12500:652 20000:2541
-7 Background crowd,11619,,,,≥12500 (above kept range),N=20000 기능 미달로 뺌,10000:15.17 12500:17.45 20000:23.50,10000:253 12500:669 20000:2570
-8 Trim remaining cost,12026,,,,≥12500 (above kept range),N=20000 기능 미달로 뺌,10000:14.23 12500:17.22 20000:23.73,10000:234 12500:651 20000:2584
+3 Own separation logic,12147,,,,≥12500 (above kept range),excluded: N=20000 unmet,10000:14.15 12500:17.08 20000:24.15,10000:219 12500:637 20000:2562
+4 Animated instances + actor budget,,above kept range,≥12500,,≥12500 (above kept range),excluded: N=20000 unmet,10000:14.21 12500:16.18 20000:20.98,10000:232 12500:626 20000:2441
+5 Simulation LOD + entity pool,,above kept range,≥12500,,≥12500 (above kept range),excluded: N=20000 unmet,10000:14.52 12500:16.66 20000:21.71,10000:239 12500:645 20000:2499
+6 ISKM,12185,,,,≥12500 (above kept range),excluded: N=20000 unmet,10000:14.71 12500:16.96 20000:22.55,10000:243 12500:652 20000:2541
+7 Background crowd,11619,,,,≥12500 (above kept range),excluded: N=20000 unmet,10000:15.17 12500:17.45 20000:23.50,10000:253 12500:669 20000:2570
+8 Trim remaining cost,12026,,,,≥12500 (above kept range),excluded: N=20000 unmet,10000:14.23 12500:17.22 20000:23.73,10000:234 12500:651 20000:2584

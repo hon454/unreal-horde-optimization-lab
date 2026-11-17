@@ -1,17 +1,23 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="840" height="458" viewBox="0 0 840 458" font-family="Segoe UI, Arial, sans-serif" font-size="13">
+<svg xmlns="http://www.w3.org/2000/svg" width="840" height="476" viewBox="0 0 840 476" font-family="Segoe UI, Arial, sans-serif" font-size="13">
 <rect width="100%" height="100%" fill="white"/>
-<text x="330.0" y="28" text-anchor="middle" font-size="16" font-weight="600">Frame p95 vs N (Full4, moving orb)</text>
+<text x="330.0" y="28" text-anchor="middle" font-size="16" font-weight="600">Frame p95 vs N (moving orb)</text>
 <line x1="70" y1="390" x2="590" y2="390" stroke="#999"/>
 <line x1="70" y1="50" x2="70" y2="390" stroke="#999"/>
 <line x1="70" y1="330.6" x2="590" y2="330.6" stroke="#f59e0b" stroke-dasharray="6 4"/>
-<text x="586" y="324.6" text-anchor="end" fill="#b45309">16.7 ms (60 fps)</text>
+<text x="443.4" y="346.6" text-anchor="middle" fill="#b45309">16.7 ms (60 fps)</text>
+<line x1="70.0" y1="390" x2="70.0" y2="394" stroke="#999"/>
 <text x="70.0" y="408" text-anchor="middle">500</text>
+<line x1="167.7" y1="390" x2="167.7" y2="394" stroke="#999"/>
 <text x="167.7" y="408" text-anchor="middle">1,000</text>
+<line x1="265.4" y1="390" x2="265.4" y2="394" stroke="#999"/>
 <text x="265.4" y="408" text-anchor="middle">2,000</text>
-<text x="296.9" y="408" text-anchor="middle">2,500</text>
+<line x1="296.9" y1="390" x2="296.9" y2="394" stroke="#999"/>
+<line x1="394.6" y1="390" x2="394.6" y2="394" stroke="#999"/>
 <text x="394.6" y="408" text-anchor="middle">5,000</text>
+<line x1="492.3" y1="390" x2="492.3" y2="394" stroke="#999"/>
 <text x="492.3" y="408" text-anchor="middle">10,000</text>
-<text x="523.7" y="408" text-anchor="middle">12,500</text>
+<line x1="523.7" y1="390" x2="523.7" y2="394" stroke="#999"/>
+<line x1="590.0" y1="390" x2="590.0" y2="394" stroke="#999"/>
 <text x="590.0" y="408" text-anchor="middle">20,000</text>
 <text x="62" y="371.8" text-anchor="end">10</text>
 <line x1="70" y1="367.8" x2="590" y2="367.8" stroke="#eee"/>
@@ -24,8 +30,9 @@
 <text x="62" y="154.4" text-anchor="end">200</text>
 <line x1="70" y1="150.4" x2="590" y2="150.4" stroke="#eee"/>
 <text x="330.0" y="426" text-anchor="middle">N (log)</text>
-<text x="70" y="448" font-size="11" fill="#555">hollow points: function not met at that N (equivalence check), left out of the max-N interpolation: 3 N=20,000, 4 N=20,000, 5 N=20,000, 6 N=20,000, 7 N=20,000, 8 N=20,000</text>
-<text x="18" y="229.0" transform="rotate(-90 18 229.0)" text-anchor="middle">frame p95 (solid) / bottleneck p50 (dashed) ms, log</text>
+<text x="70" y="452" font-size="11" fill="#555">Hollow points: the step does not do the same work at that N (equivalence check). They are left out of the max-N interpolation:</text>
+<text x="70" y="468" font-size="11" fill="#555">3 N=20,000, 4 N=20,000, 5 N=20,000, 6 N=20,000, 7 N=20,000, 8 N=20,000</text>
+<text x="18" y="238.0" transform="rotate(-90 18 238.0)" text-anchor="middle">frame p95 (solid) / bottleneck p50 (dashed) ms, log</text>
 <path d="M70.0,362.0 L167.7,317.6 L265.4,265.0 L492.3,63.2" fill="none" stroke="#2563eb" stroke-width="2"/>
 <path d="M70.0,373.3 L167.7,324.1 L265.4,269.2 L492.3,71.1" fill="none" stroke="#2563eb" stroke-width="1" stroke-dasharray="4 3" opacity="0.7"/>
 <circle cx="70.0" cy="362.0" r="3" fill="#2563eb"/>
@@ -69,15 +76,20 @@
 <circle cx="523.7" cy="329.5" r="3" fill="#4b5563"/>
 <circle cx="590.0" cy="308.8" r="4" fill="white" stroke="#4b5563" stroke-width="2"/>
 <text x="602" y="168" fill="#4b5563">6 ISKM</text>
-<path d="M492.3,337.5 L523.7,327.4 L590.0,305.8" fill="none" stroke="#2563eb" stroke-width="2"/>
-<path d="M492.3,345.7 L523.7,333.4 L590.0,311.0" fill="none" stroke="#2563eb" stroke-width="1" stroke-dasharray="4 3" opacity="0.7"/>
-<circle cx="492.3" cy="337.5" r="3" fill="#2563eb"/>
-<circle cx="523.7" cy="327.4" r="3" fill="#2563eb"/>
-<circle cx="590.0" cy="305.8" r="4" fill="white" stroke="#2563eb" stroke-width="2"/>
-<text x="602" y="186" fill="#2563eb">7 Background crowd</text>
-<path d="M492.3,342.2 L523.7,328.4 L590.0,305.1" fill="none" stroke="#dc2626" stroke-width="2"/>
-<path d="M492.3,350.0 L523.7,335.2 L590.0,309.8" fill="none" stroke="#dc2626" stroke-width="1" stroke-dasharray="4 3" opacity="0.7"/>
-<circle cx="492.3" cy="342.2" r="3" fill="#dc2626"/>
-<circle cx="523.7" cy="328.4" r="3" fill="#dc2626"/>
-<circle cx="590.0" cy="305.1" r="4" fill="white" stroke="#dc2626" stroke-width="2"/>
-<text x="602" y="204" fill="#dc2626">8 Trim remaining cost</text></svg>
+<path d="M492.3,337.5 L523.7,327.4 L590.0,305.8" fill="none" stroke="#be185d" stroke-width="2"/>
+<path d="M492.3,345.7 L523.7,333.4 L590.0,311.0" fill="none" stroke="#be185d" stroke-width="1" stroke-dasharray="4 3" opacity="0.7"/>
+<circle cx="492.3" cy="337.5" r="3" fill="#be185d"/>
+<circle cx="523.7" cy="327.4" r="3" fill="#be185d"/>
+<circle cx="590.0" cy="305.8" r="4" fill="white" stroke="#be185d" stroke-width="2"/>
+<text x="602" y="186" fill="#be185d">7 Background crowd</text>
+<path d="M492.3,342.2 L523.7,328.4 L590.0,305.1" fill="none" stroke="#65a30d" stroke-width="2"/>
+<path d="M492.3,350.0 L523.7,335.2 L590.0,309.8" fill="none" stroke="#65a30d" stroke-width="1" stroke-dasharray="4 3" opacity="0.7"/>
+<circle cx="492.3" cy="342.2" r="3" fill="#65a30d"/>
+<circle cx="523.7" cy="328.4" r="3" fill="#65a30d"/>
+<circle cx="590.0" cy="305.1" r="4" fill="white" stroke="#65a30d" stroke-width="2"/>
+<text x="602" y="204" fill="#65a30d">8 Trim remaining cost</text>
+<line x1="602" y1="232" x2="630" y2="232" stroke="#444" stroke-width="2"/>
+<text x="636" y="236" font-size="12" fill="#444">solid: frame p95</text>
+<line x1="602" y1="252" x2="630" y2="252" stroke="#444" stroke-width="1" stroke-dasharray="4 3"/>
+<text x="636" y="256" font-size="12" fill="#444">dashed: slowest of the frame,</text>
+<text x="636" y="270" font-size="12" fill="#444">game, render and GPU p50</text></svg>

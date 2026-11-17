@@ -1,83 +1,233 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="900" height="832" viewBox="0 0 900 832" font-family="Segoe UI, Arial, sans-serif" font-size="13">
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="926" viewBox="0 0 1000 926" font-family="Segoe UI, Arial, sans-serif" font-size="13">
 <rect width="100%" height="100%" fill="white"/>
-<text x="450.0" y="26" text-anchor="middle" font-size="16" font-weight="600">Remove one technique from the final configuration (N=10,000, moving orb)</text>
-<text x="450.0" y="46" text-anchor="middle" font-size="12" fill="#555">blue: removing it costs frame time (it earned it), gray: no cost</text>
-<line x1="590.8" y1="62" x2="590.8" y2="802" stroke="#b45309" stroke-dasharray="6 4"/>
-<text x="594.8" y="58" fill="#b45309" font-size="11">16.7 ms</text>
-<text x="280" y="87" text-anchor="end">final configuration (step 8)</text>
-<rect x="290" y="72" width="256.3" height="20" fill="#ea580c"/>
-<rect x="290" y="95" width="230.0" height="6" fill="#ea580c" opacity="0.55"/>
-<text x="552.3" y="87">14.23</text>
-<text x="280" y="125" text-anchor="end">without Hydration actors</text>
-<rect x="290" y="110" width="130.5" height="20" fill="#6b7280"/>
-<rect x="290" y="133" width="118.8" height="6" fill="#6b7280" opacity="0.55"/>
-<text x="426.5" y="125">7.25 (-6.98)</text>
-<text x="280" y="163" text-anchor="end">without Actor anim budget</text>
-<rect x="290" y="148" width="252.9" height="20" fill="#6b7280"/>
-<rect x="290" y="171" width="226.7" height="6" fill="#6b7280" opacity="0.55"/>
-<text x="548.9" y="163">14.04 (-0.19)</text>
-<text x="280" y="201" text-anchor="end">without Transition fixes</text>
-<rect x="290" y="186" width="256.3" height="20" fill="#6b7280"/>
-<rect x="290" y="209" width="230.0" height="6" fill="#6b7280" opacity="0.55"/>
-<text x="552.3" y="201">14.23 (+0.00)</text>
-<text x="280" y="239" text-anchor="end">without Min hold time</text>
-<rect x="290" y="224" width="252.5" height="20" fill="#6b7280"/>
-<rect x="290" y="247" width="223.8" height="6" fill="#6b7280" opacity="0.55"/>
-<text x="548.5" y="239">14.02 (-0.21)</text>
-<text x="280" y="277" text-anchor="end">without Entity pool</text>
-<rect x="290" y="262" width="256.5" height="20" fill="#2563eb"/>
-<rect x="290" y="285" width="229.7" height="6" fill="#2563eb" opacity="0.55"/>
-<text x="552.5" y="277">14.24 (+0.01)</text>
-<text x="280" y="315" text-anchor="end">without Simulation LOD</text>
-<rect x="290" y="300" width="252.1" height="20" fill="#6b7280"/>
-<rect x="290" y="323" width="224.1" height="6" fill="#6b7280" opacity="0.55"/>
-<text x="548.1" y="315">14.00 (-0.23)</text>
-<text x="280" y="353" text-anchor="end">without ISKM</text>
-<rect x="290" y="338" width="244.2" height="20" fill="#6b7280"/>
-<rect x="290" y="361" width="217.3" height="6" fill="#6b7280" opacity="0.55"/>
-<text x="540.2" y="353">13.56 (-0.67)</text>
-<text x="280" y="391" text-anchor="end">without Fixed bounds</text>
-<rect x="290" y="376" width="268.1" height="20" fill="#2563eb"/>
-<rect x="290" y="399" width="240.5" height="6" fill="#2563eb" opacity="0.55"/>
-<text x="564.1" y="391">14.89 (+0.66)</text>
-<text x="280" y="429" text-anchor="end">without Far cull</text>
-<rect x="290" y="414" width="320.0" height="20" fill="#2563eb"/>
-<rect x="290" y="437" width="288.6" height="6" fill="#2563eb" opacity="0.55"/>
-<text x="616.0" y="429">17.77 (+3.54)</text>
-<text x="280" y="467" text-anchor="end">without Background crowd</text>
-<rect x="290" y="452" width="250.8" height="20" fill="#6b7280"/>
-<rect x="290" y="475" width="222.1" height="6" fill="#6b7280" opacity="0.55"/>
-<text x="546.8" y="467">13.92 (-0.31)</text>
-<text x="280" y="505" text-anchor="end">without Separation</text>
-<rect x="290" y="490" width="239.6" height="20" fill="#6b7280"/>
-<rect x="290" y="513" width="210.7" height="6" fill="#6b7280" opacity="0.55"/>
-<text x="535.6" y="505">13.30 (-0.93)</text>
-<text x="280" y="543" text-anchor="end">without Actor capsule</text>
-<rect x="290" y="528" width="222.9" height="20" fill="#6b7280"/>
-<rect x="290" y="551" width="194.2" height="6" fill="#6b7280" opacity="0.55"/>
-<text x="518.9" y="543">12.38 (-1.86)</text>
-<text x="280" y="581" text-anchor="end">without Far shadow off</text>
-<rect x="290" y="566" width="257.6" height="20" fill="#2563eb"/>
-<rect x="290" y="589" width="230.4" height="6" fill="#2563eb" opacity="0.55"/>
-<text x="553.6" y="581">14.30 (+0.07)</text>
-<text x="280" y="619" text-anchor="end">without Fixed skeletal bounds</text>
-<rect x="290" y="604" width="273.9" height="20" fill="#2563eb"/>
-<rect x="290" y="627" width="246.0" height="6" fill="#2563eb" opacity="0.55"/>
-<text x="569.9" y="619">15.21 (+0.98)</text>
-<text x="280" y="657" text-anchor="end">without ISKM track reserve</text>
-<rect x="290" y="642" width="256.5" height="20" fill="#2563eb"/>
-<rect x="290" y="665" width="230.3" height="6" fill="#2563eb" opacity="0.55"/>
-<text x="552.5" y="657">14.24 (+0.01)</text>
-<text x="280" y="695" text-anchor="end">without Particle orb follow</text>
-<rect x="290" y="680" width="262.3" height="20" fill="#2563eb"/>
-<rect x="290" y="703" width="234.2" height="6" fill="#2563eb" opacity="0.55"/>
-<text x="558.3" y="695">14.56 (+0.33)</text>
-<text x="280" y="733" text-anchor="end">without Bounds step follow</text>
-<rect x="290" y="718" width="258.4" height="20" fill="#2563eb"/>
-<rect x="290" y="741" width="231.6" height="6" fill="#2563eb" opacity="0.55"/>
-<text x="554.4" y="733">14.35 (+0.12)</text>
-<text x="280" y="771" text-anchor="end">with engine avoidance instead of separation</text>
-<rect x="290" y="756" width="410.7" height="20" fill="#2563eb"/>
-<rect x="290" y="779" width="366.1" height="6" fill="#2563eb" opacity="0.55"/>
-<text x="706.7" y="771">22.80 (+8.57)</text>
-<text x="290" y="824" font-size="11" fill="#555">ms. thick bar = frame p95, thin bar = frame p50 (median of runs)</text></svg>
+<text x="500.0" y="26" text-anchor="middle" font-size="16" font-weight="600">Technique contributions (one technique off in the final configuration)</text>
+<text x="500.0" y="46" text-anchor="middle" font-size="12" fill="#555">Frame p95 at N=10,000, moving orb</text>
+<rect x="24" y="60" width="14" height="12" fill="#1f2937"/>
+<text x="46" y="70" font-size="12" fill="#374151">final configuration (step 8)</text>
+<rect x="243.20000000000002" y="60" width="14" height="12" fill="#2563eb"/>
+<text x="265.20000000000005" y="70" font-size="12" fill="#374151">frame time rises without it</text>
+<rect x="456.0" y="60" width="14" height="12" fill="#9333ea"/>
+<text x="478.0" y="70" font-size="12" fill="#374151">frame time falls without it</text>
+<rect x="24" y="80" width="14" height="12" fill="#9ca3af"/>
+<text x="46" y="90" font-size="12" fill="#374151">not distinguishable from the final configuration</text>
+<line x1="371.20000000000005" y1="86" x2="387.20000000000005" y2="86" stroke="#b45309" stroke-width="2" stroke-dasharray="6 4"/>
+<text x="393.20000000000005" y="90" font-size="12" fill="#374151">16.7 ms (60 fps)</text>
+<line x1="513.6" y1="86" x2="529.6" y2="86" stroke="#1f2937" stroke-width="2" stroke-dasharray="2 3"/>
+<text x="535.6" y="90" font-size="12" fill="#374151">frame p95 of the final configuration</text>
+<line x1="350.0" y1="118" x2="350.0" y2="772" stroke="#eef0f3"/>
+<text x="350.0" y="786" font-size="11" fill="#6b7280" text-anchor="middle">0</text>
+<line x1="433.3" y1="118" x2="433.3" y2="772" stroke="#eef0f3"/>
+<text x="433.3" y="786" font-size="11" fill="#6b7280" text-anchor="middle">4</text>
+<line x1="516.7" y1="118" x2="516.7" y2="772" stroke="#eef0f3"/>
+<text x="516.7" y="786" font-size="11" fill="#6b7280" text-anchor="middle">8</text>
+<line x1="600.0" y1="118" x2="600.0" y2="772" stroke="#eef0f3"/>
+<text x="600.0" y="786" font-size="11" fill="#6b7280" text-anchor="middle">12</text>
+<line x1="683.3" y1="118" x2="683.3" y2="772" stroke="#eef0f3"/>
+<text x="683.3" y="786" font-size="11" fill="#6b7280" text-anchor="middle">16</text>
+<line x1="766.7" y1="118" x2="766.7" y2="772" stroke="#eef0f3"/>
+<text x="766.7" y="786" font-size="11" fill="#6b7280" text-anchor="middle">20</text>
+<line x1="850.0" y1="118" x2="850.0" y2="772" stroke="#eef0f3"/>
+<text x="850.0" y="786" font-size="11" fill="#6b7280" text-anchor="middle">24</text>
+<text x="600.0" y="802" font-size="12" fill="#4b5563" text-anchor="middle">frame time (ms)</text>
+<line x1="697.9" y1="118" x2="697.9" y2="772" stroke="#b45309" stroke-width="1.5" stroke-dasharray="6 4"/>
+<line x1="646.5" y1="118" x2="646.5" y2="772" stroke="#1f2937" stroke-width="1.5" stroke-dasharray="2 3"/>
+<text x="340" y="133" text-anchor="end" font-size="14" fill="#111827">final configuration (step 8)</text>
+<rect x="350" y="120" width="296.5" height="16" fill="#1f2937"/>
+<rect x="350" y="138" width="266.0" height="5" fill="#1f2937" opacity="0.55"/>
+<line x1="642.4" y1="128" x2="650.5" y2="128" stroke="white" stroke-width="3.5"/>
+<line x1="642.4" y1="123" x2="642.4" y2="133" stroke="white" stroke-width="3.5"/>
+<line x1="650.5" y1="123" x2="650.5" y2="133" stroke="white" stroke-width="3.5"/>
+<line x1="642.4" y1="128" x2="650.5" y2="128" stroke="#111827" stroke-width="1.4"/>
+<line x1="642.4" y1="123" x2="642.4" y2="133" stroke="#111827" stroke-width="1.4"/>
+<line x1="650.5" y1="123" x2="650.5" y2="133" stroke="#111827" stroke-width="1.4"/>
+<text x="658.5" y="133.0" font-size="13" text-anchor="start" font-weight="600" fill="white" stroke="white" stroke-width="4" stroke-linejoin="round">14.23</text><text x="658.5" y="133.0" font-size="13" text-anchor="start" font-weight="600" fill="#111827">14.23</text>
+<text x="24" y="166" font-size="12" font-weight="600" fill="#4b5563">Distinguishable from the final configuration</text>
+<text x="340" y="191" text-anchor="end" font-size="14" fill="#111827">without the 200 m far cull</text>
+<rect x="350" y="178" width="370.1" height="16" fill="#2563eb"/>
+<rect x="350" y="196" width="333.8" height="5" fill="#2563eb" opacity="0.55"/>
+<line x1="720.0" y1="186" x2="726.2" y2="186" stroke="white" stroke-width="3.5"/>
+<line x1="720.0" y1="181" x2="720.0" y2="191" stroke="white" stroke-width="3.5"/>
+<line x1="726.2" y1="181" x2="726.2" y2="191" stroke="white" stroke-width="3.5"/>
+<line x1="720.0" y1="186" x2="726.2" y2="186" stroke="#111827" stroke-width="1.4"/>
+<line x1="720.0" y1="181" x2="720.0" y2="191" stroke="#111827" stroke-width="1.4"/>
+<line x1="726.2" y1="181" x2="726.2" y2="191" stroke="#111827" stroke-width="1.4"/>
+<text x="734.2" y="191.0" font-size="13" text-anchor="start" font-weight="600" fill="white" stroke="white" stroke-width="4" stroke-linejoin="round">17.77  (+3.54)</text><text x="734.2" y="191.0" font-size="13" text-anchor="start" font-weight="600" fill="#111827">17.77  (+3.54)</text>
+<text x="340" y="221" text-anchor="end" font-size="14" fill="#111827">without actor mesh fixed bounds</text>
+<rect x="350" y="208" width="316.9" height="16" fill="#2563eb"/>
+<rect x="350" y="226" width="284.6" height="5" fill="#2563eb" opacity="0.55"/>
+<line x1="666.2" y1="216" x2="668.2" y2="216" stroke="white" stroke-width="3.5"/>
+<line x1="666.2" y1="211" x2="666.2" y2="221" stroke="white" stroke-width="3.5"/>
+<line x1="668.2" y1="211" x2="668.2" y2="221" stroke="white" stroke-width="3.5"/>
+<line x1="666.2" y1="216" x2="668.2" y2="216" stroke="#111827" stroke-width="1.4"/>
+<line x1="666.2" y1="211" x2="666.2" y2="221" stroke="#111827" stroke-width="1.4"/>
+<line x1="668.2" y1="211" x2="668.2" y2="221" stroke="#111827" stroke-width="1.4"/>
+<text x="676.2" y="221.0" font-size="13" text-anchor="start" font-weight="600" fill="white" stroke="white" stroke-width="4" stroke-linejoin="round">15.21  (+0.98)</text><text x="676.2" y="221.0" font-size="13" text-anchor="start" font-weight="600" fill="#111827">15.21  (+0.98)</text>
+<text x="340" y="251" text-anchor="end" font-size="14" fill="#111827">without ISKM fixed bounds</text>
+<rect x="350" y="238" width="310.1" height="16" fill="#2563eb"/>
+<rect x="350" y="256" width="278.1" height="5" fill="#2563eb" opacity="0.55"/>
+<line x1="655.9" y1="246" x2="662.5" y2="246" stroke="white" stroke-width="3.5"/>
+<line x1="655.9" y1="241" x2="655.9" y2="251" stroke="white" stroke-width="3.5"/>
+<line x1="662.5" y1="241" x2="662.5" y2="251" stroke="white" stroke-width="3.5"/>
+<line x1="655.9" y1="246" x2="662.5" y2="246" stroke="#111827" stroke-width="1.4"/>
+<line x1="655.9" y1="241" x2="655.9" y2="251" stroke="#111827" stroke-width="1.4"/>
+<line x1="662.5" y1="241" x2="662.5" y2="251" stroke="#111827" stroke-width="1.4"/>
+<text x="670.5" y="251.0" font-size="13" text-anchor="start" font-weight="600" fill="white" stroke="white" stroke-width="4" stroke-linejoin="round">14.89  (+0.66)</text><text x="670.5" y="251.0" font-size="13" text-anchor="start" font-weight="600" fill="#111827">14.89  (+0.66)</text>
+<text x="340" y="281" text-anchor="end" font-size="14" fill="#111827">without ISKM †</text>
+<rect x="350" y="268" width="282.5" height="16" fill="#9333ea"/>
+<rect x="350" y="286" width="251.3" height="5" fill="#9333ea" opacity="0.55"/>
+<line x1="631.0" y1="276" x2="635.6" y2="276" stroke="white" stroke-width="3.5"/>
+<line x1="631.0" y1="271" x2="631.0" y2="281" stroke="white" stroke-width="3.5"/>
+<line x1="635.6" y1="271" x2="635.6" y2="281" stroke="white" stroke-width="3.5"/>
+<line x1="631.0" y1="276" x2="635.6" y2="276" stroke="#111827" stroke-width="1.4"/>
+<line x1="631.0" y1="271" x2="631.0" y2="281" stroke="#111827" stroke-width="1.4"/>
+<line x1="635.6" y1="271" x2="635.6" y2="281" stroke="#111827" stroke-width="1.4"/>
+<text x="643.6" y="281.0" font-size="13" text-anchor="start" font-weight="600" fill="white" stroke="white" stroke-width="4" stroke-linejoin="round">13.56  (-0.67)</text><text x="643.6" y="281.0" font-size="13" text-anchor="start" font-weight="600" fill="#111827">13.56  (-0.67)</text>
+<text x="340" y="311" text-anchor="end" font-size="14" fill="#111827">without Separation</text>
+<rect x="350" y="298" width="277.2" height="16" fill="#9333ea"/>
+<rect x="350" y="316" width="243.8" height="5" fill="#9333ea" opacity="0.55"/>
+<line x1="621.8" y1="306" x2="629.9" y2="306" stroke="white" stroke-width="3.5"/>
+<line x1="621.8" y1="301" x2="621.8" y2="311" stroke="white" stroke-width="3.5"/>
+<line x1="629.9" y1="301" x2="629.9" y2="311" stroke="white" stroke-width="3.5"/>
+<line x1="621.8" y1="306" x2="629.9" y2="306" stroke="#111827" stroke-width="1.4"/>
+<line x1="621.8" y1="301" x2="621.8" y2="311" stroke="#111827" stroke-width="1.4"/>
+<line x1="629.9" y1="301" x2="629.9" y2="311" stroke="#111827" stroke-width="1.4"/>
+<text x="637.9" y="311.0" font-size="13" text-anchor="start" font-weight="600" fill="white" stroke="white" stroke-width="4" stroke-linejoin="round">13.30  (-0.93)</text><text x="637.9" y="311.0" font-size="13" text-anchor="start" font-weight="600" fill="#111827">13.30  (-0.93)</text>
+<text x="340" y="341" text-anchor="end" font-size="14" fill="#111827">without Actor capsule</text>
+<rect x="350" y="328" width="257.8" height="16" fill="#9333ea"/>
+<rect x="350" y="346" width="224.6" height="5" fill="#9333ea" opacity="0.55"/>
+<line x1="607.6" y1="336" x2="608.1" y2="336" stroke="white" stroke-width="3.5"/>
+<line x1="607.6" y1="331" x2="607.6" y2="341" stroke="white" stroke-width="3.5"/>
+<line x1="608.1" y1="331" x2="608.1" y2="341" stroke="white" stroke-width="3.5"/>
+<line x1="607.6" y1="336" x2="608.1" y2="336" stroke="#111827" stroke-width="1.4"/>
+<line x1="607.6" y1="331" x2="607.6" y2="341" stroke="#111827" stroke-width="1.4"/>
+<line x1="608.1" y1="331" x2="608.1" y2="341" stroke="#111827" stroke-width="1.4"/>
+<text x="616.1" y="341.0" font-size="13" text-anchor="start" font-weight="600" fill="white" stroke="white" stroke-width="4" stroke-linejoin="round">12.38  (-1.86)</text><text x="616.1" y="341.0" font-size="13" text-anchor="start" font-weight="600" fill="#111827">12.38  (-1.86)</text>
+<text x="340" y="371" text-anchor="end" font-size="14" fill="#111827">without Hydration actors †</text>
+<rect x="350" y="358" width="151.0" height="16" fill="#9333ea"/>
+<rect x="350" y="376" width="137.4" height="5" fill="#9333ea" opacity="0.55"/>
+<line x1="500.8" y1="366" x2="501.1" y2="366" stroke="white" stroke-width="3.5"/>
+<line x1="500.8" y1="361" x2="500.8" y2="371" stroke="white" stroke-width="3.5"/>
+<line x1="501.1" y1="361" x2="501.1" y2="371" stroke="white" stroke-width="3.5"/>
+<line x1="500.8" y1="366" x2="501.1" y2="366" stroke="#111827" stroke-width="1.4"/>
+<line x1="500.8" y1="361" x2="500.8" y2="371" stroke="#111827" stroke-width="1.4"/>
+<line x1="501.1" y1="361" x2="501.1" y2="371" stroke="#111827" stroke-width="1.4"/>
+<text x="509.1" y="371.0" font-size="13" text-anchor="start" font-weight="600" fill="white" stroke="white" stroke-width="4" stroke-linejoin="round">7.25  (-6.98)</text><text x="509.1" y="371.0" font-size="13" text-anchor="start" font-weight="600" fill="#111827">7.25  (-6.98)</text>
+<text x="24" y="404" font-size="12" font-weight="600" fill="#4b5563">Not distinguishable (frame p95 differs by under 0.5 ms or by less than a run range)</text>
+<text x="340" y="429" text-anchor="end" font-size="14" fill="#6b7280">without Particle orb follow</text>
+<rect x="350" y="416" width="303.4" height="16" fill="#9ca3af"/>
+<rect x="350" y="434" width="270.9" height="5" fill="#9ca3af" opacity="0.55"/>
+<line x1="647.2" y1="424" x2="655.7" y2="424" stroke="white" stroke-width="3.5"/>
+<line x1="647.2" y1="419" x2="647.2" y2="429" stroke="white" stroke-width="3.5"/>
+<line x1="655.7" y1="419" x2="655.7" y2="429" stroke="white" stroke-width="3.5"/>
+<line x1="647.2" y1="424" x2="655.7" y2="424" stroke="#111827" stroke-width="1.4"/>
+<line x1="647.2" y1="419" x2="647.2" y2="429" stroke="#111827" stroke-width="1.4"/>
+<line x1="655.7" y1="419" x2="655.7" y2="429" stroke="#111827" stroke-width="1.4"/>
+<text x="663.7" y="429.0" font-size="13" text-anchor="start" fill="white" stroke="white" stroke-width="4" stroke-linejoin="round">14.56  (+0.33)</text><text x="663.7" y="429.0" font-size="13" text-anchor="start" fill="#6b7280">14.56  (+0.33)</text>
+<text x="340" y="459" text-anchor="end" font-size="14" fill="#6b7280">without Bounds step follow</text>
+<rect x="350" y="446" width="298.9" height="16" fill="#9ca3af"/>
+<rect x="350" y="464" width="267.8" height="5" fill="#9ca3af" opacity="0.55"/>
+<line x1="646.9" y1="454" x2="649.9" y2="454" stroke="white" stroke-width="3.5"/>
+<line x1="646.9" y1="449" x2="646.9" y2="459" stroke="white" stroke-width="3.5"/>
+<line x1="649.9" y1="449" x2="649.9" y2="459" stroke="white" stroke-width="3.5"/>
+<line x1="646.9" y1="454" x2="649.9" y2="454" stroke="#111827" stroke-width="1.4"/>
+<line x1="646.9" y1="449" x2="646.9" y2="459" stroke="#111827" stroke-width="1.4"/>
+<line x1="649.9" y1="449" x2="649.9" y2="459" stroke="#111827" stroke-width="1.4"/>
+<text x="657.9" y="459.0" font-size="13" text-anchor="start" fill="white" stroke="white" stroke-width="4" stroke-linejoin="round">14.35  (+0.12)</text><text x="657.9" y="459.0" font-size="13" text-anchor="start" fill="#6b7280">14.35  (+0.12)</text>
+<text x="340" y="489" text-anchor="end" font-size="14" fill="#6b7280">with far shadows back on</text>
+<rect x="350" y="476" width="298.0" height="16" fill="#9ca3af"/>
+<rect x="350" y="494" width="266.5" height="5" fill="#9ca3af" opacity="0.55"/>
+<line x1="642.9" y1="484" x2="652.3" y2="484" stroke="white" stroke-width="3.5"/>
+<line x1="642.9" y1="479" x2="642.9" y2="489" stroke="white" stroke-width="3.5"/>
+<line x1="652.3" y1="479" x2="652.3" y2="489" stroke="white" stroke-width="3.5"/>
+<line x1="642.9" y1="484" x2="652.3" y2="484" stroke="#111827" stroke-width="1.4"/>
+<line x1="642.9" y1="479" x2="642.9" y2="489" stroke="#111827" stroke-width="1.4"/>
+<line x1="652.3" y1="479" x2="652.3" y2="489" stroke="#111827" stroke-width="1.4"/>
+<text x="660.3" y="489.0" font-size="13" text-anchor="start" fill="white" stroke="white" stroke-width="4" stroke-linejoin="round">14.30  (+0.07)</text><text x="660.3" y="489.0" font-size="13" text-anchor="start" fill="#6b7280">14.30  (+0.07)</text>
+<text x="340" y="519" text-anchor="end" font-size="14" fill="#6b7280">without Entity pool</text>
+<rect x="350" y="506" width="296.7" height="16" fill="#9ca3af"/>
+<rect x="350" y="524" width="265.7" height="5" fill="#9ca3af" opacity="0.55"/>
+<line x1="643.5" y1="514" x2="649.4" y2="514" stroke="white" stroke-width="3.5"/>
+<line x1="643.5" y1="509" x2="643.5" y2="519" stroke="white" stroke-width="3.5"/>
+<line x1="649.4" y1="509" x2="649.4" y2="519" stroke="white" stroke-width="3.5"/>
+<line x1="643.5" y1="514" x2="649.4" y2="514" stroke="#111827" stroke-width="1.4"/>
+<line x1="643.5" y1="509" x2="643.5" y2="519" stroke="#111827" stroke-width="1.4"/>
+<line x1="649.4" y1="509" x2="649.4" y2="519" stroke="#111827" stroke-width="1.4"/>
+<text x="657.4" y="519.0" font-size="13" text-anchor="start" fill="white" stroke="white" stroke-width="4" stroke-linejoin="round">14.24  (+0.01)</text><text x="657.4" y="519.0" font-size="13" text-anchor="start" fill="#6b7280">14.24  (+0.01)</text>
+<text x="340" y="549" text-anchor="end" font-size="14" fill="#6b7280">without ISKM track reserve</text>
+<rect x="350" y="536" width="296.6" height="16" fill="#9ca3af"/>
+<rect x="350" y="554" width="266.4" height="5" fill="#9ca3af" opacity="0.55"/>
+<line x1="645.0" y1="544" x2="650.8" y2="544" stroke="white" stroke-width="3.5"/>
+<line x1="645.0" y1="539" x2="645.0" y2="549" stroke="white" stroke-width="3.5"/>
+<line x1="650.8" y1="539" x2="650.8" y2="549" stroke="white" stroke-width="3.5"/>
+<line x1="645.0" y1="544" x2="650.8" y2="544" stroke="#111827" stroke-width="1.4"/>
+<line x1="645.0" y1="539" x2="645.0" y2="549" stroke="#111827" stroke-width="1.4"/>
+<line x1="650.8" y1="539" x2="650.8" y2="549" stroke="#111827" stroke-width="1.4"/>
+<text x="658.8" y="549.0" font-size="13" text-anchor="start" fill="white" stroke="white" stroke-width="4" stroke-linejoin="round">14.24  (+0.01)</text><text x="658.8" y="549.0" font-size="13" text-anchor="start" fill="#6b7280">14.24  (+0.01)</text>
+<text x="340" y="579" text-anchor="end" font-size="14" fill="#6b7280">without Transition fixes</text>
+<rect x="350" y="566" width="296.5" height="16" fill="#9ca3af"/>
+<rect x="350" y="584" width="266.0" height="5" fill="#9ca3af" opacity="0.55"/>
+<line x1="643.2" y1="574" x2="647.8" y2="574" stroke="white" stroke-width="3.5"/>
+<line x1="643.2" y1="569" x2="643.2" y2="579" stroke="white" stroke-width="3.5"/>
+<line x1="647.8" y1="569" x2="647.8" y2="579" stroke="white" stroke-width="3.5"/>
+<line x1="643.2" y1="574" x2="647.8" y2="574" stroke="#111827" stroke-width="1.4"/>
+<line x1="643.2" y1="569" x2="643.2" y2="579" stroke="#111827" stroke-width="1.4"/>
+<line x1="647.8" y1="569" x2="647.8" y2="579" stroke="#111827" stroke-width="1.4"/>
+<text x="655.8" y="579.0" font-size="13" text-anchor="start" fill="white" stroke="white" stroke-width="4" stroke-linejoin="round">14.23  (+0.00)</text><text x="655.8" y="579.0" font-size="13" text-anchor="start" fill="#6b7280">14.23  (+0.00)</text>
+<text x="340" y="609" text-anchor="end" font-size="14" fill="#6b7280">without actor animation budget</text>
+<rect x="350" y="596" width="292.5" height="16" fill="#9ca3af"/>
+<rect x="350" y="614" width="262.2" height="5" fill="#9ca3af" opacity="0.55"/>
+<line x1="639.8" y1="604" x2="643.3" y2="604" stroke="white" stroke-width="3.5"/>
+<line x1="639.8" y1="599" x2="639.8" y2="609" stroke="white" stroke-width="3.5"/>
+<line x1="643.3" y1="599" x2="643.3" y2="609" stroke="white" stroke-width="3.5"/>
+<line x1="639.8" y1="604" x2="643.3" y2="604" stroke="#111827" stroke-width="1.4"/>
+<line x1="639.8" y1="599" x2="639.8" y2="609" stroke="#111827" stroke-width="1.4"/>
+<line x1="643.3" y1="599" x2="643.3" y2="609" stroke="#111827" stroke-width="1.4"/>
+<text x="651.3" y="609.0" font-size="13" text-anchor="start" fill="white" stroke="white" stroke-width="4" stroke-linejoin="round">14.04  (-0.19)</text><text x="651.3" y="609.0" font-size="13" text-anchor="start" fill="#6b7280">14.04  (-0.19)</text>
+<text x="340" y="639" text-anchor="end" font-size="14" fill="#6b7280">without minimum hold time</text>
+<rect x="350" y="626" width="292.1" height="16" fill="#9ca3af"/>
+<rect x="350" y="644" width="258.8" height="5" fill="#9ca3af" opacity="0.55"/>
+<line x1="639.6" y1="634" x2="643.8" y2="634" stroke="white" stroke-width="3.5"/>
+<line x1="639.6" y1="629" x2="639.6" y2="639" stroke="white" stroke-width="3.5"/>
+<line x1="643.8" y1="629" x2="643.8" y2="639" stroke="white" stroke-width="3.5"/>
+<line x1="639.6" y1="634" x2="643.8" y2="634" stroke="#111827" stroke-width="1.4"/>
+<line x1="639.6" y1="629" x2="639.6" y2="639" stroke="#111827" stroke-width="1.4"/>
+<line x1="643.8" y1="629" x2="643.8" y2="639" stroke="#111827" stroke-width="1.4"/>
+<text x="651.8" y="639.0" font-size="13" text-anchor="start" fill="white" stroke="white" stroke-width="4" stroke-linejoin="round">14.02  (-0.21)</text><text x="651.8" y="639.0" font-size="13" text-anchor="start" fill="#6b7280">14.02  (-0.21)</text>
+<text x="340" y="669" text-anchor="end" font-size="14" fill="#6b7280">without Simulation LOD</text>
+<rect x="350" y="656" width="291.6" height="16" fill="#9ca3af"/>
+<rect x="350" y="674" width="259.2" height="5" fill="#9ca3af" opacity="0.55"/>
+<line x1="639.5" y1="664" x2="644.8" y2="664" stroke="white" stroke-width="3.5"/>
+<line x1="639.5" y1="659" x2="639.5" y2="669" stroke="white" stroke-width="3.5"/>
+<line x1="644.8" y1="659" x2="644.8" y2="669" stroke="white" stroke-width="3.5"/>
+<line x1="639.5" y1="664" x2="644.8" y2="664" stroke="#111827" stroke-width="1.4"/>
+<line x1="639.5" y1="659" x2="639.5" y2="669" stroke="#111827" stroke-width="1.4"/>
+<line x1="644.8" y1="659" x2="644.8" y2="669" stroke="#111827" stroke-width="1.4"/>
+<text x="652.8" y="669.0" font-size="13" text-anchor="start" fill="white" stroke="white" stroke-width="4" stroke-linejoin="round">14.00  (-0.23)</text><text x="652.8" y="669.0" font-size="13" text-anchor="start" fill="#6b7280">14.00  (-0.23)</text>
+<text x="340" y="699" text-anchor="end" font-size="14" fill="#6b7280">without Background crowd †</text>
+<rect x="350" y="686" width="290.0" height="16" fill="#9ca3af"/>
+<rect x="350" y="704" width="256.9" height="5" fill="#9ca3af" opacity="0.55"/>
+<line x1="637.2" y1="694" x2="642.1" y2="694" stroke="white" stroke-width="3.5"/>
+<line x1="637.2" y1="689" x2="637.2" y2="699" stroke="white" stroke-width="3.5"/>
+<line x1="642.1" y1="689" x2="642.1" y2="699" stroke="white" stroke-width="3.5"/>
+<line x1="637.2" y1="694" x2="642.1" y2="694" stroke="#111827" stroke-width="1.4"/>
+<line x1="637.2" y1="689" x2="637.2" y2="699" stroke="#111827" stroke-width="1.4"/>
+<line x1="642.1" y1="689" x2="642.1" y2="699" stroke="#111827" stroke-width="1.4"/>
+<text x="650.1" y="699.0" font-size="13" text-anchor="start" fill="white" stroke="white" stroke-width="4" stroke-linejoin="round">13.92  (-0.31)</text><text x="650.1" y="699.0" font-size="13" text-anchor="start" fill="#6b7280">13.92  (-0.31)</text>
+<text x="24" y="732" font-size="12" font-weight="600" fill="#4b5563">Sub-experiment: a technique is replaced, not removed</text>
+<text x="340" y="757" text-anchor="end" font-size="14" fill="#111827">with engine avoidance instead of separation</text>
+<rect x="350" y="744" width="475.1" height="16" fill="#2563eb"/>
+<rect x="350" y="762" width="423.5" height="5" fill="#2563eb" opacity="0.55"/>
+<line x1="821.2" y1="752" x2="832.7" y2="752" stroke="white" stroke-width="3.5"/>
+<line x1="821.2" y1="747" x2="821.2" y2="757" stroke="white" stroke-width="3.5"/>
+<line x1="832.7" y1="747" x2="832.7" y2="757" stroke="white" stroke-width="3.5"/>
+<line x1="821.2" y1="752" x2="832.7" y2="752" stroke="#111827" stroke-width="1.4"/>
+<line x1="821.2" y1="747" x2="821.2" y2="757" stroke="#111827" stroke-width="1.4"/>
+<line x1="832.7" y1="747" x2="832.7" y2="757" stroke="#111827" stroke-width="1.4"/>
+<text x="840.7" y="757.0" font-size="13" text-anchor="start" font-weight="600" fill="white" stroke="white" stroke-width="4" stroke-linejoin="round">22.80  (+8.57)</text><text x="840.7" y="757.0" font-size="13" text-anchor="start" font-weight="600" fill="#111827">22.80  (+8.57)</text>
+<line x1="24" y1="804" x2="976" y2="804" stroke="#e5e7eb"/>
+<text x="24" y="818" font-size="12" fill="#4b5563">Thick bar: frame p95, median of the runs used (3-4 runs). Thin bar: frame p50. Black line: range of the runs' frame p95.</text>
+<text x="24" y="836" font-size="12" fill="#4b5563">Value in brackets: change of frame p95 from the final configuration, in ms.</text>
+<text x="24" y="854" font-size="12" fill="#4b5563">Distinguishable: the change is at least 0.5 ms and larger than the larger run range of the two conditions.</text>
+<text x="24" y="872" font-size="12" fill="#4b5563">† hydration off also removes the actor capsule, actor animation budget and actor mesh fixed bounds.</text>
+<text x="24" y="890" font-size="12" fill="#4b5563">† ISKM off also removes ISKM fixed bounds, the track reserve and the far-hit rule.</text>
+<text x="24" y="908" font-size="12" fill="#4b5563">† background crowd off also removes the far-hit rule and the drawing of off-map records.</text></svg>

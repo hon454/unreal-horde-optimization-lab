@@ -1,45 +1,82 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="900" height="414" viewBox="0 0 900 414" font-family="Segoe UI, Arial, sans-serif" font-size="13">
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="552" viewBox="0 0 960 552" font-family="Segoe UI, Arial, sans-serif" font-size="13">
 <rect width="100%" height="100%" fill="white"/>
-<text x="450.0" y="26" text-anchor="middle" font-size="16" font-weight="600">Frame time of the ladder at N=10,000 (moving orb)</text>
-<text x="450.0" y="46" text-anchor="middle" font-size="12" fill="#555">gray: start · blue: earned frame time · orange: spent it on quality</text>
-<line x1="674.1" y1="62" x2="674.1" y2="384" stroke="#b45309" stroke-dasharray="6 4"/>
-<text x="678.1" y="58" fill="#b45309" font-size="11">16.7 ms (60 fps)</text>
-<line x1="660.3" y1="62" x2="660.3" y2="384" stroke="#16a34a" stroke-dasharray="6 4"/>
-<text x="664.3" y="58" fill="#16a34a" font-size="11">16.1 ms (median p95 + 0.6 ms margin)</text>
-<text x="280" y="87" text-anchor="end">1. Actor baseline</text>
-<rect x="290" y="72" width="460.0" height="20" fill="#6b7280"/>
-<rect x="290" y="95" width="460.0" height="6" fill="#6b7280" opacity="0.55"/>
-<line x1="732" y1="104" x2="740" y2="70" stroke="white" stroke-width="3"/>
-<line x1="724" y1="104" x2="732" y2="70" stroke="white" stroke-width="3"/>
-<text x="756.0" y="87">665.25</text>
-<text x="280" y="125" text-anchor="end">2. Mass, engine default path</text>
-<rect x="290" y="110" width="460.0" height="20" fill="#2563eb"/>
-<rect x="290" y="133" width="460.0" height="6" fill="#2563eb" opacity="0.55"/>
-<line x1="732" y1="142" x2="740" y2="108" stroke="white" stroke-width="3"/>
-<line x1="724" y1="142" x2="732" y2="108" stroke="white" stroke-width="3"/>
-<text x="756.0" y="125">36.78</text>
-<text x="280" y="163" text-anchor="end">3. Own separation logic</text>
-<rect x="290" y="148" width="325.4" height="20" fill="#2563eb"/>
-<rect x="290" y="171" width="285.5" height="6" fill="#2563eb" opacity="0.55"/>
-<text x="621.4" y="163">14.15</text>
-<text x="280" y="201" text-anchor="end">4. Animated instances + actor budget</text>
-<rect x="290" y="186" width="326.7" height="20" fill="#ea580c"/>
-<rect x="290" y="209" width="295.7" height="6" fill="#ea580c" opacity="0.55"/>
-<text x="622.7" y="201">14.21</text>
-<text x="280" y="239" text-anchor="end">5. Simulation LOD + entity pool</text>
-<rect x="290" y="224" width="333.9" height="20" fill="#2563eb"/>
-<rect x="290" y="247" width="301.1" height="6" fill="#2563eb" opacity="0.55"/>
-<text x="629.9" y="239">14.52</text>
-<text x="280" y="277" text-anchor="end">6. ISKM</text>
-<rect x="290" y="262" width="338.3" height="20" fill="#ea580c"/>
-<rect x="290" y="285" width="303.6" height="6" fill="#ea580c" opacity="0.55"/>
-<text x="634.3" y="277">14.71</text>
-<text x="280" y="315" text-anchor="end">7. Background crowd</text>
-<rect x="290" y="300" width="348.9" height="20" fill="#ea580c"/>
-<rect x="290" y="323" width="312.0" height="6" fill="#ea580c" opacity="0.55"/>
-<text x="644.9" y="315">15.17</text>
-<text x="280" y="353" text-anchor="end">8. Trim remaining cost</text>
-<rect x="290" y="338" width="327.3" height="20" fill="#2563eb"/>
-<rect x="290" y="361" width="293.7" height="6" fill="#2563eb" opacity="0.55"/>
-<text x="623.3" y="353">14.23</text>
-<text x="290" y="406" font-size="11" fill="#555">ms. thick bar = frame p95, thin bar = frame p50 (median of runs). Steps that exceed the axis are cut</text></svg>
+<text x="480.0" y="26" text-anchor="middle" font-size="16" font-weight="600">Frame time per step (N=10,000, moving orb)</text>
+<rect x="24" y="44" width="14" height="12" fill="#6b7280"/>
+<text x="46" y="54" font-size="12" fill="#374151">start (step 1)</text>
+<rect x="153.60000000000002" y="44" width="14" height="12" fill="#2563eb"/>
+<text x="175.60000000000002" y="54" font-size="12" fill="#374151">steps that cut cost</text>
+<rect x="315.20000000000005" y="44" width="14" height="12" fill="#ea580c"/>
+<text x="337.20000000000005" y="54" font-size="12" fill="#374151">steps that add representation</text>
+<line x1="540.8000000000001" y1="50" x2="556.8000000000001" y2="50" stroke="#b45309" stroke-width="2" stroke-dasharray="6 4"/>
+<text x="562.8000000000001" y="54" font-size="12" fill="#374151">16.7 ms (60 fps)</text>
+<line x1="24" y1="70" x2="40" y2="70" stroke="#16a34a" stroke-width="2" stroke-dasharray="6 4"/>
+<text x="46" y="74" font-size="12" fill="#374151">16.1 ms = 16.7 - 0.6 ms: step 8 passes the target check below this frame p95</text>
+<line x1="24" y1="96" x2="936" y2="96" stroke="#e5e7eb"/>
+<text x="24" y="112" font-size="13" fill="#4b5563">Scale A: 0-700 ms (step 1)</text>
+<line x1="300.0" y1="122" x2="300.0" y2="160" stroke="#eef0f3"/>
+<text x="300.0" y="112" font-size="11" fill="#6b7280" text-anchor="middle">0</text>
+<line x1="377.1" y1="122" x2="377.1" y2="160" stroke="#eef0f3"/>
+<text x="377.1" y="112" font-size="11" fill="#6b7280" text-anchor="middle">100</text>
+<line x1="454.3" y1="122" x2="454.3" y2="160" stroke="#eef0f3"/>
+<text x="454.3" y="112" font-size="11" fill="#6b7280" text-anchor="middle">200</text>
+<line x1="531.4" y1="122" x2="531.4" y2="160" stroke="#eef0f3"/>
+<text x="531.4" y="112" font-size="11" fill="#6b7280" text-anchor="middle">300</text>
+<line x1="608.6" y1="122" x2="608.6" y2="160" stroke="#eef0f3"/>
+<text x="608.6" y="112" font-size="11" fill="#6b7280" text-anchor="middle">400</text>
+<line x1="685.7" y1="122" x2="685.7" y2="160" stroke="#eef0f3"/>
+<text x="685.7" y="112" font-size="11" fill="#6b7280" text-anchor="middle">500</text>
+<line x1="762.9" y1="122" x2="762.9" y2="160" stroke="#eef0f3"/>
+<text x="762.9" y="112" font-size="11" fill="#6b7280" text-anchor="middle">600</text>
+<line x1="840.0" y1="122" x2="840.0" y2="160" stroke="#eef0f3"/>
+<text x="840.0" y="112" font-size="11" fill="#6b7280" text-anchor="middle">700</text>
+<text x="290" y="139" text-anchor="end" font-size="14">1. Actor baseline</text>
+<rect x="300" y="124" width="513.2" height="20" fill="#6b7280"/>
+<rect x="300" y="147" width="460.6" height="6" fill="#6b7280" opacity="0.55"/>
+<text x="805.2" y="139" font-size="14" text-anchor="end" fill="white"><tspan font-size="11" opacity="0.9">p50 597   </tspan><tspan font-weight="600">p95 665</tspan></text>
+<line x1="24" y1="168" x2="936" y2="168" stroke="#e5e7eb"/>
+<text x="24" y="184" font-size="13" fill="#4b5563">Scale B: 0-40 ms (steps 2-8)</text>
+<line x1="300.0" y1="194" x2="300.0" y2="460" stroke="#eef0f3"/>
+<text x="300.0" y="184" font-size="11" fill="#6b7280" text-anchor="middle">0</text>
+<line x1="435.0" y1="194" x2="435.0" y2="460" stroke="#eef0f3"/>
+<text x="435.0" y="184" font-size="11" fill="#6b7280" text-anchor="middle">10</text>
+<line x1="570.0" y1="194" x2="570.0" y2="460" stroke="#eef0f3"/>
+<text x="570.0" y="184" font-size="11" fill="#6b7280" text-anchor="middle">20</text>
+<line x1="705.0" y1="194" x2="705.0" y2="460" stroke="#eef0f3"/>
+<text x="705.0" y="184" font-size="11" fill="#6b7280" text-anchor="middle">30</text>
+<line x1="840.0" y1="194" x2="840.0" y2="460" stroke="#eef0f3"/>
+<text x="840.0" y="184" font-size="11" fill="#6b7280" text-anchor="middle">40</text>
+<line x1="525.5" y1="194" x2="525.5" y2="460" stroke="#b45309" stroke-width="1.5" stroke-dasharray="6 4"/>
+<line x1="517.3" y1="194" x2="517.3" y2="460" stroke="#16a34a" stroke-width="1.5" stroke-dasharray="6 4"/>
+<text x="290" y="211" text-anchor="end" font-size="14">2. Mass, engine default path</text>
+<rect x="300" y="196" width="496.6" height="20" fill="#2563eb"/>
+<rect x="300" y="219" width="459.8" height="6" fill="#2563eb" opacity="0.55"/>
+<text x="788.6" y="211" font-size="14" text-anchor="end" fill="white"><tspan font-size="11" opacity="0.9">p50 34.06   </tspan><tspan font-weight="600">p95 36.78</tspan></text>
+<text x="290" y="249" text-anchor="end" font-size="14">3. Own separation logic</text>
+<rect x="300" y="234" width="191.0" height="20" fill="#2563eb"/>
+<rect x="300" y="257" width="167.6" height="6" fill="#2563eb" opacity="0.55"/>
+<text x="483.0" y="249" font-size="14" text-anchor="end" fill="white"><tspan font-size="11" opacity="0.9">p50 12.41   </tspan><tspan font-weight="600">p95 14.15</tspan></text>
+<text x="290" y="287" text-anchor="end" font-size="14">4. Animated instances + actor budget</text>
+<rect x="300" y="272" width="191.8" height="20" fill="#ea580c"/>
+<rect x="300" y="295" width="173.6" height="6" fill="#ea580c" opacity="0.55"/>
+<text x="483.8" y="287" font-size="14" text-anchor="end" fill="white"><tspan font-size="11" opacity="0.9">p50 12.86   </tspan><tspan font-weight="600">p95 14.21</tspan></text>
+<text x="290" y="325" text-anchor="end" font-size="14">5. Simulation LOD + entity pool</text>
+<rect x="300" y="310" width="196.0" height="20" fill="#2563eb"/>
+<rect x="300" y="333" width="176.8" height="6" fill="#2563eb" opacity="0.55"/>
+<text x="488.0" y="325" font-size="14" text-anchor="end" fill="white"><tspan font-size="11" opacity="0.9">p50 13.09   </tspan><tspan font-weight="600">p95 14.52</tspan></text>
+<text x="290" y="363" text-anchor="end" font-size="14">6. ISKM</text>
+<rect x="300" y="348" width="198.6" height="20" fill="#ea580c"/>
+<rect x="300" y="371" width="178.2" height="6" fill="#ea580c" opacity="0.55"/>
+<text x="490.6" y="363" font-size="14" text-anchor="end" fill="white"><tspan font-size="11" opacity="0.9">p50 13.20   </tspan><tspan font-weight="600">p95 14.71</tspan></text>
+<text x="290" y="401" text-anchor="end" font-size="14">7. Background crowd</text>
+<rect x="300" y="386" width="204.8" height="20" fill="#ea580c"/>
+<rect x="300" y="409" width="183.1" height="6" fill="#ea580c" opacity="0.55"/>
+<text x="496.8" y="401" font-size="14" text-anchor="end" fill="white"><tspan font-size="11" opacity="0.9">p50 13.56   </tspan><tspan font-weight="600">p95 15.17</tspan></text>
+<text x="290" y="439" text-anchor="end" font-size="14">8. Trim remaining cost</text>
+<rect x="300" y="424" width="192.1" height="20" fill="#2563eb"/>
+<rect x="300" y="447" width="172.4" height="6" fill="#2563eb" opacity="0.55"/>
+<text x="484.1" y="439" font-size="14" text-anchor="end" fill="white"><tspan font-size="11" opacity="0.9">p50 12.77   </tspan><tspan font-weight="600">p95 14.23</tspan></text>
+<line x1="24" y1="462" x2="936" y2="462" stroke="#e5e7eb"/>
+<text x="24" y="478" font-size="12" fill="#4b5563">Thick bar: frame p95. Thin bar: frame p50. Each bar is the median of 3 runs. The two panels use different scales.</text>
+<text x="24" y="496" font-size="12" fill="#4b5563">Step 8 (final configuration): frame p95 14.23 ms, 2.47 ms below 16.7 ms.</text>
+<text x="24" y="514" font-size="12" fill="#4b5563">Same-condition rerun of step 8 (3 runs): frame p95 14.31 ms (range 14.30-14.38) against 14.23 ms in the ladder.</text>
+<text x="24" y="532" font-size="12" fill="#4b5563">Colors show what each step was meant to do, not what it measured.</text></svg>
