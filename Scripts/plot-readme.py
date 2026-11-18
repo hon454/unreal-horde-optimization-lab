@@ -503,14 +503,149 @@ def ablation():
 
 
 # ---------- 4. round trips with and without the minimum hold time ----------
+# The sketch above the bars illustrates the rule; it is not measured. Distances and the hold come from the source:
+HYD_SEEN = 35      # LabConfig.h FLabQuality::DefaultHydrateM: actor edge on screen (VisibleLODDistance[Medium])
+HYD_UNSEEN = 15    # LabCrowdSubsystem.cpp BaseLODDistance[Medium] = 1500: actor edge off screen. The screen edge has no margin
+HOLD_S = 2         # LabConfig.h FLabQuality::DefaultRepHoldMs (2000), ULabRepHoldProcessor
+# One entity's screen-edge crossings for the timeline (s, illustration). It starts off screen as an instance.
+EDGE_CROSS = [0.8, 1.4, 2.0, 4.3, 4.9]
+T_END = 6
+
+
+def hold_timeline(cross, hold):
+    """Representation segments (t0, t1, actor?) of one entity whose wanted representation flips at each crossing.
+    With hold > 0, a switch back to the representation it just left waits until hold seconds after the last switch."""
+    wanted = lambda t: sum(1 for c in cross if c <= t) % 2 == 1  # odd number of crossings: on screen, actor
+    events = sorted(set(cross + [c + hold for c in cross if hold]))
+    cur, last, t0, segs = False, -1e9, 0.0, []
+    for t in events:
+        if t > T_END:
+            break
+        if wanted(t) != cur and t - last >= hold - 1e-9:
+            segs.append((t0, t, cur))
+            cur, last, t0 = wanted(t), t, t
+    return segs + [(t0, T_END, cur)]
+
+
+def round_trip_times(segs):
+    """Switch times that undo the switch before within HOLD_S seconds (the batch metric's definition)."""
+    sw = [b for _, b, _ in segs[:-1]]
+    return [t for p, t in zip(sw, sw[1:]) if t - p < HOLD_S]
+
+
+def round_trip_sketch(o, y):
+    """Left: the actor area seen from above, to scale. Right: one entity's representation over time, rule off and on."""
+    ACT, INST = BLUE, TEAL
+    label(o, 32, y, "위에서 본 액터 구역(축척대로)", [])
+    label(o, 420, y, "한 개체의 표현(예)", [])
+    # left panel
+    sc = 6.0
+    cx, cy = 206, y + 40 + HYD_SEEN * sc
+    P = lambda r, deg: (cx + r * sc * math.sin(math.radians(deg)), cy - r * sc * math.cos(math.radians(deg)))
+    h = FOV_H / 2
+    (lx, ly), (rx, ry) = P(HYD_SEEN, -h), P(HYD_SEEN, h)
+    R = HYD_SEEN * sc
+    R15 = HYD_UNSEEN * sc
+    area = (f"M{cx},{cy} L{lx:.1f},{ly:.1f} A{R:.1f},{R:.1f} 0 0 1 {rx:.1f},{ry:.1f} Z "
+            f"M{cx - R15:.1f},{cy} A{R15:.1f},{R15:.1f} 0 1 1 {cx + R15:.1f},{cy} A{R15:.1f},{R15:.1f} 0 1 1 {cx - R15:.1f},{cy} Z")
+    o.append(f'<path d="{area}" fill="{ACT}" fill-opacity="0.13"/>')
+    o.append(f'<path d="M{lx:.1f},{ly:.1f} A{R:.1f},{R:.1f} 0 0 1 {rx:.1f},{ry:.1f}" fill="none" stroke="{ACT}" stroke-width="1.5"/>')
+    a15l, a15r = P(HYD_UNSEEN, -h), P(HYD_UNSEEN, h)
+    o.append(f'<path d="M{a15l[0]:.1f},{a15l[1]:.1f} A{R15:.1f},{R15:.1f} 0 1 0 {a15r[0]:.1f},{a15r[1]:.1f}" '
+             f'fill="none" stroke="{ACT}" stroke-width="1.5"/>')
+    for sgn in (-1, 1):  # screen edges, drawn past the actor area
+        ex, ey = P(HYD_SEEN + 6, sgn * h)
+        o.append(f'<line x1="{cx}" y1="{cy}" x2="{ex:.1f}" y2="{ey:.1f}" stroke="{SUB}" stroke-dasharray="5 4"/>')
+        (ax, ay), (bx, by) = P(HYD_UNSEEN, sgn * h), P(HYD_SEEN, sgn * h)
+        o.append(f'<line x1="{ax:.1f}" y1="{ay:.1f}" x2="{bx:.1f}" y2="{by:.1f}" stroke="{AMBER}" stroke-width="5" stroke-linecap="round"/>')
+    # one entity wandering across the right edge between 15 and 35 m on its way to the orb
+    pts, cross_pts, prev = [], [], None
+    for i in range(61):
+        f = i / 60
+        r = 34 - 18 * f
+        off = 2.0 * math.sin(f * 2.5 * 2 * math.pi + 0.6)  # metres across the edge, + is outside the screen
+        pts.append(P(r, h + math.degrees(off / r)))
+        if prev is not None and (prev > 0) != (off > 0):
+            cross_pts.append(P(r, h))
+        prev = off
+    o.append('<polyline points="' + " ".join(f"{px:.1f},{py:.1f}" for px, py in pts)
+             + f'" fill="none" stroke="{INK}" stroke-width="1.8"/>')
+    (x0, y0), (x1, y1) = pts[0], pts[-1]
+    o.append(f'<circle cx="{x0:.1f}" cy="{y0:.1f}" r="4" fill="{INK}"/>')
+    ang = math.atan2(y1 - pts[-3][1], x1 - pts[-3][0])
+    tip = lambda d, a: f"{x1 + d * math.cos(a):.1f},{y1 + d * math.sin(a):.1f}"
+    o.append(f'<path d="M{tip(8, ang)} L{tip(7, ang + 2.5)} L{tip(7, ang - 2.5)} Z" fill="{INK}"/>')
+    for px, py in cross_pts:
+        o.append(f'<circle cx="{px:.1f}" cy="{py:.1f}" r="4.5" fill="white" stroke="{PURPLE}" stroke-width="2.2"/>')
+    ox, oy = P(P1_BACK, 0)
+    o.append(f'<circle cx="{ox:.1f}" cy="{oy:.1f}" r="6" fill="{AMBER}"/>')
+    o.append(halo(ox + 10, oy + 5, "오브", fill=AMBER, weight="700"))
+    o.append(f'<path d="M{cx - 7},{cy + 9} L{cx + 7},{cy + 9} L{cx},{cy - 4} Z" fill="{INK}"/>')
+    o.append(halo(cx, cy + 32, "카메라", anchor="middle"))
+    tx, ty = P(HYD_SEEN, 0)
+    o.append(halo(tx, ty - 8, f"화면 안 {HYD_SEEN}m", fill=ACT, anchor="middle", weight="700"))
+    o.append(halo(cx - R15 - 6, cy + 18, f"화면 밖 {HYD_UNSEEN}m", fill=ACT, anchor="end", weight="700"))
+    ex, ey = P(HYD_SEEN + 6, -h)
+    o.append(halo(ex - 4, ey - 10, "화면 가장자리", fill=SUB, anchor="start"))
+    bottom_left = cy + R15 + 8
+    # right panel: legend, two rows, time axis
+    X0, X1 = 420, 768
+    TX = lambda t: X0 + (X1 - X0) * t / T_END
+    ly2 = y + 34
+    for i, (name, c) in enumerate((("액터", ACT), ("인스턴스", INST))):
+        lx2 = X0 + i * 100
+        o.append(f'<rect x="{lx2}" y="{ly2 - 13}" width="22" height="16" rx="3" fill="{c}"/>')
+        o.append(f'<text x="{lx2 + 30}" y="{ly2}" font-size="16" fill="{SUB}">{name}</text>')
+    off_segs, on_segs = hold_timeline(EDGE_CROSS, 0), hold_timeline(EDGE_CROSS, HOLD_S)
+    off_rt, on_rt = round_trip_times(off_segs), round_trip_times(on_segs)
+    assert len(off_segs) == len(EDGE_CROSS) + 1 and off_rt and not on_rt, (off_segs, on_segs)
+    ry0 = ly2 + 44
+    BH, RS = 24, 92
+    rows = [("최소 유지 시간 끔", off_segs, off_rt), ("최소 유지 시간 켬(최종 구성)", on_segs, on_rt)]
+    for k, (name, segs, rt) in enumerate(rows):
+        yy = ry0 + k * RS
+        o.append(f'<text x="{X0}" y="{yy}" font-size="16" font-weight="700">{esc(name)}</text>')
+        by_ = yy + 32
+        for a, b, act in segs:
+            o.append(f'<rect x="{TX(a):.1f}" y="{by_}" width="{TX(b) - TX(a):.1f}" height="{BH}" fill="{ACT if act else INST}"/>')
+        for a, _, _ in segs[1:]:
+            o.append(f'<line x1="{TX(a):.1f}" y1="{by_}" x2="{TX(a):.1f}" y2="{by_ + BH}" stroke="white" stroke-width="2"/>')
+        for t in EDGE_CROSS:  # where the entity crosses the screen edge
+            o.append(f'<line x1="{TX(t):.1f}" y1="{by_ + BH + 3}" x2="{TX(t):.1f}" y2="{by_ + BH + 10}" stroke="{SUB}" stroke-width="1.5"/>')
+        if rt:
+            for t in rt:
+                o.append(f'<circle cx="{TX(t):.1f}" cy="{by_ - 10}" r="4.5" fill="white" stroke="{PURPLE}" stroke-width="2.2"/>')
+            o.append(f'<text x="{X1}" y="{yy}" text-anchor="end" font-size="16" font-weight="700" fill="{PURPLE}">왕복 전환 {len(rt)}건</text>')
+        else:
+            o.append(f'<text x="{X1}" y="{yy}" text-anchor="end" font-size="16" font-weight="700" fill="{SUB}">왕복 전환 0건</text>')
+            a = segs[1][0]
+            o.append(f'<line x1="{TX(a):.1f}" y1="{by_ - 10}" x2="{TX(a + HOLD_S):.1f}" y2="{by_ - 10}" stroke="{AMBER}" stroke-width="2"/>')
+            for t in (a, a + HOLD_S):
+                o.append(f'<line x1="{TX(t):.1f}" y1="{by_ - 15}" x2="{TX(t):.1f}" y2="{by_ - 5}" stroke="{AMBER}" stroke-width="2"/>')
+            o.append(halo(TX(a + HOLD_S) + 6, by_ - 5, f"{HOLD_S}초 유지", fill=AMBER, weight="700"))
+    ax_y = ry0 + RS + 32 + BH + 30
+    for t in range(T_END + 1):
+        o.append(f'<text x="{TX(t):.1f}" y="{ax_y}" text-anchor="middle" font-size="16" fill="{SUB}">{t}</text>')
+    o.append(f'<text x="{X1}" y="{ax_y + 22}" text-anchor="end" font-size="16" fill="{SUB}">초</text>')
+    y = max(bottom_left, ax_y + 22) + 30
+    foot = [f"· 주황 선: 넘으면 표현이 바뀌는 화면 가장자리({HYD_UNSEEN}~{HYD_SEEN}m)",
+            "· 보라 고리: 가장자리를 넘은 곳, 왕복 전환",
+            "· 오른쪽은 측정값이 아니라 한 개체의 예"]
+    return foot_lines(o, y, foot)
+
+
 def round_trips():
     groups = [("이동 장면", "V0"), ("정지 장면", "V1")]
     lim = DOC["equivalence"]["round_trip_max_per_sec"]
     o = []
-    y = title(o, "최소 유지 시간을 끄면 생기는 왕복 전환",
-              ["왕복 전환: 표현 경계를 넘은 개체가 2초 안에 같은 경계를 반대로 되넘은 수(초당)",
-               "호드 총수 1만, 오브 시점 카메라, 세 번 잰 중앙값. 막대 위의 검은 선: 세 번 잰 범위",
-               "최소 유지 시간: 한 번 바뀐 개체를 2초 동안 바로 전의 표현으로 되돌리지 않는다"])
+    y = title(o, "화면 가장자리의 왕복 전환과 최소 유지 시간",
+              [f"왕복 전환: 표현 경계를 넘은 개체가 {HOLD_S}초 안에 같은 경계를 반대로 되넘은 일",
+               f"최소 유지 시간: 한 번 바뀐 개체를 {HOLD_S}초 동안 바로 전의 표현으로 되돌리지 않는다"])
+    y = round_trip_sketch(o, y + 44)
+    o.append(f'<line x1="32" y1="{y}" x2="{W - 32}" y2="{y}" stroke="{LINE}"/>')
+    label(o, 32, y + 36, "측정: 초당 왕복 전환",
+          ["호드 총수 1만, 오브 시점 카메라, 세 번 잰 중앙값. 막대 위의 검은 선: 세 번 잰 범위"])
+    y += 36 + 21
     LX, X0, X1 = 32, 330, 700
     vmax = 5.0
     peak = max(float(S[f"{sp}-a8hold"]["sw_round_all_max"]) for _, sp in groups)
