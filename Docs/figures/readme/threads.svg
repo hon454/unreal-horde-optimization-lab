@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="990" viewBox="0 0 800 990" font-family="Malgun Gothic, Apple SD Gothic Neo, Noto Sans KR, Segoe UI, sans-serif" font-size="16" fill="#111827">
+<rect x="0.5" y="0.5" width="799" height="989" rx="12" fill="#ffffff" stroke="#e5e7eb"/>
+<text x="32" y="46" font-size="22" font-weight="700">단계마다 어느 스레드가 프레임을 정하나</text>
+<text x="32" y="74" font-size="16" fill="#4b5563">호드 총수 1만, 이동 장면, 오브 시점 카메라, 세 번 잰 중앙값(ms, 각 시간의 p50)</text>
+<rect x="32" y="96" width="22" height="12" rx="2" fill="#2563eb"/>
+<text x="62" y="108" font-size="16">게임 스레드</text>
+<rect x="174.8" y="96" width="22" height="12" rx="2" fill="#0d9488"/>
+<text x="204.8" y="108" font-size="16">렌더 스레드</text>
+<rect x="317.6" y="96" width="22" height="12" rx="2" fill="#db2777"/>
+<text x="347.6" y="108" font-size="16">GPU</text>
+<text x="402.0" y="108" font-size="16" fill="#4b5563">굵은 값: 병목(가장 느린 쪽)</text>
+<line x1="32" y1="129" x2="54" y2="129" stroke="#b45309" stroke-width="2" stroke-dasharray="5 4"/>
+<text x="62" y="134" font-size="16">16.7ms(60fps)</text>
+<text x="32" y="164" font-size="16"><tspan font-weight="700">단계 1 액터 기준선</tspan><tspan fill="#4b5563">  축 밖: 게임 스레드 581, 렌더 스레드 28.7, GPU 54.7, 병목 게임 스레드</tspan></text>
+<line x1="32.0" y1="212" x2="32.0" y2="832" stroke="#eef0f3"/>
+<text x="32.0" y="850" font-size="16" fill="#4b5563" text-anchor="middle">0</text>
+<line x1="184.0" y1="212" x2="184.0" y2="832" stroke="#eef0f3"/>
+<text x="184.0" y="850" font-size="16" fill="#4b5563" text-anchor="middle">5</text>
+<line x1="336.0" y1="212" x2="336.0" y2="832" stroke="#eef0f3"/>
+<text x="336.0" y="850" font-size="16" fill="#4b5563" text-anchor="middle">10</text>
+<line x1="488.0" y1="212" x2="488.0" y2="832" stroke="#eef0f3"/>
+<text x="488.0" y="850" font-size="16" fill="#4b5563" text-anchor="middle">15</text>
+<line x1="640.0" y1="212" x2="640.0" y2="832" stroke="#eef0f3"/>
+<text x="640.0" y="850" font-size="16" fill="#4b5563" text-anchor="middle">20</text>
+<text x="32" y="206" font-size="16" font-weight="700">단계 2 Mass, 엔진 기본 경로<tspan font-weight="400" fill="#4b5563">  프레임 p50 34.1</tspan></text>
+<rect x="32" y="214" width="548.0" height="11" rx="2" fill="#2563eb"/>
+<text x="586.0" y="225" font-size="14" fill="#2563eb" font-weight="700">18 병목</text>
+<rect x="32" y="228" width="221.7" height="11" rx="2" fill="#0d9488" fill-opacity="0.45"/>
+<text x="259.7" y="239" font-size="14" fill="#0d9488">7.29</text>
+<rect x="32" y="242" width="371.8" height="11" rx="2" fill="#db2777" fill-opacity="0.45"/>
+<text x="409.8" y="253" font-size="14" fill="#db2777">12.2</text>
+<line x1="539.7" y1="210" x2="539.7" y2="258" stroke="#b45309" stroke-width="2" stroke-dasharray="5 4"/>
+<text x="32" y="288" font-size="16" font-weight="700">단계 3 자체 밀어내기<tspan font-weight="400" fill="#4b5563">  프레임 p50 12.4</tspan></text>
+<rect x="32" y="296" width="345.2" height="11" rx="2" fill="#2563eb"/>
+<text x="383.2" y="307" font-size="14" fill="#2563eb" font-weight="700">11.4 병목</text>
+<rect x="32" y="310" width="172.3" height="11" rx="2" fill="#0d9488" fill-opacity="0.45"/>
+<text x="210.3" y="321" font-size="14" fill="#0d9488">5.67</text>
+<rect x="32" y="324" width="214.9" height="11" rx="2" fill="#db2777" fill-opacity="0.45"/>
+<text x="252.9" y="335" font-size="14" fill="#db2777">7.07</text>
+<line x1="539.7" y1="292" x2="539.7" y2="340" stroke="#b45309" stroke-width="2" stroke-dasharray="5 4"/>
+<text x="32" y="370" font-size="16" font-weight="700">단계 4 애니메이션 표현<tspan font-weight="400" fill="#4b5563">  프레임 p50 12.9</tspan></text>
+<rect x="32" y="378" width="359.5" height="11" rx="2" fill="#2563eb"/>
+<text x="397.5" y="389" font-size="14" fill="#2563eb" font-weight="700">11.8 병목</text>
+<rect x="32" y="392" width="171.0" height="11" rx="2" fill="#0d9488" fill-opacity="0.45"/>
+<text x="209.0" y="403" font-size="14" fill="#0d9488">5.63</text>
+<rect x="32" y="406" width="217.1" height="11" rx="2" fill="#db2777" fill-opacity="0.45"/>
+<text x="255.1" y="417" font-size="14" fill="#db2777">7.14</text>
+<line x1="539.7" y1="374" x2="539.7" y2="422" stroke="#b45309" stroke-width="2" stroke-dasharray="5 4"/>
+<text x="32" y="452" font-size="16" font-weight="700">단계 5 Simulation LOD + 엔티티 풀<tspan font-weight="400" fill="#4b5563">  프레임 p50 13.1</tspan></text>
+<rect x="32" y="460" width="366.8" height="11" rx="2" fill="#2563eb"/>
+<text x="404.8" y="471" font-size="14" fill="#2563eb" font-weight="700">12.1 병목</text>
+<rect x="32" y="474" width="163.5" height="11" rx="2" fill="#0d9488" fill-opacity="0.45"/>
+<text x="201.5" y="485" font-size="14" fill="#0d9488">5.38</text>
+<rect x="32" y="488" width="217.5" height="11" rx="2" fill="#db2777" fill-opacity="0.45"/>
+<text x="255.5" y="499" font-size="14" fill="#db2777">7.15</text>
+<line x1="539.7" y1="456" x2="539.7" y2="504" stroke="#b45309" stroke-width="2" stroke-dasharray="5 4"/>
+<text x="32" y="534" font-size="16" font-weight="700">단계 6 ISKM<tspan font-weight="400" fill="#4b5563">  프레임 p50 13.2</tspan></text>
+<rect x="32" y="542" width="374.2" height="11" rx="2" fill="#2563eb"/>
+<text x="412.2" y="553" font-size="14" fill="#2563eb" font-weight="700">12.3 병목</text>
+<rect x="32" y="556" width="117.5" height="11" rx="2" fill="#0d9488" fill-opacity="0.45"/>
+<text x="155.5" y="567" font-size="14" fill="#0d9488">3.87</text>
+<rect x="32" y="570" width="170.2" height="11" rx="2" fill="#db2777" fill-opacity="0.45"/>
+<text x="208.2" y="581" font-size="14" fill="#db2777">5.60</text>
+<line x1="539.7" y1="538" x2="539.7" y2="586" stroke="#b45309" stroke-width="2" stroke-dasharray="5 4"/>
+<text x="32" y="616" font-size="16" font-weight="700">단계 7 배경 무리<tspan font-weight="400" fill="#4b5563">  프레임 p50 13.6</tspan></text>
+<rect x="32" y="624" width="385.7" height="11" rx="2" fill="#2563eb"/>
+<text x="423.7" y="635" font-size="14" fill="#2563eb" font-weight="700">12.7 병목</text>
+<rect x="32" y="638" width="121.0" height="11" rx="2" fill="#0d9488" fill-opacity="0.45"/>
+<text x="159.0" y="649" font-size="14" fill="#0d9488">3.98</text>
+<rect x="32" y="652" width="202.1" height="11" rx="2" fill="#db2777" fill-opacity="0.45"/>
+<text x="240.1" y="663" font-size="14" fill="#db2777">6.65</text>
+<line x1="539.7" y1="620" x2="539.7" y2="668" stroke="#b45309" stroke-width="2" stroke-dasharray="5 4"/>
+<text x="32" y="698" font-size="16" font-weight="700">단계 8 남은 비용 줄이기<tspan font-weight="400" fill="#4b5563">  프레임 p50 12.8</tspan></text>
+<rect x="32" y="706" width="361.2" height="11" rx="2" fill="#2563eb"/>
+<text x="399.2" y="717" font-size="14" fill="#2563eb" font-weight="700">11.9 병목</text>
+<rect x="32" y="720" width="125.2" height="11" rx="2" fill="#0d9488" fill-opacity="0.45"/>
+<text x="163.2" y="731" font-size="14" fill="#0d9488">4.12</text>
+<rect x="32" y="734" width="187.4" height="11" rx="2" fill="#db2777" fill-opacity="0.45"/>
+<text x="225.4" y="745" font-size="14" fill="#db2777">6.16</text>
+<line x1="539.7" y1="702" x2="539.7" y2="750" stroke="#b45309" stroke-width="2" stroke-dasharray="5 4"/>
+<line x1="32" y1="762" x2="768" y2="762" stroke="#e5e7eb"/>
+<text x="32" y="780" font-size="16" font-weight="700">단계 8에서 하이드레이션을 끈 조건<tspan font-weight="400" fill="#4b5563">  프레임 p50 6.60</tspan></text>
+<rect x="32" y="788" width="159.0" height="11" rx="2" fill="#2563eb" fill-opacity="0.45"/>
+<text x="197.0" y="799" font-size="14" fill="#2563eb">5.23</text>
+<rect x="32" y="802" width="81.8" height="11" rx="2" fill="#0d9488" fill-opacity="0.45"/>
+<text x="119.8" y="813" font-size="14" fill="#0d9488">2.69</text>
+<rect x="32" y="816" width="188.8" height="11" rx="2" fill="#db2777"/>
+<text x="226.8" y="827" font-size="14" fill="#db2777" font-weight="700">6.21 병목</text>
+<line x1="539.7" y1="784" x2="539.7" y2="832" stroke="#b45309" stroke-width="2" stroke-dasharray="5 4"/>
+<line x1="32" y1="862" x2="768" y2="862" stroke="#e5e7eb"/>
+<text x="32" y="886" font-size="16" fill="#4b5563">단계 2의 프레임 p50(34.1ms)은 세 시간보다 길다. 게임 스레드가 작업자 스레드 하나의 Mass</text>
+<text x="32" y="909" font-size="16" fill="#4b5563">Avoidance를 기다린다.</text>
+<text x="32" y="932" font-size="16" fill="#4b5563">하이드레이션을 끄면 액터 캡슐, Animation Budget Allocator, 액터 메시 고정 바운드도 함께</text>
+<text x="32" y="955" font-size="16" fill="#4b5563">빠진다. 그래서 참고 값이다.</text>
+</svg>

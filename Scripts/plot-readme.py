@@ -323,6 +323,76 @@ def num_list(nums):
     return " ".join(parts + [f"{nums[-1]}{'는' if vowel(nums[-1]) else '은'}"])
 
 
+# ---------- 1b. thread times per step ----------
+# game_p50_ms / render_p50_ms / gpu_p50_ms = CSV GameThreadTime / RenderThreadTime / GPUTime medians (summarize.py).
+# bottleneck = summarize.py's slowest of the three. Step 1 is off the axis and is written as text. The hydration-off row is a
+# mixed row (ABL_MIXED) and is shown only to show the bottleneck moving to the GPU.
+THREADS = [("game", "게임 스레드", "game_p50_ms", BLUE), ("render", "렌더 스레드", "render_p50_ms", TEAL), ("gpu", "GPU", "gpu_p50_ms", PINK)]
+
+
+def threads():
+    o = []
+    y = title(o, "단계마다 어느 스레드가 프레임을 정하나",
+              ["호드 총수 1만, 이동 장면, 오브 시점 카메라, 세 번 잰 중앙값(ms, 각 시간의 p50)"])
+    y += 34
+    lx = 32
+    for _, name, _, c in THREADS:
+        o.append(f'<rect x="{lx}" y="{y - 12}" width="22" height="12" rx="2" fill="{c}"/>')
+        o.append(f'<text x="{lx + 30}" y="{y}" font-size="16">{esc(name)}</text>')
+        lx += 30 + text_w(name) + 28
+    o.append(f'<text x="{lx}" y="{y}" font-size="16" fill="{SUB}">굵은 값: 병목(가장 느린 쪽)</text>')
+    y += 26
+    o.append(f'<line x1="32" y1="{y - 5}" x2="54" y2="{y - 5}" stroke="{AMBER}" stroke-width="2" stroke-dasharray="5 4"/>')
+    o.append(f'<text x="62" y="{y}" font-size="16">16.7ms(60fps)</text>')
+    X0, X1, AX, TICK = 32, 640, 20.0, 5
+    sc = (X1 - X0) / AX
+    BH, GAP = 11, 3
+    RH = 26 + 3 * (BH + GAP) + 14
+    rows = [(f"단계 {n} {STEP_TEXT[n][0]}", cond(f"s{n}")) for n, _ in STEPS if n != 1]
+    rows.append(("단계 8에서 하이드레이션을 끈 조건", cond("a8hyd")))
+    y += 30
+    s1 = cond("s1")
+    assert all(val(s1, col) > AX for _, _, col, _ in THREADS), "step 1 is written as text because it is off the axis"
+    o.append(f'<text x="32" y="{y}" font-size="16"><tspan font-weight="700">단계 1 {esc(STEP_TEXT[1][0])}</tspan>'
+             f'<tspan fill="{SUB}">  축 밖: 게임 스레드 {fmt(val(s1, "game_p50_ms"))}, 렌더 스레드 {fmt(val(s1, "render_p50_ms"))}, '
+             f'GPU {fmt(val(s1, "gpu_p50_ms"))}, 병목 {BOT_NAME[S[s1]["bottleneck"]]}</tspan></text>')
+    y += 22
+    top = y
+    bottom = top + RH * len(rows)
+    for k in range(int(AX // TICK) + 1):
+        gx = X0 + k * TICK * sc
+        o.append(f'<line x1="{gx:.1f}" y1="{top + 26}" x2="{gx:.1f}" y2="{bottom - 10}" stroke="#eef0f3"/>')
+        o.append(f'<text x="{gx:.1f}" y="{bottom + 8}" font-size="16" fill="{SUB}" text-anchor="middle">{k * TICK:g}</text>')
+    bx = X0 + BUDGET_MS * sc
+    ry = top
+    for i, (name, c0) in enumerate(rows):
+        if i == len(rows) - 1:
+            o.append(f'<line x1="32" y1="{ry + 2}" x2="{W - 32}" y2="{ry + 2}" stroke="{LINE}"/>')
+        bot = S[c0]["bottleneck"]
+        o.append(f'<text x="32" y="{ry + 20}" font-size="16" font-weight="700">{esc(name)}'
+                 f'<tspan font-weight="400" fill="{SUB}">  프레임 p50 {fmt(val(c0, "frame_p50_ms"))}</tspan></text>')
+        by = ry + 28
+        for key, _, col, c in THREADS:
+            v = val(c0, col)
+            assert v <= AX, (c0, col, v)
+            hit = key == bot
+            op = "" if hit else ' fill-opacity="0.45"'
+            wt = ' font-weight="700"' if hit else ""
+            tag = " 병목" if hit else ""
+            o.append(f'<rect x="{X0}" y="{by}" width="{v * sc:.1f}" height="{BH}" rx="2" fill="{c}"{op}/>')
+            o.append(f'<text x="{X0 + v * sc + 6:.1f}" y="{by + BH}" font-size="14" fill="{c}"{wt}>{fmt(v)}{tag}</text>')
+            by += BH + GAP
+        o.append(f'<line x1="{bx:.1f}" y1="{ry + 24}" x2="{bx:.1f}" y2="{by + 2}" stroke="{AMBER}" stroke-width="2" stroke-dasharray="5 4"/>')
+        ry += RH
+    y = bottom + 34
+    o.append(f'<line x1="32" y1="{y - 14}" x2="{W - 32}" y2="{y - 14}" stroke="{LINE}"/>')
+    s2 = cond("s2")
+    foot = [f"단계 2의 프레임 p50({fmt(val(s2, 'frame_p50_ms'))}ms)은 세 시간보다 길다. 게임 스레드가 작업자 스레드 하나의 Mass Avoidance를 기다린다.",
+            ABL_MIXED["a8hyd"] + " 그래서 참고 값이다."]
+    y = foot_lines(o, y + 10, foot)
+    write("threads.svg", svg(y + 12, o))
+
+
 # ---------- 2. resources per step ----------
 # mem_total_mb   = CSV PhysicalUsedMB = process working set (CsvProfiler.cpp:4189, WindowsPlatformMemory.cpp:342)
 # gpu_mem_p50    = CSV GPUMem/LocalUsedMB = DXGI local CurrentUsage of this process (RHIStats.cpp:91, DXGIUtilities.cpp:111)
@@ -870,6 +940,7 @@ def scenario():
 if __name__ == "__main__":
     scenario()
     ladder()
+    threads()
     resources()
     ablation()
     round_trips()
