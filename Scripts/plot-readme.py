@@ -2,8 +2,7 @@
 # Run from anywhere: py -3 -I Scripts/plot-readme.py
 # Measured values come from the latest full batch, except the entity pool figure, which reads a reference batch and is never
 # joined to full-batch values in one figure. The figures name neither batch nor condition label (AGENTS.md "문서와 글").
-#   Measurements/Full4/summary.csv     ladder, resources, technique contributions, round trips (horde 10000, orb camera P1)
-#   Measurements/Full4/runs.csv        run ranges of the resource figure: the runs listed in summary.csv runs_used (r5 r6 r21 ...)
+#   Measurements/Full4/summary.csv     ladder, thread times, technique contributions, round trips (horde 10000, orb camera P1)
 #   Measurements/Pool2/timeline.csv    entity pool on (s8) and off (a8pool) over a 960 s window, one run each, 1-minute bins
 #   Scripts/full-conditions.json       step roles, condition kinds and groups, warm-up and window, equivalence limits
 # "Distinguishable" is plot.py's distinguishable(): the batch figures and these figures use one rule (measurement.md "차이 판정").
@@ -19,7 +18,6 @@ import sys
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.normpath(os.path.join(HERE, ".."))
 sys.path.insert(0, HERE)
-import batch_rules  # noqa: E402  base_run(): original runs and A/A runs
 import lab_conditions as lc  # noqa: E402
 import plot  # noqa: E402  distinguishable(), BUDGET_MS, FULL_ABL_MIXED
 
@@ -218,24 +216,6 @@ def hatch_key(o, y):
              f'나머지는 {ROLE_TEXT["earn"]}와 {ROLE_TEXT["start"]}(단계 1)이다</text>')
 
 
-def run_values(c, col):
-    """Per-run values behind a summary row: the runs summarize.py used (summary.csv runs_used, e.g. r5 r6 r21).
-
-    Reading runs_used keeps the second retries (run 21 and up) and leaves out the A/A runs (11-13) and replaced slow runs.
-    Every used run must be an original run or its rerun (batch_rules.base_run 1..9), never an A/A run.
-    """
-    used = S[c]["runs_used"].split()
-    assert used and all(1 <= batch_rules.base_run(u[1:]) <= batch_rules.RERUN_RUN_MAX for u in used), (c, used)
-    out = []
-    with open(os.path.join(ROOT, "Measurements", BATCH, "runs.csv"), encoding="utf-8") as f:
-        for r in csv.DictReader(f):
-            if (r["variant"] == c and int(r["n"]) == N and r["preset"] == PRESET
-                    and r["label"].rsplit("-", 1)[1] in used and r[col]):
-                out.append(float(r[col]))
-    assert len(out) == len(used), (c, col, used, out)
-    return out
-
-
 # ---------- 1. ladder ----------
 def ladder():
     o = [HATCH]
@@ -323,7 +303,7 @@ def num_list(nums):
     return " ".join(parts + [f"{nums[-1]}{'는' if vowel(nums[-1]) else '은'}"])
 
 
-# ---------- 1b. thread times per step ----------
+# ---------- 2. thread times per step ----------
 # game_p50_ms / render_p50_ms / gpu_p50_ms = CSV GameThreadTime / RenderThreadTime / GPUTime medians (summarize.py).
 # bottleneck = summarize.py's slowest of the three. Step 1 is off the axis and is written as text. The hydration-off row is a
 # mixed row (ABL_MIXED) and is shown only to show the bottleneck moving to the GPU.
@@ -391,80 +371,6 @@ def threads():
             ABL_MIXED["a8hyd"] + " 그래서 참고 값이다."]
     y = foot_lines(o, y + 10, foot)
     write("threads.svg", svg(y + 12, o))
-
-
-# ---------- 2. resources per step ----------
-# mem_total_mb   = CSV PhysicalUsedMB = process working set (CsvProfiler.cpp:4189, WindowsPlatformMemory.cpp:342)
-# gpu_mem_p50    = CSV GPUMem/LocalUsedMB = DXGI local CurrentUsage of this process (RHIStats.cpp:91, DXGIUtilities.cpp:111)
-# draw_calls_p50 = CSV RHI/DrawCalls per frame (GPUProfiler.cpp:2107)
-RESOURCES = [("프로세스 메모리", "작업 집합, MB", "mem_total_mb", BLUE),
-             ("GPU 메모리", "VRAM 사용량, MB", "gpu_mem_p50", PINK),
-             ("드로우 콜", "프레임당 개수", "draw_calls_p50", TEAL)]
-# Rises after step 3, named in the note with the step's name. resources() checks that each one is larger than both run ranges
-# and that no other step after step 3 rises by more than both ranges.
-RISES = {"mem_total_mb": [7], "gpu_mem_p50": [6, 7, 8], "draw_calls_p50": [6, 8]}
-RISE_FROM = 4
-
-
-def resources():
-    span = {}  # (step, col) -> (min, max) over the used runs
-    for num, _ in STEPS:
-        for _, _, col, _ in RESOURCES:
-            vs = run_values(cond(f"s{num}"), col)
-            assert abs(statistics.median(vs) - val(cond(f"s{num}"), col)) < 0.01, (num, col, vs)
-            span[num, col] = (min(vs), max(vs))
-    width = lambda n, col: span[n, col][1] - span[n, col][0]
-    for _, _, col, _ in RESOURCES:  # a named rise must be larger than both run ranges, and every such rise is named (measurement.md rule)
-        found = [n for n, _ in STEPS if n >= RISE_FROM
-                 and val(cond(f"s{n}"), col) - val(cond(f"s{n - 1}"), col) > max(width(n - 1, col), width(n, col))]
-        assert found == RISES[col], (col, found, RISES[col])
-    mem_spread = max(width(n, "mem_total_mb") for n, _ in STEPS)
-
-    o = [HATCH]
-    y = title(o, "단계마다 쓰는 메모리와 드로우 콜",
-              ["호드 총수 1만, 이동 장면, 오브 시점 카메라, 세 번 잰 중앙값",
-               "막대 둘레의 옅은 띠: 세 번 잰 범위(좁아서 2px가 안 되는 범위는 그리지 않았다)"])
-    LX, CX, CR = 32, 330, W - 32
-    CW = (CR - CX) / 3
-    BWMAX = 70
-    y += 44
-    for i, (name, unit, _, c) in enumerate(RESOURCES):
-        x = CX + i * CW
-        o.append(f'<text x="{x:.1f}" y="{y}" font-size="17" font-weight="700" fill="{c}">{esc(name)}</text>')
-        o.append(f'<text x="{x:.1f}" y="{y + 21}" font-size="16" fill="{SUB}">{esc(unit)}</text>')
-    y += 38
-    RH, BAR = 36, 18
-    RANGE_MIN_PX = 2.0  # narrower ranges are not drawn (stated in the subtitle)
-    for num, _ in STEPS:
-        c0 = cond(f"s{num}")
-        o.append(f'<line x1="32" y1="{y}" x2="{W - 32}" y2="{y}" stroke="{LINE}"/>')
-        o.append(f'<text x="{LX}" y="{y + 24}" font-size="16" font-weight="700">단계 {num} {esc(STEP_TEXT[num][0])}</text>')
-        for i, (_, _, col, c) in enumerate(RESOURCES):
-            x = CX + i * CW
-            sc = BWMAX / val(cond("s1"), col)
-            v = val(c0, col)
-            lo, hi = span[num, col]
-            by = y + 9
-            if (hi - lo) * sc >= RANGE_MIN_PX:  # pale band of the same colour behind the bar, min to max
-                o.append(f'<rect x="{x + lo * sc:.1f}" y="{by - 4}" width="{(hi - lo) * sc:.1f}" height="{BAR + 8}" '
-                         f'rx="4" fill="{c}" fill-opacity="0.28"/>')
-                end = max(v, hi) * sc
-            else:
-                end = v * sc
-            bar(o, x, by, max(v * sc, 1.5), BAR, c, num)
-            o.append(f'<text x="{x + end + 7:.1f}" y="{by + 15}" font-size="16" font-weight="700" fill="{c}">{round(v):,}</text>')
-        y += RH
-    o.append(f'<line x1="32" y1="{y}" x2="{W - 32}" y2="{y}" stroke="{LINE}"/>')
-    y += 32
-    o.append(f'<text x="32" y="{y}" font-size="16" font-weight="700">단계 {RISE_FROM}부터 다시 느는 단계(세 번 잰 범위보다 큰 증가)</text>')
-    for name, _, col, _ in RESOURCES:
-        y += 22
-        o.append(f'<text x="32" y="{y}" font-size="16" fill="{SUB}">{esc(name)}: '
-                 + ", ".join(f"단계 {n} {esc(STEP_TEXT[n][0])}" for n in RISES[col]) + "</text>")
-    y += 30
-    o.append(f'<text x="32" y="{y}" font-size="16" fill="{SUB}">프로세스 메모리는 같은 단계에서도 실행마다 최대 약 {round(mem_spread, -1):.0f}MB 달랐다.</text>')
-    hatch_key(o, y + 30)
-    write("resources.svg", svg(y + 52, o))
 
 
 # ---------- 3. technique contributions ----------
@@ -941,7 +847,6 @@ if __name__ == "__main__":
     scenario()
     ladder()
     threads()
-    resources()
     ablation()
     round_trips()
     pool()

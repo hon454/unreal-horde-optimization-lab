@@ -20,7 +20,7 @@
 | `summarize.py` | 프레임 CSV → `Measurements/<묶음>/runs.csv`, `summary.csv`. v2 W12부터 `clock.csv`의 CPU 클럭 열(`cpu_perf_mean` 등)을 붙이고, 총괄 묶음에는 `slow_mark`(runs.csv)와 `runs_used`, `slow_note`(summary.csv)를 붙인다. 느린 실행을 다시 잰 실행이 대신한다 |
 | `spikes.py` | 묶음의 주기 스파이크 검사 |
 | `plot.py` | `summary.csv` → `Docs/figures/`. `--batch Full4`는 사다리, 기법별 기여(이동·정지), 최대 N 그림을 그린다. 구별 판정은 함수 `distinguishable()` 하나다(`plot-readme.py`, `build-site.py`도 이 함수를 쓴다). 최대 N 표(`full-n-at-60fps.csv`와 출력)는 각 점의 겹친 쌍(`overlap_points`)을 함께 적고, `equivalence.csv`의 기능 미달(`UNMET`) 점을 보간에서 빼 `excluded`("excluded: N=… unmet")와 범위(`n_p95_bound`)를 적는다. 최대 N 그림에는 `s1opt` 선이 있고 뺀 점은 속이 빈 원이다. 탑뷰(P2) 한 점은 그리지 않는다(`--out <폴더>`로 확인용 출력, `--equivalence <csv>`) |
-| `plot-readme.py` | 루트 README의 그림(`Docs/figures/readme/`): 시나리오, 사다리(1만의 프레임 p95와 16.7ms까지의 여유), 자원, 기법별 기여, 왕복 전환, 엔티티 풀 긴 실행. 가장 최근 총괄 묶음(`Full4`)의 `summary.csv`와 `runs.csv`(`runs_used`의 실행), 엔티티 풀은 참고 묶음 `Pool2`의 `timeline.csv`를 읽는다. 그림 글자에는 묶음 이름과 조건 라벨을 쓰지 않는다 |
+| `plot-readme.py` | 루트 README의 그림(`Docs/figures/readme/`): 시나리오, 사다리(1만의 프레임 p95와 16.7ms까지의 여유), 스레드 시간, 기법별 기여, 왕복 전환, 엔티티 풀 긴 실행. 가장 최근 총괄 묶음(`Full4`)의 `summary.csv`, 엔티티 풀은 참고 묶음 `Pool2`의 `timeline.csv`를 읽는다. 그림 글자에는 묶음 이름과 조건 라벨을 쓰지 않는다 |
 | `build-site.py` | 사이트 데이터(`Site/data.js`)와 단계 화면 사본(`Site/assets/stepN.webp`). 같은 묶음과 `plot-readme.py`의 이름·규칙을 쓴다. `--out <폴더>`면 `Site/` 대신 그 폴더에 쓴다(확인용). 아직 없는 글은 `ready: false`로 자리만 둔다 |
 | `plot-code-tour.py` | 코드 투어의 한 프레임 흐름 그림(`Docs/figures/code-tour/frame-flow.svg`). 수치 없이 프로세서 선언 순서를 그린다 |
 | `check-tilde.py` | 추적되는 Markdown에서 `\~`로 쓰지 않은 `~`를 찾는다. 코드 스팬, 코드 블록, 주석, 링크 대상은 건너뛴다. 찾으면 종료 코드 1 |
