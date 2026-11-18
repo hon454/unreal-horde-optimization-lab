@@ -40,7 +40,7 @@ Niagara 메시 렌더러는 입자 하나마다 스태틱 메시 하나를 그�
 
 ![카메라 거리 구간과 표현. 0\~35m는 하이드레이션 액터, 35\~80m는 그림자를 그리는 ISKM, 80\~200m는 그림자를 끈 ISKM, 200m 밖 맵 안은 엔티티의 자리를 걷는 입자, 맵 밖은 맵 밖 무리의 기록을 그리는 입자다. 가까워지는 쪽으로 넘을 때 엔진은 80m 경계를 75.5m, 200m 경계를 188m에서 넘게 하고, 35m 경계에는 여유가 없다](images/distance-bands.svg)
 
-![최종 구성의 화면에 표현별 색을 입혔다. 아래에서 위로 빨강은 액터(0\~35m), 파랑은 그림자를 그리는 ISKM(35\~80m), 하늘은 그림자를 끈 ISKM(80\~200m), 노랑은 입자(200m 밖)다](../../Measurements/Full4/shots/reptint-s8-moving-t75.jpg)
+![최종 구성의 화면에 표현별 색을 입혔다. 아래에서 위로 빨간색은 액터(0\~35m), 파란색은 그림자를 그리는 ISKM(35\~80m), 하늘색은 그림자를 끈 ISKM(80\~200m), 노란색은 입자(200m 밖)다](../../Measurements/Full4/shots/reptint-s8-moving-t75.jpg)
 
 색과 구간은 위 그림과 같다. 80m 밖 그림자는 단계 8이 껐다([비용을 줄이는 단계와 기법별 기여](../05-cost-cuts-and-contributions/README.md)). 이 화면은 Development 빌드에서 색을 입혀 찍었고 측정값이 아니다. 구간은 엔티티 구성을 만드는 코드가 정한다.
 
@@ -68,7 +68,7 @@ Visual->Params.LODRepresentation[EMassLOD::Off] = EMassRepresentationType::None;
 3. 바뀐 개체가 2초 안에 바로 전의 표현으로 돌아가지 못하게 막는다(최소 유지 시간).
 4. 전환 대책 다섯을 켰다. 액터의 포즈가 준비될 때까지 인스턴스를 그리는 일처럼 전환 순간의 화면 튐을 막는다.
 
-![단계 5 화면에 표현별 색을 입혔다. 빨강 액터 밖은 모두 초록 VAT 인스턴스이고, 200m 밖은 비어 있다](../../Measurements/Full4/shots/reptint-s5-vat.jpg)
+![단계 5 화면에 표현별 색을 입혔다. 빨간색 액터 밖은 모두 초록색 VAT 인스턴스이고, 200m 밖은 비어 있다](../../Measurements/Full4/shots/reptint-s5-vat.jpg)
 
 단계 4와 5는 표현이 같아 단계 5 화면을 실었다. 단계 4의 [움직이는 화면](../../Docs/figures/steps/step4-vat-budget.webp)은 따로 있다.
 
